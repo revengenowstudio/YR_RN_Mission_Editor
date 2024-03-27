@@ -238,8 +238,15 @@ CString* CIniFileSection::GetValue(std::size_t index) noexcept
 		return NULL;
 
 	auto i = values.begin();
-	for (auto e = 0;e < index;e++)
+	for (auto e = 0; e < index; e++) {
+		if (i == values.end()) {
+			break;
+		}
 		i++;
+	}
+	if (i == values.end()) {
+		return nullptr;
+	}
 
 	return &i->second;
 }

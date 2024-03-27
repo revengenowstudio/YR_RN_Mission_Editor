@@ -65,7 +65,7 @@ void GetNodeName(CString& name, int n);
 /* --------- */
 
 /* Overlay picture table (maximum overlay count=0xFF) */
-PICDATA* ovrlpics[0xFF][max_ovrl_img];
+PICDATA* ovrlpics[0x1000][max_ovrl_img];
 
 // cancel draw flag
 BOOL bCancelDraw = FALSE;
@@ -5911,11 +5911,14 @@ void CIsoView::DrawMap()
 				{
 					if (!pic.bTried)
 					{
-						SetError("Loading graphics");
-						theApp.m_loading->LoadOverlayGraphic(*rules.sections["OverlayTypes"].GetValue(m.overlay), m.overlay);
-						UpdateOverlayPictures(m.overlay);
-						if (ovrlpics[m.overlay][m.overlaydata] != NULL)
-							pic = *ovrlpics[m.overlay][m.overlaydata];
+						if (auto const pOverlayId = rules.sections["OverlayTypes"].GetValue(m.overlay)) {
+							SetError("Loading graphics");
+							theApp.m_loading->LoadOverlayGraphic(*pOverlayId, m.overlay);
+							UpdateOverlayPictures(m.overlay);
+							if (ovrlpics[m.overlay][m.overlaydata] != NULL) {
+								pic = *ovrlpics[m.overlay][m.overlaydata];
+							}
+						}
 					}
 
 					if (pic.pic == NULL)
