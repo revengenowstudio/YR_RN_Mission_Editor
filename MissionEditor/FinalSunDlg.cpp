@@ -711,26 +711,8 @@ void CFinalSunDlg::OnFileSaveas()
 	}
     r=TranslateStringVariables(8, r, ";");
 
-	CString ext, fname;
-	if(Map->IsMultiplayer())
-	{
-		ext=".mpr";
-		fname="noname.mpr";
-
-		// MW 07/27/01: YRM support
-		//if(Map->IsYRMap())
-		// MW Fix: Usually always YRM in Yuri Mode,
-		// because YR does NOT read MPR
-		if(yuri_mode)
-		{
-			ext=".yrm";
-			fname="noname.yrm";
-		}
-	}
-	else{
-		ext=".map";
-		fname="noname.map";
-	}
+	auto const ext = ".map";
+	auto const fname = "noname.map";
 
 	CFileDialog dlg(FALSE, ext, /*fname*/ NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, r);
 	char cuPath[MAX_PATH];
