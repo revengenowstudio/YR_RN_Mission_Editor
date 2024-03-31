@@ -43,7 +43,7 @@ CIniFile sound;
 CIniFile tutorial;
 CIniFile eva; 
 CIniFile theme;
-CIniFile g_data;
+CIniFile g_data; // FAData.ini
 CIniFile language;
 CIniFile tiles_t; // temperat.ini shouldn´t be used except in CMapData::UpdateIniFile() and CLoading
 CIniFile tiles_s; // snow.ini shouldn´t be used except in CMapData::UpdateIniFile() and CLoading
