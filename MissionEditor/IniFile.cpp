@@ -38,6 +38,9 @@ static char THIS_FILE[] = __FILE__;
 
 using namespace std;
 
+const CIniFileSection CIniFile::EmptySection;
+const CString CIniFileSection::EmptyValue;
+
 bool SortDummy::operator()(const CString& x, const CString& y) const
 {
 	// the length is more important than spelling (numbers!!!)...
@@ -95,14 +98,12 @@ void CIniFile::Clear()
 
 CIniFileSection::CIniFileSection()
 {
-	values.clear();
-	value_orig_pos.clear();
 };
 
 CIniFileSection::~CIniFileSection()
 {
-	values.clear();
-	value_orig_pos.clear();
+	value_pos.clear();
+	value_pairs.clear();
 };
 
 WORD CIniFile::InsertFile(const CString& filename, const char* Section, BOOL bNoSpaces)
@@ -158,7 +159,7 @@ WORD CIniFile::InsertFile(const std::string& filename, const char* Section, BOOL
 				CString name = cLine.substr(0, equals).c_str();
 				CString value = cLine.substr(equals + 1, cLine.size() - equals - 1).c_str();
 
-				int cuValueIndex = sections[cSec].values.size();
+				int cuValueIndex = sections[cSec].Size();
 
 				if (bNoSpaces)
 				{
@@ -166,8 +167,7 @@ WORD CIniFile::InsertFile(const std::string& filename, const char* Section, BOOL
 					value.Trim();
 				}
 
-				sections[cSec].values[name] = value;
-				sections[cSec].value_orig_pos[name] = cuValueIndex;
+				sections[cSec].Assign(name, value);
 			}
 		}
 
@@ -180,7 +180,7 @@ WORD CIniFile::InsertFile(const std::string& filename, const char* Section, BOOL
 	return 0;
 }
 
-const CIniFileSection* CIniFile::GetSection(std::size_t index) const
+const CIniFileSection* CIniFile::TryGetSection(std::size_t index) const
 {
 	if (index > sections.size() - 1)
 		return NULL;
@@ -192,7 +192,7 @@ const CIniFileSection* CIniFile::GetSection(std::size_t index) const
 	return &i->second;
 }
 
-CIniFileSection* CIniFile::GetSection(std::size_t index)
+CIniFileSection* CIniFile::TryGetSection(std::size_t index)
 {
 	if (index > sections.size() - 1)
 		return NULL;
@@ -202,59 +202,6 @@ CIniFileSection* CIniFile::GetSection(std::size_t index)
 		i++;
 
 	return &i->second;
-}
-
-const CIniFileSection* CIniFile::GetSection(const CString& section) const
-{
-	auto it = sections.find(section);
-	if (it == sections.end())
-		return nullptr;
-	return &it->second;
-}
-
-CIniFileSection* CIniFile::GetSection(const CString& section)
-{
-	auto it = sections.find(section);
-	if (it == sections.end())
-		return nullptr;
-	return &it->second;
-}
-
-const CString* CIniFileSection::GetValue(std::size_t index) const noexcept
-{
-	if (index > values.size() - 1)
-		return NULL;
-
-	auto i = values.begin();
-	for (auto e = 0;e < index;e++)
-		i++;
-
-	return &i->second;
-}
-
-CString* CIniFileSection::GetValue(std::size_t index) noexcept
-{
-	if (index > values.size() - 1)
-		return NULL;
-
-	auto i = values.begin();
-	for (auto e = 0; e < index; e++) {
-		if (i == values.end()) {
-			break;
-		}
-		i++;
-	}
-	if (i == values.end()) {
-		return nullptr;
-	}
-
-	return &i->second;
-}
-
-CString CIniFileSection::GetValueByName(const CString& valueName, const CString& defaultValue) const
-{
-	auto it = values.find(valueName);
-	return (it == values.end()) ? defaultValue : it->second;
 }
 
 const CString* CIniFile::GetSectionName(std::size_t index) const noexcept
@@ -274,19 +221,6 @@ CString& CIniFileSection::AccessValueByName(const CString& valueName)
 	return values[valueName];
 }
 
-const CString* CIniFileSection::GetValueName(std::size_t index) const noexcept
-{
-	if (index > values.size() - 1)
-		return NULL;
-
-	auto i = values.begin();
-	for (auto e = 0; e < index; ++e)
-		i++;
-
-
-	return &(i->first);
-}
-
 BOOL CIniFile::SaveFile(const CString& filename) const
 {
 	return SaveFile(std::string(filename.GetString()));
@@ -298,14 +232,10 @@ BOOL CIniFile::SaveFile(const std::string& Filename) const
 
 	file.open(Filename, ios::out | ios::trunc);
 
-	int i;
-	for (i = 0;i < sections.size();i++)
-	{
-		file << "[" << (LPCTSTR)*GetSectionName(i) << "]" << endl;
-		int e;
-		for (e = 0;e < GetSection(i)->values.size();e++)
-		{
-			file << (LPCTSTR) * (GetSection(i)->GetValueName(e)) << "=" << (LPCTSTR)*GetSection(i)->GetValue(e) << endl;
+	for (auto const& sec  : sections) {
+		file << "[" << sec.first << "]" << endl;
+		for (auto const& pair : sec.second) {
+			file << pair.first << "=" << pair.second << endl;
 		}
 		file << endl;
 	}
@@ -318,81 +248,28 @@ BOOL CIniFile::SaveFile(const std::string& Filename) const
 
 int CIniFileSection::FindValue(CString sval) const noexcept
 {
-	int i;
-	auto it = values.cbegin();
-	for (i = 0;i < values.size();i++)
-	{
-		if (sval == it->second)
-			return i;
-		it++;
+	for (auto idx = 0;
+		idx < this->value_pairs.size();
+		++idx) {
+		if (this->value_pairs[idx].second == sval) {
+			return idx;
+		}
 	}
 	return -1;
 }
 
 int CIniFileSection::FindName(CString sval) const noexcept
 {
-	int i;
-	auto it = values.cbegin();
-	for (i = 0;i < values.size();i++)
-	{
-		if (sval == it->first)
-			return i;
-		it++;
+	auto const it = this->value_pos.find(sval);
+	if (it != this->value_pos.end()) {
+		return it->second;
 	}
 	return -1;
 }
 
-void CIniFile::DeleteLeadingSpaces(BOOL bValueNames, BOOL bValues)
-{
-	int i;
-	for (i = 0;i < sections.size();i++)
-	{
-		CIniFileSection& sec = *GetSection(i);
-		int e;
-		for (e = 0;e < sec.values.size();e++)
-		{
-			if (bValues) sec.GetValue(e)->TrimLeft();
-			if (bValueNames)
-			{
-				CString value = *sec.GetValue(e);
-				CString name = *sec.GetValueName(e);
-
-				sec.values.erase(name);
-				name.TrimLeft();
-				sec.values[name] = value;
-			}
-		}
-	}
-}
-
-void CIniFile::DeleteEndingSpaces(BOOL bValueNames, BOOL bValues)
-{
-	int i;
-	for (i = 0;i < sections.size();i++)
-	{
-		CIniFileSection& sec = *GetSection(i);
-		int e;
-		for (e = 0;e < sec.values.size();e++)
-		{
-			if (bValues) sec.GetValue(e)->TrimRight();
-			if (bValueNames)
-			{
-				//CString& name=(CString&)*sec.GetValueName(e);
-				//name.TrimRight();
-				CString value = *sec.GetValue(e);
-				CString name = *sec.GetValueName(e);
-
-				sec.values.erase(name);
-				name.TrimRight();
-				sec.values[name] = value;
-			}
-		}
-	}
-}
-
 CString CIniFile::GetValueByName(const CString& sectionName, const CString& valueName, const CString& defaultValue) const
 {
-	auto section = GetSection(sectionName);
+	auto section = TryGetSection(sectionName);
 	if (!section)
 		return defaultValue;
 	return section->GetValueByName(valueName, defaultValue);
