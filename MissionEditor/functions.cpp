@@ -331,22 +331,22 @@ void ShowOptionsDialog()
 	opt.m_TSEXE=theApp.m_Options.TSExe;
 	if(opt.DoModal()==IDCANCEL) return;
 	theApp.m_Options.TSExe=opt.m_TSEXE;
-	optini.Assign(game, "Exe", theApp.m_Options.TSExe);
-	optini.Assign(app, "Language", opt.m_LanguageName);
+	optini.SetString(game, "Exe", theApp.m_Options.TSExe);
+	optini.SetString(app, "Language", opt.m_LanguageName);
 
 	BOOL bOldSearch=theApp.m_Options.bSearchLikeTS;
 	if(!(opt.m_LikeTS==1)) {
-		optini.Assign(app, "FileSearchLikeGame", "yes");
+		optini.SetString(app, "FileSearchLikeGame", "yes");
 		theApp.m_Options.bSearchLikeTS=TRUE;
 	}
 	else {
 		theApp.m_Options.bSearchLikeTS=FALSE;
-		optini.Assign(app, "FileSearchLikeGame", "no");
+		optini.SetString(app, "FileSearchLikeGame", "no");
 	}
 
 	auto bOldPreferLocalTheaterFiles = theApp.m_Options.bPreferLocalTheaterFiles;
 	theApp.m_Options.bPreferLocalTheaterFiles = opt.m_PreferLocalTheaterFiles ? true : false;
-	optini.Assign(app, "PreferLocalTheaterFiles", theApp.m_Options.bPreferLocalTheaterFiles ? "1" : "0");
+	optini.SetString(app, "PreferLocalTheaterFiles", theApp.m_Options.bPreferLocalTheaterFiles ? "1" : "0");
 
 
 	if (
