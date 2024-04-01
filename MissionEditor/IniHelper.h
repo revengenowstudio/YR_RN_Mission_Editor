@@ -5,7 +5,7 @@
 class INIHelper
 {
 public:
-	static bool StingToBool(const CString& str, bool def)
+	static bool StringToBool(const CString& str, bool def)
 	{
 		switch (toupper(static_cast<unsigned char>(*str))) {
 		case '1':

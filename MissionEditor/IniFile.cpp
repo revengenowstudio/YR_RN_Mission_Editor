@@ -167,7 +167,7 @@ WORD CIniFile::InsertFile(const std::string& filename, const char* Section, BOOL
 					value.Trim();
 				}
 
-				sections[cSec].Assign(name, value);
+				sections[cSec].SetString(name, value);
 			}
 		}
 
@@ -216,11 +216,6 @@ const CString* CIniFile::GetSectionName(std::size_t index) const noexcept
 	return &(i->first);
 }
 
-CString& CIniFileSection::AccessValueByName(const CString& valueName)
-{
-	return values[valueName];
-}
-
 BOOL CIniFile::SaveFile(const CString& filename) const
 {
 	return SaveFile(std::string(filename.GetString()));
@@ -246,21 +241,21 @@ BOOL CIniFile::SaveFile(const std::string& Filename) const
 }
 
 
-int CIniFileSection::FindValue(CString sval) const noexcept
+int CIniFileSection::FindValue(CString val) const noexcept
 {
 	for (auto idx = 0;
 		idx < this->value_pairs.size();
 		++idx) {
-		if (this->value_pairs[idx].second == sval) {
+		if (this->value_pairs[idx].second == val) {
 			return idx;
 		}
 	}
 	return -1;
 }
 
-int CIniFileSection::FindName(CString sval) const noexcept
+int CIniFileSection::FindIndex(const CString& key) const noexcept
 {
-	auto const it = this->value_pos.find(sval);
+	auto const it = this->value_pos.find(key);
 	if (it != this->value_pos.end()) {
 		return it->second;
 	}
