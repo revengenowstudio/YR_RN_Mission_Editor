@@ -609,8 +609,8 @@ public:
 	virtual ~CMapData();
 	void Pack(BOOL bCreatePreview = FALSE, BOOL bCompression = FALSE);
 	void Unpack();
-	void UpdateTreeInfo(LPCSTR lpTreeType = NULL);
-	void UpdateBuildingInfo(LPCSTR lpUnitType = NULL);
+	void UpdateTreeInfo(const CString* lpTreeType = NULL);
+	void UpdateBuildingInfo(const CString* lpUnitType = NULL);
 	void CalcMapRect();
 
 	// MW change: UpdateStructures() public, so that houses dialog can access it
