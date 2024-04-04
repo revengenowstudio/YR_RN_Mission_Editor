@@ -95,11 +95,10 @@ void CAll::UpdateDialog()
 	m_Value.SetWindowText("");
 
 	int i;
-	for(i=ini.sections.size()-1;i>=0;i--)
-	{
-		const CString* name=ini.GetSectionName(i);
-		if(!Map->IsMapSection(*name))
-		m_Sections.InsertString(0, *name);
+	for (auto const& [name, sec] : ini) {
+		if (!Map->IsMapSection(name)) {
+			m_Sections.InsertString(-1, name);
+		}
 	}
 
 	m_Sections.SetCurSel(1);
@@ -119,10 +118,8 @@ void CAll::OnSelchangeSections()
 		int i;
 		m_Keys.SetRedraw(FALSE);
 		SetCursor(LoadCursor(0,IDC_WAIT));
-		for(i=0;i<ini.sections[cuSection].values.size();i++)
-		{
-			const CString* name=ini.sections[cuSection].GetValueName(i);
-			m_Keys.InsertString(-1, *name);
+		for(auto const&[key, val] : ini[cuSection]) {
+			m_Keys.InsertString(-1, key);
 			
 		}
 		SetCursor(m_hArrowCursor);
@@ -144,11 +141,11 @@ void CAll::OnChangeValue()
 
 	
 	CString cuKey;
-	if(m_Keys.GetCurSel()>=0)m_Keys.GetText(m_Keys.GetCurSel(), cuKey) ;
+	if (m_Keys.GetCurSel() >= 0) {
+		m_Keys.GetText(m_Keys.GetCurSel(), cuKey);
+	}
 
-	
-
-	ini.sections[cuSection].values[cuKey]=t;
+	ini.SetString(cuSection, cuKey, t);
 	
 }
 
@@ -162,7 +159,7 @@ void CAll::OnSelchangeKeys()
 	CString cuKey;
 	m_Keys.GetText(m_Keys.GetCurSel(), cuKey) ;
 	
-	m_Value.SetWindowText(ini.sections[cuSection].values[cuKey]);
+	m_Value.SetWindowText(ini.GetString(cuSection, cuKey));
 }
 
 void CAll::OnUpdateValue() 
@@ -172,11 +169,11 @@ void CAll::OnUpdateValue()
 
 void CAll::OnAddsection() 
 {
-	CString name=InputBox("Please set the name of the new section (the section may already exist)", "Insert Section");
+	CString name = InputBox("Please set the name of the new section (the section may already exist)", "Insert Section");
 	
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	CIniFileSection stub=ini.sections[(LPCTSTR)name];
+	ini.AddSection(name);
 	
 	UpdateDialog();
 }
@@ -187,7 +184,7 @@ void CAll::OnDeletesection()
 
 	int cusection;
 	cusection=m_Sections.GetCurSel();
-	if(cusection==-1) {
+	if (cusection==-1) {
 		MessageBox("You cannot delete a section without choosing one.");
 		return;
 	}
@@ -195,9 +192,11 @@ void CAll::OnDeletesection()
 	CString str;
 	m_Sections.GetLBText(cusection, str);
 
-	if(MessageBox(CString((CString)"Are you sure you want to delete " + str + "? You should be really careful, you may not be able to use the map afterwards."), "Delete section", MB_YESNO)==IDNO) return;
+	if (MessageBox(CString((CString)"Are you sure you want to delete " + str + "? You should be really careful, you may not be able to use the map afterwards."), "Delete section", MB_YESNO) == IDNO) {
+		return;
+	}
 	
-	ini.sections.erase(str);
+	ini.DeleteSection(str);
 
 	UpdateDialog();
 }
@@ -220,9 +219,11 @@ void CAll::OnDeletekey()
 	m_Sections.GetLBText(cuSection, sec);
 	m_Keys.GetText(cukey, str);
 
-	if(MessageBox(CString((CString)"Are you sure you want to delete " + str + "? You should be really careful, you may not be able to use the map afterwards."), "Delete key", MB_YESNO)==IDNO) return;
+	if (MessageBox(CString((CString)"Are you sure you want to delete " + str + "? You should be really careful, you may not be able to use the map afterwards."), "Delete key", MB_YESNO) == IDNO) {
+		return;
+	}
 	
-	ini.sections[sec].values.erase(str);
+	ini.RemoveValueByKey(sec, str);
 
 	UpdateDialog();	
 
@@ -246,15 +247,14 @@ void CAll::OnAddkey()
 	CString key, value;
 	key=InputBox("Please set the name and value for the current key here: (for example, setting a new key ""Strength"" with the value 200 can be written as ""Strength=200"". You don´t need to specify a value.)", "Create key");
 
-	if(key.Find("=")!=-1)
-	{
+	if (key.Find("=") != -1) {
 		// value specified
 		// MW BUGFIX
 		value=key.Right(key.GetLength()-key.Find("=")-1);
 		key=key.Left(key.Find("="));
 	}
 	
-	ini.sections[sec].values[key]=value;
+	ini.SetString(sec, key, value);
 
 	UpdateDialog();
 	m_Sections.SetCurSel(cusection);
