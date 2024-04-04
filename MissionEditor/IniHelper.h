@@ -35,7 +35,7 @@ public:
 	template<>
 	static CString ToString<bool>(const bool& origin) 
 	{
-		static CString result[] = {  "false", "true" };
+		static CString result[] = {  "no", "yes" };
 		return result[origin];
 	}
 };

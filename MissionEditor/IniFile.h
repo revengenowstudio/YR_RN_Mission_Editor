@@ -70,6 +70,10 @@ public:
 	int FindIndex(const CString& key) const noexcept;
 	int FindValue(CString val) const noexcept;
 
+	const CString& operator[](const CString& key) const {
+		return this->GetString(key);
+	}
+
 	const CString* TryGetString(const CString& key) const {
 		auto const it = value_pos.find(key);
 		if (it != value_pos.end()) {
@@ -180,6 +184,7 @@ public:
 	}
 
 	[[deprecated("instead use iterators or for_each")]]
+	// get key
 	const CString* GetValueName(std::size_t index) const noexcept {
 		return &Nth(index).first;
 	}
@@ -197,20 +202,20 @@ class CIniFile
 	static const CIniFileSection EmptySection;
 
 public:
-	CIniFile(CIniFile&& rhs) :
+	CIniFile(CIniFile&& rhs) noexcept :
 		m_filename(std::move(rhs.m_filename)),
 		sections(std::move(rhs.sections))
 	{}
-	CIniFile(const CIniFile& rhs) :
+	CIniFile(const CIniFile& rhs) noexcept :
 		m_filename(rhs.m_filename),
 		sections(rhs.sections)
 	{}
 
-	CIniFile& operator=(CIniFile&& rhs) {
+	CIniFile& operator=(CIniFile&& rhs) noexcept {
 		new (this)CIniFile(std::move(rhs));
 		return *this;
 	}
-	CIniFile& operator=(const CIniFile& rhs) {
+	CIniFile& operator=(const CIniFile& rhs) noexcept {
 		new (this)CIniFile(rhs);
 		return *this;
 	}
@@ -275,6 +280,14 @@ public:
 	}
 
 	// ============== Writer and Helper converter ============================
+	CIniFileSection& AddSection(CString&& sectionName) {
+		auto const ret = this->sections.insert({ std::move(sectionName), {}});
+		return ret.first->second;
+	}
+	CIniFileSection& AddSection(const CString& sectionName) {
+		return this->AddSection(CString(sectionName));
+	}
+
 	void SetSection(const CString& sectionName, const CIniFileSection& sec) {
 		sections.insert_or_assign(sectionName, sec);
 	}
@@ -297,6 +310,14 @@ public:
 	void SetBool(const CString& section, const CString& key, const bool value) {
 		 this->SetString(section, key, INIHelper::ToString(value));
 	}
+
+	void RemoveValueByKey(const CString& section, const CString& key) {
+		if (auto pSec = this->TryGetSection(section)) {
+			pSec->RemoveByKey(key);
+		}
+	}
+
+	// ================= Iterator Related =============================
 
 	auto Size() const noexcept {
 		return this->sections.size();
