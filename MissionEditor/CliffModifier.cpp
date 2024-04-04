@@ -310,12 +310,14 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 	}
 
 		
-	CString sec=GetDataSection();
-	CIniFile& ini=Map->GetIniFile();
-	if(g_data.sections.find(sec+ini.sections["Map"].values["Theater"])!=g_data.sections.end())
-		sec=sec+ini.sections["Map"].values["Theater"];
+	CString sec = GetDataSection();
+	CIniFile& ini = Map->GetIniFile();
+	auto const& theaterID = g_data.GetString("Map", "Theater");
+	if (!theaterID.IsEmpty()) {
+		sec += theaterID;
+	}
 
-	count=atoi(g_data.sections[sec].values[type+"c"]);
+	count = g_data.GetInteger(sec, type + "c");
 
 	
 	
@@ -339,7 +341,7 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 		itoa(i, c, 10);
 		CString cur=type;
 		cur+=c;
-		notusedascliff[dwStartSet+atoi(g_data.sections[sec].values[cur])]=TRUE;
+		notusedascliff[dwStartSet + g_data.GetInteger(sec, cur)] = TRUE;
 	}
 
 	CString corner_searched="";
@@ -373,16 +375,12 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 		if(corner_searched.GetLength()>0) break;
 	}
 
-	BOOL bCornerFound=FALSE;
-	if(g_data.sections[sec].FindName(type+corner_searched+"c")>=0)
-	{
-		int icount=atoi(g_data.sections[sec].values[type+corner_searched+"c"]);
-		if(icount)
-		{
-			bCornerFound=TRUE;
-			count=icount;
-		}
+	BOOL bCornerFound = FALSE;;
+	if (int icount = g_data.GetInteger(sec, type + corner_searched + "c")) {
+		bCornerFound = TRUE;
+		count = icount;
 	}
+	
 	
 	if(!bCornerFound) corner_searched="";
 
@@ -395,11 +393,10 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 	DWORD dwDY=m_dwTo/Map->GetIsoSize();
 
 	
-	for(i=0;i<count;i++)
-	{
+	for (i = 0; i < count; i++) {
 		char c[50];
 		itoa(i,c,10);
-		careables.push_back(dwStartSet+atoi(g_data.sections[sec].values[type+corner_searched+c]));				
+		careables.push_back(dwStartSet + g_data.GetInteger(sec, type + corner_searched + c));
 	}
 
 	for(i=0;i<careables.size();i++)
@@ -453,21 +450,26 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 	{
 		CString tset;
 		char c[50];
-		int watercliffs=atoi(tiles->sections["General"].values["WaterCliffs"]);
-		if(m_bAlternative) watercliffs=cliffwater2set;
+		int watercliffs = tiles->GetInteger("General", "WaterCliffs");
+		if (m_bAlternative) {
+			watercliffs = cliffwater2set;
+		}
 		itoa(watercliffs, c, 10);
 		int e;
-		for(e=0;e<4-strlen(c);e++)
-			tset+="0";
+		for (e = 0; e < 4 - strlen(c); e++) {
+			tset += "0";
+		}
 		tset+=c;
 		CString sec="TileSet";
 		sec+=tset;
 
-		if(tiles->sections.find(sec)==tiles->sections.end()) return useables[k];
+		auto const pSec = tiles->TryGetSection(sec);
+		if (!pSec) {
+			return useables[k];
+		}
 
 
-		if(atoi(tiles->sections[sec].values["TilesInSet"])>useables[k]-dwStartSet)
-		{
+		if (pSec->GetInteger("TilesInSet") > useables[k] - dwStartSet) {
 			DWORD dwStartWaterSet=0;
 			for(i=0;i<(*tiledata_count);i++)
 			{
