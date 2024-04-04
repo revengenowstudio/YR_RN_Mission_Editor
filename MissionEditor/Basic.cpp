@@ -334,7 +334,7 @@ void CBasic::UpdateStrings()
 
 void CBasic::OnEditchangeRequiredaddon() 
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "RequiredAddOn", GetText(&m_RequiredAddOn));
 	if (ini.GetInteger("Basic", "RequiredAddOn") == 0) {
 		ini.RemoveValueByKey("Basic", "RequiredAddOn");
