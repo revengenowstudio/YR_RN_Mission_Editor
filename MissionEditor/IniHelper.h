@@ -28,4 +28,14 @@ public:
 		}
 		return def;
 	}
+
+	template<typename T>
+	static CString ToString(const T& origin);// { static_assert(false, "T must have specialized implementations!"); }
+
+	template<>
+	static CString ToString<bool>(const bool& origin) 
+	{
+		static CString result[] = {  "false", "true" };
+		return result[origin];
+	}
 };

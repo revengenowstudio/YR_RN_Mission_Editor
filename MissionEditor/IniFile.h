@@ -78,6 +78,14 @@ public:
 		return nullptr;
 	}
 
+	const std::pair<int, bool> TryGetInteger(const CString& key) const {
+		auto const got = this->TryGetString(key);
+		if (!got) {
+			return {};
+		}
+		return { INIHelper::StringToInteger(*got, 0), true };
+	}
+
 	const CString& GetString(const CString& key) const {
 		if (auto const ret = TryGetString(key)) {
 			return *ret;
@@ -92,8 +100,13 @@ public:
 		return defaultValue;
 	}
 
-	int GetInteger(const CString& key, int def = 0)const {
+	int GetInteger(const CString& key, int def = 0) const {
 		return INIHelper::StringToInteger(this->GetString(key), def);
+	}
+
+	bool GetBool(const CString& key, bool def = false) const {
+		auto const& str = this->GetString(key);
+		return INIHelper::StringToBool(str, def);
 	}
 
 	size_t Size() const { return value_pos.size(); }
@@ -121,6 +134,17 @@ public:
 		value_pairs[it->second].second = std::move(value);
 	}
 
+	void Insert(const CString& key, const CString& value) {
+		this->Insert(key, CString(value));
+	}
+
+	void Insert(const CString& key, CString&& value) {
+		 value_pairs.push_back({ key, value });
+		 value_pos.insert_or_assign(key, value_pairs.size() - 1);
+	}
+
+	// ==================== Delete
+
 	void RemoveAt(size_t idx) {
 		ASSERT(idx < value_pairs.size());
 		for (auto affectedIdx = idx + 1; affectedIdx < value_pairs.size(); ++affectedIdx) {
@@ -130,7 +154,7 @@ public:
 			it->second--;
 		}
 		auto const itErased = value_pairs.erase(value_pairs.begin() + idx);
-		ASSERT(value_pos.erase(itErased->first), 1);
+		ASSERT(value_pos.erase(itErased->first) == 1);
 	}
 
 	void RemoveByKey(const CString& key) {
@@ -156,9 +180,6 @@ public:
 	}
 
 	[[deprecated("instead use iterators or for_each")]]
-	int GetValueOrigPos(int index) const noexcept;
-
-	[[deprecated("instead use iterators or for_each")]]
 	const CString* GetValueName(std::size_t index) const noexcept {
 		return &Nth(index).first;
 	}
@@ -176,6 +197,24 @@ class CIniFile
 	static const CIniFileSection EmptySection;
 
 public:
+	CIniFile(CIniFile&& rhs) :
+		m_filename(std::move(rhs.m_filename)),
+		sections(std::move(rhs.sections))
+	{}
+	CIniFile(const CIniFile& rhs) :
+		m_filename(rhs.m_filename),
+		sections(rhs.sections)
+	{}
+
+	CIniFile& operator=(CIniFile&& rhs) {
+		new (this)CIniFile(std::move(rhs));
+		return *this;
+	}
+	CIniFile& operator=(const CIniFile& rhs) {
+		new (this)CIniFile(rhs);
+		return *this;
+	}
+
 	[[deprecated("instead use GetString")]]
 	CString GetValueByName(const CString& sectionName, const CString& valueName, const CString& defaultValue) const;
 	void Clear();
@@ -189,9 +228,6 @@ public:
 	// ================ Section interfaces ================
 
 	const CString* GetSectionName(std::size_t Index) const noexcept;
-	const CIniFileSection* TryGetSection(std::size_t index) const;
-	CIniFileSection* TryGetSection(std::size_t index);
-
 	const CIniFileSection* TryGetSection(const CString& section) const
 	{
 		auto pMutThis = const_cast<std::remove_cv_t<std::remove_pointer_t<decltype(this)>>*>(this);
@@ -232,8 +268,7 @@ public:
 		return GetSection(section).GetString(key);
 	}
 	const bool GetBool(const CString& section, const CString& key, bool def = false) const {
-		auto const& str = this->GetString(section, key);
-		return INIHelper::StringToBool(str, def);
+		return this->GetSection(section).GetBool(key, def);
 	}
 	const int GetInteger(const CString& section, const CString& key, int def = 0) const {
 		return GetSection(section).GetInteger(key, def);
@@ -257,6 +292,14 @@ public:
 
 	void SetString(const CString& section, const CString& key, const CString& value) {
 		return this->SetString(section, key, CString(value));
+	}
+
+	void SetBool(const CString& section, const CString& key, const bool value) {
+		 this->SetString(section, key, INIHelper::ToString(value));
+	}
+
+	auto Size() const noexcept {
+		return this->sections.size();
 	}
 
 	auto begin() noexcept

@@ -180,30 +180,6 @@ WORD CIniFile::InsertFile(const std::string& filename, const char* Section, BOOL
 	return 0;
 }
 
-const CIniFileSection* CIniFile::TryGetSection(std::size_t index) const
-{
-	if (index > sections.size() - 1)
-		return NULL;
-
-	auto i = sections.cbegin();
-	for (auto e = 0;e < index;e++)
-		i++;
-
-	return &i->second;
-}
-
-CIniFileSection* CIniFile::TryGetSection(std::size_t index)
-{
-	if (index > sections.size() - 1)
-		return NULL;
-
-	CIniI i = sections.begin();
-	for (auto e = 0;e < index;e++)
-		i++;
-
-	return &i->second;
-}
-
 const CString* CIniFile::GetSectionName(std::size_t index) const noexcept
 {
 	if (index > sections.size() - 1)
@@ -265,20 +241,8 @@ int CIniFileSection::FindIndex(const CString& key) const noexcept
 CString CIniFile::GetValueByName(const CString& sectionName, const CString& valueName, const CString& defaultValue) const
 {
 	auto section = TryGetSection(sectionName);
-	if (!section)
+	if (!section) {
 		return defaultValue;
-	return section->GetValueByName(valueName, defaultValue);
+	}
+	return section->GetStringOr(valueName, defaultValue);
 }
-
-int CIniFileSection::GetValueOrigPos(int index) const noexcept
-{
-	if (index > value_orig_pos.size() - 1)
-		return -1;
-
-	auto i = value_orig_pos.cbegin();
-	for (int e = 0;e < index;e++)
-		i++;
-
-	return i->second;
-}
-

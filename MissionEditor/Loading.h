@@ -110,9 +110,9 @@ public:
 	CLoading(CWnd* pParent = NULL);   // Standardconstructor
 	void InitPics(CProgressCtrl* prog=NULL);
 	void Load();
-	BOOL LoadUnitGraphic(LPCTSTR lpUnittype);
+	BOOL LoadUnitGraphic(const CString& lpUnittype);
 	void LoadBuildingSubGraphic(const CString& subkey, const CIniFileSection& artSection, BOOL bAlwaysSetChar, char theat, HMIXFILE hShpMix, SHPHEADER& shp_h, BYTE*& shp);
-	void LoadOverlayGraphic(LPCTSTR lpOvrlName, int iOvrlNum);
+	void LoadOverlayGraphic(const CString& lpOvrlName, int iOvrlNum);
 	void InitVoxelNormalTables();
 	HTSPALETTE GetIsoPalette(char theat);
 	HTSPALETTE GetUnitPalette(char theat);
