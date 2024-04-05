@@ -108,6 +108,10 @@ public:
 		return INIHelper::StringToInteger(this->GetString(key), def);
 	}
 
+	float GetFloat(const CString& key, float def = 0.0) const {
+		return INIHelper::StringToFloat(this->GetString(key), def);
+	}
+
 	bool GetBool(const CString& key, bool def = false) const {
 		auto const& str = this->GetString(key);
 		return INIHelper::StringToBool(str, def);
@@ -309,6 +313,9 @@ public:
 
 	void SetBool(const CString& section, const CString& key, const bool value) {
 		 this->SetString(section, key, INIHelper::ToString(value));
+	}
+	void SetInteger(const CString& section, const CString& key, const bool value) {
+		this->SetString(section, key, INIHelper::ToString(value));
 	}
 
 	void RemoveValueByKey(const CString& section, const CString& key) {
