@@ -74,7 +74,7 @@ BOOL CCellTag::OnInitDialog()
 	
 	CComboBox& m_Tag=*((CComboBox*)GetDlgItem(IDC_TAG));
 
-	if(ini.sections.find("Tags")==ini.sections.end())
+	if(!ini.TryGetSection("Tags"))
 	{
 		MessageBox("No tags are specified.");
 		OnCancel();
@@ -82,7 +82,9 @@ BOOL CCellTag::OnInitDialog()
 	else
 	{
 		ListTags(m_Tag, FALSE);
-		if(m_tag=="") m_Tag.SetCurSel(0);
+		if (m_tag == "") {
+			m_Tag.SetCurSel(0);
+		}
 	}
 	
 	UpdateStrings();
