@@ -142,6 +142,10 @@ public:
 		value_pairs[it->second].second = std::move(value);
 	}
 
+	void SetInteger(const CString& key, const int val) {
+		this->SetString(key, INIHelper::ToString(val));
+	}
+
 	void Insert(const CString& key, const CString& value) {
 		this->Insert(key, CString(value));
 	}
@@ -314,7 +318,7 @@ public:
 	void SetBool(const CString& section, const CString& key, const bool value) {
 		 this->SetString(section, key, INIHelper::ToString(value));
 	}
-	void SetInteger(const CString& section, const CString& key, const bool value) {
+	void SetInteger(const CString& section, const CString& key, const int value) {
 		this->SetString(section, key, INIHelper::ToString(value));
 	}
 
