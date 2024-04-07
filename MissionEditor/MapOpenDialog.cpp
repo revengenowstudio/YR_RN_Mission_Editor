@@ -56,7 +56,7 @@ UINT CALLBACK OFNHookProc(
 			CIniFile CurMap;
 			CurMap.InsertFile(utf16ToUtf8(psz),"Basic");
 
-			SetDlgItemText(hdlg, IDC_MAPNAME, CurMap.sections["Basic"].values["Name"]);
+			SetDlgItemText(hdlg, IDC_MAPNAME, CurMap.GetString("Basic", "Name"));
 			
 			
 		}
