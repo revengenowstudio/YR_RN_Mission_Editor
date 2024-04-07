@@ -92,31 +92,26 @@ void CSingleplayerSettings::UpdateDialog()
 {
 	CIniFile& ini=Map->GetIniFile();
 
-	CIniFileSection& sec=ini.sections["Basic"];
+	auto const& sec = ini["Basic"];
 
-	if(sec.values.find("Intro")!=sec.values.end())
-		m_Intro.SetWindowText(sec.values["Intro"]);
-	if(sec.values.find("Brief")!=sec.values.end())
-		m_Brief.SetWindowText(sec.values["Brief"]);
-	if(sec.values.find("Win")!=sec.values.end())
-		m_Win.SetWindowText(sec.values["Win"]);
-	if(sec.values.find("Lose")!=sec.values.end())
-		m_Lose.SetWindowText(sec.values["Lose"]);
-	if(sec.values.find("Action")!=sec.values.end())
-		m_Action.SetWindowText(sec.values["Action"]);
-	if(sec.values.find("PostScore")!=sec.values.end())
-		m_PostScore.SetWindowText(sec.values["PostScore"]);
-	if(sec.values.find("PreMapSelect")!=sec.values.end())
-		m_PreMapSelect.SetWindowText(sec.values["PreMapSelect"]);
+	auto setIfExists = [&sec](CWnd& wnd, const CString& key) {
+		if (auto val = sec.TryGetString(key)) {
+			wnd.SetWindowText(*val);
+		}
+	};
 
-	if(sec.values.find("StartingDropships")!=sec.values.end())
-		m_StartingDropships.SetWindowText(sec.values["StartingDropships"]);
-	if(sec.values.find("CarryOverMoney")!=sec.values.end())
-		m_CarryOverMoney.SetWindowText(sec.values["CarryOverMoney"]);
-	if(sec.values.find("TimerInherit")!=sec.values.end())
-		m_TimerInherit.SetWindowText(sec.values["TimerInherit"]);
-	if(sec.values.find("FillSilos")!=sec.values.end())
-		m_FillSilos.SetWindowText(sec.values["FillSilos"]);
+	setIfExists(m_Intro, "Intro");
+	setIfExists(m_Brief, "Brief");
+	setIfExists(m_Win, "Win");
+	setIfExists(m_Lose, "Lose");
+	setIfExists(m_Action, "Action");
+	setIfExists(m_PostScore, "PostScore");
+	setIfExists(m_PreMapSelect, "PreMapSelect");
+
+	setIfExists(m_StartingDropships, "StartingDropships");
+	setIfExists(m_CarryOverMoney, "CarryOverMoney");
+	setIfExists(m_TimerInherit, "TimerInherit");
+	setIfExists(m_FillSilos, "FillSilos");
 
 	ListMovies(m_Intro, TRUE);
 	ListMovies(m_Brief, TRUE);
@@ -130,70 +125,70 @@ void CSingleplayerSettings::UpdateDialog()
 	UpdateStrings();
 }
 
-void CSingleplayerSettings::OnEditchangeIntro() 
+void CSingleplayerSettings::OnEditchangeIntro()
 {
-	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["Intro"]=GetText(&m_Intro);		
+	CIniFile& ini = Map->GetIniFile();
+	ini.SetString("Basic", "Intro", GetText(&m_Intro));
 }
 
 void CSingleplayerSettings::OnEditchangeBrief() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["Brief"]=GetText(&m_Brief);	
+	ini.SetString("Basic", "Brief", GetText(&m_Brief));
 }
 
 void CSingleplayerSettings::OnEditchangeWin() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["Win"]=GetText(&m_Win);	
+	ini.SetString("Basic", "Win", GetText(&m_Win));
 }
 
 void CSingleplayerSettings::OnEditchangeLose() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["Lose"]=GetText(&m_Lose);	
+	ini.SetString("Basic", "Lose", GetText(&m_Lose));
 }
 
 void CSingleplayerSettings::OnEditchangeAction() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["Action"]=GetText(&m_Action);	
+	ini.SetString("Basic", "Action", GetText(&m_Action));
 }
 
 void CSingleplayerSettings::OnEditchangePostscore() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["PostScore"]=GetText(&m_PostScore);	
+	ini.SetString("Basic", "PostScore", GetText(&m_PostScore));
 }
 
 void CSingleplayerSettings::OnEditchangePremapselect() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["PreMapSelect"]=GetText(&m_PreMapSelect);	
+	ini.SetString("Basic", "PreMapSelect", GetText(&m_PreMapSelect));
 }
 
 void CSingleplayerSettings::OnEditchangeStartingdropships() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["StartingDropships"]=GetText(&m_StartingDropships);
+	ini.SetString("Basic", "StartingDropships", GetText(&m_StartingDropships));
 }
 
 void CSingleplayerSettings::OnChangeCarryovermoney() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["CarryOverMoney"]=GetText(&m_CarryOverMoney);
+	ini.SetString("Basic", "CarryOverMoney", GetText(&m_CarryOverMoney));
 }
 
 void CSingleplayerSettings::OnEditchangeTimerinherit() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["TimerInherit"]=GetText(&m_TimerInherit);	
+	ini.SetString("Basic", "TimerInherit", GetText(&m_TimerInherit));
 }
 
 void CSingleplayerSettings::OnEditchangeFillsilos() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["FillSilos"]=GetText(&m_FillSilos);
+	ini.SetString("Basic", "FillSilos", GetText(&m_FillSilos));
 }
 
 void CSingleplayerSettings::UpdateStrings()
