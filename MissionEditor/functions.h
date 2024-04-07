@@ -42,7 +42,7 @@ CString TranslateHouse(CString original, BOOL bToUI=FALSE);
 void ShowOptionsDialog();
 
 // repairs a trigger (sets flags correctly)
-void RepairTrigger(CString& triggerdata);
+bool RepairTrigger(CString& triggerdata);
 
 // coordinate functions
 void PosToXY(const char* pos, int* X, int* Y);

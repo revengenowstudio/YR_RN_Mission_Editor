@@ -182,15 +182,29 @@ void SetMainStatusBarReady()
 }
 
 // Should not be required anymore
-void RepairTrigger(CString& triggerdata)
+bool RepairTrigger(CString& triggerdata)
 {
-	if(GetParam(triggerdata, 3).GetLength()==0) triggerdata=SetParam(triggerdata, 3, "0");
-	if(GetParam(triggerdata, 4).GetLength()==0) triggerdata=SetParam(triggerdata, 4, "1");
-	if(GetParam(triggerdata, 5).GetLength()==0) triggerdata=SetParam(triggerdata, 5, "1");
-	if(GetParam(triggerdata, 6).GetLength()==0) triggerdata=SetParam(triggerdata, 6, "1");
-	if(GetParam(triggerdata, 7).GetLength()==0) {
-		triggerdata=SetParam(triggerdata, 7, "0");
+	if (GetParam(triggerdata, 3).IsEmpty()) {
+		triggerdata = SetParam(triggerdata, 3, "0");
+		return true;
 	}
+	if (GetParam(triggerdata, 4).IsEmpty()) {
+		triggerdata = SetParam(triggerdata, 4, "1");
+		return true;
+	}
+	if (GetParam(triggerdata, 5).IsEmpty()) {
+		triggerdata = SetParam(triggerdata, 5, "1");
+		return true;
+	}
+	if (GetParam(triggerdata, 6).IsEmpty()) {
+		triggerdata = SetParam(triggerdata, 6, "1");
+		return true;
+	}
+	if (GetParam(triggerdata, 7).IsEmpty()) {
+		triggerdata = SetParam(triggerdata, 7, "0");
+		return true;
+	}
+	return false;
 }
 
 // make some UI noise

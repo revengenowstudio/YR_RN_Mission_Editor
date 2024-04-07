@@ -132,36 +132,30 @@ BOOL CMapValidator::CheckMap()
 	Map->UpdateIniFile(MAPDATA_UPDATE_TO_INI);
 	CIniFile& ini=Map->GetIniFile();
 
-	if(ini.sections.find("Map")==ini.sections.end() )
-	{
-		bAllow=FALSE;
+	if (!ini.TryGetSection("Map")) {
+		bAllow = FALSE;
 		AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_NoMap"), 0);
 	}
-	if(ini.sections.find("Basic")==ini.sections.end() || ini.sections["Basic"].values.size()==0)
-	{
-		bAllow=FALSE;
+	if (ini["Basic"].Size() == 0) {
+		bAllow = FALSE;
 		AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_NoBasic"), 0);
-		
-	}
-	else
-	{
-		if(ini.sections["Basic"].values["Name"].GetLength()==0)
+	} else {
+		if (ini.GetString("Basic","Name").IsEmpty()) {
 			AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_NoName"), 1);
+		}
 
-		if(ini.sections["Basic"].values.find("Player")==ini.sections["Basic"].values.end())
-		{
 #ifdef TS_MODE
+		if (ini.GetString("Basic", "Player").IsEmpty()) {
 			if(ini.sections.find(MAPHOUSES)!=ini.sections.end() && ini.sections["Houses"].values.size()>0)
 			{
 				AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_HousesButNoPlayer"), 1);
 				AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_HousesInMultiplayer"), 1);
 			}
-#endif
 		}
-	
-		if(ini.sections.find(MAPHOUSES)==ini.sections.end())
-		{
-			int d=Map->GetWaypointCount();			
+#endif
+
+		if (!ini.TryGetSection(MAPHOUSES)) {
+			int d = Map->GetWaypointCount();
 			int below8found=0;
 			int i;
 			for(i=0;i<d;i++)
@@ -175,102 +169,90 @@ BOOL CMapValidator::CheckMap()
 				}
 			}
 
-			if(below8found<8)
-			{
-				if(isFalse(ini.sections["Basic"].values["Official"]))
-				{
+			if (below8found < 8) {
+				if(!ini.GetBool("Basic", "Official")) {
 					AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_Not8Waypoints"), 1);
 				}
 
-				if(below8found<2)
+				if (below8found < 2) {
 					AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_HousesNoWaypoints"), 1);
+				}
 			}
 			
 #ifdef RA2_MODE
-			if(isTrue(ini.sections["Basic"].values["Official"]))
+			if (ini.GetBool("Basic", "Official")) {
 				AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_OfficialYes"), 1);
+			}
 #endif
 
 		}
-		
-		int i;
-		for(i=0;i<ini.sections["Tags"].values.size();i++)
-		{
-			CString trigger=GetParam(*ini.sections["Tags"].GetValue(i),2);
-			if(ini.sections["Triggers"].FindName(trigger)<0)
-			{
+
+		for (auto const& [id, def] : ini["Tags"]) {
+			CString trigger = GetParam(def, 2);
+			if (!ini["Triggers"].Exists(trigger)) {
 				CString error;
-				error=GetLanguageStringACP("MV_TriggerMissing");
-				error=TranslateStringVariables(1, error, trigger);
-				error=TranslateStringVariables(2, error, "Tag");
-				error=TranslateStringVariables(3, error, *ini.sections["Tags"].GetValueName(i));
-				AddItemWithNewLine(m_MapProblemList, error, 1);
-			}
-		}
-		// repair triggers
-		for(i=0;i<ini.sections["Triggers"].values.size();i++)
-		{
-			RepairTrigger(ini.sections["Triggers"].values[*ini.sections["Triggers"].GetValueName(i)]);
-		}
-		for(i=0;i<ini.sections["Triggers"].values.size();i++)
-		{
-			CString trigger=GetParam(*ini.sections["Triggers"].GetValue(i),1);
-			if(ini.sections["Triggers"].FindName(trigger)<0 && trigger!="<none>")
-			{
-				CString error;
-				error=GetLanguageStringACP("MV_TriggerMissing");
-				error=TranslateStringVariables(1, error, trigger);
-				error=TranslateStringVariables(2, error, "Trigger");
-				error=TranslateStringVariables(3, error, *ini.sections["Triggers"].GetValueName(i));
+				error = GetLanguageStringACP("MV_TriggerMissing");
+				error = TranslateStringVariables(1, error, trigger);
+				error = TranslateStringVariables(2, error, "Tag");
+				error = TranslateStringVariables(3, error, id);
 				AddItemWithNewLine(m_MapProblemList, error, 1);
 			}
 		}
 
-		for(i=0;i<ini.sections["TeamTypes"].values.size();i++)
-		{
-			CIniFileSection& sec=ini.sections[*ini.sections["TeamTypes"].GetValue(i)];
-			CString taskforce=sec.values["TaskForce"];
-			if(taskforce.GetLength()>0 && ini.sections["TaskForces"].FindValue(taskforce)<0)
-			{
-				CString error;
-				error=GetLanguageStringACP("MV_TaskForceMissing");
-				error=TranslateStringVariables(1, error, taskforce);
-				error=TranslateStringVariables(2, error, *ini.sections["TeamTypes"].GetValue(i));
-				AddItemWithNewLine(m_MapProblemList, error, 1);
-			}
-		}
-		for(i=0;i<ini.sections["TeamTypes"].values.size();i++)
-		{
-			CIniFileSection& sec=ini.sections[*ini.sections["TeamTypes"].GetValue(i)];
-			CString scripttype=sec.values["Script"];
-			if(scripttype.GetLength()>0 && ini.sections["ScriptTypes"].FindValue(scripttype)<0)
-			{
-				CString error;
-				error=GetLanguageStringACP("MV_ScripttypeMissing");
-				error=TranslateStringVariables(1, error, scripttype);
-				error=TranslateStringVariables(2, error, *ini.sections["TeamTypes"].GetValue(i));
-				AddItemWithNewLine(m_MapProblemList, error, 1);
-			}
-		}
-		for(i=0;i<ini.sections["TeamTypes"].values.size();i++)
-		{
-			CIniFileSection& sec=ini.sections[*ini.sections["TeamTypes"].GetValue(i)];
-			if(sec.FindName("Tag")>=0)
-			{
-				CString tag=sec.values["Tag"];
-				if(ini.sections["Tags"].FindName(tag)<0)
-				{
+		if (auto pTriggerSec = ini.TryGetSection("Triggers")) {
+			for (auto& [id, def] : *pTriggerSec) {
+				auto defCopy = def;
+				if (RepairTrigger(defCopy)) {
+					pTriggerSec->SetString(id, defCopy);
+				}
+				// check linked trigger
+				auto const trigger = GetParam(defCopy, 1);
+				if (!pTriggerSec->Exists(trigger) && trigger != "<none>") {
 					CString error;
-					error=GetLanguageStringACP("MV_TagMissing");
-					error=TranslateStringVariables(1, error, tag);
-					error=TranslateStringVariables(2, error, "Teamtype");
-					error=TranslateStringVariables(3, error, *ini.sections["TeamTypes"].GetValue(i));
+					error = GetLanguageStringACP("MV_TriggerMissing");
+					error = TranslateStringVariables(1, error, trigger);
+					error = TranslateStringVariables(2, error, "Trigger");
+					error = TranslateStringVariables(3, error, id);
 					AddItemWithNewLine(m_MapProblemList, error, 1);
 				}
 			}
 		}
-		for(i=0;i<Map->GetCelltagCount();i++)
-		{		
+
+		for (auto const& [seq, id] : ini["TeamTypes"]) {
+			auto const& sec = ini[id];
+			// check taskforce
+			auto const taskforce = sec.GetString("TaskForce");
+			if (!taskforce.IsEmpty() && !ini["TaskForces"].HasValue(taskforce)) {
+				CString error;
+				error = GetLanguageStringACP("MV_TaskForceMissing");
+				error = TranslateStringVariables(1, error, taskforce);
+				error = TranslateStringVariables(2, error, id);
+				AddItemWithNewLine(m_MapProblemList, error, 1);
+			}
+			// check script
+			CString scripttype = sec.GetString("Script");
+			if (!scripttype.IsEmpty() && !ini["ScriptTypes"].HasValue(scripttype)) {
+				CString error;
+				error = GetLanguageStringACP("MV_ScripttypeMissing");
+				error = TranslateStringVariables(1, error, scripttype);
+				error = TranslateStringVariables(2, error, id);
+				AddItemWithNewLine(m_MapProblemList, error, 1);
+			}
+			// check tag
+			auto const& tag = sec.GetString("Tag");
+			if (!tag.IsEmpty()) {
+				if (!ini["Tags"].Exists(tag)) {
+					CString error;
+					error = GetLanguageStringACP("MV_TagMissing");
+					error = TranslateStringVariables(1, error, tag);
+					error = TranslateStringVariables(2, error, "Teamtype");
+					error = TranslateStringVariables(3, error, id);
+					AddItemWithNewLine(m_MapProblemList, error, 1);
+				}
+			}
+		}
+
+		for (auto i = 0; i < Map->GetCelltagCount(); i++) {		
 			CString tag;
 			DWORD pos;
 			Map->GetCelltagData(i, &tag, &pos);
@@ -283,8 +265,7 @@ BOOL CMapValidator::CheckMap()
 			CString p=cx;
 			p+="/";
 			p+=cy;
-			if(ini.sections["Tags"].FindName(tag)<0)
-			{
+			if (!ini["Tags"].Exists(tag)) {
 				CString error;
 				error=GetLanguageStringACP("MV_TagMissing");
 				error=TranslateStringVariables(1, error, tag);
