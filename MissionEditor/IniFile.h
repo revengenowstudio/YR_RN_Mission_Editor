@@ -280,7 +280,7 @@ public:
 	const CString& GetString(const CString& section, const CString& key) const {
 		return GetSection(section).GetString(key);
 	}
-	const CString& GetStringOr(const CString& section, const CString& key, const CString& def) const {
+	const CString GetStringOr(const CString& section, const CString& key, const CString& def) const {
 		return GetSection(section).GetStringOr(key, def);
 	}
 	const bool GetBool(const CString& section, const CString& key, bool def = false) const {
