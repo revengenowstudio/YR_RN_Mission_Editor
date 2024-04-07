@@ -2859,7 +2859,7 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 
 			dlg.m_tag = tag;
 			dlg.m_tag += " (";
-			dlg.m_tag += GetParam(Map->GetIniFile().sections["Tags"].values[(LPCTSTR)tag], 1);
+			dlg.m_tag += GetParam(Map->GetIniFile().GetString("Tags", tag), 1);
 			dlg.m_tag += ")";
 
 			if (dlg.DoModal() == IDCANCEL) return;
@@ -3499,28 +3499,20 @@ COLORREF CIsoView::GetColor(const char* house, const char* vcolor)
 	CIniFile& ini = Map->GetIniFile();
 	if (house && strlen(house))
 	{
-		if (ini.sections.find(house) != ini.sections.end())
-		{
-			color = ini.sections[house].values["Color"];
+		auto const& localColorDef = ini.GetString(house, "Color");
+		if (!localColorDef.IsEmpty()) {
+			color = localColorDef;
+		} else {
+			color = rules.GetString(house, "Color");
 		}
-		else
-			color = rules.sections[house].values["Color"];
 	}
 
 	if (vcolor)
 		color = vcolor;
 
-	if (color)
-	{
+	if (color) {
 		CString colorValues;
-		if (ini.sections.contains("Colors"))
-		{
-			colorValues = ini.sections["Colors"].GetValueByName(color);
-		}
-		if (colorValues.IsEmpty() && rules.sections.contains("Colors"))
-		{
-			colorValues = rules.sections["Colors"].GetValueByName(color);
-		}
+		colorValues = ini.GetStringOr("Colors", color, rules.GetString("Colors", color));
 		auto colorArray = SplitParams(colorValues);
 		if (colorArray.size() == 3)
 		{
@@ -4335,8 +4327,10 @@ void CIsoView::UpdateStatusBar(int x, int y)
 		DWORD pos;
 		Map->GetCelltagData(n, &type, &pos);
 		CIniFile& ini = Map->GetIniFile();
-		if (ini.sections["Tags"].values.find(type) != ini.sections["Tags"].values.end())
-			name = GetParam(ini.sections["Tags"].values[type], 1);
+		auto const tagStr = ini.GetString("Tags", type);
+		if (!tagStr.IsEmpty()) {
+			name = GetParam(tagStr, 1);
+		}
 
 		statusbar += GetLanguageStringACP("CellTagStatus");
 		statusbar += name;
@@ -5681,7 +5675,7 @@ void CIsoView::DrawMap()
 
 	// Now left, right, top & bottom contain the needed values
 
-	DWORD MM_heightstart = tilesets_start[atoi((*tiles).sections["General"].values["HeightBase"])];
+	DWORD MM_heightstart = tilesets_start[atoi((*tiles).GetString("General", "HeightBase"))];
 
 	// now draw everything
 	int u, v, z;
@@ -5911,9 +5905,10 @@ void CIsoView::DrawMap()
 				{
 					if (!pic.bTried)
 					{
-						if (auto const pOverlayId = rules.sections["OverlayTypes"].GetValue(m.overlay)) {
+						auto const& overlayId = rules.GetSection("OverlayTypes").Nth(m.overlay).second;
+						if (!overlayId.IsEmpty()) {
 							SetError("Loading graphics");
-							theApp.m_loading->LoadOverlayGraphic(*pOverlayId, m.overlay);
+							theApp.m_loading->LoadOverlayGraphic(overlayId, m.overlay);
 							UpdateOverlayPictures(m.overlay);
 							if (ovrlpics[m.overlay][m.overlaydata] != NULL) {
 								pic = *ovrlpics[m.overlay][m.overlaydata];
@@ -6040,7 +6035,7 @@ void CIsoView::DrawMap()
 						{
 							SetError("Loading graphics");
 							theApp.m_loading->LoadUnitGraphic(objp.type);
-							::Map->UpdateBuildingInfo(objp.type);
+							::Map->UpdateBuildingInfo(&objp.type);
 							int dir = (7 - objp.direction / 32) % 8;
 							pic = buildinginfo[id].pic[dir];
 							if (pic.pic == NULL) pic = buildinginfo[id].pic[0];
@@ -6080,7 +6075,7 @@ void CIsoView::DrawMap()
 							{
 								SetError("Loading graphics");
 								theApp.m_loading->LoadUnitGraphic(upg);
-								::Map->UpdateBuildingInfo(upg);
+								::Map->UpdateBuildingInfo(&upg);
 								pic = pics[GetUnitPictureFilename(upg, dir)];
 								if (pic.pic == NULL) missingimages[upg] = TRUE;
 							}
@@ -6089,8 +6084,8 @@ void CIsoView::DrawMap()
 							{
 								static const CString LocLookup[3][2] = { {"PowerUp1LocXX", "PowerUp1LocYY"}, {"PowerUp2LocXX", "PowerUp2LocYY"}, {"PowerUp3LocXX", "PowerUp3LocYY"} };
 								const auto drawCoordsPowerUp = drawCoordsBldShp + ProjectedVec(
-									atoi(art.sections[objp.type].values[LocLookup[upgrade][0]]),
-									atoi(art.sections[objp.type].values[LocLookup[upgrade][1]])
+									atoi(art.GetString(objp.type, LocLookup[upgrade][0])),
+									atoi(art.GetString(objp.type, LocLookup[upgrade][1]))
 								);
 								// py-=atoi(art.sections[obj.type].values["PowerUp1LocZZ"]); 
 #ifndef NOSURFACES
@@ -6150,19 +6145,18 @@ void CIsoView::DrawMap()
 
 					if (pic.pic == NULL)
 					{
-						if (!missingimages[*rules.sections["BuildingTypes"].GetValue(m.node.type)])
-						{
+						auto const& buildingId = rules.GetSection("BuildingTypes").Nth(m.node.type).second;
+						if (!buildingId.IsEmpty() && !missingimages[buildingId]) {
 							SetError("Loading graphics");
-							theApp.m_loading->LoadUnitGraphic(*rules.sections["BuildingTypes"].GetValue(m.node.type));
-							::Map->UpdateBuildingInfo(*rules.sections["BuildingTypes"].GetValue(m.node.type));
+							theApp.m_loading->LoadUnitGraphic(buildingId);
+							::Map->UpdateBuildingInfo(&buildingId);
 							pic = buildinginfo[id].pic[0];
 						}
-						if (pic.pic == NULL);
-						{
+						if (pic.pic == NULL) {
 #ifndef NOSURFACES
 							Blit(pics["HOUSE"].pic, drawCoordsBld.x, drawCoordsBld.y - 19);
 #endif
-							missingimages[*rules.sections["BuildingTypes"].GetValue(m.node.type)] = TRUE;
+							missingimages[buildingId] = TRUE;
 						}
 					}
 
@@ -6374,7 +6368,7 @@ void CIsoView::DrawMap()
 					{
 						SetError("Loading graphics");
 						theApp.m_loading->LoadUnitGraphic(type);
-						::Map->UpdateTreeInfo(type);
+						::Map->UpdateTreeInfo(&type);
 						pic = treeinfo[id].pic;
 					}
 					if (pic.pic == NULL)
