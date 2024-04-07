@@ -111,50 +111,44 @@ void CHouses::UpdateDialog()
 	ListHouses(m_Side, FALSE, TRUE);
 
 	int i;
-	for(i=0;i<rules.sections[HOUSES].values.size();i++)
-	{
+	auto const& houseSec = rules[HOUSES];
+	for (i = 0; i < houseSec.Size(); i++) {
 #ifdef RA2_MODE
-		CString j=*rules.sections[HOUSES].GetValue(i);
-		j.MakeLower();
-		if(j=="nod" || j=="gdi") continue;
+		auto const& name = houseSec.Nth(i).second;
+		if (!name.CompareNoCase("nod") || !name.CompareNoCase("gdi")) {
+			continue;
+		}
 #endif
-				
 		char house_id[5];
-		CString houseCString;
-		itoa(i,house_id,10);
-		houseCString=house_id;
-		houseCString+=" ";
-		houseCString+=TranslateHouse(*rules.sections[HOUSES].GetValue(i), TRUE);
+		itoa(i, house_id, 10);
+		CString houseCString = house_id;
+		houseCString += " ";
+		houseCString += TranslateHouse(name, TRUE);
 		m_ActsLike.AddString(houseCString);
 	}
 
 	CIniFile& ini=Map->GetIniFile();
 
-	if(ini.sections.find(MAPHOUSES)==ini.sections.end() && ini.sections.size()>0)
-	{
+	if(!ini.TryGetSection(MAPHOUSES) && ini.Size()>0) {
 		// MessageBox("No houses do exist, if you want to use houses, you should use ""Prepare houses"" before doing anything else.");
 	}
-	else
-	{
+	else {
 		m_HumanPlayer.AddString("None");
 		m_HumanPlayer.SetCurSel(0);
-		for(i=0;i<ini.sections[MAPHOUSES].values.size();i++)
+		for(auto const& [seq, id]: ini[MAPHOUSES])
 		{
 #ifdef RA2_MODE
-			CString j=*ini.sections[MAPHOUSES].GetValue(i);
-			j.MakeLower();
-			if(j=="nod" || j=="gdi") continue;
-#endif	
-			m_houses.AddString(TranslateHouse(*ini.sections[MAPHOUSES].GetValue(i), TRUE));
-			m_HumanPlayer.AddString(TranslateHouse(*ini.sections[MAPHOUSES].GetValue(i), TRUE));
-			
+			if (!id.CompareNoCase("nod") || !id.CompareNoCase("gdi")) {
+				continue;
+			}
+#endif
+			m_houses.AddString(TranslateHouse(id, TRUE));
+			m_HumanPlayer.AddString(TranslateHouse(id, TRUE));
 		}
-
 		
-		if(ini.sections["Basic"].values.find("Player")!=ini.sections["Basic"].values.end())
-		{
-			m_HumanPlayer.SetCurSel(m_HumanPlayer.FindStringExact(0, TranslateHouse(ini.sections["Basic"].values["Player"], TRUE)));
-			
+		auto const& playerHouseStr = ini.GetString("Basic", "Player");
+		if(!playerHouseStr.IsEmpty()) {
+			m_HumanPlayer.SetCurSel(m_HumanPlayer.FindStringExact(0, TranslateHouse(playerHouseStr, TRUE)));
 		}
 
 		m_houses.SetCurSel(0);
@@ -180,16 +174,14 @@ void CHouses::UpdateDialog()
 
 	
 	// ok now color list
-	const auto& rulesColors = rules.sections["Colors"];
-	for(i=0;i< rulesColors.values.size();i++)
-	{
-		m_Color.AddString(*rulesColors.GetValueName(i));
+	const auto& rulesColors = rules["Colors"];
+	for (auto const& [id, def] : rulesColors) {
+		m_Color.AddString(id);
 	}
-	for (i = 0;i < ini.sections["Colors"].values.size();i++)
-	{
-		auto col = *ini.sections["Colors"].GetValueName(i);
-		if(rulesColors.values.find(col) == rulesColors.values.end())
-			m_Color.AddString(*ini.sections["Colors"].GetValueName(i));
+	for (auto const& [id, def] : ini["Colors"]) {
+		if (!rulesColors.Exists(id)) {
+			m_Color.AddString(id);
+		}
 	}
 }
 
@@ -222,27 +214,27 @@ void CHouses::OnSelchangeHouses()
 
 	name=TranslateHouse(name);
 
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
+	auto const& s = ini[name];
 
 	// ListHouses(m_ActsLike, TRUE);
 
 #ifndef RA2_MODE
 	m_ActsLike.SetWindowText(s.values["ActsLike"]);
 #endif
-	m_Allies.SetWindowText(TranslateHouse(s.values["Allies"], TRUE));
-	m_Color.SetWindowText(s.values["Color"]);
-	m_Credits.SetWindowText(s.values["Credits"]);
-	m_Edge.SetWindowText(s.values["Edge"]);
-	m_IQ.SetWindowText(s.values["IQ"]);
-	m_Nodecount.SetWindowText(s.values["NodeCount"]);
-	m_PercentBuilt.SetWindowText(s.values["PercentBuilt"]);
-	m_PlayerControl.SetWindowText(s.values["PlayerControl"]);
+	m_Allies.SetWindowText(TranslateHouse(s.GetString("Allies"), TRUE));
+	m_Color.SetWindowText(s.GetString("Color"));
+	m_Credits.SetWindowText(s.GetString("Credits"));
+	m_Edge.SetWindowText(s.GetString("Edge"));
+	m_IQ.SetWindowText(s.GetString("IQ"));
+	m_Nodecount.SetWindowText(s.GetString("NodeCount"));
+	m_PercentBuilt.SetWindowText(s.GetString("PercentBuilt"));
+	m_PlayerControl.SetWindowText(s.GetString("PlayerControl"));
 #ifndef RA2_MODE
-	m_Side.SetWindowText(s.values["Side"]);
+	m_Side.SetWindowText(s.GetString("Side"));
 #else
-	m_Side.SetWindowText(TranslateHouse(s.values["Country"], TRUE));
+	m_Side.SetWindowText(TranslateHouse(s.GetString("Country"), TRUE));
 #endif
-	m_TechLevel.SetWindowText(s.values["TechLevel"]);
+	m_TechLevel.SetWindowText(s.GetString("TechLevel"));
 
 }
 
@@ -253,29 +245,27 @@ void CHouses::OnPreparehouses()
 #ifdef RA2_MODE
 	if(Map->IsMultiplayer())
 	{
-		ini.sections["Basic"].values["MultiplayerOnly"]="1";
+		ini.SetInteger("Basic", "MultiplayerOnly", 1);
 
-		int i;
-		for (i=0;i<rules.sections[HOUSES].values.size();i++)
-		{
+		auto const rulesHouseSec = rules[HOUSES];
+		for (auto i = 0;i < rulesHouseSec.Size();++i) {
 			char c[50];
 			int k=i;
 			itoa(k,c,10);
-			CString country=*rules.sections[HOUSES].GetValue(i);
-
+			auto const& country = rulesHouseSec.Nth(i).second;
 			// we now create a MAPHOUSE with the same name as the current rules house
-			ini.sections[MAPHOUSES].values[c]=country;
-			
-			ini.sections[country].values["IQ"]="0";
-			ini.sections[country].values["Edge"]="North";
-			ini.sections[country].values["Color"]=rules.sections[country].values["Color"];
-			ini.sections[country].values["Allies"]=country;
-			ini.sections[country].values["Country"]=country;
-			ini.sections[country].values["Credits"]="0";
-			ini.sections[country].values["NodeCount"]="0";
-			ini.sections[country].values["TechLevel"]="1";
-			ini.sections[country].values["PercentBuilt"]="0";
-			ini.sections[country].values["PlayerControl"]="no";
+			ini.SetString(MAPHOUSES, c, country);
+
+			ini.SetString(country, "IQ", "0");
+			ini.SetString(country, "Edge", "North");
+			ini.SetString(country, "Color", rules.GetString(country, "Color"));
+			ini.SetString(country, "Allies", country);
+			ini.SetString(country, "Country", country);
+			ini.SetString(country, "Credits", "0");
+			ini.SetString(country, "NodeCount", "0");
+			ini.SetString(country, "TechLevel", "1");
+			ini.SetString(country, "PercentBuilt", "0");
+			ini.SetString(country, "PlayerControl", "no");
 
 		}
 		
@@ -285,39 +275,33 @@ void CHouses::OnPreparehouses()
 #endif
 
 	// import the rules.ini houses
-	if(ini.sections.find(MAPHOUSES)!=ini.sections.end())
-	{
-		if(ini.sections[MAPHOUSES].values.size()>0)
-		{
-			MessageBox("There are already houses in your map. You need to delete these first.");
-			return;
-		}
+	if (ini[MAPHOUSES].Size() > 0) {
+		MessageBox("There are already houses in your map. You need to delete these first.");
+		return;
 	}
 
-	int i;
-	for(i=0;i<rules.sections[HOUSES].values.size();i++)
-	{
-		AddHouse(GetHouseSectionName(*rules.sections[HOUSES].GetValue(i)));
+	for (auto const& [seq, id] : rules[HOUSES]) {
+		AddHouse(GetHouseSectionName(id));
 	}
 }
 
-void CHouses::AddHouse(const char *name)
+void CHouses::AddHouse(const CString& name)
 {
 	CIniFile& ini=Map->GetIniFile();
 
-	if(ini.sections.find(name)!=ini.sections.end())
-	{
-		MessageBox(((CString)"Sorry this name is not available. " + name + (CString)" is already used in the map file. You need to use another name."));
+	if (ini.TryGetSection(name)) {
+		MessageBox("Sorry this name is not available. " + name + " is already used in the map file. You need to use another name.");
 		return;
 	}
-	if(ini.sections.find(TranslateHouse(name))!=ini.sections.end())
-	{
-		MessageBox(((CString)"Sorry this name is not available. " + name + (CString)" is already used in the map file. You need to use another name."));
+	if (ini.TryGetSection(TranslateHouse(name))) {
+		MessageBox("Sorry this name is not available. " + name + " is already used in the map file. You need to use another name.");
 		return;
 	}
 #ifdef RA2_MODE
 	CNewRA2HouseDlg dlg;
-	if(dlg.DoModal()==IDCANCEL) return;
+	if (dlg.DoModal() == IDCANCEL) {
+		return;
+	}
 #endif
 
 	int c;
@@ -331,17 +315,21 @@ void CHouses::AddHouse(const char *name)
 	{
 		char k[50];
 		itoa(c,k,10);
-		if(ini.sections[MAPHOUSES].values.find(k)==ini.sections[MAPHOUSES].values.end())
-			pos=c;
-		if(pos!=-1) break;
+		if (!ini[MAPHOUSES].Exists(k)) {
+			pos = c;
+		}
+		if (pos != -1) {
+			break;
+		}
 	}
 #ifdef RA2_MODE
 	for(c=0;c>-1;c++)
 	{
 		char k[50];
 		itoa(c,k,10);
-		if(ini.sections[HOUSES].values.find(k)==ini.sections[HOUSES].values.end())
+		if (!ini[HOUSES].Exists(k)) {
 			pos2=c;
+		}
 		if(pos2!=-1) break;
 	}
 #endif
@@ -349,72 +337,77 @@ void CHouses::AddHouse(const char *name)
 	char k[50];
 	itoa(pos,k,10);
 	
-	ini.sections[MAPHOUSES].values[k]=TranslateHouse(name);
+	auto const translatedHouseName = TranslateHouse(name);
+	ini.SetString(MAPHOUSES, k, translatedHouseName);
 
 	CString country;
-	country=name; 
+	country = name;
 	country.Replace(" House", "");
 	country.Replace("House","");
-	if(country.Find(" ")>=0) country.Replace(" ", "_"); //=country.Left(country.Find(" "));
+	if (country.Find(" ") >= 0) {
+		country.Replace(" ", "_"); //=country.Left(country.Find(" "));
+	}
 
 #ifdef RA2_MODE
-	itoa(pos2, k, 10);
-	ini.sections[HOUSES].values[k]=country;
+	_itoa(pos2, k, 10);
+	ini.SetString(HOUSES, k, country);
 #endif
-	
-	ini.sections[TranslateHouse(name)].values["IQ"]="0";
-	ini.sections[TranslateHouse(name)].values["Edge"]="West";
-	ini.sections[TranslateHouse(name)].values["Allies"]=TranslateHouse(name);
+	ini.SetInteger(translatedHouseName, "IQ", 0);
+	ini.SetString(translatedHouseName, "Edge", "West");
+	ini.SetString(translatedHouseName, "Allies", translatedHouseName);
 
-	CString side=name;
+	CString side = name;
 #ifdef RA2_MODE
-	side=rules.sections[TranslateHouse(dlg.m_Country)].values["Side"];
+	side = rules.GetString(TranslateHouse(dlg.m_Country), "Side");
 #endif
 
-	if(strstr(name, "Nod")!=NULL)
-	{
+	if (strstr(name, "Nod") != NULL) {
 #ifndef RA2_MODE
-		ini.sections[TranslateHouse(name)].values["Side"]="Nod";
+		ini.sections[translatedHouseName].values["Side"]="Nod";
 #endif
-		ini.sections[TranslateHouse(name)].values["Color"]="DarkRed";
-		if(name!="Nod") ini.sections[name].values["Allies"]+=",Nod";
-	}
-	else
-	{
+		ini.SetString(translatedHouseName, "Color", "DarkRed");
+		if (name != "Nod") {
+			ini.SetString(name, "Allies", ini.GetString(name, "Allies") + ",Nod");
+		}
+	} else {
 #ifndef RA2_MODE
-		ini.sections[TranslateHouse(name)].values["Side"]="GDI";
+		ini.sections[translatedHouseName].values["Side"]="GDI";
 #endif
-		ini.sections[TranslateHouse(name)].values["Color"]="Gold";
-		if(name!="GDI") ini.sections[TranslateHouse(name)].values["Allies"]+=",GDI";
+		ini.SetString(translatedHouseName, "Color", "Gold");
+		if (name != "GDI") {
+			ini.SetString(translatedHouseName, "Allies", ini.GetString(translatedHouseName, "Allies") + ",GDI");
+		}
 	}
-	ini.sections[TranslateHouse(name)].values["Credits"]="0";
+	ini.SetInteger(translatedHouseName, "Credits", 0);
 #ifndef RA2_MODE
-	ini.sections[TranslateHouse(name)].values["ActsLike"]="0";
+	ini.SetInteger(translatedHouseName, "ActsLike", 0);
 #else
-	ini.sections[TranslateHouse(name)].values["Country"]=TranslateHouse(country);
+	ini.SetString(translatedHouseName, "Country", TranslateHouse(country));
 #endif
-	ini.sections[TranslateHouse(name)].values["NodeCount"]="0";
-	ini.sections[TranslateHouse(name)].values["TechLevel"]="10";
-	ini.sections[TranslateHouse(name)].values["PercentBuilt"]="100";
-	ini.sections[TranslateHouse(name)].values["PlayerControl"]="no";
+	ini.SetInteger(translatedHouseName, "NodeCount", 0);
+	ini.SetInteger(translatedHouseName, "TechLevel", 10);
+	ini.SetInteger(translatedHouseName, "PercentBuilt", 100);
+	ini.SetBool(translatedHouseName, "PlayerControl", false);
 
 #ifdef RA2_MODE
-	dlg.m_Country=TranslateHouse(dlg.m_Country); // just to make sure...
-	country=TranslateHouse(country);
-    ini.sections[country].values["ParentCountry"]=dlg.m_Country;
-	ini.sections[country].values["Name"]=country;
-	ini.sections[country].values["Suffix"]=rules.sections[dlg.m_Country].values["Suffix"];
-	ini.sections[country].values["Prefix"]=rules.sections[dlg.m_Country].values["Prefix"];
-	ini.sections[country].values["Color"]=rules.sections[dlg.m_Country].values["Color"];
-	ini.sections[country].values["Side"]=rules.sections[dlg.m_Country].values["Side"];
-	ini.sections[country].values["SmartAI"]=rules.sections[dlg.m_Country].values["SmartAI"];
-	ini.sections[country].values["CostUnitsMult"]="1";
+	dlg.m_Country = TranslateHouse(dlg.m_Country); // just to make sure...
+	country = TranslateHouse(country);
+	ini.SetString(country, "ParentCountry", dlg.m_Country);
+	ini.SetString(country, "Name", country);
+	ini.SetString(country, "Suffix", rules.GetString(dlg.m_Country, "Suffix"));
+	ini.SetString(country, "Prefix", rules.GetString(dlg.m_Country, "Prefix"));
+	ini.SetString(country, "Color", rules.GetString(dlg.m_Country, "Color"));
+	ini.SetString(country, "Side", rules.GetString(dlg.m_Country, "Side"));
+	ini.SetString(country, "SmartAI", rules.GetString(dlg.m_Country, "SmartAI"));
+	ini.SetInteger(country, "CostUnitsMult", 1);
 #endif
 
 	int cusel=m_houses.GetCurSel();
 	UpdateDialog();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs();
-	if(cusel!=-1)m_houses.SetCurSel(cusel);
+	if (cusel != -1) {
+		m_houses.SetCurSel(cusel);
+	}
 }
 
 void CHouses::OnShowWindow(BOOL bShow, UINT nStatus) 
@@ -423,10 +416,8 @@ void CHouses::OnShowWindow(BOOL bShow, UINT nStatus)
 
 	CIniFile& ini=Map->GetIniFile();
 	
-	if(bShow)
-	{
-		if(ini.sections.find(MAPHOUSES)==ini.sections.end() && ini.sections.size()>0)
-		{
+	if (bShow) {
+		if (!ini.TryGetSection(MAPHOUSES) && ini.Size() > 0) {
 #ifndef RA2_MODE
 			 MessageBox("No houses do exist, if you want to use houses, you should use ""Prepare houses"" before doing anything else. Note that in a multiplayer map independent computer players cannot be created by using the names GDI and Nod for the house. Just use something like GDI_AI.");
 #else
@@ -434,23 +425,20 @@ void CHouses::OnShowWindow(BOOL bShow, UINT nStatus)
 
 #endif
 		}
+	} else {
+		// call all KillFocus !
+		OnKillfocusIq();
+		OnEditchangeActslike();
+		OnKillfocusAllies();
+		OnKillfocusColor();
+		OnKillfocusCredits();
+		OnKillfocusEdge();
+		OnKillfocusNodecount();
+		OnKillfocusPercentbuilt();
+		OnKillfocusPlayercontrol();
+		OnKillfocusSide();
+		OnKillfocusTechlevel();
 	}
-		else
-		{
-			// call all KillFocus !
-			OnKillfocusIq();
-			OnEditchangeActslike();
-			OnKillfocusAllies();
-			OnKillfocusColor();
-			OnKillfocusCredits();
-			OnKillfocusEdge();
-			OnKillfocusNodecount();
-			OnKillfocusPercentbuilt();
-			OnKillfocusPlayercontrol();
-			OnKillfocusSide();
-			OnKillfocusTechlevel();
-		}
-	
 }
 
 void CHouses::OnAddhouse() 
@@ -468,33 +456,31 @@ void CHouses::OnDeletehouse()
 	CIniFile& ini=Map->GetIniFile();
 
 	int cusel;
-	cusel=m_houses.GetCurSel();
-	if(cusel==-1) return;
+	cusel = m_houses.GetCurSel();
+	if (cusel == -1) {
+		return;
+	}
 
 	CString name;
 	CString uiname;
 	m_houses.GetLBText(cusel, name);
 
 	uiname=name;
-	name=TranslateHouse(name);
+	name = TranslateHouse(name);
 
 	CString str=GetLanguageStringACP("DeleteHouse");
-	str=TranslateStringVariables(1, str, uiname);
-	if(MessageBox(str,GetLanguageStringACP("DeleteHouseCap"),MB_YESNO)==IDNO) return;
-
-	ini.sections.erase((LPCTSTR)name);
-
-	int i;
-	for(i=0;i<ini.sections[MAPHOUSES].values.size();i++)
-	{
-		if(*ini.sections[MAPHOUSES].GetValue(i)==name)
-		{
-			ini.sections[MAPHOUSES].values.erase(*ini.sections[MAPHOUSES].GetValueName(i));
-		}
+	str = TranslateStringVariables(1, str, uiname);
+	if (MessageBox(str, GetLanguageStringACP("DeleteHouseCap"), MB_YESNO) == IDNO) {
+		return;
 	}
 
-	if(ini.sections[MAPHOUSES].values.size()==0)
-		ini.sections.erase(MAPHOUSES);
+	ini.DeleteSection(name);
+
+	ini.RemoveValueByKey(MAPHOUSES, name);
+
+	if (ini[MAPHOUSES].Size() == 0) {
+		ini.DeleteSection(MAPHOUSES);
+	}
 
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs();
 	UpdateDialog();
@@ -514,11 +500,9 @@ void CHouses::OnKillfocusIq()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_IQ.GetWindowText(t);
-	s.values["IQ"]=t;
+	ini.SetString(name, "IQ", t);
 }
 
 void CHouses::OnKillfocusEdge() 
@@ -535,11 +519,9 @@ void CHouses::OnKillfocusEdge()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_Edge.GetWindowText(t);
-	s.values["Edge"]=t;	
+	ini.SetString(name, "Edge", t);
 }
 
 void CHouses::OnKillfocusSide() 
@@ -556,15 +538,13 @@ void CHouses::OnKillfocusSide()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_Side.GetWindowText(t);
 	t=TranslateHouse(t);
 #ifndef RA2_MODE
-	s.values["Side"]=t;	
+	ini.SetString(name, "Side", t);
 #else
-	s.values["Country"]=t;
+	ini.SetString(name, "Country", t);
 #endif
 }
 
@@ -582,11 +562,9 @@ void CHouses::OnKillfocusColor()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_Color.GetWindowText(t);
-	s.values["Color"]=t;
+	ini.SetString(name, "Color", t);
 	
 	//Map->UpdateIniFile(MAPDATA_UPDATE_FROM_INI);
 	// MW fix: Only update structures
@@ -612,12 +590,10 @@ void CHouses::OnKillfocusAllies()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_Allies.GetWindowText(t);
 	t=TranslateHouse(t);
-	s.values["Allies"]=t;	
+	ini.SetString(name, "Allies", t);
 }
 
 void CHouses::OnKillfocusCredits() 
@@ -634,11 +610,9 @@ void CHouses::OnKillfocusCredits()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_Credits.GetWindowText(t);
-	s.values["Credits"]=t;	
+	ini.SetString(name, "Credits", t);
 }
 
 void CHouses::OnEditchangeActslike() 
@@ -655,15 +629,11 @@ void CHouses::OnEditchangeActslike()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	
-
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_ActsLike.GetWindowText(t);
 	TruncSpace(t);
 	t=TranslateHouse(t);
-	s.values["ActsLike"]=t;	
+	ini.SetString(name, "ActsLike", t);
 }
 
 void CHouses::OnKillfocusNodecount() 
@@ -680,11 +650,9 @@ void CHouses::OnKillfocusNodecount()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_Nodecount.GetWindowText(t);
-	s.values["NodeCount"]=t;	
+	ini.SetString(name, "NodeCount", t);
 }
 
 void CHouses::OnKillfocusTechlevel() 
@@ -701,11 +669,9 @@ void CHouses::OnKillfocusTechlevel()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_TechLevel.GetWindowText(t);
-	s.values["TechLevel"]=t;	
+	ini.SetString(name, "TechLevel", t);
 }
 
 void CHouses::OnKillfocusPercentbuilt() 
@@ -722,11 +688,9 @@ void CHouses::OnKillfocusPercentbuilt()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_PercentBuilt.GetWindowText(t);
-	s.values["PercentBuilt"]=t;	
+	ini.SetString(name, "PercentBuilt", t);
 }
 
 void CHouses::OnKillfocusPlayercontrol() 
@@ -743,11 +707,9 @@ void CHouses::OnKillfocusPlayercontrol()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_PlayerControl.GetWindowText(t);
-	s.values["PlayerControl"]=t;	
+	ini.SetString(name, "PlayerControl", t);
 }
 
 void CHouses::OnSelchangeHumanplayer() 
@@ -758,14 +720,12 @@ void CHouses::OnSelchangeHumanplayer()
 	m_HumanPlayer.GetLBText(m_HumanPlayer.GetCurSel(),pl);
 	pl=TranslateHouse(pl);
 
-	if(pl.GetLength()==0 || pl=="None")
-	{
-		ini.sections["Basic"].values.erase("Player");
+	if(pl.GetLength()==0 || pl=="None") {
+		ini.RemoveValueByKey("Basic", "Player");
+		return;
 	}
-	else
-	{
-		ini.sections["Basic"].values["Player"]=(LPCTSTR)pl;
-	}
+
+	ini.SetString("Basic", "Player", pl);
 }
 
 void CHouses::OnSelchangeActslike() 
@@ -780,15 +740,11 @@ void CHouses::OnSelchangeActslike()
 	m_houses.GetLBText(cusel, name);
 	name=TranslateHouse(name);
 
-	
-
-	CIniFileSection& s=ini.sections[(LPCTSTR)name];
-
 	CString t;
 	m_ActsLike.GetLBText(m_ActsLike.GetCurSel(),t);
 	TruncSpace(t);
 	t=TranslateHouse(t);
-	s.values["ActsLike"]=t;		
+	ini.SetString(name, "ActsLike", t);
 }
 
 void CHouses::UpdateStrings()
