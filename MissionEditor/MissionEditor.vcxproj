@@ -367,6 +367,7 @@
     <ClInclude Include="CliffModifier.h" />
     <ClInclude Include="ComboUInputDlg.h" />
     <ClInclude Include="defines.h" />
+    <ClInclude Include="IniHelper.h" />
     <ClInclude Include="LineDrawer.h" />
     <ClInclude Include="DynamicGraphDlg.h" />
     <ClInclude Include="FinalSun.h" />

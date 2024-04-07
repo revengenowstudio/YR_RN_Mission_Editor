@@ -565,6 +565,9 @@
     <ClInclude Include="TextDrawer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IniHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\clifftoo.bmp">
