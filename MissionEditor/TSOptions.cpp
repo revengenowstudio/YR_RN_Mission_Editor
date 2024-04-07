@@ -92,7 +92,7 @@ void CTSOptions::OnOK()
 	this->GetDlgItem(IDC_EDIT1)->GetWindowText(m_TSEXE);
 	int n=m_Language.GetItemData(m_Language.GetCurSel()); 
 	
-	m_LanguageName=*language.sections["Languages"].GetValue(n);
+	m_LanguageName = language["Languages"].Nth(n).second;
 
 	CDialog::OnOK();
 }
@@ -110,19 +110,15 @@ BOOL CTSOptions::OnInitDialog()
 
 	UpdateData(FALSE);
 
-	int i;
-	for(i=0;i<language.sections["Languages"].values.size();i++)
-	{
-		CString lang=*language.sections["Languages"].GetValue(i);
-		lang=language.sections[lang+"Header"].values["Name"];
-
-		
-
-		m_Language.SetItemData(m_Language.AddString(lang),i);
-		if (lang=="English")
+	auto const& languageSec = language["Languages"];
+	for (auto i = 0; i < languageSec.Size(); i++) {
+		auto const& def = languageSec.Nth(i).second;
+		auto const& lang = language.GetString(def + "Header", "Name");
+		m_Language.SetItemData(m_Language.AddString(lang), i);
+		if (lang == "English") {
 			m_Language.SetCurSel(i);
+		}
 	}
-
 	
 	return TRUE;  
 }
