@@ -1170,9 +1170,6 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 
 	CIniFile& ini=Map->GetIniFile();
 
-
-	int i;
-
 	// delete invalid ini sections
 	for (auto it = ini.begin(); it != ini.end();) {
 		if (it->second.Size() == 0 || it->first.IsEmpty()) {
@@ -1278,7 +1275,6 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 
 			WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
 
-			CString d;
 			char c[50];
 			for (auto e = 0; e < headerSec.Size(); e++) {
 				auto const& [key, value] = headerSec.Nth(e);
@@ -1291,9 +1287,8 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 
 				if (e % 500 == 0) {
 					int percent = e * 100 / headerSec.Size();
-					d = *ini.GetSectionName(i);
 					itoa(percent, c, 10);
-					SetText((CString)"Saving... " + d + "( " + c + "% )");
+					SetText((CString)"Saving... " + headerSecName + "( " + c + "% )");
 					UpdateWindow();
 				}
 
@@ -1307,16 +1302,15 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 			if (!Map->IsRulesSection(secName)) {
 				continue;
 			}
-			rulessections[*ini.GetSectionName(i)] = TRUE;
+			rulessections[secName] = TRUE;
 
 			fi = "[";
-			fi += *ini.GetSectionName(i);
+			fi += secName;
 			fi += "]";
 			fi += "\n";
 
 			WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
 
-			CString d;
 			char c[50];
 			for (auto e = 0; e < sec.Size(); e++) {
 				auto const& [key, value] = sec.Nth(e);
@@ -1328,9 +1322,8 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 
 				if (e % 500 == 0) {
 					int percent = e * 100 / sec.Size();
-					d = *ini.GetSectionName(i);
 					itoa(percent, c, 10);
-					SetText((CString)"Saving... " + d + "( " + c + "% )");
+					SetText((CString)"Saving... " + secName + "( " + c + "% )");
 					UpdateWindow();
 				}
 
@@ -1415,7 +1408,6 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 
 				WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
 
-				CString d;
 				char c[50];
 				for (auto e = 0; e < sec.Size(); e++) {
 					auto const& [key, value] = sec.Nth(e);
@@ -1427,9 +1419,8 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 
 					if (e % 500 == 0) {
 						int percent = e * 100 / sec.Size();
-						d = *ini.GetSectionName(i);
 						itoa(percent, c, 10);
-						SetText((CString)"Saving... " + d + "( " + c + "% )");
+						SetText((CString)"Saving... " + secName + "( " + c + "% )");
 						UpdateWindow();
 					}
 
