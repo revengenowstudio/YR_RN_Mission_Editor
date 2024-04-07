@@ -1310,11 +1310,8 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 		
 	CIsoView& v=*((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
 
-	_rules_image=lpUnittype;
-	auto const imageID = rules.GetString(lpUnittype, "Image");
-	if (!imageID.IsEmpty()) {
-		_rules_image = imageID;
-	}
+	_rules_image = lpUnittype;
+	_rules_image = rules.GetStringOr(lpUnittype, "Image", _rules_image);
 
 	CString _art_image = _rules_image;
 	auto const& imageID = art.GetString(_rules_image, "Image");
@@ -3708,11 +3705,7 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 	auto const istiberium = rules.GetBool(lpOvrlName, "Tiberium");
 	auto const isveins = rules.GetBool(lpOvrlName, "IsVeins");
 	
-	image=lpOvrlName;
-	auto const imageID = rules.GetString(lpOvrlName, "Image");
-	if (!imageID.IsEmpty()) {
-		image= imageID;
-	}
+	image = rules.GetStringOr(lpOvrlName, "Image", lpOvrlName);
 
 	TruncSpace(image);
 
@@ -5170,11 +5163,7 @@ void CLoading::PrepareUnitGraphic(LPCSTR lpUnittype)
 	
 	CIsoView& v=*((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
 
-	_rules_image=lpUnittype;
-	auto const& imageID = rules.GetString(lpUnittype, "Image");
-	if (!imageID.IsEmpty()) {
-		_rules_image= imageID;
-	}
+	_rules_image = rules.GetStringOr(lpUnittype, "Image", lpUnittype);
 
 	CString _art_image = _rules_image;
 	auto const& imageID = art.GetString(_rules_image, "Image");
