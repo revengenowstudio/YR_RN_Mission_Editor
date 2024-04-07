@@ -89,17 +89,17 @@ void CLighting::UpdateDialog()
 {
 	CIniFile& ini=Map->GetIniFile();
 
-	m_Ambient.SetWindowText(ini.sections["Lighting"].values["Ambient"]);
-	m_Ambient2.SetWindowText(ini.sections["Lighting"].values["IonAmbient"]);
-	m_Level.SetWindowText(ini.sections["Lighting"].values["Level"]);
-	m_Level2.SetWindowText(ini.sections["Lighting"].values["IonLevel"]);
-	m_Red.SetWindowText(ini.sections["Lighting"].values["Red"]);
-	m_Red2.SetWindowText(ini.sections["Lighting"].values["IonRed"]);
-	m_Green.SetWindowText(ini.sections["Lighting"].values["Green"]);
-	m_Green2.SetWindowText(ini.sections["Lighting"].values["IonGreen"]);
-	m_Blue.SetWindowText(ini.sections["Lighting"].values["Blue"]);
-	m_Blue2.SetWindowText(ini.sections["Lighting"].values["IonBlue"]);
-	//MessageBox(ini.sections["Lightning"].values["Ambient"]);
+	m_Ambient.SetWindowText(ini.GetString("Lighting", "Ambient"));
+	m_Ambient2.SetWindowText(ini.GetString("Lighting", "IonAmbient"));
+	m_Level.SetWindowText(ini.GetString("Lighting", "Level"));
+	m_Level2.SetWindowText(ini.GetString("Lighting", "IonLevel"));
+	m_Red.SetWindowText(ini.GetString("Lighting", "Red"));
+	m_Red2.SetWindowText(ini.GetString("Lighting", "IonRed"));
+	m_Green.SetWindowText(ini.GetString("Lighting", "Green"));
+	m_Green2.SetWindowText(ini.GetString("Lighting", "IonGreen"));
+	m_Blue.SetWindowText(ini.GetString("Lighting", "Blue"));
+	m_Blue2.SetWindowText(ini.GetString("Lighting", "IonBlue"));
+	//MessageBox(ini.GetString("Lightning", "Ambient"));
 }
 
 BOOL CLighting::OnInitDialog() 
@@ -125,8 +125,7 @@ void CLighting::OnChangeAmbient()
 	CString ctext;
 	m_Ambient.GetWindowText(ctext);
 	CString text=(char*)(LPCTSTR)ctext;
-	ini.sections["Lighting"].values["Ambient"]=text;
-
+	ini.SetString("Lighting", "Ambient", text);
 }
 
 void CLighting::OnChangeLevel() 
@@ -136,8 +135,7 @@ void CLighting::OnChangeLevel()
 	CString ctext;
 	m_Level.GetWindowText(ctext);
 	CString text=(char*)(LPCTSTR)ctext;
-	ini.sections["Lighting"].values["Level"]=text;
-	
+	ini.SetString("Lighting", "Level", text);
 }
 
 void CLighting::OnKillfocusAmbient() 
@@ -152,7 +150,7 @@ void CLighting::OnChangeRed()
 	CString ctext;
 	m_Red.GetWindowText(ctext);
 	CString text=(char*)(LPCTSTR)ctext;
-	ini.sections["Lighting"].values["Red"]=text;
+	ini.SetString("Lighting", "Red", text);
 }
 
 void CLighting::OnChangeGreen() 
@@ -162,7 +160,7 @@ void CLighting::OnChangeGreen()
 	CString ctext;
 	m_Green.GetWindowText(ctext);
 	CString text=(char*)(LPCTSTR)ctext;
-	ini.sections["Lighting"].values["Green"]=text;
+	ini.SetString("Lighting", "Green", text);
 }
 
 void CLighting::OnChangeBlue() 
@@ -172,7 +170,7 @@ void CLighting::OnChangeBlue()
 	CString ctext;
 	m_Blue.GetWindowText(ctext);
 	CString text=(char*)(LPCTSTR)ctext;
-	ini.sections["Lighting"].values["Blue"]=text;
+	ini.SetString("Lighting", "Blue", text);
 }
 
 void CLighting::OnChangeAmbient2() 
@@ -182,7 +180,7 @@ void CLighting::OnChangeAmbient2()
 	CString ctext;
 	m_Ambient2.GetWindowText(ctext);
 	CString text=(char*)(LPCTSTR)ctext;
-	ini.sections["Lighting"].values["IonAmbient"]=text;
+	ini.SetString("Lighting", "IonAmbient", text);
 }
 
 void CLighting::OnChangeLevel2() 
@@ -192,7 +190,7 @@ void CLighting::OnChangeLevel2()
 	CString ctext;
 	m_Level2.GetWindowText(ctext);
 	CString text=(char*)(LPCTSTR)ctext;
-	ini.sections["Lighting"].values["IonLevel"]=text;
+	ini.SetString("Lighting", "IonLevel", text);
 }
 
 void CLighting::OnChangeRed2() 
@@ -202,7 +200,7 @@ void CLighting::OnChangeRed2()
 	CString ctext;
 	m_Red2.GetWindowText(ctext);
 	CString text=(char*)(LPCTSTR)ctext;
-	ini.sections["Lighting"].values["IonRed"]=text;
+	ini.SetString("Lighting", "IonRed", text);
 }
 
 void CLighting::OnChangeGreen2() 
@@ -212,7 +210,7 @@ void CLighting::OnChangeGreen2()
 	CString ctext;
 	m_Green2.GetWindowText(ctext);
 	CString text=(char*)(LPCTSTR)ctext;
-	ini.sections["Lighting"].values["IonGreen"]=text;
+	ini.SetString("Lighting", "IonGreen", text);
 }
 
 void CLighting::OnChangeBlue2() 
@@ -222,5 +220,5 @@ void CLighting::OnChangeBlue2()
 	CString ctext;
 	m_Blue2.GetWindowText(ctext);
 	CString text=(char*)(LPCTSTR)ctext;
-	ini.sections["Lighting"].values["IonBlue"]=text;
+	ini.SetString("Lighting", "IonBlue", text);
 }
