@@ -468,8 +468,9 @@ void CScriptTypes::OnEditchangeType()
 	case 6:
 		m_Desc.SetWindowText("Script action #:");
 		while(m_Param.DeleteString(0)!=CB_ERR);
-		for(i=1;i<=ini.sections[(LPCTSTR)Scripttype].values.size()-1;i++)
-			m_Param.AddString(itoa(i,tmp,10));			
+		for (i = 1; i <= ini[Scripttype].Size() - 1; i++) {
+			m_Param.AddString(itoa(i, tmp, 10));
+		}
 		break;
 	case 8:
 		m_Desc.SetWindowText("Split groups:");
@@ -503,19 +504,17 @@ void CScriptTypes::OnEditchangeType()
 	case 47:
 		{
 			m_Desc.SetWindowText("Type to move/attack:");
-
-			for(i=0;i<rules.sections["BuildingTypes"].values.size();i++)
-			{
+			auto const& bldTypeSec = rules["BuildingTypes"];
+			for (i = 0; i < bldTypeSec.Size(); i++) {
 				char c[50];
 				itoa(i,c,10);
 				CString s=c;
 				
 				s+=" ";
 				//s+=rules.sections[*rules.sections["BuildingTypes"].GetValue(i)].values["Name"];
-				s+=Map->GetUnitName(*rules.sections["BuildingTypes"].GetValue(i));
+				s+=Map->GetUnitName(bldTypeSec.Nth(i).second);
 				m_Param.AddString(s);
 			}
-					
 			break;
 		}
 
@@ -527,10 +526,7 @@ void CScriptTypes::OnEditchangeType()
 
 	char types[50];
 	itoa(type, types, 10);
-	ini.sections[(LPCTSTR)Scripttype].values[action]=SetParam(ini.sections[(LPCTSTR)Scripttype].values[action], 0, (LPCTSTR)types);
-	
-	
-
+	ini.SetString(Scripttype, action, SetParam(ini.GetString(Scripttype, action), 0, types));
 }
 
 void CScriptTypes::OnSelchangeType() 
@@ -567,9 +563,7 @@ void CScriptTypes::OnEditchangeParam()
 	param=TranslateHouse(param);
 
 	itoa(m_Action.GetCurSel(), action, 10);
-	ini.sections[(LPCTSTR)Scripttype].values[action]=SetParam(ini.sections[(LPCTSTR)Scripttype].values[action], 1, (LPCTSTR)param);
-
-	
+	ini.SetString(Scripttype, action, SetParam(ini.GetString(Scripttype, action), 1, param));
 }
 
 void CScriptTypes::OnSelchangeParam() 
@@ -589,9 +583,9 @@ void CScriptTypes::OnAddaction()
 
 
 	char action[20];
-	int count=ini.sections[(LPCTSTR)Scripttype].values.size()-1;
+	int count = ini[Scripttype].Size() - 1;
 	itoa(count,action,10);
-	ini.sections[(LPCTSTR)Scripttype].values[action]="0,0";
+	ini.SetString(Scripttype, action, "0,0");
 
 	UpdateDialog();
 }
@@ -618,11 +612,11 @@ void CScriptTypes::OnDeleteaction()
 		itoa(i, current, 10);
 		itoa(i+1, next, 10);
 
-		ini.sections[(LPCTSTR)Scripttype].values[current]=ini.sections[(LPCTSTR)Scripttype].values[next];
+		ini.SetString(Scripttype, current, ini.GetString(Scripttype, next));
 	}
 	char last[50];
 	itoa(m_Action.GetCount()-1, last, 10);
-	ini.sections[(LPCTSTR)Scripttype].values.erase(last);
+	ini.RemoveValueByKey(Scripttype, last);
 
 	UpdateDialog();
 }
@@ -636,8 +630,8 @@ void CScriptTypes::OnAdd()
 	CString ID=GetFreeID();
 	
 	CString p=GetFree("ScriptTypes");
-	ini.sections["ScriptTypes"].values[p]=ID;
-	ini.sections[ID].values["Name"]="New script";
+	ini.SetString("ScriptTypes", p, ID);
+	ini.SetString(ID, "Name", "New script");
 	
 
 	
@@ -670,10 +664,13 @@ void CScriptTypes::OnDelete()
 	TruncSpace(Scripttype);
 
 	int res=MessageBox("Are you sure to delete this ScriptType? Don´t forget to delete any references to this ScriptType","Delete ScriptType", MB_YESNO | MB_ICONQUESTION);
-	if(res!=IDYES) return;
+	if (res != IDYES) {
+		return;
+	}
 
-	ini.sections.erase((LPCTSTR)Scripttype);
-	ini.sections["ScriptTypes"].values.erase(*ini.sections["ScriptTypes"].GetValueName(ini.sections["ScriptTypes"].FindValue((LPCTSTR)Scripttype)));
+	ini.DeleteSection(Scripttype);
+	auto const& id = ini["ScriptTypes"].Nth(ini["ScriptTypes"].FindValue(Scripttype)).first;
+	ini.RemoveValueByKey("ScriptTypes", id);
 	//UpdateDialog();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 }
