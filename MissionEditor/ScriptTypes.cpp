@@ -316,21 +316,18 @@ void CScriptTypes::UpdateDialog()
 
 	UpdateData(FALSE);
 	
-
-	int i;
-	for(i=0;i<ini.sections["ScriptTypes"].values.size();i++)
-	{
-		CString type,s;
-		type=*ini.sections["ScriptTypes"].GetValue(i);
-		s=type;
-		s+=" (";
-		s+=ini.sections[(LPCTSTR)type].values["Name"];
-		s+=")";
-		m_ScriptType.AddString(s);
+	for (auto const& [seq, type] : ini["ScriptTypes"]) {
+		CString desc = type;
+		desc += " (";
+		desc += ini.GetString(type, "Name");
+		desc += ")";
+		m_ScriptType.AddString(desc);
 	}
 
 	m_ScriptType.SetCurSel(0);
-	if(sel>=0) m_ScriptType.SetCurSel(sel);
+	if (sel >= 0) {
+		m_ScriptType.SetCurSel(sel);
+	}
 	OnSelchangeScripttype();
 
 
@@ -353,12 +350,11 @@ void CScriptTypes::OnSelchangeScripttype()
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 	
-	m_Name=ini.sections[(LPCTSTR)Scripttype].values["Name"];
+	m_Name = ini.GetString(Scripttype, "Name");
 
-	int count=ini.sections[(LPCTSTR)Scripttype].values.size()-1;
+	int count = ini[Scripttype].Size() - 1;
 	int i;
-	for(i=0;i<count;i++)
-	{
+	for (i = 0; i < count; i++) {
 		char c[50];
 		itoa(i,c,10);
 		m_Action.AddString(c);
@@ -374,22 +370,26 @@ void CScriptTypes::OnSelchangeScripttype()
 
 void CScriptTypes::OnSelchangeAction() 
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString Scripttype;
 	char action[50];
-	if(m_ScriptType.GetCurSel()<0) return;
-	if(m_Action.GetCurSel()<0) return;
+	if (m_ScriptType.GetCurSel() < 0) {
+		return;
+	}
+	if (m_Action.GetCurSel() < 0) {
+		return;
+	}
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 
 	itoa(m_Action.GetCurSel(), action, 10);
 	//m_Type.SetWindowText(GetParam(ini.sections[(LPCTSTR)Scripttype].values[action],0));
-	m_Type.SetCurSel(atoi(GetParam(ini.sections[(LPCTSTR)Scripttype].values[action], 0)));
+	m_Type.SetCurSel(atoi(GetParam(ini.GetString(Scripttype, action), 0)));
 
 	OnSelchangeType();
 
-	m_Param.SetWindowText(GetParam(ini.sections[(LPCTSTR)Scripttype].values[action],1));
+	m_Param.SetWindowText(GetParam(ini.GetString(Scripttype, action), 1));
 
 	
 }
@@ -404,13 +404,15 @@ void CScriptTypes::OnChangeName()
 
 	DWORD pos=n->GetSel();
 	CString Scripttype;
-	if(m_ScriptType.GetCurSel()<0) return;
+	if (m_ScriptType.GetCurSel() < 0) {
+		return;
+	}
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 	
 
 
-	ini.sections[(LPCTSTR)Scripttype].values["Name"]=m_Name;
+	ini.SetString(Scripttype, "Name", m_Name);
 
 	UpdateDialog();
 	n->SetSel(pos);
