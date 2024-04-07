@@ -374,8 +374,6 @@ DWORD CMapData::GetAITriggerTypeCount()
 
 void CMapData::GetAITriggerType(DWORD dwAITriggerType, AITRIGGERTYPE* pAITrg)
 {
-	CString data;
-
 	if (dwAITriggerType >= GetAITriggerTypeCount()) {
 		return;
 	}
@@ -590,7 +588,7 @@ void CMapData::LoadMap(const std::string& file)
 
 	// repair taskforces (bug in earlier 0.95 versions)
 	for (auto const& [idx, id] : m_mapfile.GetSection("TaskForces")) {
-		vector<const CString&> toDelete;
+		vector<CString> toDelete;
 		toDelete.reserve(5);
 
 		auto const sec = m_mapfile.TryGetSection(id);
@@ -3520,16 +3518,8 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 
 		for (auto const& [seq, id] : rules.GetSection("BuildingTypes")) {
 			auto const& type = id;
-			auto artname = std::ref(type);
-			auto const& typeSec = rules.GetSection(type);
-
-			if (auto const pImage = typeSec.TryGetString("Image")) {
-				artname = *pImage;
-			}
-			auto const& typeSec = ini.GetSection(type);
-			if (auto const pImage = typeSec.TryGetString("Image")) {
-				artname = *pImage;
-			}
+			auto artname = rules.GetStringOr(type, "Image", type);
+			artname = ini.GetStringOr(type, "Image", artname);
 
 			int w, h;
 			char d[6];
@@ -3606,11 +3596,7 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 
 		for (auto const& [seq, id] : rules.GetSection("BuildingTypes")) {
 			auto const& type = id;
-			auto artname = type;
-			auto const& typeSec = ini.GetSection(type);
-			if (auto pImage = typeSec.TryGetString("Image")) {
-				artname = *pImage;
-			}
+			auto artname = ini.GetStringOr(type, "Image", type);
 
 			int w, h;
 			char d[6];
@@ -3660,16 +3646,8 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 
 	// only for specific building -> faster
 	auto const& type = *lpUnitType;
-	auto artname = std::ref(type);
-
-	auto const& typeSec = rules.GetSection(type);
-	if (auto const pImage = typeSec.TryGetString("Image")) {
-		artname = *pImage;
-	}
-	auto const& typeSec = ini.GetSection(type);
-	if (auto const pImage = typeSec.TryGetString("Image")) {
-		artname = *pImage;
-	}
+	auto artname = rules.GetStringOr(type, "Image", type);
+	artname = ini.GetStringOr(type, "Image", artname);
 
 	int w, h;
 	char d[6];
@@ -3719,16 +3697,8 @@ void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 		int i;
 		for (auto const&[seq, id] : rules["TerrainTypes"]) {
 			auto const& type = id;
-			auto artname = std::ref(type);
-
-			auto const& typeSec = rules.GetSection(type);
-			if (auto const pImage = typeSec.TryGetString("Image")) {
-				artname = *pImage;
-			}
-			auto const& typeSec = ini.GetSection(type);
-			if (auto const pImage = typeSec.TryGetString("Image")) {
-				artname = *pImage;
-			}
+			auto artname = rules.GetStringOr(type, "Image", type);
+			artname = ini.GetStringOr(type, "Image", artname);
 
 			int w, h;
 			char d[6];
@@ -3769,11 +3739,7 @@ void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 
 		for (auto const& [seq, id] : ini["TerrainTypes"]) {
 			auto const& type = id;
-			auto artname = std::ref(type);
-			auto const& typeSec = ini.GetSection(type);
-			if (auto const pImage = typeSec.TryGetString("Image")) {
-				artname = *pImage;
-			}
+			auto artname = ini.GetStringOr(type, "Image", type);
 
 			int w, h;
 			char d[6];
@@ -3814,16 +3780,8 @@ void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 	}
 
 	auto const& type = *lpTreeType;
-	auto artname = std::ref(type);
-
-	auto const& typeSec = rules.GetSection(type);
-	if (auto const pImage = typeSec.TryGetString("Image")) {
-		artname = *pImage;
-	}
-	auto const& typeSec = ini.GetSection(type);
-	if (auto const pImage = typeSec.TryGetString("Image")) {
-		artname = *pImage;
-	}
+	auto artname = rules.GetStringOr(type, "Image", type);
+	artname = ini.GetStringOr(type, "Image", artname);
 
 	int w, h;
 	char d[6];
@@ -6863,10 +6821,8 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 Returns TRUE for all sections that should not be modified using the INI editor,
 because they become modified whenever the map is saved by the editor itself.
 */
-BOOL CMapData::IsMapSection(LPCSTR lpSectionName)
+bool CMapData::IsMapSection(const CString& str)
 {
-	CString str;
-	str = lpSectionName;
 
 	if (str == "IsoMapPack5" || str == "OverlayPack" || str == "OverlayDataPack" ||
 		str == "Preview" || str == "PreviewPack" || str == "Map" ||
