@@ -316,7 +316,7 @@ public:
 
 
 		int rampbase = rampset_start;//atoi((*tiles).sections["General"].values["RampBase"]);
-		int rampsmooth = atoi((*tiles).sections["General"].AccessValueByName("RampSmooth"));
+		int rampsmooth = tiles->GetInteger("General", "RampSmooth");
 
 		if (ns == -1 && (d.wTileSet == rampset || d.wTileSet == rampsmooth) && d.bMorphable)
 		{
@@ -360,8 +360,7 @@ public:
 		if (dwPos > fielddata_size) return FALSE;
 
 		int replacement = 0; // MW fix: ignore for bridges
-		if ((*tiledata)[dwID].bReplacementCount && atoi((*tiles).sections["General"].AccessValueByName("BridgeSet")) != (*tiledata)[dwID].wTileSet)
-		{
+		if ((*tiledata)[dwID].bReplacementCount && tiles->GetInteger("General", "BridgeSet") != (*tiledata)[dwID].wTileSet) {
 			replacement = rand() * (1 + (*tiledata)[dwID].bReplacementCount) / RAND_MAX;
 		}
 
@@ -1000,7 +999,7 @@ public:
 #endif
 
 	BOOL IsYRMap();
-	BOOL IsMapSection(LPCSTR lpSectionName);
+	bool IsMapSection(const CString& sectionName);
 	void ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeight);
 	void SmoothTiberium(DWORD dwPos);
 	int GetPowerOfHouse(LPCTSTR lpHouse);
