@@ -146,6 +146,10 @@ public:
 		this->SetString(key, INIHelper::ToString(val));
 	}
 
+	void SetBool(const CString& key, const bool val) {
+		this->SetString(key, INIHelper::ToString(val));
+	}
+
 	void Insert(const CString& key, const CString& value) {
 		this->Insert(key, CString(value));
 	}
@@ -178,7 +182,9 @@ public:
 
 	void RemoveValue(const CString& val) {
 		auto const idx = this->FindValue(val);
-		RemoveAt(idx);
+		if (idx >= 0) {
+			RemoveAt(idx);
+		}
 	}
 
 	auto begin() const noexcept
