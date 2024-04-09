@@ -381,23 +381,25 @@ DWORD CTileSetBrowserView::GetTileID(DWORD dwTileSet, DWORD dwType)
 {
 	int i, e;
 	DWORD tilecount = 0;
-	for (i = 0;i < 10000;i++)
+	for (i = 0; i < 10000; i++)
 	{
 		CString tset;
 		char c[50];
 		itoa(i, c, 10);
 		int e;
-		for (e = 0;e < 4 - strlen(c);e++)
+		for (e = 0; e < 4 - strlen(c); e++)
 			tset += "0";
 		tset += c;
 		CString sec = "TileSet";
 		sec += tset;
 
-		if (tiles->sections.find(sec) == tiles->sections.end())
+		auto const pSec = tiles->TryGetSection(sec);
+		if (!pSec) {
 			return 0xFFFFFFFF;
+		}
 
-
-		for (e = 0;e < atoi(tiles->sections[sec].values["TilesInSet"]);e++)
+		auto const tilesInSet = pSec->GetInteger("TilesInSet");
+		for (e = 0; e < tilesInSet; e++)
 		{
 			if (i == dwTileSet && e == dwType)
 				return tilecount;
@@ -421,8 +423,9 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 	CString tset;
 
 	int e;
-	for (e = 0;e < 4 - strlen(currentTileSet);e++)
+	for (e = 0; e < 4 - strlen(currentTileSet); e++) {
 		tset += "0";
+	}
 
 	tset += currentTileSet;
 
@@ -430,7 +433,7 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 	m_tile_height = 0;
 
 	int i;
-	int max = atoi(tiles->sections[(CString)"TileSet" + tset].values["TilesInSet"]);
+	int max = tiles->GetInteger("TileSet" + tset, "TilesInSet");
 	DWORD dwStartID = GetTileID(dwTileSet, 0);
 	if ((*tiledata)[dwStartID].wTileCount && (*tiledata)[dwStartID].tiles[0].pic)
 	{
@@ -447,16 +450,11 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 			((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = 1;
 			((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = 1;
 
-			int i;
-			for (i = 0;i < g_data.sections["StdBrushSize"].values.size();i++)
-			{
-				CString n = *g_data.sections["StdBrushSize"].GetValueName(i);
-				if ((*tiles).sections["General"].FindName(n) >= 0)
-				{
-					int tset = atoi((*tiles).sections["General"].values[n]);
-					if (tset == m_currentTileSet)
-					{
-						int bs = atoi(*g_data.sections["StdBrushSize"].GetValue(i));
+			for (auto const& [n, val] : g_data["StdBrushSize"]) {
+				if (tiles->GetSection("General").Exists(n)) {
+					int tset = tiles->GetInteger("General", n);
+					if (tset == m_currentTileSet) {
+						int bs = atoi(val);
 						((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = bs - 1;
 						((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
 						((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = bs;
@@ -810,16 +808,11 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 					((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = 1;
 					((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = 1;
 
-					int i;
-					for (i = 0;i < g_data.sections["StdBrushSize"].values.size();i++)
-					{
-						CString n = *g_data.sections["StdBrushSize"].GetValueName(i);
-						if ((*tiles).sections["General"].FindName(n) >= 0)
-						{
-							int tset = atoi((*tiles).sections["General"].values[n]);
-							if (tset == m_currentTileSet)
-							{
-								int bs = atoi(*g_data.sections["StdBrushSize"].GetValue(i));
+					for (auto const& [n, val] : g_data["StdBrushSize"]) {
+						if (tiles->GetSection("General").Exists(n)) {
+							int tset = tiles->GetInteger("General", n);
+							if (tset == m_currentTileSet) {
+								int bs = atoi(val);
 								((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = bs - 1;
 								((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
 								((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = bs;
@@ -938,7 +931,7 @@ void CTileSetBrowserView::SetOverlay(DWORD dwID)
 	}
 	if (!bFound)
 	{
-		theApp.m_loading->LoadOverlayGraphic(*rules.sections["OverlayTypes"].GetValue(dwID), dwID);
+		theApp.m_loading->LoadOverlayGraphic(rules["OverlayTypes"].Nth(dwID).second, dwID);
 		((CFinalSunDlg*)(theApp.m_pMainWnd))->m_view.m_isoview->UpdateOverlayPictures();
 		//p=ovrlpics[dwID][k];
 	}
