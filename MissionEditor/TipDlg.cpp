@@ -65,13 +65,13 @@ CTipDlg::CTipDlg(CWnd* pParent /*=NULL*/)
 	optini.LoadFile(iniFile);
 
 	CWinApp* pApp = AfxGetApp();
-	m_bStartup = !atoi(optini.sections[szSection].values[szIntStartup]);
-	UINT iFilePos = atoi(optini.sections[szSection].values[szIntFilePos]);
+	m_bStartup = !optini.GetBool(szSection, szIntStartup);
+	UINT iFilePos = optini.GetInteger(szSection, szIntFilePos);
 
 	// try top open the tips file
 	CString tipsfile=AppPath;
 	tipsfile+="\\tips.";
-	tipsfile+=language.sections[theApp.m_Options.LanguageName+"Header"].values["ExtensionName"];
+	tipsfile += language.GetString(theApp.m_Options.LanguageName + "Header", "ExtensionName");
 
 	m_pStream = fopen(tipsfile, "r");
 	if (m_pStream == NULL) 
@@ -85,20 +85,15 @@ CTipDlg::CTipDlg(CWnd* pParent /*=NULL*/)
 	_fstat(_fileno(m_pStream), &buf);
 	CString strCurrentTime = ctime(&buf.st_ctime);
 	strCurrentTime.TrimRight();
-	CString strStoredTime = optini.sections[szSection].values[szTimeStamp];
-	if (strCurrentTime != strStoredTime) 
-	{
+	auto const& strStoredTime = optini.GetString(szSection, szTimeStamp);
+	if (strCurrentTime != strStoredTime) {
 		iFilePos = 0;
-		optini.sections[szSection].values[szTimeStamp]=(LPCTSTR)strCurrentTime;
-
+		optini.SetString(szSection, szTimeStamp, strCurrentTime);
 	}
 
-	if (fseek(m_pStream, iFilePos, SEEK_SET) != 0) 
-	{
+	if (fseek(m_pStream, iFilePos, SEEK_SET) != 0) {
 		AfxMessageBox(GetLanguageStringACP("CG_IDP_FILE_CORRUPT"));
-	}
-	else 
-	{
+	} else  {
 		GetNextTipString(m_strTip);
 	}
 
@@ -121,9 +116,7 @@ CTipDlg::~CTipDlg()
 #endif
 		optini.LoadFile(iniFile);
 
-		char val[50];
-		itoa(ftell(m_pStream),val, 10);
-		optini.sections[szSection].values[szIntFilePos]=val;
+		optini.SetInteger(szSection, szIntFilePos, ftell(m_pStream));
 		optini.SaveFile(iniFile);
 		fclose(m_pStream);
 	}
@@ -203,10 +196,7 @@ void CTipDlg::OnOK()
 #endif
 
 	optini.LoadFile(iniFile);
-
-	char val[50];
-	itoa(!m_bStartup,val, 10);
-	optini.sections[szSection].values[szIntStartup]=val;
+	optini.SetBool(szSection, szIntStartup, !m_bStartup);
 	optini.SaveFile(iniFile);
 }
 
