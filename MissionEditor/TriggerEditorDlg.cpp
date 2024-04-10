@@ -204,15 +204,16 @@ void CTriggerEditorDlg::OnDeletetrigger()
 	auto const& triggerId = ini["Triggers"].Nth(curtrig).first;
 
 	if (res == IDYES) {
-		CString keyToDelete;
+		std::vector<CString> keysToDelete;
 		for (auto const& [type, def] : ini["Tags"]) {
 			auto const attTrigg = GetParam(def, 2);
 			if (triggerId == attTrigg) {
-				keyToDelete = type;
-				break;
+				keysToDelete.push_back(type);
 			}
 		}
-		ini.RemoveValueByKey("Tags", keyToDelete);
+		for (auto const& keyToDelete : keysToDelete) {
+			ini.RemoveValueByKey("Tags", keyToDelete);
+		}
 	}
 
 	ini.RemoveValueByKey("Triggers", triggerId);
