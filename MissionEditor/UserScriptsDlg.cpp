@@ -1148,21 +1148,21 @@ void CUserScriptsDlg::OnOK()
 				variables[params[0]]=ID_T;
 			}			
 
-			ini.sections["Triggers"].values[ID_T]=params[1];
-			ini.sections["Events"].values[ID_T]=params[2];
-			ini.sections["Actions"].values[ID_T]=params[3];
+			ini.SetString("Triggers", ID_T, params[1]);
+			ini.SetString("Events", ID_T, params[2]);
+			ini.SetString("Actions", ID_T, params[3]);
 
 			BOOL tag=TRUE;
 			params[4].MakeLower();
 			if(params[4]=="false" || params[4]=="no") tag=FALSE;
 
-			if(tag)
-			{
-				CString ID_TAG=GetFreeID();
-				ini.sections["Tags"].values[ID_TAG]="0,";
-				ini.sections["Tags"].values[ID_TAG]+=GetParam(params[1],2);
-				ini.sections["Tags"].values[ID_TAG]+=",";
-				ini.sections["Tags"].values[ID_TAG]+=ID_T;
+			if(tag) {
+				auto const ID_TAG=GetFreeID();
+				CString def = "0,";
+				def += GetParam(params[1], 2);;
+				def += ",";
+				def += ID_T;
+				ini.SetString("Tags", ID_TAG, def);
 			}
 
 			report+="Trigger " + GetParam(params[1],2) + " added\r\n";
@@ -1187,12 +1187,12 @@ void CUserScriptsDlg::OnOK()
 				}
 			}
 			
-			//if(ini.sections[params[0]].FindName(params[1])>=0)
+			//if(ini.sections[params[0]].FindIndex(params[1])>=0)
 			{
 				if(bSafeMode) goto nextline;				
 			}
 
-			ini.sections[params[0]].values[params[1]]=params[2];
+			ini.SetString(params[0], params[1], params[2]);
 
 			report +=params[0]+(CString)"->"+params[1]+(CString) " set to \"" + params[2] + "\"\r\n"; 
 			
@@ -1217,12 +1217,11 @@ void CUserScriptsDlg::OnOK()
 				}
 			}
 
-			if(ini.sections.find(params[1])==ini.sections.end() || ini.sections[params[1]].FindName(params[2])<0)
-			{
-				variables[params[0]]="";				
+			if (ini[params[1]].FindIndex(params[2]) < 0) {
+				variables[params[0]] = "";
+			} else {
+				variables[params[0]] = ini.GetString(params[1], params[2]);
 			}
-			else
-			variables[params[0]]=ini.sections[params[1]].values[params[2]];
 		}
 		else if(name==ID_SET_SAFE_MODE)
 		{
@@ -1667,7 +1666,7 @@ void CUserScriptsDlg::OnOK()
 
 			if(bSafeMode && n>=0)
 			{
-				if(ini.sections["Waypoints"].FindName(id)>=0)
+				if(ini["Waypoints"].FindIndex(id)>=0)
 				{
 					goto nextline;
 				}
@@ -1753,7 +1752,7 @@ void CUserScriptsDlg::OnOK()
 				variables[params[0]]=ID_T;
 			}	
 
-			ini.sections["AITriggerTypes"].values[ID_T]=params[1];
+			ini.SetString("AITriggerTypes", ID_T, params[1]);
 
 			report+="AI Trigger " + GetParam(params[1],0) + " added\r\n";
 			
@@ -1787,7 +1786,7 @@ void CUserScriptsDlg::OnOK()
 			}		
 
 			CString ID_TAG=ID_T; //GetFreeID();
-			ini.sections["Tags"].values[ID_TAG]=params[1]; 
+			ini.SetString("Tags", ID_TAG, params[1]);
 
 			report+="Tag " + GetParam(params[1],1) + " added\r\n";
 			
@@ -2649,7 +2648,7 @@ void CUserScriptsDlg::OnOK()
 				goto nextline;
 			}
 
-			lastStructureDeleted=*ini.sections["Structures"].GetValueName(index);
+			lastStructureDeleted = ini["Structures"].Nth(index).first;
 			Map->DeleteStructure(index);
 
 			report+="Structure deleted\r\n";
@@ -2684,7 +2683,7 @@ void CUserScriptsDlg::OnOK()
 				goto nextline;
 			}
 
-			lastUnitDeleted=*ini.sections["Units"].GetValueName(index);
+			lastUnitDeleted = ini["Units"].Nth(index).first;
 			Map->DeleteUnit(index);
 
 			report+="Vehicle deleted\r\n";
@@ -2720,7 +2719,7 @@ void CUserScriptsDlg::OnOK()
 				goto nextline;
 			}
 			
-			lastAircraftDeleted=*ini.sections["Aircraft"].GetValueName(index);
+			lastAircraftDeleted = ini["Aircraft"].Nth(index).first;
 			Map->DeleteAircraft(index);
 
 			report+="Aircraft deleted\r\n";
@@ -3099,9 +3098,8 @@ void CUserScriptsDlg::OnOK()
 
 			int index=atoi(params[1]);
 			CString s;
-			if(index>=0 && index<Map->GetAircraftCount())
-			{
-				s=*ini.sections["Aircraft"].GetValue(index);
+			if (index >= 0 && index < Map->GetAircraftCount()) {
+				s = ini["Aircraft"].Nth(index).second;
 			}
 
 			variables[params[0]]=s;
@@ -3126,9 +3124,8 @@ void CUserScriptsDlg::OnOK()
 
 			int index=atoi(params[1]);
 			CString s;
-			if(index>=0 && index<Map->GetStructureCount())
-			{
-				s=*ini.sections["Structures"].GetValue(index);
+			if (index >= 0 && index < Map->GetStructureCount()) {
+				s = ini["Structures"].Nth(index).second;
 			}
 
 			variables[params[0]]=s;
@@ -3153,9 +3150,8 @@ void CUserScriptsDlg::OnOK()
 
 			int index=atoi(params[1]);
 			CString s;
-			if(index>=0 && index<Map->GetUnitCount())
-			{
-				s=*ini.sections["Units"].GetValue(index);
+			if (index >= 0 && index < Map->GetUnitCount()) {
+				s = ini["Units"].Nth(index).second;
 			}
 
 			variables[params[0]]=s;
