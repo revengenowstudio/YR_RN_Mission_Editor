@@ -135,8 +135,7 @@ public:
 		auto const it = value_pos.find(key);
 		// new, never had one
 		if (it == value_pos.end()) {
-			this->value_pairs.push_back({ key, std::move(value) });
-			value_pos[key] = value_pairs.size();
+			this->Insert(key, std::move(value));
 			return;
 		}
 		value_pairs[it->second].second = std::move(value);
