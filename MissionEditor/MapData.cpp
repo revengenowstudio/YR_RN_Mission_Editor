@@ -3814,10 +3814,13 @@ void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 	}
 }
 
-int CMapData::GetBuildingID(LPCSTR lpBuildingName)
+int CMapData::GetBuildingID(const CString& lpBuildingName)
 {
-	if (buildingid.find(lpBuildingName) == buildingid.end()) return -1;
-	return buildingid[lpBuildingName];
+	auto const it = buildingid.find(lpBuildingName);
+	if (it == buildingid.end()) {
+		return -1;
+	}
+	return it->second;
 }
 
 

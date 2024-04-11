@@ -399,7 +399,7 @@ public:
 	}
 
 
-	int GetBuildingID(LPCSTR lpBuildingName);
+	int GetBuildingID(const CString& lpBuildingName);
 	void ImportRUL(LPCTSTR lpFilename);
 	void ExportRulesChanges(const char* filename);
 	void DeleteRulesSections();
