@@ -115,12 +115,13 @@ namespace FSunPackLib
 	std::wstring utf8ToUtf16(const std::string& utf8)
 	{
 		// wstring_convert and codecvt_utf8_utf16 are deprecated in C++17, fallback to Win32
-		if (utf8.size() == 0)
+		auto utf8Count = static_cast<int>(utf8.size());
+		if (utf8Count == 0) {
 			// MultiByteToWideChar does not support passing in cbMultiByte == 0
 			return L"";
+		}
 
 		// unterminatedCountWChars will be the count of WChars NOT including the terminating zero (due to passing in utf8.size() instead of -1)
-		auto utf8Count = utf8.size();
 		auto unterminatedCountWChars = MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, utf8.data(), utf8Count, nullptr, 0);
 		if (unterminatedCountWChars == 0)
 		{
@@ -287,7 +288,7 @@ namespace FSunPackLib
 		return true;
 	}
 
-	int DecodeBase64(const char* sp, std::vector<BYTE>& dest)
+	size_t DecodeBase64(const char* sp, std::vector<BYTE>& dest)
 	{
 		auto len = strlen(reinterpret_cast<const char*>(sp));
 		auto res = decode64(data_ref(sp, len));

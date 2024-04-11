@@ -183,8 +183,8 @@ public:
 
 	const byte* get_z_image(int i) const
 	{
-		int a = get_index()[i] + get_image_header(i)->z_ofs;
-		int b = get_image(i) + get_cb_diamond() - data();
+		auto const a = get_index()[i] + get_image_header(i)->z_ofs;
+		auto const b = get_image(i) + get_cb_diamond() - data();
 		assert(a == b);
 		return data() + get_index()[i] + get_image_header(i)->z_ofs;
 	}

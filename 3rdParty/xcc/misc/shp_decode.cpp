@@ -377,45 +377,47 @@ static void write_v80(byte v, int count, byte*& d)
 	}
 }
 
+#include <cstdint>
+
 void get_same(const byte* s, const byte* r, const byte* s_end, byte*& p, int& cb_p)
 {
-	_asm
-	{
-		push	esi
-		push	edi
-		mov		eax, s_end
-		mov		ebx, s
-		xor		ecx, ecx
-		mov		edi, p
-		mov		[edi], ecx
-		dec		ebx
+	const byte* s_end_ptr = s_end;
+	const byte* s_ptr = s;
+	int ecx_value = 0;
+	byte* edi_ptr = p;
+	*edi_ptr = static_cast<byte>(ecx_value);
+	s_ptr--;
+
 next_s:
-		inc		ebx
-		xor		edx, edx
-		mov		esi, r
-		mov		edi, ebx
-		cmp		edi, esi
-		jnb		end0
+	s_ptr++;
+	int edx_value = 0;
+	const byte* esi_ptr = r;
+	const byte* edi_val = s_ptr;
+	if (edi_val >= esi_ptr)
+		goto end0;
+
 next0:
-		inc		edx
-		cmp		esi, eax
-		jnb		end_line
-		cmpsb
-		je		next0
+	edx_value++;
+	if (esi_ptr >= s_end_ptr)
+		goto end_line;
+
+	if (*esi_ptr == *s_ptr)
+		goto next0;
+
 end_line:
-		dec		edx
-		cmp		edx, ecx
-		jl		next_s
-		mov		ecx, edx
-		mov		edi, p
-		mov		[edi], ebx
-		jmp		next_s
+	edx_value--;
+	if (edx_value < ecx_value)
+		goto next_s;
+
+	ecx_value = edx_value;
+	edi_ptr = p;
+	*edi_ptr = static_cast<byte>(*s_ptr);
+	goto next_s;
+
 end0:
-		mov		edi, cb_p
-		mov		[edi], ecx
-		pop		edi
-		pop		esi
-	}
+	edi_ptr = reinterpret_cast<byte*>(& cb_p);
+	*edi_ptr = ecx_value;
+	// Restore registers
 }
 
 static void write80_c0(byte*& w, int count, int p)
@@ -617,162 +619,144 @@ int decode80c(const byte image_in[], byte image_out[], int cb_in)
 	return (w - image_out);
 }
 
-int decode80(const byte image_in[], byte image_out[])
+int __fastcall decode80(const byte image_in[], byte image_out[])
 {
-	int cb_out;
-	/*
-	0 copy 0cccpppp p
-	1 copy 10cccccc
-	2 copy 11cccccc p p
-	3 fill 11111110 c c v
-	4 copy 11111111 c c p p
-	*/
-	
-	_asm
+	byte* i; // edi
+	unsigned int v4; // eax
+	const byte* v5; // esi
+	unsigned int v6; // ecx
+	int v7; // eax
+	const byte* v8; // edx
+	byte* v9; // esi
+	unsigned int v10; // ecx
+	unsigned int v11; // eax
+	const byte* v12; // esi
+	unsigned int v13; // ecx
+	char v14; // al
+
+	for (i = image_out; ; i += v10)
 	{
-		push	esi
-		push	edi
-		mov		ax, ds
-		mov		es, ax
-		mov		esi, image_in
-		mov		edi, image_out
-next0:
-		xor		eax, eax
-		lodsb
-		mov		ecx, eax
-		test	eax, 0x80
-		jnz		c1c
-		shr		ecx, 4
-		add		ecx, 3
-		and		eax, 0xf
-		shl		eax, 8
-		lodsb
-		mov		edx, esi
-		mov		esi, edi
-		sub		esi, eax
-		jmp		copy_from_destination
-c1c:
-		and		ecx, 0x3f
-		test	eax, 0x40
-		jnz		c2c
-		or		ecx, ecx
-		jz		end0
-		jmp		copy_from_source
-c2c:
-		xor		eax, eax
-		lodsw
-		cmp		ecx, 0x3e
-		je		c3
-		ja		c4
-		mov		edx, esi
-		mov		esi, image_out
-		add		esi, eax
-		add		ecx, 3
-		jmp		copy_from_destination
-c3:
-		mov		ecx, eax
-		lodsb
-		rep		stosb
-		jmp		next0
-c4:
-		mov		ecx, eax
-		lodsw
-		mov		edx, esi
-		mov		esi, image_out
-		add		esi, eax
-copy_from_destination:
-		rep		movsb
-		mov		esi, edx
-		jmp		next0
-copy_from_source:
-		rep		movsb
-		jmp		next0
-end0:
-		sub		edi, image_out
-		mov		cb_out, edi
-		pop		edi
-		pop		esi
+		while (1)
+		{
+			v4 = (unsigned __int8)*image_in;
+			v5 = image_in + 1;
+			if ((v4 & 0x80) == 0)
+			{
+				v6 = (v4 >> 4) + 3;
+				v7 = (v4 & 0xF) << 8;
+				v7 |= static_cast<unsigned char>(*v5);
+				v8 = v5 + 1;
+				v9 = &i[-v7];
+				goto copy_from_destination;
+			}
+			v10 = v4 & 0x3F;
+			if ((v4 & 0x40) == 0)
+				break;
+			v11 = *(unsigned __int16*)v5;
+			v12 = v5 + 2;
+			if (v10 == 62)
+			{
+				v13 = v11;
+				v14 = *v12;
+				image_in = v12 + 1;
+				memset(i, v14, v13);
+				i += v13;
+			} else
+			{
+				if (v10 > 0x3E)
+				{
+					v6 = v11;
+					v11 = *reinterpret_cast<const int16_t*>(v12);
+					v8 = v12 + 2;
+					v9 = &image_out[v11];
+				} else
+				{
+					v8 = v12;
+					v9 = &image_out[v11];
+					v6 = v10 + 3;
+				}
+			copy_from_destination:
+				memcpy(i, v9, v6);
+				i += v6;
+				image_in = v8;
+			}
+		}
+		if ((v4 & 0x3F) == 0)
+			break;
+		memcpy(i, v5, v10);
+		image_in = &v5[v10];
 	}
-	return cb_out;
+	return i - image_out;
 }
 
-int decode80r(const byte image_in[], byte image_out[])
+int __fastcall decode80r(const byte image_in[], byte image_out[])
 {
-	int cb_out;
-	/*
-	0 copy 0cccpppp p
-	1 copy 10cccccc
-	2 copy 11cccccc p p
-	3 fill 11111110 c c v
-	4 copy 11111111 c c p p
-	*/
-	
-	_asm
+	byte* i; // edi
+	unsigned int v4; // eax
+	const byte* v5; // esi
+	unsigned int v6; // ecx
+	int v7; // eax
+	const byte* v8; // edx
+	byte* v9; // esi
+	unsigned int v10; // ecx
+	unsigned int v11; // eax
+	const byte* v12; // esi
+	unsigned int v13; // ecx
+	char v14; // al
+
+	for (i = image_out; ; i += v10)
 	{
-		push	esi
-		push	edi
-		mov		ax, ds
-		mov		es, ax
-		mov		esi, image_in
-		mov		edi, image_out
-next0:
-		xor		eax, eax
-		lodsb
-		mov		ecx, eax
-		test	eax, 0x80
-		jnz		c1c
-		shr		ecx, 4
-		add		ecx, 3
-		and		eax, 0xf
-		shl		eax, 8
-		lodsb
-		mov		edx, esi
-		mov		esi, edi
-		sub		esi, eax
-		jmp		copy_from_destination
-c1c:
-		and		ecx, 0x3f
-		test	eax, 0x40
-		jnz		c2c
-		or		ecx, ecx
-		jz		end0
-		jmp		copy_from_source
-c2c:
-		xor		eax, eax
-		lodsw
-		cmp		ecx, 0x3e
-		je		c3
-		ja		c4
-		mov		edx, esi
-		mov		esi, edi
-		sub		esi, eax
-		add		ecx, 3
-		jmp		copy_from_destination
-c3:
-		mov		ecx, eax
-		lodsb
-		rep		stosb
-		jmp		next0
-c4:
-		mov		ecx, eax
-		lodsw
-		mov		edx, esi
-		mov		esi, edi
-		sub		esi, eax
-copy_from_destination:
-		rep		movsb
-		mov		esi, edx
-		jmp		next0
-copy_from_source:
-		rep		movsb
-		jmp		next0
-end0:
-		sub		edi, image_out
-		mov		cb_out, edi
-		pop		edi
-		pop		esi
+		while (1)
+		{
+			v4 = (unsigned __int8)*image_in;
+			v5 = image_in + 1;
+			if ((v4 & 0x80) == 0)
+			{
+				v6 = (v4 >> 4) + 3;
+				v7 = (v4 & 0xF) << 8;
+				v7 |= static_cast<unsigned char>(*v5);
+				v8 = v5 + 1;
+				v9 = &i[-v7];
+				goto copy_from_destination;
+			}
+			v10 = v4 & 0x3F;
+			if ((v4 & 0x40) == 0)
+				break;
+			v11 = *(unsigned __int16*)v5;
+			v12 = v5 + 2;
+			if (v10 == 62)
+			{
+				v13 = v11;
+				v14 = *v12;
+				image_in = v12 + 1;
+				memset(i, v14, v13);
+				i += v13;
+			} else
+			{
+				if (v10 > 0x3E)
+				{
+					v6 = v11;
+					v11 = *reinterpret_cast<const int16_t*>(v12);
+					v8 = v12 + 2;
+					v9 = &i[-v11];
+				} else
+				{
+					v8 = v12;
+					v9 = &i[-v11];
+					v6 = v10 + 3;
+				}
+			copy_from_destination:
+				memcpy(i, v9, v6);
+				i += v6;
+				image_in = v8;
+			}
+		}
+		if ((v4 & 0x3F) == 0)
+			break;
+		memcpy(i, v5, v10);
+		image_in = &v5[v10];
 	}
-	return cb_out;
+	return i - image_out;
 }
 
 int decode2(const byte* s, byte* d, int cb_s, const byte* reference_palet)
@@ -1167,7 +1151,7 @@ int encode5(const byte* s, byte* d, int cb_s, int format)
 	byte* w = d;
 	while (r < r_end)
 	{
-		int cb_section = min(r_end - r, 8192);
+		int cb_section = min<size_t>(r_end - r, 8192);
 		t_pack_section_header& header = *reinterpret_cast<t_pack_section_header*>(w);
 		w += sizeof(t_pack_section_header);
 		w += header.size_in = format == 80 ? encode80(r, w, cb_section) : encode5s(r, w, cb_section);

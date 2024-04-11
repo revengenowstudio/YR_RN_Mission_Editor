@@ -47,7 +47,7 @@ public:
 	enum { IDD = IDD_INPUTBOX };
 	//}}AFX_DATA
 
-
+	const CString& GetResult() const { return m_Result; }
 // Überschreibungen
 	// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
 	//{{AFX_VIRTUAL(CInputBox)
@@ -68,6 +68,7 @@ protected:
 private:
 	CString m_Text;
 	CString m_Caption;
+	CString m_Result;
 };
 
 //{{AFX_INSERT_LOCATION}}

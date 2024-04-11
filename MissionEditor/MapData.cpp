@@ -278,7 +278,9 @@ void CMapData::CalcMapRect()
 	m_maprect.right = atoi(custr);
 
 	cucomma = strchr(&msize[cupos], ','); // we check again... could be there is a new ini format
-	if (cucomma == NULL) cucomma = (char*)((int)msize + strlen(msize));
+	if (cucomma == NULL) {
+		cucomma = msize + strlen(msize);
+	}
 	memcpy_s(custr, custr_size, &msize[cupos], (cucomma - msize) - cupos + 1);
 	custr[((cucomma - msize)) - cupos] = 0;
 	cupos = cucomma - msize + 1;
@@ -321,7 +323,9 @@ void CMapData::CalcMapRect()
 
 
 	cucomma = strchr(&msize[cupos], ','); // we check again... could be there is a new ini format
-	if (cucomma == NULL) cucomma = (char*)((int)msize + strlen(msize));
+	if (cucomma == NULL) {
+		cucomma = msize + strlen(msize);
+	}
 	memcpy_s(custr, custr_size, &msize[cupos], (cucomma - msize) - cupos + 1);
 	custr[((cucomma - msize)) - cupos] = 0;
 	cupos = cucomma - msize + 1;
@@ -1092,7 +1096,7 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 	BYTE* hexpacked = NULL; // must be freed!
 
 
-	errstream << "Values allocated. Pointer: " << (int)values << endl;
+	errstream << "Values allocated. Pointer: " << std::hex << values << endl;
 	errstream.flush();
 
 

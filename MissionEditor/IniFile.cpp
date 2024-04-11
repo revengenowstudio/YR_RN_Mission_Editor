@@ -217,9 +217,9 @@ BOOL CIniFile::SaveFile(const std::string& Filename) const
 }
 
 
-int CIniFileSection::FindValue(CString val) const noexcept
+int64_t CIniFileSection::FindValue(CString val) const noexcept
 {
-	for (auto idx = 0;
+	for (size_t idx = 0;
 		idx < this->value_pairs.size();
 		++idx) {
 		if (this->value_pairs[idx].second == val) {
@@ -229,7 +229,7 @@ int CIniFileSection::FindValue(CString val) const noexcept
 	return -1;
 }
 
-int CIniFileSection::FindIndex(const CString& key) const noexcept
+int64_t CIniFileSection::FindIndex(const CString& key) const noexcept
 {
 	auto const it = this->value_pos.find(key);
 	if (it != this->value_pos.end()) {

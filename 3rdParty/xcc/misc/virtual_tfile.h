@@ -32,7 +32,7 @@ private:
 		return reinterpret_cast<const char*>(m_data.data());
 	}
 
-	int size() const
+	auto size() const
 	{
 		return m_data.size();
 	}

@@ -4,7 +4,7 @@
     <Import Project="$(MSBuildThisFileDirectory)/Common.props" />
   </ImportGroup>
   <PropertyGroup>
-	<XccVcpkgDirTriplet>$(XccDir)\vcpkg_installed\x86-windows\x86-windows</XccVcpkgDirTriplet>
+  <XccVcpkgDirTriplet>$(XccDir)\vcpkg_installed\$(Platform)-windows\$(Platform)-windows</XccVcpkgDirTriplet>
     <XccVcpkgDir>$(XccVcpkgDirTriplet)</XccVcpkgDir>
   </PropertyGroup>
   <PropertyGroup Label="UserMacros" />

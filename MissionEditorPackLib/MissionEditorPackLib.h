@@ -109,7 +109,7 @@ sp - source poINTer
 dp - dest buffer (should be as large as sp)
 Returns the hex data length
 */
-	int DecodeBase64(const char* sp, std::vector<BYTE>& dest);
+	size_t DecodeBase64(const char* sp, std::vector<BYTE>& dest);
 
 
 // format 80

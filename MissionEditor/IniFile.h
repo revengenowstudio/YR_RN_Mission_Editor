@@ -67,8 +67,8 @@ public:
 		ASSERT(index < value_pairs.size());
 		return this->value_pairs[index];
 	}
-	int FindIndex(const CString& key) const noexcept;
-	int FindValue(CString val) const noexcept;
+	int64_t FindIndex(const CString& key) const noexcept;
+	int64_t FindValue(CString val) const noexcept;
 
 	const CString& operator[](const CString& key) const {
 		return this->GetString(key);
@@ -203,7 +203,7 @@ public:
 	}
 
 private:
-	map<CString, int, SortDummy> value_pos{};
+	map<CString, int64_t, SortDummy> value_pos{};
 	vector<std::pair<CString, CString>> value_pairs{};// sequenced
 	mutable bool isRegistry{false};
 };

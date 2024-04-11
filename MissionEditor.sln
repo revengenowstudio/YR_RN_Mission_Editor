@@ -101,8 +101,8 @@ Global
 		{DEB40EF0-E215-4C2F-A0AD-3742E2E01A8C}.Tests FinalAlertDebug YR|x64.Build.0 = Debug|x64
 		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertDebug YR|Win32.ActiveCfg = DebugMinimal|Win32
 		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertDebug YR|Win32.Build.0 = DebugMinimal|Win32
-		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertDebug YR|x64.ActiveCfg = Debug|x64
-		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertDebug YR|x64.Build.0 = Debug|x64
+		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertDebug YR|x64.ActiveCfg = DebugMinimal|x64
+		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertDebug YR|x64.Build.0 = DebugMinimal|x64
 		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertDebug|Win32.ActiveCfg = DebugMinimal|Win32
 		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertDebug|Win32.Build.0 = DebugMinimal|Win32
 		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertDebug|x64.ActiveCfg = Debug|x64
