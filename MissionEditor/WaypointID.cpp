@@ -71,13 +71,12 @@ void CWaypointID::OnFree()
 	int i;
 	CString freen;
 
-	for(i=0;i>-1;i++)
+	for (i = 0; i > -1; i++)
 	{
 		char d[50];
-		itoa(i,d,10);
-		if(ini.sections["Waypoints"].values.find(d)==ini.sections["Waypoints"].values.end())
-		{
-			freen=d;
+		itoa(i, d, 10);
+		if (ini.GetString("Waypoints", d).IsEmpty()) {
+			freen = d;
 			break;
 		}
 	}
