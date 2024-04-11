@@ -190,8 +190,8 @@ CFinalSunApp theApp;
 
 CString currentOwner="Neutral";
 
-map<CString, XCString> CCStrings;
-map<CString, XCString> AllStrings;
+TranslationMap CCStrings;
+TranslationMap AllStrings;
 
 // tilesets
 int cliffset;
