@@ -35,7 +35,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CMapOpenDialog
 
-UINT CALLBACK OFNHookProc(
+UINT_PTR CALLBACK OFNHookProc(
   HWND hdlg,      // handle to child dialog window
   UINT uiMsg,     // message identifier
   WPARAM wParam,  // message parameter

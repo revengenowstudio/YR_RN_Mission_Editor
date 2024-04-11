@@ -109,7 +109,7 @@ public:
 	//{{AFX_VIRTUAL(CFinalSunDlg)
 	public:
 	virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pLResult);
-	virtual int DoModal();
+	virtual INT_PTR DoModal();
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
 	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);

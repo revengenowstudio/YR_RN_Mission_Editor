@@ -45,7 +45,7 @@ public:
 
 	int get_c_spans(int i) const
 	{
-		return get_section_tailer(i)->span_end_ofs - get_section_tailer(i)->span_start_ofs >> 2;
+		return (get_section_tailer(i)->span_end_ofs - get_section_tailer(i)->span_start_ofs) >> 2;
 	}
 
 	int get_c_section_tailers() const

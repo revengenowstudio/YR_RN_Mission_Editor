@@ -2705,7 +2705,7 @@ BOOL CFinalSunDlg::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 	if(pHead->code==TTN_NEEDTEXT)
 	{
 		TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pHead;
-		UINT nID =pHead->idFrom;
+		auto nID =pHead->idFrom;
 		if (pTTT->uFlags & TTF_IDISHWND)
 		{
 			// idFrom ist der HWND des Tools
@@ -3090,7 +3090,7 @@ LONG __stdcall ExceptionHandler(
 	CString s_add;	
 	char adress[50];
 	char c[50];
-	itoa((int)ExceptionInfo->ExceptionRecord->ExceptionAddress, adress, 16);
+	itoa((std::ptrdiff_t)ExceptionInfo->ExceptionRecord->ExceptionAddress, adress, 16);
 	s="Unknown exception";
 	switch(ExceptionInfo->ExceptionRecord->ExceptionCode)
 	{
@@ -3252,7 +3252,7 @@ LONG __stdcall ExceptionHandler(
 	return EXCEPTION_EXECUTE_HANDLER;//EXCEPTION_CONTINUE_SEARCH;//EXCEPTION_EXECUTE_HANDLER;
 }
 
-int CFinalSunDlg::DoModal() 
+INT_PTR CFinalSunDlg::DoModal()
 {
 	int res=0;
 	SetUnhandledExceptionFilter(ExceptionHandler);

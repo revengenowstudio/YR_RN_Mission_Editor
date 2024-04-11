@@ -50,7 +50,7 @@ public:
 
     inline T length() const
     {
-        return sqrt(squaredLength());
+        return static_cast<T>(sqrt(squaredLength()));
     }
 
     inline T squaredLength() const

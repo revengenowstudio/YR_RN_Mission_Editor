@@ -32,6 +32,7 @@
 #include <span>
 #include <string>
 #include <vartypes.h>
+#include <stdint.h>
 #include <vector>
 #include <xcc/data_ref.h>
 #include <xcc/find_ptr.h>

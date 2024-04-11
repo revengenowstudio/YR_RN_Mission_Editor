@@ -1765,7 +1765,7 @@ namespace FSunPackLib
 			Vec3f secMinVec, secMaxVec;
 			GetVXLSectionBounds(i, rotation, postHVAOffset, secMinVec, secMaxVec);
 			auto extent = secMaxVec - secMinVec;
-			auto volume = extent.x() * extent.y() * extent.z();
+			auto volume = static_cast<int>(extent.x() * extent.y() * extent.z());
 			if (volume >= iLargestVolume)
 			{
 				iLargestVolume = volume;
@@ -1785,8 +1785,8 @@ namespace FSunPackLib
 
 
 		const auto extents = (maxCoords - minCoords);
-		int rtWidth = ceil(extents.x());
-		int rtHeight = ceil(extents.y());
+		int rtWidth = static_cast<int>(ceil(extents.x()));
+		int rtHeight = static_cast<int>(ceil(extents.y()));
 		const int c_pixels = rtWidth * rtHeight;
 
 		// MYASSERT(c_pixels,1);
@@ -2000,7 +2000,7 @@ namespace FSunPackLib
 			Vec3f secMinVec, secMaxVec;
 			GetVXLSectionBounds(i, rotation, modelOffset, secMinVec, secMaxVec);
 			auto extent = secMaxVec - secMinVec;
-			auto volume = extent.x() * extent.y() * extent.z();
+			auto volume = static_cast<int>(extent.x() * extent.y() * extent.z());
 			if (volume >= iLargestVolume)
 			{
 				iLargestVolume = volume;
@@ -2021,8 +2021,8 @@ namespace FSunPackLib
 
 
 		const auto extents = (maxCoords - minCoords);
-		int rtWidth = ceil(extents.x()) + 1;
-		int rtHeight = ceil(extents.y()) + 1;
+		int rtWidth = static_cast<int>(ceil(extents.x()) + 1);
+		int rtHeight = static_cast<int>(ceil(extents.y()) + 1);
 		const int c_pixels = rtWidth * rtHeight;
 
 		MYASSERT(c_pixels, 1);

@@ -5216,7 +5216,7 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 
 }
 
-void CIsoView::OnTimer(UINT nIDEvent)
+void CIsoView::OnTimer(UINT_PTR nIDEvent)
 {
 	// theApp.m_loading->FreeAll();
 	// theApp.m_loading->InitPics();
