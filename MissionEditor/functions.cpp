@@ -1308,12 +1308,13 @@ CString GetFreeID()
 			"Actions",
 			"AITriggerTypes",
 		};
-		auto const found = find(std::begin(typeListSections), std::end(typeListSections), [&ini, input](auto const& key) {
-			return ini.GetSection(key).HasValue(input);
-			});
-		if (found != std::end(typeListSections)) {
+		if (find(std::begin(typeListSections), std::end(typeListSections), input) != std::end(typeListSections)) {
 			return true;
 		}
+		if (find(std::begin(idListSections), std::end(idListSections), input) != std::end(idListSections)) {
+			return true;
+		}
+		return false;
 	};
 
 	for (;;) {
