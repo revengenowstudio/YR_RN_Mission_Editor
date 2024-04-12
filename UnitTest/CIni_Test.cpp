@@ -19,6 +19,7 @@ AllowUnidirectionalTunnels=yes
 
 	CIniFile file;
 	ASSERT_EQ(file.LoadFile(std::string(testIni)), 0);
+	remove(testIni);
 
 	EXPECT_EQ(true, file.GetBool("Debug","AllowTunnels"));
 }

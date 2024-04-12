@@ -41,19 +41,6 @@ using namespace std;
 const CIniFileSection CIniFile::EmptySection;
 const CString CIniFileSection::EmptyValue;
 
-bool SortDummy::operator()(const CString& x, const CString& y) const
-{
-	// the length is more important than spelling (numbers!!!)...
-	if (x.GetLength() < y.GetLength()) return true;
-	if (x.GetLength() == y.GetLength())
-	{
-		if (x < y) return true;
-	}
-
-	return false;
-
-}
-
 typedef map<CString, CIniFileSection>::iterator CIniI;
 typedef map<CString, CString, SortDummy>::iterator SI;
 typedef map<CString, int, SortDummy>::iterator SII;
@@ -159,14 +146,11 @@ WORD CIniFile::InsertFile(const std::string& filename, const char* Section, BOOL
 				CString name = cLine.substr(0, equals).c_str();
 				CString value = cLine.substr(equals + 1, cLine.size() - equals - 1).c_str();
 
-				int cuValueIndex = sections[cSec].Size();
-
 				if (bNoSpaces)
 				{
 					name.Trim();
 					value.Trim();
 				}
-
 				sections[cSec].SetString(name, value);
 			}
 		}

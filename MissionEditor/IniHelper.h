@@ -59,6 +59,7 @@ public:
 	{
 		char buffer[0x100];
 		_itoa_s(origin, buffer, 10);
+		buffer[sizeof buffer - 1] = '\0';
 		return buffer;
 	}
 };
