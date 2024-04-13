@@ -326,7 +326,7 @@ public:
 		}
 		auto&& newSec = CIniFileSection{};
 		newSec.SetString(key, value);
-		ASSERT(sections.insert({ key, std::move(newSec) }).second == true);
+		ASSERT(sections.insert({ section, std::move(newSec) }).second == true);
 	}
 
 	void SetString(const CString& section, const CString& key, const CString& value) {
