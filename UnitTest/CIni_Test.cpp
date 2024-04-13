@@ -137,3 +137,104 @@ Count=10
 	EXPECT_EQ(false, file.GetBool("Debug", "DisplayAllOverlay"));
 }
 
+TEST(CIniFileClass, IniAddSectionTest) {
+	auto const fileName = "test.ini";
+	IniTestHelper helper(fileName, R"(
+[SlopeSetPiecesDirections]
+Count=10
+0=Right_1
+1=Left_1
+2=Top_1
+3=Bottom_1
+4=Right_2
+5=Left_2
+6=Left_2
+7=Bottom_2
+8=Top_2
+9=Top_2
+)");
+
+	CIniFile file;
+	ASSERT_EQ(file.LoadFile(std::string(fileName)), 0);
+	file.AddSection("Debug");
+	auto pDebugSec = file.TryGetSection("Debug");
+	ASSERT_NE(pDebugSec, nullptr);
+	pDebugSec->SetBool("DisplayAllOverlay", false);
+	pDebugSec->SetBool("AllowTunnels", true);
+	EXPECT_EQ(true, file.GetBool("Debug", "AllowTunnels"));
+	EXPECT_EQ(false, file.GetBool("Debug", "DisplayAllOverlay"));
+}
+
+TEST(CIniFileClass, IniDeleteSectionTest) {
+	auto const fileName = "test.ini";
+	IniTestHelper helper(fileName, R"(
+[LUNARLimits]
+TreeMax=999
+TreeMin=999
+
+[URBANLimits]
+TreeMax=999
+;TreeMax=27
+
+[TEMPERATELimits]
+TreeMax=999
+;TreeMax=27
+
+[SNOWLimits]
+TreeMax=999
+;TreeMax=27
+
+[NEWURBANLimits]
+TreeMax=999
+;TreeMax=27
+
+[DESERTLimits]
+TreeMin=30
+TreeMax=999
+)");
+
+	CIniFile file;
+	ASSERT_EQ(file.LoadFile(std::string(fileName)), 0);
+
+	EXPECT_EQ(999, file.GetInteger("SNOWLimits", "TreeMax"));
+	EXPECT_EQ(999, file.GetInteger("LUNARLimits", "TreeMin"));
+
+	EXPECT_EQ(6, file.Size());
+	file.DeleteSection("SNOWLimits");
+
+	EXPECT_EQ(0, file.GetInteger("SNOWLimits", "TreeMax"));
+	EXPECT_EQ(nullptr, file.TryGetSection("SNOWLimits"));
+	EXPECT_EQ(5, file.Size());
+}
+
+TEST(CIniFileClass, IniDeleteValueTest) {
+	auto const fileName = "test.ini";
+	IniTestHelper helper(fileName, R"(
+[LUNARLimits]
+TreeMax=999
+TreeMin=999
+
+[NewUrbanInfo]
+Morphable2=114
+Ramps2=117
+Cliffs2=110
+CliffsWater2=112
+
+; tileset ini overwritings
+; only used by FinalAlert
+[IgnoreSetTEMPERATE]
+0=77
+1=78
+2=79
+)");
+
+	CIniFile file;
+	ASSERT_EQ(file.LoadFile(std::string(fileName)), 0);
+
+	EXPECT_EQ(114, file.GetInteger("NewUrbanInfo", "Morphable2"));
+	file.RemoveValueByKey("NewUrbanInfo", "Morphable2");
+
+	EXPECT_EQ(0, file.GetInteger("NewUrbanInfo", "Morphable2"));
+	EXPECT_EQ(false, file["NewUrbanInfo"].Exists("Morphable2"));
+
+}

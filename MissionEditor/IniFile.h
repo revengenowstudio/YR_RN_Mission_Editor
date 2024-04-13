@@ -172,14 +172,17 @@ public:
 
 	void RemoveAt(size_t idx) {
 		ASSERT(idx < value_pairs.size());
-		for (auto affectedIdx = idx + 1; affectedIdx < value_pairs.size(); ++affectedIdx) {
+		// delete from record first;
+		auto const& pair = value_pairs.at(idx);
+		ASSERT(value_pos.erase(pair.first) == 1);
+		value_pairs.erase(value_pairs.begin() + idx);
+		// now update all key-pos indexing, dec 1
+		for (auto affectedIdx = idx; affectedIdx < value_pairs.size(); ++affectedIdx) {
 			auto const& kvPair = value_pairs[affectedIdx];
 			auto const it = value_pos.find(kvPair.first);
 			ASSERT(it != value_pos.end());
 			it->second--;
 		}
-		auto const itErased = value_pairs.erase(value_pairs.begin() + idx);
-		ASSERT(value_pos.erase(itErased->first) == 1);
 	}
 
 	void RemoveByKey(const CString& key) {
