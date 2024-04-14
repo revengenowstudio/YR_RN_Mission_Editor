@@ -590,9 +590,9 @@ void CViewObjects::UpdateDialog()
 	int i=0;
 
 	//TV_InsertItemW(tree.m_hWnd, L"HELLO", 5, TVI_LAST, TVI_ROOT, -2);
-	
+	auto const translatedNoObj = GetLanguageStringACP("NothingObList");
 	HTREEITEM first=tree.InsertItem(TVIF_PARAM | TVIF_TEXT,
-		TranslateStringACP(GetLanguageStringACP("NothingObList")), i, i, 0, 0, -2, TVI_ROOT, TVI_LAST);
+		translatedNoObj, i, i, 0, 0, -2, TVI_ROOT, TVI_LAST);
 
 	HTREEITEM rootitems[15];
 
@@ -600,7 +600,7 @@ void CViewObjects::UpdateDialog()
 	
 	if(!Map->IsMultiplayer() || !theApp.m_Options.bEasy)
 		rootitems[11]=tree.InsertItem(TVIF_PARAM | TVIF_TEXT,
-			TranslateStringACP(sTreeRoots[11]), i, i, 0, 0, i, TVI_ROOT, TVI_LAST);
+			sTreeRoots[11], i, i, 0, 0, i, TVI_ROOT, TVI_LAST);
 	
 
 	for(i=0;i<10;i++)
@@ -624,17 +624,17 @@ void CViewObjects::UpdateDialog()
 	}
 
 
-	rootitems[13]=tree.InsertItem(TVIF_PARAM | TVIF_TEXT, TranslateStringACP(sTreeRoots[13]), 13, 13, 0, 0, 13, TVI_ROOT, first);
+	rootitems[13]=tree.InsertItem(TVIF_PARAM | TVIF_TEXT, sTreeRoots[13], 13, 13, 0, 0, 13, TVI_ROOT, first);
 
 	rootitems[12]=tree.InsertItem(TVIF_PARAM | TVIF_TEXT,
-			TranslateStringACP(sTreeRoots[12]), 12,12, 0, 0, 12, TVI_ROOT, TVI_LAST);
+			sTreeRoots[12], 12,12, 0, 0, 12, TVI_ROOT, TVI_LAST);
 
 	rootitems[10]=tree.InsertItem(TVIF_PARAM | TVIF_TEXT,
-			TranslateStringACP(sTreeRoots[10]), 10, 10, 0, 0, 10, TVI_ROOT, TVI_LAST);
+			sTreeRoots[10], 10, 10, 0, 0, 10, TVI_ROOT, TVI_LAST);
 
 #ifdef SMUDGE_SUPP
 	rootitems[14]=tree.InsertItem(TVIF_PARAM | TVIF_TEXT,
-			TranslateStringACP(sTreeRoots[14]), 14, 14, 0, 0, 10, TVI_ROOT, rootitems[4]);
+			sTreeRoots[14], 14, 14, 0, 0, 10, TVI_ROOT, rootitems[4]);
 #endif
 
 
