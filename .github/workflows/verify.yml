@@ -1,8 +1,8 @@
 name: Basic verify
 
 on:
-  push:
-    branches: [ "!main", "!RN" ]
+  pull_request:
+    branches: [ "main", "RN" ]
   workflow_dispatch:
 
 jobs:
