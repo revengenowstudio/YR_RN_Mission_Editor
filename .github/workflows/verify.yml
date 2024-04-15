@@ -2,7 +2,7 @@ name: Basic verify
 
 on:
   push:
-    branches: [ "!main", "!RN", "*" ]
+    branches: [ "*", "!main", "!RN" ]
   workflow_dispatch:
 
 
