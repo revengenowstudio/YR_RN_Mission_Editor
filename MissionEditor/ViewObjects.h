@@ -28,7 +28,39 @@
 //
 #include <afxcview.h>
 
+#define MAKE_MASK(refVal) 1 << static_cast<int>(refVal) 
 
+enum class TreeViewTechnoType {
+	Set_None = -1,
+	Building = 0,
+	Infantry,
+	Vehicle,
+	Aircraft,
+	_Last,
+	_First = 0,
+	Count = _Last,
+};
+
+enum class TechnoTypeMask
+{
+	ForBuilding = MAKE_MASK(TreeViewTechnoType::Building),
+	ForInfantry = MAKE_MASK(TreeViewTechnoType::Infantry),
+	ForVehicle = MAKE_MASK(TreeViewTechnoType::Vehicle),
+	ForAircraft = MAKE_MASK(TreeViewTechnoType::Aircraft),
+};
+
+inline bool operator&(TechnoTypeMask lhs, TechnoTypeMask rhs)
+{
+	return static_cast<int>(lhs) & static_cast<int>(rhs);
+}
+inline bool operator&(TechnoTypeMask lhs, TreeViewTechnoType rhs)
+{
+	return lhs & static_cast<TechnoTypeMask>(MAKE_MASK(rhs));
+}
+inline bool operator&(TreeViewTechnoType lhs, TechnoTypeMask rhs)
+{
+	return rhs & static_cast<TechnoTypeMask>(MAKE_MASK(lhs));
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Ansicht CViewObjects 

@@ -105,21 +105,20 @@ void CSpecialFlags::UpdateDialog()
 {
 	CIniFile& ini=Map->GetIniFile();
 
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
-	m_DestroyableBridges.SetWindowText(sec->values["DestroyableBridges"]);
-	m_FixedAlliance.SetWindowText(sec->values["FixedAlliance"]);
-	m_FogOfWar.SetWindowText(sec->values["FogOfWar"]);
-	m_HarvesterImmune.SetWindowText(sec->values["HarvesterImmune"]);
-	m_Inert.SetWindowText(sec->values["Inert"]);
-	m_InitialVeteran.SetWindowText(sec->values["InitialVeteran"]);
-	m_IonStorms.SetWindowText(sec->values["IonStorms"]);
-	m_MCVDeploy.SetWindowText(sec->values["MCVDeploy"]);
-	m_Meteorites.SetWindowText(sec->values["Meteorites"]);
-	m_TiberiumExplosive.SetWindowText(sec->values["TiberiumExplosive"]);
-	m_TiberiumGrows.SetWindowText(sec->values["TiberiumGrows"]);
-	m_TiberiumSpreads.SetWindowText(sec->values["TiberiumSpreads"]);
-	m_Visceroids.SetWindowText(sec->values["Visceroids"]);
+	auto const& sec = ini["SpecialFlags"];
+	m_DestroyableBridges.SetWindowText(sec.GetString("DestroyableBridges"));
+	m_FixedAlliance.SetWindowText(sec.GetString("FixedAlliance"));
+	m_FogOfWar.SetWindowText(sec.GetString("FogOfWar"));
+	m_HarvesterImmune.SetWindowText(sec.GetString("HarvesterImmune"));
+	m_Inert.SetWindowText(sec.GetString("Inert"));
+	m_InitialVeteran.SetWindowText(sec.GetString("InitialVeteran"));
+	m_IonStorms.SetWindowText(sec.GetString("IonStorms"));
+	m_MCVDeploy.SetWindowText(sec.GetString("MCVDeploy"));
+	m_Meteorites.SetWindowText(sec.GetString("Meteorites"));
+	m_TiberiumExplosive.SetWindowText(sec.GetString("TiberiumExplosive"));
+	m_TiberiumGrows.SetWindowText(sec.GetString("TiberiumGrows"));
+	m_TiberiumSpreads.SetWindowText(sec.GetString("TiberiumSpreads"));
+	m_Visceroids.SetWindowText(sec.GetString("Visceroids"));
 
 #ifdef RA2_MODE
 	SetDlgItemText(IDC_LTIBERIUMGROWS,"Ore grows:");
@@ -144,168 +143,103 @@ void CSpecialFlags::UpdateDialog()
 void CSpecialFlags::OnEditchangeTiberiumgrows() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_TiberiumGrows);
-	sec->values["TiberiumGrows"]=(LPCTSTR)str;
+	ini.SetString("SpecialFlags", "TiberiumGrows", str);
 }
 
 void CSpecialFlags::OnEditchangeTiberiumspreads() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_TiberiumSpreads);
-	sec->values["TiberiumSpreads"]=(LPCTSTR)str;	
+	ini.SetString("SpecialFlags", "TiberiumSpreads", str);
 }
 
 void CSpecialFlags::OnEditchangeTiberiumexplosive() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_TiberiumExplosive);
-	sec->values["TiberiumExplosive"]=(LPCTSTR)str;
+	ini.SetString("SpecialFlags", "TiberiumExplosive", str);
 }
 
 void CSpecialFlags::OnEditchangeDestroyablebridges() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_DestroyableBridges);
-	sec->values["DestroyableBridges"]=(LPCTSTR)str;	
+	ini.SetString("SpecialFlags", "DestroyableBridges", str);
 }
 
 void CSpecialFlags::OnEditchangeMcvdeploy() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_MCVDeploy);
-	sec->values["MCVDeploy"]=(LPCTSTR)str;	
+	ini.SetString("SpecialFlags", "MCVDeploy", str);
 }
 
 void CSpecialFlags::OnEditchangeInitialveteran() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_InitialVeteran);
-	sec->values["InitialVeteran"]=(LPCTSTR)str;
+	ini.SetString("SpecialFlags", "InitialVeteran", str);
 }
 
 void CSpecialFlags::OnEditchangeFixedalliance() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_FixedAlliance);
-	sec->values["FixedAlliance"]=(LPCTSTR)str;
+	ini.SetString("SpecialFlags", "FixedAlliance", str);
 }
 
 void CSpecialFlags::OnEditchangeHarvesterimmune() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_HarvesterImmune);
-	sec->values["HarvesterImmune"]=(LPCTSTR)str;	
+	ini.SetString("SpecialFlags", "HarvesterImmune", str);
 }
 
 void CSpecialFlags::OnEditchangeFogofwar() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_FogOfWar);
-	sec->values["FogOfWar"]=(LPCTSTR)str;	
+	ini.SetString("SpecialFlags", "FogOfWar", str);
 }
 
 void CSpecialFlags::OnEditchangeInert() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_Inert);
-	sec->values["Inert"]=(LPCTSTR)str;	
+	ini.SetString("SpecialFlags", "Inert", str);
 }
 
 void CSpecialFlags::OnEditchangeIonstorms() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_IonStorms);
-	sec->values["IonStorms"]=(LPCTSTR)str;	
+	ini.SetString("SpecialFlags", "IonStorms", str);
 }
 
 void CSpecialFlags::OnEditchangeMeteorites() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_Meteorites);
-	sec->values["Meteorites"]=(LPCTSTR)str;	
+	ini.SetString("SpecialFlags", "Meteorites", str);
 }
 
 void CSpecialFlags::OnEditchangeVisceroids() 
 {
 	CIniFile& ini=Map->GetIniFile();
-
-	CIniFileSection *sec;
-	sec=&ini.sections["SpecialFlags"];
 	CString str;
-
-
 	str=GetText(&m_Visceroids);
-	sec->values["Visceroids"]=(LPCTSTR)str;	
+	ini.SetString("SpecialFlags", "Visceroids", str);
 }

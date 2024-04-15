@@ -122,41 +122,42 @@ void CBasic::UpdateDialog()
 {
 	CIniFile& ini=Map->GetIniFile();
 
-	m_AltNextScenario.SetWindowText(ini.sections["Basic"].values["AltNextScenario"]);
-	m_Name.SetWindowText(ini.sections["Basic"].values["Name"]);
-	m_CarryOverCap.SetWindowText(ini.sections["Basic"].values["CarryOverCap"]);
-	m_EndOfGame.SetWindowText(ini.sections["Basic"].values["EndOfGame"]);
-	m_FreeRadar.SetWindowText(ini.sections["Basic"].values["FreeRadar"]);
-	m_IceGrowthEnabled.SetWindowText(ini.sections["Basic"].values["IceGrowthEnabled"]);
-	m_IgnoreGlobalAITriggers.SetWindowText(ini.sections["Basic"].values["IgnoreGlobalAITriggers"]);
-	m_InitTime.SetWindowText(ini.sections["Basic"].values["InitTime"]);
-	m_MultiplayerOnly.SetWindowText(ini.sections["Basic"].values["MultiplayerOnly"]);
-	m_NewINIFormat.SetWindowText(ini.sections["Basic"].values["NewINIFormat"]);
-	m_NextScenario.SetWindowText(ini.sections["Basic"].values["NextScenario"]);
-	m_Official.SetWindowText(ini.sections["Basic"].values["Official"]);
-	m_OneTimeOnly.SetWindowText(ini.sections["Basic"].values["OneTimeOnly"]);
-	m_Percent.SetWindowText(ini.sections["Basic"].values["Percent"]);
-	m_SkipMapSelect.SetWindowText(ini.sections["Basic"].values["SkipMapSelect"]);
-	m_SkipScore.SetWindowText(ini.sections["Basic"].values["SkipScore"]);
-	m_TiberiumDeathToVisceroid.SetWindowText(ini.sections["Basic"].values["TiberiumDeathToVisceroid"]);
-	m_TiberiumGrowthEnabled.SetWindowText(ini.sections["Basic"].values["TiberiumGrowthEnabled"]);
-	m_TrainCrate.SetWindowText(ini.sections["Basic"].values["TrainCrate"]);
-	m_TruckCrate.SetWindowText(ini.sections["Basic"].values["TruckCrate"]);
-	m_VeinGrowthEnabled.SetWindowText(ini.sections["Basic"].values["VeinGrowthEnabled"]);
+	auto const& basicSec = ini["Basic"];
+	m_AltNextScenario.SetWindowText(basicSec["AltNextScenario"]);
+	m_Name.SetWindowText(basicSec["Name"]);
+	m_CarryOverCap.SetWindowText(basicSec["CarryOverCap"]);
+	m_EndOfGame.SetWindowText(basicSec["EndOfGame"]);
+	m_FreeRadar.SetWindowText(basicSec["FreeRadar"]);
+	m_IceGrowthEnabled.SetWindowText(basicSec["IceGrowthEnabled"]);
+	m_IgnoreGlobalAITriggers.SetWindowText(basicSec["IgnoreGlobalAITriggers"]);
+	m_InitTime.SetWindowText(basicSec["InitTime"]);
+	m_MultiplayerOnly.SetWindowText(basicSec["MultiplayerOnly"]);
+	m_NewINIFormat.SetWindowText(basicSec["NewINIFormat"]);
+	m_NextScenario.SetWindowText(basicSec["NextScenario"]);
+	m_Official.SetWindowText(basicSec["Official"]);
+	m_OneTimeOnly.SetWindowText(basicSec["OneTimeOnly"]);
+	m_Percent.SetWindowText(basicSec["Percent"]);
+	m_SkipMapSelect.SetWindowText(basicSec["SkipMapSelect"]);
+	m_SkipScore.SetWindowText(basicSec["SkipScore"]);
+	m_TiberiumDeathToVisceroid.SetWindowText(basicSec["TiberiumDeathToVisceroid"]);
+	m_TiberiumGrowthEnabled.SetWindowText(basicSec["TiberiumGrowthEnabled"]);
+	m_TrainCrate.SetWindowText(basicSec["TrainCrate"]);
+	m_TruckCrate.SetWindowText(basicSec["TruckCrate"]);
+	m_VeinGrowthEnabled.SetWindowText(basicSec["VeinGrowthEnabled"]);
 
-	if(ini.sections["Basic"].values.find("RequiredAddOn")!=ini.sections["Basic"].values.end())
-	{
-		m_RequiredAddOn.SetWindowText(ini.sections["Basic"].values["RequiredAddOn"]);
-	}
-	else
+	auto const& addOn = basicSec.GetString("RequiredAddOn");
+	if (!addOn.IsEmpty()) {
+		m_RequiredAddOn.SetWindowText(addOn);
+	} else {
 		m_RequiredAddOn.SetWindowText("0");
+	}
 
 }
 
 void CBasic::OnChangeName() 
 {
 	CIniFile& ini=Map->GetIniFile();
- 	ini.sections["Basic"].values["Name"]=GetText(&m_Name);
+	ini.SetString("Basic", "Name", GetText(&m_Name));
 }
 
 void CBasic::UpdateData()
@@ -170,121 +171,121 @@ void CBasic::UpdateData()
 void CBasic::OnEditchangeNextscenario() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["NextScenario"]=GetText(&m_NextScenario);	
+	ini.SetString("Basic", "NextScenario", GetText(&m_NextScenario));
 }
 
 void CBasic::OnEditchangeAltnextscenario() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["AltNextScenario"]=GetText(&m_AltNextScenario);	
+	ini.SetString("Basic", "AltNextScenario", GetText(&m_AltNextScenario));
 }
 
 void CBasic::OnChangeNewiniformat() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["NewINIFormat"]=GetText(&m_NewINIFormat);
+	ini.SetString("Basic", "NewINIFormat", GetText(&m_NewINIFormat));
 }
 
 void CBasic::OnChangeCarryovercap() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["CarryOverCap"]=GetText(&m_CarryOverCap);
+	ini.SetString("Basic", "CarryOverCap", GetText(&m_CarryOverCap));
 }
 
 void CBasic::OnEditchangeEndofgame() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["EndOfGame"]=GetText(&m_EndOfGame);	
+	ini.SetString("Basic", "EndOfGame", GetText(&m_EndOfGame));
 }
 
 void CBasic::OnEditchangeSkipscore() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["SkipScore"]=GetText(&m_SkipScore);	
+	ini.SetString("Basic", "SkipScore", GetText(&m_SkipScore));
 }
 
 void CBasic::OnEditchangeOnetimeonly() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["OneTimeOnly"]=GetText(&m_OneTimeOnly);	
+	ini.SetString("Basic", "OneTimeOnly", GetText(&m_OneTimeOnly));
 }
 
 void CBasic::OnEditchangeSkipmapselect() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["SkipMapSelect"]=GetText(&m_SkipMapSelect);	
+	ini.SetString("Basic", "SkipMapSelect", GetText(&m_SkipMapSelect));
 }
 
 void CBasic::OnEditchangeOfficial() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["Official"]=GetText(&m_Official);	
+	ini.SetString("Basic", "Official", GetText(&m_Official));
 }
 
 void CBasic::OnEditchangeIgnoreglobalaitriggers() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["IgnoreGlobalAITriggers"]=GetText(&m_IgnoreGlobalAITriggers);	
+	ini.SetString("Basic", "IgnoreGlobalAITriggers", GetText(&m_IgnoreGlobalAITriggers));
 }
 
 void CBasic::OnEditchangeTruckcrate() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["TruckCrate"]=GetText(&m_TruckCrate);	
+	ini.SetString("Basic", "TruckCrate", GetText(&m_TruckCrate));
 }
 
 void CBasic::OnEditchangeTraincrate() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["TrainCrate"]=GetText(&m_TrainCrate);
+	ini.SetString("Basic", "TrainCrate", GetText(&m_TrainCrate));
 }
 
 void CBasic::OnChangePercent() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["Percent"]=GetText(&m_Percent);
+	ini.SetString("Basic", "Percent", GetText(&m_Percent));
 }
 
 void CBasic::OnChangeMultiplayeronly() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["MultiplayerOnly"]=GetText(&m_MultiplayerOnly);	
+	ini.SetString("Basic", "MultiplayerOnly", GetText(&m_MultiplayerOnly));
 }
 
 void CBasic::OnEditchangeTiberiumgrowthenabled() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["TiberiumGrowthEnabled"]=GetText(&m_TiberiumGrowthEnabled);
+	ini.SetString("Basic", "TiberiumGrowthEnabled", GetText(&m_TiberiumGrowthEnabled));
 }
 
 void CBasic::OnEditchangeVeingrowthenabled() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["VeinGrowthEnabled"]=GetText(&m_VeinGrowthEnabled);	
+	ini.SetString("Basic", "VeinGrowthEnabled", GetText(&m_VeinGrowthEnabled));
 }
 
 void CBasic::OnEditchangeIcegrowthenabled() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["IceGrowthEnabled"]=GetText(&m_IceGrowthEnabled);	
+	ini.SetString("Basic", "IceGrowthEnabled", GetText(&m_IceGrowthEnabled));
 }
 
 void CBasic::OnEditchangeTiberiumdeathtovisceroid() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["TiberiumDeathToVisceroid"]=GetText(&m_TiberiumDeathToVisceroid);	
+	ini.SetString("Basic", "TiberiumDeathToVisceroid", GetText(&m_TiberiumDeathToVisceroid));
 }
 
 void CBasic::OnEditchangeFreeradar() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["FreeRadar"]=GetText(&m_FreeRadar);
+	ini.SetString("Basic", "FreeRadar", GetText(&m_FreeRadar));
 }
 
 void CBasic::OnChangeInittime() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["InitTime"]=GetText(&m_InitTime);
+	ini.SetString("Basic", "InitTime", GetText(&m_InitTime));
 }
 
 void CBasic::UpdateStrings()
@@ -333,9 +334,11 @@ void CBasic::UpdateStrings()
 
 void CBasic::OnEditchangeRequiredaddon() 
 {
-	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Basic"].values["RequiredAddOn"]=GetText(&m_RequiredAddOn);	
-	if(ini.sections["Basic"].values["RequiredAddOn"]=="0") ini.sections["Basic"].values.erase("RequiredAddOn");
+	CIniFile& ini = Map->GetIniFile();
+	ini.SetString("Basic", "RequiredAddOn", GetText(&m_RequiredAddOn));
+	if (ini.GetInteger("Basic", "RequiredAddOn") == 0) {
+		ini.RemoveValueByKey("Basic", "RequiredAddOn");
+	}
 
 }
 

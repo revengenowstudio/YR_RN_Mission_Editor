@@ -82,9 +82,9 @@ void CMapD::UpdateDialog()
 {
 	CIniFile& ini=Map->GetIniFile();
 
-	m_LocalSize.SetWindowText( ini.sections["Map"].values["LocalSize"] );
+	m_LocalSize.SetWindowText(ini.GetString("Map", "LocalSize"));
 	//m_Size.SetWindowText( ini.sections["Map"].values["Size"] );
-	m_Theater.SetWindowText( ini.sections["Map"].values["Theater"] );
+	m_Theater.SetWindowText(ini.GetString("Map", "Theater"));
 
 	char c[50];
 	itoa(Map->GetWidth(), c, 10);
@@ -108,7 +108,7 @@ void CMapD::OnChangeUsesize()
 void CMapD::OnEditchangeTheater() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Map"].values["Theater"]=GetText(&m_Theater);	
+	ini.SetString("Map", "Theater", GetText(&m_Theater));
 }
 
 void CMapD::UpdateStrings()
@@ -125,7 +125,7 @@ void CMapD::UpdateStrings()
 void CMapD::OnChangelocal() 
 {
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["Map"].values["LocalSize"]=GetText(&m_LocalSize);
+	ini.SetString("Map", "LocalSize", GetText(&m_LocalSize));
 	
 	Map->CalcMapRect();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);

@@ -42,9 +42,6 @@ build_*/
 *.ncb
 *.sdf
 *.suo
-*.sln
-*.vcxproj
-*.filters
 *.aps
 
 # CMake

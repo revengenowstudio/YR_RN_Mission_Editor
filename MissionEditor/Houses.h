@@ -37,7 +37,7 @@ class CHouses : public CDialog
 // Konstruktion
 public:
 	void UpdateStrings();
-	void AddHouse(const char* name);
+	void AddHouse(const CString& name);
 	void UpdateDialog();
 	CHouses();
 	~CHouses();

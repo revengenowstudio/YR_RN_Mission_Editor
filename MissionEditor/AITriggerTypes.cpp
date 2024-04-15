@@ -151,122 +151,26 @@ END_MESSAGE_MAP()
 
 void ListObjects(CComboBox& cb)
 {
-	CComboBox& m_UnitType=cb;
-	CIniFile& ini=Map->GetIniFile();
+	CComboBox& m_UnitType = cb;
+	CIniFile& ini = Map->GetIniFile();
 
-	int i;
+	auto addToUnitTypeByIni = [&m_UnitType](CIniFile& ini, const CString& sectionName) {
+		for (auto const& item : ini.GetSection(sectionName)) {
+			auto const& type = item.second;
+			auto const desc = type +
+				" (" + Map->GetUnitName(type) + ")";
+			m_UnitType.AddString(desc);
+		}
+	};
+	auto addToUnitType = [&ini, &addToUnitTypeByIni](const CString& sectionName) {
+		addToUnitTypeByIni(rules, sectionName);
+		addToUnitTypeByIni(ini, sectionName);
+	};
 
-	CString ss="InfantryTypes";
-	for(i=0;i<rules.sections[ss].values.size();i++)
-	{
-		CString type;
-		CString s;
-		type=*rules.sections[ss].GetValue(i);
-		s=type;
-		s+=" (";
-		
-		s+=Map->GetUnitName((char*)(LPCTSTR)type);
-
-		s+=")";
-		m_UnitType.AddString(s);
-	}
-	for(i=0;i<ini.sections[ss].values.size();i++)
-	{
-		CString type;
-		CString s;
-		type=*ini.sections[ss].GetValue(i);
-		s=type;
-		s+=" (";
-		
-		s+=Map->GetUnitName((char*)(LPCTSTR)type);
-
-		s+=")";
-		m_UnitType.AddString(s);
-	}
-
-	ss="VehicleTypes";
-	for(i=0;i<rules.sections[ss].values.size();i++)
-	{
-		CString type;
-		CString s;
-		type=*rules.sections[ss].GetValue(i);
-		s=type;
-		s+=" (";
-		
-		s+=Map->GetUnitName((char*)(LPCTSTR)type);
-
-		s+=")";
-		m_UnitType.AddString(s);
-	}
-	for(i=0;i<ini.sections[ss].values.size();i++)
-	{
-		CString type;
-		CString s;
-		type=*ini.sections[ss].GetValue(i);
-		s=type;
-		s+=" (";
-		
-		s+=Map->GetUnitName((char*)(LPCTSTR)type);
-
-		s+=")";
-		m_UnitType.AddString(s);
-	}
-
-	ss="AircraftTypes";
-	for(i=0;i<rules.sections[ss].values.size();i++)
-	{
-		CString type;
-		CString s;
-		type=*rules.sections[ss].GetValue(i);
-		s=type;
-		s+=" (";
-		
-		s+=Map->GetUnitName((char*)(LPCTSTR)type);
-
-		s+=")";
-		m_UnitType.AddString(s);
-	}
-	for(i=0;i<ini.sections[ss].values.size();i++)
-	{
-		CString type;
-		CString s;
-		type=*ini.sections[ss].GetValue(i);
-		s=type;
-		s+=" (";
-		
-		s+=Map->GetUnitName((char*)(LPCTSTR)type);
-
-		s+=")";
-		m_UnitType.AddString(s);
-	}
-
-	ss="BuildingTypes";
-	for(i=0;i<rules.sections[ss].values.size();i++)
-	{
-		CString type;
-		CString s;
-		type=*rules.sections[ss].GetValue(i);
-		s=type;
-		s+=" (";
-		
-		s+=Map->GetUnitName((char*)(LPCTSTR)type);
-
-		s+=")";
-		m_UnitType.AddString(s);
-	}
-	for(i=0;i<ini.sections[ss].values.size();i++)
-	{
-		CString type;
-		CString s;
-		type=*ini.sections[ss].GetValue(i);
-		s=type;
-		s+=" (";
-		
-		s+=Map->GetUnitName((char*)(LPCTSTR)type);
-
-		s+=")";
-		m_UnitType.AddString(s);
-	}
+	addToUnitType("InfantryTypes");
+	addToUnitType("VehicleTypes");
+	addToUnitType("AircraftTypes");
+	addToUnitType("BuildingTypes");
 }
 
 void CAITriggerTypes::UpdateDialog()
@@ -347,9 +251,9 @@ void CAITriggerTypes::OnSelchangeAitriggertype()
 	
 	m_Enabled=FALSE;
 	CIniFile& ini=Map->GetIniFile();
-	if(ini.sections["AITriggerTypesEnable"].values.find((LPCTSTR)aitrigger)!=ini.sections["AITriggerTypesEnable"].values.end())
-		if(stricmp(ini.sections["AITriggerTypesEnable"].values[(LPCTSTR)aitrigger], "yes")==NULL)
-			m_Enabled=TRUE;
+	if (ini.GetBool("AITriggerTypesEnable", aitrigger)) {
+		m_Enabled = TRUE;
+	}
 
 	AITrigInfo info;
 	info=ConvertToAITrigInfoFromHex((char*)(LPCSTR)aitt.data);
@@ -541,34 +445,41 @@ void CAITriggerTypes::OnEnabled()
 	UpdateData();
 
 	int sel=m_AITriggerType.GetCurSel();
-	if(sel<0) return;
-
+	if (sel < 0) {
+		return;
+	}
 	CString aitrigger;
 	m_AITriggerType.GetLBText(sel,aitrigger);
 	TruncSpace(aitrigger);
 
 	CIniFile& ini=Map->GetIniFile();
 
-	if(m_Enabled)
-	{
+	if(m_Enabled) {
 		// enable it
-		ini.sections["AITriggerTypesEnable"].values[(LPCTSTR)aitrigger]="yes";
+		ini.SetBool("AITriggerTypesEnable", aitrigger, true);
+	} else {
+		if (auto const pSec = ini.TryGetSection("AITriggerTypesEnable")) {
+			pSec->RemoveByKey(aitrigger);
+		}
 	}
-	else
-		ini.sections["AITriggerTypesEnable"].values.erase((LPCTSTR)aitrigger);
 }
 
 void CAITriggerTypes::SetAITriggerParam(const char *value, int param)
 {
 	int sel=m_AITriggerType.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 
 	CString aitrigger;
 	m_AITriggerType.GetLBText(sel,aitrigger);
 	TruncSpace(aitrigger);
 
 	CIniFile& ini=Map->GetIniFile();
-	ini.sections["AITriggerTypes"].values[aitrigger]=SetParam(ini.sections["AITriggerTypes"].values[aitrigger],param,value);
+
+	if (auto const pSec = ini.TryGetSection("AITriggerTypes")) {
+		pSec->SetString(aitrigger, SetParam(pSec->GetString(aitrigger), param, value));
+	}
 }
 
 void CAITriggerTypes::OnAdd() 
@@ -578,12 +489,9 @@ void CAITriggerTypes::OnAdd()
 	CString data="New AI Trigger,";
 	
 	// now try to set a teamtype
-	if(ini.sections["TeamTypes"].values.size()>0)
-	{
-		data+=*ini.sections["TeamTypes"].GetValue(0);
-	}
-	else
-	{
+	if (ini["TeamTypes"].Size()>0) {
+		data+=*ini["TeamTypes"].Nth(0).second;
+	} else {
 		data+="<none>";
 	}
 	
@@ -599,18 +507,18 @@ void CAITriggerTypes::OnAdd()
 	data+="<none>,0000000000000000000000000000000000000000000000000000000000000000,50.000000,30.000000,50.000000,1,0,1,1,";
 	
 	// a pool seems to need both teamtypes the same
-	if(ini.sections["TeamTypes"].values.size()>0)
-	{
-		data+="<none>";//*ini.sections["TeamTypes"].GetValue(0);
-	}
-	else
+	//if(ini.sections["TeamTypes"].values.size()>0)
+	//{
+	//	data+="<none>";//*ini.sections["TeamTypes"].GetValue(0);
+	//}
+	//else
 	{
 		data+="<none>";
 	}
 
 	data+=",1,1,1";
 	
-	ini.sections["AITriggerTypes"].values[ID]=data;
+	ini.SetString("AITriggerTypes", ID, data);
 
 	UpdateDialog();
 	
@@ -639,10 +547,10 @@ void CAITriggerTypes::OnDelete()
 	m_AITriggerType.GetLBText(sel,aitrigger);
 	TruncSpace(aitrigger);
 
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	
-	ini.sections["AITriggerTypes"].values.erase(aitrigger);
-	ini.sections["AITriggerTypesEnable"].values.erase(aitrigger);
+	ini.RemoveValueByKey("AITriggerTypes", aitrigger);
+	ini.RemoveValueByKey("AITriggerTypesEnable", aitrigger);
 
 	UpdateDialog();
 }

@@ -95,14 +95,7 @@ END_MESSAGE_MAP()
 
 CString GetName(CString id)
 {
-	CIniFile& ini=Map->GetIniFile();
-	if(ini.sections.find(id)!=ini.sections.end())
-	{
-		if(ini.sections[id].values.find("Name")!=ini.sections[id].values.end())
-			return ini.sections[id].values["Name"];
-		
-	}
-	return rules.sections[id].values["Name"];
+	return rules.GetString(id, "Name");
 }
 
 void CBuilding::OnOK() 
@@ -152,93 +145,28 @@ BOOL CBuilding::OnInitDialog()
 	UpdateData(FALSE);
 
 	int upgradecount=0;
-	if(strcmp(m_type,"GACTWR")==NULL)
-		upgradecount=1;
-
-
-	if(ini.sections.find(m_type)!=ini.sections.end())
-	{
-		if(ini.sections[m_type].values.find("Upgrades")!=ini.sections[m_type].values.end())
-		{
-			// ok we have our upgrade
-			upgradecount=atoi(ini.sections[m_type].values["Upgrades"]);
-		}
-		else
-		{
-			if(rules.sections[m_type].values.find("Upgrades")!=rules.sections[m_type].values.end())
-				upgradecount=atoi(rules.sections[m_type].values["Upgrades"]);
-		}
-	}
-	else
-	{
-		if(rules.sections[m_type].values.find("Upgrades")!=rules.sections[m_type].values.end())
-				upgradecount=atoi(rules.sections[m_type].values["Upgrades"]);
+	if (strcmp(m_type, "GACTWR") == NULL) {
+		upgradecount = 1;
 	}
 
+	upgradecount = ini.GetInteger(m_type, "Upgrades");
 	
 	GetDlgItem(IDC_P5)->SendMessage(CB_SETCURSEL, atoi(m_spotlight), 0);
 
-	if(upgradecount>0)
-	{
-		for(i=0;i<rules.sections["BuildingTypes"].values.size();i++)
-		{
-			const char* unitname=*rules.sections["BuildingTypes"].GetValue(i);
-
-			// okay, first all the old units
-			if(ini.sections.find(unitname)!=ini.sections.end())
-			{
-				// new thing specified
-				if(ini.sections[unitname].values.find("PowersUpBuilding")!=ini.sections[unitname].values.end())
-				{
-					
-					// ini file specified new PowersUpBuilding
-					if(_stricmp(ini.sections[unitname].values["PowersUpBuilding"], m_type)==NULL)
-					{
-						((CComboBox*)GetDlgItem(IDC_P6))->AddString(((CString)unitname+" ("+GetName(unitname)+")"));
-						((CComboBox*)GetDlgItem(IDC_P7))->AddString(((CString)unitname+" ("+GetName(unitname)+")"));
-						((CComboBox*)GetDlgItem(IDC_P8))->AddString(((CString)unitname+" ("+GetName(unitname)+")"));
-					}
+	if (upgradecount > 0) {
+		auto updatePowerupItems = [=](const CIniFile& ini) {
+			for (auto const& [seq, unitname] : ini["BuildingTypes"]) {
+				auto const& targetBldID = ini.GetString(unitname, "PowersUpBuilding");
+				if (targetBldID == m_type) {
+					auto const desc = unitname + " (" + GetName(unitname) + ")";
+					((CComboBox*)GetDlgItem(IDC_P6))->AddString(desc);
+					((CComboBox*)GetDlgItem(IDC_P7))->AddString(desc);
+					((CComboBox*)GetDlgItem(IDC_P8))->AddString(desc);
 				}
 			}
-			else
-			{
-				// ini did not specify thing specified
-				if(rules.sections[unitname].values.find("PowersUpBuilding")!=rules.sections[unitname].values.end())
-				{
-					// rules file specified new PowersUpBuilding
-					if(_stricmp(rules.sections[unitname].values["PowersUpBuilding"], m_type)==NULL)
-					{
-						((CComboBox*)GetDlgItem(IDC_P6))->AddString(((CString)unitname+" ("+GetName(unitname)+")"));
-						((CComboBox*)GetDlgItem(IDC_P7))->AddString(((CString)unitname+" ("+GetName(unitname)+")"));
-						((CComboBox*)GetDlgItem(IDC_P8))->AddString(((CString)unitname+" ("+GetName(unitname)+")"));
-					}
-				}
-			}
-		}
-		if(ini.sections.find("BuildingTypes")!=ini.sections.end())
-		{
-			for(i=0;i<ini.sections["BuildingTypes"].values.size();i++)
-			{
-				const char* unitname=*ini.sections["BuildingTypes"].GetValue(i);
-
-				// okay, first all the old units
-				if(ini.sections.find(unitname)!=ini.sections.end())
-				{
-					// new thing specified
-					if(ini.sections[unitname].values.find("PowersUpBuilding")!=ini.sections[unitname].values.end())
-					{
-						// ini file specified new PowersUpBuilding
-						if(_stricmp(ini.sections[unitname].values["PowersUpBuilding"], m_type)==NULL)
-						{
-							((CComboBox*)GetDlgItem(IDC_P6))->AddString(((CString)unitname+" ("+GetName(unitname)+")"));
-							((CComboBox*)GetDlgItem(IDC_P7))->AddString(((CString)unitname+" ("+GetName(unitname)+")"));
-							((CComboBox*)GetDlgItem(IDC_P8))->AddString(((CString)unitname+" ("+GetName(unitname)+")"));
-						}
-					}
-				}
-				
-			}
-		}
+		};
+		updatePowerupItems(rules);
+		updatePowerupItems(ini);
 	}
 
 	GetDlgItem(IDC_P8)->EnableWindow(TRUE);

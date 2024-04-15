@@ -35,7 +35,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CMapOpenDialog
 
-UINT CALLBACK OFNHookProc(
+UINT_PTR CALLBACK OFNHookProc(
   HWND hdlg,      // handle to child dialog window
   UINT uiMsg,     // message identifier
   WPARAM wParam,  // message parameter
@@ -56,7 +56,7 @@ UINT CALLBACK OFNHookProc(
 			CIniFile CurMap;
 			CurMap.InsertFile(utf16ToUtf8(psz),"Basic");
 
-			SetDlgItemText(hdlg, IDC_MAPNAME, CurMap.sections["Basic"].values["Name"]);
+			SetDlgItemText(hdlg, IDC_MAPNAME, CurMap.GetString("Basic", "Name"));
 			
 			
 		}

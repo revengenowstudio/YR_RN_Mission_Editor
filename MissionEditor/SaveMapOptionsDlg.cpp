@@ -59,7 +59,7 @@ CSaveMapOptionsDlg::CSaveMapOptionsDlg(CWnd* pParent /*=NULL*/)
 	if(!Map->IsMultiplayer())
 		m_PreviewMode=1;
 
-	m_MapName=ini.sections["Basic"].values["Name"];
+	m_MapName = ini.GetString("Basic", "Name");
 }
 
 

@@ -54,28 +54,28 @@ inline CString GetUnitPictureFilename(LPCTSTR lpUnitName, DWORD dwPicIndex)
 
 	CString UnitName = lpUnitName;
 
-	UnitName = rules.sections[lpUnitName].GetValueByName("Image", lpUnitName);
-
-	if (ini.sections.find(lpUnitName) != ini.sections.end())
-		UnitName = ini.sections[lpUnitName].GetValueByName("Image", UnitName);
-
-	if (rules.sections[lpUnitName].values.find("Image") != rules.sections[lpUnitName].values.end())
-		UnitName = rules.sections[lpUnitName].values["Image"];
+	UnitName = ini.GetString(lpUnitName, "Image");
+	if (UnitName.IsEmpty()) {
+		UnitName = rules.GetString(lpUnitName, "Image");
+	}
 
 	CString artname = UnitName;
-
-	if (art.sections[UnitName].values.find("Image") != art.sections[UnitName].values.end())
-	{
-		if (!isTrue(g_data.sections["IgnoreArtImage"].AccessValueByName(UnitName)))
-			artname = art.sections[UnitName].AccessValueByName("Image");
+	if (UnitName.IsEmpty()) {
+		artname = lpUnitName;
 	}
-		
+	auto const shapeName = art.GetString(UnitName, "Image");
+
+	if (!shapeName.IsEmpty()) {
+		if (!g_data.GetBool("IgnoreArtImage", UnitName)) {
+			artname = shapeName;
+		}
+	}
 
 	CString filename = UnitName;
 
-	if (art.sections[UnitName].FindName("NewTheater") >= 0 && art.sections[UnitName].AccessValueByName("DemandLoad") != "yes")
-		if (art.sections[UnitName].AccessValueByName("NewTheater") == "yes")
-			filename.SetAt(1, 'T');
+	if (art.GetBool(UnitName, "NewTheater") && !art.GetBool(UnitName, "DemandLoad")) {
+		filename.SetAt(1, 'T');
+	}
 
 	char n[50];
 	itoa(dwPicIndex, n, 10);

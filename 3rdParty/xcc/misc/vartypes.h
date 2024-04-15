@@ -1,3 +1,4 @@
+#pragma once
 /*
     XCC Utilities and Library
     Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>

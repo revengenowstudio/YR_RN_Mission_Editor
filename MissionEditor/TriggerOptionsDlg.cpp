@@ -85,99 +85,105 @@ void CTriggerOptionsDlg::UpdateDialog()
 {
 	// MW 07/20/01
 
-	CIniFile& ini=Map->GetIniFile();
-	if(m_currentTrigger.GetLength()==0) return;
+	CIniFile& ini = Map->GetIniFile();
+	if (m_currentTrigger.IsEmpty()) {
+		return;
+	}
 
 	ListHouses(m_House, FALSE, TRUE, FALSE);
 	ListTriggers(m_AttachedTrigger);
 	m_AttachedTrigger.InsertString(0, "<none>");
 
-	RepairTrigger(ini.sections["Triggers"].values[m_currentTrigger]);
-
-	m_Name.SetWindowText(GetParam(ini.sections["Triggers"].values[m_currentTrigger],2));
-	m_House.SetWindowText(TranslateHouse(GetParam(ini.sections["Triggers"].values[m_currentTrigger],0), TRUE));
-	CString attachedTrigger=GetParam(ini.sections["Triggers"].values[m_currentTrigger],1);
-	m_AttachedTrigger.SetWindowText(attachedTrigger);
-
-	m_Disabled.SetCheck((atoi(GetParam(ini.sections["Triggers"].values[m_currentTrigger],3))));
-	m_Easy.SetCheck((atoi(GetParam(ini.sections["Triggers"].values[m_currentTrigger],4))));
-	m_Medium.SetCheck((atoi(GetParam(ini.sections["Triggers"].values[m_currentTrigger],5))));
-	m_Hard.SetCheck((atoi(GetParam(ini.sections["Triggers"].values[m_currentTrigger],6))));
-
-	int i;
-	for(i=0;i<m_AttachedTrigger.GetCount();i++)
-	{
-		CString tmp;
-		m_AttachedTrigger.GetLBText(i,tmp);
-		TruncSpace(tmp);
-		if(tmp==attachedTrigger)
-			m_AttachedTrigger.SetCurSel(i);
+	auto triggerCopy = ini["Triggers"][m_currentTrigger];
+	if (RepairTrigger(triggerCopy)) {
+		ini.SetString("Triggers", m_currentTrigger, triggerCopy);
 	}
 
-	for(i=0;i<ini.sections["Tags"].values.size();i++)
-	{
-	    CString type=*ini.sections["Tags"].GetValueName(i);
+	m_Name.SetWindowText(GetParam(triggerCopy, 2));
+	m_House.SetWindowText(TranslateHouse(GetParam(triggerCopy, 0), TRUE));
+	CString attachedTrigger = GetParam(triggerCopy, 1);
+	m_AttachedTrigger.SetWindowText(attachedTrigger);
 
-		CString attTrigg=GetParam(ini.sections["Tags"].values[type], 2);
-		if(attTrigg==m_currentTrigger)
-		{
-			m_TriggerType.SetWindowText(GetParam(ini.sections["Tags"].values[type], 0));
+	m_Disabled.SetCheck((atoi(GetParam(triggerCopy, 3))));
+	m_Easy.SetCheck((atoi(GetParam(triggerCopy, 4))));
+	m_Medium.SetCheck((atoi(GetParam(triggerCopy, 5))));
+	m_Hard.SetCheck((atoi(GetParam(triggerCopy, 6))));
+
+	for (auto i = 0; i < m_AttachedTrigger.GetCount(); i++) {
+		CString tmp;
+		m_AttachedTrigger.GetLBText(i, tmp);
+		TruncSpace(tmp);
+		if (tmp == attachedTrigger) {
+			m_AttachedTrigger.SetCurSel(i);
+		}
+	}
+
+	for (auto const& [type, def] : ini["Tags"]) {
+		CString attTrigg = GetParam(def, 2);
+		if (attTrigg == m_currentTrigger) {
+			m_TriggerType.SetWindowText(GetParam(def, 0));
 			break;
 		}
 	}
 }
 
-void CTriggerOptionsDlg::OnChangeName() 
+void CTriggerOptionsDlg::OnChangeName()
 {
-	if(m_currentTrigger.GetLength()==0) return;
-	
-	CIniFile& ini=Map->GetIniFile();
-	
-	if(ini.sections["Triggers"].FindName(m_currentTrigger)<0 || m_currentTrigger.GetLength()==0) return;
-	
+	if (m_currentTrigger.GetLength() == 0) {
+		return;
+	}
+
+	CIniFile& ini = Map->GetIniFile();
+
+	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
+		return;
+	}
+
 	CString newName;
 	m_Name.GetWindowText(newName);
 
-	if(newName.GetLength()==0) newName=" ";
+	if (newName.GetLength() == 0) {
+		newName = " ";
+	}
 
-	if(newName.Find(",",0)>=0) 
+	if (newName.Find(",", 0) >= 0)
 	{//newName.SetAt(newName.Find(",",0), 0);
-		newName=newName.Left(newName.Find(",",0));
+		newName = newName.Left(newName.Find(",", 0));
 
-	m_Name.SetWindowText(newName);}
+		m_Name.SetWindowText(newName);
+	}
 
-	
 
-	ini.sections["Triggers"].values[m_currentTrigger]=SetParam(ini.sections["Triggers"].values[m_currentTrigger], 2, newName);
+
+	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 2, newName));
 
 	int i;
-	int p=0;
-	for(i=0;i<ini.sections["Tags"].values.size();i++)
-	{
-	    CString type=*ini.sections["Tags"].GetValueName(i);
-
-		CString attTrigg=GetParam(ini.sections["Tags"].values[type], 2);
-		if(attTrigg==m_currentTrigger)
-		{
+	int p = 0;
+	for (auto const& [type, def] : ini["Tags"]) {
+		CString attTrigg = GetParam(def, 2);
+		if (attTrigg == m_currentTrigger) {
 			p++;
 			char c[50];
-			itoa(p,c,10);
-			CString newVal=newName+" ";
-			newVal+=c;
-			ini.sections["Tags"].values[type]=SetParam(ini.sections["Tags"].values[type], 1, newVal);
-			
+			itoa(p, c, 10);
+			CString newVal = newName + " ";
+			newVal += c;
+			ini.SetString("Tags", type, SetParam(ini.GetString("Tags", type), 1, newVal));
 		}
 	}
 	//MessageBox(ini.sections["Triggers"].values[m_currentTrigger],newName);
-	RepairTrigger(ini.sections["Triggers"].values[m_currentTrigger]);
-
+	auto triggerCopy = ini["Triggers"][m_currentTrigger];
+	if (RepairTrigger(triggerCopy)) {
+		ini.SetString("Triggers", m_currentTrigger, triggerCopy);
+	}
 }
 
 void CTriggerOptionsDlg::OnEditchangeHouse() 
 {
 	CIniFile& ini=Map->GetIniFile();
 	
-	if(ini.sections["Triggers"].FindName(m_currentTrigger)<0 || m_currentTrigger.GetLength()==0) return;
+	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
+		return;
+	}
 
 	CString newHouse;
 	m_House.GetWindowText(newHouse);
@@ -188,31 +194,37 @@ void CTriggerOptionsDlg::OnEditchangeHouse()
 
 	newHouse.TrimLeft();
 	TruncSpace(newHouse);
-	if(newHouse.Find(",",0)>=0) newHouse.SetAt(newHouse.Find(",",0), 0);
+	if (newHouse.Find(",", 0) >= 0) {
+		newHouse.SetAt(newHouse.Find(",", 0), 0);
+	}
 
+	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 0, newHouse));
 	
-
-	ini.sections["Triggers"].values[m_currentTrigger]=SetParam(ini.sections["Triggers"].values[m_currentTrigger], 0, newHouse);
-	
-	RepairTrigger(ini.sections["Triggers"].values[m_currentTrigger]);
-
+	auto triggerCopy = ini["Triggers"][m_currentTrigger];
+	if (RepairTrigger(triggerCopy)) {
+		ini.SetString("Triggers", m_currentTrigger, triggerCopy);
+	}
 }
 
 void CTriggerOptionsDlg::OnEditchangeAttachedtrigger() 
 {
 	CIniFile& ini=Map->GetIniFile();
 	
-	if(ini.sections["Triggers"].FindName(m_currentTrigger)<0 || m_currentTrigger.GetLength()==0) return;
+	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
+		return;
+	}
 
 	CString newTrigger;
 	m_AttachedTrigger.GetWindowText(newTrigger);
 	newTrigger.TrimLeft();
 	TruncSpace(newTrigger);
 
-	if(newTrigger.Find(",",0)>=0) newTrigger.SetAt(newTrigger.Find(",",0), 0);
+	if (newTrigger.Find(",", 0) >= 0) {
+		newTrigger.SetAt(newTrigger.Find(",", 0), 0);
+	}
 	
 
-	ini.sections["Triggers"].values[m_currentTrigger]=SetParam(ini.sections["Triggers"].values[m_currentTrigger], 1, newTrigger);
+	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 1, newTrigger));
 
 	
 	
@@ -230,11 +242,13 @@ void CTriggerOptionsDlg::OnKillFocus(CWnd* pNewWnd)
 	((CTriggerEditorDlg*)(this->GetOwner()->GetOwner()))->UpdateDialog();	
 }
 
-void CTriggerOptionsDlg::OnEditchangeTriggertype() 
+void CTriggerOptionsDlg::OnEditchangeTriggertype()
 {
-	CIniFile& ini=Map->GetIniFile();
-	
-	if(ini.sections["Triggers"].FindName(m_currentTrigger)<0 || m_currentTrigger.GetLength()==0) return;
+	CIniFile& ini = Map->GetIniFile();
+
+	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
+		return;
+	}
 
 
 	CString newType;
@@ -242,18 +256,17 @@ void CTriggerOptionsDlg::OnEditchangeTriggertype()
 	TruncSpace(newType);
 
 	int i;
-	for(i=0;i<ini.sections["Tags"].values.size();i++)
-	{
-	    CString type=*ini.sections["Tags"].GetValueName(i);
-
-		CString attTrigg=GetParam(ini.sections["Tags"].values[type], 2);
-		if(attTrigg==m_currentTrigger)
-		{
-			ini.sections["Tags"].values[type]=SetParam(ini.sections["Tags"].values[type], 0, newType);
+	for (auto const& [type, def] : ini["Tags"]) {
+		CString attTrigg = GetParam(def, 2);
+		if (attTrigg == m_currentTrigger) {
+			ini.SetString("Tags", type, SetParam(ini["Tags"][type], 0, newType));
 		}
-	}	
-	
-	RepairTrigger(ini.sections["Triggers"].values[m_currentTrigger]);
+	}
+
+	auto trigger = ini["Triggers"][m_currentTrigger];
+	if (RepairTrigger(trigger)) {
+		ini.SetString("Triggers", m_currentTrigger, trigger);
+	}
 }
 
 BOOL CTriggerOptionsDlg::PreTranslateMessage(MSG* pMsg)
@@ -275,79 +288,80 @@ BOOL CTriggerOptionsDlg::OnInitDialog()
 	return TRUE;
 }
 
-void CTriggerOptionsDlg::OnDisabled() 
+void CTriggerOptionsDlg::OnDisabled()
 {
-	CIniFile& ini=Map->GetIniFile();
-	
-	if(ini.sections["Triggers"].FindName(m_currentTrigger)<0 || m_currentTrigger.GetLength()==0) return;
+	CIniFile& ini = Map->GetIniFile();
 
-	BOOL bDisabled=FALSE;
-	if(m_Disabled.GetCheck()==0) bDisabled=FALSE;
-		else
-		bDisabled=TRUE;
-	
-	if(bDisabled)
-		ini.sections["Triggers"].values[m_currentTrigger]=SetParam(ini.sections["Triggers"].values[m_currentTrigger], 3, "1");
-	else
-		ini.sections["Triggers"].values[m_currentTrigger]=SetParam(ini.sections["Triggers"].values[m_currentTrigger], 3, "0");
+	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
+		return;
+	}
 
+	BOOL bDisabled = FALSE;
+	if (m_Disabled.GetCheck() == 0) {
+		bDisabled = FALSE;
+	} else {
+		bDisabled = TRUE;
+	}
 
-		
+	auto const param = bDisabled ? "1" : "0";
+	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 3, param));
 }
 
 void CTriggerOptionsDlg::OnEasy() 
 {
 	CIniFile& ini=Map->GetIniFile();
 	
-	if(ini.sections["Triggers"].FindName(m_currentTrigger)<0 || m_currentTrigger.GetLength()==0) return;
+	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
+		return;
+	}
 
 	BOOL bEasy=FALSE;
-	if(m_Easy.GetCheck()==0) bEasy=FALSE;
-		else
-		bEasy=TRUE;
-	
-	if(bEasy)
-		ini.sections["Triggers"].values[m_currentTrigger]=SetParam(ini.sections["Triggers"].values[m_currentTrigger], 4, "1");
-	else
-		ini.sections["Triggers"].values[m_currentTrigger]=SetParam(ini.sections["Triggers"].values[m_currentTrigger], 4, "0");
+	if (m_Easy.GetCheck() == 0) {
+		bEasy = FALSE;
+	} else {
+		bEasy = TRUE;
+	}
 
-
+	auto const param = bEasy ? "1" : "0";
+	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 4, param));
 }
 
 void CTriggerOptionsDlg::OnMedium() 
 {
 	CIniFile& ini=Map->GetIniFile();
 	
-	if(ini.sections["Triggers"].FindName(m_currentTrigger)<0 || m_currentTrigger.GetLength()==0) return;
+	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
+		return;
+	}
 
 	BOOL bMedium=FALSE;
-	if(m_Medium.GetCheck()==0) bMedium=FALSE;
-		else
-		bMedium=TRUE;
+	if (m_Medium.GetCheck() == 0) {
+		bMedium = FALSE;
+	} else {
+		bMedium = TRUE;
+	}
 	
-	if(bMedium)
-		ini.sections["Triggers"].values[m_currentTrigger]=SetParam(ini.sections["Triggers"].values[m_currentTrigger], 5, "1");
-	else
-		ini.sections["Triggers"].values[m_currentTrigger]=SetParam(ini.sections["Triggers"].values[m_currentTrigger], 5, "0");
-	
+	auto const param = bMedium ? "1" : "0";
+	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 5, param));
 }
 
 void CTriggerOptionsDlg::OnHard() 
 {
 	CIniFile& ini=Map->GetIniFile();
 	
-	if(ini.sections["Triggers"].FindName(m_currentTrigger)<0 || m_currentTrigger.GetLength()==0) return;
+	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
+		return;
+	}
 
 	BOOL bHard=FALSE;
-	if(m_Hard.GetCheck()==0) bHard=FALSE;
-		else
-		bHard=TRUE;
+	if (m_Hard.GetCheck() == 0) {
+		bHard = FALSE;
+	} else {
+		bHard = TRUE;
+	}
 	
-	if(bHard)
-		ini.sections["Triggers"].values[m_currentTrigger]=SetParam(ini.sections["Triggers"].values[m_currentTrigger], 6, "1");
-	else
-		ini.sections["Triggers"].values[m_currentTrigger]=SetParam(ini.sections["Triggers"].values[m_currentTrigger], 6, "0");
-	
+	auto const param = bHard ? "1" : "0";
+	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 6, param));
 }
 
 //MW 07/20/01

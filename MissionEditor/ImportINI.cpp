@@ -90,15 +90,18 @@ BOOL CImportINI::OnInitDialog()
 	CIniFile inifile;
 	inifile.LoadFile(this->m_FileName);
 	
-	if(inifile.sections.size()<1){MessageBox("File does not have any ini content, abort.","Error");EndDialog(IDCANCEL);return TRUE;}
+	if (inifile.Size() < 1) {
+		MessageBox("File does not have any ini content, abort.", "Error"); 
+		EndDialog(IDCANCEL); 
+		return TRUE;
+	}
 	
-	m_inicount=inifile.sections.size();
+	m_inicount = inifile.Size();
 
-	int i;
-	for(i=0;i<inifile.sections.size();i++)
-	{
-		if(!Map->IsMapSection(*inifile.GetSectionName(i)))
-		m_Available.InsertString(-1, *inifile.GetSectionName(i));
+	for (auto const& [secName, _] : inifile) {
+		if (!Map->IsMapSection(secName)) {
+			m_Available.InsertString(-1, secName);
+		}
 	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control

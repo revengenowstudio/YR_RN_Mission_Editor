@@ -189,35 +189,23 @@ void CTriggers::UpdateDialog()
 	int i;
 
 	m_Trigger2.AddString("<none>");
-	for(i=0;i<ini.sections["Triggers"].values.size();i++)
-	{
-		CString type;
-		CString s;
-		type=*ini.sections["Triggers"].GetValueName(i);
-		
-		s=type;
-		s+=" (";
-		s+=GetParam(ini.sections["Triggers"].values[type], 2);
-		s+=")";
+	for (auto const& [type, def] : ini["Triggers"]) {
+		auto s = type;
+		s += " (";
+		s += GetParam(def, 2);
+		s += ")";
 
 		m_Trigger.AddString(s);
 		m_Trigger2.AddString(s);
-
 	}
 	
-	for(i=0;i<g_data.sections["Events"].values.size();i++)
-	{
-		CString eventid=*g_data.sections["Events"].GetValueName(i);
-		CString eventdata=*g_data.sections["Events"].GetValue(i);
-		CString text=eventid+" "+GetParam(eventdata,0);
+	for (auto const& [eventid, eventdata] : g_data["Events"]) {
+		CString text = eventid + " " + GetParam(eventdata, 0);
 		m_EventType.AddString(text);
 	}
 
-	for(i=0;i<g_data.sections["Actions"].values.size();i++)
-	{
-		CString actionid=*g_data.sections["Actions"].GetValueName(i);
-		CString actiondata=*g_data.sections["Actions"].GetValue(i);
-		CString text=actionid+" "+GetParam(actiondata,0);
+	for (auto const& [actionid, actiondata] : g_data["Actions"]) {
+		CString text = actionid + " " + GetParam(actiondata, 0);
 		m_ActionType.AddString(text);
 	}
 	
@@ -227,25 +215,18 @@ void CTriggers::UpdateDialog()
 	CComboBox* wayp;
 	wayp=(CComboBox*)GetDlgItem(IDC_ACTIONWAYPOINT);
 	while(wayp->DeleteString(0)!=CB_ERR);
-	if(ini.sections.find("Waypoints")!=ini.sections.end())
-	{
-		for(i=0;i<ini.sections["Waypoints"].values.size();i++)
-		{
-			wayp->AddString(*ini.sections["Waypoints"].GetValueName(i));		
-		}
+
+	for (auto const& [num, coord] : ini["Waypoints"]) {
+		wayp->AddString(num);
 	}
 
-
-	if(sel==-1 || m_Trigger.SetCurSel(sel)==FALSE)
-	{
+	if(sel==-1 || m_Trigger.SetCurSel(sel)==FALSE) {
 		m_Trigger.SetCurSel(0);
 	}
-	if(selat==-1 || m_Trigger.SetCurSel(selat)==FALSE)
-	{
+	if(selat==-1 || m_Trigger.SetCurSel(selat)==FALSE) {
 		m_Action.SetCurSel(0);
 	}
-	if(selev==-1 || m_Trigger.SetCurSel(selev)==FALSE)
-	{
+	if(selev==-1 || m_Trigger.SetCurSel(selev)==FALSE) {
 		m_Event.SetCurSel(0);
 	}
 
@@ -269,20 +250,19 @@ void CTriggers::OnSelchangeTrigger()
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 		
-	TriggerData=ini.sections["Triggers"].values[CurrentTrigger];
-	EventData=ini.sections["Events"].values[CurrentTrigger];
-	ActionData=ini.sections["Actions"].values[CurrentTrigger];
+	TriggerData = ini.GetString("Triggers", CurrentTrigger);
+	EventData = ini.GetString("Events", CurrentTrigger);
+	ActionData = ini.GetString("Actions", CurrentTrigger);
 
 	m_Name=GetParam(TriggerData, 2);
 	m_House.SetWindowText(TranslateHouse(GetParam(TriggerData,0), TRUE));
 	
 
 	CString trig2=GetParam(TriggerData,1);
-	if(ini.sections["Triggers"].values.find(trig2)!=ini.sections["Triggers"].values.end())
-	{
-		trig2+=" (";
-		trig2+=GetParam( ini.sections["Triggers"].values[GetParam(TriggerData,1)],2);
-		trig2+=")";
+	if (ini["Triggers"].Exists(trig2)) {
+		trig2 += " (";
+		trig2 += GetParam(ini["Triggers"][GetParam(TriggerData, 1)], 2);
+		trig2 += ")";
 	}
 	m_Trigger2.SetWindowText(trig2);
 
@@ -338,11 +318,10 @@ void CTriggers::OnSelchangeEvent()
 	TruncSpace(CurrentTrigger);
 
 
-	CString EventData;
-	EventData=ini.sections["Events"].values[(LPCTSTR)CurrentTrigger];
+	auto const& eventData = ini["Events"][CurrentTrigger];
 	
 	int startpos=1+selev*3;
-	CString EventType=GetParam(EventData,startpos);
+	CString EventType=GetParam(eventData,startpos);
 	m_EventType.SetWindowText(EventType);
 	for(i=0;i<m_EventType.GetCount();i++)
 	{
@@ -352,9 +331,9 @@ void CTriggers::OnSelchangeEvent()
 		if(tmp==EventType)
 			m_EventType.SetCurSel(i);
 	}
-	m_E1.SetWindowText(GetParam(EventData,startpos+1));
+	m_E1.SetWindowText(GetParam(eventData,startpos+1));
 
-	m_E2.SetWindowText(GetParam(EventData,startpos+2));
+	m_E2.SetWindowText(GetParam(eventData,startpos+2));
 
 	OnEditchangeEventtype();
 }
@@ -373,8 +352,7 @@ void CTriggers::OnSelchangeAction()
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
-	CString ActionData;
-	ActionData=ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger];
+	auto const& ActionData=ini["Actions"][CurrentTrigger];
 
 	int startpos=1+selac*8;
 	CString ActionType=GetParam(ActionData,startpos);
@@ -406,7 +384,9 @@ void CTriggers::OnEditchangeHouse()
 	CIniFile& ini=Map->GetIniFile();
 
 	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
@@ -417,7 +397,7 @@ void CTriggers::OnEditchangeHouse()
 
 	house=TranslateHouse(house);
 	
-	ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger], 0, (LPCTSTR)house);
+	ini.SetString("Triggers", CurrentTrigger, SetParam(ini["Triggers"][CurrentTrigger], 0, house));
 }
 
 void CTriggers::OnSelchangeHouse() 
@@ -442,14 +422,16 @@ void CTriggers::OnChangeName()
 
 	int esel=name.GetSel();
 	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
 		
-	ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger], 2, (LPCTSTR)m_Name);
+	ini.SetString("Triggers", CurrentTrigger, SetParam(ini["Triggers"][CurrentTrigger], 2, m_Name));
 
 	UpdateDialog();
 	
@@ -465,15 +447,16 @@ void CTriggers::OnChangeFlag1()
 	UpdateData();
 
 	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
-		
-	ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger], 3, (LPCTSTR)m_F1);
 
+	ini.SetString("Triggers", CurrentTrigger, SetParam(ini["Triggers"][CurrentTrigger], 3, m_F1));
 }
 
 void CTriggers::OnChangeFlag2() 
@@ -483,14 +466,16 @@ void CTriggers::OnChangeFlag2()
 	UpdateData();
 
 	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
-		
-	ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger], 4, (LPCTSTR)m_F2);
+
+	ini.SetString("Triggers", CurrentTrigger, SetParam(ini["Triggers"][CurrentTrigger], 4, m_F2));
 	
 }
 
@@ -501,14 +486,16 @@ void CTriggers::OnChangeFlag3()
 	UpdateData();
 
 	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
 		
-	ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger], 5, (LPCTSTR)m_F3);
+	ini.SetString("Triggers", CurrentTrigger, SetParam(ini["Triggers"][CurrentTrigger], 5, m_F3));
 
 	
 }
@@ -520,14 +507,16 @@ void CTriggers::OnChangeFlag4()
 	UpdateData();
 
 	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
 		
-	ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger], 6, (LPCTSTR)m_F4);
+	ini.SetString("Triggers",CurrentTrigger,SetParam(ini["Triggers"][CurrentTrigger], 6, m_F4));
 
 }
 
@@ -538,14 +527,16 @@ void CTriggers::OnChangeFlag5()
 	UpdateData();
 
 	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
 		
-	ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger], 7, (LPCTSTR)m_F5);
+	ini.SetString("Triggers", CurrentTrigger, SetParam(ini["Triggers"][CurrentTrigger], 7, m_F5));
 
 }
 
@@ -554,7 +545,9 @@ void CTriggers::OnEditchangeTrigger2()
 	CIniFile& ini=Map->GetIniFile();
 
 	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
@@ -564,7 +557,7 @@ void CTriggers::OnEditchangeTrigger2()
 	m_Trigger2.GetWindowText(trg);
 	TruncSpace(trg);
 	
-	ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Triggers"].values[(LPCTSTR)CurrentTrigger], 1, (LPCTSTR)trg);	
+	ini.SetString("Triggers", CurrentTrigger, SetParam(ini["Triggers"][CurrentTrigger], 1, trg));
 }
 
 void CTriggers::OnSelchangeTrigger2() 
@@ -605,18 +598,19 @@ void CTriggers::OnEditchangeEventtype()
 
 	int pos=1+3*sel2;
 	
-	ini.sections["Events"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Events"].values[(LPCTSTR)CurrentTrigger], pos, (LPCTSTR)eventtype);
+	ini.SetString("Events", CurrentTrigger, SetParam(ini["Events"][CurrentTrigger], pos, eventtype));
 
-	if(g_data.sections["Events"].FindName(eventtype)<0) return;
-
+	if (g_data["Events"].FindIndex(eventtype) < 0) {
+		return;
+	}
 	
 	CString ptype[2];
-	ptype[0]=GetParam(g_data.sections["Events"].values[eventtype],1);
-	ptype[1]=GetParam(g_data.sections["Events"].values[eventtype],2);
+	ptype[0]=GetParam(g_data["Events"][eventtype],1);
+	ptype[1]=GetParam(g_data["Events"][eventtype],2);
 
 	int pListType[2];
-	pListType[0]=atoi(GetParam(g_data.sections["ParamTypes"].values[ptype[0]], 1));
-	pListType[1]=atoi(GetParam(g_data.sections["ParamTypes"].values[ptype[1]], 1));
+	pListType[0]=atoi(GetParam(g_data["ParamTypes"][ptype[0]], 1));
+	pListType[1]=atoi(GetParam(g_data["ParamTypes"][ptype[1]], 1));
 
 	int i;
 	for(i=0;i<2;i++)
@@ -641,7 +635,7 @@ void CTriggers::OnEditchangeEventtype()
 			continue;
 		}
 
-		*label=GetParam(g_data.sections["ParamTypes"].values[ptype[i]], 0);
+		*label=GetParam(g_data["ParamTypes"][ptype[i]], 0);
 
 		
 
@@ -701,7 +695,7 @@ void CTriggers::OnEditchangeEventparam1()
 
 	int pos=1+3*sel2+1;
 	
-	ini.sections["Events"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Events"].values[(LPCTSTR)CurrentTrigger], pos, (LPCTSTR)param1);
+	ini.SetString("Events", CurrentTrigger, SetParam(ini["Events"][CurrentTrigger], pos, param1));
 	
 }
 
@@ -734,7 +728,7 @@ void CTriggers::OnEditchangeEventparam2()
 
 	int pos=1+3*sel2+2;
 	
-	ini.sections["Events"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Events"].values[(LPCTSTR)CurrentTrigger], pos, (LPCTSTR)param2);
+	ini.SetString("Events", CurrentTrigger, SetParam(ini["Events"][CurrentTrigger], pos, param2));
 		
 }
 
@@ -787,27 +781,30 @@ void CTriggers::OnEditchangeActiontype()
 
 	int pos=1+8*sel2;
 	
-	ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger], pos, (LPCTSTR)actiontype);
+	ini.SetString("Actions", CurrentTrigger, SetParam(ini["Actions"][CurrentTrigger], pos, actiontype));
 
-	if(g_data.sections["Actions"].FindName(actiontype)<0) return;
+	if (g_data["Actions"].FindIndex(actiontype) < 0) {
+		return;
+	}
 
 	
 	CString ptype[6];
-	ptype[0]=GetParam(g_data.sections["Actions"].values[actiontype],1);
-	ptype[1]=GetParam(g_data.sections["Actions"].values[actiontype],2);
-	ptype[2]=GetParam(g_data.sections["Actions"].values[actiontype],3);
-	ptype[3]=GetParam(g_data.sections["Actions"].values[actiontype],4);
-	ptype[4]=GetParam(g_data.sections["Actions"].values[actiontype],5);
-	ptype[5]=GetParam(g_data.sections["Actions"].values[actiontype],6);
+	ptype[0]=GetParam(g_data["Actions"][actiontype],1);
+	ptype[1]=GetParam(g_data["Actions"][actiontype],2);
+	ptype[2]=GetParam(g_data["Actions"][actiontype],3);
+	ptype[3]=GetParam(g_data["Actions"][actiontype],4);
+	ptype[4]=GetParam(g_data["Actions"][actiontype],5);
+	ptype[5]=GetParam(g_data["Actions"][actiontype],6);
 
-	if(GetParam(g_data.sections["Actions"].values[actiontype],7)=="0")
+	if (GetParam(g_data["Actions"][actiontype], 7) == "0") {
 		m_LAW="Unused";
-	else
-		m_LAW="Waypoint:";
+	} else {
+		m_LAW = "Waypoint:";
+	}
 
 	int pListType[6];
-	pListType[0]=atoi(GetParam(g_data.sections["ParamTypes"].values[ptype[0]], 1));
-	pListType[1]=atoi(GetParam(g_data.sections["ParamTypes"].values[ptype[1]], 1));
+	pListType[0]=atoi(GetParam(g_data["ParamTypes"][ptype[0]], 1));
+	pListType[1]=atoi(GetParam(g_data["ParamTypes"][ptype[1]], 1));
 
 	
 
@@ -842,7 +839,7 @@ void CTriggers::OnEditchangeActiontype()
 			continue;
 		}
 
-		*label = GetParam(g_data.sections["ParamTypes"].values[ptype[i]], 0);
+		*label = GetParam(g_data["ParamTypes"][ptype[i]], 0);
 
 		
 
@@ -1041,7 +1038,7 @@ void CTriggers::OnEditchangeActionwaypoint()
 
 	int pos=1+8*sel2+7;
 	
-	ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger], pos, (LPCTSTR)waypoint);
+	ini.SetString("Actions", CurrentTrigger, SetParam(ini["Actions"][CurrentTrigger], pos, waypoint));
 	
 }
 
@@ -1059,9 +1056,13 @@ void CTriggers::OnEditchangeActionparam1()
 	CIniFile& ini=Map->GetIniFile();
 
 	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 	int sel2=m_Action.GetCurSel();
-	if(sel2<0) return;
+	if (sel2 < 0) {
+		return;
+	}
 	
 
 	CString CurrentTrigger;
@@ -1074,7 +1075,7 @@ void CTriggers::OnEditchangeActionparam1()
 
 	int pos=1+8*sel2+1;
 	
-	ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger], pos, (LPCTSTR)p1);
+	ini.SetString("Actions", CurrentTrigger, SetParam(ini["Actions"][CurrentTrigger], pos, p1));
 	
 }
 
@@ -1107,7 +1108,7 @@ void CTriggers::OnEditchangeActionparam2()
 
 	int pos=1+8*sel2+2;
 	
-	ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger], pos, (LPCTSTR)p2);
+	ini.SetString("Actions", CurrentTrigger, SetParam(ini["Actions"][CurrentTrigger], pos, p2));
 	
 }
 
@@ -1140,7 +1141,7 @@ void CTriggers::OnEditchangeActionparam3()
 
 	int pos=1+8*sel2+3;
 	
-	ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger], pos, (LPCTSTR)p3);
+	ini.SetString("Actions", CurrentTrigger, SetParam(ini["Actions"][CurrentTrigger], pos, p3));
 	
 }
 
@@ -1173,7 +1174,7 @@ void CTriggers::OnEditchangeActionparam4()
 
 	int pos=1+8*sel2+4;
 	
-	ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger], pos, (LPCTSTR)p4);
+	ini.SetString("Actions", CurrentTrigger, SetParam(ini["Actions"][CurrentTrigger], pos, p4));
 	
 }
 
@@ -1206,7 +1207,7 @@ void CTriggers::OnEditchangeActionparam5()
 
 	int pos=1+8*sel2+5;
 	
-	ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger], pos, (LPCTSTR)p5);
+	ini.SetString("Actions", CurrentTrigger, SetParam(ini["Actions"][CurrentTrigger], pos, p5));
 	
 }
 
@@ -1239,7 +1240,7 @@ void CTriggers::OnEditchangeActionparam6()
 
 	int pos=1+8*sel2+6;
 	
-	ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger]=SetParam(ini.sections["Actions"].values[(LPCTSTR)CurrentTrigger], pos, (LPCTSTR)p6);
+	ini.SetString("Actions", CurrentTrigger, SetParam(ini["Actions"][CurrentTrigger], pos, p6));
 	
 }
 
@@ -1264,16 +1265,14 @@ void CTriggers::OnAddevent()
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
-	CIniFileSection& sec=ini.sections["Events"];
+	CIniFileSection& sec=ini.AddSection("Events");
 
-	int cval=atoi(GetParam(sec.values[(LPCTSTR)CurrentTrigger],0));
+	int cval=atoi(GetParam(sec[CurrentTrigger],0));
 	cval++;
 	char c[50];
 	itoa(cval,c,10);
 	
-	sec.values[(LPCTSTR)CurrentTrigger]=SetParam(sec.values[(LPCTSTR)CurrentTrigger],0,c);
-	sec.values[(LPCTSTR)CurrentTrigger]+=",13,0,0";
-
+	sec.SetString(CurrentTrigger, SetParam(sec[CurrentTrigger], 0, c) + ",13,0,0");
 
 	UpdateDialog();
 
@@ -1284,49 +1283,53 @@ void CTriggers::OnAddevent()
 
 }
 
-void CTriggers::OnDeleteevent() 
+void CTriggers::OnDeleteevent()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
-	int sel2=m_Event.GetCurSel();
-	if(sel2<0) return;
-	if(MessageBox("Do you really want to delete this event?","Delete event", MB_YESNO)==IDNO) return;
+	int sel = m_Trigger.GetCurSel();
+	if (sel < 0) {
+		return;
+	}
+	int sel2 = m_Event.GetCurSel();
+	if (sel2 < 0) {
+		return;
+	}
+	if (MessageBox("Do you really want to delete this event?", "Delete event", MB_YESNO) == IDNO) {
+		return;
+	}
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
-	CIniFileSection& sec=ini.sections["Events"];
+	auto const& sec = ini["Events"];
 
-	CString data;
-	data=sec.values[(LPCTSTR)CurrentTrigger];
+	auto data = sec[CurrentTrigger];
 
-	int v=atoi(GetParam(data,0));
+	int v = atoi(GetParam(data, 0));
 	char c[50];
 	v--;
-	itoa(v,c,10);
-	data=SetParam(data,0, c);
+	itoa(v, c, 10);
+	data = SetParam(data, 0, c);
 
-	int pos=1+sel2*3;
-	int posc=1+v*3;
-	int i;
-	for(i=0;i<3;i++)
-		data=SetParam(data,pos+i, GetParam(data,posc+i));
+	int pos = 1 + sel2 * 3;
+	int posc = 1 + v * 3;
 
-	char* cupos=(char*)(LPCTSTR)data;
-	for(i=0;i<posc;i++)
-	{
-		cupos=strchr(cupos+1, ',');
-		if(i==posc-1)
-		{
-			cupos[0]=0;
+	for (auto i = 0; i < 3; i++) {
+		data = SetParam(data, pos + i, GetParam(data, posc + i));
+	}
+
+	LPCSTR cupos = data.operator LPCSTR();
+	for (auto i = 0; i < posc; i++) {
+		cupos = strchr(cupos + 1, ',');
+		if (i == posc - 1) {
+			data.SetAt(cupos - data.operator LPCSTR(), '\0');
 			break;
 		}
 	}
 
-	sec.values[(LPCTSTR)CurrentTrigger]=data;
+	ini.SetString("Events", CurrentTrigger, data);
 	UpdateDialog();
 	m_Trigger.SetCurSel(sel);
 	OnSelchangeTrigger();
@@ -1337,23 +1340,23 @@ void CTriggers::OnAddaction()
 	CIniFile& ini=Map->GetIniFile();
 
 	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
-	CIniFileSection& sec=ini.sections["Actions"];
+	CIniFileSection& sec=ini.AddSection("Actions");
 
-	int cval=atoi(GetParam(sec.values[(LPCTSTR)CurrentTrigger],0));
+	int cval=atoi(GetParam(sec[CurrentTrigger],0));
 	cval++;
 	char c[50];
 	itoa(cval,c,10);
 	
-	sec.values[(LPCTSTR)CurrentTrigger]=SetParam(sec.values[(LPCTSTR)CurrentTrigger],0,c);
-	sec.values[(LPCTSTR)CurrentTrigger]+=",0,0,0,0,0,0,0,A";
-
+	sec.SetString(CurrentTrigger, SetParam(sec[CurrentTrigger], 0, c) + ",0,0,0,0,0,0,0,A");
 
 	UpdateDialog();
 
@@ -1371,16 +1374,17 @@ void CTriggers::OnDeleteaction()
 	if(sel<0) return;
 	int sel2=m_Action.GetCurSel();
 	if(sel2<0) return;
-	if(MessageBox("Do you really want to delete this action?","Delete action", MB_YESNO)==IDNO) return;
+	if (MessageBox("Do you really want to delete this action?", "Delete action", MB_YESNO) == IDNO) {
+		return;
+	}
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
-	CIniFileSection& sec=ini.sections["Actions"];
+	auto const& sec = ini["Actions"];
 
-	CString data;
-	data=sec.values[(LPCTSTR)CurrentTrigger];
+	auto data = sec[CurrentTrigger];
 
 	int v=atoi(GetParam(data,0));
 	char c[50];
@@ -1394,18 +1398,16 @@ void CTriggers::OnDeleteaction()
 	for(i=0;i<3;i++)
 		data=SetParam(data,pos+i, GetParam(data,posc+i));
 
-	char* cupos=(char*)(LPCTSTR)data;
-	for(i=0;i<posc;i++)
-	{
-		cupos=strchr(cupos+1, ',');
-		if(i==posc-1)
-		{
-			cupos[0]=0;
+	LPCSTR cupos = data.operator LPCSTR();
+	for (auto i = 0; i < posc; i++) {
+		cupos = strchr(cupos + 1, ',');
+		if (i == posc - 1) {
+			data.SetAt(cupos - data.operator LPCSTR(), '\0');
 			break;
 		}
 	}
 
-	sec.values[(LPCTSTR)CurrentTrigger]=data;
+	ini.SetString("Actions", CurrentTrigger, data);
 	UpdateDialog();	
 
 	m_Trigger.SetCurSel(sel);
@@ -1418,41 +1420,43 @@ void CTriggers::OnDeletetrigger()
 	CIniFile& ini=Map->GetIniFile();
 
 	int sel=m_Trigger.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 
-	if(MessageBox("Do you really want to delete this trigger? Don´t forget to delete the attached tag (important!)","Delete trigger", MB_YESNO)==IDNO) return;
+	if (MessageBox("Do you really want to delete this trigger? Don´t forget to delete the attached tag (important!)", "Delete trigger", MB_YESNO) == IDNO) {
+		return;
+	}
 
 	CString CurrentTrigger;
 	m_Trigger.GetLBText(sel, CurrentTrigger);
 	TruncSpace(CurrentTrigger);
 
-	ini.sections["Triggers"].values.erase((LPCTSTR)CurrentTrigger);
-	ini.sections["Events"].values.erase((LPCTSTR)CurrentTrigger);
-	ini.sections["Actions"].values.erase((LPCTSTR)CurrentTrigger);
+	ini.RemoveValueByKey( "Triggers",CurrentTrigger);
+	ini.RemoveValueByKey( "Events",CurrentTrigger);
+	ini.RemoveValueByKey( "Actions",CurrentTrigger);
 
 	//UpdateDialog();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 }
 
-void CTriggers::OnAddtrigger() 
+void CTriggers::OnAddtrigger()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	CString ID_T=GetFreeID();
-	ini.sections["Triggers"].values[ID_T]="GDI,<none>,New trigger,0,1,1,1,0";
-	ini.sections["Events"].values[ID_T]="0";
-	ini.sections["Actions"].values[ID_T]="0";
+	CString newId = GetFreeID();
+	ini.SetString("Triggers", newId, "GDI,<none>,New trigger,0,1,1,1,0");
+	ini.SetString("Events", newId, "0");
+	ini.SetString("Actions", newId, "0");
 
-	if(MessageBox("Trigger created. If you want to create a simple tag now, press Yes. The tag will be called ""New tag"", you should name it like the trigger (after you have set up the trigger).","Trigger created",MB_YESNO))
-	{
-		CString ID_TAG=GetFreeID();
-		ini.sections["Tags"].values[ID_TAG]="0,New tag,";
-		ini.sections["Tags"].values[ID_TAG]+=ID_T;
+	if (MessageBox("Trigger created. If you want to create a simple tag now, press Yes. The tag will be called ""New tag"", you should name it like the trigger (after you have set up the trigger).", "Trigger created", MB_YESNO)) {
+		CString newTagId = GetFreeID();
+		ini.SetString("Tags", newTagId, "0,New tag," + newId);
 	}
 
 	//UpdateDialog();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
-		
+
 }
 
 

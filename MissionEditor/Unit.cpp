@@ -88,15 +88,15 @@ void CUnit::Init(CString house, CString strength, CString direction, CString act
 {
 	CIniFile& ini=Map->GetIniFile();
 
-	if(house=="") 
-	{
-		m_house=*rules.sections["Houses"].GetValue(0);
-		if(ini.sections.find("Houses")!=ini.sections.end())
-			if(ini.sections["Houses"].values.size()>0)
-				m_house=TranslateHouse(*ini.sections["Houses"].GetValue(0), TRUE);
+	if (house.IsEmpty()) {
+		auto const& houseSec = rules["Houses"];
+		m_house = houseSec.Nth(0).second;
+		if (houseSec.Size() > 0) {
+			m_house = TranslateHouse(m_house, TRUE);
+		}
+	} else {
+		m_house = TranslateHouse(house, TRUE);
 	}
-	else
-		m_house=TranslateHouse(house, TRUE);
 
 	m_flag1=flag1;
 	m_flag2=flag2;

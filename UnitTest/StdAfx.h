@@ -1,6 +1,8 @@
-/*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+﻿/*
+    FinalSun/FinalAlert 2 Mission Editor
+
+    Copyright (C) 1999-2024 Electronic Arts, Inc.
+    Authored by Matthias Wagner
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,31 +18,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+// stdafx.h : include everything that should be available everywhere in the code
+//
+
 #pragma once
 
-// #define WIN32_LEAN_AND_MEAN
+#include <gtest/gtest.h>
+#include <iostream>
+#include <afxwin.h> 
 
-#include <array>
-#include <boost/algorithm/string.hpp>
-#include <cassert>
-#include <climits>
-#include <cstdint>
-#include <list>
-#include <memory>
-#include <map>
-#include <set>
-#include <span>
-#include <string>
-#include <vartypes.h>
-#include <stdint.h>
-#include <vector>
-#include <xcc/data_ref.h>
-#include <xcc/find_ptr.h>
-#ifndef XCC_MINIMAL_BUILD
-#include <xcc/string_view.h>
+#if !defined(ASSERT)
+#define ASSERT(x) if (!(x)) throw("assertion failed");
 #endif
-
-using namespace std;
-using boost::iequals;
-using boost::to_lower_copy;
-using boost::trim_copy;

@@ -53,7 +53,7 @@ CMMXSavingOptionsDlg::CMMXSavingOptionsDlg(CWnd* pParent /*=NULL*/)
 	m_Standard = TRUE;
 	//}}AFX_DATA_INIT
 
-	m_Description=Map->GetIniFile().sections["Basic"].values["Name"];
+	m_Description = Map->GetIniFile().GetString("Basic", "Name");
 }
 
 

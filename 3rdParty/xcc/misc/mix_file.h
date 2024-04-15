@@ -48,7 +48,7 @@ public:
 		m_mix_expansion = true;
 	}
 
-	int get_c_files() const
+	auto get_c_files() const
 	{
 		return m_index.size();
 	}

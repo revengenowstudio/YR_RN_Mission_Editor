@@ -118,14 +118,13 @@ BOOL CNewMap::OnInitDialog()
 
 	CComboBox& house=*((CComboBox*)(GetDlgItem(IDC_HOUSE)));
 	int i;
-	for(i=0;i<rules.sections[HOUSES].values.size();i++)
-	{
-		house.AddString(*rules.sections[HOUSES].GetValue(i));
+	for (auto const& [seq, id] : rules[HOUSES]) {
+		house.AddString(id);
 	}
 
-	m_House=rules.sections[HOUSES].values["0"];
+	m_House = rules[HOUSES].Nth(0).second;
 
-	CComboBox& theater=*((CComboBox*)GetDlgItem(IDC_THEATER));
+	CComboBox& theater = *((CComboBox*)GetDlgItem(IDC_THEATER));
 	theater.AddString(THEATER0);
 	theater.AddString(THEATER1);
 #ifdef RA2_MODE
@@ -265,8 +264,7 @@ void CNewMap::OnEditchangeImportfile()
 
 	cmap.InsertFile(m_MapToImport,"Map");
 	
-	if(cmap.sections.find("Map")==cmap.sections.end())
-	{
+	if (!cmap.TryGetSection("Map")) {
 		m_OK.EnableWindow(FALSE);
 		return;
 	}

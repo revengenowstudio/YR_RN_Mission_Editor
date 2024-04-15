@@ -188,8 +188,7 @@ BOOL CFinalSunApp::InitInstance()
 #endif
 	language.LoadFile(languagefile);
 
-	if (language.sections.size() == 0)
-	{
+	if (language.Size() == 0) {
 		MessageBox(0, "FALanguage.ini does not exist or is not valid (download corrupt?)", "", 0);
 		exit(0);
 	}
@@ -233,122 +232,128 @@ BOOL CFinalSunApp::InitInstance()
 
 	auto& opts = m_Options;
 
-	HKEY hKey = 0;
-	int res;
-	res = RegOpenKeyExW(HKEY_LOCAL_MACHINE, key.c_str(), 0, KEY_EXECUTE/*KEY_ALL_ACCESS*/, &hKey);
-	if (res != ERROR_SUCCESS)
-	{
-		std::wstring s = L"Failed to access registry. Using manual setting. Error was:\n";
-		wchar_t c[1024] = { 0 };
-		FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, 0, res, 0, c, 1023, NULL);
-		MessageBoxW(0, (s + c).c_str(), L"Error", 0);
-		opts.TSExe = optini.sections[game].values["Exe"];
-	}
-	else
-	{
-		// key opened
-		wchar_t path[MAX_PATH + 1] = { 0 };
-		DWORD pathsize = MAX_PATH;
-		DWORD type = REG_SZ;
-		if ((res = RegQueryValueExW(hKey, L"InstallPath", 0, &type, (unsigned char*)path, &pathsize)) != ERROR_SUCCESS)
-		{
-			std::wstring s = L"Failed to access registry. Using manual setting. Error was:\n";
-			wchar_t c[1024] = { 0 };
-			FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, 0, res, 0, c, 1023, NULL);
-			MessageBoxW(0, (s + c).c_str(), L"Error", 0);
-			opts.TSExe = optini.sections[game].values["Exe"];
-		}
-		else
+	// TODO: use config
+	auto getPathFromRegistry = false;
+	auto getPathFromIni = true;
+
+	if (getPathFromRegistry) {
+		do {
+			int res;
+			HKEY hKey = 0;
+			res = RegOpenKeyExW(HKEY_LOCAL_MACHINE, key.c_str(), 0, KEY_EXECUTE/*KEY_ALL_ACCESS*/, &hKey);
+			if (res != ERROR_SUCCESS) {
+				getPathFromIni = true;
+				std::wstring s = L"Failed to access registry. Using manual setting. Error was:\n";
+				wchar_t c[1024] = { 0 };
+				FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, 0, res, 0, c, 1023, NULL);
+				MessageBoxW(0, (s + c).c_str(), L"Error", 0);
+				break;
+			}
+			// key opened
+			wchar_t path[MAX_PATH + 1] = { 0 };
+			DWORD pathsize = MAX_PATH;
+			DWORD type = REG_SZ;
+			if ((res = RegQueryValueExW(hKey, L"InstallPath", 0, &type, (unsigned char*)path, &pathsize)) != ERROR_SUCCESS) {
+				getPathFromIni = true;
+				std::wstring s = L"Failed to access registry. Using manual setting. Error was:\n";
+				wchar_t c[1024] = { 0 };
+				FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, 0, res, 0, c, 1023, NULL);
+				MessageBoxW(0, (s + c).c_str(), L"Error", 0);
+				break;
+			} 
 			opts.TSExe = path;
+		} while (0);
 	}
 
+	if (getPathFromIni) {
+		opts.TSExe = optini.GetString(game, "Exe");
+	}
 
+	auto const& appSec = optini[app];
 	if (copiedDefaultFile ||
-		optini.sections.size() == 0 ||
-		opts.TSExe.GetLength() == 0 ||
-		optini.sections[app].values["Language"].GetLength() == 0 ||
-		optini.sections[app].values.find("FileSearchLikeGame") == optini.sections[app].values.end() ||
-		optini.sections[app].values.find("PreferLocalTheaterFiles") == optini.sections[app].values.end())
-	{
+		optini.Size() == 0 ||
+		opts.TSExe.IsEmpty() ||
+		appSec.GetString( "Language").IsEmpty() ||
+		!appSec.GetBool("FileSearchLikeGame") ||
+		!appSec.GetBool("PreferLocalTheaterFiles")) {
 		opts.bSearchLikeTS = TRUE;
 
 		bOptionsStartup = TRUE;
 		ShowOptionsDialog();
 		bOptionsStartup = FALSE;
 
-	}
-	else
-	{
-		opts.LanguageName = optini.sections[app].values["Language"];
-		if (optini.sections[app].values["FileSearchLikeGame"] != "no")
+	} else {
+		opts.LanguageName = appSec.GetString("Language");
+		if (appSec.GetBool("FileSearchLikeGame")) {
 			opts.bSearchLikeTS = TRUE;
-		else opts.bSearchLikeTS = FALSE;
+		}
+		else {
+			opts.bSearchLikeTS = FALSE;
+		}
 	}
-	opts.bPreferLocalTheaterFiles = optini.sections[app].values.emplace("PreferLocalTheaterFiles", opts.bPreferLocalTheaterFiles ? "1" : "0").first->second == "1";
+	opts.bPreferLocalTheaterFiles = appSec.GetBool("PreferLocalTheaterFiles", opts.bPreferLocalTheaterFiles);
+	auto const& graphSec = optini["Graphics"];
+	opts.bDoNotLoadAircraftGraphics = graphSec.GetBool("NoAircraftGraphics");
+	opts.bDoNotLoadVehicleGraphics = graphSec.GetBool("NoVehicleGraphics");
+	opts.bDoNotLoadBuildingGraphics = graphSec.GetBool("NoBuildingGraphics");
+	opts.bDoNotLoadInfantryGraphics = graphSec.GetBool("NoInfantryGraphics");
+	opts.bDoNotLoadTreeGraphics = graphSec.GetBool("NoTreeGraphics");
+	opts.bDoNotLoadSnowGraphics = graphSec.GetBool("NoSnowGraphics");
+	opts.bDoNotLoadTemperateGraphics = graphSec.GetBool("NoTemperateGraphics");
+	opts.bDoNotLoadBMPs = graphSec.GetBool("NoBMPs");
+	opts.bDoNotLoadOverlayGraphics = graphSec.GetBool("NoOverlayGraphics");
+	opts.bVSync = graphSec.GetBool("VSync", opts.bVSync);
 
-	opts.bDoNotLoadAircraftGraphics = optini.sections["Graphics"].values["NoAircraftGraphics"] == "1";
-	opts.bDoNotLoadVehicleGraphics = optini.sections["Graphics"].values["NoVehicleGraphics"] == "1";
-	opts.bDoNotLoadBuildingGraphics = optini.sections["Graphics"].values["NoBuildingGraphics"] == "1";
-	opts.bDoNotLoadInfantryGraphics = optini.sections["Graphics"].values["NoInfantryGraphics"] == "1";
-	opts.bDoNotLoadTreeGraphics = optini.sections["Graphics"].values["NoTreeGraphics"] == "1";
-	opts.bDoNotLoadSnowGraphics = optini.sections["Graphics"].values["NoSnowGraphics"] == "1";
-	opts.bDoNotLoadTemperateGraphics = optini.sections["Graphics"].values["NoTemperateGraphics"] == "1";
-	opts.bDoNotLoadBMPs = optini.sections["Graphics"].values["NoBMPs"] == "1";
-	opts.bDoNotLoadOverlayGraphics = optini.sections["Graphics"].values["NoOverlayGraphics"] == "1";
-	opts.bVSync = optini.sections["Graphics"].values.emplace("VSync", opts.bVSync ? "1" : "0").first->second == "1";
+	auto const& userInterfaceSec = optini["UserInterface"];
+	opts.bDisableAutoShore = userInterfaceSec.GetBool("DisableAutoShore");
+	opts.bDisableAutoLat = userInterfaceSec.GetBool("DisableAutoLat");
+	opts.bNoSounds = !userInterfaceSec.GetBool("Sounds");
+	opts.bDisableSlopeCorrection = userInterfaceSec.GetBool("DisableSlopeCorrection");
+	opts.fLoadScreenDelayInSeconds = userInterfaceSec.GetFloat("LoadScreenDelay", opts.fLoadScreenDelayInSeconds);
+	opts.bShowStats = userInterfaceSec.GetBool("ShowStats", opts.bShowStats);
+	opts.bHighResUI = userInterfaceSec.GetBool("HighRes", opts.bHighResUI);
+	opts.useDefaultMouseCursor = userInterfaceSec.GetBool("UseDefaultMouseCursor", opts.useDefaultMouseCursor);
 
-	opts.bDisableAutoShore = optini.sections["UserInterface"].values["DisableAutoShore"] == "1";
-	opts.bDisableAutoLat = optini.sections["UserInterface"].values["DisableAutoLat"] == "1";
-	opts.bNoSounds = optini.sections["UserInterface"].values["Sounds"] != "1";
-	opts.bDisableSlopeCorrection = optini.sections["UserInterface"].values["DisableSlopeCorrection"] == "1";
-	opts.fLoadScreenDelayInSeconds = static_cast<float>(atof(optini.sections["UserInterface"].values.emplace("LoadScreenDelay", std::to_string(opts.fLoadScreenDelayInSeconds).c_str()).first->second));
-	opts.bShowStats = optini.sections["UserInterface"].values.emplace("ShowStats", opts.bShowStats ? "1" : "0").first->second == "1";
-	opts.bHighResUI = optini.sections["UserInterface"].values.emplace("HighRes", opts.bHighResUI ? "1" : "0").first->second == "1";	
-	opts.useDefaultMouseCursor = optini.sections["UserInterface"].values.emplace("UseDefaultMouseCursor", opts.useDefaultMouseCursor ? "1" : "0").first->second == "1";
-
-	opts.fMiniMapScale = static_cast<float>(atof(optini.sections["MiniMap"].values.emplace("Scale", std::to_string(opts.fMiniMapScale).c_str()).first->second));
+	opts.fMiniMapScale = optini["MiniMap"].GetFloat("Scale", opts.fMiniMapScale);
 
 	auto defaultViewSteps = CString(Join(",", opts.viewScaleSteps | std::views::transform([](auto v) {return std::to_string(v); })).c_str());
-	auto viewScaleStepsRange = SplitParams(optini.sections["UserInterface"].values.emplace("ViewScaleSteps", defaultViewSteps).first->second) | std::views::transform([](auto v) { return static_cast<float>(std::atof(v)); });
+	auto viewScaleStepsRange = SplitParams(userInterfaceSec.GetStringOr("ViewScaleSteps", defaultViewSteps)) | std::views::transform([](auto v) { return static_cast<float>(std::atof(v)); });
 	opts.viewScaleSteps.assign(viewScaleStepsRange.begin(), viewScaleStepsRange.end());
-	opts.viewScaleUseSteps = optini.sections["UserInterface"].values.emplace("ViewScaleUseSteps", opts.viewScaleUseSteps ? "1" : "0").first->second == "1";
-	opts.viewScaleSpeed = static_cast<float>(atof(optini.sections["UserInterface"].values.emplace("ViewScaleSpeed", std::to_string(opts.viewScaleSpeed).c_str()).first->second));
+	opts.viewScaleUseSteps = userInterfaceSec.GetBool("ViewScaleUseSteps", opts.viewScaleUseSteps);
+	opts.viewScaleSpeed = userInterfaceSec.GetFloat("ViewScaleSpeed", opts.viewScaleSpeed);
 
 	// MW 07/19/01
-	opts.bShowCells = optini.sections["UserInterface"].values["ShowBuildingCells"] == "1";
+	opts.bShowCells = userInterfaceSec.GetBool("ShowBuildingCells");
 
 	optini.SaveFile(iniFile);
 
 	// MW 07/20/01: Load file list
 	int i;
-	for (i = 0;i < 4;i++)
-	{
+	for (i = 0;i < 4;i++) {
 		char c[50];
 		itoa(i, c, 10);
-		opts.prev_maps[i] = optini.sections["Files"].values[c];
+		opts.prev_maps[i] = optini.GetString("Files", c);
 	}
 
-	if (opts.bDoNotLoadTemperateGraphics && opts.bDoNotLoadSnowGraphics)
-	{
+	if (opts.bDoNotLoadTemperateGraphics && opts.bDoNotLoadSnowGraphics) {
 		MessageBox(0, "You have turned off loading of both snow and temperate terrain in 'FinalAlert.ini'. At least one of these must be loaded. The application will now quit.", "Error", 0);
 		exit(-982);
 	}
 
 	int EasyView;
-	if (optini.sections["UserInterface"].FindName("EasyView") < 0)
-	{
+	if (userInterfaceSec.FindIndex("EasyView") < 0) {
 		MessageBox(0, GetLanguageStringACP("ExplainEasyView"), GetLanguageStringACP("ExplainEasyViewCap"), 0);
 		EasyView = 1;
 
 		optini.LoadFile(iniFile);
-		optini.sections["UserInterface"].values["EasyView"] = "1";
+		optini.SetInteger("UserInterface", "EasyView", 1);
 		optini.SaveFile(iniFile);
+	} else {
+		EasyView = userInterfaceSec.GetInteger("EasyView");
 	}
-	else
-	{
-		EasyView = atoi(optini.sections["UserInterface"].values["EasyView"]);
+	if (EasyView != 0) {
+		theApp.m_Options.bEasy = TRUE;
 	}
-	if (EasyView != 0) theApp.m_Options.bEasy = TRUE;
 
 
 

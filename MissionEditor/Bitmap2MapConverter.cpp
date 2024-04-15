@@ -102,12 +102,12 @@ BOOL CBitmap2MapConverter::Convert(HBITMAP hBitmap, CMapData & mapdata)
 	int water_start=i+8; // to 12
 
 
-	int sandset=atoi((*tiles).sections["General"].values["SandTile"]);
-	int greenset=atoi((*tiles).sections["General"].values["GreenTile"]);
+	int sandset = tiles->GetInteger("General", "SandTile");
+	int greenset= tiles->GetInteger("General", "GreenTile");
 
 #ifdef RA2_MODE
-	sandset=atoi((*tiles).sections["General"].values["GreenTile"]);
-	greenset=atoi((*tiles).sections["General"].values["RoughTile"]);
+	sandset = tiles->GetInteger("General", "GreenTile");
+	greenset = tiles->GetInteger("General", "RoughTile");
 #endif
 
 	for(i=0;i<(*tiledata_count);i++)

@@ -57,21 +57,24 @@ void DoEvents()
 void GetNodeName(CString& name, int n);
 
 
-CString GetFree(const char* section)
+CString GetFree(const char* sectionName)
 {
-	CIniFile& ini = Map->GetIniFile();
+	auto const ini = Map->GetIniFile();
 
-	int i = 0;
-	char l[50];
-	itoa(i, l, 10);
+	int idx = 0;
+	char idStr[50];
+	itoa(idx, idStr, 10);
 
-	while (ini.sections[section].values.find(l) != ini.sections[section].values.end())
-	{
-		i++;
-		itoa(i, l, 10);
+	auto const& section = ini.GetSection(sectionName);
+	for (;;) {
+		itoa(idx, idStr, 10);
+		if (!section.Exists(idStr)) {
+			break;
+		}
+		idx++;
 	}
 
-	return l;
+	return idStr;
 }
 
 
@@ -80,65 +83,37 @@ This function calculates a number for the specified building type.
 Because this function is slow, you should only use it to fill the
 buildingid map
 */
-inline int GetBuildingNumber(LPCTSTR name)
-{
-	CIniFile& ini = Map->GetIniFile();
 
-	int v = rules.sections["BuildingTypes"].FindValue(name);
+int getItemNumber(const CString& section, const CString& name) {
+	auto const& ini = Map->GetIniFile();
+	int idx = rules.GetSection(section).FindValue(name);
 
-	if (v > -1)
-	{
-
-		return v;
+	if (idx >= 0) {
+		return idx;
 	}
 
-	v = ini.sections["BuildingTypes"].FindValue(name);
-	if (v > -1)
-	{
-		return v + 0x0C00;
+	idx = ini.GetSection(section).FindValue(name);
+	if (idx > -1) {
+		// why ?
+		return idx + 0x0C00;
 	}
 	return -1;
 }
 
-inline int GetTerrainNumber(LPCTSTR name)
+inline int GetBuildingNumber(const CString& name)
 {
-	CIniFile& ini = Map->GetIniFile();
+	return getItemNumber("BuildingTypes", name);
+}
 
-	int v = rules.sections["TerrainTypes"].FindValue(name);
-
-	if (v > -1)
-	{
-
-		return v;
-	}
-
-	v = ini.sections["TerrainTypes"].FindValue(name);
-	if (v > -1)
-	{
-		return v + 0x0C00;
-	}
-	return -1;
+inline int GetTerrainNumber(const CString& name)
+{
+	return getItemNumber("TerrainTypes", name);
 }
 
 #ifdef SMUDGE_SUPP
-inline int GetSmudgeNumber(LPCTSTR name)
+inline int GetSmudgeNumber(const CString& name)
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	int v = rules.sections["SmudgeTypes"].FindValue(name);
-
-	if (v > -1)
-	{
-
-		return v;
-	}
-
-	v = ini.sections["SmudgeTypes"].FindValue(name);
-	if (v > -1)
-	{
-		return v + 0x0C00;
-	}
-	return -1;
+	return getItemNumber("SmudgeTypes", name);
 }
 #endif
 
@@ -266,9 +241,9 @@ CMapData::~CMapData()
 
 void CMapData::CalcMapRect()
 {
-	CIniFileSection& sec = m_mapfile.sections["Map"];
+	auto const& sec = m_mapfile.GetSection("Map");
 	char msize[50];
-	strcpy_s(msize, sec.values["Size"]);
+	strcpy_s(msize, sec.GetString("Size"));
 
 
 	int cupos = 0;
@@ -303,7 +278,9 @@ void CMapData::CalcMapRect()
 	m_maprect.right = atoi(custr);
 
 	cucomma = strchr(&msize[cupos], ','); // we check again... could be there is a new ini format
-	if (cucomma == NULL) cucomma = (char*)((int)msize + strlen(msize));
+	if (cucomma == NULL) {
+		cucomma = msize + strlen(msize);
+	}
 	memcpy_s(custr, custr_size, &msize[cupos], (cucomma - msize) - cupos + 1);
 	custr[((cucomma - msize)) - cupos] = 0;
 	cupos = cucomma - msize + 1;
@@ -314,7 +291,7 @@ void CMapData::CalcMapRect()
 
 	// local size
 
-	strcpy_s(msize, sec.values["LocalSize"]);
+	strcpy_s(msize, sec.GetString("LocalSize"));
 	cupos = 0;
 
 
@@ -346,7 +323,9 @@ void CMapData::CalcMapRect()
 
 
 	cucomma = strchr(&msize[cupos], ','); // we check again... could be there is a new ini format
-	if (cucomma == NULL) cucomma = (char*)((int)msize + strlen(msize));
+	if (cucomma == NULL) {
+		cucomma = msize + strlen(msize);
+	}
 	memcpy_s(custr, custr_size, &msize[cupos], (cucomma - msize) - cupos + 1);
 	custr[((cucomma - msize)) - cupos] = 0;
 	cupos = cucomma - msize + 1;
@@ -366,52 +345,47 @@ WORD CMapData::GetHousesCount(BOOL bCountries)
 	bCountries = FALSE;
 #endif
 
-	CString sSection = MAPHOUSES;
-	if (bCountries) sSection = HOUSES;
+	CString sSection = bCountries ? HOUSES : MAPHOUSES;
 
-	if (m_mapfile.sections.find(sSection) != m_mapfile.sections.end())
-		if (m_mapfile.sections[sSection].values.size() > 0) return m_mapfile.sections[sSection].values.size();
+	if (auto const count = m_mapfile.GetSection(sSection).Size()) {
+		return count;
+	}
 
-	return(rules.sections[HOUSES].values.size());
+	return(rules.GetSection(HOUSES).Size());
 }
 
 CString CMapData::GetHouseID(WORD wHouse, BOOL bCountry)
 {
-	if (wHouse >= GetHousesCount())
-		return CString("");
+	if (wHouse >= GetHousesCount()) {
+		return "";
+	}
 
 #ifndef RA2_MODE
 	bCountry = FALSE;
 #endif
-
-	CString sSection = MAPHOUSES;
-	if (bCountry) sSection = HOUSES;
-
-
-	if (m_mapfile.sections.find(sSection) != m_mapfile.sections.end())
-		if (m_mapfile.sections[sSection].values.size() > 0) return *m_mapfile.sections[sSection].GetValue(wHouse);
-
-	return(*rules.sections[HOUSES].GetValue(wHouse));
+	CString sSection = bCountry ? HOUSES : MAPHOUSES;
+	auto const& houseSec = m_mapfile.GetSection(sSection);
+	if (wHouse < houseSec.Size()) {
+		return houseSec.Nth(wHouse).second;
+	}
+	return rules.GetSection(HOUSES).Nth(wHouse).second;
 }
 
 DWORD CMapData::GetAITriggerTypeCount()
 {
-	if (m_mapfile.sections.find("AITriggerTypes") != m_mapfile.sections.end())
-		return(m_mapfile.sections["AITriggerTypes"].values.size());
-
-	return 0;
+	return m_mapfile.GetSection("AITriggerTypes").Size();
 }
 
 void CMapData::GetAITriggerType(DWORD dwAITriggerType, AITRIGGERTYPE* pAITrg)
 {
-	CString data;
-
-	if (dwAITriggerType >= GetAITriggerTypeCount())
+	if (dwAITriggerType >= GetAITriggerTypeCount()) {
 		return;
+	}
 
-	data = *m_mapfile.sections["AITriggerTypes"].GetValue(dwAITriggerType);
+	auto const& aiTriggerTypeSec = m_mapfile.GetSection("AITriggerTypes");
+	auto const& [id, data] = aiTriggerTypeSec.Nth(dwAITriggerType);
 
-	pAITrg->ID = *m_mapfile.sections["AITriggerTypes"].GetValueName(dwAITriggerType);
+	pAITrg->ID = id;
 	pAITrg->name = GetParam(data, 0);
 	pAITrg->teamtype1 = GetParam(data, 1);
 	pAITrg->owner = GetParam(data, 2);
@@ -430,32 +404,31 @@ void CMapData::GetAITriggerType(DWORD dwAITriggerType, AITRIGGERTYPE* pAITrg)
 	pAITrg->easy = GetParam(data, 15);
 	pAITrg->medium = GetParam(data, 16);
 	pAITrg->hard = GetParam(data, 17);
-
-
 }
 
 WORD CMapData::GetHouseIndex(LPCTSTR lpHouse)
 {
-	if (m_mapfile.sections.find(HOUSES) != m_mapfile.sections.end())
-		if (m_mapfile.sections[HOUSES].values.size() > 0)
-			return m_mapfile.sections[HOUSES].FindValue(lpHouse);
-
-
-	return rules.sections[HOUSES].FindValue(lpHouse);
+	auto const idx = m_mapfile.GetSection(HOUSES).FindValue(lpHouse);
+	if (idx >= 0) {
+		return idx;
+	}
+	return rules.GetSection(HOUSES).FindValue(lpHouse);
 }
 
 DWORD CMapData::GetAITriggerTypeIndex(LPCTSTR lpID)
 {
-	if (GetAITriggerTypeCount() == 0) return 0;
+	if (GetAITriggerTypeCount() == 0) {
+		return 0;
+	}
 
-	return m_mapfile.sections["AITriggerTypes"].FindName(lpID);
+	return m_mapfile.GetSection("AITriggerTypes").FindIndex(lpID);
 }
 
 CString CMapData::GetAITriggerTypeID(DWORD dwAITriggerType)
 {
 	if (dwAITriggerType >= GetAITriggerTypeCount()) return CString("");
 
-	return *m_mapfile.sections["AITriggerTypes"].GetValueName(dwAITriggerType);
+	return m_mapfile["AITriggerTypes"].Nth(dwAITriggerType).first;
 }
 
 CIniFile& CMapData::GetIniFile()
@@ -490,21 +463,20 @@ void CMapData::UpdateIniFile(DWORD dwFlags)
 		CalcMapRect();
 		InitMinimap();
 
-		slopesetpiecesset = atoi((*tiles).sections["General"].values["SlopeSetPieces"]);
-		rampset = atoi((*tiles).sections["General"].values["RampBase"]);
-		rampsmoothset = atoi((*tiles).sections["General"].values["RampSmooth"]);
-		cliffset = atoi((*tiles).sections["General"].values["CliffSet"]);
+		slopesetpiecesset = tiles->GetInteger("General", "SlopeSetPieces");
+		rampsmoothset = tiles->GetInteger("General", "RampSmooth");
+		cliffset = tiles->GetInteger("General", "CliffSet");
 		cliffset_start = GetTileID(cliffset, 0);
-		waterset = atoi((*tiles).sections["General"].values["WaterSet"]);
-		shoreset = atoi((*tiles).sections["General"].values["ShorePieces"]);
-		rampset_start = GetTileID(atoi((*tiles).sections["General"].values["RampBase"]), 0);
-		ramp2set = atoi(g_data.sections["NewUrbanInfo"].values["Ramps2"]);
+		waterset = tiles->GetInteger("General", "WaterSet");
+		shoreset = tiles->GetInteger("General", "ShorePieces");
+		rampset_start = GetTileID(tiles->GetInteger("General", "RampBase"), 0);
+		ramp2set = g_data.GetInteger("NewUrbanInfo", "Ramps2");
 		ramp2set_start = GetTileID(ramp2set, 0);
-		pave2set = atoi(g_data.sections["NewUrbanInfo"].values["Morphable2"]);
+		pave2set = g_data.GetInteger("NewUrbanInfo", "Morphable2");
 		pave2set_start = GetTileID(pave2set, 0);
-		cliff2set = atoi(g_data.sections["NewUrbanInfo"].values["Cliffs2"]);
+		cliff2set = g_data.GetInteger("NewUrbanInfo", "Cliffs2");
 		cliff2set_start = GetTileID(cliff2set, 0);
-		cliffwater2set = atoi(g_data.sections["NewUrbanInfo"].values["CliffsWater2"]);
+		cliffwater2set = g_data.GetInteger("NewUrbanInfo", "CliffsWater2");
 
 		InitializeUnitTypes();
 		UpdateBuildingInfo();
@@ -606,10 +578,11 @@ void CMapData::LoadMap(const std::string& file)
 	char lowc[MAX_PATH] = { 0 };
 	strcpy_s(lowc, file.c_str());
 	_strlwr(lowc);
-	if (strstr(lowc, ".mpr"))
-	{
-		m_mapfile.sections["Basic"].values["MultiplayerOnly"] = "1";
-		if (m_mapfile.sections["Basic"].FindName("Player") >= 0) m_mapfile.sections["Basic"].values.erase("Player");
+	if (strstr(lowc, ".mpr")) {
+		m_mapfile.SetString("Basic", "MultiplayerOnly", "1");
+		if (m_mapfile["Basic"].HasValue("Player")) {
+			m_mapfile.TryGetSection("Basic")->RemoveValue("Player");
+		}
 	}
 
 
@@ -618,25 +591,19 @@ void CMapData::LoadMap(const std::string& file)
 	errstream.flush();
 
 	// repair taskforces (bug in earlier 0.95 versions)
-	for (i = 0;i < m_mapfile.sections["TaskForces"].values.size();i++)
-	{
+	for (auto const& [idx, id] : m_mapfile.GetSection("TaskForces")) {
 		vector<CString> toDelete;
 		toDelete.reserve(5);
 
-		CIniFileSection& sec = m_mapfile.sections[*m_mapfile.sections["TaskForces"].GetValue(i)];
-		int e;
-		for (e = 0;e < sec.values.size();e++)
-		{
-			if (sec.GetValue(e)->GetLength() == 0)
-			{
-				toDelete.push_back(*sec.GetValueName(e));
+		auto const sec = m_mapfile.TryGetSection(id);
+		ASSERT(sec != nullptr);
+		for (auto const& [key, val] : *sec) {
+			if (val.IsEmpty()) {
+				toDelete.push_back(key);
 			}
-
-
 		}
-		for (e = 0;e < toDelete.size();e++)
-		{
-			sec.values.erase(toDelete[e]);
+		for (auto const& keyToDelete : toDelete) {
+			sec->RemoveByKey(keyToDelete);
 		}
 	}
 
@@ -702,9 +669,8 @@ void CMapData::LoadMap(const std::string& file)
 	UpdateTreeInfo();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->UpdateOverlayPictures();
 
-
-	if (m_mapfile.sections["Map"].values["Theater"] == THEATER0)
-	{
+	auto const& theaterType = m_mapfile.GetString("Map", "Theater");
+	if (theaterType == THEATER0) {
 		tiledata = &s_tiledata;
 		tiledata_count = &s_tiledata_count;
 		tiles = &tiles_s;
@@ -736,8 +702,7 @@ void CMapData::LoadMap(const std::string& file)
 		theApp.m_loading->cur_theat = 'T';
 
 	}
-	else if (m_mapfile.sections["Map"].values["Theater"] == THEATER1)
-	{
+	else if (theaterType == THEATER1) {
 		tiledata = &t_tiledata;
 		tiledata_count = &t_tiledata_count;
 		tiles = &tiles_t;
@@ -767,9 +732,7 @@ void CMapData::LoadMap(const std::string& file)
 		theApp.m_loading->FreeTileSet();
 		theApp.m_loading->InitTMPs(&dlg.m_Progress);
 		theApp.m_loading->cur_theat = 'A';
-	}
-	else if (m_mapfile.sections["Map"].values["Theater"] == THEATER2)
-	{
+	} else if (theaterType == THEATER2) {
 		tiledata = &t_tiledata;
 		tiledata_count = &t_tiledata_count;
 		tiles = &tiles_t;
@@ -799,9 +762,7 @@ void CMapData::LoadMap(const std::string& file)
 		theApp.m_loading->FreeTileSet();
 		theApp.m_loading->InitTMPs(&dlg.m_Progress);
 		theApp.m_loading->cur_theat = 'U';
-	}
-	else if (yuri_mode && m_mapfile.sections["Map"].values["Theater"] == THEATER3)
-	{
+	} else if (yuri_mode && theaterType == THEATER3) {
 		tiledata = &t_tiledata;
 		tiledata_count = &t_tiledata_count;
 		tiles = &tiles_t;
@@ -834,9 +795,7 @@ void CMapData::LoadMap(const std::string& file)
 
 		theApp.m_loading->InitTMPs(&dlg.m_Progress);
 		theApp.m_loading->cur_theat = 'N';
-	}
-	else if (yuri_mode && m_mapfile.sections["Map"].values["Theater"] == THEATER4)
-	{
+	} else if (yuri_mode && theaterType == THEATER4) {
 		tiledata = &t_tiledata;
 		tiledata_count = &t_tiledata_count;
 		tiles = &tiles_t;
@@ -869,9 +828,7 @@ void CMapData::LoadMap(const std::string& file)
 
 		theApp.m_loading->InitTMPs(&dlg.m_Progress);
 		theApp.m_loading->cur_theat = 'L';
-	}
-	else if (m_mapfile.sections["Map"].values["Theater"] == THEATER5)
-	{
+	} else if (theaterType == THEATER5) {
 		tiledata = &t_tiledata;
 		tiledata_count = &t_tiledata_count;
 		tiles = &tiles_t;
@@ -905,9 +862,7 @@ void CMapData::LoadMap(const std::string& file)
 
 		theApp.m_loading->InitTMPs(&dlg.m_Progress);
 		theApp.m_loading->cur_theat = 'D';
-	}
-	else
-	{
+	} else {
 		theApp.m_loading->FreeAll();
 		CString s = "Fatal error! %9 doesn´t support the theater of this map!";
 		s = TranslateStringACP(s);
@@ -957,12 +912,8 @@ void CMapData::Unpack()
 	CString ovrl;
 	int i;
 
-
-	ovrl = "";
-
-	for (i = 0;i < m_mapfile.sections["OverlayPack"].values.size();i++)
-	{
-		ovrl += *m_mapfile.sections["OverlayPack"].GetValue(i);
+	for (auto const& [idx, val] : m_mapfile.GetSection("OverlayPack")) {
+		ovrl += val;
 	}
 
 	//BYTE values[262144];
@@ -982,10 +933,9 @@ void CMapData::Unpack()
 	memcpy(m_Overlay, values.data(), std::min(VALUESIZE, values.size()));
 
 	ovrl = "";
-
-	for (i = 0;i < m_mapfile.sections["OverlayDataPack"].values.size();i++)
-	{
-		ovrl += *m_mapfile.sections["OverlayDataPack"].GetValue(i);
+	
+	for (auto const& [idx, val] : m_mapfile.GetSection("OverlayDataPack")) {
+		ovrl += val;
 	}
 
 	values.assign(VALUESIZE, 0);
@@ -1004,29 +954,26 @@ void CMapData::Unpack()
 	CString IsoMapPck;
 	int len_needed = 0;
 
-	CIniFileSection& sec = m_mapfile.sections["IsoMapPack5"];
-	int lines = sec.values.size();
-
+	auto const& sec = m_mapfile["IsoMapPack5"];
 	/*char c[50];
 	itoa(m_mapfile.sections["IsoMapPack5"].values.size(), c, 10);
 	MessageBox(0,c,"",0);*/
 
-	for (i = 0;i < lines;i++)
-	{
-		len_needed += sec.GetValue(i)->GetLength();
+	for (auto const& [key, val] : sec) {
+		len_needed += val.GetLength();
 	}
 
 	LPSTR lpMapPack = new(char[len_needed + 1]);
 	memset(lpMapPack, 0, len_needed + 1);
 
 	int cur_pos = 0;
-	for (i = 0;i < lines;i++)
+	for (auto const& [key, val] : sec)
 	{
-		memcpy(lpMapPack + cur_pos, (LPCSTR)*sec.GetValue(i), sec.GetValue(i)->GetLength());
-		cur_pos += sec.GetValue(i)->GetLength();
+		memcpy(lpMapPack + cur_pos, val, val.GetLength());
+		cur_pos += val.GetLength();
 		DoEvents();
 
-		//IsoMapPck+=*sec.GetValue(i);
+		//IsoMapPck+=val;
 	}
 
 	IsoMapPck = lpMapPack;
@@ -1100,17 +1047,16 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 	int i;
 	BYTE* base64 = NULL; // must be freed!
 
-	m_mapfile.sections.erase("OverlayPack");
-	m_mapfile.sections.erase("OverlayDataPack");
-	m_mapfile.sections.erase("IsoMapPack5"); // only activate when packing isomappack is supported
+	m_mapfile.DeleteSection("OverlayPack");
+	m_mapfile.DeleteSection("OverlayDataPack");
+	m_mapfile.DeleteSection("IsoMapPack5"); // only activate when packing isomappack is supported
 
 	DWORD pos;
 
 	errstream << "Creating Digest" << endl;
 	errstream.flush();
 
-	if (m_mapfile.sections["Digest"].values.size() == 0)
-	{
+	if (m_mapfile["Digest"].Size() == 0) {
 		srand(GetTickCount());
 		unsigned short vals[10];
 		for (i = 0;i < 10;i++)
@@ -1128,11 +1074,16 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 			char str[200];
 			memset(str, 0, 200);
 			WORD cpysize = 70;
-			if (pos + cpysize > strlen((char*)base64)) cpysize = strlen((char*)base64) - pos;
+			if (pos + cpysize > strlen((char*)base64)) {
+				cpysize = strlen((char*)base64) - pos;
+			}
 			memcpy(str, &base64[pos], cpysize);
-			if (strlen(str) > 0)
-				m_mapfile.sections["Digest"].values[cLine] = str;
-			if (cpysize < 70) break;
+			if (strlen(str) > 0) {
+				m_mapfile.SetString("Digest", cLine, str);
+			}
+			if (cpysize < 70) { 
+				break; 
+			}
 			pos += 70;
 		}
 
@@ -1145,7 +1096,7 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 	BYTE* hexpacked = NULL; // must be freed!
 
 
-	errstream << "Values allocated. Pointer: " << (int)values << endl;
+	errstream << "Values allocated. Pointer: " << std::hex << values << endl;
 	errstream.flush();
 
 
@@ -1173,11 +1124,16 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 		char str[200];
 		memset(str, 0, 200);
 		WORD cpysize = 70;
-		if (pos + cpysize > strlen((char*)base64)) cpysize = strlen((char*)base64) - pos;
+		if (pos + cpysize > strlen((char*)base64)) {
+			cpysize = strlen((char*)base64) - pos;
+		}
 		memcpy(str, &base64[pos], cpysize);
-		if (strlen(str) > 0)
-			m_mapfile.sections["OverlayPack"].values[cLine] = str;
-		if (cpysize < 70) break;
+		if (strlen(str) > 0) {
+			m_mapfile.SetString("OverlayPack", cLine, str);
+		}
+		if (cpysize < 70) {
+			break;
+		}
 		pos += 70;
 	}
 
@@ -1223,11 +1179,16 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 		char str[200];
 		memset(str, 0, 200);
 		WORD cpysize = 70;
-		if (pos + cpysize > strlen((char*)base64)) cpysize = strlen((char*)base64) - pos;
+		if (pos + cpysize > strlen((char*)base64)) {
+			cpysize = strlen((char*)base64) - pos;
+		}
 		memcpy(str, &base64[pos], cpysize);
-		if (strlen(str) > 0)
-			m_mapfile.sections["OverlayDataPack"].values[cLine] = str;
-		if (cpysize < 70) break;
+		if (strlen(str) > 0) {
+			m_mapfile.SetString("OverlayDataPack", cLine, str);
+		}
+		if (cpysize < 70) {
+			break;
+		}
 		pos += 70;
 	}
 
@@ -1269,10 +1230,13 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 		int cpysize = 70;
 		if (pos + cpysize > base64len) cpysize = base64len - pos;
 		memcpy(str, &base64[pos], cpysize);
-		if (cpysize)
-			m_mapfile.sections["IsoMapPack5"].values[cLine] = str;
+		if (cpysize) {
+			m_mapfile.SetString("IsoMapPack5", cLine, str);
+		}
 
-		if (cpysize < 70) break;
+		if (cpysize < 70) {
+			break;
+		}
 		pos += 70;
 	}
 
@@ -1294,13 +1258,13 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 		int pitch;
 		((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_minimap.DrawMinimap(&lpDibData, biinfo, pitch);
 
-		m_mapfile.sections.erase("PreviewPack");
-		m_mapfile.sections["Preview"].values["Size"] = m_mapfile.sections["Map"].values["Size"];
+		m_mapfile.DeleteSection("PreviewPack");
+		m_mapfile.SetString("Preview", "Size",  m_mapfile.GetString("Map","Size"));
 		char c[50];
 		itoa(biinfo.bmiHeader.biWidth, c, 10);
-		m_mapfile.sections["Preview"].values["Size"] = SetParam(m_mapfile.sections["Preview"].values["Size"], 2, c);
+		m_mapfile.SetString("Preview", "Size", SetParam(m_mapfile.GetString("Preview", "Size"), 2, c));
 		itoa(biinfo.bmiHeader.biHeight, c, 10);
-		m_mapfile.sections["Preview"].values["Size"] = SetParam(m_mapfile.sections["Preview"].values["Size"], 3, c);
+		m_mapfile.SetString("Preview", "Size", SetParam(m_mapfile.GetString("Preview", "Size"), 3, c));
 
 		BYTE* lpRAW = new(BYTE[biinfo.bmiHeader.biWidth * biinfo.bmiHeader.biHeight * 3]);
 
@@ -1342,9 +1306,12 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 			WORD cpysize = 70;
 			if (pos + cpysize > strlen((char*)base64)) cpysize = strlen((char*)base64) - pos;
 			memcpy(str, &base64[pos], cpysize);
-			if (strlen(str) > 0)
-				m_mapfile.sections["PreviewPack"].values[cLine] = str;
-			if (cpysize < 70) break;
+			if (strlen(str) > 0) {
+				m_mapfile.SetString("PreviewPack", cLine, str);
+			}
+			if (cpysize < 70) {
+				break;
+			}
 			pos += 70;
 		}
 
@@ -1501,8 +1468,7 @@ void CMapData::UpdateInfantry(BOOL bSave)
 {
 	vector<INFANTRY>& iv = m_infantry;
 
-	if (bSave == FALSE)
-	{
+	if (bSave == FALSE) {
 		iv.clear();
 		iv.reserve(100);
 
@@ -1514,181 +1480,155 @@ void CMapData::UpdateInfantry(BOOL bSave)
 				fielddata[i].infantry[e] = -1;
 		}
 
+		for (auto const& [id, data] : m_mapfile.GetSection("Infantry")) {
+			int x = atoi(GetParam(data, 4));
+			int y = atoi(GetParam(data, 3));
+			int sp = atoi(GetParam(data, 5));
+			int pos = x + y * GetIsoSize();
 
-		if (m_mapfile.sections.find("Infantry") != m_mapfile.sections.end())
-		{
-			CIniFileSection& sec = m_mapfile.sections["Infantry"];
+			INFANTRY id;
+			id.deleted = 0;
+			id.house = GetParam(data, 0);
+			id.type = GetParam(data, 1);
+			id.strength = GetParam(data, 2);
+			id.y = GetParam(data, 3);
+			id.x = GetParam(data, 4);
+			id.pos = GetParam(data, 5);
+			id.action = GetParam(data, 6);
+			id.direction = GetParam(data, 7);
+			id.tag = GetParam(data, 8);
+			id.flag1 = GetParam(data, 9);
+			id.flag2 = GetParam(data, 10);
+			id.flag3 = GetParam(data, 11);
+			id.flag4 = GetParam(data, 12);
+			id.flag5 = GetParam(data, 13);
 
-			for (i = 0;i < sec.values.size();i++)
+			iv.push_back(id);
+
+			int spp = sp - 1;
+			if (spp < 0) spp = 0;
+
+			if (spp < SUBPOS_COUNT)
+				if (pos < fielddata_size)
+					fielddata[pos].infantry[spp] = iv.size() - 1;
+
+			Mini_UpdatePos(x, y, IsMultiplayer());
+
+
+
+			/*else
 			{
-				CString data = *sec.GetValue(i);
-
-				int x = atoi(GetParam(data, 4));
-				int y = atoi(GetParam(data, 3));
-				int sp = atoi(GetParam(data, 5));
-				int pos = x + y * GetIsoSize();
-
-				INFANTRY id;
-				id.deleted = 0;
-				id.house = GetParam(data, 0);
-				id.type = GetParam(data, 1);
-				id.strength = GetParam(data, 2);
-				id.y = GetParam(data, 3);
-				id.x = GetParam(data, 4);
-				id.pos = GetParam(data, 5);
-				id.action = GetParam(data, 6);
-				id.direction = GetParam(data, 7);
-				id.tag = GetParam(data, 8);
-				id.flag1 = GetParam(data, 9);
-				id.flag2 = GetParam(data, 10);
-				id.flag3 = GetParam(data, 11);
-				id.flag4 = GetParam(data, 12);
-				id.flag5 = GetParam(data, 13);
-
-				iv.push_back(id);
-
-				int spp = sp - 1;
-				if (spp < 0) spp = 0;
-
-				if (spp < SUBPOS_COUNT)
-					if (pos < fielddata_size)
-						fielddata[pos].infantry[spp] = iv.size() - 1;
-
-				Mini_UpdatePos(x, y, IsMultiplayer());
-
-
-
-				/*else
+				int e;
+				for(e=0;e<SUBPOS_COUNT;e++)
 				{
-					int e;
-					for(e=0;e<SUBPOS_COUNT;e++)
+					if(fielddata[pos].infantry[e]<0)
 					{
-						if(fielddata[pos].infantry[e]<0)
-						{
-							fielddata[pos].infantry[e]=i;
-							break;
-						}
+						fielddata[pos].infantry[e]=i;
+						break;
 					}
-				}*/
-			}
+				}
+			}*/
 		}
+		return;
 	}
-	else
-	{
-		m_mapfile.sections.erase("Infantry");
-		int i;
+	
+	// do save
+	
+	m_mapfile.DeleteSection("Infantry");
+	int i;
 
-		int count = 0;
-		for (i = 0;i < iv.size();i++)
-		{
-			INFANTRY& id = iv[i];
-			if (!id.deleted)
-			{
-				INFANTRY& infantry = id;
+	int count = 0;
+	for (i = 0; i < iv.size(); i++) {
+		INFANTRY& id = iv[i];
+		if (!id.deleted) {
+			INFANTRY& infantry = id;
 
-				CString value;
-				value = infantry.house + "," + infantry.type + "," + infantry.strength + "," + infantry.y +
-					"," + infantry.x + "," + infantry.pos + "," + infantry.action + "," + infantry.direction + "," +
-					infantry.tag + "," + infantry.flag1 + "," + infantry.flag2 + "," + infantry.flag3 + "," +
-					infantry.flag4 + "," + infantry.flag5;
+			CString value;
+			value = infantry.house + "," + infantry.type + "," + infantry.strength + "," + infantry.y +
+				"," + infantry.x + "," + infantry.pos + "," + infantry.action + "," + infantry.direction + "," +
+				infantry.tag + "," + infantry.flag1 + "," + infantry.flag2 + "," + infantry.flag3 + "," +
+				infantry.flag4 + "," + infantry.flag5;
 
-				char c[50];
-				itoa(count, c, 10);
+			char c[50];
+			itoa(count, c, 10);
 
-				m_mapfile.sections["Infantry"].values[c] = value;
+			m_mapfile.SetString("Infantry", c, value);
 
-				count++;
-			}
+			count++;
 		}
-
 	}
 }
 
 void CMapData::UpdateAircraft(BOOL bSave)
 {
-	if (bSave == FALSE)
-	{
-		int i;
-		for (i = 0;i < GetIsoSize() * GetIsoSize();i++)
-		{
-			fielddata[i].aircraft = -1;
+	if (bSave != FALSE) {
+		return;
+	}
+	int i;
+	for (i = 0; i < GetIsoSize() * GetIsoSize(); i++) {
+		fielddata[i].aircraft = -1;
+	}
+	auto const& sec = m_mapfile["Aircraft"];
+	for (i = 0; i < sec.Size(); i++) {
+		int x = atoi(GetParam(sec.Nth(i).second, 4));
+		int y = atoi(GetParam(sec.Nth(i).second, 3));
+		int pos = x + y * GetIsoSize();
+		if (pos < fielddata_size) {
+			fielddata[pos].aircraft = i;
 		}
-
-
-		if (m_mapfile.sections.find("Aircraft") != m_mapfile.sections.end())
-		{
-			CIniFileSection& sec = m_mapfile.sections["Aircraft"];
-
-			for (i = 0;i < sec.values.size();i++)
-			{
-				int x = atoi(GetParam(*sec.GetValue(i), 4));
-				int y = atoi(GetParam(*sec.GetValue(i), 3));
-				int pos = x + y * GetIsoSize();
-				if (pos < fielddata_size) fielddata[pos].aircraft = i;
-
-				Mini_UpdatePos(x, y, IsMultiplayer());
-			}
-		}
+		Mini_UpdatePos(x, y, IsMultiplayer());
 	}
 }
 
 void CMapData::UpdateStructures(BOOL bSave)
 {
-	if (bSave == FALSE)
-	{
-		int i;
-		for (i = 0;i < GetIsoSize() * GetIsoSize();i++)
-		{
-			fielddata[i].structure = -1;
-			fielddata[i].structuretype = -1;
-		}
+	if (bSave != FALSE) {
+		return;
+	}
+	for (auto i = 0; i < GetIsoSize() * GetIsoSize(); i++) {
+		fielddata[i].structure = -1;
+		fielddata[i].structuretype = -1;
+	}
 
-		m_structurepaint.clear();
+	m_structurepaint.clear();
 
-		if (m_mapfile.sections.find("Structures") != m_mapfile.sections.end())
-		{
-			CIniFileSection& sec = m_mapfile.sections["Structures"];
+	auto const& sec = m_mapfile["Structures"];
 
-			for (i = 0;i < sec.values.size();i++)
+	for (auto i = 0; i < sec.Size(); i++) {
+		STRUCTUREPAINT sp;
+		auto const& val = sec.Nth(i).second;
+		sp.col = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->GetColor(GetParam(val, 0));
+		sp.strength = atoi(GetParam(val, 2));
+		sp.upgrade1 = GetParam(val, 12);
+		sp.upgrade2 = GetParam(val, 13);
+		sp.upgrade3 = GetParam(val, 14);
+		sp.upradecount = atoi(GetParam(val, 10));
+		sp.x = atoi(GetParam(val, 4));
+		sp.y = atoi(GetParam(val, 3));
+		sp.direction = atoi(GetParam(val, 5));
+		sp.type = GetParam(val, 1);
+
+		TruncSpace(sp.upgrade1);
+		TruncSpace(sp.upgrade2);
+		TruncSpace(sp.upgrade3);
+
+		m_structurepaint.push_back(sp);
+
+		int x = atoi(GetParam(val, 4));
+		int y = atoi(GetParam(val, 3));
+		int d, e;
+		int bid = buildingid[GetParam(val, 1)];
+		for (d = 0; d < buildinginfo[bid].h; d++) {
+			for (e = 0; e < buildinginfo[bid].w; e++)
 			{
-				STRUCTUREPAINT sp;
-				sp.col = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->GetColor(GetParam(*sec.GetValue(i), 0));
-				sp.strength = atoi(GetParam(*sec.GetValue(i), 2));
-				sp.upgrade1 = GetParam(*sec.GetValue(i), 12);
-				sp.upgrade2 = GetParam(*sec.GetValue(i), 13);
-				sp.upgrade3 = GetParam(*sec.GetValue(i), 14);
-				sp.upradecount = atoi(GetParam(*sec.GetValue(i), 10));
-				sp.x = atoi(GetParam(*sec.GetValue(i), 4));
-				sp.y = atoi(GetParam(*sec.GetValue(i), 3));
-				sp.direction = atoi(GetParam(*sec.GetValue(i), 5));
-				sp.type = GetParam(*sec.GetValue(i), 1);
-
-				TruncSpace(sp.upgrade1);
-				TruncSpace(sp.upgrade2);
-				TruncSpace(sp.upgrade3);
-
-				m_structurepaint.push_back(sp);
-
-				int x = atoi(GetParam(*sec.GetValue(i), 4));
-				int y = atoi(GetParam(*sec.GetValue(i), 3));
-				int d, e;
-				int bid = buildingid[GetParam(*sec.GetValue(i), 1)];
-				for (d = 0;d < buildinginfo[bid].h;d++)
+				int pos = (x + d) + (y + e) * GetIsoSize();
+				if (pos < fielddata_size)
 				{
-					for (e = 0;e < buildinginfo[bid].w;e++)
-					{
-						int pos = (x + d) + (y + e) * GetIsoSize();
-						if (pos < fielddata_size)
-						{
-							fielddata[pos].structure = i;
-							fielddata[pos].structuretype = bid;
-						}
-
-						Mini_UpdatePos(x + d, y + e, IsMultiplayer());
-					}
+					fielddata[pos].structure = i;
+					fielddata[pos].structuretype = bid;
 				}
 
-
+				Mini_UpdatePos(x + d, y + e, IsMultiplayer());
 			}
 		}
 	}
@@ -1698,127 +1638,104 @@ void CMapData::UpdateTerrain(BOOL bSave, int num)
 {
 	vector<TERRAIN>& t = m_terrain;
 
-	if (bSave == FALSE)
-	{
-		if (m_mapfile.sections.find("Terrain") == m_mapfile.sections.end() || m_mapfile.sections["Terrain"].values.size() <= 0)
+	if (bSave == FALSE) {
+		if (m_mapfile["Terrain"].Size() <= 0) {
 			return;
+		}
+		if (num >= 0) {
+			return;
+		}
+		t.clear();
+		t.reserve(100);
 
-		if (num < 0)
-		{
-			t.clear();
-			t.reserve(100);
-
-			int i;
-			for (i = 0;i < GetIsoSize() * GetIsoSize();i++)
-			{
-				fielddata[i].terrain = -1;
-			}
-
-
-
-			CIniFileSection& sec = m_mapfile.sections["Terrain"];
-
-			for (i = 0;i < sec.values.size();i++)
-			{
-				int x, y;
-				PosToXY(*sec.GetValueName(i), &x, &y);
-
-				// check for valid coordinates ; MW May 17th 2001
-				ASSERT(x >= 0 && x < GetIsoSize());
-				ASSERT(y >= 0 && y < GetIsoSize());
-				if (x < 0 || x >= GetIsoSize() || y < 0 || y >= GetIsoSize())
-				{
-					// invalid coordinates - ignore in release
-				}
-				else
-				{
-					TERRAIN td;
-					td.deleted = 0;
-					td.type = *sec.GetValue(i);
-					td.x = x;
-					td.y = y;
-
-					t.push_back(td);
-
-					int pos = x + y * GetIsoSize();
-					fielddata[pos].terrain = i;
-					fielddata[pos].terraintype = terrainid[td.type];
-				}
-			}
-
-			m_mapfile.sections.erase("Terrain");
-
+		for (auto i = 0; i < GetIsoSize() * GetIsoSize(); i++) {
+			fielddata[i].terrain = -1;
 		}
 
+		auto const& sec = m_mapfile["Terrain"];
+
+		for (auto i = 0; i < sec.Size(); i++) {
+			int x, y;
+			PosToXY(*sec.GetValueName(i), &x, &y);
+
+			// check for valid coordinates ; MW May 17th 2001
+			ASSERT(x >= 0 && x < GetIsoSize());
+			ASSERT(y >= 0 && y < GetIsoSize());
+			if (x < 0 || x >= GetIsoSize() || y < 0 || y >= GetIsoSize()) {
+				// invalid coordinates - ignore in release
+				continue;
+			}
+			TERRAIN td;
+			td.deleted = 0;
+			td.type = sec.Nth(i).second;
+			td.x = x;
+			td.y = y;
+
+			t.push_back(td);
+
+			int pos = x + y * GetIsoSize();
+			fielddata[pos].terrain = i;
+			fielddata[pos].terraintype = terrainid[td.type];
+		}
+		m_mapfile.DeleteSection("Terrain");
+		return;
 	}
-	else
+
+
+	//if(num<0)
 	{
+		//if(m_mapfile.sections.find("Terrain")!=m_mapfile.sections.end()) MessageBox(0,"Reupdate!","",0);
+		m_mapfile.DeleteSection("Terrain");
 
-		//if(num<0)
-		{
-			//if(m_mapfile.sections.find("Terrain")!=m_mapfile.sections.end()) MessageBox(0,"Reupdate!","",0);
-			m_mapfile.sections.erase("Terrain");
-			int i;
+		for (auto i = 0; i < t.size(); i++) {
+			TERRAIN& td = t[i];
+			if (!td.deleted) {
+				char j1[15];
+				char k1[15];
 
-			for (i = 0;i < t.size();i++)
-			{
-				TERRAIN& td = t[i];
-				if (!td.deleted)
+				int x, y;
+				x = td.x;
+				y = td.y;
+
+				itoa(y, j1, 10);
+				if (strlen(j1) < 3)
 				{
-					char j1[15];
-					char k1[15];
-
-					int x, y;
-					x = td.x;
-					y = td.y;
-
-					itoa(y, j1, 10);
-					if (strlen(j1) < 3)
-					{
-						strcpy_safe(j1 + 1, j1);
-						j1[0] = '0';
-					}
-					if (strlen(j1) < 3)
-					{
-						strcpy_safe(j1 + 1, j1);
-						j1[0] = '0';
-					}
-					itoa(x, k1, 10);
-					strcat(k1, j1);
-
-
-					m_mapfile.sections["Terrain"].values[k1] = td.type;
+					strcpy_safe(j1 + 1, j1);
+					j1[0] = '0';
 				}
+				if (strlen(j1) < 3)
+				{
+					strcpy_safe(j1 + 1, j1);
+					j1[0] = '0';
+				}
+				itoa(x, k1, 10);
+				strcat(k1, j1);
+
+
+				m_mapfile.SetString("Terrain", k1, td.type);
 			}
 		}
-
 	}
 }
 
 void CMapData::UpdateUnits(BOOL bSave)
 {
-	if (bSave == FALSE)
-	{
+	if (bSave == FALSE) {
 		int i;
-		for (i = 0;i < GetIsoSize() * GetIsoSize();i++)
-		{
+		for (i = 0;i < GetIsoSize() * GetIsoSize();i++) {
 			fielddata[i].unit = -1;
 		}
 
+		auto const& sec = m_mapfile["Units"];
 
-		if (m_mapfile.sections.find("Units") != m_mapfile.sections.end())
-		{
-			CIniFileSection& sec = m_mapfile.sections["Units"];
-
-			for (i = 0;i < sec.values.size();i++)
-			{
-				int x = atoi(GetParam(*sec.GetValue(i), 4));
-				int y = atoi(GetParam(*sec.GetValue(i), 3));
-				int pos = x + y * GetIsoSize();
-				if (pos < fielddata_size) fielddata[pos].unit = i;
-
-				Mini_UpdatePos(x, y, IsMultiplayer());
+		for (i = 0; i < sec.Size(); i++) {
+			int x = atoi(GetParam(sec.Nth(i).second, 4));
+			int y = atoi(GetParam(sec.Nth(i).second, 3));
+			int pos = x + y * GetIsoSize();
+			if (pos < fielddata_size) {
+				fielddata[pos].unit = i;
 			}
+			Mini_UpdatePos(x, y, IsMultiplayer());
 		}
 	}
 
@@ -1826,89 +1743,69 @@ void CMapData::UpdateUnits(BOOL bSave)
 
 void CMapData::UpdateWaypoints(BOOL bSave)
 {
-	if (bSave == FALSE)
-	{
-		int i;
-		for (i = 0;i < GetIsoSize() * GetIsoSize();i++)
-		{
-			fielddata[i].waypoint = -1;
-		}
-
-
-		if (m_mapfile.sections.find("Waypoints") != m_mapfile.sections.end())
-		{
-			CIniFileSection& sec = m_mapfile.sections["Waypoints"];
-
-			for (i = 0;i < sec.values.size();i++)
-			{
-				int x, y;
-				PosToXY(*sec.GetValue(i), &x, &y);
-
-				int pos = x + y * GetIsoSize();
-				if (pos < 0 || pos >= fielddata_size) continue;
-				fielddata[pos].waypoint = i;
-
-				int k, l;
-				for (k = -1;k < 2;k++)
-					for (l = -1;l < 2;l++)
-						Mini_UpdatePos(x + k, y + l, IsMultiplayer());
-			}
-		}
+	if (bSave != FALSE) {
+		return;
+	}
+	int i;
+	for (i = 0; i < GetIsoSize() * GetIsoSize(); i++) {
+		fielddata[i].waypoint = -1;
 	}
 
+	auto const& sec = m_mapfile["Waypoints"];
+
+	for (i = 0; i < sec.Size(); i++) {
+		int x, y;
+		PosToXY(sec.Nth(i).second, &x, &y);
+
+		int pos = x + y * GetIsoSize();
+		if (pos < 0 || pos >= fielddata_size) continue;
+		fielddata[pos].waypoint = i;
+
+		int k, l;
+		for (k = -1; k < 2; k++)
+			for (l = -1; l < 2; l++)
+				Mini_UpdatePos(x + k, y + l, IsMultiplayer());
+	}
 }
 
 void CMapData::UpdateNodes(BOOL bSave)
 {
-	if (bSave == FALSE)
-	{
-		int i;
+	if (bSave != FALSE) {
+		return;
+	}
 
-		for (i = 0;i < GetIsoSize() * GetIsoSize();i++)
-		{
-			fielddata[i].node.index = -1;
-			fielddata[i].node.type = -1;
-			fielddata[i].node.house = "";
-		}
+	for (auto i = 0; i < GetIsoSize() * GetIsoSize(); i++) {
+		fielddata[i].node.index = -1;
+		fielddata[i].node.type = -1;
+		fielddata[i].node.house = "";
+	}
 
-		if (m_mapfile.sections.find(MAPHOUSES) != m_mapfile.sections.end())
-		{
+	for (auto const& [seq, id] : m_mapfile[MAPHOUSES]) {
+		auto const& sec = m_mapfile.GetSection(id);
+		int nodeCount = sec.GetInteger("NodeCount");
+		for (auto idx = 0; idx < nodeCount; idx++) {
+			CString nodeName;
+			GetNodeName(nodeName, idx);
+			auto const& nodeVal = sec.GetString(nodeName);
+			CString type, sx, sy;
+			type = GetParam(nodeVal, 0);
+			sy = GetParam(nodeVal, 1);
+			sx = GetParam(nodeVal, 2);
 
-			for (i = 0;i < m_mapfile.sections[MAPHOUSES].values.size();i++)
-			{
-				CIniFileSection& sec = m_mapfile.sections[*m_mapfile.sections[MAPHOUSES].GetValue(i)];
-				int c = atoi(sec.values["NodeCount"]);
-
-				int e;
-				for (e = 0;e < c;e++)
-				{
-					CString p;
-					GetNodeName(p, e);
-
-					CString type, sx, sy;
-					type = GetParam(sec.values[p], 0);
-					sy = GetParam(sec.values[p], 1);
-					sx = GetParam(sec.values[p], 2);
-
-					int x = atoi(sx);
-					int y = atoi(sy);
-					int bid = buildingid[type];
-					int d, f;
-					for (d = 0;d < buildinginfo[bid].h;d++)
-					{
-						for (f = 0;f < buildinginfo[bid].w;f++)
-						{
-							int pos = x + d + (y + f) * GetIsoSize();
-							fielddata[pos].node.type = buildingid[type];
-							fielddata[pos].node.house = *m_mapfile.sections[MAPHOUSES].GetValue(i);
-							fielddata[pos].node.index = e;
-						}
-					}
+			int x = atoi(sx);
+			int y = atoi(sy);
+			int bid = buildingid[type];
+			int d, f;
+			for (d = 0; d < buildinginfo[bid].h; d++) {
+				for (f = 0; f < buildinginfo[bid].w; f++) {
+					int pos = x + d + (y + f) * GetIsoSize();
+					fielddata[pos].node.type = buildingid[type];
+					fielddata[pos].node.house = id;
+					fielddata[pos].node.index = idx;
 				}
 			}
 		}
 	}
-
 }
 
 void CMapData::UpdateOverlay(BOOL bSave)
@@ -1949,27 +1846,23 @@ void CMapData::UpdateOverlay(BOOL bSave)
 
 void CMapData::UpdateCelltags(BOOL bSave)
 {
-	if (bSave == FALSE)
-	{
-		int i;
-		for (i = 0;i < GetIsoSize() * GetIsoSize();i++)
-		{
-			fielddata[i].celltag = -1;
-		}
+	if (bSave != FALSE) {
+		return;
+	}
+	int i;
+	for (i = 0; i < GetIsoSize() * GetIsoSize(); i++) {
+		fielddata[i].celltag = -1;
+	}
 
+	auto const& sec = m_mapfile["CellTags"];
 
-		if (m_mapfile.sections.find("CellTags") != m_mapfile.sections.end())
-		{
-			CIniFileSection& sec = m_mapfile.sections["CellTags"];
+	for (i = 0; i < sec.Size(); i++) {
+		int x, y;
+		PosToXY(sec.Nth(i).first, &x, &y);
 
-			for (i = 0;i < sec.values.size();i++)
-			{
-				int x, y;
-				PosToXY(*sec.GetValueName(i), &x, &y);
-
-				int pos = x + y * GetIsoSize();
-				if (pos < fielddata_size) fielddata[pos].celltag = i;
-			}
+		int pos = x + y * GetIsoSize();
+		if (pos < fielddata_size) {
+			fielddata[pos].celltag = i;
 		}
 	}
 }
@@ -2038,10 +1931,14 @@ void CMapData::DeleteWaypoint(DWORD dwIndex)
 	int x = pos % m_IsoSize;
 	int y = pos / m_IsoSize;
 
+	auto const pSec = m_mapfile.TryGetSection("Waypoints");
+	ASSERT(pSec != nullptr);
 
-
-	m_mapfile.sections["Waypoints"].values.erase(*m_mapfile.sections["Waypoints"].GetValueName(dwIndex));
-	if (!m_noAutoObjectUpdate) UpdateWaypoints(FALSE);
+	pSec->RemoveAt(dwIndex);
+	
+	if (!m_noAutoObjectUpdate) {
+		UpdateWaypoints(FALSE);
+	}
 
 	int k, l;
 	for (k = -1;k < 2;k++)
@@ -2051,45 +1948,60 @@ void CMapData::DeleteWaypoint(DWORD dwIndex)
 
 void CMapData::DeleteCelltag(DWORD dwIndex)
 {
-	if (dwIndex >= GetCelltagCount()) return;
+	if (dwIndex >= GetCelltagCount()) {
+		return;
+	}
 
-	m_mapfile.sections["CellTags"].values.erase(*m_mapfile.sections["CellTags"].GetValueName(dwIndex));
-	if (!m_noAutoObjectUpdate) UpdateCelltags(FALSE);
+	auto const pSec = m_mapfile.TryGetSection("CellTags");
+	ASSERT(pSec != nullptr);
+	pSec->RemoveAt(dwIndex);
+
+	if (!m_noAutoObjectUpdate) {
+		UpdateCelltags(FALSE);
+	}
 }
 
 void CMapData::DeleteUnit(DWORD dwIndex)
 {
 	if (dwIndex >= GetUnitCount()) return;
 
-	CIniFileSection& sec = m_mapfile.sections["Units"];
-	int x = atoi(GetParam(*sec.GetValue(dwIndex), 4));
-	int y = atoi(GetParam(*sec.GetValue(dwIndex), 3));
+	auto const& pSec = m_mapfile.TryGetSection("Units");
+	ASSERT(pSec != nullptr);
+	int x = atoi(GetParam(pSec->Nth(dwIndex).second, 4));
+	int y = atoi(GetParam(pSec->Nth(dwIndex).second, 3));
 
+	pSec->RemoveAt(dwIndex);
 
-	m_mapfile.sections["Units"].values.erase(*m_mapfile.sections["Units"].GetValueName(dwIndex));
-	if (!m_noAutoObjectUpdate) UpdateUnits(FALSE);
+	if (!m_noAutoObjectUpdate) {
+		UpdateUnits(FALSE);
+	}
 
 	Mini_UpdatePos(x, y, IsMultiplayer());
 }
 
 void CMapData::DeleteStructure(DWORD dwIndex)
 {
-	if (dwIndex >= GetStructureCount()) return;
+	if (dwIndex >= GetStructureCount()) {
+		return;
+	}
 
-	CIniFileSection& sec = m_mapfile.sections["Structures"];
-	int x = atoi(GetParam(*sec.GetValue(dwIndex), 4));
-	int y = atoi(GetParam(*sec.GetValue(dwIndex), 3));
-	CString type = GetParam(*sec.GetValue(dwIndex), 1);
+	auto const& pSec = m_mapfile.TryGetSection("Structures");
+	ASSERT(pSec != nullptr);
+	auto const& val = pSec->Nth(dwIndex).second;
+	int x = atoi(GetParam(val, 4));
+	int y = atoi(GetParam(val, 3));
+	CString type = GetParam(val, 1);
 
-	m_mapfile.sections["Structures"].values.erase(*m_mapfile.sections["Structures"].GetValueName(dwIndex));
-	if (!m_noAutoObjectUpdate) UpdateStructures(FALSE);
+	pSec->RemoveAt(dwIndex);
+
+	if (!m_noAutoObjectUpdate) {
+		UpdateStructures(FALSE);
+	}
 
 	int d, e;
 	int bid = buildingid[type];
-	for (d = 0;d < buildinginfo[bid].h;d++)
-	{
-		for (e = 0;e < buildinginfo[bid].w;e++)
-		{
+	for (d = 0;d < buildinginfo[bid].h;d++) {
+		for (e = 0;e < buildinginfo[bid].w;e++) {
 			int pos = (x + d) + (y + e) * GetIsoSize();
 
 			Mini_UpdatePos(x + d, y + e, IsMultiplayer());
@@ -2101,13 +2013,17 @@ void CMapData::DeleteAircraft(DWORD dwIndex)
 {
 	if (dwIndex >= GetAircraftCount()) return;
 
-	CIniFileSection& sec = m_mapfile.sections["Aircraft"];
-	int x = atoi(GetParam(*sec.GetValue(dwIndex), 4));
-	int y = atoi(GetParam(*sec.GetValue(dwIndex), 3));
+	auto const& pSec = m_mapfile.TryGetSection("Aircraft");
+	ASSERT(pSec != nullptr);
+	auto const& val = pSec->Nth(dwIndex).second;
+	int x = atoi(GetParam(val, 4));
+	int y = atoi(GetParam(val, 3));
 
+	pSec->RemoveAt(dwIndex);
 
-	m_mapfile.sections["Aircraft"].values.erase(*m_mapfile.sections["Aircraft"].GetValueName(dwIndex));
-	if (!m_noAutoObjectUpdate) UpdateAircraft(FALSE);
+	if (!m_noAutoObjectUpdate) {
+		UpdateAircraft(FALSE);
+	}
 
 	Mini_UpdatePos(x, y, IsMultiplayer());
 }
@@ -2141,23 +2057,23 @@ void CMapData::DeleteTerrain(DWORD dwIndex)
 
 void CMapData::DeleteNode(LPCTSTR lpHouse, DWORD dwIndex)
 {
-	CString p; // p is last node
-	GetNodeName(p, atoi(m_mapfile.sections[lpHouse].values["NodeCount"]) - 1);
+	CString nodeName; // p is last node
+	auto const nodeCount = m_mapfile.GetInteger(lpHouse, "NodeCount");
+	GetNodeName(nodeName, nodeCount - 1);
 
-	char c[50];
-	itoa(atoi(m_mapfile.sections[lpHouse].values["NodeCount"]) - 1, c, 10);
-
-	int i;
-	for (i = dwIndex;i < atoi(m_mapfile.sections[lpHouse].values["NodeCount"]) - 1;i++)
-	{
-		CString d1, d2;
-		GetNodeName(d1, i);
-		GetNodeName(d2, i + 1);
-		m_mapfile.sections[lpHouse].values[d1] = m_mapfile.sections[lpHouse].values[d2];
+	for (auto i = dwIndex; i < nodeCount - 1; i++) {
+		CString prevNodeName, nextNodeName;
+		GetNodeName(prevNodeName, i);
+		GetNodeName(nextNodeName, i + 1);
+		m_mapfile.SetString(lpHouse, prevNodeName, m_mapfile.GetString(lpHouse, nextNodeName));
 	}
 
-	m_mapfile.sections[lpHouse].values.erase(p);
-	m_mapfile.sections[lpHouse].values["NodeCount"] = c;
+	auto const& pSec = m_mapfile.TryGetSection(lpHouse);
+	pSec->RemoveAt(dwIndex);
+
+	char nodeCountStr[50];
+	itoa(nodeCount - 1, nodeCountStr, 10);
+	m_mapfile.SetString(lpHouse, "NodeCount", nodeCountStr);
 
 	UpdateNodes(FALSE);
 }
@@ -2192,8 +2108,10 @@ BOOL CMapData::AddWaypoint(CString lpID, DWORD dwPos)
 	//MessageBox(0,k,"",0);
 
 
-	m_mapfile.sections["Waypoints"].values[id] = k;
-	if (!m_noAutoObjectUpdate) UpdateWaypoints(FALSE);
+	m_mapfile.SetString("Waypoints", id, k);
+	if (!m_noAutoObjectUpdate) {
+		UpdateWaypoints(FALSE);
+	}
 
 	return TRUE;
 }
@@ -2202,11 +2120,12 @@ BOOL CMapData::AddWaypoint(CString lpID, DWORD dwPos)
 
 void CMapData::GetStructureData(DWORD dwIndex, STRUCTURE* lpStructure) const
 {	
-	const auto section = m_mapfile.GetSection("Structures");
-	if (!section || dwIndex >= section->values.size())
+	auto const& section = m_mapfile.GetSection("Structures");
+	if (dwIndex >= section.Size()) {
 		return;
+	}
 
-	CString data = *section->GetValue(dwIndex);
+	auto const& data = section.Nth(dwIndex).second;
 
 	lpStructure->house = GetParam(data, 0);
 	lpStructure->type = GetParam(data, 1);
@@ -2230,11 +2149,11 @@ void CMapData::GetStructureData(DWORD dwIndex, STRUCTURE* lpStructure) const
 
 void CMapData::GetStdStructureData(DWORD dwIndex, STDOBJECTDATA* lpStdStructure) const
 {
-	const auto section = m_mapfile.GetSection("Structures");
-	if (!section || dwIndex >= section->values.size())
+	auto const& section = m_mapfile.GetSection("Structures");
+	if (dwIndex >= section.Size()) {
 		return;
-
-	CString data = *section->GetValue(dwIndex);
+	}
+	auto const& data = section.Nth(dwIndex).second;
 
 	lpStdStructure->house = GetParam(data, 0);
 	lpStdStructure->type = GetParam(data, 1);
@@ -2255,32 +2174,28 @@ BOOL CMapData::AddNode(NODE* lpNode, WORD dwPos)
 		node.x.Format("%d", dwPos % Map->GetIsoSize());
 		node.y.Format("%d", dwPos / Map->GetIsoSize());
 		node.house = GetHouseID(0);
-		node.type = *rules.sections["BuildingTypes"].GetValue(0);
+		node.type = rules["BuildingTypes"].Nth(0).second;
 	}
 
-	if (m_mapfile.sections.find(HOUSES) == m_mapfile.sections.end() || m_mapfile.sections[HOUSES].values.size() == 0)
-	{
+	if (m_mapfile.GetSection(HOUSES).Size() == 0) {
 		return FALSE;
 	}
 
+	auto nodeCount = m_mapfile.GetInteger(node.house, "NodeCount");
 
-	int c = atoi(m_mapfile.sections[(LPCTSTR)node.house].values["NodeCount"]);
+	nodeCount++;
+	char newNodeCountStr[50];
+	itoa(nodeCount, newNodeCountStr, 10);
+	m_mapfile.SetString(node.house, "NodeCount", newNodeCountStr);
 
-	c++;
-	char sc[50];
-	itoa(c, sc, 10);
-	m_mapfile.sections[(LPCTSTR)node.house].values["NodeCount"] = sc;
-
-	c--;
+	nodeCount--;
 	CString p;
-	GetNodeName(p, c);
+	GetNodeName(p, nodeCount);
 
+	auto&& nodeRecord = node.type
+		+ "," + node.y + "," + node.x;
 
-	m_mapfile.sections[(LPCTSTR)node.house].values[p] = node.type;
-	m_mapfile.sections[(LPCTSTR)node.house].values[p] += ",";
-	m_mapfile.sections[(LPCTSTR)node.house].values[p] += node.y;
-	m_mapfile.sections[(LPCTSTR)node.house].values[p] += ",";
-	m_mapfile.sections[(LPCTSTR)node.house].values[p] += node.x;
+	m_mapfile.SetString(node.house, p, std::move(nodeRecord));
 
 	UpdateNodes(FALSE);
 
@@ -2483,10 +2398,8 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 
 	CString id = GetFree("Structures");
 
-	if (suggestedID.GetLength() > 0)
-	{
-		if (m_mapfile.sections["Structures"].values.find(suggestedID) == m_mapfile.sections["Structures"].values.end())
-			id = suggestedID;
+	if (!suggestedID.IsEmpty() && !m_mapfile["Structures"].Exists(suggestedID)) {
+		id = suggestedID;
 	}
 
 	CString value;
@@ -2495,9 +2408,11 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 		structure.flag2 + "," + structure.energy + "," + structure.upgradecount + "," + structure.spotlight + ","
 		+ structure.upgrade1 + "," + structure.upgrade2 + "," + structure.upgrade3 + "," + structure.flag3 + "," + structure.flag4;
 
-	m_mapfile.sections["Structures"].values[id] = (LPCTSTR)value;
+	m_mapfile.SetString("Structures", id, value);
 
-	if (!m_noAutoObjectUpdate) UpdateStructures(FALSE);
+	if (!m_noAutoObjectUpdate) {
+		UpdateStructures(FALSE);
+	}
 
 	return TRUE;
 }
@@ -2510,60 +2425,32 @@ void CMapData::InitializeUnitTypes()
 	terrainid.clear();
 
 	int i;
-	m_overlayCredits[OverlayCredits_Riparius] = atoi(m_mapfile.GetValueByName("Riparius", "Value", rules.sections["Riparius"].AccessValueByName("Value")));
-	m_overlayCredits[OverlayCredits_Cruentus] = atoi(m_mapfile.GetValueByName("Cruentus", "Value", rules.sections["Cruentus"].AccessValueByName("Value"))); 
-	m_overlayCredits[OverlayCredits_Vinifera] = atoi(m_mapfile.GetValueByName("Vinifera", "Value", rules.sections["Vinifera"].AccessValueByName("Value")));
-	m_overlayCredits[OverlayCredits_Aboreus] = atoi(m_mapfile.GetValueByName("Aboreus", "Value", rules.sections["Aboreus"].AccessValueByName("Value")));
-	for (i = 0;i < rules.sections["BuildingTypes"].values.size();i++)
-	{
-		CString type = *rules.sections["BuildingTypes"].GetValue(i);
+	m_overlayCredits[OverlayCredits_Riparius] = m_mapfile.GetInteger("Riparius", "Value");
+	m_overlayCredits[OverlayCredits_Cruentus] = m_mapfile.GetInteger("Cruentus", "Value");
+	m_overlayCredits[OverlayCredits_Vinifera] = m_mapfile.GetInteger("Vinifera", "Value");
+	m_overlayCredits[OverlayCredits_Aboreus] = m_mapfile.GetInteger("Aboreus", "Value");
 
-		int n = GetBuildingNumber(type);
-		buildingid[type] = n;
+	for (auto const& [seq, typeId] : rules["BuildingTypes"]) {
+		buildingid[typeId] = GetBuildingNumber(typeId);
+	}
+	for (auto const& [seq, typeId] : m_mapfile["BuildingTypes"]) {
+		buildingid[typeId] = GetBuildingNumber(typeId);
 	}
 
-	for (i = 0;i < m_mapfile.sections["BuildingTypes"].values.size();i++)
-	{
-		CString type = *m_mapfile.sections["BuildingTypes"].GetValue(i);
-
-		int n = GetBuildingNumber(type);
-		buildingid[type] = n;
+	for (auto const& [seq, typeId] : rules["TerrainTypes"]) {
+		terrainid[typeId] = GetTerrainNumber(typeId);
 	}
-
-	for (i = 0;i < rules.sections["TerrainTypes"].values.size();i++)
-	{
-		CString type = *rules.sections["TerrainTypes"].GetValue(i);
-
-		int n = GetTerrainNumber(type);
-		terrainid[type] = n;
-	}
-
-	for (i = 0;i < m_mapfile.sections["TerrainTypes"].values.size();i++)
-	{
-		CString type = *m_mapfile.sections["TerrainTypes"].GetValue(i);
-
-		int n = GetTerrainNumber(type);
-		terrainid[type] = n;
+	for (auto const& [seq, typeId] : m_mapfile["TerrainTypes"]) {
+		terrainid[typeId] = GetTerrainNumber(typeId);
 	}
 
 #ifdef SMUDGE_SUPP
-
-	for (i = 0;i < rules.sections["SmudgeTypes"].values.size();i++)
-	{
-		CString type = *rules.sections["SmudgeTypes"].GetValue(i);
-
-		int n = GetSmudgeNumber(type);
-		smudgeid[type] = n;
+	for (auto const& [seq, typeId] : rules["SmudgeTypes"]) {
+		smudgeid[typeId] = GetSmudgeNumber(typeId);
 	}
-
-	for (i = 0;i < m_mapfile.sections["SmudgeTypes"].values.size();i++)
-	{
-		CString type = *m_mapfile.sections["SmudgeTypes"].GetValue(i);
-
-		int n = GetSmudgeNumber(type);
-		smudgeid[type] = n;
+	for (auto const& [seq, typeId] : m_mapfile["SmudgeTypes"]) {
+		smudgeid[typeId] = GetSmudgeNumber(typeId);
 	}
-
 #endif
 
 
@@ -2649,11 +2536,12 @@ void CMapData::GetInfantryData(DWORD dwIndex, INFANTRY* lpInfantry) const
 
 void CMapData::GetUnitData(DWORD dwIndex, UNIT* lpUnit) const
 {
-	const auto section = m_mapfile.GetSection("Units");
-	if (!section || dwIndex >= section->values.size())
+	auto const& section = m_mapfile.GetSection("Units");
+	if (dwIndex >= section.Size()) {
 		return;
+	}
 
-	CString data = *section->GetValue(dwIndex);
+	auto const& data = section.Nth(dwIndex).second;
 
 	lpUnit->house = GetParam(data, 0);
 	lpUnit->type = GetParam(data, 1);
@@ -2673,11 +2561,12 @@ void CMapData::GetUnitData(DWORD dwIndex, UNIT* lpUnit) const
 
 void CMapData::GetAircraftData(DWORD dwIndex, AIRCRAFT* lpAircraft) const
 {
-	const auto section = m_mapfile.GetSection("Aircraft");
-	if (!section || dwIndex >= section->values.size())
+	auto const& section = m_mapfile.GetSection("Aircraft");
+	if (dwIndex >= section.Size()) {
 		return;
+	}
 
-	CString data = *section->GetValue(dwIndex);
+	auto const& data = section.Nth(dwIndex).second;
 
 	lpAircraft->house = GetParam(data, 0);
 	lpAircraft->type = GetParam(data, 1);
@@ -2713,7 +2602,7 @@ BOOL CMapData::AddCelltag(LPCTSTR lpTag, DWORD dwPos)
 	itoa(dwPos % GetIsoSize(), k, 10);
 	strcat(k, j);
 
-	m_mapfile.sections["CellTags"].values[k] = lpTag;
+	m_mapfile.SetString("CellTags", k, lpTag);
 
 	if (!m_noAutoObjectUpdate) UpdateCelltags(FALSE);
 	return TRUE;
@@ -2721,17 +2610,16 @@ BOOL CMapData::AddCelltag(LPCTSTR lpTag, DWORD dwPos)
 
 void CMapData::GetCelltagData(DWORD dwIndex, CString* lpTag, DWORD* lpdwPos) const
 {
-	const auto section = m_mapfile.GetSection("CellTags");
-	if (!section || dwIndex >= section->values.size())
+	auto const& section = m_mapfile.GetSection("CellTags");
+	if (dwIndex >= section.Size()) {
 		return;
+	}
+
+	auto const& [pos, tag] = section.Nth(dwIndex);
 
 	int x, y;
-	CString pos;
-
-	pos = *section->GetValueName(dwIndex);
 	PosToXY(pos, &x, &y);
 
-	const auto tag = section->GetValueByName(pos);
 	*lpTag = tag;
 	*lpdwPos = x + y * GetIsoSize();
 }
@@ -2766,10 +2654,8 @@ BOOL CMapData::AddAircraft(AIRCRAFT* lpAircraft, LPCTSTR lpType, LPCTSTR lpHouse
 
 	CString id = GetFree("Aircraft");
 
-	if (suggestedID.GetLength() > 0)
-	{
-		if (m_mapfile.sections["Aircraft"].values.find(suggestedID) == m_mapfile.sections["Aircraft"].values.end())
-			id = suggestedID;
+	if (!suggestedID.IsEmpty() && !m_mapfile["Aircraft"].Exists(suggestedID)) {
+		id = suggestedID;
 	}
 
 	CString value;
@@ -2777,9 +2663,11 @@ BOOL CMapData::AddAircraft(AIRCRAFT* lpAircraft, LPCTSTR lpType, LPCTSTR lpHouse
 		aircraft.x + "," + aircraft.direction + "," + aircraft.action + "," + aircraft.tag + ","
 		+ aircraft.flag1 + "," + aircraft.flag2 + "," + aircraft.flag3 + "," + aircraft.flag4;
 
-	m_mapfile.sections["Aircraft"].values[id] = value;
+	m_mapfile.SetString("Aircraft", id, value);
 
-	if (!m_noAutoObjectUpdate) UpdateAircraft(FALSE);
+	if (!m_noAutoObjectUpdate) {
+		UpdateAircraft(FALSE);
+	}
 
 	return TRUE;
 }
@@ -2817,10 +2705,8 @@ BOOL CMapData::AddUnit(UNIT* lpUnit, LPCTSTR lpType, LPCTSTR lpHouse, DWORD dwPo
 
 	CString id = GetFree("Units");
 
-	if (suggestedID.GetLength() > 0)
-	{
-		if (m_mapfile.sections["Units"].values.find(suggestedID) == m_mapfile.sections["Units"].values.end())
-			id = suggestedID;
+	if (!suggestedID.IsEmpty() && !m_mapfile["Units"].Exists(suggestedID)) {
+		id = suggestedID;
 	}
 
 	CString value;
@@ -2828,9 +2714,11 @@ BOOL CMapData::AddUnit(UNIT* lpUnit, LPCTSTR lpType, LPCTSTR lpHouse, DWORD dwPo
 		unit.x + "," + unit.direction + "," + unit.action + "," + unit.tag + ","
 		+ unit.flag1 + "," + unit.flag2 + "," + unit.flag3 + "," + unit.flag4 + "," + unit.flag5 + "," + unit.flag6;
 
-	m_mapfile.sections["Units"].values[id] = value;
+	m_mapfile.SetString("Units", id, value);
 
-	if (!m_noAutoObjectUpdate) UpdateUnits(FALSE);
+	if (!m_noAutoObjectUpdate) {
+		UpdateUnits(FALSE);
+	}
 	return TRUE;
 }
 
@@ -2966,30 +2854,40 @@ BOOL CMapData::IsGroundObjectAt(DWORD dwPos) const
 
 void CMapData::GetWaypointData(DWORD dwIndex, CString* lpID, DWORD* lpdwPos) const
 {
-	if (lpID) *lpID = "";
-	if (lpdwPos) *lpdwPos = 0;
+	if (lpID) {
+		*lpID = "";
+	}
+	if (lpdwPos) {
+		*lpdwPos = 0;
+	}
 
-	const auto section = m_mapfile.GetSection("Waypoints");
-	if (!section || dwIndex >= section->values.size())
+	auto const& section = m_mapfile.GetSection("Waypoints");
+	if (dwIndex >= section.Size()) {
 		return;
+	}
 
-	CString data = *section->GetValue(dwIndex);
+	auto const& [id, data] = section.Nth(dwIndex);
 
 	int x, y;
 	PosToXY(data, &x, &y);
 
-	if (lpID) *lpID = *section->GetValueName(dwIndex);
-	if (lpdwPos) *lpdwPos = x + y * GetIsoSize();
+	if (lpID) {
+		*lpID = id;
+	}
+	if (lpdwPos) {
+		*lpdwPos = x + y * GetIsoSize();
+	}
 
 }
 
 void CMapData::GetStdAircraftData(DWORD dwIndex, STDOBJECTDATA* lpStdAircraft) const
 {
-	const auto section = m_mapfile.GetSection("Aircraft");
-	if (!section || dwIndex >= section->values.size())
+	auto const& section = m_mapfile.GetSection("Aircraft");
+	if (dwIndex >= section.Size()) {
 		return;
+	}
 
-	CString data = *section->GetValue(dwIndex);
+	auto const& data = section.Nth(dwIndex).second;
 
 	lpStdAircraft->house = GetParam(data, 0);
 	lpStdAircraft->type = GetParam(data, 1);
@@ -3000,11 +2898,12 @@ void CMapData::GetStdAircraftData(DWORD dwIndex, STDOBJECTDATA* lpStdAircraft) c
 
 void CMapData::GetStdUnitData(DWORD dwIndex, STDOBJECTDATA* lpStdUnit) const
 {
-	const auto section = m_mapfile.GetSection("Units");
-	if (!section || dwIndex >= section->values.size())
+	auto const& section = m_mapfile.GetSection("Units");
+	if (dwIndex >= section.Size()) {
 		return;
+	}
 
-	CString data = *section->GetValue(dwIndex);
+	auto const& data = section.Nth(dwIndex).second;
 
 	lpStdUnit->house = GetParam(data, 0);
 	lpStdUnit->type = GetParam(data, 1);
@@ -3020,20 +2919,17 @@ DWORD CMapData::GetInfantryCount() const
 
 DWORD CMapData::GetUnitCount() const
 {
-	const auto section = m_mapfile.GetSection("Units");
-	return section ? section->values.size() : 0;
+	return m_mapfile.GetSection("Units").Size();
 }
 
 DWORD CMapData::GetStructureCount() const
 {
-	const auto section = m_mapfile.GetSection("Structures");
-	return section ? section->values.size() : 0;
+	return m_mapfile.GetSection("Structures").Size();
 }
 
 DWORD CMapData::GetAircraftCount() const
 {
-	const auto section = m_mapfile.GetSection("Aircraft");
-	return section ? section->values.size() : 0;
+	return m_mapfile.GetSection("Aircraft").Size();
 }
 
 DWORD CMapData::GetTerrainCount() const
@@ -3052,58 +2948,50 @@ WCHAR* CMapData::GetUnitName(LPCTSTR lpID) const
 {
 	WCHAR* res = NULL;
 
-	if (g_data.sections["Rename"].FindName(lpID) >= 0)
-	{
-		CCStrings[lpID].SetString((LPSTR)(LPCSTR)GetLanguageStringACP(g_data.sections["Rename"].values[(LPCSTR)lpID]));
+	auto const& renameStr = g_data.GetString("Rename", lpID);
+	if (!renameStr.IsEmpty()) {
+		CCStrings[lpID].SetString(GetLanguageStringACP(renameStr));
 		res = CCStrings[lpID].wString;
 		return res;
 	}
 
-	if (CCStrings.find(lpID) != CCStrings.end() && CCStrings[lpID].len > 0) res = CCStrings[lpID].wString;
+	if (CCStrings.find(lpID) != CCStrings.end() && CCStrings[lpID].len > 0) { 
+		res = CCStrings[lpID].wString; 
+	}
 
-	if (!res && m_mapfile.sections.find(lpID) != m_mapfile.sections.end())
-	{
-		const auto section = m_mapfile.GetSection(lpID);
-		if (section && section->values.find("Name") != section->values.end())
-		{
-			CCStrings[lpID].SetString(section->values.at("Name"));
+	if (!res) {
+		auto const& section = m_mapfile.GetSection(lpID);
+		auto const& nameVal = section.GetString("Name");
+		if (!nameVal.IsEmpty()) {
+			CCStrings[lpID].SetString(nameVal);
 
 			res = CCStrings[lpID].wString;
 		}
 	}
 
-	if (!res && rules.sections.find(lpID) != rules.sections.end())
-	{
-		const auto section = rules.GetSection(lpID);
-		if (section && section->values.find("Name") != section->values.end())
-		{
-			CCStrings[lpID].SetString(section->values.at("Name"));
+	if (!res) {
+		auto const& nameStr = rules.GetString(lpID, "Name");
+		if (!nameStr.IsEmpty()) {
+			CCStrings[lpID].SetString(nameStr);
 			res = CCStrings[lpID].wString;
 		}
 	}
 
-	if (!res)
-	{
+	if (!res) {
 		CCStrings[lpID].SetString(L"MISSING", 7);
 		res = CCStrings[lpID].wString;
 	}
-
-
 	return res;
-
-	//return CString("");
 }
 
 DWORD CMapData::GetCelltagCount() const
 {
-	const auto section = m_mapfile.GetSection("CellTags");
-	return section ? section->values.size() : 0;
+	return  m_mapfile.GetSection("CellTags").Size();
 }
 
 DWORD CMapData::GetWaypointCount() const
 {
-	const auto section = m_mapfile.GetSection("Waypoints");
-	return section ? section->values.size() : 0;
+	return  m_mapfile.GetSection("Waypoints").Size();
 }
 
 void CMapData::DeleteRulesSections()
@@ -3111,87 +2999,93 @@ void CMapData::DeleteRulesSections()
 	int i;
 
 	// delete any rules sections except the types lists (we need those to get the data of new units in the map)...
-	for (i = 0; i < m_mapfile.sections.size(); i++)
-	{
-		CString name = *m_mapfile.GetSectionName(i);
-
-		if (IsRulesSection(name) && name.Find("Types") < 0)
-		{
-			m_mapfile.sections.erase(name);
+	for (auto it = m_mapfile.begin(); it != m_mapfile.end();) {
+		auto const& name = it->first;
+		if (IsRulesSection(name) && name.Find("Types") < 0) {
+			// special care for deletion, this is a deletion in a loop
+			it = m_mapfile.DeleteAt(it);
+			continue;
 		}
+		++it;
 	}
 
 	// now delete these types lists...
-	for (i = 0; i < m_mapfile.sections.size(); i++)
-	{
-		CString name = *m_mapfile.GetSectionName(i);
-
-		if (IsRulesSection(name))
-		{
-			m_mapfile.sections.erase(name);
+	for (auto it = m_mapfile.begin(); it != m_mapfile.end();) {		
+		auto const& name = it->first;
+		if (IsRulesSection(name)) {
+			// special care for deletion, this is a deletion in a loop
+			it = m_mapfile.DeleteAt(it);
+			continue;
 		}
+		++it;
 	}
 }
 
 BOOL CMapData::IsRulesSection(LPCTSTR lpSection)
 {
 	int i;
-	for (i = 0;i < GetHousesCount();i++)
-		if (GetHouseID(i) == lpSection) return FALSE;
-
-	if (strcmp(lpSection, HOUSES) == NULL) return FALSE;
-	if (strcmp(lpSection, "VariableNames") == NULL) return FALSE;
-
-	if (rules.sections.find(lpSection) != rules.sections.end()) return TRUE;
-
-
-	if (m_mapfile.sections.find("InfantryTypes") != m_mapfile.sections.end())
-		if (m_mapfile.sections["InfantryTypes"].FindValue(lpSection) >= 0)
-			return TRUE;
-
-	if (m_mapfile.sections.find("VehicleTypes") != m_mapfile.sections.end())
-		if (m_mapfile.sections["VehicleTypes"].FindValue(lpSection) >= 0)
-			return TRUE;
-
-	if (m_mapfile.sections.find("AircraftTypes") != m_mapfile.sections.end())
-		if (m_mapfile.sections["AircraftTypes"].FindValue(lpSection) >= 0)
-			return TRUE;
-
-	if (m_mapfile.sections.find("BuildingTypes") != m_mapfile.sections.end())
-		if (m_mapfile.sections["BuildingTypes"].FindValue(lpSection) >= 0)
-			return TRUE;
-
-	if (m_mapfile.sections.find("TerrainTypes") != m_mapfile.sections.end())
-		if (m_mapfile.sections["TerrainTypes"].FindValue(lpSection) >= 0)
-			return TRUE;
-
-	if ((CString)"IsoMapPack5" != lpSection && (CString)"OverlayPack" != lpSection && (CString)"OverlayDataPack" != lpSection && m_mapfile.sections.find(lpSection) != m_mapfile.sections.end())
-	{
-		CIniFileSection& sec = m_mapfile.sections[lpSection];
-		if (sec.FindName("ROF") > -1 && sec.FindName("Range") > -1 &&
-			sec.FindName("Damage") > -1 && sec.FindName("Warhead") > -1)
-			return TRUE; // a weapon
-
-		if (sec.FindName("Spread") > -1 && sec.FindName("Range") > -1 &&
-			sec.FindName("Damage") > -1 && sec.FindName("Warhead") > -1)
-			return TRUE; // a warhead
-
-		// check for projectile/warhead
-		for (i = 0;i < m_mapfile.sections.size();i++)
-		{
-			CString name = *m_mapfile.GetSectionName(i);
-			if ((CString)"IsoMapPack5" != name && (CString)"OverlayPack" != name && (CString)"OverlayDataPack" != name && (m_mapfile.GetSection(i)->FindName("Projectile") > -1 || m_mapfile.GetSection(i)->FindName("Warhead") > -1))
-			{
-				// MW Bugfix: Check if is found in Projectile first...
-				// This may have caused several crashes while saving
-				if (m_mapfile.GetSection(i)->FindName("Projectile") >= 0)
-					if (*m_mapfile.GetSection(i)->GetValue(m_mapfile.GetSection(i)->FindName("Projectile")) == lpSection)
-						return TRUE;
-			}
+	for (i = 0; i < GetHousesCount(); i++) {
+		if (GetHouseID(i) == lpSection) {
+			return FALSE;
 		}
 	}
 
+	if (strcmp(lpSection, HOUSES) == NULL) {
+		return FALSE;
+	}
+	if (strcmp(lpSection, "VariableNames") == NULL) {
+		return FALSE;
+	}
 
+	if (rules.TryGetSection(lpSection) != nullptr) {
+		return TRUE;
+	}
+
+	if (m_mapfile["InfantryTypes"].HasValue(lpSection)) {
+		return TRUE;
+	}
+	if (m_mapfile["VehicleTypes"].HasValue(lpSection)) {
+		return TRUE;
+	}
+	if (m_mapfile["AircraftTypes"].HasValue(lpSection)) {
+		return TRUE;
+	}
+	if (m_mapfile["BuildingTypes"].HasValue(lpSection)) {
+		return TRUE;
+	}
+	if (m_mapfile["TerrainTypes"].HasValue(lpSection)) {
+		return TRUE;
+	}
+
+	auto const pMapSec = m_mapfile.TryGetSection(lpSection);
+	if ((CString)"IsoMapPack5" != lpSection
+		&& (CString)"OverlayPack" != lpSection
+		&& (CString)"OverlayDataPack" != lpSection
+		&& pMapSec) {
+		if (pMapSec->FindIndex("ROF") > -1 && pMapSec->FindIndex("Range") > -1 &&
+			pMapSec->FindIndex("Damage") > -1 && pMapSec->FindIndex("Warhead") > -1)
+			return TRUE; // a weapon
+
+		if (pMapSec->FindIndex("Spread") > -1 && pMapSec->FindIndex("Range") > -1 &&
+			pMapSec->FindIndex("Damage") > -1 && pMapSec->FindIndex("Warhead") > -1)
+			return TRUE; // a warhead
+
+		// check for projectile/warhead
+		for (auto const& [name, sec] : m_mapfile) {
+			if ((CString)"IsoMapPack5" != name
+				&& (CString)"OverlayPack" != name
+				&& (CString)"OverlayDataPack" != name
+				&& (sec.Exists("Projectile") || sec.Exists("Warhead"))) {
+				// MW Bugfix: Check if is found in Projectile first...
+				// This may have caused several crashes while saving
+				if (sec.Exists("Projectile")) {
+					if (sec.GetString("Projectile") == lpSection) {
+						return TRUE;
+					}
+				}
+			}
+		}
+	}
 
 	return FALSE;
 
@@ -3200,28 +3094,18 @@ BOOL CMapData::IsRulesSection(LPCTSTR lpSection)
 void CMapData::ExportRulesChanges(const char* filename)
 {
 	CIniFile rul;
-
-	int i;
-	for (i = 0;i < m_mapfile.sections.size();i++)
-	{
-
-		CString name = *m_mapfile.GetSectionName(i);
-
-		if (IsRulesSection(name))
-		{
-
-			rul.sections[name] = *m_mapfile.GetSection(i);
-
+	for (auto const& [name, sec] : m_mapfile) {
+		if (IsRulesSection(name)) {
+			rul.SetSection(name, sec);
 		}
 	}
-
 	rul.SaveFile(std::string(filename));
 }
 
 void CMapData::ImportRUL(LPCTSTR lpFilename)
 {
 	m_mapfile.InsertFile(std::string(lpFilename), NULL);
-	m_mapfile.sections.erase("Editor");
+	m_mapfile.DeleteSection("Editor");
 	UpdateBuildingInfo();
 	UpdateTreeInfo();
 }
@@ -3296,11 +3180,13 @@ void CMapData::UpdateMapFieldData(BOOL bSave)
 
 				int replacement = 0;
 				int ground = mfd->wGround;
-				if (ground == 0xFFFF) ground = 0;
+				if (ground == 0xFFFF) {
+					ground = 0;
+				}
 
-				if ((*tiledata)[ground].bReplacementCount && atoi((*tiles).sections["General"].values["BridgeSet"]) != (*tiledata)[ground].wTileSet)
-				{
-					replacement = rand() * (1 + (*tiledata)[ground].bReplacementCount) / RAND_MAX;
+				auto const& tile = (*tiledata)[ground];
+				if (tile.bReplacementCount && tiles->GetInteger("General", "BridgeSet") != tile.wTileSet) {
+					replacement = rand() * (1 + tile.bReplacementCount) / RAND_MAX;
 				}
 
 				fielddata[pos].bRNDImage = replacement;
@@ -3626,50 +3512,39 @@ void CMapData::UpdateMapFieldData(BOOL bSave)
 	}
 }
 
-void CMapData::UpdateBuildingInfo(LPCSTR lpUnitType)
+// TODO: simplify this function, remove duplicated codes
+void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 {
 	CIniFile& ini = GetIniFile();
 
-	if (!lpUnitType)
-	{
+	if (!lpUnitType) {
 		memset(buildinginfo, 0, 0x0F00 * sizeof(BUILDING_INFO));
 
-		int i;
-		for (i = 0;i < rules.sections["BuildingTypes"].values.size();i++)
-		{
-
-
-			CString type = *rules.sections["BuildingTypes"].GetValue(i);
-			CString artname = type;
-
-
-			if (rules.sections[type].values.find("Image") != rules.sections[type].values.end())
-			{
-				artname = rules.sections[type].values["Image"];
-			}
-			if (ini.sections.find(type) != ini.sections.end())
-			{
-				if (ini.sections[type].values.find("Image") != ini.sections[type].values.end())
-				{
-					artname = ini.sections[type].values["Image"];
-				}
-			}
+		for (auto const& [seq, id] : rules.GetSection("BuildingTypes")) {
+			auto const& type = id;
+			auto artname = rules.GetStringOr(type, "Image", type);
+			artname = ini.GetStringOr(type, "Image", artname);
 
 			int w, h;
 			char d[6];
-			memcpy(d, art.sections[artname].values["Foundation"], 1);
+			auto const& foundationStr = art[artname].GetString("Foundation");
+			// TODO: foundationStr == "Custom"
+			d[0] = foundationStr[0];
 			d[1] = 0;
 			w = atoi(d);
-			if (w == 0) w = 1;
-			memcpy(d, (LPCTSTR)art.sections[artname].values["Foundation"] + 2, 1);
+			if (w == 0) {
+				w = 1;
+			}
+			d[0] = foundationStr[2];
 			d[1] = 0;
 			h = atoi(d);
-			if (h == 0) h = 1;
+			if (h == 0) {
+				h = 1;
+			}
 
 			int n = Map->GetUnitTypeID(type);
 
-			if (n >= 0 && n < 0x0F00)
-			{
+			if (n >= 0 && n < 0x0F00) {
 				buildinginfo[n].w = w;
 				buildinginfo[n].h = h;
 
@@ -3680,83 +3555,73 @@ void CMapData::UpdateBuildingInfo(LPCSTR lpUnitType)
 
 				CString lpPicFile = GetUnitPictureFilename(type, 0);
 
-				if (pics.find(lpPicFile) != pics.end())
-				{
-					if (pics[lpPicFile].bTerrain == TheaterChar::None)
-					{
+				if (pics.find(lpPicFile) != pics.end()) {
+					if (pics[lpPicFile].bTerrain == TheaterChar::None) {
 						buildinginfo[n].bSnow = TRUE;
 						buildinginfo[n].bTemp = TRUE;
 						buildinginfo[n].bUrban = TRUE;
 					}
-					else if (pics[lpPicFile].bTerrain == TheaterChar::T) buildinginfo[n].bTemp = TRUE;
-					else if (pics[lpPicFile].bTerrain == TheaterChar::A) buildinginfo[n].bSnow = TRUE;
-					else if (pics[lpPicFile].bTerrain == TheaterChar::U) buildinginfo[n].bUrban = TRUE;
+					else if (pics[lpPicFile].bTerrain == TheaterChar::T) {
+						buildinginfo[n].bTemp = TRUE;
+					}
+					else if (pics[lpPicFile].bTerrain == TheaterChar::A) {
+						buildinginfo[n].bSnow = TRUE;
+					}
+					else if (pics[lpPicFile].bTerrain == TheaterChar::U) {
+						buildinginfo[n].bUrban = TRUE;
+					}
 				}
-				else
-				{
+				else {
 					buildinginfo[n].bSnow = TRUE;
 					buildinginfo[n].bTemp = TRUE;
 					buildinginfo[n].bUrban = TRUE;
 				}
 
 				buildinginfo[n].pic_count = 8;
-				int k;
-				for (k = 0;k < 8;k++)
-				{
+				for (auto k = 0;k < 8;k++) {
 					lpPicFile = GetUnitPictureFilename(type, k);
 
-					if (pics.find(lpPicFile) != pics.end())
-					{
+					if (pics.find(lpPicFile) != pics.end()) {
 						buildinginfo[n].pic[k] = pics[lpPicFile];
 					}
-					else
-					{
+					else {
 						buildinginfo[n].pic[k].pic = NULL;
 					}
 
 				}
 
 
-			}
-			else
-			{
+			} else {
 				errstream << "Building not found " << endl;
 				errstream.flush();
 			}
 
 		}
 
-		for (i = 0;i < ini.sections["BuildingTypes"].values.size();i++)
-		{
-
-
-			CString type = *ini.sections["BuildingTypes"].GetValue(i);
-			CString artname = type;
-
-
-			if (ini.sections.find(type) != ini.sections.end())
-			{
-				if (ini.sections[type].values.find("Image") != ini.sections[type].values.end())
-				{
-					artname = ini.sections[type].values["Image"];
-				}
-			}
+		for (auto const& [seq, id] : rules.GetSection("BuildingTypes")) {
+			auto const& type = id;
+			auto artname = ini.GetStringOr(type, "Image", type);
 
 			int w, h;
 			char d[6];
-			memcpy(d, art.sections[artname].values["Foundation"], 1);
+			auto const& foundationStr = art[artname].GetString("Foundation");
+			// TODO: foundationStr == "Custom"
+			d[0] = foundationStr[0];
 			d[1] = 0;
 			w = atoi(d);
-			if (w == 0) w = 1;
-			memcpy(d, (LPCTSTR)art.sections[artname].values["Foundation"] + 2, 1);
+			if (w == 0) {
+				w = 1;
+			}
+			d[0] = foundationStr[2];
 			d[1] = 0;
 			h = atoi(d);
-			if (h == 0) h = 1;
+			if (h == 0) {
+				h = 1;
+			}
 
 			int n = Map->GetUnitTypeID(type);
 
-			if (n >= 0 && n < 0x0F00)
-			{
+			if (n >= 0 && n < 0x0F00) {
 				buildinginfo[n].w = w;
 				buildinginfo[n].h = h;
 				buildinginfo[n].bSnow = TRUE;
@@ -3766,16 +3631,13 @@ void CMapData::UpdateBuildingInfo(LPCSTR lpUnitType)
 				CString lpPicFile = GetUnitPictureFilename(type, 0);
 
 				int k;
-				for (k = 0;k < 8;k++)
-				{
+				for (k = 0;k < 8;k++) {
 					lpPicFile = GetUnitPictureFilename(type, k);
 
-					if (pics.find(lpPicFile) != pics.end())
-					{
+					if (pics.find(lpPicFile) != pics.end()) {
 						buildinginfo[n].pic[k] = pics[lpPicFile];
 					}
-					else
-					{
+					else {
 						buildinginfo[n].pic[k].pic = NULL;
 					}
 				}
@@ -3783,105 +3645,81 @@ void CMapData::UpdateBuildingInfo(LPCSTR lpUnitType)
 			}
 
 		}
-	}
-	else
-	{
-		// only for specific building -> faster
-		CString type = lpUnitType;
-		CString artname = type;
-
-
-		if (rules.sections[type].values.find("Image") != rules.sections[type].values.end())
-		{
-			artname = rules.sections[type].values["Image"];
-		}
-		if (ini.sections.find(type) != ini.sections.end())
-		{
-			if (ini.sections[type].values.find("Image") != ini.sections[type].values.end())
-			{
-				artname = ini.sections[type].values["Image"];
-			}
-		}
-
-		int w, h;
-		char d[6];
-		memcpy(d, art.sections[artname].values["Foundation"], 1);
-		d[1] = 0;
-		w = atoi(d);
-		if (w == 0) w = 1;
-		memcpy(d, (LPCTSTR)art.sections[artname].values["Foundation"] + 2, 1);
-		d[1] = 0;
-		h = atoi(d);
-		if (h == 0) h = 1;
-
-		int n = Map->GetUnitTypeID(type);
-
-		if (n >= 0 && n < 0x0F00)
-		{
-			buildinginfo[n].w = w;
-			buildinginfo[n].h = h;
-			CString lpPicFile = GetUnitPictureFilename(type, 0);
-			buildinginfo[n].pic_count = 8;
-
-			int k;
-			for (k = 0;k < 8;k++)
-			{
-				lpPicFile = GetUnitPictureFilename(type, k);
-
-				if (pics.find(lpPicFile) != pics.end())
-				{
-					buildinginfo[n].pic[k] = pics[lpPicFile];
-				}
-				else
-				{
-					buildinginfo[n].pic[k].pic = NULL;
-				}
-			}
-
-		}
+		return;
 	}
 
+	// only for specific building -> faster
+	auto const& type = *lpUnitType;
+	auto artname = rules.GetStringOr(type, "Image", type);
+	artname = ini.GetStringOr(type, "Image", artname);
+
+	int w, h;
+	char d[6];
+	auto const& foundationStr = art[artname].GetString("Foundation");
+	// TODO: foundationStr == "Custom"
+	d[0] = foundationStr[0];
+	d[1] = 0;
+	w = atoi(d);
+	if (w == 0) {
+		w = 1;
+	}
+	d[0] = foundationStr[2];
+	d[1] = 0;
+	h = atoi(d);
+	if (h == 0) {
+		h = 1;
+	}
+
+	int n = Map->GetUnitTypeID(type);
+
+	if (n >= 0 && n < 0x0F00) {
+		buildinginfo[n].w = w;
+		buildinginfo[n].h = h;
+		CString lpPicFile = GetUnitPictureFilename(type, 0);
+		buildinginfo[n].pic_count = 8;
+
+		int k;
+		for (k = 0; k < 8; k++) {
+			lpPicFile = GetUnitPictureFilename(type, k);
+
+			if (pics.find(lpPicFile) != pics.end()) {
+				buildinginfo[n].pic[k] = pics[lpPicFile];
+			} else {
+				buildinginfo[n].pic[k].pic = NULL;
+			}
+		}
+	}
 }
 
-void CMapData::UpdateTreeInfo(LPCSTR lpTreeType)
+void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 {
 	CIniFile& ini = GetIniFile();
 
-	if (!lpTreeType)
-	{
+	if (!lpTreeType) {
 		memset(treeinfo, 0, 0x0F00 * sizeof(TREE_INFO));
 
 		int i;
-		for (i = 0;i < rules.sections["TerrainTypes"].values.size();i++)
-		{
-
-
-			CString type = *rules.sections["TerrainTypes"].GetValue(i);
-			CString artname = type;
-
-
-			if (rules.sections[type].values.find("Image") != rules.sections[type].values.end())
-			{
-				artname = rules.sections[type].values["Image"];
-			}
-			if (ini.sections.find(type) != ini.sections.end())
-			{
-				if (ini.sections[type].values.find("Image") != ini.sections[type].values.end())
-				{
-					artname = ini.sections[type].values["Image"];
-				}
-			}
+		for (auto const&[seq, id] : rules["TerrainTypes"]) {
+			auto const& type = id;
+			auto artname = rules.GetStringOr(type, "Image", type);
+			artname = ini.GetStringOr(type, "Image", artname);
 
 			int w, h;
 			char d[6];
-			memcpy(d, art.sections[artname].values["Foundation"], 1);
+			auto const& foundationStr = art[artname].GetString("Foundation");
+			// TODO: foundationStr == "Custom"
+			d[0] = foundationStr[0];
 			d[1] = 0;
 			w = atoi(d);
-			if (w == 0) w = 1;
-			memcpy(d, (LPCTSTR)art.sections[artname].values["Foundation"] + 2, 1);
+			if (w == 0) {
+				w = 1;
+			}
+			d[0] = foundationStr[2];
 			d[1] = 0;
 			h = atoi(d);
-			if (h == 0) h = 1;
+			if (h == 0) {
+				h = 1;
+			}
 
 			int n = GetUnitTypeID(type);
 
@@ -3903,32 +3741,26 @@ void CMapData::UpdateTreeInfo(LPCSTR lpTreeType)
 
 		}
 
-		for (i = 0;i < ini.sections["TerrainTypes"].values.size();i++)
-		{
-
-
-			CString type = *ini.sections["TerrainTypes"].GetValue(i);
-			CString artname = type;
-
-
-			if (ini.sections.find(type) != ini.sections.end())
-			{
-				if (ini.sections[type].values.find("Image") != ini.sections[type].values.end())
-				{
-					artname = ini.sections[type].values["Image"];
-				}
-			}
+		for (auto const& [seq, id] : ini["TerrainTypes"]) {
+			auto const& type = id;
+			auto artname = ini.GetStringOr(type, "Image", type);
 
 			int w, h;
 			char d[6];
-			memcpy(d, art.sections[artname].values["Foundation"], 1);
+			auto const& foundationStr = art[artname].GetString("Foundation");
+			// TODO: foundationStr == "Custom"
+			d[0] = foundationStr[0];
 			d[1] = 0;
 			w = atoi(d);
-			if (w == 0) w = 1;
-			memcpy(d, (LPCTSTR)art.sections[artname].values["Foundation"] + 2, 1);
+			if (w == 0) {
+				w = 1;
+			}
+			d[0] = foundationStr[2];
 			d[1] = 0;
 			h = atoi(d);
-			if (h == 0) h = 1;
+			if (h == 0) {
+				h = 1;
+			}
 
 			int n = Map->GetUnitTypeID(type);
 
@@ -3948,60 +3780,51 @@ void CMapData::UpdateTreeInfo(LPCSTR lpTreeType)
 			}
 
 		}
-	}
-	else
-	{
-		CString type = lpTreeType;
-		CString artname = type;
-
-
-		if (rules.sections[type].values.find("Image") != rules.sections[type].values.end())
-		{
-			artname = rules.sections[type].values["Image"];
-		}
-		if (ini.sections.find(type) != ini.sections.end())
-		{
-			if (ini.sections[type].values.find("Image") != ini.sections[type].values.end())
-			{
-				artname = ini.sections[type].values["Image"];
-			}
-		}
-
-		int w, h;
-		char d[6];
-		memcpy(d, art.sections[artname].values["Foundation"], 1);
-		d[1] = 0;
-		w = atoi(d);
-		if (w == 0) w = 1;
-		memcpy(d, (LPCTSTR)art.sections[artname].values["Foundation"] + 2, 1);
-		d[1] = 0;
-		h = atoi(d);
-		if (h == 0) h = 1;
-		int n = Map->GetUnitTypeID(type);
-
-		if (n >= 0 && n < 0x0F00)
-		{
-			treeinfo[n].w = w;
-			treeinfo[n].h = h;
-
-			CString lpPicFile = GetUnitPictureFilename(type, 0);
-			if (pics.find(lpPicFile) != pics.end())
-			{
-
-				treeinfo[n].pic = pics[lpPicFile];
-			}
-			else
-				treeinfo[n].pic.pic = NULL;
-		}
-
+		return;
 	}
 
+	auto const& type = *lpTreeType;
+	auto artname = rules.GetStringOr(type, "Image", type);
+	artname = ini.GetStringOr(type, "Image", artname);
+
+	int w, h;
+	char d[6];
+	auto const& foundationStr = art[artname].GetString("Foundation");
+	// TODO: foundationStr == "Custom"
+	d[0] = foundationStr[0];
+	d[1] = 0;
+	w = atoi(d);
+	if (w == 0) {
+		w = 1;
+	}
+	d[0] = foundationStr[2];
+	d[1] = 0;
+	h = atoi(d);
+	if (h == 0) {
+		h = 1;
+	}
+	int n = Map->GetUnitTypeID(type);
+
+	if (n >= 0 && n < 0x0F00) {
+		treeinfo[n].w = w;
+		treeinfo[n].h = h;
+
+		CString lpPicFile = GetUnitPictureFilename(type, 0);
+		if (pics.find(lpPicFile) != pics.end()) {
+			treeinfo[n].pic = pics[lpPicFile];
+		} else {
+			treeinfo[n].pic.pic = NULL;
+		}
+	}
 }
 
-int CMapData::GetBuildingID(LPCSTR lpBuildingName)
+int CMapData::GetBuildingID(const CString& lpBuildingName)
 {
-	if (buildingid.find(lpBuildingName) == buildingid.end()) return -1;
-	return buildingid[lpBuildingName];
+	auto const it = buildingid.find(lpBuildingName);
+	if (it == buildingid.end()) {
+		return -1;
+	}
+	return it->second;
 }
 
 
@@ -4025,7 +3848,9 @@ MAPFIELDDATA* CMapData::GetMappackPointer(DWORD dwPos)
 
 void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, DWORD dwGroundHeight)
 {
-	if (fielddata != NULL) delete[] fielddata;
+	if (fielddata != NULL) {
+		delete[] fielddata;
+	}
 	int i;
 	for (i = 0;i < dwSnapShotCount;i++)
 	{
@@ -4039,8 +3864,9 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 		delete[] m_snapshots[i].overlaydata;
 		// m_snapshots[i].mapfile.Clear();
 	}
-	if (m_snapshots != NULL) delete[] m_snapshots;
-
+	if (m_snapshots != NULL) {
+		delete[] m_snapshots;
+	}
 
 
 
@@ -4086,7 +3912,7 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 	mapsize += ",";
 	mapsize += c;
 
-	m_mapfile.sections["Map"].values["Size"] = mapsize;
+	m_mapfile.SetString("Map", "Size", mapsize);
 
 	itoa(dwWidth - 4, c, 10);
 	mapsize = "2,4,";
@@ -4095,8 +3921,8 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 	mapsize += ",";
 	mapsize += c;
 
-	m_mapfile.sections["Map"].values["Theater"] = lpTerrainType;
-	m_mapfile.sections["Map"].values["LocalSize"] = mapsize;
+	m_mapfile.SetString("Map", "Theater", lpTerrainType);
+	m_mapfile.SetString("Map", "LocalSize", mapsize);
 
 	map<CString, PICDATA>::iterator it = pics.begin();
 	for (int e = 0;e < pics.size();e++)
@@ -4164,9 +3990,8 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 			((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->UpdateOverlayPictures();
 
 		theApp.m_loading->InitPics();
-
-		if (m_mapfile.sections["Map"].values["Theater"] == THEATER0)
-		{
+		auto const& theaterType = m_mapfile.GetString("Map", "Theater");
+		if (theaterType == THEATER0) {
 			tiledata = &s_tiledata;
 			tiledata_count = &s_tiledata_count;
 			tiles = &tiles_s;
@@ -4199,8 +4024,7 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 			theApp.m_loading->cur_theat = 'T';
 
 		}
-		else if (m_mapfile.sections["Map"].values["Theater"] == THEATER1)
-		{
+		else if (theaterType == THEATER1) {
 			tiledata = &t_tiledata;
 			tiledata_count = &t_tiledata_count;
 			tiles = &tiles_t;
@@ -4232,8 +4056,7 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 				theApp.m_loading->InitTMPs(&dlg->m_Progress);
 			theApp.m_loading->cur_theat = 'A';
 		}
-		else if (m_mapfile.sections["Map"].values["Theater"] == THEATER2)
-		{
+		else if (theaterType == THEATER2) {
 			tiledata = &t_tiledata;
 			tiledata_count = &t_tiledata_count;
 			tiles = &tiles_t;
@@ -4265,8 +4088,7 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 				theApp.m_loading->InitTMPs(&dlg->m_Progress);
 			theApp.m_loading->cur_theat = 'U';
 		}
-		else if (yuri_mode && m_mapfile.sections["Map"].values["Theater"] == THEATER3)
-		{
+		else if (yuri_mode && theaterType == THEATER3) {
 			tiledata = &t_tiledata;
 			tiledata_count = &t_tiledata_count;
 			tiles = &tiles_t;
@@ -4301,8 +4123,7 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 				theApp.m_loading->InitTMPs(&dlg->m_Progress);
 			theApp.m_loading->cur_theat = 'N';
 		}
-		else if (yuri_mode && m_mapfile.sections["Map"].values["Theater"] == THEATER4)
-		{
+		else if (yuri_mode && theaterType == THEATER4) {
 			tiledata = &t_tiledata;
 			tiledata_count = &t_tiledata_count;
 			tiles = &tiles_t;
@@ -4339,8 +4160,7 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 			}
 			theApp.m_loading->cur_theat = 'L';
 		}
-		else if (m_mapfile.sections["Map"].values["Theater"] == THEATER5)
-		{
+		else if (theaterType == THEATER5) {
 			tiledata = &t_tiledata;
 			tiledata_count = &t_tiledata_count;
 			tiles = &tiles_t;
@@ -4376,8 +4196,7 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 				theApp.m_loading->InitTMPs(&dlg->m_Progress);
 			theApp.m_loading->cur_theat = 'D';
 		}
-		else
-		{
+		else {
 			theApp.m_loading->FreeAll();
 			CString s = "Fatal error! %9 doesn´t support the theater of this map!";
 			s = TranslateStringACP(s);
@@ -4385,8 +4204,7 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 			exit(0);
 		}
 	}
-	else
-	{
+	else {
 		// e.g. unittests
 		tiles = &tiles_t;
 	}
@@ -4625,29 +4443,27 @@ DWORD CMapData::GetTileID(DWORD dwTileSet, int iTile)
 {
 	int i, e;
 	DWORD tilecount = 0;
-	for (i = 0;i < 10000;i++)
-	{
+	for (i = 0; i < 10000; i++) {
 		CString tset;
 		char c[50];
 		itoa(i, c, 10);
 		int e;
-		for (e = 0;e < 4 - strlen(c);e++)
+		for (e = 0; e < 4 - strlen(c); e++) {
 			tset += "0";
+		}
 		tset += c;
 		CString sec = "TileSet";
 		sec += tset;
 
-		if (tiles->sections.find(sec) == tiles->sections.end()) return 0xFFFFFFFF;
-
-
-		for (e = 0;e < atoi(tiles->sections[sec].values["TilesInSet"]);e++)
-		{
-			if (i == dwTileSet && e == iTile) return tilecount;
-			tilecount++;
-
+		auto const pSec = tiles->TryGetSection(sec);
+		if (!pSec) {
+			return 0xFFFFFFFF;
 		}
 
-
+		for (e = 0; e < pSec->GetInteger("TilesInSet"); e++) {
+			if (i == dwTileSet && e == iTile) return tilecount;
+			tilecount++;
+		}
 	}
 
 	return tilecount;
@@ -4670,30 +4486,26 @@ void CMapData::HideField(DWORD dwPos, BOOL bHide)
 
 void CMapData::UpdateTubes(BOOL bSave)
 {
-	if (!bSave)
-	{
-		m_tubes.clear();
-		if (m_mapfile.sections.find("Tubes") == m_mapfile.sections.end())
-			return;
+	if (bSave) {
+		return;
+	}
 
-		auto& tubeSection = m_mapfile.sections["Tubes"];
+	m_tubes.clear();
 
-		std::uint16_t secSize = tubeSection.values.size();
-		m_tubes.reserve(secSize + 10);
+	auto const& tubeSection = m_mapfile["Tubes"];
+	std::uint16_t secSize = tubeSection.Size();
+	if (!secSize) {
+		return;
+	}
+	m_tubes.reserve(secSize + 10);
 
-		for (auto& [sTubeId, value] : tubeSection)
-		{
-			const auto tubeId = std::atoi(sTubeId);
-			if (tubeId < 0 || tubeId >= std::numeric_limits<std::uint16_t>::max())
-				continue;
-			m_tubes.push_back(std::make_unique<CTube>(static_cast<std::uint16_t>(tubeId), value.GetString()));
+	for (auto& [sTubeId, value] : tubeSection) {
+		const auto tubeId = std::atoi(sTubeId);
+		if (tubeId < 0 || tubeId >= std::numeric_limits<std::uint16_t>::max()) {
+			continue;
 		}
+		m_tubes.push_back(std::make_unique<CTube>(static_cast<std::uint16_t>(tubeId), value.GetString()));
 	}
-	else
-	{
-
-	}
-
 }
 
 
@@ -4701,47 +4513,46 @@ void CMapData::UpdateTubes(BOOL bSave)
 void CMapData::SetTube(CTube* lpTI)
 {
 	CString sTubeId;
-	if (lpTI->hasId())
+	if (lpTI->hasId()) {
 		sTubeId = std::to_string(lpTI->getId()).c_str();
-	else
-	{
-		for (std::uint16_t i = 0;i < 10000;i++)
-		{
+	}
+	else {
+		for (std::uint16_t i = 0;i < 10000;i++) {
 			sTubeId = std::to_string(i).c_str();
-			if (m_mapfile.sections["Tubes"].values.find(sTubeId) == m_mapfile.sections["Tubes"].values.end())
-			{
+			if (!m_mapfile["Tubes"].Exists(sTubeId)) {
 				lpTI->setId(i);
 				break;
 			}
 		}
 	}
 
-	if (!lpTI->hasId())
+	if (!lpTI->hasId()) {
 		return;
+	}
 
-	m_mapfile.sections["Tubes"].values[sTubeId] = lpTI->toString().c_str();
+	m_mapfile.SetString("Tubes", sTubeId, lpTI->toString().c_str());
 	UpdateTubes(FALSE);
 }
 
 CTube* CMapData::GetTube(std::uint16_t wID)
 {
 	auto it = std::find_if(m_tubes.begin(), m_tubes.end(), [wID](const auto& el) {return el->getId() == wID;});
-	if (it == m_tubes.end())
+	if (it == m_tubes.end()) {
 		return nullptr;
-
+	}
 	return it->get();
 }
 
 
 void CMapData::DeleteTube(std::uint16_t wID)
 {
-	if (m_mapfile.sections.find("Tubes") == m_mapfile.sections.end())
+	auto pSec = m_mapfile.TryGetSection("Tubes");
+	if (!pSec) {
 		return;
+	}
 
-	auto& tubeSection = m_mapfile.sections["Tubes"];
 	const CString sTubeId = std::to_string(wID).c_str();
-
-	std::erase_if(tubeSection.values, [&sTubeId](const auto& el) {return el.first == sTubeId;});
+	pSec->RemoveByKey(sTubeId);
 
 	//CString id1 = *m_mapfile.sections["Tubes"].GetValueName(wID);
 
@@ -5066,23 +4877,23 @@ static const CString tile_to_lat[tile_to_lat_count][3] = {
 
 bool CMapData::hasLat(WORD wGround) const
 {
-	if (wGround >= *tiledata_count)
+	if (wGround >= *tiledata_count) {
 		return false;
+	}
 	const auto set = (*tiledata)[wGround].wTileSet;
-
-	const auto& sec = tiles->sections["General"];
+	const auto& sec = tiles->GetSection("General");
 	const CString empty;
 
-	for (int i = 0; i < tile_to_lat_count; ++i)
-	{
-		const int tile = atoi(sec.GetValueByName(tile_to_lat[i][0], empty));
-		const int lat = atoi(sec.GetValueByName(tile_to_lat[i][1], empty));
-		const int target_tile = atoi(sec.GetValueByName(tile_to_lat[i][2], empty));
+	for (int i = 0; i < tile_to_lat_count; ++i) {
+		const int tile = sec.GetInteger(tile_to_lat[i][0]);
+		const int lat = sec.GetInteger(tile_to_lat[i][1]);
+		const int target_tile = sec.GetInteger(tile_to_lat[i][2]);
 		if (lat &&
 			(set == tile ||
 				set == lat ||
-				set == target_tile))
+				set == target_tile)) {
 			return true;
+		}
 	}
 
 	return false;
@@ -5090,28 +4901,34 @@ bool CMapData::hasLat(WORD wGround) const
 
 void CMapData::SmoothAllAt(DWORD dwPos)
 {
-	if (theApp.m_Options.bDisableAutoLat) return;
+	if (theApp.m_Options.bDisableAutoLat) {
+		return;
+	}
 
-	if (dwPos > fielddata_size) return;
+	if (dwPos > fielddata_size) {
+		return;
+	}
 
 	int set = 0, ground = fielddata[dwPos].wGround;
 
-	if (ground == 0xFFFF) ground = 0;
+	if (ground == 0xFFFF) {
+		ground = 0;
+	}
 	set = (*tiledata)[ground].wTileSet;
 
-	const auto& sec = tiles->sections["General"];
+	const auto& sec = tiles->GetSection("General");
 	const CString empty;
 
-	for (int i = 0; i < tile_to_lat_count; ++i)
-	{
-		const int tile = atoi(sec.GetValueByName(tile_to_lat[i][0], empty));
-		const int lat = atoi(sec.GetValueByName(tile_to_lat[i][1], empty));
-		const int target_tile = atoi(sec.GetValueByName(tile_to_lat[i][2], empty));
+	for (int i = 0; i < tile_to_lat_count; ++i) {
+		const int tile = sec.GetInteger(tile_to_lat[i][0]);
+		const int lat = sec.GetInteger(tile_to_lat[i][1]);
+		const int target_tile = sec.GetInteger(tile_to_lat[i][2]);
 		if (strlen(tile_to_lat[i][2]) &&
 			lat &&
 			(set == tile ||
-				set == lat))
+				set == lat)) {
 			SmoothAt(dwPos, tile, lat, target_tile);
+		}
 	}
 }
 
@@ -5137,12 +4954,13 @@ void CMapData::CreateShore(int left, int top, int right, int bottom, BOOL bRemov
 	memset(noChange, 0, sizeof(BOOL) * isosize * isosize);
 	//memset(replaced, 0, sizeof(BOOL)*isosize*isosize);
 
-	int watercliffset = atoi((*tiles).sections["General"].values["WaterCliffs"]);
+	int watercliffset = tiles->GetInteger("General", "WaterCliffs");
 	int xx, yy;
 
-	for (i = 0;i < *tiledata_count;i++)
-	{
-		if ((*tiledata)[i].wTileSet == waterset && (*tiledata)[i].cx == 1 && (*tiledata)[i].cy == 1) break;
+	for (i = 0; i < *tiledata_count; i++) {
+		if ((*tiledata)[i].wTileSet == waterset && (*tiledata)[i].cx == 1 && (*tiledata)[i].cy == 1) {
+			break;
+		}
 	}
 
 	int smallwater = i;
@@ -5156,21 +4974,21 @@ void CMapData::CreateShore(int left, int top, int right, int bottom, BOOL bRemov
 	map<int, int> softsets;
 	CString sec = "SoftTileSets";
 
-	for (i = 0;i < g_data.sections[sec].values.size();i++)
-	{
-		CString tset = *g_data.sections[sec].GetValueName(i);
+	for (auto const& [key, val] : g_data[sec]) {
+		CString tset = key;
 		TruncSpace(tset);
-		int p = (*tiles).sections["General"].FindName(tset);
-		if (p < 0) continue;
+		auto const& generalSec = tiles->GetSection("General");
+		int idx = generalSec.FindIndex(tset);
+		if (idx < 0) {
+			continue;
+		}
 
-		int set = atoi(*(*tiles).sections["General"].GetValue(p));
-		if (atoi(*g_data.sections[sec].GetValue(i))) softsets[set] = 1;
-
+		int set = atoi(generalSec.Nth(idx).second);
+		if (atoi(val)) {
+			softsets[set] = 1;
+		}
 
 	}
-
-
-
 
 	last_succeeded_operation = 7001;
 
@@ -6013,8 +5831,8 @@ void CMapData::CreateShore(int left, int top, int right, int bottom, BOOL bRemov
 
 				if (bShoreFound)
 				{
-					int sandtile = atoi(tiles->sections["General"].values["GreenTile"]);
-					int sandlat = atoi(tiles->sections["General"].values["ClearToGreenLat"]);
+					int sandtile = tiles->GetInteger("General", "GreenTile");
+					int sandlat = tiles->GetInteger("General", "ClearToGreenLat");
 
 					int i;
 					for (i = 0;i < *tiledata_count;i++)
@@ -6058,11 +5876,11 @@ void CMapData::CreateShore(int left, int top, int right, int bottom, BOOL bRemov
 
 				if (bShoreFound && hasChanged)
 				{
-					int sandtile = atoi(tiles->sections["General"].values["GreenTile"]);
-					int sandlat = atoi(tiles->sections["General"].values["ClearToGreenLat"]);
+					int sandtile = tiles->GetInteger("General", "GreenTile");
+					int sandlat = tiles->GetInteger("General", "ClearToGreenLat");
 
 
-					SmoothAt(pos, sandtile, sandlat, atoi(tiles->sections["General"].values["ClearTile"]));
+					SmoothAt(pos, sandtile, sandlat, tiles->GetInteger("General", "ClearTile"));
 				}
 
 			}
@@ -6087,16 +5905,22 @@ void CMapData::CreateShore(int left, int top, int right, int bottom, BOOL bRemov
 
 BOOL CMapData::IsMultiplayer()
 {
-	if (m_mapfile.sections["Basic"].FindName("Player") >= 0) return FALSE;
-	if (isTrue(m_mapfile.sections["Basic"].values["MultiplayerOnly"])) return TRUE;
-	if (m_mapfile.sections.find(MAPHOUSES) == m_mapfile.sections.end()) return TRUE;
+	if (m_mapfile["Basic"].Exists("Player")) {
+		return FALSE;
+	}
+	if (m_mapfile.GetBool("Basic", "MultiplayerOnly")) {
+		return TRUE;
+	}
+	if (!m_mapfile.TryGetSection(MAPHOUSES)) {
+		return TRUE;
+	}
 
 	return FALSE;
 }
 
 CString CMapData::GetTheater()
 {
-	return m_mapfile.sections["Map"].values["Theater"];
+	return m_mapfile.GetString("Map", "Theater");
 }
 
 void CMapData::Copy(int left, int top, int right, int bottom)
@@ -6251,7 +6075,9 @@ void CMapData::Paste(int x, int y, int z_mod)
 
 			FIELDDATA* fd = Map->GetFielddataAt(i + x + (y + e) * m_IsoSize);
 			int ground = fd->wGround;
-			if (ground = 0xFFFF) ground = 0;
+			if (ground == 0xFFFF) {
+				ground = 0;
+			}
 
 
 			int height = fd->bHeight;//-(*tiledata)[ground].tiles[fd->bSubTile].bZHeight;
@@ -6263,7 +6089,9 @@ void CMapData::Paste(int x, int y, int z_mod)
 	}
 
 	int ground = GetFielddataAt(x + y * m_IsoSize)->wGround;
-	if (ground == 0xFFFF) ground = 0;
+	if (ground == 0xFFFF) {
+		ground = 0;
+	}
 	int startheight = lowestheight + z_mod;//-(*tiledata)[ground].tiles[GetFielddataAt(x+y*m_IsoSize)->bSubTile].bZHeight;
 
 	//char c[50];
@@ -6411,22 +6239,22 @@ int CMapData::CalcMoneyOnMap()
 
 		if (ovrl >= RIPARIUS_BEGIN && ovrl <= RIPARIUS_END)
 		{
-			money += (ovrld + 1) * (atoi(rules.sections["Riparius"].values["Value"]));
+			money += (ovrld + 1) * rules.GetInteger("Riparius", "Value");
 		}
 
 		if (ovrl >= CRUENTUS_BEGIN && ovrl <= CRUENTUS_END)
 		{
-			money += (ovrld + 1) * (atoi(rules.sections["Cruentus"].values["Value"]));
+			money += (ovrld + 1) * rules.GetInteger("Cruentus", "Value");
 		}
 
 		if (ovrl >= VINIFERA_BEGIN && ovrl <= VINIFERA_END)
 		{
-			money += (ovrld + 1) * (atoi(rules.sections["Vinifera"].values["Value"]));
+			money += (ovrld + 1) * rules.GetInteger("Vinifera", "Value");
 		}
 
 		if (ovrl >= ABOREUS_BEGIN && ovrl <= ABOREUS_END)
 		{
-			money += (ovrld + 1) * (atoi(rules.sections["Aboreus"].values["Value"]));
+			money += (ovrld + 1) * rules.GetInteger("Aboreus", "Value");
 		}
 	}
 
@@ -6656,7 +6484,7 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 	mapsize += ",";
 	mapsize += c;
 
-	m_mapfile.sections["Map"].values["Size"] = mapsize;
+	m_mapfile.SetString("Map", "Size", mapsize);
 
 	itoa(dwNewWidth - 4, c, 10);
 	mapsize = "2,4,";
@@ -6665,7 +6493,7 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 	mapsize += ",";
 	mapsize += c;
 
-	m_mapfile.sections["Map"].values["LocalSize"] = mapsize;
+	m_mapfile.SetString("Map", "LocalSize", mapsize);
 
 
 	CalcMapRect();
@@ -7000,10 +6828,8 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 Returns TRUE for all sections that should not be modified using the INI editor,
 because they become modified whenever the map is saved by the editor itself.
 */
-BOOL CMapData::IsMapSection(LPCSTR lpSectionName)
+bool CMapData::IsMapSection(const CString& str)
 {
-	CString str;
-	str = lpSectionName;
 
 	if (str == "IsoMapPack5" || str == "OverlayPack" || str == "OverlayDataPack" ||
 		str == "Preview" || str == "PreviewPack" || str == "Map" ||
@@ -7014,7 +6840,7 @@ BOOL CMapData::IsMapSection(LPCSTR lpSectionName)
 	return FALSE;
 }
 
-int GetEventParamStart(CString& EventData, int param);
+int GetEventParamStart(const CString& EventData, int param);
 
 BOOL CMapData::IsYRMap()
 {
@@ -7029,14 +6855,17 @@ BOOL CMapData::IsYRMap()
 
 		int i;
 		int max = 0;
-		if (tiledata == &u_tiledata)
-		{
-			max = atoi(g_data.sections["RA2TileMax"].values["Urban"]);
+		if (tiledata == &u_tiledata) {
+			max = g_data.GetInteger("RA2TileMax", "Urban");
 		}
-		else if (tiledata == &s_tiledata) max = atoi(g_data.sections["RA2TileMax"].values["Snow"]);
-		else if (tiledata == &t_tiledata) max = atoi(g_data.sections["RA2TileMax"].values["Temperat"]);
+		else if (tiledata == &s_tiledata) {
+			max = g_data.GetInteger("RA2TileMax", "Snow");
+		}
+		else if (tiledata == &t_tiledata) {
+			max = g_data.GetInteger("RA2TileMax", "Temperat");
+		}
 
-		int yroverlay = atoi(g_data.sections["YROverlay"].values["Begin"]);
+		int yroverlay = g_data.GetInteger("YROverlay", "Begin");
 
 		for (i = 0;i < fielddata_size;i++)
 		{
@@ -7056,12 +6885,11 @@ BOOL CMapData::IsYRMap()
 			INFANTRY inf;
 			GetInfantryData(i, &inf);
 
-			if (inf.deleted) continue;
+			if (inf.deleted) {
+				continue;
+			}
 
-			CIniFileSection& sec = g_data.sections["YRInfantry"];
-
-			if (sec.values.find(inf.type) != sec.values.end())
-			{
+			if (g_data["YRInfantry"].Exists(inf.type)) {
 				return TRUE;
 			}
 		}
@@ -7072,12 +6900,11 @@ BOOL CMapData::IsYRMap()
 			STRUCTURE str;
 			GetStructureData(i, &str);
 
-			if (str.deleted) continue;
+			if (str.deleted) {
+				continue;
+			}
 
-			CIniFileSection& sec = g_data.sections["YRBuildings"];
-
-			if (sec.values.find(str.type) != sec.values.end())
-			{
+			if (g_data["YRBuildings"].Exists(str.type)) {
 				return TRUE;
 			}
 		}
@@ -7088,12 +6915,11 @@ BOOL CMapData::IsYRMap()
 			UNIT unit;
 			GetUnitData(i, &unit);
 
-			if (unit.deleted) continue;
+			if (unit.deleted) {
+				continue;
+			}
 
-			CIniFileSection& sec = g_data.sections["YRUnits"];
-
-			if (sec.values.find(unit.type) != sec.values.end())
-			{
+			if (g_data["YRUnits"].Exists(unit.type)) {
 				return TRUE;
 			}
 		}
@@ -7104,12 +6930,11 @@ BOOL CMapData::IsYRMap()
 			AIRCRAFT air;
 			GetAircraftData(i, &air);
 
-			if (air.deleted) continue;
+			if (air.deleted) {
+				continue;
+			}
 
-			CIniFileSection& sec = g_data.sections["YRAircraft"];
-
-			if (sec.values.find(air.type) != sec.values.end())
-			{
+			if (g_data["YRAircraft"].Exists(air.type)) {
 				return TRUE;
 			}
 		}
@@ -7120,51 +6945,40 @@ BOOL CMapData::IsYRMap()
 			TERRAIN& tr = m_terrain[i];
 
 
-			if (tr.deleted) continue;
+			if (tr.deleted) {
+				continue;
+			}
 
-			CIniFileSection& sec = g_data.sections["YRTerrain"];
-
-			if (sec.values.find(tr.type) != sec.values.end())
-			{
+			if (g_data["YRTerrain"].Exists(tr.type)) {
 				return TRUE;
 			}
 		}
 
-		count = m_mapfile.sections["Triggers"].values.size();
-		for (i = 0;i < count;i++)
-		{
-			CString event;
-			CString action;
-			CString id;
-
-			id = *m_mapfile.sections["Triggers"].GetValueName(i);
-
-			event = m_mapfile.sections["Events"].values[id];
-			action = m_mapfile.sections["Actions"].values[id];
+		for (auto const& [id, val] : m_mapfile["Triggers"]) {
+			auto const& eventParams = m_mapfile.GetString("Events", id);
+			auto const& actionParams = m_mapfile.GetString("Actions", id);
 
 			int eventcount, actioncount;
-			eventcount = atoi(GetParam(event, 0));
-			actioncount = atoi(GetParam(action, 0));
+			eventcount = atoi(GetParam(eventParams, 0));
+			actioncount = atoi(GetParam(actionParams, 0));
 
-			int e;
-
-			for (e = 0;e < eventcount;e++)
-			{
-				CString type = GetParam(event, GetEventParamStart(event, e));
-				if (g_data.sections["EventsRA2"].values.find(type) != g_data.sections["EventsRA2"].values.end())
-				{
-					if (isTrue(GetParam(g_data.sections["EventsRA2"].values[type], 9)))
+			for (auto e = 0; e < eventcount; e++) {
+				CString type = GetParam(eventParams, GetEventParamStart(eventParams, e));
+				auto const& eventDetail = g_data.GetString("EventsRA2", type);
+				if (!eventDetail.IsEmpty()) {
+					if (isTrue(GetParam(eventDetail, 9))) {
 						return TRUE;
+					}
 				}
 			}
 
-			for (e = 0;e < actioncount;e++)
-			{
-				CString type = GetParam(action, 1 + e * 8);
-				if (g_data.sections["ActionsRA2"].values.find(type) != g_data.sections["ActionsRA2"].values.end())
-				{
-					if (isTrue(GetParam(g_data.sections["ActionsRA2"].values[type], 14)))
+			for (auto e = 0; e < actioncount; e++) {
+				CString type = GetParam(actionParams, 1 + e * 8);
+				auto const& actionDetail = g_data.GetString("ActionsRA2", type);
+				if (!actionDetail.IsEmpty()) {
+					if (isTrue(GetParam(actionDetail, 14))) {
 						return TRUE;
+					}
 				}
 			}
 		}
@@ -7239,185 +7053,143 @@ void CMapData::DeleteSmudge(DWORD dwIndex)
 
 void CMapData::UpdateSmudges(BOOL bSave, int num)
 {
-	vector<SMUDGE>& t = m_smudges;
+	vector<SMUDGE>& smudges = m_smudges;
 
-	if (bSave == FALSE)
-	{
-		if (m_mapfile.sections.find("Smudge") == m_mapfile.sections.end() || m_mapfile.sections["Smudge"].values.size() <= 0)
+	if (bSave == FALSE) {
+		auto const& sec = m_mapfile.GetSection("Smudge");
+		if (sec.Size() <= 0) {
 			return;
+		}
 
-		if (num < 0)
-		{
-			t.clear();
-			t.reserve(100);
+		if (num < 0) {
+			smudges.clear();
+			smudges.reserve(100);
 
-			int i;
-			for (i = 0;i < GetIsoSize() * GetIsoSize();i++)
-			{
+			for (auto i = 0; i < GetIsoSize() * GetIsoSize(); i++) {
 				fielddata[i].smudge = -1;
 			}
 
-
-
-			CIniFileSection& sec = m_mapfile.sections["Smudge"];
-
-			for (i = 0;i < sec.values.size();i++)
-			{
+			for (auto i = 0; i < sec.Size(); i++) {
 				int x, y;
-				x = atoi(GetParam(*sec.GetValue(i), 2));
-				y = atoi(GetParam(*sec.GetValue(i), 1));
+				auto const& val = sec.Nth(i).second;
+				x = atoi(GetParam(val, 2));
+				y = atoi(GetParam(val, 1));
 
 				// check for valid coordinates ; MW May 17th 2001
 				ASSERT(x >= 0 && x < GetIsoSize());
 				ASSERT(y >= 0 && y < GetIsoSize());
-				if (x < 0 || x >= GetIsoSize() || y < 0 || y >= GetIsoSize())
-				{
+				if (x < 0 || x >= GetIsoSize() || y < 0 || y >= GetIsoSize()) {
 					// invalid coordinates - ignore in release
+					continue;
 				}
-				else
-				{
-					SMUDGE td;
-					td.deleted = 0;
-					td.type = GetParam(*sec.GetValue(i), 0);
-					td.x = x;
-					td.y = y;
 
-					t.push_back(td);
+				SMUDGE td;
+				td.deleted = 0;
+				td.type = GetParam(val, 0);
+				td.x = x;
+				td.y = y;
 
-					int pos = x + y * GetIsoSize();
-					fielddata[pos].smudge = i;
-					fielddata[pos].smudgetype = smudgeid[td.type];
-				}
+				smudges.push_back(td);
+
+				int pos = x + y * GetIsoSize();
+				fielddata[pos].smudge = i;
+				fielddata[pos].smudgetype = smudgeid[td.type];
 			}
 
-			m_mapfile.sections.erase("Smudge");
+			m_mapfile.DeleteSection("Smudge");
 
 		}
-
+		return;
 	}
-	else
+	
+	
+
+	//if(num<0)
 	{
+		//if(m_mapfile.sections.find("Smudge")!=m_mapfile.sections.end()) MessageBox(0,"Reupdate!","",0);
+		m_mapfile.DeleteSection("Smudge");
+		int i;
 
-		//if(num<0)
-		{
-			//if(m_mapfile.sections.find("Smudge")!=m_mapfile.sections.end()) MessageBox(0,"Reupdate!","",0);
-			m_mapfile.sections.erase("Smudge");
-			int i;
+		for (i = 0; i < smudges.size(); i++) {
+			auto const& td = smudges[i];
+			if (!td.deleted) {
+				char numBuffer[50];
+				CString val = td.type;
+				val += ",";
+				itoa(td.y, numBuffer, 10);
+				val += numBuffer;
+				val += ",";
+				itoa(td.x, numBuffer, 10);
+				val += numBuffer;
+				val += ",0";
 
-			for (i = 0;i < t.size();i++)
-			{
-				SMUDGE& td = t[i];
-				if (!td.deleted)
-				{
-					char c[50];
-					CString val = td.type;
-					val += ",";
-					itoa(td.y, c, 10);
-					val += c;
-					val += ",";
-					itoa(td.x, c, 10);
-					val += c;
-					val += ",0";
+				itoa(i, numBuffer, 10);
 
-					itoa(i, c, 10);
-
-					m_mapfile.sections["Smudge"].values[c] = val;
-				}
+				m_mapfile.SetString("Smudge", numBuffer, val);
 			}
 		}
-
 	}
-
 }
 
 void CMapData::UpdateSmudgeInfo(LPCSTR lpSmudgeType)
 {
 	CIniFile& ini = GetIniFile();
 
-	if (!lpSmudgeType)
-	{
+	if (!lpSmudgeType) {
 		memset(smudgeinfo, 0, 0x0F00 * sizeof(SMUDGE_INFO));
 
 		int i;
-		for (i = 0;i < rules.sections["SmudgeTypes"].values.size();i++)
-		{
-
-
-			CString type = *rules.sections["SmudgeTypes"].GetValue(i);
-			CString artname = type;
-
-
+		for (auto const& [seq, type] : rules.GetSection("SmudgeTypes")) {
 			int n = GetUnitTypeID(type);
 
-			if (n >= 0 && n < 0x0F00)
-			{
-
+			if (n >= 0 && n < 0x0F00) {
 				CString lpPicFile = GetUnitPictureFilename(type, 0);
 
-				if (pics.find(lpPicFile) != pics.end())
-				{
-
+				if (pics.find(lpPicFile) != pics.end()) {
 					smudgeinfo[n].pic = pics[lpPicFile];
 				}
-				else
+				else {
 					smudgeinfo[n].pic.pic = NULL;
+				}
 			}
 
 		}
 
-		for (i = 0;i < ini.sections["SmudgeTypes"].values.size();i++)
-		{
-
-
-			CString type = *ini.sections["SmudgeTypes"].GetValue(i);
-			CString artname = type;
-
-
-
+		for (auto const&[seq, type]: ini.GetSection("SmudgeTypes")) {
 			int n = Map->GetUnitTypeID(type);
 
-			if (n >= 0 && n < 0x0F00)
-			{
+			if (n >= 0 && n < 0x0F00) {
 				//smudgeinfo[n].w=w;
 				//smudgeinfo[n].h=h;
 
 				CString lpPicFile = GetUnitPictureFilename(type, 0);
 
-				if (pics.find(lpPicFile) != pics.end())
-				{
+				if (pics.find(lpPicFile) != pics.end()) {
 					smudgeinfo[n].pic = pics[lpPicFile];
 				}
-				else
+				else {
 					smudgeinfo[n].pic.pic = NULL;
+				}
 			}
 
 		}
+		return;
 	}
-	else
-	{
-		CString type = lpSmudgeType;
-		CString artname = type;
 
+	CString type = lpSmudgeType;
+	CString artname = type;
 
+	int n = Map->GetUnitTypeID(type);
 
-		int n = Map->GetUnitTypeID(type);
+	if (n >= 0 && n < 0x0F00) {
+		CString lpPicFile = GetUnitPictureFilename(type, 0);
+		if (pics.find(lpPicFile) != pics.end()) {
 
-		if (n >= 0 && n < 0x0F00)
-		{
-
-			CString lpPicFile = GetUnitPictureFilename(type, 0);
-			if (pics.find(lpPicFile) != pics.end())
-			{
-
-				smudgeinfo[n].pic = pics[lpPicFile];
-			}
-			else
-				smudgeinfo[n].pic.pic = NULL;
+			smudgeinfo[n].pic = pics[lpPicFile];
+		} else {
+			smudgeinfo[n].pic.pic = NULL;
 		}
-
 	}
-
-
 }
 
 void CMapData::GetSmudgeData(DWORD dwIndex, SMUDGE* lpData) const

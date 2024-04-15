@@ -130,27 +130,31 @@ void CTerrainDlg::Update()
 	{
 		int i;
 		int tilecount = 0;
-		for (i = 0;i < 10000;i++)
-		{
+		for (i = 0;i < 10000;i++) {
 			CString tset;
 			char c[50];
 			itoa(i, c, 10);
 			int e;
-			for (e = 0;e < 4 - strlen(c);e++)
+			for (e = 0; e < 4 - strlen(c); e++) {
 				tset += "0";
+			}
 			tset += c;
 			CString sec = "TileSet";
 			sec += tset;
 
-			if (tiles->sections.find(sec) == tiles->sections.end())
+			auto const pSec = tiles->TryGetSection(sec);
+
+			if (!pSec) {
 				break;
-			if (atoi(tiles->sections[sec].values["TilesInSet"]) == 0)
+			}
+			if (pSec->GetInteger("TilesInSet") == 0) {
 				continue;
+			}
 
 			CString string;
 			string = tset;
 			string += " (";
-			string += TranslateStringACP(tiles->sections[sec].values["SetName"]);
+			string += TranslateStringACP(pSec->GetString("SetName"));
 			string += ")";
 
 			BOOL bForced = FALSE;
@@ -158,22 +162,24 @@ void CTerrainDlg::Update()
 
 
 			// force yes
-			CString datsec = (CString)"UseSet" + Map->GetTheater();
+			auto const& theaterType = Map->GetTheater();
 			auto tsetc = CString(std::to_string(atoi(tset)).c_str());
 
-			if (g_data.sections[datsec].FindValue(tsetc) >= 0)
+			if (g_data["UseSet" + theaterType].HasValue(tsetc)) {
 				bForced = TRUE;
+			}
 
 			// force no
-			datsec = (CString)"IgnoreSet" + Map->GetTheater();
-			if (g_data.sections[datsec].FindValue(tsetc) >= 0)
+			if (g_data["IgnoreSet" + theaterType].HasValue(tsetc)) {
 				bForcedNot = TRUE;
+			}
 
 
-			if (bForced || (!bForcedNot && (*tiledata)[tilecount].bAllowToPlace && !(*tiledata)[tilecount].bMarbleMadness))
+			if (bForced || (!bForcedNot && (*tiledata)[tilecount].bAllowToPlace && !(*tiledata)[tilecount].bMarbleMadness)) {
 				TileSet->SetItemData(TileSet->AddString(string), i);
+			}
 
-			tilecount += atoi(tiles->sections[sec].values["TilesInSet"]);
+			tilecount += tiles->GetInteger(sec, "TilesInSet");
 		}
 
 		TileSet->SetCurSel(0);
@@ -185,36 +191,34 @@ void CTerrainDlg::Update()
 
 	while (Overlays->DeleteString(0) != CB_ERR);
 
-	int i;
 
 	int e = 0;
-	for (i = 0;i < rules.sections["OverlayTypes"].values.size();i++)
-	{
-		CString id = *rules.sections["OverlayTypes"].GetValue(i);
+	auto const& types = rules["OverlayTypes"];
+	for (auto i = 0; i < types.Size(); i++) {
+		CString id = types.Nth(i).second;
 		id.TrimLeft();
 		id.TrimRight();
 
-		if (id.GetLength() > 0)
-		{
+		if (id.GetLength() > 0) {
 
-			if (rules.sections.find(id) != rules.sections.end() && rules.sections[id].FindName("Name") >= 0)
-			{
+			if (rules[id].Exists("Name")) {
 				int p;
 				BOOL bListIt = TRUE;
-				for (p = 0;p < max_ovrl_img;p++)
-					if (ovrlpics[i][p] != NULL && ovrlpics[i][p]->pic != NULL)
+				for (p = 0; p < max_ovrl_img; p++) {
+					if (ovrlpics[i][p] != NULL && ovrlpics[i][p]->pic != NULL) {
 						bListIt = TRUE;
-
+					}
+				}
 #ifdef RA2_MODE
 				if ((i >= 39 && i <= 60) || (i >= 180 && i <= 201) || i == 239 || i == 178 || i == 167 || i == 126
-					|| (i >= 122 && i <= 125))
+					|| (i >= 122 && i <= 125)) {
 					bListIt = FALSE;
+				}
 #endif
 
-				if (bListIt)
-				{
+				if (bListIt) {
 					CString str;
-					str = TranslateStringACP(rules.sections[(*rules.sections["OverlayTypes"].GetValue(i))].values["Name"]);
+					str = TranslateStringACP(rules.GetString(id, "Name"));
 					Overlays->SetItemData(Overlays->AddString(str), e);
 				}
 			}
@@ -228,26 +232,29 @@ DWORD CTerrainDlg::GetTileID(DWORD dwTileSet, int iTile)
 {
 	int i, e;
 	DWORD tilecount = 0;
-	for (i = 0;i < 10000;i++)
+	for (i = 0; i < 10000; i++)
 	{
 		CString tset;
 		char c[50];
 		itoa(i, c, 10);
 		int e;
-		for (e = 0;e < 4 - strlen(c);e++)
+		for (e = 0; e < 4 - strlen(c); e++) {
 			tset += "0";
+		}
 		tset += c;
 		CString sec = "TileSet";
 		sec += tset;
 
-		if (tiles->sections.find(sec) == tiles->sections.end())
+		auto const pSec = tiles->TryGetSection(sec);
+		if (!pSec) {
 			return 0xFFFFFFFF;
+		}
 
-
-		for (e = 0;e < atoi(tiles->sections[sec].values["TilesInSet"]);e++)
-		{
-			if (i == dwTileSet && e == iTile)
+		auto const tilesInset = pSec->GetInteger("TilesInSet");
+		for (e = 0; e < tilesInset; e++) {
+			if (i == dwTileSet && e == iTile) {
 				return tilecount;
+			}
 			tilecount++;
 
 		}

@@ -100,19 +100,19 @@ void CGlobalsDlg::UpdateDialog()
 		CString added=c;
 		added+=" ";
 
-		if(ini.sections["VariableNames"].FindName(c)>=0)
-		{
-			added+=ini.sections["VariableNames"].values[c];
-		}
-		else
-		{
-			bFailFind=TRUE;
-			added+=" No name";
+		auto const& variableStr = ini.GetString("VariableNames", c);
+		if (!variableStr.IsEmpty()) {
+			added += variableStr;
+		} else {
+			bFailFind = TRUE;
+			added += " No name";
 		}
 
 		m_Global.SetItemData(m_Global.AddString(added),i);
 
-		if(bFailFind) break;
+		if (bFailFind) {
+			break;
+		}
 	}
 
 	m_Global.SetCurSel(oldsel);
@@ -136,8 +136,10 @@ void CGlobalsDlg::OnChangeDescription()
 
 	if(m_Description.Find(",")>=0) m_Description.SetAt(m_Description.Find(","), 0);
 
-	if(ini.sections["VariableNames"].values[c].GetLength()==0) ini.sections["VariableNames"].values[c]="text,0";
-	ini.sections["VariableNames"].values[c]=SetParam(ini.sections["VariableNames"].values[c], 0, m_Description);
+	if (ini.GetString( "VariableNames",c).IsEmpty()) {
+		ini.SetString("VariableNames", c, "text,0");
+	}
+	ini.SetString("VariableNames", c, SetParam(ini.GetString("VariableNames", c), 0, m_Description));
 
 	// do not remove, Tiberian Sun seems to don´t like probably unused global numbers
 	//if(m_Description.GetLength()==0)
@@ -158,13 +160,13 @@ void CGlobalsDlg::OnSelchangeGlobal()
 	char c[50];
 	itoa(curglob, c, 10);
 
-	if(ini.sections["VariableNames"].FindName(c)>=0)
-	{
-		m_Description=GetParam(ini.sections["VariableNames"].values[c],0);
-		m_Value.SetWindowText(GetParam(ini.sections["VariableNames"].values[c],1));
+	auto const& variable = ini.GetString("VariableNames", c);
+	if (!variable.IsEmpty()) {
+		m_Description = GetParam(variable, 0);
+		m_Value.SetWindowText(GetParam(variable, 1));
+	} else {
+		m_Description = "";
 	}
-	else
-		m_Description="";
 
 	UpdateData(FALSE);	
 }
@@ -197,14 +199,16 @@ void CGlobalsDlg::OnEditchangeValue()
 	char c[50];
 	itoa(curglob, c, 10);
 
-	if(ini.sections["VariableNames"].FindName(c)<0) return;
-
+	auto const& variable = ini.GetString("VariableNames", c);
+	if (variable.IsEmpty()) {
+		return;
+	}
 	
 	UpdateData(TRUE);
 	
 	str=GetParam(str, 0);
 	TruncSpace(str);
-	ini.sections["VariableNames"].values[c]=SetParam(ini.sections["VariableNames"].values[c], 1, str);
+	ini.SetString("VariableNames", c, SetParam(variable, 1, str));
 
 	UpdateDialog();	
 }

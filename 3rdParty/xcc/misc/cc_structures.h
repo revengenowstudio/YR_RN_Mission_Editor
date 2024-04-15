@@ -43,17 +43,12 @@ enum t_game
 
 const char* game_name[];
 
-inline __int32 reverse(__int32 v)
+
+static int32_t reverse(int32_t v)
 {
-	_asm
-	{
-		mov		eax, v
-		xchg	al, ah
-		rol		eax, 16
-		xchg	al, ah
-		mov		v, eax
-	}
-	return v;
+	uint32_t result = ((v & 0x00FF00FF) << 8) | ((v & 0xFF00FF00) >> 8);
+	result = (result << 16) | (result >> 16);
+	return result;
 }
 
 #pragma pack(push, 1)

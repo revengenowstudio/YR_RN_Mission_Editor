@@ -249,13 +249,12 @@ void CLoading::Load()
 		}
 	}
 #else
-	if(bUseFirestorm && yuri_mode) // MW actually this is Yuri's Revenge
-	{
+	// MW actually this is Yuri's Revenge
+	if (bUseFirestorm && yuri_mode) {
 		CIniFile rulesmd;
 		LoadTSIni("rulesmd.ini", &rulesmd, TRUE);
-		if(rulesmd.sections.size()>0)
-		{
-			rules=rulesmd;
+		if (rulesmd.Size() > 0) {
+			rules = std::move(rulesmd);
 		}
 	}
 #endif
@@ -321,10 +320,8 @@ void CLoading::Load()
 	{
 		CIniFile artmd;
 		LoadTSIni("artmd.ini", &artmd, TRUE);
-		if(artmd.sections.size()>0)
-		{
-			art.Clear();
-			art=artmd;
+		if(artmd.Size()>0) {
+			art = std::move(artmd);
 		}
 	}
 #endif
@@ -348,8 +345,7 @@ void CLoading::Load()
 	UpdateWindow();	
 	
 	
-	if(bUseFirestorm)
-	{
+	if(bUseFirestorm) {
 		int b;
 		for(b=99;b>0;b--)
 		{
@@ -361,11 +357,17 @@ void CLoading::Load()
 			name+=".ini";
 
 			LoadTSIni(name, &sound, FALSE);
-			if(sound.sections.size()>0) break;
+			if (sound.Size() > 0) {
+				break;
+			}
 		}
 
-	} else LoadTSIni("Sound01.ini", &sound, FALSE);
-	if(sound.sections.size()==0) LoadTSIni("Sound.ini", &sound, FALSE);
+	} else {
+		LoadTSIni("Sound01.ini", &sound, FALSE);
+	}
+	if (sound.Size() == 0) {
+		LoadTSIni("Sound.ini", &sound, FALSE);
+	}
 
 	m_progress.SetPos(2);
 	UpdateWindow();
@@ -440,8 +442,9 @@ void CLoading::Load()
 		UpdateWindow();
 
 		// MW FIX: MAKE URBAN RAMPS MORPHABLE:
-		if(tiles_un.sections["TileSet0117"].FindName("Morphable")<0)
-			tiles_un.sections["TileSet0117"].values["Morphable"]="true";
+		if (!tiles_un["TileSet0117"].Exists("Morphable")) {
+			tiles_un.SetBool("TileSet0117", "Morphable", true);
+		}
 
 		m_cap.SetWindowText(GetLanguageStringACP("LoadLoadLunar"));
 		m_progress.SetPos(1);
@@ -536,7 +539,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 					pics[(LPCTSTR)ff.GetFileName()].pic = BitmapToSurface(((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd, *BitmapFromFile(ff.GetFilePath())).Detach();
 
 					DDSURFACEDESC2 desc;
-					memset(&desc, 0, sizeof(DDSURFACEDESC2));
+					::memset(&desc, 0, sizeof(DDSURFACEDESC2));
 					desc.dwSize = sizeof(DDSURFACEDESC2);
 					desc.dwFlags = DDSD_HEIGHT | DDSD_WIDTH;
 					((LPDIRECTDRAWSURFACE4)pics[(LPCTSTR)ff.GetFileName()].pic)->GetSurfaceDesc(&desc);
@@ -566,7 +569,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	try {
 		pics["SCROLLCURSOR"].pic = BitmapToSurface(((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd, *BitmapFromResource(IDB_SCROLLCURSOR)).Detach();
 		FSunPackLib::SetColorKey((LPDIRECTDRAWSURFACE4)pics["SCROLLCURSOR"].pic, -1);
-		memset(&desc, 0, sizeof(DDSURFACEDESC2));
+		::memset(&desc, 0, sizeof(DDSURFACEDESC2));
 		desc.dwSize = sizeof(DDSURFACEDESC2);
 		desc.dwFlags = DDSD_HEIGHT | DDSD_WIDTH;
 		((LPDIRECTDRAWSURFACE4)pics["SCROLLCURSOR"].pic)->GetSurfaceDesc(&desc);
@@ -581,7 +584,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	try {
 		pics["CELLTAG"].pic = BitmapToSurface(((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd, *BitmapFromResource(IDB_CELLTAG)).Detach();
 		FSunPackLib::SetColorKey((LPDIRECTDRAWSURFACE4)pics["CELLTAG"].pic, CLR_INVALID);
-		memset(&desc, 0, sizeof(DDSURFACEDESC2));
+		::memset(&desc, 0, sizeof(DDSURFACEDESC2));
 		desc.dwSize = sizeof(DDSURFACEDESC2);
 		desc.dwFlags = DDSD_HEIGHT | DDSD_WIDTH;
 		((LPDIRECTDRAWSURFACE4)pics["CELLTAG"].pic)->GetSurfaceDesc(&desc);
@@ -604,7 +607,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	{
 		pics["FLAG"].pic = BitmapToSurface(((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd, *BitmapFromResource(IDB_FLAG)).Detach();
 		FSunPackLib::SetColorKey((LPDIRECTDRAWSURFACE4)pics["FLAG"].pic, -1);
-		memset(&desc, 0, sizeof(DDSURFACEDESC2));
+		::memset(&desc, 0, sizeof(DDSURFACEDESC2));
 		desc.dwSize = sizeof(DDSURFACEDESC2);
 		desc.dwFlags = DDSD_HEIGHT | DDSD_WIDTH;
 		((LPDIRECTDRAWSURFACE4)pics["FLAG"].pic)->GetSurfaceDesc(&desc);
@@ -621,7 +624,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	// MW April 2nd, 2001
 	// prepare 1x1 hidden tile replacement
 	DDSURFACEDESC2 ddsd;
-	memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
+	::memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
 	ddsd.dwSize=sizeof(DDSURFACEDESC2);
 	ddsd.ddsCaps.dwCaps=DDSCAPS_OFFSCREENPLAIN;
 	ddsd.dwFlags=DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
@@ -669,10 +672,8 @@ void CLoading::InitPics(CProgressCtrl* prog)
 
 
 	// new: Prepare building terrain information:
-	int i;
-	for(i=0;i<rules.sections["BuildingTypes"].values.size();i++)
-	{
-		PrepareUnitGraphic(*rules.sections["BuildingTypes"].GetValue(i));
+	for(auto const& [seq, id] : rules.GetSection("BuildingTypes")) {
+		PrepareUnitGraphic(id);
 		
 	}
 	ms.dwLength=sizeof(MEMORYSTATUS);
@@ -739,8 +740,8 @@ void CLoading::CreateINI()
 #endif
 
 	version.LoadString(IDS_VERSION);
-	path.sections[app].values["Path"]=AppPath;
-	path.sections[app].values["Version"]=version;
+	path.SetString(app, "Path", AppPath);
+	path.SetString(app, "Version", version);
 
 	path.SaveFile(iniFile);
 }
@@ -886,71 +887,76 @@ void CLoading::InitSHPs(CProgressCtrl* prog)
 	int i;
 
 	// overlay:
-	if(!theApp.m_Options.bDoNotLoadOverlayGraphics)
-	for(i=0;i<rules.sections["OverlayTypes"].values.size();i++)
-	{
-		LoadOverlayGraphic(*rules.sections["OverlayTypes"].GetValue(i), i);
-		if(m_progress.m_hWnd!=NULL && i%15==0) {
-			m_progress.SetPos(m_progress.GetPos()+1);
-			UpdateWindow();
-		}
-	}	
-
-	if(!theApp.m_Options.bDoNotLoadVehicleGraphics)
-	for(i=0;i<rules.sections["VehicleTypes"].values.size();i++)
-	{
-		LoadUnitGraphic(*rules.sections["VehicleTypes"].GetValue(i));
-		if(m_progress.m_hWnd!=NULL && i%15==0) {
-			m_progress.SetPos(m_progress.GetPos()+1);
-			UpdateWindow();
+	if (!theApp.m_Options.bDoNotLoadOverlayGraphics) {
+		auto const& sec = rules["OverlayTypes"];
+		for (i = 0; i < sec.Size(); i++) {
+			LoadOverlayGraphic(sec.Nth(i).second, i);
+			if (m_progress.m_hWnd != NULL && i % 15 == 0) {
+				m_progress.SetPos(m_progress.GetPos() + 1);
+				UpdateWindow();
+			}
 		}
 	}
 
-	if(!theApp.m_Options.bDoNotLoadInfantryGraphics)
-	for(i=0;i<rules.sections["InfantryTypes"].values.size();i++)
-	{
-		LoadUnitGraphic(*rules.sections["InfantryTypes"].GetValue(i));
-		if(m_progress.m_hWnd!=NULL && i%15==0){
-			m_progress.SetPos(m_progress.GetPos()+1);
-			UpdateWindow();
+	if (!theApp.m_Options.bDoNotLoadVehicleGraphics) {
+		auto const& sec = rules["VehicleTypes"];
+		for (i = 0; i < sec.Size(); i++) {
+			LoadUnitGraphic(sec.Nth(i).second);
+			if (m_progress.m_hWnd != NULL && i % 15 == 0) {
+				m_progress.SetPos(m_progress.GetPos() + 1);
+				UpdateWindow();
+			}
 		}
 	}
 
-	if(!theApp.m_Options.bDoNotLoadBuildingGraphics)
-	for(i=0;i<rules.sections["BuildingTypes"].values.size();i++)
-	{
-		LoadUnitGraphic(*rules.sections["BuildingTypes"].GetValue(i));
-		if(m_progress.m_hWnd!=NULL && i%15==0) {
-			m_progress.SetPos(m_progress.GetPos()+1);
-			UpdateWindow();
+	if (!theApp.m_Options.bDoNotLoadInfantryGraphics) {
+		auto const& sec = rules.GetSection("InfantryTypes");
+		for (i = 0; i < sec.Size(); i++) {
+			LoadUnitGraphic(sec.Nth(i).second);
+			if (m_progress.m_hWnd != NULL && i % 15 == 0) {
+				m_progress.SetPos(m_progress.GetPos() + 1);
+				UpdateWindow();
+			}
 		}
 	}
 
-	if(!theApp.m_Options.bDoNotLoadAircraftGraphics)
-	for(i=0;i<rules.sections["AircraftTypes"].values.size();i++)
-	{
-		LoadUnitGraphic(*rules.sections["AircraftTypes"].GetValue(i));
-		if(m_progress.m_hWnd!=NULL && i%15==0) {
-			m_progress.SetPos(m_progress.GetPos()+1);
-			UpdateWindow();
+
+	if (!theApp.m_Options.bDoNotLoadBuildingGraphics) {
+		auto const& sec = rules.GetSection("BuildingTypes");
+		for (i = 0; i < sec.Size(); i++) {
+			LoadUnitGraphic(sec.Nth(i).second);
+			if (m_progress.m_hWnd != NULL && i % 15 == 0) {
+				m_progress.SetPos(m_progress.GetPos() + 1);
+				UpdateWindow();
+			}
 		}
 	}
 
-	if(!theApp.m_Options.bDoNotLoadTreeGraphics)
-	for(i=0;i<rules.sections["TerrainTypes"].values.size();i++)
-	{
-		LoadUnitGraphic(*rules.sections["TerrainTypes"].GetValue(i));
-		if(m_progress.m_hWnd!=NULL && i%15==0)
-		{
-			m_progress.SetPos(m_progress.GetPos()+1);
-			UpdateWindow();
+	if(!theApp.m_Options.bDoNotLoadAircraftGraphics) {
+		auto const& sec = rules.GetSection("AircraftTypes");
+		for (i = 0; i < sec.Size(); i++) {
+			LoadUnitGraphic(sec.Nth(i).second);
+			if (m_progress.m_hWnd != NULL && i % 15 == 0) {
+				m_progress.SetPos(m_progress.GetPos() + 1);
+				UpdateWindow();
+			}
+		}
+	}
+
+	if (!theApp.m_Options.bDoNotLoadTreeGraphics) {
+		auto const& sec = rules.GetSection("TerrainTypes");
+		for (i = 0; i < sec.Size(); i++) {
+			LoadUnitGraphic(sec.Nth(i).second);
+			if (m_progress.m_hWnd != NULL && i % 15 == 0) {
+				m_progress.SetPos(m_progress.GetPos() + 1);
+				UpdateWindow();
+			}
 		}
 	}
 
 #ifdef SMUDGE_SUPP
-	for(i=0;i<rules.sections["SmudgeTypes"].values.size();i++)
-	{
-		LoadUnitGraphic(*rules.sections["SmudgeTypes"].GetValue(i));
+	for(auto const& [seq, id] : rules.GetSection("SmudgeTypes")) {
+		LoadUnitGraphic(id);
 		/*if(m_progress.m_hWnd!=NULL && i%15==0)
 		{
 			m_progress.SetPos(m_progress.GetPos()+1);
@@ -1173,21 +1179,21 @@ std::optional<FindShpResult> CLoading::FindUnitShp(const CString& image, char pr
 	const bool firstCharSupportsTheater = first == 'G' || first == 'N' || first == 'C' || first == 'Y';
 
 	HTSPALETTE forcedPalette = 0;
-	const auto& unitPalettePrefixes = g_data.sections["ForceUnitPalettePrefix"];
-	if (unitPalettePrefixes.end() != std::find_if(unitPalettePrefixes.begin(), unitPalettePrefixes.end(), [&image](const auto& pair) {return image.Find(pair.second) == 0;}))
-	{
+	const auto& unitPalettePrefixes = g_data["ForceUnitPalettePrefix"];
+	if (unitPalettePrefixes.end() != std::find_if(unitPalettePrefixes.begin(), unitPalettePrefixes.end(),
+		[&image](const auto& pair) {return image.Find(pair.second) == 0; })) {
 		forcedPalette = GetUnitPalette(preferred_theat);
 	}
 
-	const auto& isoPalettePrefixes = g_data.sections["ForceIsoPalettePrefix"];
-	if (isoPalettePrefixes.end() != std::find_if(isoPalettePrefixes.begin(), isoPalettePrefixes.end(), [&image](const auto& pair) {return image.Find(pair.second) == 0;}))
-	{
+	const auto& isoPalettePrefixes = g_data["ForceIsoPalettePrefix"];
+	if (isoPalettePrefixes.end() != std::find_if(isoPalettePrefixes.begin(), isoPalettePrefixes.end(), 
+		[&image](const auto& pair) {return image.Find(pair.second) == 0;})) {
 		forcedPalette = GetIsoPalette(preferred_theat);
 	}
 
-	const bool isTheater = isTrue(artSection.GetValueByName("Theater"));
-	const bool isNewTheater = isTrue(artSection.GetValueByName("NewTheater"));
-	const bool terrainPalette = isTrue(artSection.GetValueByName("TerrainPalette"));
+	const bool isTheater = artSection.GetBool("Theater");
+	const bool isNewTheater = artSection.GetBool("NewTheater");
+	const bool terrainPalette = artSection.GetBool("TerrainPalette");
 
 	auto unitOrIsoPalette = terrainPalette ? GetIsoPalette(preferred_theat) : GetUnitPalette(preferred_theat);
 
@@ -1281,7 +1287,7 @@ int lepton_to_screen_y(int leptons)
 	return leptons * f_y / 256;
 }
 
-BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
+BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 {
 	errstream << "Loading: " << lpUnittype << endl;
 	errstream.flush();
@@ -1296,31 +1302,31 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 	WORD wStep=1; // step is 1 for infantry, buildings, etc, and for shp vehicles it specifies the step rate between every direction
 	WORD wStartWalkFrame=0; // for examply cyborg reaper has another walk starting frame
 	int iTurretOffset=0; // used for centering y pos of turret (if existing) (for vehicles)
-	const BOOL bStructure=rules.sections["BuildingTypes"].FindValue(lpUnittype)>=0; // is this a structure?
-	const BOOL bVehicle = rules.sections["VehicleTypes"].FindValue(lpUnittype) >= 0; // is this a structure?
+	const BOOL bStructure = rules["BuildingTypes"].HasValue(lpUnittype); // is this a structure?
+	const BOOL bVehicle = rules["VehicleTypes"].HasValue(lpUnittype); // is this a structure?
 
-	BOOL bPowerUp=rules.sections[lpUnittype].values["PowersUpBuilding"]!="";
+	auto const bPowerUp = !rules.GetString(lpUnittype, "PowersUpBuilding").IsEmpty();
 
 		
 	CIsoView& v=*((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
 
-	_rules_image=lpUnittype;
-	if(rules.sections[lpUnittype].values.find("Image")!=rules.sections[lpUnittype].values.end())
-		_rules_image=rules.sections[lpUnittype].values["Image"];
+	_rules_image = lpUnittype;
+	_rules_image = rules.GetStringOr(lpUnittype, "Image", _rules_image);
 
 	CString _art_image = _rules_image;
-	if(art.sections[_rules_image].values.find("Image")!=art.sections[_rules_image].values.end())
-	{
-		if(!isTrue(g_data.sections["IgnoreArtImage"].values[_rules_image]))
-			_art_image=art.sections[_rules_image].values["Image"];
+	auto const& imageID = art.GetString(_rules_image, "Image");
+	if (!imageID.IsEmpty()) {
+		if (!g_data.GetBool("IgnoreArtImage", _rules_image)) {
+			_art_image = imageID;
+		}
 	}
 
 	const CString& image = _art_image;
-	const auto& rulesSection = rules.sections[lpUnittype];
-	const auto& artSection = art.sections[image];
+	const auto& rulesSection = rules[lpUnittype];
+	const auto& artSection = art[image];
 
-	if(!isTrue(art.sections[image].values["Voxel"])) // is it a shp graphic?
-	{
+	// is it a shp graphic?
+	if (!artSection.GetBool(image, "Voxel")) {
 		try
 		{
 
@@ -1337,7 +1343,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 		HTSPALETTE hPalette = shp->palette;
 		const auto hShpMix = shp->mixfile;
 		theat = static_cast<char>(shp->theat);
-		auto limited_to_theater = isTrue(artSection.GetValueByName("TerrainPalette")) ? shp->mixfile_theater : TheaterChar::None;
+		auto limited_to_theater = artSection.GetBool("TerrainPalette") ? shp->mixfile_theater : TheaterChar::None;
 
 		
 		SHPHEADER head;
@@ -1399,9 +1405,8 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 			}
 			//hShpMix=20;
 
-			    
-			if(rules.sections[lpUnittype].values["Bib"]!="no") // seems to be ignored by TS, art.ini overwrites???
-			{			
+			// seems to be ignored by TS, art.ini overwrites???
+			if(rules.GetBool( lpUnittype, "Bib")) {			
 				LoadBuildingSubGraphic("BibShape", artSection, bAlwaysSetChar, theat, hShpMix, bib_h, bib);
 			}
 
@@ -1409,13 +1414,13 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 			LoadBuildingSubGraphic("IdleAnim", artSection, bAlwaysSetChar, theat, hShpMix, idleanim_h, idleanim);
 			LoadBuildingSubGraphic("ActiveAnim2", artSection, bAlwaysSetChar, theat, hShpMix, activeanim2_h, activeanim2);
 			LoadBuildingSubGraphic("ActiveAnim3", artSection, bAlwaysSetChar, theat, hShpMix, activeanim3_h, activeanim3);
-			if (!isTrue(g_data.sections["IgnoreSuperAnim1"].values[image]))
+			if (!g_data.GetBool("IgnoreSuperAnim1", image))
 				LoadBuildingSubGraphic("SuperAnim", artSection, bAlwaysSetChar, theat, hShpMix, superanim1_h, superanim1);
-			if (!isTrue(g_data.sections["IgnoreSuperAnim2"].values[image]))
+			if (!g_data.GetBool("IgnoreSuperAnim2", image))
 				LoadBuildingSubGraphic("SuperAnimTwo", artSection, bAlwaysSetChar, theat, hShpMix, superanim2_h, superanim2);
-			if (!isTrue(g_data.sections["IgnoreSuperAnim3"].values[image]))
+			if (!g_data.GetBool("IgnoreSuperAnim3", image))
 				LoadBuildingSubGraphic("SuperAnimThree", artSection, bAlwaysSetChar, theat, hShpMix, superanim3_h, superanim3);
-			if (!isTrue(g_data.sections["IgnoreSuperAnim4"].values[image]))
+			if (!g_data.GetBool("IgnoreSuperAnim4", image))
 				LoadBuildingSubGraphic("SuperAnimFour", artSection, bAlwaysSetChar, theat, hShpMix, superanim4_h, superanim4);
 			LoadBuildingSubGraphic("SpecialAnim", artSection, bAlwaysSetChar, theat, hShpMix, specialanim1_h, specialanim1);
 			LoadBuildingSubGraphic("SpecialAnimTwo", artSection, bAlwaysSetChar, theat, hShpMix, specialanim2_h, specialanim2);
@@ -1427,21 +1432,23 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 
 			FSunPackLib::VoxelNormalClass vnc = FSunPackLib::VoxelNormalClass::Unknown;
 
-			if (isTrue(rules.sections[image].values["Turret"]))
-			{
-				turretanim_name = rules.sections[image].values["TurretAnim"];
+			if (rules.GetBool(image, "Turret")) {
+				turretanim_name = rules.GetString(image, "TurretAnim");
 				auto vxl_turretanim_filename = turretanim_name.IsEmpty() ? image + "tur.vxl" : turretanim_name + ".vxl";
 				auto vxl_barrelanim_filename = image + "barl.vxl";
-				if (art.sections[turretanim_name].values.find("Image") != art.sections[turretanim_name].values.end())
-					vxl_turretanim_filename = art.sections[turretanim_name].values["Image"] + ".vxl";
+				auto const& imageID = art.GetString(turretanim_name, "Image");
+				if (!imageID.IsEmpty()) {
+					vxl_turretanim_filename = imageID + ".vxl";
+				}
 
-				if (bStructure && turretanim_name.GetLength() > 0 && isFalse(rules.sections[image].values["TurretAnimIsVoxel"]))
-				{
+				if (bStructure && turretanim_name.GetLength() > 0 && !rules.GetBool(image, "TurretAnimIsVoxel")) {
 					turretanim_filename = turretanim_name + ".shp";
-					if (art.sections[turretanim_name].values.find("Image") != art.sections[turretanim_name].values.end()) turretanim_filename = art.sections[turretanim_name].values["Image"] + ".shp";
+					auto const& imageID = art.GetString(turretanim_name, "Image");
+					if (imageID.IsEmpty()) {
+						turretanim_filename = imageID + ".shp";
+					}
 
-					if (isTrue(artSection.GetValueByName("NewTheater")))
-					{
+					if (artSection.GetBool("NewTheater")) {
 						auto tmp = turretanim_filename;
 						tmp.SetAt(1, theat);
 						if (FSunPackLib::XCC_DoesFileExist(tmp, hShpMix))
@@ -1468,20 +1475,17 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 						}
 
 					}
-				}
-				else if (
-					(bStructure && turretanim_name.GetLength() > 0 && isTrue(rules.sections[image].values["TurretAnimIsVoxel"]))
+				} else if (
+					(bStructure && turretanim_name.GetLength() > 0 && rules.GetBool(image, "TurretAnimIsVoxel"))
 					|| (!bStructure && (FindFileInMix(vxl_turretanim_filename) || FindFileInMix(vxl_barrelanim_filename)))
-				)
-				{
+				) {
 					turretanim_filename = vxl_turretanim_filename;
 					barrelanim_filename = vxl_barrelanim_filename;
 
 					HMIXFILE hVXL = FindFileInMix(vxl_turretanim_filename);
 					HMIXFILE hBarl = FindFileInMix(vxl_barrelanim_filename);
 
-					if (artSection.values.find("TurretOffset") != art.sections[image].values.end())
-						iTurretOffset = atoi(art.sections[image].values["TurretOffset"]);
+					iTurretOffset = artSection.GetInteger("TurretOffset", iTurretOffset);
 					Vec3f turretModelOffset(iTurretOffset / 6.0f, 0.0f, 0.0f);
 
 
@@ -1567,7 +1571,17 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 								RECT r;
 								int center_x, center_y;
 								if (!
-									FSunPackLib::LoadVXLImage(*m_voxelNormalTables, lightDirection, rotation, turretModelOffset, vxlBarrelColors[i], vxlBarrelLighting[i], &center_x, &center_y, atoi(rules.sections[image].values["TurretAnimZAdjust"]), 0, 0, 0, 0, &r)
+									FSunPackLib::LoadVXLImage(
+										*m_voxelNormalTables, 
+										lightDirection, 
+										rotation, 
+										turretModelOffset, 
+										vxlBarrelColors[i], 
+										vxlBarrelLighting[i], 
+										&center_x, 
+										&center_y, 
+										rules.GetInteger(image, "TurretAnimZAdjust"), 
+										0, 0, 0, 0, &r)
 									)
 								{
 
@@ -1591,21 +1605,21 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 			}
 
 
-			if(art.sections[image].values.find("WalkFrames")!=art.sections[image].values.end())
-				wStep=atoi(art.sections[image].values["WalkFrames"]);
-			if(art.sections[image].values.find("StartWalkFrame")!=art.sections[image].values.end())
-				wStartWalkFrame=atoi(art.sections[image].values["StartWalkFrame"]);
+			wStep = art.GetInteger(image, "WalkFrames", wStep);
+			wStartWalkFrame = art.GetInteger(image, "StartWalkFrame", wStartWalkFrame);
 			
-			if(art.sections[image].values["Palette"]=="lib")
-				hPalette=m_hPalLib;
+			if (art.GetString(image, "Palette") == "lib") {
+				hPalette = m_hPalLib;
+			}
 
 			BOOL bSuccess=FSunPackLib::SetCurrentSHP(filename, hShpMix);
 			if(
 			!bSuccess
-			)
-			{
+			) {
 				filename=image+".sno";
-				if(cur_theat=='T' || cur_theat=='U' /* || cur_theat=='N' ? */) hPalette=m_hPalIsoTemp;
+				if (cur_theat == 'T' || cur_theat == 'U' /* || cur_theat=='N' ? */) {
+					hPalette = m_hPalIsoTemp;
+				}
 				HMIXFILE hShpMix=FindFileInMix(filename);
 				bSuccess=FSunPackLib::SetCurrentSHP(filename, hShpMix);
 				
@@ -1615,42 +1629,38 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				}
 			}
 			
-			if(bSuccess)
-			{
-			
-			FSunPackLib::XCC_GetSHPHeader(&head);
-			int i;
-			int maxPics=head.c_images;
-			if(maxPics>8) maxPics=8; // we only need 8 pictures for every direction!
-			if(bStructure && !bPowerUp && !isTrue(rules.sections[image].values["Turret"])) maxPics=1;
-			if(bVoxelTurret) maxPics=8;
-			
+			if (bSuccess) {
 
-
-			if(!bStructure && rules.sections[image].values["Turret"]=="yes")
-			{
-				int iStartTurret=wStartWalkFrame+8*wStep;
-				const WORD wAnimCount=4; // anims between each "normal" direction, seems to be hardcoded
-				
+				FSunPackLib::XCC_GetSHPHeader(&head);
 				int i;
-
-				for(i=0;i<8;i++)
-				{
-					if(iStartTurret+i*wAnimCount<head.c_images)
-					{
-						FSunPackLib::XCC_GetSHPImageHeader(iStartTurret+i*wAnimCount, &turretinfo[i]);
-						FSunPackLib::XCC_GetSHPHeader(&turrets_h[i]);
-						FSunPackLib::LoadSHPImage(iStartTurret+i*wAnimCount, turretColors[i]);
-					}
-					
+				int maxPics = head.c_images;
+				if (maxPics > 8) {
+					maxPics = 8; // we only need 8 pictures for every direction!
 				}
-			}
+				if (bStructure && !bPowerUp && !rules.GetBool(image, "Turret")) {
+					maxPics = 1;
+				}
+				if (bVoxelTurret) {
+					maxPics = 8;
+				}
+
+				if (!bStructure && rules.GetBool(image, "Turret")) {
+					int iStartTurret = wStartWalkFrame + 8 * wStep;
+					const WORD wAnimCount = 4; // anims between each "normal" direction, seems to be hardcoded
+					for (auto i = 0; i < 8; i++) {
+						if (iStartTurret + i * wAnimCount < head.c_images) {
+							FSunPackLib::XCC_GetSHPImageHeader(iStartTurret + i * wAnimCount, &turretinfo[i]);
+							FSunPackLib::XCC_GetSHPHeader(&turrets_h[i]);
+							FSunPackLib::LoadSHPImage(iStartTurret + i * wAnimCount, turretColors[i]);
+						}
+					}
+				}
 
 			
 			
 			// create an array of pointers to directdraw surfaces
 			lpT=new(BYTE*[maxPics]);
-			memset(lpT, 0, sizeof(BYTE)*maxPics);
+			::memset(lpT, 0, sizeof(BYTE)*maxPics);
 			std::vector<std::vector<BYTE>> lighting(maxPics);
 			std::vector<SHPIMAGEHEADER> shp_image_headers(maxPics);
 			
@@ -1661,19 +1671,16 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 					FSunPackLib::LoadSHPImage(0, 1, &lpT[i]);
 					FSunPackLib::XCC_GetSHPImageHeader(0, &shp_image_headers[i]);
 				}
-			}
-			else if(wStep==1 && (rules.sections[lpUnittype].values["PowersUpBuilding"].GetLength()==0 || !isTrue(rules.sections[lpUnittype].values["Turret"]))) 
-			{ // standard case...
-
+			} else if(wStep==1 && (rules.GetString(lpUnittype, "PowersUpBuilding").IsEmpty() || !rules.GetBool( lpUnittype,"Turret"))) { 
+				// standard case...
 				FSunPackLib::LoadSHPImage(wStartWalkFrame, maxPics, lpT);
-				for (int i = 0; i < maxPics; ++i)
+				for (int i = 0; i < maxPics; ++i) {
 					FSunPackLib::XCC_GetSHPImageHeader(wStartWalkFrame + i, &shp_image_headers[i]);
+				}
 			
-			}
-			else if(rules.sections[lpUnittype].values["PowersUpBuilding"].GetLength()!=0 && isTrue(rules.sections[lpUnittype].values["Turret"]))
-			{ // a "real" turret (vulcan cannon, etc...)
-				for(i=0;i<maxPics; i++)
-				{
+			} else if(!rules.GetString(lpUnittype, "PowersUpBuilding").IsEmpty() && rules.GetBool(lpUnittype, "Turret")) { 
+				// a "real" turret (vulcan cannon, etc...)
+				for(i=0;i<maxPics; i++) {
 					FSunPackLib::LoadSHPImage(i*4, 1, &lpT[i]);
 					FSunPackLib::XCC_GetSHPImageHeader(i*4, &shp_image_headers[i]);
 				}
@@ -1701,7 +1708,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, bib, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1716,7 +1723,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, activeanim, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1729,7 +1736,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, idleanim, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1742,7 +1749,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, activeanim2, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1754,7 +1761,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, activeanim3, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1766,7 +1773,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, superanim1, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1779,7 +1786,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, superanim2, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1792,7 +1799,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, superanim3, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1805,7 +1812,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, superanim4, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1818,7 +1825,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, specialanim1, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1831,7 +1838,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, specialanim2, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1843,7 +1850,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, specialanim3, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1856,7 +1863,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				{
 					DDBLTFX fx;
 
-					memset(&fx, 0, sizeof(DDBLTFX));
+					::memset(&fx, 0, sizeof(DDBLTFX));
 					fx.dwSize=sizeof(DDBLTFX);
 
 					//lpT[i]->Blt(NULL, specialanim4, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
@@ -1871,7 +1878,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				if(!vxlBarrelColors[i].empty() && (i == 1 || i == 0 || i == 7))
 				{
 					DDSURFACEDESC2 ddsd;
-					memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
+					::memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
 					ddsd.dwSize = sizeof(DDSURFACEDESC2);
 					ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
 					ddsd.dwWidth = barrels_h[i].cx;
@@ -1881,19 +1888,19 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 					char c[50];
 					itoa(i, c, 10);
 #ifdef RA2_MODE
-					XMover = atoi(g_data.sections["BuildingVoxelBarrelsRA2"].values[(CString)lpUnittype + "X"]);
-					YMover = atoi(g_data.sections["BuildingVoxelBarrelsRA2"].values[(CString)lpUnittype + "Y"]);
-					XMover += atoi(g_data.sections["BuildingVoxelBarrelsRA2"].values[(CString)lpUnittype + (CString)"X" + c]);
-					YMover += atoi(g_data.sections["BuildingVoxelBarrelsRA2"].values[(CString)lpUnittype + (CString)"Y" + c]);
+					XMover = g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "X");
+					YMover = g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "Y");
+					XMover += g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "X" + c);
+					YMover += g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "Y" + c);
 #else
-					XMover = atoi(g_data.sections["BuildingVoxelBarrels"].values[(CString)lpUnittype + "X"]);
-					YMover = atoi(g_data.sections["BuildingVoxelBarrels"].values[(CString)lpUnittype + "Y"]);
+					XMover = atoi(g_data.GetInteger("BuildingVoxelBarrels"].lpUnittype + "X");
+					YMover = atoi(g_data.GetInteger("BuildingVoxelBarrels"].lpUnittype + "Y");
 #endif
 
 					RECT srcRect, destRect;
 
-					int mx = head.cx / 2 + atoi(rules.sections[image].values["TurretAnimX"]) - barrelinfo[i].x;
-					int my = head.cy / 2 + atoi(rules.sections[image].values["TurretAnimY"]) - barrelinfo[i].y;
+					int mx = head.cx / 2 + rules.GetInteger(image, "TurretAnimX") - barrelinfo[i].x;
+					int my = head.cy / 2 + rules.GetInteger(image, "TurretAnimY") - barrelinfo[i].y;
 
 					srcRect.top = 0;
 					srcRect.left = 0;
@@ -1916,7 +1923,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				if(!turretColors[i].empty())
 				{
 					DDSURFACEDESC2 ddsd;
-					memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
+					::memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
 					ddsd.dwSize=sizeof(DDSURFACEDESC2);
 					ddsd.dwFlags=DDSD_WIDTH | DDSD_HEIGHT;
 					//turrets[i]->GetSurfaceDesc(&ddsd);
@@ -1928,21 +1935,21 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 					char c[50];
 					itoa(i, c, 10);
 #ifdef RA2_MODE
-					XMover = atoi(g_data.sections["BuildingVoxelTurretsRA2"].values[(CString)lpUnittype + "X"]);
-					YMover = atoi(g_data.sections["BuildingVoxelTurretsRA2"].values[(CString)lpUnittype + "Y"]);
-					XMover += atoi(g_data.sections["BuildingVoxelTurretsRA2"].values[(CString)lpUnittype + (CString)"X" + c]);
-					YMover += atoi(g_data.sections["BuildingVoxelTurretsRA2"].values[(CString)lpUnittype + (CString)"Y" + c]);
+					XMover = g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "X");
+					YMover = g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "Y");
+					XMover += g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "X" + c);
+					YMover += g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "Y" + c);
 #else
-					XMover = atoi(g_data.sections["BuildingVoxelTurrets"].values[(CString)lpUnittype + "X"]);
-					YMover = atoi(g_data.sections["BuildingVoxelTurrets"].values[(CString)lpUnittype + "Y"]);
+					XMover = g_data.GetInteger("BuildingVoxelTurrets", lpUnittype + "X");
+					YMover = g_data.GetInteger("BuildingVoxelTurrets", lpUnittype + "Y");
 #endif
 
 					RECT srcRect, destRect;
 					
 					if (bVoxelTurret)
 					{
-						int mx = head.cx / 2 + atoi(rules.sections[image].values["TurretAnimX"]) - turretinfo[i].x;
-						int my = head.cy / 2 + atoi(rules.sections[image].values["TurretAnimY"]) - turretinfo[i].y;						
+						int mx = head.cx / 2 + rules.GetInteger(image, "TurretAnimX") - turretinfo[i].x;
+						int my = head.cy / 2 + rules.GetInteger(image, "TurretAnimY") - turretinfo[i].y;						
 
 						srcRect.top=0;
 						srcRect.left=0;
@@ -1957,8 +1964,8 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 					else // !bVoxelTurret
 					{
 
-						int mx = atoi(rules.sections[image].values["TurretAnimX"]);
-						int my = atoi(rules.sections[image].values["TurretAnimY"]);//+atoi(rules.sections[image].values["barrelAnimZAdjust"]);
+						int mx = rules.GetInteger(image, "TurretAnimX");
+						int my = rules.GetInteger(image, "TurretAnimY");//+rules.GetInteger(image, "barrelAnimZAdjust");
 
 
 
@@ -1983,7 +1990,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				if(!vxlBarrelColors[i].empty() && i!=1 && i!=0 && i!=7)
 				{
 					DDSURFACEDESC2 ddsd;
-					memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
+					::memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
 					ddsd.dwSize = sizeof(DDSURFACEDESC2);
 					ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
 					ddsd.dwWidth = barrels_h[i].cx;
@@ -1993,19 +2000,19 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 					char c[50];
 					itoa(i, c, 10);
 #ifdef RA2_MODE
-					XMover = atoi(g_data.sections["BuildingVoxelBarrelsRA2"].values[(CString)lpUnittype + "X"]);
-					YMover = atoi(g_data.sections["BuildingVoxelBarrelsRA2"].values[(CString)lpUnittype + "Y"]);
-					XMover += atoi(g_data.sections["BuildingVoxelBarrelsRA2"].values[(CString)lpUnittype + (CString)"X" + c]);
-					YMover += atoi(g_data.sections["BuildingVoxelBarrelsRA2"].values[(CString)lpUnittype + (CString)"Y" + c]);
+					XMover = g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "X");
+					YMover = g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "Y");
+					XMover += g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + (CString)"X" + c);
+					YMover += g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + (CString)"Y" + c);
 #else
-					XMover = atoi(g_data.sections["BuildingVoxelBarrels"].values[(CString)lpUnittype + "X"]);
-					YMover = atoi(g_data.sections["BuildingVoxelBarrels"].values[(CString)lpUnittype + "Y"]);
+					XMover = g_data.GetInteger("BuildingVoxelBarrels", lpUnittype + "X");
+					YMover = g_data.GetInteger("BuildingVoxelBarrels", lpUnittype + "Y");
 #endif
 
 					RECT srcRect, destRect;
 
-					int mx = head.cx / 2 + atoi(rules.sections[image].values["TurretAnimX"]) - barrelinfo[i].x;
-					int my = head.cy / 2 + atoi(rules.sections[image].values["TurretAnimY"]) - barrelinfo[i].y;
+					int mx = head.cx / 2 + rules.GetInteger(image, "TurretAnimX") - barrelinfo[i].x;
+					int my = head.cy / 2 + rules.GetInteger(image, "TurretAnimY") - barrelinfo[i].y;
 
 					srcRect.top = 0;
 					srcRect.left = 0;
@@ -2025,8 +2032,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 									
 				}
 
-				if(!bPowerUp && i!=0 && (imghead.unknown==0 && !isTrue(g_data.sections["Debug"].values["IgnoreSHPImageHeadUnused"])) && bStructure)
-				{
+				if(!bPowerUp && i!=0 && (imghead.unknown==0 && !g_data.GetBool("Debug", "IgnoreSHPImageHeadUnused")) && bStructure) {
 					if(lpT[i]) delete[] lpT[i];
 					lpT[i]=NULL;
 				}
@@ -2130,15 +2136,14 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 
 		int XMover, YMover;
 #ifdef RA2_MODE
-		XMover=atoi(g_data.sections["VehicleVoxelTurretsRA2"].values[(CString)lpUnittype+"X"]);
-		YMover=atoi(g_data.sections["VehicleVoxelTurretsRA2"].values[(CString)lpUnittype+"Y"]);
+		XMover=g_data.GetInteger("VehicleVoxelTurretsRA2", lpUnittype+"X");
+		YMover=g_data.GetInteger("VehicleVoxelTurretsRA2", lpUnittype+"Y");
 #else
-		XMover=atoi(g_data.sections["VehicleVoxelTurrets"].values[(CString)lpUnittype+"X"]);
-		YMover=atoi(g_data.sections["VehicleVoxelTurrets"].values[(CString)lpUnittype+"Y"]);
+		XMover=g_data.GetInteger("VehicleVoxelTurrets", lpUnittype+"X");
+		YMover=g_data.GetInteger("VehicleVoxelTurrets", lpUnittype+"Y");
 #endif
 
-		if (artSection.values.find("TurretOffset") != art.sections[image].values.end())
-			iTurretOffset = atoi(art.sections[image].values["TurretOffset"]);
+		iTurretOffset = art.GetInteger(image, "TurretOffset", iTurretOffset);
 		
 		int i;
 
@@ -2172,8 +2177,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 			RECT lprB;
 			int turret_x,turret_y,turret_x_zmax,turret_y_zmax,barrel_x,barrel_y;
 
-			if(isTrue(rules.sections[lpUnittype].values["Turret"]))
-			{
+			if(rules.GetBool( lpUnittype, "Turret")) {
 				if(FSunPackLib::SetCurrentVXL(image+"tur.vxl", hMix))
 				{
 					FSunPackLib::LoadVXLImage(*m_voxelNormalTables, lightDirection, rotation, turretModelOffset, turretColors, turretNormals, &turret_x,&turret_y, 0, &turret_x_zmax, &turret_y_zmax,-1,-1,&lprT);
@@ -2207,7 +2211,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 			FSunPackLib::GetVXLSectionInfo(0, vnc);  // we assume the normal class for all voxels sections and turrets or barrels is the same
 
 			DDSURFACEDESC2 ddsd;
-			memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
+			::memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
 			ddsd.dwSize=sizeof(DDSURFACEDESC2);
 			ddsd.dwFlags=DDSD_WIDTH | DDSD_HEIGHT;
 			ddsd.dwWidth=r.right-r.left;
@@ -2219,7 +2223,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 			if(turretColors.size())
 			{
 				DDSURFACEDESC2 ddsdT;
-				memset(&ddsdT, 0, sizeof(DDSURFACEDESC2));
+				::memset(&ddsdT, 0, sizeof(DDSURFACEDESC2));
 				ddsdT.dwSize=sizeof(DDSURFACEDESC2);
 				ddsdT.dwFlags=DDSD_WIDTH | DDSD_HEIGHT;
 				ddsdT.dwWidth=lprT.right-lprT.left;
@@ -2227,7 +2231,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				//lpTurret->GetSurfaceDesc(&ddsdT);
 
 				DDBLTFX fx;
-				memset(&fx, 0, sizeof(DDBLTFX));
+				::memset(&fx, 0, sizeof(DDBLTFX));
 				fx.dwSize=sizeof(DDBLTFX);
 
 				
@@ -2254,7 +2258,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 			if(barrelColors.size())
 			{
 				DDSURFACEDESC2 ddsdB;
-				memset(&ddsdB, 0, sizeof(DDSURFACEDESC2));
+				::memset(&ddsdB, 0, sizeof(DDSURFACEDESC2));
 				ddsdB.dwSize=sizeof(DDSURFACEDESC2);
 				ddsdB.dwFlags=DDSD_WIDTH | DDSD_HEIGHT;
 				ddsdB.dwWidth=lprB.right-lprB.left;
@@ -2262,7 +2266,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 				//lpBarrel->GetSurfaceDesc(&ddsdB);
 				
 				DDSURFACEDESC2 ddsdT;
-				memset(&ddsdT, 0, sizeof(DDSURFACEDESC2));
+				::memset(&ddsdT, 0, sizeof(DDSURFACEDESC2));
 				ddsdT.dwSize=sizeof(DDSURFACEDESC2);
 				ddsdT.dwFlags=DDSD_WIDTH | DDSD_HEIGHT;
 				
@@ -2275,7 +2279,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 
 
 				DDBLTFX fx;
-				memset(&fx, 0, sizeof(DDBLTFX));
+				::memset(&fx, 0, sizeof(DDBLTFX));
 				fx.dwSize=sizeof(DDBLTFX);
 
 				RECT srcRect, destRect;
@@ -2303,7 +2307,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 			errstream << ddsd.dwWidth << " " << ddsd.dwHeight << "\n";
 			PICDATA p;
 			p.pic = new(BYTE[colors.size()]);
-			memcpy(p.pic, colors.data(), colors.size());
+			::memcpy(p.pic, colors.data(), colors.size());
 			p.lighting = pLighting;
 			p.normalClass = vnc;
 			
@@ -2351,7 +2355,7 @@ BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
 }
 void CLoading::LoadBuildingSubGraphic(const CString& subkey, const CIniFileSection& artSection, BOOL bAlwaysSetChar, char theat, HMIXFILE hShpMix, SHPHEADER& shp_h, BYTE*& shp)
 {
-	CString subname = artSection.GetValueByName(subkey);
+	CString subname = artSection.GetString(subkey);
 	if (subname.GetLength() > 0)
 	{
 		auto res = FindUnitShp(subname, theat, artSection);
@@ -2373,1212 +2377,6 @@ void CLoading::LoadBuildingSubGraphic(const CString& subkey, const CIniFileSecti
 
 		}
 	}
-}
-#else // surfaces
-BOOL CLoading::LoadUnitGraphic(LPCTSTR lpUnittype)
-{
-	last_succeeded_operation=10;
-
-	CString _rules_image; // the image used
-	CString filename; // filename of the image
-	char theat=cur_theat; // standard theater char is t (Temperat). a is snow.
-
-	BOOL bAlwaysSetChar; // second char is always theater, even if NewTheater not specified!
-	WORD wStep=1; // step is 1 for infantry, buildings, etc, and for shp vehicles it specifies the step rate between every direction
-	WORD wStartWalkFrame=0; // for examply cyborg reaper has another walk starting frame
-	int iTurretOffset=0; // used for centering y pos of turret (if existing)
-	BOOL bStructure=rules.sections["BuildingTypes"].FindValue(lpUnittype)>=0; // is this a structure?
-
-	BOOL bPowerUp=rules.sections[lpUnittype].values["PowersUpBuilding"]!="";
-		
-	HTSPALETTE hPalette;
-	if(theat=='T') hPalette=m_hPalIsoTemp;
-	if(theat=='A') hPalette=m_hPalIsoSnow;
-	if(theat=='U') hPalette=m_hPalIsoUrb;
-	
-	CIsoView& v=*((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
-
-	_rules_image = lpUnittype;
-	if (rules.sections[lpUnittype].values.find("Image") != rules.sections[lpUnittype].values.end())
-		_rules_image = rules.sections[lpUnittype].values["Image"];
-
-	CString _art_image = _rules_image;
-	if (art.sections[_rules_image].values.find("Image") != art.sections[_rules_image].values.end())
-	{
-		if (!isTrue(g_data.sections["IgnoreArtImage"].values[_rules_image]))
-			_art_image = art.sections[_rules_image].values["Image"];
-	}
-
-	const CString& image = _art_image;
-	const auto& rulesSection = rules.sections[lpUnittype];
-	const auto& artSection = art.sections[image];
-
-	if(!isTrue(art.sections[image].values["Voxel"])) // is it a shp graphic?
-	{
-		try
-		{
-
-		filename=image+".shp";
-
-				
-		BYTE bTerrain=0;
-
-		
-		
-		BOOL isNewTerrain=FALSE;
-		if(isTrue(art.sections[image].values["NewTheater"]))//&& isTrue(artSection.GetValueByName("TerrainPalette")))//(filename.GetAt(0)=='G' || filename.GetAt(0)=='N' || filename.GetAt(0)=='C') && filename.GetAt(1)=='A')
-		{
-			hPalette=m_hPalUnitTemp;
-			if(theat=='A') hPalette=m_hPalUnitSnow;
-			if(theat=='U') hPalette=m_hPalUnitUrb;
-			filename.SetAt(1, theat);
-			isNewTerrain=TRUE;
-		}
-		
-		
-		HMIXFILE hShpMix=FindFileInMix(filename, &bTerrain);
-		
-		BYTE bIgnoreTerrain=TRUE;
-		
-		if(hShpMix==NULL && isNewTerrain)
-		{
-			filename.SetAt(1, 'G');
-			hShpMix=FindFileInMix(filename, &bTerrain);
-			if(hShpMix) theat='G';
-			
-		}
-
-		
-		
-		if(hShpMix==NULL && isNewTerrain)
-		{
-			filename.SetAt(1, 'A');
-			hShpMix=FindFileInMix(filename, &bTerrain);
-			if(hShpMix) theat='A';
-		}
-		
-		if(hShpMix==NULL && isNewTerrain)
-		{
-			filename.SetAt(1, 'T');
-			hShpMix=FindFileInMix(filename, &bTerrain);
-			if(hShpMix){
-				theat='T';
-				hPalette=m_hIsoTemp;
-			}
-		}
-
-		
-		if(isTrue(artSection.GetValueByName("TerrainPalette")))
-		{
-			bIgnoreTerrain=FALSE;
-			
-			if(cur_theat=='T')
-			hPalette=m_hPalIsoTemp;
-			else if(cur_theat=='A')
-				hPalette=m_hPalIsoSnow;
-			else if (cur_theat=='U')
-				hPalette=m_hPalIsoUrb;
-				
-			
-			
-		}
-
-
-		
-		if(hShpMix==0) 
-		{
-			filename=image;
-			filename+=".shp";
-			hShpMix=FindFileInMix(filename, &bTerrain);
-
-			
-			
-			if(hShpMix==NULL)
-			{
-				filename=image;
-				if(theat=='T') filename+=".tem";
-				if(theat=='A') filename+=".sno";
-				if(theat=='U') filename+=".urb";
-				filename.MakeLower();
-				hShpMix=FindFileInMix(filename, &bTerrain);
-				
-				if(hShpMix==NULL)
-				{
-					filename=image;
-					filename+=".tem";
-					hShpMix=FindFileInMix(filename, &bTerrain);
-					if(hShpMix)
-					{
-						hPalette=m_hPalIsoTemp;
-					}
-				}
-				
-				if(hShpMix!=NULL)
-				{
-				
-					
-					
-				}
-				else
-				{
-					filename=image+".shp";
-
-					filename.SetAt(1, 'A');
-
-					hShpMix=FindFileInMix(filename);
-
-					if(hShpMix!=NULL)
-					{
-						bAlwaysSetChar=TRUE;
-					}
-					else
-					{
-						filename.SetAt(1, 'A');
-						hShpMix=FindFileInMix(filename);
-
-						if(hShpMix!=NULL)
-						{
-							theat='A';
-							bAlwaysSetChar=TRUE;
-						}
-						else
-						{
-							filename.SetAt(1, 'U');
-							hShpMix=FindFileInMix(filename);
-							if(hShpMix) theat='U';
-							else
-							{
-								filename.SetAt(1, 'T');
-								hShpMix=FindFileInMix(filename);
-								if(hShpMix) theat='T';
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				theat='T';
-			}
-
-		}
-		else
-		{
-
-			// now we need to find out the palette
-			
-				if(isTrue(artSection.GetValueByName("TerrainPalette"))) // it´s a file in isotemp.mix/isosno.mix
-				{
-										
-				}
-				else // it´s a file in temperat.mix/snow.mix
-				{
-					if(cur_theat=='T') hPalette=m_hPalUnitTemp;
-					if(cur_theat=='A') hPalette=m_hPalUnitSnow;
-					if(cur_theat=='U') hPalette=m_hPalUnitUrb;
-				}
-			
-		}
-
-						
-
-		if(filename=="tibtre01.tem" || filename=="tibtre02.tem" || filename=="tibtre03.tem" || filename=="veinhole.tem")
-		{
-			hPalette=m_hPalUnitTemp;
-		}
-
-		
-		SHPHEADER head;
-		CString bibname;
-		CString bibfilename;
-		CString activeanim_name;
-		CString activeanim_filename;
-		CString idleanim_name;
-		CString idleanim_filename;
-		CString activeanim2_name;
-		CString activeanim2_filename;
-		CString activeanim3_name;
-		CString activeanim3_filename;
-		CString superanim1_name,superanim1_filename;
-		CString superanim2_name,superanim2_filename;
-		CString superanim3_name,superanim3_filename;
-		CString superanim4_name,superanim4_filename;
-		CString specialanim1_name,specialanim1_filename;
-		CString specialanim2_name,specialanim2_filename;
-		CString specialanim3_name,specialanim3_filename;
-		CString specialanim4_name,specialanim4_filename;
-
-		CString turretanim_name;
-		CString turretanim_filename;
-		LPDIRECTDRAWSURFACE4 bib=NULL;
-		LPDIRECTDRAWSURFACE4 activeanim=NULL;
-		LPDIRECTDRAWSURFACE4 idleanim=NULL;
-		LPDIRECTDRAWSURFACE4 activeanim2=NULL;
-		LPDIRECTDRAWSURFACE4 activeanim3=NULL;
-		LPDIRECTDRAWSURFACE4 superanim1=NULL;
-		LPDIRECTDRAWSURFACE4 superanim2=NULL;
-		LPDIRECTDRAWSURFACE4 superanim3=NULL;
-		LPDIRECTDRAWSURFACE4 superanim4=NULL;
-		LPDIRECTDRAWSURFACE4 specialanim1=NULL;
-		LPDIRECTDRAWSURFACE4 specialanim2=NULL;
-		LPDIRECTDRAWSURFACE4 specialanim3=NULL;
-		LPDIRECTDRAWSURFACE4 specialanim4=NULL;
-		LPDIRECTDRAWSURFACE4* lpT=NULL;
-		LPDIRECTDRAWSURFACE4 turrets[8] = { 0 };
-		SHPIMAGEHEADER turretinfo[8];
-		
-		if(hShpMix>0)
-		{		
-				
-
-			//errstream << (LPCTSTR)filename << " found " ;
-			//errstream.flush();
-
-			    
-			if(rules.sections[lpUnittype].values["Bib"]!="no") // seems to be ignored by TS, art.ini overwrites???
-			{
-				
-				bibname=art.sections[image].values["BibShape"];
-				if(bibname.GetLength()>0)
-				{
-					bibfilename=bibname+".shp";
-
-					if(isTrue(art.sections[image].values["NewTheater"]))
-						bibfilename.SetAt(1, theat);
-
-					if(bAlwaysSetChar) bibfilename.SetAt(1, theat);
-
-					if(FSunPackLib::XCC_DoesFileExist(bibfilename, hShpMix))
-					{
-						FSunPackLib::SetCurrentSHP(bibfilename, hShpMix);
-						FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &bib);
-						
-					}
-				}
-			}
-
-			activeanim_name=art.sections[image].values["ActiveAnim"];
-			if(activeanim_name.GetLength()>0)
-			{
-				activeanim_filename=activeanim_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					activeanim_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) activeanim_filename.SetAt(1, theat);
-
-				if(FSunPackLib::XCC_DoesFileExist(activeanim_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(activeanim_filename, hShpMix);
-					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &activeanim);
-					
-					
-				}
-			}
-
-			idleanim_name=art.sections[image].values["IdleAnim"];
-			if(idleanim_name.GetLength()>0)
-			{
-				idleanim_filename=idleanim_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					idleanim_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) idleanim_filename.SetAt(1, theat);
-
-				if(FSunPackLib::XCC_DoesFileExist(idleanim_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(idleanim_filename, hShpMix);
-					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &idleanim);
-				}
-			}
-
-
-			activeanim2_name=art.sections[image].values["ActiveAnimTwo"];
-			if(activeanim2_name.GetLength()>0)
-			{
-				activeanim2_filename=activeanim2_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					activeanim2_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) activeanim2_filename.SetAt(1, theat);
-				
-				if(FSunPackLib::XCC_DoesFileExist(activeanim2_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(activeanim2_filename, hShpMix);
-					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &activeanim2);
-					
-				}
-			}
-
-			activeanim3_name=art.sections[image].values["ActiveAnimThree"];
-			if(activeanim3_name.GetLength()>0)
-			{
-				activeanim3_filename=activeanim3_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					activeanim3_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) activeanim3_filename.SetAt(1, theat);
-				
-				if(FSunPackLib::XCC_DoesFileExist(activeanim3_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(activeanim3_filename, hShpMix);
-					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &activeanim3);
-					
-				}
-			}
-
-			superanim1_name=art.sections[image].values["SuperAnim"];
-			if(superanim1_name.GetLength()>0)
-			{
-				superanim1_filename=superanim1_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					superanim1_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) superanim1_filename.SetAt(1, theat);
-				
-				if(FSunPackLib::XCC_DoesFileExist(superanim1_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(superanim1_filename, hShpMix);					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &superanim1);
-				}
-			}
-
-			superanim2_name=art.sections[image].values["SuperAnimTwo"];
-			if(superanim2_name.GetLength()>0)
-			{
-				superanim2_filename=superanim2_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					superanim2_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) superanim2_filename.SetAt(1, theat);
-				
-				if(FSunPackLib::XCC_DoesFileExist(superanim2_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(superanim2_filename, hShpMix);					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &superanim2);
-				}
-			}
-
-			superanim3_name=art.sections[image].values["SuperAnimThree"];
-			if(superanim3_name.GetLength()>0)
-			{
-				superanim3_filename=superanim3_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					superanim3_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) superanim3_filename.SetAt(1, theat);
-				
-				if(FSunPackLib::XCC_DoesFileExist(superanim3_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(superanim3_filename, hShpMix);					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &superanim3);
-				}
-			}
-
-			superanim4_name=art.sections[image].values["SuperAnimFour"];
-			if(superanim4_name.GetLength()>0)
-			{
-				superanim4_filename=superanim4_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					superanim4_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) superanim4_filename.SetAt(1, theat);
-				
-				if(FSunPackLib::XCC_DoesFileExist(superanim4_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(superanim4_filename, hShpMix);					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &superanim4);
-				}
-			}
-
-			specialanim1_name=art.sections[image].values["SpecialAnim"];
-			if(specialanim1_name.GetLength()>0)
-			{
-				specialanim1_filename=specialanim1_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					specialanim1_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) specialanim1_filename.SetAt(1, theat);
-				
-				if(FSunPackLib::XCC_DoesFileExist(specialanim1_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(specialanim1_filename, hShpMix);					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &specialanim1);
-				}
-			}
-
-			specialanim2_name=art.sections[image].values["SpecialAnimTwo"];
-			if(specialanim2_name.GetLength()>0)
-			{
-				specialanim2_filename=specialanim2_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					specialanim2_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) specialanim2_filename.SetAt(1, theat);
-				
-				if(FSunPackLib::XCC_DoesFileExist(specialanim2_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(specialanim2_filename, hShpMix);					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &specialanim2);
-				}
-			}
-
-			specialanim3_name=art.sections[image].values["SpecialAnimThree"];
-			if(specialanim3_name.GetLength()>0)
-			{
-				specialanim3_filename=specialanim3_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					specialanim3_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) specialanim3_filename.SetAt(1, theat);
-				
-				if(FSunPackLib::XCC_DoesFileExist(specialanim3_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(specialanim3_filename, hShpMix);					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &specialanim3);
-				}
-			}
-
-			specialanim4_name=art.sections[image].values["SpecialAnimFour"];
-			if(specialanim4_name.GetLength()>0)
-			{
-				specialanim4_filename=specialanim4_name+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					specialanim4_filename.SetAt(1, theat);
-
-				if(bAlwaysSetChar) specialanim4_filename.SetAt(1, theat);
-				
-				if(FSunPackLib::XCC_DoesFileExist(specialanim4_filename, hShpMix))
-				{
-					FSunPackLib::SetCurrentSHP(specialanim4_filename, hShpMix);					
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &specialanim4);
-				}
-			}
-
-			BOOL bVoxelTurret=FALSE;
-
-			turretanim_name=rules.sections[image].values["TurretAnim"];
-			if(bStructure && rules.sections[image].values["Turret"]=="yes" && turretanim_name.GetLength()>0 && rules.sections[image].values["TurretAnimIsVoxel"]!="true")
-			{
-				turretanim_filename=turretanim_name+".shp";
-				if(art.sections[turretanim_name].values.find("Image")!=art.sections[turretanim_name].values.end()) turretanim_filename=art.sections[turretanim_name].values["Image"]+".shp";
-
-				if(isTrue(art.sections[image].values["NewTheater"]))
-					turretanim_filename.SetAt(1, theat);
-				
-			
-				FSunPackLib::SetCurrentSHP(turretanim_filename, hShpMix);
-				FSunPackLib::XCC_GetSHPHeader(&head);
-
-				int iStartTurret=0;
-				const WORD wAnimCount=4; // anims between each "normal" direction, seems to be hardcoded
-				
-				int i;
-
-				for(i=0;i<8;i++)
-				{
-					if(iStartTurret+i*wAnimCount<head.c_images)
-					{
-						FSunPackLib::XCC_GetSHPImageHeader(iStartTurret+i*wAnimCount, &turretinfo[i]);
-						FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, iStartTurret+i*wAnimCount, 1, &turrets[i]);
-					}
-					
-				}
-			}
-			else if(bStructure && rules.sections[image].values["Turret"]=="yes" && turretanim_name.GetLength()>0 && rules.sections[image].values["TurretAnimIsVoxel"]=="true")
-			{
-				turretanim_filename=turretanim_name+".vxl";
-				if(art.sections[turretanim_name].values.find("Image")!=art.sections[turretanim_name].values.end()) turretanim_filename=art.sections[turretanim_name].values["Image"]+".vxl";
-
-				//if(isTrue(art.sections[image].values["NewTheater"]))
-				//	turretanim_filename.SetAt(1, theat);
-				
-				HMIXFILE hVXL=FindFileInMix(turretanim_filename);
-			
-				if(hVXL)
-				{
-					bVoxelTurret=TRUE;
-
-					if(
-					FSunPackLib::SetCurrentVXL(turretanim_filename, hVXL)
-					)
-					{					
-						int i;
-
-						for(i=0;i<8;i++)
-						{
-							float r_x,r_y,r_z;
-				
-
-							r_x=300;
-							r_y=0;
-							r_z=45*i+90;
-
-							// convert
-							const double pi = 3.141592654;
-							r_x=r_x/180.0f*pi;
-							r_y=r_y/180.0f*pi;
-							r_z=r_z/180.0f*pi;						
-
-							int center_x, center_y;
-							if(!
-							FSunPackLib::LoadVXLImageInSurface(*m_voxelNormalTables, lightDirection, v.dd, 0, 1, r_x, r_y, r_z, &turrets[i], hPalette,&center_x, &center_y,atoi(rules.sections[image].values["TurretAnimZAdjust"]))
-							)
-							{
-								
-							}
-							else
-							{
-								DDSURFACEDESC2 ddsd;
-								memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-								ddsd.dwSize=sizeof(DDSURFACEDESC2);
-								ddsd.dwFlags=DDSD_WIDTH | DDSD_HEIGHT;
-								turrets[i]->GetSurfaceDesc(&ddsd);
-								turretinfo[i].x=-center_x;
-								turretinfo[i].y=-center_y;
-								turretinfo[i].cx=ddsd.dwWidth;
-								turretinfo[i].cy=ddsd.dwHeight;
-							}
-							
-						}
-					}
-				}
-			}
-
-
-			if(art.sections[image].values.find("WalkFrames")!=art.sections[image].values.end())
-				wStep=atoi(art.sections[image].values["WalkFrames"]);
-			if(art.sections[image].values.find("StartWalkFrame")!=art.sections[image].values.end())
-				wStartWalkFrame=atoi(art.sections[image].values["StartWalkFrame"]);
-			if(art.sections[image].values.find("TurretOffset")!=art.sections[image].values.end())
-				iTurretOffset=atoi(art.sections[image].values["TurretOffset"]);
-
-			
-			if(art.sections[image].values["Palette"]=="lib")
-				hPalette=m_hPalLib;
-
-			BOOL bSuccess=FSunPackLib::SetCurrentSHP(filename, hShpMix);
-			if(
-			!bSuccess
-			)
-			{
-				filename=image+=".sno";
-				if(cur_theat=='T' || cur_theat=='U') hPalette=m_hPalIsoTemp;
-				hShpMix=FindFileInMix(filename, &bTerrain);
-				bSuccess=FSunPackLib::SetCurrentSHP(filename, hShpMix);
-				
-				if(!bSuccess)
-				{
-					missingimages[lpUnittype]=TRUE;	
-				}
-			}
-			
-			if(bSuccess)
-			{
-			
-			FSunPackLib::XCC_GetSHPHeader(&head);
-			int i;
-			int maxPics=head.c_images;
-			if(maxPics>8) maxPics=8; // we only need 8 pictures for every direction!
-			if(bStructure && !bPowerUp) maxPics=1;
-			if(bVoxelTurret) maxPics=8;
-
-
-			if(!bStructure && rules.sections[image].values["Turret"]=="yes")
-			{
-				int iStartTurret=wStartWalkFrame+8*wStep;
-				const WORD wAnimCount=4; // anims between each "normal" direction, seems to be hardcoded
-				
-				int i;
-
-				for(i=0;i<8;i++)
-				{
-					if(!bStructure && iStartTurret+i*wAnimCount<head.c_images)
-					{
-						FSunPackLib::XCC_GetSHPImageHeader(iStartTurret+i*wAnimCount, &turretinfo[i]);
-						FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, iStartTurret+i*wAnimCount, 1, &turrets[i]);
-					}
-					
-				}
-			}
-
-			
-			
-			// create an array of pointers to directdraw surfaces
-			lpT=new(LPDIRECTDRAWSURFACE4[maxPics]);
-			memset(lpT, 0, sizeof(LPDIRECTDRAWSURFACE4)*maxPics);
-			
-			if(bVoxelTurret)
-			{
-				for(i=0;i<maxPics; i++)
-				{
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, 1, &lpT[i]);
-				}
-			}
-			else if(wStep==1 && (rules.sections[lpUnittype].values["PowersUpBuilding"].GetLength()==0 || !isTrue(rules.sections[lpUnittype].values["Turret"]))) 
-			{ // standard case...
-
-				FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, wStartWalkFrame, maxPics, lpT);
-			
-			}
-			else if(rules.sections[lpUnittype].values["PowersUpBuilding"].GetLength()!=0 && isTrue(rules.sections[lpUnittype].values["Turret"]))
-			{ // a "real" turret (vulcan cannon, etc...)
-				for(i=0;i<maxPics; i++)
-				{
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, i*4, 1, &lpT[i]);
-				}
-			}
-			else	 
-			{ // walk frames used
-				for(i=0;i<maxPics; i++)
-				{
-					int pic_in_file=i;
-					FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, i*wStep+wStartWalkFrame, 1, &lpT[i]);
-				}
-			}
-
-			for(i=0; i<maxPics; i++)
-			{
-				int pic_in_file=i;
-				if(bStructure && bVoxelTurret) pic_in_file=0;
-				SHPIMAGEHEADER imghead;
-				FSunPackLib::XCC_GetSHPImageHeader(pic_in_file, &imghead);
-
-				if(bib!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, bib, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					imghead.cx=head.cx-imghead.x; // update size of main graphic
-					imghead.cy=head.cy-imghead.y;
-
-				}
-
-				if(activeanim!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, activeanim, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-
-				if(idleanim!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, idleanim, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-
-				if(activeanim2!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, activeanim2, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-
-				if(activeanim3!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, activeanim3, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-				
-				if(superanim1!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, superanim1, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-
-				if(superanim2!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, superanim2, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-
-				if(superanim3!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, superanim3, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-
-				if(superanim4!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, superanim4, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-
-				if(specialanim1!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, specialanim1, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-
-				if(specialanim2!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, specialanim2, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-
-				if(specialanim3!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, specialanim3, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-
-				if(specialanim4!=NULL)
-				{
-					DDBLTFX fx;
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					lpT[i]->Blt(NULL, specialanim4, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-
-					
-				}
-				
-				
-				
-				if(turrets[i]!=NULL)
-				{
-					DDBLTFX fx;
-					int iMove=0;
-
-					DDSURFACEDESC2 ddsd;
-					memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-					ddsd.dwSize=sizeof(DDSURFACEDESC2);
-					ddsd.dwFlags=DDSD_WIDTH | DDSD_HEIGHT;
-					turrets[i]->GetSurfaceDesc(&ddsd);
-					
-
-					memset(&fx, 0, sizeof(DDBLTFX));
-					fx.dwSize=sizeof(DDBLTFX);
-
-					RECT srcRect, destRect;
-					srcRect.left=0;					
-					srcRect.right=ddsd.dwWidth;
-					destRect.left=(head.cx-ddsd.dwWidth)/2;					
-					destRect.right=head.cx-destRect.left;
-					
-					if(iMove<0)
-					{
-						srcRect.top=-iMove;
-						srcRect.bottom=ddsd.dwHeight;
-						destRect.top=0;
-						destRect.bottom=head.cy+iMove-(head.cy-ddsd.dwHeight);
-					}
-					else
-					{
-						int mx=imghead.x/2+imghead.cx/2+(-turretinfo[i].x/2-turretinfo[i].cx)+ atoi(rules.sections[image].values["TurretAnimX"]);
-						int my=imghead.y/2+imghead.cy/2+(-turretinfo[i].y/2-turretinfo[i].cy) + atoi(rules.sections[image].values["TurretAnimY"]);//+atoi(rules.sections[image].values["TurretAnimZAdjust"]);
-						
-						if(ddsd.dwWidth!=head.cx || ddsd.dwHeight!=head.cy)
-						{
-							// voxel turret
-							//mx=head.cx/2-ddsd.dwWidth/2;//+atoi(rules.sections[image].values["TurretAnimX"]);
-							//my=head.cy/2-ddsd.dwHeight/2+atoi(rules.sections[image].values["TurretAnimY"])+atoi(rules.sections[image].values["TurretAnimZAdjust"])/2;
-							mx=imghead.x+imghead.cx/2+turretinfo[i].x+atoi(rules.sections[image].values["TurretAnimX"]);
-							my=imghead.y+imghead.cy/2+turretinfo[i].y+atoi(rules.sections[image].values["TurretAnimY"]);//+atoi(rules.sections[image].values["TurretAnimZAdjust"])/2;
-							
-							errstream << turretinfo[i].x << " y:" << turretinfo[i].y << " mx:" << mx << " my:" << my << endl;
-							errstream.flush();
-							
-							int XMover, YMover;
-#ifdef RA2_MODE
-							XMover=atoi(g_data.sections["BuildingVoxelTurretsRA2"].values[(CString)lpUnittype+"X"]);
-							YMover=atoi(g_data.sections["BuildingVoxelTurretsRA2"].values[(CString)lpUnittype+"Y"]);
-#else
-							XMover=atoi(g_data.sections["BuildingVoxelTurrets"].values[(CString)lpUnittype+"X"]);
-							YMover=atoi(g_data.sections["BuildingVoxelTurrets"].values[(CString)lpUnittype+"Y"]);
-#endif
-
-							mx+=XMover;
-							my+=YMover;
-
-							srcRect.top=0;
-							srcRect.left=0;
-							srcRect.right=ddsd.dwWidth;
-							srcRect.bottom=ddsd.dwHeight;
-							destRect.top=my;
-							destRect.left=mx;
-							destRect.right=destRect.left+ddsd.dwWidth;
-							destRect.bottom=destRect.top+ddsd.dwHeight;
-							if(destRect.top<0)
-							{
-								int old=destRect.top;
-								destRect.top=0;
-								srcRect.top-=old-destRect.top;
-
-							}
-							if(destRect.right>=head.cx)
-							{
-								int old=destRect.right;
-								destRect.right=head.cx;
-								srcRect.right-=old-destRect.right;
-							}
-							if(destRect.bottom>=head.cy)
-							{
-								int old=destRect.bottom;
-								destRect.bottom=head.cy;
-								srcRect.bottom-=old-destRect.bottom;
-							}
-						}
-						else
-						{
-
-							if(mx<0)mx=0;
-							if(my<0)my=0;
-							srcRect.top=0;
-							srcRect.right=ddsd.dwWidth-mx;
-							srcRect.bottom=ddsd.dwHeight-my;
-							destRect.top=my;
-							destRect.left=mx+(head.cx-ddsd.dwWidth)/2;
-							destRect.right=destRect.left+ddsd.dwWidth;;
-							destRect.bottom=destRect.top+ddsd.dwHeight;
-						}
-					}
-						
-										
-					
-
-					if(lpT[i]->Blt(&destRect, turrets[i], &srcRect, DDBLT_KEYSRC | DDBLT_WAIT, &fx)!=DD_OK)
-					{
-						
-						errstream << "vxl turret: " << i << " size: " << ddsd.dwWidth << " " << ddsd.dwHeight << "  failed" << endl;
-						errstream.flush(); 
-						//exit(-99);
-					}
-
-									
-				}
-
-				if(!bPowerUp && i!=0 && imghead.unknown==0 && bStructure)
-				{
-					if(lpT[i]) lpT[i]->Release();
-				}
-				else
-				{
-					char ic[50];
-					itoa(i, ic, 10);
-
-					PICDATA p;
-					p.pic=lpT[i];				
-					p.x=imghead.x;
-					p.y=imghead.y;
-					p.wHeight=imghead.cy;
-					p.wWidth=imghead.cx;
-					p.wMaxWidth=head.cx;
-					p.wMaxHeight=head.cy;
-					p.bType=PICDATA_TYPE_SHP;
-					p.bTerrain=bTerrain;
-					if(bIgnoreTerrain) p.bTerrain=0;
-
-					
-					pics[image+ic]=p;
-
-					//errstream << " --> finished as " << (LPCSTR)(image+ic) << endl;
-					//errstream.flush();
-				}
-				
-			
-			}
-			
-			delete[] lpT;
-
-			
-			if(bib) bib->Release();
-			if(activeanim)activeanim->Release();
-			if(idleanim)idleanim->Release();
-			if(activeanim2)activeanim2->Release();
-			if(activeanim3)activeanim3->Release();
-			if(superanim1)superanim1->Release();
-			if(superanim2)superanim2->Release();
-			if(superanim3)superanim3->Release();
-			if(superanim4)superanim4->Release();
-			if(specialanim1)specialanim1->Release();
-			if(specialanim2)specialanim2->Release();
-			if(specialanim3)specialanim3->Release();
-			if(specialanim4)specialanim4->Release();
-			
-			for(i=0;i<8;i++)
-				if(turrets[i])turrets[i]->Release();
-			
-			}
-
-			//errstream << " --> Finished" << endl;
-			//errstream.flush();
-		}
-		
-		else
-		{
-			errstream << "File in theater " << cur_theat << " not found: " << (LPCTSTR)filename << endl;
-			errstream.flush();
-
-			missingimages[lpUnittype]=TRUE;			
-		}
-
-		}
-		catch(...)
-		{
-			errstream << " exception " << endl;
-			errstream.flush();
-		}
-	
-		
-	}
-	else
-	{
-		filename=image+".vxl"; 
-
-		HMIXFILE hMix=FindFileInMix(filename);
-		if(hMix==FALSE)
-		{
-			missingimages[lpUnittype]=TRUE;
-			return FALSE;
-		}
-
-		
-		int i;
-
-		try
-		{
-		
-		for(i=0;i<8;i++)
-		{
-			float r_x,r_y,r_z;
-			
-
-			r_x=300;
-			r_y=0;
-			r_z=45*i+90;
-
-			// convert
-			const double pi = 3.141592654;
-			r_x=r_x/180.0f*pi;
-			r_y=r_y/180.0f*pi;
-			r_z=r_z/180.0f*pi;
-
-			
-
-			LPDIRECTDRAWSURFACE4 lpT;//=new(LPDIRECTDRAWSURFACE4[1]);
-			LPDIRECTDRAWSURFACE4 lpTurret=NULL;
-			LPDIRECTDRAWSURFACE4 lpBarrel=NULL;
-			int turret_x,turret_y,turret_x_zmax,turret_y_zmax,barrel_x,barrel_y;
-
-			if(isTrue(rules.sections[lpUnittype].values["Turret"]))
-			{
-				if(FSunPackLib::SetCurrentVXL(image+"tur.vxl", hMix))
-				{
-					FSunPackLib::LoadVXLImageInSurface(*m_voxelNormalTables, lightDirection, v.dd, 0, 1, r_x, r_y, r_z, &lpTurret, m_hPalUnitTemp,&turret_x,&turret_y,0,&turret_x_zmax, &turret_y_zmax,-1,-1);
-				}
-				if(FSunPackLib::SetCurrentVXL(image+"barl.vxl", hMix))
-				{
-					FSunPackLib::LoadVXLImageInSurface(*m_voxelNormalTables, lightDirection, v.dd, 0, 1, r_x, r_y, r_z, &lpBarrel, m_hPalUnitTemp,&barrel_x,&barrel_y,0,NULL,NULL,0,0);
-				}	
-			}
-
-
-			if(!FSunPackLib::SetCurrentVXL(filename, hMix))
-			{
-				return FALSE;
-			}
-
-			
-
-			int xcenter,ycenter,xcenter_zmax,ycenter_zmax;
-
-			if(!
-			FSunPackLib::LoadVXLImageInSurface(*m_voxelNormalTables, lightDirection, v.dd, 0, 1, r_x, r_y, r_z, &lpT, m_hPalUnitTemp,&xcenter, &ycenter,0,&xcenter_zmax,&ycenter_zmax)
-			)
-			{
-				return FALSE;
-			}
-
-			DDSURFACEDESC2 ddsd;
-			memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-			ddsd.dwSize=sizeof(DDSURFACEDESC2);
-			ddsd.dwFlags=DDSD_WIDTH | DDSD_HEIGHT;
-			lpT->GetSurfaceDesc(&ddsd);
-
-			// turret
-			if(lpTurret)
-			{
-				DDSURFACEDESC2 ddsdT;
-				memset(&ddsdT, 0, sizeof(DDSURFACEDESC2));
-				ddsdT.dwSize=sizeof(DDSURFACEDESC2);
-				ddsdT.dwFlags=DDSD_WIDTH | DDSD_HEIGHT;
-				lpTurret->GetSurfaceDesc(&ddsdT);
-
-				DDBLTFX fx;
-				memset(&fx, 0, sizeof(DDBLTFX));
-				fx.dwSize=sizeof(DDBLTFX);
-
-				RECT srcRect, destRect;
-				srcRect.left=0;					
-				srcRect.right=ddsdT.dwWidth;
-				destRect.left=xcenter_zmax-turret_x;					
-				destRect.right=destRect.left+ddsdT.dwWidth;
-				srcRect.top=0;					
-				srcRect.bottom=ddsdT.dwHeight;
-				destRect.top=ycenter_zmax-turret_y;					
-				destRect.bottom=destRect.top+ddsdT.dwHeight;
-
-				lpT->Blt(&destRect, lpTurret, &srcRect, DDBLT_KEYSRC | DDBLT_WAIT, &fx);
-				
-			}
-
-			// barrel
-			if(lpBarrel)
-			{
-				DDSURFACEDESC2 ddsdB;
-				memset(&ddsdB, 0, sizeof(DDSURFACEDESC2));
-				ddsdB.dwSize=sizeof(DDSURFACEDESC2);
-				ddsdB.dwFlags=DDSD_WIDTH | DDSD_HEIGHT;
-				lpBarrel->GetSurfaceDesc(&ddsdB);
-				
-				DDSURFACEDESC2 ddsdT;
-				memset(&ddsdT, 0, sizeof(DDSURFACEDESC2));
-				ddsdT.dwSize=sizeof(DDSURFACEDESC2);
-				ddsdT.dwFlags=DDSD_WIDTH | DDSD_HEIGHT;
-				
-				if(lpTurret) lpTurret->GetSurfaceDesc(&ddsdT);
-
-
-				DDBLTFX fx;
-				memset(&fx, 0, sizeof(DDBLTFX));
-				fx.dwSize=sizeof(DDBLTFX);
-
-				RECT srcRect, destRect;
-				srcRect.left=0;					
-				srcRect.right=ddsdB.dwWidth;
-				destRect.left=xcenter_zmax-barrel_x+(turret_x_zmax-turret_x);					
-				destRect.right=destRect.left+ddsdB.dwWidth;
-				srcRect.top=0;					
-				srcRect.bottom=ddsdB.dwHeight;
-				destRect.top=ycenter_zmax-barrel_y+(turret_y_zmax-turret_y);					
-				destRect.bottom=destRect.top+ddsdB.dwHeight;
-
-				lpT->Blt(&destRect, lpBarrel, &srcRect, DDBLT_KEYSRC | DDBLT_WAIT, &fx);
-				
-			}
-
-			char ic[50];
-			itoa(7-i, ic, 10);
-
-			errstream << ddsd.dwWidth << " " << ddsd.dwHeight << "\n";
-			PICDATA p;
-			p.pic=lpT;				
-			p.x=-xcenter;
-			p.y=-ycenter;
-			p.wHeight=ddsd.dwHeight;
-			p.wWidth=ddsd.dwWidth;
-			p.wMaxWidth=ddsd.dwWidth;
-			p.wMaxHeight=ddsd.dwHeight;
-			p.bType=PICDATA_TYPE_VXL;
-			p.bTerrain=0;
-					
-			pics[image+ic]=p;
-
-			errstream << "vxl saved as " << (LPCSTR)image << (LPCSTR)ic << endl;
-			errstream.flush();
-
-			if(lpBarrel) lpBarrel->Release();
-			if(lpTurret) lpTurret->Release();
-
-			//delete[] lpT;
-			
-		}
-		}
-		catch(...)
-		{
-
-		}
-
-	}
-
-	
-
-	return FALSE;	
 }
 #endif
 
@@ -4384,36 +3182,36 @@ void CLoading::InitTMPs(CProgressCtrl* prog)
 	errstream.flush();
 
 	// we need to have that here, CMapData::UpdateIniFile() is too late for the shore hack
-	shoreset=atoi((*tiles).sections["General"].values["ShorePieces"]);
-	waterset=atoi((*tiles).sections["General"].values["WaterSet"]);
+	shoreset = tiles->GetInteger("General", "ShorePieces");
+	waterset = tiles->GetInteger("General", "WaterSet");
 
 
 
 		
 
 
-	int i, tcount=0;
+	int i, tcount = 0;
 
-	for(i=0;i<10000;i++)
-	{
+	for (i = 0; i < 10000; i++) {
 		CString tset;
 		char c[50];
 		itoa(i, c, 10);
 		int e;
-		for(e=0;e<4-strlen(c);e++)
-			tset+="0";
+		for (e = 0; e < 4 - strlen(c); e++) {
+			tset += "0";
+		}
 		tset+=c;
 		CString sec="TileSet";
 		sec+=tset;
 
-		if(tiles->sections.find(sec)==tiles->sections.end()) break;
+		auto const pSec = tiles->TryGetSection(sec);
+		if (!pSec) {
+			break;
+		}
 			
-		for(e=0;e<atoi(tiles->sections[sec].values["TilesInSet"]);e++)
-		{
+		for (e = 0; e < pSec->GetInteger("TilesInSet"); e++) {
 			tcount++;
 		}
-
-			
 	}
 
 	if(prog) prog->SetRange(0, tcount);
@@ -4436,34 +3234,40 @@ void CLoading::InitTMPs(CProgressCtrl* prog)
 		CString sec="TileSet";
 		sec+=tset;
 
-		if(tiles->sections.find(sec)==tiles->sections.end()) break;
+		auto const pSec = tiles->TryGetSection(sec);
+		if (!pSec) {
+			break;
+		}
 
 		BOOL bTib, bMorph, bPlace, bMadness;
 		bPlace=TRUE;
 		bTib=FALSE;
 		bMorph=FALSE;
 		bMadness=FALSE;
-		tiles->sections[sec].values["AllowTiberium"].MakeLower();
-		if(tiles->sections[sec].values["AllowTiberium"]=="true")
-			bTib=TRUE;
-		tiles->sections[sec].values["Morphable"].MakeLower();
-		if(tiles->sections[sec].values["Morphable"]=="true")
-			bMorph=TRUE;
-		tiles->sections[sec].values["AllowToPlace"].MakeLower();
-		if(tiles->sections[sec].values["AllowToPlace"]=="no")
-			bPlace=FALSE;
-		tiles->sections[sec].values["NonMarbleMadness"].MakeLower();
-		if(tiles->sections[sec].values["NonMarbleMadness"].GetLength()>0)
-			bMadness=TRUE;
-		auto tilesetAnimSection = tiles->GetSection(tiles->sections[sec].GetValueByName("SetName"));
+
+		if (pSec->GetBool("AllowTiberium")) {
+			bTib = TRUE;
+		}
+
+		if (pSec->GetBool("Morphable")) {
+			bMorph = TRUE;
+		}
+
+		if (!pSec->GetBool("AllowToPlace")) {
+			bPlace = FALSE;
+		}
+
+		if (!pSec->GetString("NonMarbleMadness").IsEmpty()) {
+			bMadness = TRUE;
+		}
+		auto const tilesetAnimSection = tiles->TryGetSection(tiles->GetString(sec, "SetName"));
 
 		tilesets_start[i]=tilecount;
 
 
-		for(e=0;e<atoi(tiles->sections[sec].values["TilesInSet"]);e++)
-		{
+		for (e = 0; e < tiles->GetInteger(sec, "TilesInSet"); e++) {
 			std::string sId = std::format("{:02}", e + 1);
-			CString filename=tiles->sections[sec].values["FileName"];
+			CString filename = tiles->GetString(sec, "FileName");
 			filename+=sId.c_str();
 
 			CString bas_f=filename;
@@ -4521,10 +3325,10 @@ void CLoading::InitTMPs(CProgressCtrl* prog)
 
 			if (tilesetAnimSection)
 			{
-				auto anim = tilesetAnimSection->GetValueByName(std::format("Tile{}Anim", sId).c_str());
-				auto offsetX = std::atoi(tilesetAnimSection->GetValueByName(std::format("Tile{}XOffset", sId).c_str()));
-				auto offsetY = std::atoi(tilesetAnimSection->GetValueByName(std::format("Tile{}YOffset", sId).c_str()));
-				auto attachesTo = std::atoi(tilesetAnimSection->GetValueByName(std::format("Tile{}AttachesTo", sId).c_str()));
+				auto anim = tilesetAnimSection->GetString(std::format("Tile{}Anim", sId).c_str());
+				auto offsetX = tilesetAnimSection->GetInteger(std::format("Tile{}XOffset", sId).c_str());
+				auto offsetY = tilesetAnimSection->GetInteger(std::format("Tile{}YOffset", sId).c_str());
+				auto attachesTo = tilesetAnimSection->GetInteger(std::format("Tile{}AttachesTo", sId).c_str());
 				auto animFileName = anim + suffix;
 				HMIXFILE hAnimMix = FindFileInMix(animFileName);
 				if (hAnimMix)
@@ -4580,8 +3384,7 @@ void CLoading::InitTMPs(CProgressCtrl* prog)
 	}
 
 	tilecount=0;	
-	for(i=0;i<10000;i++)
-	{
+	for (i = 0; i < 10000; i++) {
 		CString tset;
 		char c[50];
 		itoa(i, c, 10);
@@ -4592,25 +3395,22 @@ void CLoading::InitTMPs(CProgressCtrl* prog)
 		CString sec="TileSet";
 		sec+=tset;
 
-		if(tiles->sections.find(sec)==tiles->sections.end()) break;
-
-		
-		int madnessid=atoi(tiles->sections[sec].values["MarbleMadness"]);
-		
-		for(e=0;e<atoi(tiles->sections[sec].values["TilesInSet"]);e++)
-		{
-			if(madnessid)
-			{
-				(*tiledata)[tilecount].wMarbleGround=tilesets_start[madnessid]+(tilecount-tilesets_start[i]);
-			}
-			else
-				(*tiledata)[tilecount].wMarbleGround=0xFFFF;
-
-			tilecount++;								
-			
+		auto const pSec = tiles->TryGetSection(sec);
+		if (!pSec) {
+			break;
 		}
 
+		int madnessid= pSec->GetInteger("MarbleMadness");
 		
+		for (e = 0; e < pSec->GetInteger("TilesInSet"); e++) {
+			if(madnessid) {
+				(*tiledata)[tilecount].wMarbleGround=tilesets_start[madnessid]+(tilecount-tilesets_start[i]);
+			}
+			else {
+				(*tiledata)[tilecount].wMarbleGround = 0xFFFF;
+			}
+			tilecount++;
+		}
 	}
 			
 }
@@ -4772,13 +3572,16 @@ BOOL CLoading::LoadTile(LPCSTR lpFilename, HMIXFILE hOwner, HTSPALETTE hPalette,
 #ifdef RA2_MODE
 							section="ShoreTerrainRA2";
 #endif
-							
-							if(g_data.sections[section].FindName(hack)>=0)
-							{
-								int t=atoi(g_data.sections[section].values[hack]);
-								if(t) td->tiles[i].bHackedTerrainType=TERRAINTYPE_WATER;
-								else
-									td->tiles[i].bHackedTerrainType=0xe;
+							auto const& sec = g_data.GetSection(section);
+							auto const hackValIdx = sec.FindIndex(hack);
+							if (hackValIdx >= 0) {
+								int t = atoi(sec.Nth(hackValIdx).second);
+								if (t) {
+									td->tiles[i].bHackedTerrainType = TERRAINTYPE_WATER;
+								}
+								else {
+									td->tiles[i].bHackedTerrainType = 0xe;
+								}
 							}
 						}
 						if((*tiledata)[dwID].wTileSet==waterset) (*tiledata)[dwID].tiles[i].bHackedTerrainType=TERRAINTYPE_WATER;
@@ -4816,188 +3619,10 @@ BOOL CLoading::LoadTile(LPCSTR lpFilename, HMIXFILE hOwner, HTSPALETTE hPalette,
 	
 
 }
-#else // now standard version, with surfaces
-BOOL CLoading::LoadTile(LPCSTR lpFilename, HMIXFILE hOwner, HTSPALETTE hPalette, DWORD dwID, BOOL bReplacement)
-{
-	last_succeeded_operation=12;
-
-	//errstream << "Loading " << lpFilename << " owned by " << hOwner << ", palette " << hPalette ;
-	//errstream << lpFilename << endl;
-	//errstream.flush();
-
-	CIsoView& v=*((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
-
-
-	//DeleteFile((CString)AppPath+(CString)"\\TmpTmp.tmp");
-	//FSunPackLib::XCC_ExtractFile(lpFilename, (CString)AppPath+(CString)"\\TmpTmp.tmp" /*lpFilename*//*, hOwner);
-
-	int tileCount;
-	try{
-	if(FSunPackLib::XCC_DoesFileExist(lpFilename, hOwner))
-	//if(DoesFileExist((CString)AppPath+(CString)"\\TmpTmp.tmp"))
-	{
-		//if(
-		FSunPackLib::SetCurrentTMP(lpFilename, hOwner);
-		//)
-		{
-
-			//FSunPackLib::SetCurrentTMP((CString)AppPath+"\\TmpTmp.tmp"/* lpFilename*//*, NULL/*hOwner*//*);
-			int tileWidth, tileHeight;
-			RECT rect;
-			FSunPackLib::XCC_GetTMPInfo(&rect, &tileCount, &tileWidth, &tileHeight);
-
-		
-			LPDIRECTDRAWSURFACE4* pics=new(LPDIRECTDRAWSURFACE4[tileCount]);
-			if(FSunPackLib::LoadTMPImageInSurface(v.dd,0, tileCount, pics, hPalette))
-			//if(FSunPackLib::LoadTMPImageInSurface(v.dd,lpFilename, 0, tileCount, pics, hPalette, hOwner))
-			{
-				TILEDATA* td;
-				if(!bReplacement) td=&(*tiledata)[dwID];
-				else
-				{
-
-					TILEDATA* lpTmp=NULL;
-					if((*tiledata)[dwID].bReplacementCount)
-					{
-						lpTmp=new(TILEDATA[(*tiledata)[dwID].bReplacementCount]);
-						memcpy(lpTmp, (*tiledata)[dwID].lpReplacements, sizeof(TILEDATA)* (*tiledata)[dwID].bReplacementCount);
-					}
-					
-					(*tiledata)[dwID].lpReplacements=new(TILEDATA[(*tiledata)[dwID].bReplacementCount+1]);
-
-					if((*tiledata)[dwID].bReplacementCount)
-					{
-						memcpy((*tiledata)[dwID].lpReplacements, lpTmp, sizeof(TILEDATA)*(*tiledata)[dwID].bReplacementCount);
-						delete[] lpTmp;
-					}
-
-					td=&(*tiledata)[dwID].lpReplacements[(*tiledata)[dwID].bReplacementCount];
-					(*tiledata)[dwID].bReplacementCount++;
-				}
-
-							
-				td->tiles=new(SUBTILE[tileCount]);
-				td->wTileCount=tileCount;
-				td->cx=tileWidth;
-				td->cy=tileHeight;
-				td->rect=rect;
-				
-				int i;
-				for(i=0;i<tileCount;i++)
-				{
-					if(pics[i]!=NULL)
-					{
-
-						int cx,cy;
-						BYTE height,terraintype,direction;
-						POINT p;
-						FSunPackLib::XCC_GetTMPTileInfo(i, &p, &cx, &cy, &direction, &height, &terraintype, &td->tiles[i].rgbLeft, &td->tiles[i].rgbRight);
-						td->tiles[i].pic=pics[i];
-						td->tiles[i].sX=p.x;
-						td->tiles[i].sY=p.y;
-						td->tiles[i].wWidth=cx;
-						td->tiles[i].wHeight=cy;
-						td->tiles[i].bZHeight=height;
-						td->tiles[i].bTerrainType=terraintype;
-						td->tiles[i].bHackedTerrainType=terraintype;
-						td->tiles[i].bDirection=direction;
-
-						if(terraintype==0xa) 
-						{
-#ifdef RA2_MODE
-							td->tiles[i].bHackedTerrainType=TERRAINTYPE_WATER;
-#else
-							td->tiles[i].bHackedTerrainType=TERRAINTYPE_WATER;
-#endif
-						}
-						if(terraintype==TERRAINTYPE_ROUGH) td->tiles[i].bHackedTerrainType=TERRAINTYPE_GROUND;
-
-						//if((*tiledata)[dwID].wTileSet==waterset) (*tiledata)[dwID].tiles[i].bHackedTerrainType=TERRAINTYPE_WATER;
-
-						// shore hack: check fsdata.ini for new shore terrain
-						if(td->wTileSet==shoreset)
-						{
-							int h;
-							for(h=0;h<(*tiledata_count);h++)
-							{
-								if((*tiledata)[h].wTileSet==shoreset) break;
-							}
-
-							int pos=dwID-h;
-							char c[50];
-							itoa(pos,c,10);
-							CString hack=c;
-							hack+="_";
-							itoa(i, c, 10);
-							hack+=c;/*
-							hack+="_";
-							itoa(i/tileWidth, c, 10);
-							hack+=c;*/
-
-							CString section="ShoreTerrainTS";
-#ifdef RA2_MODE
-							section="ShoreTerrainRA2";
-#endif
-							
-							if(g_data.sections[section].FindName(hack)>=0)
-							{
-								int t=atoi(g_data.sections[section].values[hack]);
-								if(t) td->tiles[i].bHackedTerrainType=TERRAINTYPE_WATER;
-								else
-									td->tiles[i].bHackedTerrainType=0xe;
-							}
-						}
-						if((*tiledata)[dwID].wTileSet==waterset) (*tiledata)[dwID].tiles[i].bHackedTerrainType=TERRAINTYPE_WATER;
-					}
-					else
-					{
-						td->tiles[i].pic=NULL;
-						td->tiles[i].sX=0;
-						td->tiles[i].sY=0;
-						td->tiles[i].wWidth=0;
-						td->tiles[i].wHeight=0;
-						td->tiles[i].bZHeight=0;
-						td->tiles[i].bTerrainType=0;
-						td->tiles[i].bDirection=0;
-					}
-				}
-			}
-			
-			if(tileCount>0) delete[] pics;
-		}
-	}	
-	else
-	{
-		//errstream << " not found" << endl;
-		return FALSE;
-	}
-	}
-	catch(...)
-	{
-
-	}
-	
-	if((*tiledata)[dwID].wTileCount==0 || (*tiledata)[dwID].tiles[0].pic==NULL)
-	{
-		//errstream << " failed" << endl;
-		//errstream.flush();
-
-		return FALSE;
-	}
-	else
-	{
-		//errstream << " succeeded" << endl;
-		//errstream.flush();
-	}
-
-	return TRUE;
-	
-
-}
 #endif
 
 #ifdef NOSURFACES_OBJECTS // palettized
-void CLoading::LoadOverlayGraphic(LPCTSTR lpOvrlName_, int iOvrlNum)
+void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 {
 	last_succeeded_operation=11;
 
@@ -5055,8 +3680,8 @@ void CLoading::LoadOverlayGraphic(LPCTSTR lpOvrlName_, int iOvrlNum)
 	}
 
 	HTSPALETTE forcedPalette = 0;
-	const auto& isoPalettePrefixes = g_data.sections["ForceOvrlIsoPalettePrefix"];
-	const auto& unitPalettePrefixes = g_data.sections["ForceOvrlUnitPalettePrefix"];
+	const auto& isoPalettePrefixes = g_data["ForceOvrlIsoPalettePrefix"];
+	const auto& unitPalettePrefixes = g_data["ForceOvrlUnitPalettePrefix"];
 	const CString sOvrlName(lpOvrlName_);
 	if (unitPalettePrefixes.end() != std::find_if(unitPalettePrefixes.begin(), unitPalettePrefixes.end(), [&sOvrlName](const auto& pair) {return sOvrlName.Find(pair.second) == 0;}))
 	{
@@ -5070,54 +3695,52 @@ void CLoading::LoadOverlayGraphic(LPCTSTR lpOvrlName_, int iOvrlNum)
 	HMIXFILE hMix;
 
 	CString lpOvrlName = lpOvrlName_;
-	if(lpOvrlName.Find(' ')>=0) lpOvrlName = lpOvrlName.Left(lpOvrlName.Find(' '));
+	if (lpOvrlName.Find(' ') >= 0) {
+		lpOvrlName = lpOvrlName.Left(lpOvrlName.Find(' '));
+	}
 	//if(strchr(lpOvrlName, ' ')!=NULL) strchr(lpOvrlName, ' ')[0]=0;
 	//if(lpOvrlName
 
-	CString isveinhole_t=rules.sections[lpOvrlName].values["IsVeinholeMonster"];
-	CString istiberium_t=rules.sections[lpOvrlName].values["Tiberium"];
-	CString isveins_t=rules.sections[lpOvrlName].values["IsVeins"];
-	isveinhole_t.MakeLower();
-	istiberium_t.MakeLower();
-	isveins_t.MakeLower();
-	BOOL isveinhole=FALSE, istiberium=FALSE, isveins=FALSE;
-	if(isTrue(isveinhole_t)) isveinhole=TRUE;
-	if(isTrue(istiberium_t)) istiberium=TRUE;
-	if(isTrue(isveins_t)) isveins=TRUE;
-
-
+	auto const isveinhole = rules.GetBool(lpOvrlName, "IsVeinholeMonster");
+	auto const istiberium = rules.GetBool(lpOvrlName, "Tiberium");
+	auto const isveins = rules.GetBool(lpOvrlName, "IsVeins");
 	
- 
-
-	image=lpOvrlName;
-	if(rules.sections[lpOvrlName].values.find("Image")!=rules.sections[lpOvrlName].values.end())
-		image=rules.sections[lpOvrlName].values["Image"];
+	image = rules.GetStringOr(lpOvrlName, "Image", lpOvrlName);
 
 	TruncSpace(image);
 
 	CString imagerules=image;
-	if(art.sections[image].values.find("Image")!=art.sections[image].values.end())
-		image=art.sections[image].values["Image"];
+	auto const& imageID = art.GetString(image, "Image");
+	if (!imageID.IsEmpty()) {
+		image = imageID;
+	}
 
 	TruncSpace(image);
 
-	if(cur_theat=='T') filename=image+".tem";
-	if(cur_theat=='A') filename=image+".sno";
-	if(cur_theat=='U') filename=image+".urb";
-	if(cur_theat=='N') filename=image+".ubn";
-	if(cur_theat=='L') filename=image+".lun";
-	if(cur_theat=='D') filename=image+".des";
+	if (cur_theat == 'T') {
+		filename = image + ".tem";
+	} else if (cur_theat == 'A') {
+		filename = image + ".sno";
+	} else if (cur_theat == 'U') {
+		filename = image + ".urb";
+	} else if (cur_theat == 'N') {
+		filename = image + ".ubn";
+	} else if (cur_theat == 'L') {
+		filename = image + ".lun";
+	} else if (cur_theat == 'D') {
+		filename = image + ".des";
+	}
 
 
 	hMix=FindFileInMix(filename);
 
-	const auto& artSection = art.sections[image];
+	const auto& artSection = art[image];
 	
-	if(hMix==NULL)
-	{
+	if (hMix == NULL) {
 		filename=image+".shp";
-		if(isTrue(artSection.GetValueByName("NewTheater")))
+		if (artSection.GetBool("NewTheater")) {
 			filename.SetAt(1, theat);
+		}
 
 		if(cur_theat=='U' && m_hPalUnitUrb) hPalette=m_hPalUnitUrb;
 		if(cur_theat=='T') hPalette=m_hPalUnitTemp;
@@ -5297,15 +3920,15 @@ void CLoading::LoadOverlayGraphic(LPCTSTR lpOvrlName_, int iOvrlNum)
 				FSunPackLib::XCC_GetSHPImageHeader(i, &imghead);
 				
 				// MW: fixed april 20th, 2002
-				if(imghead.unknown==0 && !isTrue(g_data.sections["Debug"].values["IgnoreSHPImageHeadUnused"])) // is it a shadow or not used image?
-					if(lpT[i]) 
-					{
+				 // is it a shadow or not used image?
+				if (imghead.unknown == 0 && !g_data.GetBool("Debug", "IgnoreSHPImageHeadUnused")) {
+					if (lpT[i]) {
 						delete[] lpT[i];
-						lpT[i]=NULL;
+						lpT[i] = NULL;
 					}
+				}
 				
-				if(/*imghead.unknown &&*/ lpT[i])
-				{
+				if(/*imghead.unknown &&*/ lpT[i]) {
 					char ic[50];
 					itoa(i, ic, 10);
 
@@ -5670,12 +4293,12 @@ void CLoading::CalcPicCount()
 
 	m_bmp_count=m_pic_count;
 
-	if(!theApp.m_Options.bDoNotLoadVehicleGraphics)	m_pic_count+=rules.sections["VehicleTypes"].values.size();
-	if(!theApp.m_Options.bDoNotLoadOverlayGraphics) m_pic_count+=rules.sections["OverlayTypes"].values.size();
-	if(!theApp.m_Options.bDoNotLoadInfantryGraphics) m_pic_count+=rules.sections["InfantryTypes"].values.size();
-	if(!theApp.m_Options.bDoNotLoadBuildingGraphics) m_pic_count+=rules.sections["BuildingTypes"].values.size();
-	if(!theApp.m_Options.bDoNotLoadAircraftGraphics) m_pic_count+=rules.sections["AircraftTypes"].values.size();
-	if(!theApp.m_Options.bDoNotLoadTreeGraphics) m_pic_count+=rules.sections["TerrainTypes"].values.size();
+	if(!theApp.m_Options.bDoNotLoadVehicleGraphics)	m_pic_count+=rules["VehicleTypes"].Size();
+	if(!theApp.m_Options.bDoNotLoadOverlayGraphics) m_pic_count+=rules["OverlayTypes"].Size();
+	if(!theApp.m_Options.bDoNotLoadInfantryGraphics) m_pic_count+=rules["InfantryTypes"].Size();
+	if(!theApp.m_Options.bDoNotLoadBuildingGraphics) m_pic_count+=rules["BuildingTypes"].Size();
+	if(!theApp.m_Options.bDoNotLoadAircraftGraphics) m_pic_count+=rules["AircraftTypes"].Size();
+	if(!theApp.m_Options.bDoNotLoadTreeGraphics) m_pic_count+=rules["TerrainTypes"].Size();
 
 	int i;
 /*
@@ -6174,36 +4797,37 @@ void CLoading::PostNcDestroy()
 
 void CLoading::PrepareHouses()
 {
-	int i;
-	int p=0 ;
-	for(i=0;i<rules.sections["Sides"].values.size();i++)
-	{
-		int t=0;
-		while(GetParam(*rules.sections["Sides"].GetValue(i), t).GetLength()>0)
-		{
-			sides[p].name=GetParam(*rules.sections["Sides"].GetValue(i), t);
-			sides[p].orig_n=rules.sections["Sides"].GetValueOrigPos(i); // mw fix instead of =i
+	int p = 0;
+	auto const& sideSec = rules["Sides"];
+	for (auto i = 0; i < sideSec.Size(); i++) {
+		int t = 0;
+		auto const& sideParams = sideSec.Nth(i).second;
+		for (;;) {
+			auto const paramN = GetParam(sideParams, t);
+			if (paramN.IsEmpty()) {
+				break;
+			}
+			sides[p].name = paramN;
+			sides[p].orig_n = i; // mw fix instead of =i
 			t++;
 			p++;
 		}
 	}
 
-	for(i=0;i<rules.sections[HOUSES].values.size();i++)
-	{
-		if(rules.sections[HOUSES].GetValueOrigPos(i)<0) continue;
-
-		HOUSEINFO& house=houses[rules.sections[HOUSES].GetValueOrigPos(i)];
-		house.name=*rules.sections[HOUSES].GetValue(i);
-		house.bPlayable=isTrue(rules.sections[house.name].values["Multiplay"]);
+	auto const houseSec = rules[HOUSES];
+	for (auto i = 0; i < houseSec.Size(); i++) {
+		HOUSEINFO& house = houses[i];
+		house.name = houseSec.Nth(i).second;
+		house.bPlayable = rules.GetBool(house.name, "Multiplay");
 		memset(&house.color, 0, sizeof(RGBTRIPLE));
 		int e;
-		for(e=0;e<sides.size();e++)
-		{
-			house.side=NULL;
-			if(sides[e].name==rules.sections[house.name].values["Side"])
-				house.side=&sides[e];
+		for (e = 0; e < sides.size(); e++) {
+			house.side = nullptr;
+			if (sides[e].name == rules.GetString(house.name, "Side")) {
+				house.side = &sides[e];
+			}
 		}
-		
+
 	}
 }
 
@@ -6237,7 +4861,7 @@ public:
 	}
 };
 
-extern map<CString, XCString> AllStrings;
+extern TranslationMap AllStrings;
 void CLoading::LoadStrings()
 {
 	last_succeeded_operation=9;
@@ -6415,34 +5039,27 @@ void CLoading::LoadStrings()
 
 	
 
-	for(i=0;i<rules.sections.size();i++)
-	{
-		if(rules.GetSection(i)->FindName("UIName")>=0)
-		{
-			int e;
-		
-			if(strings.find(rules.GetSection(i)->values["UIName"])!=strings.end())
-			{
-				//MessageBox(strings[rules.GetSection(i)->values["UIName"]].cString);
-				if(!strings[rules.GetSection(i)->values["UIName"]].bUsedDefault)
-				{
-					//CCStrings[*rules.GetSectionName(i)].cString=strings[rules.GetSection(i)->values["UIName"]].cString; //.SetString(strings[rules.GetSection(i)->values["UIName"]].wString, strings[rules.GetSection(i)->values["UIName"]].len);
-					CCStrings[*rules.GetSectionName(i)].SetString(strings[rules.GetSection(i)->values["UIName"]].wString, strings[rules.GetSection(i)->values["UIName"]].len);
-				}
-				else
-				{
-					CCStrings[*rules.GetSectionName(i)].SetString(strings[rules.GetSection(i)->values["UIName"]].wString, strings[rules.GetSection(i)->values["UIName"]].len);
-					CCStrings[*rules.GetSectionName(i)].cString=rules.GetSection(i)->GetValueByName("Name");
-				}
-			}
-			else 
-			{
-				//MessageBox((LPSTR)(LPCSTR)rules.GetSection(i)->values["Name"], *rules.GetSectionName(i));
-				CCStrings[*rules.GetSectionName(i)].SetString((LPSTR)(LPCSTR)rules.GetSection(i)->GetValueByName("Name"));
-			}
+	for (auto const& [secName, sec] : rules) {
+		auto const& uiNameLabel = sec.GetString("UIName");
+		if (uiNameLabel.IsEmpty()) {
+			CCStrings[secName].SetString(sec.GetString("Name"));
+			continue;
 		}
-		else CCStrings[*rules.GetSectionName(i)].SetString((LPSTR)(LPCSTR)rules.GetSection(i)->GetValueByName("Name"));
-
+		auto const found = strings.find(uiNameLabel);
+		// no record
+		if (found == strings.end()) {
+			//MessageBox((LPSTR)(LPCSTR)rules.GetSection(i)->values["Name"], secName);
+			CCStrings[secName].SetString(sec.GetString("Name"));
+			continue;
+		}
+		//MessageBox(strings[uiNameLabel].cString);
+		if (!found->second.bUsedDefault) {
+			//CCStrings[secName].cString=strings[uiNameLabel].cString; //.SetString(strings[uiNameLabel].wString, strings[uiNameLabel].len);
+			CCStrings[secName].SetString(strings[uiNameLabel].wString, strings[uiNameLabel].len);
+			continue;
+		}
+		CCStrings[secName].SetString(strings[uiNameLabel].wString, strings[uiNameLabel].len);
+		CCStrings[secName].cString = sec.GetString("Name");
 	}
 	
 	
@@ -6450,7 +5067,7 @@ void CLoading::LoadStrings()
 	int i;
 	for(i=0;i<rules.sections.size();i++)
 	{
-		if(rules.GetSection(i)->FindName("Name")>=0)
+		if(rules.GetSection(i)->FindIndex("Name")>=0)
 		{
 			//CCStrings[*rules.GetSectionName(i)].cString=rules.GetSection(i)->values["Name"];
 			//CCStrings[*rules.GetSectionName(i)].SetString=rul
@@ -6464,42 +5081,40 @@ void CLoading::LoadStrings()
 
 void CLoading::HackRules()
 {
-	if(editor_mode==ra2_mode)
-	{
-		int i;
-		int max_c=0;
-		for(i=0;i<rules.sections["BuildingTypes"].values.size();i++)
-		{
-			int p=atoi(*rules.sections["BuildingTypes"].GetValueName(i));
-			if(p>max_c) max_c=p;
+	if (editor_mode == ra2_mode) {
+
+		auto const& gateOne = rules.GetString("General", "GDIGateOne");
+		if (!gateOne.IsEmpty()) {
+			auto const pSec = rules.TryGetSection("BuildingTypes");
+			ASSERT(pSec != nullptr);
+			if (!pSec->HasValue(gateOne)) {
+				pSec->Insert(gateOne, gateOne);
+			}
 		}
-
-		char c[50];		
-		itoa(max_c+1,c,10);
-
-		rules.sections["BuildingTypes"].values[c]=rules.sections["General"].values["GDIGateOne"];
 
 #ifdef RA2_MODE
 		// RULES(MD).INI has the incorrect colors set for the following houses, let's remap them to the expected values.
 		// Fixup YuriCountry colour
-		if (rules.sections["YuriCountry"].GetValueByName("Color") == "DarkRed") {
-			rules.sections["YuriCountry"].values["Color"] = "Purple";
+		if (rules.GetString("YuriCountry", "Color") == "DarkRed") {
+			rules.SetString("YuriCountry", "Color", "Purple");
 		}
 		// Fixup Allied colors
-		std::list<CString> allied_houses;
-		allied_houses.push_back("British");
-		allied_houses.push_back("French");
-		allied_houses.push_back("Germans");
-		allied_houses.push_back("Americans");
-		allied_houses.push_back("Alliance");
-		for (std::list<CString>::iterator it = allied_houses.begin(); it != allied_houses.end(); ++it) {
-			if (rules.sections[*it].GetValueByName("Color") == "Gold") {
-				rules.sections[*it].values["Color"] = "DarkBlue";
+		static const char* allied_houses[] = {
+			"British",
+			"French",
+			"Germans",
+			"Americans",
+			"Alliance",
+		};
+
+		for (auto const& name : allied_houses) {
+			if (rules.GetString(name, "Color") == "Gold") {
+				rules.SetString(name, "Color", "DarkBlue");
 			}
 		}
 		// Fixup Nod color
-		if (rules.sections["Nod"].GetValueByName("Color") == "Gold") {
-			rules.sections["Nod"].values["Color"] = "DarkRed";
+		if (rules.GetString("Nod", "Color") == "Gold") {
+			rules.SetString("Nod", "Color", "DarkRed");
 		}
 #endif
 
@@ -6530,12 +5145,14 @@ void CLoading::PrepareUnitGraphic(LPCSTR lpUnittype)
 	WORD wStep=1; // step is 1 for infantry, buildings, etc, and for shp vehicles it specifies the step rate between every direction
 	WORD wStartWalkFrame=0; // for examply cyborg reaper has another walk starting frame
 	int iTurretOffset=0; // used for centering y pos of turret (if existing)
-	BOOL bStructure=rules.sections["BuildingTypes"].FindValue(lpUnittype)>=0; // is this a structure?
+	BOOL bStructure = rules["BuildingTypes"].HasValue(lpUnittype); // is this a structure?
 
-	if(!bStructure) return; // make sure we only use it for buildings now
+	 // make sure we only use it for buildings now
+	if (!bStructure) {
+		return;
+	}
+	auto const bPowerUp = !rules.GetString(lpUnittype, "PowersUpBuilding").IsEmpty();
 
-	BOOL bPowerUp=rules.sections[lpUnittype].values["PowersUpBuilding"]!="";
-		
 	HTSPALETTE hPalette;
 	if(theat=='T') hPalette=m_hPalIsoTemp;
 	if(theat=='A') hPalette=m_hPalIsoSnow;
@@ -6546,23 +5163,20 @@ void CLoading::PrepareUnitGraphic(LPCSTR lpUnittype)
 	
 	CIsoView& v=*((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
 
-	_rules_image=lpUnittype;
-	if(rules.sections[lpUnittype].values.find("Image")!=rules.sections[lpUnittype].values.end())
-		_rules_image=rules.sections[lpUnittype].values["Image"];
+	_rules_image = rules.GetStringOr(lpUnittype, "Image", lpUnittype);
 
 	CString _art_image = _rules_image;
-	if(art.sections[_rules_image].values.find("Image")!=art.sections[_rules_image].values.end())
-	{
-		if(!isTrue(g_data.sections["IgnoreArtImage"].values[_rules_image]))
-			_art_image=art.sections[_rules_image].values["Image"];
+	auto const& imageID = art.GetString(_rules_image, "Image");
+	if (!imageID.IsEmpty() && !g_data.GetBool("IgnoreArtImage", _rules_image)) {
+		_art_image = imageID;
 	}
 
 	const CString& image = _art_image;
-	const auto& rulesSection = rules.sections[lpUnittype];
-	const auto& artSection = art.sections[image];
+	const auto& rulesSection = rules[lpUnittype];
+	const auto& artSection = art[image];
 
-	if(!isTrue(art.sections[image].values["Voxel"])) // is it a shp graphic?
-	{
+	// is it a shp graphic?
+	if(!artSection.GetBool("Voxel")) {
 		try
 		{
 
@@ -6782,28 +5396,23 @@ void CLoading::PrepareUnitGraphic(LPCSTR lpUnittype)
 		}*/
 
 		auto shp = FindUnitShp(image, cur_theat, artSection);
-		if (!shp)
+		if (!shp) {
 			return;
+		}
 
 		filename = shp->filename;
 		hPalette = shp->palette;
 
-		auto limited_to_theater = isTrue(artSection.GetValueByName("TerrainPalette")) ? shp->mixfile_theater : TheaterChar::None;
+		auto limited_to_theater = artSection.GetBool("TerrainPalette") ? shp->mixfile_theater : TheaterChar::None;
 
-		if(filename=="tibtre01.tem" || filename=="tibtre02.tem" || filename=="tibtre03.tem" || filename=="veinhole.tem")
-		{
+		if(filename=="tibtre01.tem" || filename=="tibtre02.tem" || filename=="tibtre03.tem" || filename=="veinhole.tem") {
 			hPalette=m_hPalUnitTemp;
 		}
-				
-			
-		if(shp->mixfile>0)
-		{			
 
-			BOOL bSuccess=FSunPackLib::SetCurrentSHP(filename, shp->mixfile);
-			if(
-			!bSuccess
-			)
-			{
+		if (shp->mixfile > 0) {
+
+			BOOL bSuccess = FSunPackLib::SetCurrentSHP(filename, shp->mixfile);
+			if (!bSuccess) {
 				filename=image+".sno";
 				if(cur_theat=='T' || cur_theat=='U') hPalette=m_hPalIsoTemp;
 				HMIXFILE hShpMix=FindFileInMix(filename);
@@ -6941,14 +5550,11 @@ void CLoading::FetchPalettes()
 
 	FSunPackLib::ColorConverter conf(pf);
 
-	const auto& rulesColors = rules.sections["Colors"];
-	for(i=0;i< rulesColors.values.size();i++)
-	{
-		CString col=*rulesColors.GetValueName(i);
-		COLORREF cref=v.GetColor("", col);		
+	for (auto const& [name, col] : rules["Colors"]) {
+		COLORREF cref = v.GetColor("", col);
 		
-		color_conv[col]=conf.GetColor(GetRValue(cref), GetGValue(cref), GetBValue(cref));
-		colorref_conv[cref]=color_conv[col];
+		color_conv[col] = conf.GetColor(GetRValue(cref), GetGValue(cref), GetBValue(cref));
+		colorref_conv[cref] = color_conv[col];
 	}
 }
 

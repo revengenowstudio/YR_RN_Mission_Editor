@@ -76,32 +76,29 @@ BOOL CRTPDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	int i;
-	for(i=0;i<rules.sections["TerrainTypes"].values.size();i++)
-	{
-		CString unitname=*rules.sections["TerrainTypes"].GetValue(i);
+	for (auto const& [seq, unitname] : rules["TerrainTypes"]) {
 		CString addedString=unitname;
 
-		if(g_data.sections["IgnoreRA2"].FindValue(unitname)>=0) continue;
-	
+		if (g_data["IgnoreRA2"].HasValue(unitname)) {
+			continue;
+		}
 		addedString=TranslateStringACP(addedString);
 			
-				
-		if(unitname.Find("TREE")>=0) 
-		{
-			
-						
+		if (unitname.Find("TREE") >= 0) {
 			if(unitname.GetLength()>0 && unitname!="VEINTREE") // out with it :-)
 			{
-				int TreeMin=atoi(g_data.sections[Map->GetTheater()+"Limits"].values["TreeMin"]);
-				int TreeMax=atoi(g_data.sections[Map->GetTheater()+"Limits"].values["TreeMax"]);
+				auto const& theaterType = Map->GetTheater();
+				int TreeMin = g_data.GetInteger(theaterType + "Limits", "TreeMin");
+				int TreeMax = g_data.GetInteger(theaterType + "Limits", "TreeMax");
 				
 				CString id=unitname;
 				id.Delete(0, 4);
 				int n=atoi(id);
 
 				
-				if(n<TreeMin || n>TreeMax) continue;
+				if (n<TreeMin || n>TreeMax) {
+					continue;
+				}
 
 				m_Available.AddString(unitname);			
 			}
@@ -237,7 +234,7 @@ void CRTPDlg::OnPaint()
 		if(missingimages.find(type)==missingimages.end())
 		{			
 			theApp.m_loading->LoadUnitGraphic(type);
-			Map->UpdateTreeInfo(type);
+			Map->UpdateTreeInfo(&type);
 			p=&treeinfo[id].pic;
 		}
 		if(p->pic==NULL)

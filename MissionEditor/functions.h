@@ -42,7 +42,7 @@ CString TranslateHouse(CString original, BOOL bToUI=FALSE);
 void ShowOptionsDialog();
 
 // repairs a trigger (sets flags correctly)
-void RepairTrigger(CString& triggerdata);
+bool RepairTrigger(CString& triggerdata);
 
 // coordinate functions
 void PosToXY(const char* pos, int* X, int* Y);
@@ -84,7 +84,7 @@ void ListWaypoints(CComboBox &cb);
 void ListTargets(CComboBox& cb);
 void ListTags(CComboBox& cb, BOOL bListNone);
 void ListMovies(CComboBox& cb, BOOL bListNone, BOOL bListParam=FALSE);
-void ListBuildings(CComboBox& cb, BOOL bININame=FALSE);
+void ListBuildings(CComboBox& cb, bool useIniName = false);
 void ListUnits(CComboBox& cb);
 void ListAircraft(CComboBox& cb);
 void ListInfantry(CComboBox& cb);

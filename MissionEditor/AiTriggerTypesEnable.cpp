@@ -80,29 +80,27 @@ void CAiTriggerTypesEnable::UpdateDialog()
 
 	while(m_AITriggerType.DeleteString(0)!=CB_ERR);
 
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	int i;
-	for(i=0;i<ini.sections["AITriggerTypesEnable"].values.size();i++)
-	{
-		CString aitrigger=*ini.sections["AITriggerTypesEnable"].GetValueName(i);
-		CString str=aitrigger;
+	for(auto const[aitrigger, val] : ini["AITriggerTypesEnable"]) {
+		CString str = aitrigger;
 		str+=" (";
-
-		if(ai.sections["AITriggerTypes"].values.find(aitrigger)!=ai.sections["AITriggerTypes"].values.end())
-		{
-			// standard ai trigger
-			str+=GetParam(ai.sections["AITriggerTypes"].values[aitrigger],0);
-			str+=" -> ";
-			str+=*ini.sections["AITriggerTypesEnable"].GetValue(i);
-
-
-		}
-		if(ini.sections["AITriggerTypes"].values.find(aitrigger)!=ini.sections["AITriggerTypes"].values.end())
-		{
-			str+=GetParam(ini.sections["AITriggerTypes"].values[aitrigger],0);
-			str+=" -> ";
-			str+=*ini.sections["AITriggerTypesEnable"].GetValue(i);
+		// parse from map definition first
+		auto const& aiDef = ini.GetString("AITriggerTypes", aitrigger);
+		if (!aiDef.IsEmpty()) {
+			str += GetParam(aiDef, 0);
+			str += " -> ";
+			str += val;
+		} else {
+			// if not found, try retrieving from global AI ini
+			auto const& aiDef = ai.GetString("AITriggerTypes", aitrigger);
+			if (!aiDef.IsEmpty()) {
+				// standard ai trigger
+				str += GetParam(aiDef, 0);
+				str += " -> ";
+				str += val;
+			}
 		}
 
 		str+=")";
@@ -122,9 +120,8 @@ void CAiTriggerTypesEnable::OnEnableall()
 	// enable all standard ai triggers
 	CIniFile& ini=Map->GetIniFile();
 	int i;
-	for(i=0;i<ai.sections["AITriggerTypes"].values.size();i++)
-	{
-		ini.sections["AITriggerTypesEnable"].values[*ai.sections["AITriggerTypes"].GetValueName(i)]="yes";		
+	for (auto const& [id, def] : ai["AITriggerTypes"]) {
+		ini.SetBool("AITriggerTypesEnable", id, true);
 	}
 
 	UpdateDialog();
@@ -140,31 +137,35 @@ void CAiTriggerTypesEnable::OnSelchangeAitriggertype()
 void CAiTriggerTypesEnable::OnDelete() 
 {
 	int sel=m_AITriggerType.GetCurSel();
-	if(sel<0) return;
+	if (sel < 0) {
+		return;
+	}
 	CString aitrigger;
 	m_AITriggerType.GetLBText(sel,aitrigger);
-	if(aitrigger.Find(" ")>=0) aitrigger.SetAt(aitrigger.Find(" "), 0);
+	if (aitrigger.Find(" ") >= 0) {
+		aitrigger.SetAt(aitrigger.Find(" "), 0);
+	}
 	
 	CIniFile& ini=Map->GetIniFile();
 
-	ini.sections["AITriggerTypesEnable"].values.erase((LPCTSTR)aitrigger);
+	ini.RemoveValueByKey("AITriggerTypesEnable", aitrigger);
 	UpdateDialog();
 }
 
 void CAiTriggerTypesEnable::OnAdd() 
 {
-	
-
-	//CString p=InputBox("Please enter the ID of the AITriggerType (for a list of all AITriggerType-IDs use the All-Section)","Enable AITriggerType");
+	//CString newTriggerId=InputBox("Please enter the ID of the AITriggerType (for a list of all AITriggerType-IDs use the All-Section)","Enable AITriggerType");
 	CAITriggerAddDlg dlg;
 	if(dlg.DoModal()==IDCANCEL) return;
 
-	CString p=dlg.m_AITrigger;
-	TruncSpace(p);
-	if(p.GetLength()==0) return;
+	CString newTriggerId = dlg.m_AITrigger;
+	TruncSpace(newTriggerId);
+	if (newTriggerId.GetLength() == 0) {
+		return;
+	}
 
 	CIniFile& ini=Map->GetIniFile();
 
-	ini.sections["AITriggerTypesEnable"].values[p]="yes";
+	ini.SetBool("AITriggerTypesEnable", newTriggerId, true);
 	UpdateDialog();
 }

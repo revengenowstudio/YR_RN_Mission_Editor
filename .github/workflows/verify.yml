@@ -1,0 +1,36 @@
+name: Basic verify
+
+on:
+  push:
+    branches: [ "!main", "!RN", "*" ]
+
+jobs:
+  compile-check:
+    runs-on: windows-2019
+    env:
+      CONFIGURATION: Debug
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+        submodules: recursive
+    - name: Change configuration to debug for PR
+      if: github.event_name == 'pull_request'
+      shell: bash
+      run: |
+        echo "CONFIGURATION=FinalAlertDebug YR" >> $GITHUB_ENV
+        mkdir Debug || true
+
+    - name: setup-msvc
+      uses: egor-tensin/vs-shell@v2
+      with:
+        # Target architecture
+        arch: x64
+    - name: build-msvc
+      run: |
+        devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project UnitTest
+    - name: do UT
+      run: |
+        cd x64\Debug
+        ./UnitTest

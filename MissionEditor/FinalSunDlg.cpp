@@ -536,7 +536,7 @@ void CFinalSunDlg::OnFileOpenmap()
 		
 		FSunPackLib::XCC_ExtractFile(pktFile, extractFile, hMix);
 		m_PKTHeader.LoadFile(extractFile, TRUE);
-		fileToOpen=m_PKTHeader.sections["MultiMaps"].values["1"]+".map";
+		fileToOpen = m_PKTHeader.GetString("MultiMaps", "1") + ".map";
 
 		
 
@@ -553,8 +553,8 @@ void CFinalSunDlg::OnFileOpenmap()
 
 	CIniFile f;
 	f.InsertFile(fileToOpen, "Map");
-	if((f.sections["Map"].values["Theater"]==THEATER0 && theApp.m_Options.bDoNotLoadTemperateGraphics) || (f.sections["Map"].values["Theater"]==THEATER1 && theApp.m_Options.bDoNotLoadSnowGraphics))
-	{
+	auto const& theaterType = f.GetString("Map", "Theater");
+	if ((theaterType == THEATER0 && theApp.m_Options.bDoNotLoadTemperateGraphics) || (theaterType == THEATER1 && theApp.m_Options.bDoNotLoadSnowGraphics)) {
 		MessageBox("You have selected to don´t show temperate or snow theater, but this map uses this theater. You cannot load it without restarting FinalSun/FinalAlert 2 with this theater enabled.", "Error");
 		return;
 	}
@@ -648,32 +648,61 @@ void CFinalSunDlg::UpdateDialogs(BOOL bOnlyMissionControl, BOOL bNoRepos)
 
 	OutputDebugString("Dialogs updated\n");
 
-	if(m_basic.m_hWnd) m_basic.UpdateDialog();
-	if(m_all.m_hWnd) m_all.UpdateDialog();
-	if(m_map.m_hWnd) m_map.UpdateDialog();
-	if(m_lighting.m_hWnd) m_lighting.UpdateDialog();
-	if(m_specialflags.m_hWnd) m_specialflags.UpdateDialog();
-	if(m_teamtypes.m_hWnd) m_teamtypes.UpdateDialog();
-	if(m_houses.m_hWnd) m_houses.UpdateDialog();
-	if(m_taskforces.m_hWnd) m_taskforces.UpdateDialog();
-	if(m_Scripttypes.m_hWnd) m_Scripttypes.UpdateDialog();
-	if(m_triggers.m_hWnd) m_triggers.UpdateDialog();
-	if(m_triggereditor.m_hWnd) m_triggereditor.UpdateDialog();
-	if(m_tags.m_hWnd) m_tags.UpdateDialog();
-	if(m_aitriggertypesenable.m_hWnd) m_aitriggertypesenable.UpdateDialog();
-	if(m_aitriggertypes.m_hWnd) m_aitriggertypes.UpdateDialog();
-	if(m_singleplayersettings.m_hWnd) m_singleplayersettings.UpdateDialog();
+	if (m_basic.m_hWnd) {
+		m_basic.UpdateDialog();
+	}
+	if (m_all.m_hWnd) {
+		m_all.UpdateDialog();
+	}
+	if (m_map.m_hWnd) {
+		m_map.UpdateDialog();
+	}
+	if (m_lighting.m_hWnd) {
+		m_lighting.UpdateDialog();
+	}
+	if (m_specialflags.m_hWnd) {
+		m_specialflags.UpdateDialog();
+	}
+	if (m_teamtypes.m_hWnd) {
+		m_teamtypes.UpdateDialog();
+	}
+	if (m_houses.m_hWnd) {
+		m_houses.UpdateDialog();
+	}
+	if (m_taskforces.m_hWnd) {
+		m_taskforces.UpdateDialog();
+	}
+	if (m_Scripttypes.m_hWnd) {
+		m_Scripttypes.UpdateDialog();
+	}
+	if (m_triggers.m_hWnd) {
+		m_triggers.UpdateDialog();
+	}
+	if (m_triggereditor.m_hWnd) {
+		m_triggereditor.UpdateDialog();
+	}
+	if (m_tags.m_hWnd) {
+		m_tags.UpdateDialog();
+	}
+	if (m_aitriggertypesenable.m_hWnd) {
+		m_aitriggertypesenable.UpdateDialog();
+	}
+	if (m_aitriggertypes.m_hWnd) {
+		m_aitriggertypes.UpdateDialog();
+	}
+	if (m_singleplayersettings.m_hWnd) {
+		m_singleplayersettings.UpdateDialog();
+	}
 
 	CIniFile& ini=Map->GetIniFile();
-	if(ini.sections.find(MAPHOUSES)!=ini.sections.end() && ini.sections[MAPHOUSES].values.size()>0)
-	{
-		if(ini.sections[MAPHOUSES].FindValue("Neutral")>=0)
-			currentOwner="Neutral";
-		else
-			currentOwner=*ini.sections[MAPHOUSES].GetValue(0);
+
+	currentOwner = "Neutral";
+	auto const& houseSec = ini[MAPHOUSES];
+	if (houseSec.Size() > 0) {
+		if (!houseSec.HasValue("Neutral")) {
+			currentOwner = ini[MAPHOUSES].Nth(0).second;
+		}
 	}
-	else
-		currentOwner="Neutral";//*rules.sections[HOUSES].GetValue(0);
 
 	if(!bOnlyMissionControl)
 	{
@@ -686,8 +715,9 @@ void CFinalSunDlg::UpdateDialogs(BOOL bOnlyMissionControl, BOOL bNoRepos)
 		m_view.m_objectview->UpdateDialog();
 		m_view.m_minimap.UpdateView();
 
-		if(tiles!=NULL && tiledata!=NULL && tiledata_count!=NULL)
-		m_view.m_browser->m_bar.Update();
+		if (tiles != NULL && tiledata != NULL && tiledata_count != NULL) {
+			m_view.m_browser->m_bar.Update();
+		}
 	}
 
 	AD.reset();
@@ -904,41 +934,36 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 		}
 		char c[50];
 		CIniFile& ini=Map->GetIniFile();
-		CIniFileSection& sec=ini.sections["Header"];
-		itoa(wp_count, c, 10);
-		sec.values["NumberStartingPoints"]=c;
-		for(i=0;i<8;i++)
-		{
-			CString s="Waypoint";
-			itoa(i+1, c, 10);
-			s+=c;
+		auto const sec = ini.TryGetSection("Header");
+		sec->SetInteger("NumberStartingPoints", wp_count);
+		for (i = 0; i < 8; i++) {
+			CString key = "Waypoint";
+			itoa(i + 1, c, 10);
+			key += c;
 			itoa(xw[i], c, 10);
-			CString val=c;
-			val+=",";
+			CString val = c;
+			val += ",";
 			itoa(yw[i], c, 10);
-			val+=c;
-			sec.values[s]=val;
+			val += c;
+			sec->SetString(key, val);
 		}
 
 		int startx, starty, width, height;
 		MC_GetHeaderRect(startx, starty, width, height);
 
-		itoa(height, c, 10);
-		sec.values["Height"]=c;
-		itoa(width, c, 10); 
-		sec.values["Width"]=c;
+		sec->SetInteger("Height", height);
+		sec->SetInteger("Width", width);
 
 		//CIniFile& ini=Map->GetIniFile();
-
-		CString left=GetParam(ini.sections["Map"].values["LocalSize"], 0);
-		CString top=GetParam(ini.sections["Map"].values["LocalSize"], 1);
+		auto const& localSizeStr = ini.GetString("Map", "LocalSize");
+		CString left = GetParam(localSizeStr, 0);
+		CString top = GetParam(localSizeStr, 1);
 		
 		//startx=1;//Map->GetHeight()/2;//atoi(left);//Map->GetIsoSize()/2-Map->GetWidth()/2;//198/2-50;//Map->GetIsoSize()/2-Map->GetHeight()/2;//Map->GetWidth()/2-50;
 		//starty=Map->GetWidth();//Map->GetIsoSize()/2-Map->GetWidth()/2;//198/2-50;//Map->GetIsoSize()/2-Map->GetWidth()/2;//Map->GetHeight()/2-50;
 		itoa(startx, c, 10);
-		sec.values["StartX"]=c;
-		itoa(starty, c, 10);
-		sec.values["StartY"]=c;
+		sec->SetInteger("StartX", startx);
+		sec->SetInteger("StartY", starty);
 		
 		/*CMultiSaveOptionsDlg mso;
 			
@@ -982,51 +1007,72 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 	CString MAPFileName=CoreName;
 	MAPFileName+=".map";
 
-	DWORD dwFlags=MAPDATA_UPDATE_TO_INI_ALL;
+	DWORD dwFlags = MAPDATA_UPDATE_TO_INI_ALL;
 
-	if(!bSaveAsMMX)
-	{
+	if (!bSaveAsMMX) {
 		CSaveMapOptionsDlg opt;
 
 
-		CString gm=Map->GetIniFile().sections["Basic"].values["GameMode"];
+		CString gm = Map->GetIniFile().GetString("Basic", "GameMode");
 		gm.MakeLower();
-		if(gm.GetLength())
-		{
-			opt.m_Standard=gm.Find("standard")>=0;
-			opt.m_AirWar=gm.Find("airwar")>=0;
-			opt.m_Cooperative=gm.Find("cooperative")>=0;
-			opt.m_Duel=gm.Find("duel")>=0;
-			opt.m_Navalwar=gm.Find("navalwar")>=0;
-			opt.m_Nukewar=gm.Find("nukewar")>=0;
-			opt.m_Meatgrind=gm.Find("meatgrind")>=0;
-			opt.m_Megawealth=gm.Find("megawealth")>=0;
-			opt.m_TeamGame=gm.Find("teamgame")>=0;
+		if (gm.GetLength()) {
+			opt.m_Standard = gm.Find("standard") >= 0;
+			opt.m_AirWar = gm.Find("airwar") >= 0;
+			opt.m_Cooperative = gm.Find("cooperative") >= 0;
+			opt.m_Duel = gm.Find("duel") >= 0;
+			opt.m_Navalwar = gm.Find("navalwar") >= 0;
+			opt.m_Nukewar = gm.Find("nukewar") >= 0;
+			opt.m_Meatgrind = gm.Find("meatgrind") >= 0;
+			opt.m_Megawealth = gm.Find("megawealth") >= 0;
+			opt.m_TeamGame = gm.Find("teamgame") >= 0;
+		} else {
+			opt.m_Standard = TRUE;
 		}
-		else
-			opt.m_Standard=TRUE;
-
 		
-		if(opt.DoModal()==IDCANCEL) return;
+		if (opt.DoModal() == IDCANCEL) {
+			return;
+		}
 
-		gm="";
-		if(opt.m_Standard) gm+="standard, ";
-		if(opt.m_Meatgrind) gm+="meatgrind, ";
-		if(opt.m_Navalwar) gm+="navalwar, ";
-		if(opt.m_Nukewar) gm+="nukewar, ";
-		if(opt.m_AirWar) gm+="airwar, ";
-		if(opt.m_Megawealth) gm+="megawealth, ";
-		if(opt.m_Duel) gm+="duel, ";
-		if(opt.m_Cooperative) gm+="cooperative, ";
-		if(opt.m_TeamGame) gm+="teamgame, ";
+		gm = "";
+		if (opt.m_Standard) {
+			gm += "standard, ";
+		}
+		if (opt.m_Meatgrind) {
+			gm += "meatgrind, ";
+		}
+		if (opt.m_Navalwar) {
+			gm += "navalwar, ";
+		}
+		if (opt.m_Nukewar) {
+			gm += "nukewar, ";
+		}
+		if (opt.m_AirWar) {
+			gm += "airwar, ";
+		}
+		if (opt.m_Megawealth) {
+			gm += "megawealth, ";
+		}
+		if (opt.m_Duel) {
+			gm += "duel, ";
+		}
+		if (opt.m_Cooperative) {
+			gm += "cooperative, ";
+		}
+		if (opt.m_TeamGame) {
+			gm += "teamgame, ";
+		}
 
-		if(gm.ReverseFind(',')>=0) gm=gm.Left(gm.ReverseFind(','));
+		if (gm.ReverseFind(',') >= 0) {
+			gm = gm.Left(gm.ReverseFind(','));
+		}
 
-		if(gm.GetLength()==0) gm="standard";
+		if (gm.GetLength() == 0) {
+			gm = "standard";
+		}
 		
 
-		Map->GetIniFile().sections["Basic"].values["Name"]=opt.m_MapName;
-		Map->GetIniFile().sections["Basic"].values["GameMode"]=gm;
+		Map->GetIniFile().SetString("Basic", "Name", opt.m_MapName);
+		Map->GetIniFile().SetString("Basic", "GameMode", gm);
 
 		int i;
 		int count=0;
@@ -1037,44 +1083,56 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 			Map->GetWaypointData(i, &id, &pos);
 			int idi;
 			idi=atoi(id);
-			if(idi!=i) break;
-			if(idi>=0 && idi<8) count++;			
+			if (idi != i) {
+				break;
+			}
+			if (idi >= 0 && idi < 8) {
+				count++;
+			}
 		}
 
-		if(count<2) count=2;
-
-		Map->GetIniFile().sections["Basic"].values["MinPlayer"]="2";
-		char c[50];
-		itoa(count, c, 10);
-		Map->GetIniFile().sections["Basic"].values["MaxPlayer"]=c;
+		if (count < 2) {
+			count = 2;
+		}
+		// TODO: control from dialog
+		Map->GetIniFile().SetInteger("Basic", "MinPlayer", 2);
+		Map->GetIniFile().SetInteger("Basic", "MaxPlayer", count);
 		
-		if(opt.m_Compress==0) dwFlags|=MAPDATA_UPDATE_TO_INI_ALL_COMPRESSED;
-		if(opt.m_PreviewMode==0) dwFlags|=MAPDATA_UPDATE_TO_INI_ALL_PREVIEW;
-		if(opt.m_PreviewMode==2) hidePreview=TRUE;
-	}
-	else
-	{
+		if (opt.m_Compress == 0) {
+			dwFlags |= MAPDATA_UPDATE_TO_INI_ALL_COMPRESSED;
+		}
+		if (opt.m_PreviewMode == 0) {
+			dwFlags |= MAPDATA_UPDATE_TO_INI_ALL_PREVIEW;
+		}
+		if (opt.m_PreviewMode == 2) {
+			hidePreview = TRUE;
+		}
+	} else {
 		CMMXSavingOptionsDlg opt;
-
-		if(m_PKTHeader.sections.size()>0) // old pkt header exists
-		{
-			CIniFileSection& sec=m_PKTHeader.sections[m_PKTHeader.sections["MultiMaps"].values["1"]];
-			if(sec.values["Description"].GetLength()>0) opt.m_Description=sec.values["Description"];
-			opt.m_MinPlayers=atoi(sec.values["MinPlayers"])-2;
-			opt.m_Maxplayers=atoi(sec.values["MaxPlayers"])-2;
-			CString gm=sec.values["GameMode"];
+		// old pkt header exists
+		if (m_PKTHeader.Size() > 0) {
+			auto const& sec = m_PKTHeader[m_PKTHeader.GetString("MultiMaps", "1")];
+			auto const& desc = sec.GetString("Description");
+			if (!desc.IsEmpty()) {
+				opt.m_Description = desc;
+			}
+			opt.m_MinPlayers = sec.GetInteger("MinPlayers") - 2;
+			opt.m_Maxplayers = sec.GetInteger("MaxPlayers") - 2;
+			CString gm = sec["GameMode"];
 			gm.MakeLower();
-			opt.m_Standard=gm.Find("standard")>=0;
-			opt.m_AirWar=gm.Find("airwar")>=0;
-			opt.m_Cooperative=gm.Find("cooperative")>=0;
-			opt.m_Duel=gm.Find("duel")>=0;
-			opt.m_NavalWar=gm.Find("navalwar")>=0;
-			opt.m_NukeWar=gm.Find("nukewar")>=0;
-			opt.m_Meatgrind=gm.Find("meatgrind")>=0;
-			opt.m_MegaWealth=gm.Find("megawealth")>=0;
+			opt.m_Standard = gm.Find("standard") >= 0;
+			opt.m_AirWar = gm.Find("airwar") >= 0;
+			opt.m_Cooperative = gm.Find("cooperative") >= 0;
+			opt.m_Duel = gm.Find("duel") >= 0;
+			opt.m_NavalWar = gm.Find("navalwar") >= 0;
+			opt.m_NukeWar = gm.Find("nukewar") >= 0;
+			opt.m_Meatgrind = gm.Find("meatgrind") >= 0;
+			opt.m_MegaWealth = gm.Find("megawealth") >= 0;
 		}
 
-		if(opt.DoModal()==IDCANCEL) return;
+		if (opt.DoModal() == IDCANCEL) {
+			return;
+		}
 
 		Description=opt.m_Description;
 		standard=opt.m_Standard;
@@ -1091,7 +1149,7 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 
 		dwFlags|=MAPDATA_UPDATE_TO_INI_ALL_PREVIEW;
 
-		Map->GetIniFile().sections["Basic"].values["Official"]="Yes";
+		Map->GetIniFile().SetBool("Basic", "Official", "Yes");
 
 		// Map->GetIniFile().sections["Basic"].values["Name"]=opt.m_Description;
 	}	
@@ -1112,22 +1170,21 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 
 	CIniFile& ini=Map->GetIniFile();
 
-
-	int i;
-
-	for(i=0;i<ini.sections.size();i++)
-	{
-		if(ini.GetSection(i)->values.size()==0 || ini.GetSectionName(i)->GetLength()==0)
-		{
-			ini.sections.erase(*ini.GetSectionName(i));
+	// delete invalid ini sections
+	for (auto it = ini.begin(); it != ini.end();) {
+		if (it->second.Size() == 0 || it->first.IsEmpty()) {
+			it = ini.DeleteAt(it);
 		}
+		++it;
 	}
 
-	for(i=0;i<ini.sections.size();i++)
-	{
-		CIniFileSection& sec=*ini.GetSection(i);
+	// why need this trim? we should handle it in the first place
+#if 0
+	for(auto & sec : ini) {
 		int e;
-		if(*ini.GetSectionName(i)!="IsoMapPack5")
+		if (sec.first == "IsoMapPack5") {
+			continue;
+		}
 		for(e=0;e<sec.values.size();e++)
 		{
 			sec.GetValue(e)->TrimLeft();
@@ -1160,7 +1217,7 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 			}
 		}
 	}
-
+#endif
 	
 	
 	SetText("Saving...");
@@ -1206,196 +1263,183 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 		fi="";
 
 		// MW 07/28/01: Header saving at top
-		for(i=0;i<ini.sections.size();i++)
 		{
-			if(*ini.GetSectionName(i)=="Header")
-			{
-				rulessections[*ini.GetSectionName(i)]=TRUE;
+			auto const headerSecName = "Header";
+			auto const& headerSec = ini[headerSecName];
+			rulessections[headerSecName] = TRUE;
 
-				fi= "[" ;
-				fi+= *ini.GetSectionName(i);
-				fi+= "]" ;
-				fi+= "\n";
+			fi = "[";
+			fi += headerSecName;
+			fi += "]";
+			fi += "\n";
 
+			WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
+
+			char c[50];
+			for (auto e = 0; e < headerSec.Size(); e++) {
+				auto const& [key, value] = headerSec.Nth(e);
+				fi = key;
+				fi += "=";
+				fi += value;
+				fi += "\n";
 				WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
-				
-				int e;
-				CIniFileSection& sec=*ini.GetSection(i);
-				CString d;
-				
-			
-				char c[50];
-				for(e=0;e<sec.values.size();e++)
-				{
-					fi= *sec.GetValueName(e);
-					fi+= "=" ;
-					fi+= *sec.GetValue(e) ;
-					fi+= "\n";
-					WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
-	
-					
-					if(e%500==0)
-					{
-						int percent=e*100/sec.values.size();
-						d=*ini.GetSectionName(i);
-						itoa(percent,c ,10);
-						SetText((CString)"Saving... "+d+"( "+c+"% )");
-						UpdateWindow();
-					}
-					
+
+
+				if (e % 500 == 0) {
+					int percent = e * 100 / headerSec.Size();
+					itoa(percent, c, 10);
+					SetText((CString)"Saving... " + headerSecName + "( " + c + "% )");
+					UpdateWindow();
 				}
 
-				fi= "\n";
-				WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);	
 			}
 
+			fi = "\n";
+			WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
 		}
 
-		for(i=0;i<ini.sections.size();i++)
-		{
-			if(Map->IsRulesSection(*ini.GetSectionName(i)))
-			{
-				rulessections[*ini.GetSectionName(i)]=TRUE;
+		for (auto const& [secName, sec] : ini) {
+			if (!Map->IsRulesSection(secName)) {
+				continue;
+			}
+			rulessections[secName] = TRUE;
 
-				fi= "[" ;
-				fi+= *ini.GetSectionName(i);
-				fi+= "]" ;
-				fi+= "\n";
+			fi = "[";
+			fi += secName;
+			fi += "]";
+			fi += "\n";
 
+			WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
+
+			char c[50];
+			for (auto e = 0; e < sec.Size(); e++) {
+				auto const& [key, value] = sec.Nth(e);
+				fi = key;
+				fi += "=";
+				fi += value;
+				fi += "\n";
 				WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
-				
-				int e;
-				CIniFileSection& sec=*ini.GetSection(i);
-				CString d;
-				
-			
-				char c[50];
-				for(e=0;e<sec.values.size();e++)
-				{
-					fi= *sec.GetValueName(e);
-					fi+= "=" ;
-					fi+= *sec.GetValue(e) ;
-					fi+= "\n";
-					WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
-	
-					
-					if(e%500==0)
-					{
-						int percent=e*100/sec.values.size();
-						d=*ini.GetSectionName(i);
-						itoa(percent,c ,10);
-						SetText((CString)"Saving... "+d+"( "+c+"% )");
-						UpdateWindow();
-					}
-					
+
+				if (e % 500 == 0) {
+					int percent = e * 100 / sec.Size();
+					itoa(percent, c, 10);
+					SetText((CString)"Saving... " + secName + "( " + c + "% )");
+					UpdateWindow();
 				}
 
-				fi= "\n";
-				WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);	
 			}
 
+			fi = "\n";
+			WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
 		}
 
 		// the preview must be before map data...
-		if(hidePreview)
-		{
-			fi+= "; this is a hidden preview";fi+= "\n";
-			fi+= "[Preview]" ;fi+= "\n" ;
-			fi+= "Size=0,0,106,61" ;fi+= "\n" ;fi+= "\n";
-			fi+= "[PreviewPack]" ;fi+= "\n";
-			fi+= "2=BIACcgAEwBtAMnRABAAaQCSANMAVQASAAnIABMAbQDJ0QAQAGkAkgDTAFUAEgAJyAATAG0" ;fi+= "\n";
-			fi+= "1=yAsAIAXQ5PDQ5PDQ6JQATAEE6PDQ4PDI4JgBTAFEAkgAJyAATAG0AydEAEABpAJIA0wBVA" ;fi+= "\n" ;fi+= "\n";
-		}
-		else{
-			fi+= "[Preview]" ;fi+= "\n";
-			int e;
-			for(e=0;e<ini.sections["Preview"].values.size();e++)
-			{
-				fi+= *ini.sections["Preview"].GetValueName(e) ;fi+= "=" ;
-				fi+= *ini.sections["Preview"].GetValue(e);
-				fi+= "\n";
+		if (hidePreview) {
+			fi += "; this is a hidden preview"; 
+			fi += "\n";
+			fi += "[Preview]"; 
+			fi += "\n";
+			fi += "Size=0,0,106,61"; 
+			fi += "\n"; 
+			fi += "\n";
+			fi += "[PreviewPack]"; 
+			fi += "\n";
+			fi += "2=BIACcgAEwBtAMnRABAAaQCSANMAVQASAAnIABMAbQDJ0QAQAGkAkgDTAFUAEgAJyAATAG0"; 
+			fi += "\n";
+			fi += "1=yAsAIAXQ5PDQ5PDQ6JQATAEE6PDQ4PDI4JgBTAFEAkgAJyAATAG0AydEAEABpAJIA0wBVA";
+			fi += "\n"; 
+			fi += "\n";
+		} else {
+			fi += "[Preview]"; 
+			fi += "\n";
+			for (auto const& [key, value] : ini["Preview"]) {
+				fi += key;
+				fi += "=";
+				fi += value;
+				fi += "\n";
 			}
-			fi+= "\n";
-			fi+= "[PreviewPack]" ;fi+= "\n";
-			for(e=0;e<ini.sections["PreviewPack"].values.size();e++)
-			{
-				fi+= *ini.sections["PreviewPack"].GetValueName(e) ;fi+= "=" ;
-				fi+= *ini.sections["PreviewPack"].GetValue(e) ;
-				fi+= "\n";
+			fi += "\n";
+			fi += "[PreviewPack]"; 
+			fi += "\n";
+			for (auto const& [key, value] : ini["PreviewPack"]) {
+				fi += key; 
+				fi += "=";
+				fi += value;
+				fi += "\n";
 			}
-			fi+= "\n";
+			fi += "\n";
 		}
 
 		
 		WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
 
-		for(i=0;i<ini.sections.size();i++)
-		{
-			if(rulessections.find(*ini.GetSectionName(i))!=rulessections.end() || (*ini.GetSectionName(i)=="Digest" || *ini.GetSectionName(i)=="PreviewPack" || *ini.GetSectionName(i)=="Preview" || *ini.GetSectionName(i)=="Header"))
-			{
+		auto alreadyHandledSections = [&rulessections](const CString& secName) {
+			const char* handledSections[] = {
+				"Digest",
+				"PreviewPack",
+				"Preview",
+				"Header"
+			};
 
-				
-
-				
+			if (rulessections.find(secName) != rulessections.end()) {
+				return true;
 			}
-			else if(*ini.GetSectionName(i)!="")
-			{
-				//MessageBox(ini.GetSectionName(i)->data());
-				
-				
+
+			for (auto const pSec : handledSections) {
+				if (pSec == secName) {
+					return true;
+				}
+			}
+
+			return false;
+		};
+
+		for (auto const& [secName, sec] : ini) {
+			if (alreadyHandledSections(secName)) {
+				continue;
+			}
+			if (!secName.IsEmpty()) {
+				//MessageBox(secName);
 				//its a standard section:
-				fi= "[" ;
-				fi+= *ini.GetSectionName(i);
-				fi+= "]" ;
-				fi+= "\n";
+				fi = "[";
+				fi += secName;
+				fi += "]";
+				fi += "\n";
 
 				WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
-				
-				int e;
-				CIniFileSection& sec=*ini.GetSection(i);
-				CString d;
-				
-			
+
 				char c[50];
-				for(e=0;e<sec.values.size();e++)
-				{
-					fi= *sec.GetValueName(e);
-					fi+= "=" ;
-					fi+= *sec.GetValue(e) ;
-					fi+= "\n";
+				for (auto e = 0; e < sec.Size(); e++) {
+					auto const& [key, value] = sec.Nth(e);
+					fi = key;
+					fi += "=";
+					fi += value;
+					fi += "\n";
 					WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
 
-					
-										
-					
-					if(e%500==0)
-					{
-						int percent=e*100/sec.values.size();
-						d=*ini.GetSectionName(i);
-						itoa(percent,c ,10);
-						SetText((CString)"Saving... "+d+"( "+c+"% )");
+					if (e % 500 == 0) {
+						int percent = e * 100 / sec.Size();
+						itoa(percent, c, 10);
+						SetText((CString)"Saving... " + secName + "( " + c + "% )");
 						UpdateWindow();
 					}
-					
+
 				}
 
-				fi= "\n";
-				WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);			
-				
+				fi = "\n";
+				WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
 			}
 		}
 
-		
-		fi+= "\n";
-		fi+= "[Digest]" ;fi+= "\n";
-		int e;
-		for(e=0;e<ini.sections["Digest"].values.size();e++)
-		{
-			fi+= *ini.sections["Digest"].GetValueName(e) ;fi+= "=" ;
-			fi+= *ini.sections["Digest"].GetValue(e) ;
-			fi+= "\n";
+		fi += "\n";
+		fi += "[Digest]";
+		fi += "\n";
+		for (auto const& [key, value] : ini["Digest"]) {
+			fi += key; fi += "=";
+			fi += value;
+			fi += "\n";
 		}
-		fi+= "\n";
+		fi += "\n";
 		WriteFile(hFile, fi, fi.GetLength(), &bwr, NULL);
 
 				
@@ -1434,36 +1478,52 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 				//CoreName.Replace(" ", "");
 				//Description.Replace(" ","");
 				
-				f.sections["MultiMaps"].values["1"]=CoreName;
-				f.sections[CoreName].values["Description"]=Description;
+				f.SetString("MultiMaps", "1", CoreName);
+				f.SetString(CoreName, "Description", Description);
 				CString gm;
-				if(standard) gm+="standard, ";
-				if(meatgrind) gm+="meatgrind, ";
-				if(navalwar) gm+="navalwar, ";
-				if(nukewar) gm+="nukewar, ";
-				if(airwar) gm+="airwar, ";
-				if(megawealth) gm+="megawealth, ";
-				if(duel) gm+="duel, ";
-				if(cooperative) gm+="cooperative, ";
+				if (standard) {
+					gm += "standard, ";
+				}
+				if (meatgrind) {
+					gm += "meatgrind, ";
+				}
+				if (navalwar) {
+					gm += "navalwar, ";
+				}
+				if (nukewar) {
+					gm += "nukewar, ";
+				}
+				if (airwar) {
+					gm += "airwar, ";
+				}
+				if (megawealth) {
+					gm += "megawealth, ";
+				}
+				if (duel) {
+					gm += "duel, ";
+				}
+				if (cooperative) {
+					gm += "cooperative, ";
+				}
 
-				if(gm.ReverseFind(',')>=0) gm=gm.Left(gm.ReverseFind(','));
+				if (gm.ReverseFind(',') >= 0) {
+					gm = gm.Left(gm.ReverseFind(','));
+				}
 
-				f.sections[CoreName].values["GameMode"]=gm;
+				f.SetString(CoreName, "GameMode", gm);
 
 				char c[50];
-				itoa(maxplayers, c, 10);
-				f.sections[CoreName].values["MaxPlayers"]=c;
-				itoa(minplayers,c,10);
-				f.sections[CoreName].values["MinPlayers"]=c;
+				f.SetInteger( CoreName,"MaxPlayers", maxplayers);
+				f.SetInteger(CoreName, "MinPlayers", minplayers);
 
-				f.sections[CoreName].values["CD"]="0,1";
+				f.SetString(CoreName, "CD", "0,1");
 				
 
 				f.SaveFile(PKTFileName);
 
 				LPCSTR files[2];
-				files[0]=(LPCSTR)PKTFileName;
-				files[1]=(LPCSTR)MAPFileName;
+				files[0] = (LPCSTR)PKTFileName;
+				files[1] = (LPCSTR)MAPFileName;
 
 #ifdef RA2_MODE
 				auto game = yuri_mode ? FSunPackLib::Game::RA2_YR : FSunPackLib::Game::RA2;
@@ -1613,11 +1673,10 @@ void CFinalSunDlg::OnDebugExportmappacknosections()
 	int i;
 
 
-	ovrl="";
+	ovrl = "";
 
-	for(i=0;i<ini.sections["IsoMapPack5"].values.size();i++)
-	{
-		ovrl+=*ini.sections["IsoMapPack5"].GetValue(i);
+	for (auto const& [key, val] : ini["IsoMapPack5"]) {
+		ovrl += val;
 	}
 
 
@@ -1647,16 +1706,17 @@ void CFinalSunDlg::OnDebugExportmappack()
 	
 }
 
-void DeleteTypeList(CString SectionType)
+void deleteTypeListFromIni(CIniFile& ini, const CString& SectionType)
 {
-	CIniFile& ini=Map->GetIniFile();
-	
-	int i;
-	for(i=0;i<ini.sections[SectionType].values.size();i++)
-	{
-		ini.sections.erase(*ini.sections[SectionType].GetValue(i));
+	for (auto const& [seq, id] : ini[SectionType]) {
+		ini.DeleteSection(id);
 	}
-	ini.sections.erase(SectionType);
+	ini.DeleteSection(SectionType);
+}
+
+void DeleteTypeList(const CString& SectionType)
+{
+	deleteTypeListFromIni(Map->GetIniFile(), SectionType);
 }
 
 void CFinalSunDlg::OnFileNew() 
@@ -1700,13 +1760,14 @@ void CFinalSunDlg::OnFileNew()
 	CString plhouse;
 	BOOL bPrepareHouses=FALSE;
 	BOOL bAutoProd=FALSE;
-	if(bSingleplayer)
-	{
+	if (bSingleplayer) {
 		CNewMapSpDlg spdlg;
-		if(spdlg.DoModal()==IDCANCEL) return;
+		if (spdlg.DoModal() == IDCANCEL) {
+			return;
+		}
 		bPrepareHouses=spdlg.m_PrepareHouses;
 		bAutoProd=spdlg.m_AutoProd;
-		plhouse=*rules.sections[HOUSES].GetValue(spdlg.m_House);
+		plhouse = rules[HOUSES].Nth(spdlg.m_House).second;
 	}
 
 	bNoDraw=TRUE;
@@ -1750,7 +1811,7 @@ void CFinalSunDlg::OnFileNew()
 				Map->ClearOverlayData();
 			}
 			
-			CIniFile& ini=Map->GetIniFile();
+			CIniFile& ini = Map->GetIniFile();
 
 			int i;
 			int count=Map->GetTerrainCount();
@@ -1776,31 +1837,20 @@ void CFinalSunDlg::OnFileNew()
 					Map->DeleteAircraft(0);
 			}
 
-			ini.sections["Basic"].values["Name"]="Noname";
+			ini.SetString("Basic", "Name", "Noname");
 
-			for(i=0;i<ini.sections[MAPHOUSES].values.size();i++)
-			{
-				ini.sections.erase(*ini.sections[MAPHOUSES].GetValue(i));
-			}
-			ini.sections.erase(MAPHOUSES);
+			deleteTypeListFromIni(ini, MAPHOUSES);
+			deleteTypeListFromIni(ini, HOUSES);
 
-			for(i=0;i<ini.sections[HOUSES].values.size();i++)
-			{
-				ini.sections.erase(*ini.sections[HOUSES].GetValue(i));
-			}
-			ini.sections.erase(HOUSES);
-
-			if(TRUE)
-			{
-				ini.sections.erase("Tags");
-				ini.sections.erase("Triggers");
-				ini.sections.erase("Actions");
-				ini.sections.erase("Events");
+			if (TRUE) {
+				ini.DeleteSection("Tags");
+				ini.DeleteSection("Triggers");
+				ini.DeleteSection("Actions");
+				ini.DeleteSection("Events");
 				DeleteTypeList("TeamTypes");
 				DeleteTypeList("TaskForces");
 				DeleteTypeList("ScriptTypes");
-				ini.sections.erase("CellTags");
-
+				ini.DeleteSection("CellTags");
 				// ini.sections.erase("AITriggerTypesEnable");
 				// ini.sections.erase("AITriggerTypes");
 			}
@@ -1845,120 +1895,111 @@ void CFinalSunDlg::OnFileNew()
 
 	CIniFile& ini=Map->GetIniFile();
 
-	if(!bSingleplayer) ini.sections["Basic"].values["MultiplayerOnly"]="1";
+	if (!bSingleplayer) {
+		ini.SetString("Basic", "MultiplayerOnly", "1");
+	}
 
-	if(bSingleplayer)
-	{
-		ini.sections["Basic"].values["MultiplayerOnly"]="0";
+	if (bSingleplayer) {
+		ini.SetString("Basic", "MultiplayerOnly", "0");
 
-		ini.sections.erase("Preview");
-		ini.sections.erase("PreviewPack");
-		
+		ini.DeleteSection("Preview");
+		ini.DeleteSection("PreviewPack");
 
-		
-		
-		if(bPrepareHouses)
-		{
+		if (bPrepareHouses) {
 			//CString plhouse;
 			//plhouse=GetHouseSectionName(dlg.m_House);
-			plhouse+=" House";
-			ini.sections["Basic"].values["Player"]=plhouse;
-			
-			int i;
-			for (i=0;i<rules.sections[HOUSES].values.size();i++)
-			{
-#ifdef RA2_MODE
-				CString j=*rules.sections[HOUSES].GetValue(i);
-				j.MakeLower();
-				if(j=="nod" || j=="gdi") continue;
-#endif	
+			plhouse += " House";
+			ini.SetString("Basic", "Player", plhouse);
 
-				char c[50];
-				int k=i;
-				itoa(k,c,10);
-				CString country=*rules.sections[HOUSES].GetValue(i);
-				CString house=GetHouseSectionName(country);
-				ini.sections[MAPHOUSES].values[c]=house;
+			auto const& rulesHouseSec = rules[HOUSES];
+			for (auto idx = 0; idx < rulesHouseSec.Size(); idx++) {
 #ifdef RA2_MODE
-				ini.sections[HOUSES].values[c]=country;
+				auto const& country = rulesHouseSec.Nth(idx).second;
+				if (!country.CompareNoCase("nod") || country.CompareNoCase("gdi")) {
+					continue;
+				}
+#endif
+				char idxStr[50];
+				itoa(idx, idxStr, 10);
+				CString house = GetHouseSectionName(country);
+				ini.SetString(MAPHOUSES, idxStr, house);
+#ifdef RA2_MODE
+				ini.SetString(HOUSES, idxStr, country);
 #endif
 
 				// is it a player house or a ai house?
-				if(house!=(LPCTSTR)plhouse)
-				{
-					ini.sections[house].values["IQ"]="5";
+				if (house != (LPCTSTR)plhouse) {
+					ini.SetInteger(house, "IQ", 5);
 					
-					ini.sections[house].values["PlayerControl"]="no";
+					ini.SetBool(house, "PlayerControl", false);
 
 					// now, if the user wants to, check if this house is a passive or active house
-					if(stricmp(rules.sections[house].values["MultiplayPassive"],"true")!=NULL && bAutoProd)
-					{
-						CString id=GetFreeID();
+					if (!rules.GetBool(house, "MultiplayPassive") && bAutoProd) {
+						CString id = GetFreeID();
 
-						char c[50];
-						k=i;
-						itoa(i,c,10);
+
 #ifdef RA2_MODE
 						//k=i+rules.sections[HOUSES].values.size();
 						//itoa(k,c,10);
 #endif
-						
-						ini.sections["Triggers"].values[id]=country;
-						ini.sections["Triggers"].values[id]+=",<none>,AI Auto Production ";
-						ini.sections["Triggers"].values[id]+=TranslateHouse(country, TRUE);
-						ini.sections["Triggers"].values[id]+=",0,1,1,1,0";
+						CString triggerContent = country;
+						triggerContent += ",<none>,AI Auto Production ";
+						triggerContent += TranslateHouse(country, TRUE);
+						triggerContent += ",0,1,1,1,0";
+						ini.SetString("Triggers", id, triggerContent);
 
-						ini.sections["Events"].values[id]="1,13,0,10"; // after 10 secs, start prod.
+						ini.SetString("Events", id, "1,13,0,10"); // after 10 secs, start prod.
 
-						ini.sections["Actions"].values[id]="3,3,0,";
-						ini.sections["Actions"].values[id]+=c;
-						ini.sections["Actions"].values[id]+=",0,0,0,0,A,13,0,";
-						ini.sections["Actions"].values[id]+=c;
-						ini.sections["Actions"].values[id]+=",0,0,0,0,A,74,0,";
-						ini.sections["Actions"].values[id]+=c;
-						ini.sections["Actions"].values[id]+=",0,0,0,0,A";
+						CString actionContent = "3,3,0,";
+						actionContent += idxStr;
+						actionContent += ",0,0,0,0,A,13,0,";
+						actionContent += idxStr;
+						actionContent += ",0,0,0,0,A,74,0,";
+						actionContent += idxStr;
+						actionContent += ",0,0,0,0,A";
+
+						ini.SetString("Actions",id, actionContent);
 
 
+						CString ID_TAG = GetFreeID();
+						CString tagContent ="0,AI Auto Production ";
+						tagContent += TranslateHouse(house, TRUE);
+						tagContent += ",";
+						tagContent += id;
 
-						CString ID_TAG=GetFreeID();
-						ini.sections["Tags"].values[ID_TAG]="0,AI Auto Production ";
-						ini.sections["Tags"].values[ID_TAG]+=TranslateHouse(house, TRUE);
-						ini.sections["Tags"].values[ID_TAG]+=",";
-						ini.sections["Tags"].values[ID_TAG]+=id;
+						ini.SetString("Tags", ID_TAG, tagContent);
 					}
 						
-				}
-				else
-				{
-					ini.sections[house].values["IQ"]="0";
-
-					ini.sections[house].values["PlayerControl"]="yes";
+				} else {
+					ini.SetInteger(house, "IQ", 0);
+					ini.SetBool(house, "PlayerControl", true);
 				}
 
 #ifndef RA2_MODE
 				ini.sections[house].values["ActsLike"]=c;
 				ini.sections[house].values["Side"]=house;
 #else
-				ini.sections[house].values["Country"]=*rules.sections[HOUSES].GetValue(i);
+				ini.SetString(house, "Country", country);
 #endif
-				ini.sections[house].values["Edge"]="North";
-				
-				ini.sections[house].values["Color"]=rules.sections[*rules.sections[HOUSES].GetValue(i)].values["Color"];
-				ini.sections[house].values["Allies"]=house;
-				ini.sections[house].values["Credits"]="0";
-				ini.sections[house].values["NodeCount"]="0";
-				ini.sections[house].values["TechLevel"]="10";
-				ini.sections[house].values["PercentBuilt"]="100";
+				ini.SetString(house, "Edge", "North");
+
+				auto const& countrySec = rules[country];
+				ini.SetString(house, "Color", countrySec.GetString("Color"));
+				ini.SetString(house, "Allies", house);
+				ini.SetInteger(house, "Credits", 0);
+				ini.SetInteger(house, "NodeCount", 0);
+				ini.SetInteger(house, "TechLevel", 10);
+				ini.SetInteger(house, "PercentBuilt", 100);
 
 #ifdef RA2_MODE
-				ini.sections[country].values["ParentCountry"]=country;
-				ini.sections[country].values["Name"]=country;
-				ini.sections[country].values["Suffix"]=rules.sections[country].values["Suffix"];
-				ini.sections[country].values["Prefix"]=rules.sections[country].values["Prefix"];
-				ini.sections[country].values["Color"]=rules.sections[country].values["Color"];
-				ini.sections[country].values["Side"]=rules.sections[country].values["Side"];
-				ini.sections[country].values["SmartAI"]=rules.sections[country].values["SmartAI"];
-				ini.sections[country].values["CostUnitsMult"]="1";
+				ini.SetString(country, "ParentCountry", country);
+				ini.SetString(country, "Name", country);
+				ini.SetString(country, "Suffix", countrySec.GetString("Suffix"));
+				ini.SetString(country, "Prefix", countrySec.GetString("Prefix"));
+				ini.SetString(country, "Color", countrySec.GetString("Color"));
+				ini.SetString(country, "Side", countrySec.GetString("Side"));
+				ini.SetString(country, "SmartAI", countrySec.GetString("SmartAI"));
+				ini.SetInteger(country, "CostUnitsMult", 1);// this is actual a float value
 #endif
 
 
@@ -1970,30 +2011,30 @@ void CFinalSunDlg::OnFileNew()
 	{
 		// for RA2, we create standard houses
 #ifdef RA2_MODE
-		int i;
-		for (i=0;i<rules.sections[HOUSES].values.size();i++)
-		{
+		auto const& rulesHouseSec = rules[HOUSES];
+		for (auto idx = 0; idx < rulesHouseSec.Size(); idx++) {
 			char c[50];
-			int k=i;
+			int k=idx;
 			itoa(k,c,10);
-			CString country=*rules.sections[HOUSES].GetValue(i);
+			auto const& country = rulesHouseSec.Nth(idx).second;
 
-			if(country.GetLength()==0) continue; // make sure we don´t have an empty entry
+			if (country.IsEmpty()) {
+				continue; // make sure we don´t have an empty entry
+			}
 
 			// we now create a HOUSE with the same name as the current rules house
-			ini.sections[MAPHOUSES].values[c]=country;
+			ini.SetString(MAPHOUSES, c, country);
 			
-			ini.sections[country].values["IQ"]="0";
-			ini.sections[country].values["Edge"]="North";
-			ini.sections[country].values["Color"]=rules.sections[country].values["Color"];
-			ini.sections[country].values["Allies"]=country;
-			ini.sections[country].values["Country"]=country;
-			ini.sections[country].values["Credits"]="0";
-			ini.sections[country].values["NodeCount"]="0";
-			ini.sections[country].values["TechLevel"]="1";
-			ini.sections[country].values["PercentBuilt"]="0";
-			ini.sections[country].values["PlayerControl"]="no";
-
+			ini.SetInteger(country, "IQ", 0);
+			ini.SetString(country, "Edge", "North");
+			ini.SetString(country, "Color", rules.GetString(country, "Color"));
+			ini.SetString(country, "Allies", country);
+			ini.SetString(country, "Country", country);
+			ini.SetInteger(country, "Credits", 0);
+			ini.SetInteger(country, "NodeCount", 0);
+			ini.SetInteger(country, "TechLevel", 1);
+			ini.SetInteger(country, "PercentBuilt", 0);
+			ini.SetBool(country, "PlayerControl", false);
 		}
 #endif
 
@@ -2001,12 +2042,9 @@ void CFinalSunDlg::OnFileNew()
 
 	// MW: added March 31st
 	// now allow automatic ai trigger enabling
-	if(createdlg.m_AITriggers)
-	{
-		int i;
-		for(i=0;i<ai.sections["AITriggerTypes"].values.size();i++)
-		{
-			ini.sections["AITriggerTypesEnable"].values[*ai.sections["AITriggerTypes"].GetValueName(i)]="yes";		
+	if (createdlg.m_AITriggers) {
+		for (auto const& [id, _] : ai["AITriggerTypes"]) {
+			ini.SetBool("AITriggerTypesEnable", id, true);
 		}
 	}
 
@@ -2055,27 +2093,27 @@ void CFinalSunDlg::UpdateStrings()
 	// first, we load the original menu (we can´t translate from for example german!)
 	my_menu->LoadMenu(IDR_MAIN);
 
-	int i,e;
-	for(i=0;i<my_menu->GetMenuItemCount();i++)
+	int idx,e;
+	for(idx=0;idx<my_menu->GetMenuItemCount();idx++)
 	{
 		MENUITEMINFO mii;
 		ZeroMemory(&mii, sizeof(MENUITEMINFO));
 		mii.cbSize=sizeof(MENUITEMINFO);
 		mii.fMask=MIIM_ID | MIIM_STATE | MIIM_TYPE;
 
-		my_menu->GetMenuItemInfo(i, &mii, TRUE);
-		my_menu->GetMenuString(i, str, MF_BYPOSITION);
-		my_menu->ModifyMenu(i,mii.fState | mii.fType | MF_BYPOSITION | MF_STRING, mii.wID, TranslateStringACP((LPCTSTR)str));
-		for(e=0;e<my_menu->GetSubMenu(i)->GetMenuItemCount();e++)
+		my_menu->GetMenuItemInfo(idx, &mii, TRUE);
+		my_menu->GetMenuString(idx, str, MF_BYPOSITION);
+		my_menu->ModifyMenu(idx,mii.fState | mii.fType | MF_BYPOSITION | MF_STRING, mii.wID, TranslateStringACP((LPCTSTR)str));
+		for(e=0;e<my_menu->GetSubMenu(idx)->GetMenuItemCount();e++)
 		{
-			int id=my_menu->GetSubMenu(i)->GetMenuItemID(e);
+			int id=my_menu->GetSubMenu(idx)->GetMenuItemID(e);
 			
 			ZeroMemory(&mii, sizeof(MENUITEMINFO));
 			mii.cbSize=sizeof(MENUITEMINFO);
 			mii.fMask=MIIM_ID | MIIM_STATE | MIIM_TYPE;
-			my_menu->GetSubMenu(i)->GetMenuItemInfo(e, &mii, TRUE);
-			my_menu->GetSubMenu(i)->GetMenuString(e, str, MF_BYPOSITION);
-			my_menu->GetSubMenu(i)->ModifyMenu(e,mii.fState | mii.fType | MF_BYPOSITION | MF_STRING, mii.wID, TranslateStringACP((LPCTSTR)str));
+			my_menu->GetSubMenu(idx)->GetMenuItemInfo(e, &mii, TRUE);
+			my_menu->GetSubMenu(idx)->GetMenuString(e, str, MF_BYPOSITION);
+			my_menu->GetSubMenu(idx)->ModifyMenu(e,mii.fState | mii.fType | MF_BYPOSITION | MF_STRING, mii.wID, TranslateStringACP((LPCTSTR)str));
 			
 		}
 	}
@@ -2092,20 +2130,20 @@ void CFinalSunDlg::UpdateStrings()
 	
 	// MW 07/20/01: Show prev. opened files
 	int prev_maps_count=0;
-	for(i=0;i<4;i++)
+	for(idx=0;idx<4;idx++)
 	{
-		if(theApp.m_Options.prev_maps[i].GetLength()>0)
+		if(theApp.m_Options.prev_maps[idx].GetLength()>0)
 		{
 			prev_maps_count++;
 
 			int id=0;
 			CString str="bla";
-			str=theApp.m_Options.prev_maps[i];
+			str=theApp.m_Options.prev_maps[idx];
 		
-			if(i==0) id=ID_FILE_FILE1;
-			else if(i==1) id=ID_FILE_FILE2;
-			else if(i==2) id=ID_FILE_FILE3;
-			else if(i==3) id=ID_FILE_FILE4;
+			if(idx==0) id=ID_FILE_FILE1;
+			else if(idx==1) id=ID_FILE_FILE2;
+			else if(idx==2) id=ID_FILE_FILE3;
+			else if(idx==3) id=ID_FILE_FILE4;
 				
 			my_menu->GetSubMenu(0)->InsertMenu(10+prev_maps_count, MF_BYPOSITION | MF_STRING, id, str);
 		}
@@ -2121,14 +2159,14 @@ void CFinalSunDlg::UpdateStrings()
 	if(theApp.m_Options.bEasy)
 	{
 		CMenu* edit_my_menu=my_menu->GetSubMenu(1);
-		for(i=edit_my_menu->GetMenuItemCount()-1;i>=11;i--) // MW 07/17/2001: i>=9 changed to i>=10 so Basic dialog is always available
+		for(idx=edit_my_menu->GetMenuItemCount()-1;idx>=11;idx--) // MW 07/17/2001: i>=9 changed to i>=10 so Basic dialog is always available
 		{
-			edit_my_menu->DeleteMenu(i, MF_BYPOSITION);
+			edit_my_menu->DeleteMenu(idx, MF_BYPOSITION);
 		}
 		CMenu* terrain_my_menu=my_menu->GetSubMenu(2);
-		for(i=terrain_my_menu->GetMenuItemCount()-1;i>=8;i--)
+		for(idx=terrain_my_menu->GetMenuItemCount()-1;idx>=8;idx--)
 		{
-			terrain_my_menu->DeleteMenu(i, MF_BYPOSITION);
+			terrain_my_menu->DeleteMenu(idx, MF_BYPOSITION);
 		}
 	}
 
@@ -2247,20 +2285,17 @@ void CFinalSunDlg::OnOptionsSimpleview()
 	Options.LoadFile(u8AppDataPath+"\\FinalAlert.ini");
 #endif
 
-	if(GetMenu()->GetMenuState(ID_OPTIONS_SIMPLEVIEW, MF_BYCOMMAND) & MF_CHECKED)
-	{
+	if (GetMenu()->GetMenuState(ID_OPTIONS_SIMPLEVIEW, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_SIMPLEVIEW, MF_BYCOMMAND | MF_UNCHECKED);
 		theApp.m_Options.bEasy=FALSE;		
-		Options.sections["UserInterface"].values["EasyView"]="0";
+		Options.SetInteger("UserInterface", "EasyView", 0);
 
 		// hide all dialogs:
 		HideAllDialogs();		
-	}
-	else
-	{
+	} else {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_SIMPLEVIEW, MF_BYCOMMAND | MF_CHECKED);
 		theApp.m_Options.bEasy=TRUE;
-		Options.sections["UserInterface"].values["EasyView"]="1";
+		Options.SetInteger("UserInterface", "EasyView", 1);
 	}
 
 	UpdateStrings();
@@ -2670,7 +2705,7 @@ BOOL CFinalSunDlg::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 	if(pHead->code==TTN_NEEDTEXT)
 	{
 		TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pHead;
-		UINT nID =pHead->idFrom;
+		auto nID =pHead->idFrom;
 		if (pTTT->uFlags & TTF_IDISHWND)
 		{
 			// idFrom ist der HWND des Tools
@@ -2851,10 +2886,10 @@ void CFinalSunDlg::OnTerrainShowallfields()
 		return;
 	}
 
-	int i;
-	for(i=0;i<Map->GetIsoSize()*Map->GetIsoSize();i++)
+	int idx;
+	for(idx=0;idx<Map->GetIsoSize()*Map->GetIsoSize();idx++)
 	{
-		Map->HideField(i, FALSE);
+		Map->HideField(idx, FALSE);
 	}
 
 	m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
@@ -2917,11 +2952,11 @@ void CFinalSunDlg::OnMaptoolsChangemapheight()
 	int mapwidth=Map->GetWidth();
 	int mapheight=Map->GetHeight();
 	int max=Map->GetIsoSize()*Map->GetIsoSize();
-	int i;
-	for(i=0;i<max;i++)
+	int idx;
+	for(idx=0;idx<max;idx++)
 	{
-		int dwX=i%isosize;
-		int dwY=i/isosize;
+		int dwX=idx%isosize;
+		int dwY=idx/isosize;
 
 		//if(dwX==0 || dwY==0 || dwX+dwY<mapwidth+1 || dwX+dwY+1>mapwidth+mapheight*2 || (dwY+1>mapwidth && dwX<dwY-mapwidth+1) || (dwX+1>mapwidth && dwY+mapwidth<dwX+1))
 		//if( dwX<2|| dwY<2 || dwX+dwY<mapwidth+2 || dwX+dwY+2>mapwidth+mapheight*2 || (dwY+2>mapwidth && dwX-2<dwY-mapwidth) || (dwX+2>mapwidth && dwY+mapwidth-2<dwX)) 
@@ -2931,7 +2966,7 @@ void CFinalSunDlg::OnMaptoolsChangemapheight()
 		}
 		else
 		{
-			int v=Map->GetHeightAt(i);
+			int v=Map->GetHeightAt(idx);
 			if(v+vmin <0)
 			{
 				vmin=-v;
@@ -2962,10 +2997,10 @@ void CFinalSunDlg::OnMaptoolsChangemapheight()
 	
 	
 
-	for(i=0;i<max;i++)
+	for(idx=0;idx<max;idx++)
 	{
-		int dwX=i%isosize;
-		int dwY=i/isosize;
+		int dwX=idx%isosize;
+		int dwY=idx/isosize;
 
 		//if(dwX==0 || dwY==0 || dwX+dwY<mapwidth+1 || dwX+dwY+1>mapwidth+mapheight*2 || (dwY+1>mapwidth && dwX<dwY-mapwidth+1) || (dwX+1>mapwidth && dwY+mapwidth<dwX+1))
 		//if( dwX<2|| dwY<2 || dwX+dwY<mapwidth+2 || dwX+dwY+2>mapwidth+mapheight*2 || (dwY+2>mapwidth && dwX-2<dwY-mapwidth) || (dwX+2>mapwidth && dwY+mapwidth-2<dwX)) 
@@ -2975,7 +3010,7 @@ void CFinalSunDlg::OnMaptoolsChangemapheight()
 		}
 		else
 		{
-			int v=Map->GetHeightAt(i);
+			int v=Map->GetHeightAt(idx);
 			if(v+a <0 || v+a>MAXHEIGHT)
 			{
 				MessageBox(GetLanguageStringACP("StrChangeHeightErr"), GetLanguageStringACP("StrChangeHeightErrCap"), MB_ICONSTOP);
@@ -2984,10 +3019,10 @@ void CFinalSunDlg::OnMaptoolsChangemapheight()
 		}
 	}
 
-	for(i=0;i<max;i++)
+	for(idx=0;idx<max;idx++)
 	{
-		int v=Map->GetHeightAt(i);
-		Map->SetHeightAt(i, v+a);
+		int v=Map->GetHeightAt(idx);
+		Map->SetHeightAt(idx, v+a);
 	}
 
 	this->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
@@ -3055,7 +3090,7 @@ LONG __stdcall ExceptionHandler(
 	CString s_add;	
 	char adress[50];
 	char c[50];
-	itoa((int)ExceptionInfo->ExceptionRecord->ExceptionAddress, adress, 16);
+	itoa((std::ptrdiff_t)ExceptionInfo->ExceptionRecord->ExceptionAddress, adress, 16);
 	s="Unknown exception";
 	switch(ExceptionInfo->ExceptionRecord->ExceptionCode)
 	{
@@ -3217,7 +3252,7 @@ LONG __stdcall ExceptionHandler(
 	return EXCEPTION_EXECUTE_HANDLER;//EXCEPTION_CONTINUE_SEARCH;//EXCEPTION_EXECUTE_HANDLER;
 }
 
-int CFinalSunDlg::DoModal() 
+INT_PTR CFinalSunDlg::DoModal()
 {
 	int res=0;
 	SetUnhandledExceptionFilter(ExceptionHandler);
@@ -3513,17 +3548,14 @@ void CFinalSunDlg::OnOptionsDisableautoshore()
 	Options.LoadFile(u8AppDataPath+"\\FinalAlert.ini");
 #endif
 
-	if(GetMenu()->GetMenuState(ID_OPTIONS_DISABLEAUTOSHORE, MF_BYCOMMAND) & MF_CHECKED)
-	{
+	if (GetMenu()->GetMenuState(ID_OPTIONS_DISABLEAUTOSHORE, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_DISABLEAUTOSHORE, MF_BYCOMMAND | MF_UNCHECKED);
 		theApp.m_Options.bDisableAutoShore=FALSE;		
-		Options.sections["UserInterface"].values["DisableAutoShore"]="0";
-	}
-	else
-	{
+		Options.SetBool("UserInterface", "DisableAutoShore", false);
+	} else {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_DISABLEAUTOSHORE, MF_BYCOMMAND | MF_CHECKED);
 		theApp.m_Options.bDisableAutoShore=TRUE;
-		Options.sections["UserInterface"].values["DisableAutoShore"]="1";
+		Options.SetBool("UserInterface", "DisableAutoShore", true);
 	}
 
 	
@@ -3602,17 +3634,14 @@ void CFinalSunDlg::OnOptionsDisableautolat()
 	Options.LoadFile(u8AppDataPath+"\\FinalAlert.ini");
 #endif
 
-	if(GetMenu()->GetMenuState(ID_OPTIONS_DISABLEAUTOLAT, MF_BYCOMMAND) & MF_CHECKED)
-	{
+	if (GetMenu()->GetMenuState(ID_OPTIONS_DISABLEAUTOLAT, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_DISABLEAUTOLAT, MF_BYCOMMAND | MF_UNCHECKED);
 		theApp.m_Options.bDisableAutoLat=FALSE;		
-		Options.sections["UserInterface"].values["DisableAutoLat"]="0";
-	}
-	else
-	{
+		Options.SetBool("UserInterface", "DisableAutoLat", false);
+	} else {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_DISABLEAUTOLAT, MF_BYCOMMAND | MF_CHECKED);
 		theApp.m_Options.bDisableAutoLat=TRUE;
-		Options.sections["UserInterface"].values["DisableAutoLat"]="1";
+		Options.SetBool("UserInterface", "DisableAutoLat", true);
 	}
 
 	
@@ -3696,17 +3725,15 @@ void CFinalSunDlg::OnOptionsSounds()
 	Options.LoadFile(u8AppDataPath+"\\FinalAlert.ini");
 #endif
 
-	if(GetMenu()->GetMenuState(ID_OPTIONS_SOUNDS, MF_BYCOMMAND) & MF_CHECKED)
-	{
+	if (GetMenu()->GetMenuState(ID_OPTIONS_SOUNDS, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_SOUNDS, MF_BYCOMMAND | MF_UNCHECKED);
 		theApp.m_Options.bNoSounds=TRUE;		
-		Options.sections["UserInterface"].values["Sounds"]="0";
+		Options.SetBool("UserInterface", "Sounds", false);
 	}
-	else
-	{
+	else {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_SOUNDS, MF_BYCOMMAND | MF_CHECKED);
 		theApp.m_Options.bNoSounds=FALSE;
-		Options.sections["UserInterface"].values["Sounds"]="1";
+		Options.SetBool("UserInterface", "Sounds", true);
 	}
 
 	
@@ -3730,17 +3757,14 @@ void CFinalSunDlg::OnOptionsDisableslopecorrection()
 	Options.LoadFile(u8AppDataPath +"\\FinalAlert.ini");
 #endif
 
-	if(GetMenu()->GetMenuState(ID_OPTIONS_DISABLESLOPECORRECTION, MF_BYCOMMAND) & MF_CHECKED)
-	{
+	if (GetMenu()->GetMenuState(ID_OPTIONS_DISABLESLOPECORRECTION, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_DISABLESLOPECORRECTION, MF_BYCOMMAND | MF_UNCHECKED);
-		theApp.m_Options.bDisableSlopeCorrection=FALSE;		
-		Options.sections["UserInterface"].values["DisableSlopeCorrection"]="0";
-	}
-	else
-	{
+		theApp.m_Options.bDisableSlopeCorrection=FALSE;
+		Options.SetBool("UserInterface", "DisableSlopeCorrection", false);
+	} else {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_DISABLESLOPECORRECTION, MF_BYCOMMAND | MF_CHECKED);
 		theApp.m_Options.bDisableSlopeCorrection=TRUE;
-		Options.sections["UserInterface"].values["DisableSlopeCorrection"]="1";
+		Options.SetBool("UserInterface", "DisableSlopeCorrection", true);
 	}
 
 #ifndef RA2_MODE
@@ -3760,17 +3784,14 @@ void CFinalSunDlg::OnOptionsShowbuildingoutline()
 	Options.LoadFile(u8AppDataPath+"\\FinalAlert.ini");
 #endif
 
-	if(GetMenu()->GetMenuState(ID_OPTIONS_SHOWBUILDINGOUTLINE, MF_BYCOMMAND) & MF_CHECKED)
-	{
+	if (GetMenu()->GetMenuState(ID_OPTIONS_SHOWBUILDINGOUTLINE, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_SHOWBUILDINGOUTLINE, MF_BYCOMMAND | MF_UNCHECKED);
 		theApp.m_Options.bShowCells=FALSE;		
-		Options.sections["UserInterface"].values["ShowBuildingCells"]="0";
-	}
-	else
-	{
+		Options.SetBool("UserInterface", "ShowBuildingCells", false);
+	} else {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_SHOWBUILDINGOUTLINE, MF_BYCOMMAND | MF_CHECKED);
 		theApp.m_Options.bShowCells=TRUE;
-		Options.sections["UserInterface"].values["ShowBuildingCells"]="1";
+		Options.SetBool("UserInterface", "ShowBuildingCells", true);
 	}
 
 	m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
@@ -3810,12 +3831,12 @@ void CFinalSunDlg::OnFileFile4()
 // MW 07/20/01: Checks if file already exists in prev. files list. If not, adds it (may delete old ones)
 void CFinalSunDlg::InsertPrevFile(CString lpFilename)
 {
-	int i;
+	int idx;
 	
 	//int free_at=-1;
-	for(i=0;i<4;i++)
+	for(idx=0;idx<4;idx++)
 	{
-		CString f=theApp.m_Options.prev_maps[i];
+		CString f=theApp.m_Options.prev_maps[idx];
 		CString f2=lpFilename;
 		f2.MakeLower();
 		f.MakeLower();
@@ -3845,17 +3866,16 @@ void CFinalSunDlg::InsertPrevFile(CString lpFilename)
 
 
 
-	for(i=3;i>0;i--)
-	{
-		theApp.m_Options.prev_maps[i]=theApp.m_Options.prev_maps[i-1];
+	for (idx = 3; idx > 0; idx--) {
+		theApp.m_Options.prev_maps[idx]=theApp.m_Options.prev_maps[idx-1];
 		char e[10];
-		itoa(i, e, 10);
+		itoa(idx, e, 10);
 
-		Options.sections["Files"].values[e]=theApp.m_Options.prev_maps[i];
+		Options.SetString("Files", e, theApp.m_Options.prev_maps[idx]);
 	}
 
 	theApp.m_Options.prev_maps[0]=lpFilename;
-	Options.sections["Files"].values["0"]=theApp.m_Options.prev_maps[0];
+	Options.SetString("Files", "0", theApp.m_Options.prev_maps[0]);
 
 
 
@@ -3907,7 +3927,7 @@ void CFinalSunDlg::OpenMap(LPCSTR lpFilename)
 		
 		FSunPackLib::XCC_ExtractFile(pktFile, extractFile, hMix);
 		m_PKTHeader.LoadFile(extractFile, TRUE);
-		fileToOpen=m_PKTHeader.sections["MultiMaps"].values["1"]+".map";
+		fileToOpen = m_PKTHeader.GetString("MultiMaps", "1") + ".map";
 
 		
 
@@ -3924,7 +3944,8 @@ void CFinalSunDlg::OpenMap(LPCSTR lpFilename)
 
 	CIniFile f;
 	f.InsertFile(fileToOpen, "Map");
-	if((f.sections["Map"].values["Theater"]==THEATER0 && theApp.m_Options.bDoNotLoadTemperateGraphics) || (f.sections["Map"].values["Theater"]==THEATER1 && theApp.m_Options.bDoNotLoadSnowGraphics))
+	auto const& theaterType = f.GetString("Map", "Theater");
+	if((theaterType ==THEATER0 && theApp.m_Options.bDoNotLoadTemperateGraphics) || (theaterType ==THEATER1 && theApp.m_Options.bDoNotLoadSnowGraphics))
 	{
 		MessageBox("You have selected to don´t show temperate or snow theater, but this map uses this theater. You cannot load it without restarting FinalSun/FinalAlert 2 with this theater enabled.", "Error");
 		return;
@@ -3967,21 +3988,21 @@ void CFinalSunDlg::OpenMap(LPCSTR lpFilename)
 			{
 				int fielddata_size=Map->GetIsoSize()*Map->GetIsoSize();
 
-				int i;
-				for(i=0;i<fielddata_size;i++)
+				int idx;
+				for(idx=0;idx<fielddata_size;idx++)
 				{
-					int gr=Map->GetFielddataAt(i)->wGround;
+					int gr=Map->GetFielddataAt(idx)->wGround;
 					if(gr==0xFFFF) gr=0;
 					
 					if(gr>=(*tiledata_count))
 					{
-						Map->SetTileAt(i, 0, 0);					
+						Map->SetTileAt(idx, 0, 0);					
 					}
 					else
 					{				
-						if((*tiledata)[gr].wTileCount<=Map->GetFielddataAt(i)->bSubTile)
+						if((*tiledata)[gr].wTileCount<=Map->GetFielddataAt(idx)->bSubTile)
 						{
-							Map->SetTileAt(i, 0, 0);
+							Map->SetTileAt(idx, 0, 0);
 						}
 					}
 				}
@@ -4056,18 +4077,15 @@ void CFinalSunDlg::OnOptionsSmoothzoom()
 	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
 #endif
 
-	if (GetMenu()->GetMenuState(ID_OPTIONS_SMOOTHZOOM, MF_BYCOMMAND) & MF_CHECKED)
-	{
+	if (GetMenu()->GetMenuState(ID_OPTIONS_SMOOTHZOOM, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_SMOOTHZOOM, MF_BYCOMMAND | MF_UNCHECKED);
 		theApp.m_Options.viewScaleUseSteps = true;		
-	}
-	else
-	{
+	} else {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_SMOOTHZOOM, MF_BYCOMMAND | MF_CHECKED);
 		theApp.m_Options.viewScaleUseSteps = false;		
 	} 
 
-	Options.sections["UserInterface"].values["ViewScaleUseSteps"] = theApp.m_Options.viewScaleUseSteps ? "1" : "0";
+	Options.SetBool("UserInterface", "ViewScaleUseSteps", theApp.m_Options.viewScaleUseSteps);
 
 #ifndef RA2_MODE
 	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");
@@ -4107,7 +4125,7 @@ void CFinalSunDlg::OnOptionsUsedefaultmousecursor()
 		m_hArrowCursor = LoadCursor(NULL, IDC_ARROW);
 	}
 
-	Options.sections["UserInterface"].values["UseDefaultMouseCursor"] = theApp.m_Options.useDefaultMouseCursor ? "1" : "0";
+	Options.SetBool("UserInterface", "UseDefaultMouseCursor", theApp.m_Options.useDefaultMouseCursor);
 
 #ifndef RA2_MODE
 	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");

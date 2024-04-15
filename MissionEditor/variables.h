@@ -29,6 +29,8 @@
 #include "FinalSun.h"
 #include "MapData.h"
 
+using TranslationMap = map<CString, XCString>;
+
 // the map
 extern CMapData* Map;
 
@@ -132,7 +134,7 @@ extern BOOL yr_only[];
 
 
 extern CString currentOwner;
-extern map<CString, XCString> CCStrings;
+extern TranslationMap CCStrings;
 
 // tileset ids
 extern int cliffset;
