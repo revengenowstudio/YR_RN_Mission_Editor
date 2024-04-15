@@ -3512,6 +3512,43 @@ void CMapData::UpdateMapFieldData(BOOL bSave)
 	}
 }
 
+struct BuildingFoundation {
+	int Width{ 1 };
+	int Height{ 1 };
+};
+
+BuildingFoundation getBuildingFoundation(const CString& artId) {
+	int w, h;
+	char d[6];
+
+	auto const& foundationStr = art[artId].GetString("Foundation");
+
+	// TODO: foundationStr == "Custom"
+	if (foundationStr == "Custom") {
+		return BuildingFoundation{};
+	}
+	// empty or not enough for NxM
+	if (foundationStr.GetLength() < 3) {
+		return BuildingFoundation{};
+	}
+
+	d[0] = foundationStr[0];
+	d[1] = 0;
+	w = atoi(d);
+	if (w == 0) {
+		w = 1;
+	}
+	d[0] = foundationStr[2];
+	d[1] = 0;
+	h = atoi(d);
+	if (h == 0) {
+		h = 1;
+	}
+	return BuildingFoundation{
+		w, h
+	};
+}
+
 // TODO: simplify this function, remove duplicated codes
 void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 {
@@ -3525,28 +3562,13 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 			auto artname = rules.GetStringOr(type, "Image", type);
 			artname = ini.GetStringOr(type, "Image", artname);
 
-			int w, h;
-			char d[6];
-			auto const& foundationStr = art[artname].GetString("Foundation");
-			// TODO: foundationStr == "Custom"
-			d[0] = foundationStr[0];
-			d[1] = 0;
-			w = atoi(d);
-			if (w == 0) {
-				w = 1;
-			}
-			d[0] = foundationStr[2];
-			d[1] = 0;
-			h = atoi(d);
-			if (h == 0) {
-				h = 1;
-			}
+			auto const foundation = getBuildingFoundation(artname);
 
 			int n = Map->GetUnitTypeID(type);
 
 			if (n >= 0 && n < 0x0F00) {
-				buildinginfo[n].w = w;
-				buildinginfo[n].h = h;
+				buildinginfo[n].w = foundation.Width;
+				buildinginfo[n].h = foundation.Height;
 
 				buildinginfo[n].bSnow = FALSE;
 				buildinginfo[n].bTemp = FALSE;
@@ -3602,28 +3624,13 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 			auto const& type = id;
 			auto artname = ini.GetStringOr(type, "Image", type);
 
-			int w, h;
-			char d[6];
-			auto const& foundationStr = art[artname].GetString("Foundation");
-			// TODO: foundationStr == "Custom"
-			d[0] = foundationStr[0];
-			d[1] = 0;
-			w = atoi(d);
-			if (w == 0) {
-				w = 1;
-			}
-			d[0] = foundationStr[2];
-			d[1] = 0;
-			h = atoi(d);
-			if (h == 0) {
-				h = 1;
-			}
+			auto const foundation = getBuildingFoundation(artname);
 
 			int n = Map->GetUnitTypeID(type);
 
 			if (n >= 0 && n < 0x0F00) {
-				buildinginfo[n].w = w;
-				buildinginfo[n].h = h;
+				buildinginfo[n].w = foundation.Width;
+				buildinginfo[n].h = foundation.Height;
 				buildinginfo[n].bSnow = TRUE;
 				buildinginfo[n].bTemp = TRUE;
 				buildinginfo[n].bUrban = TRUE;
@@ -3653,28 +3660,13 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 	auto artname = rules.GetStringOr(type, "Image", type);
 	artname = ini.GetStringOr(type, "Image", artname);
 
-	int w, h;
-	char d[6];
-	auto const& foundationStr = art[artname].GetString("Foundation");
-	// TODO: foundationStr == "Custom"
-	d[0] = foundationStr[0];
-	d[1] = 0;
-	w = atoi(d);
-	if (w == 0) {
-		w = 1;
-	}
-	d[0] = foundationStr[2];
-	d[1] = 0;
-	h = atoi(d);
-	if (h == 0) {
-		h = 1;
-	}
+	auto const foundation = getBuildingFoundation(artname);
 
 	int n = Map->GetUnitTypeID(type);
 
 	if (n >= 0 && n < 0x0F00) {
-		buildinginfo[n].w = w;
-		buildinginfo[n].h = h;
+		buildinginfo[n].w = foundation.Width;
+		buildinginfo[n].h = foundation.Height;
 		CString lpPicFile = GetUnitPictureFilename(type, 0);
 		buildinginfo[n].pic_count = 8;
 
@@ -3704,29 +3696,14 @@ void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 			auto artname = rules.GetStringOr(type, "Image", type);
 			artname = ini.GetStringOr(type, "Image", artname);
 
-			int w, h;
-			char d[6];
-			auto const& foundationStr = art[artname].GetString("Foundation");
-			// TODO: foundationStr == "Custom"
-			d[0] = foundationStr[0];
-			d[1] = 0;
-			w = atoi(d);
-			if (w == 0) {
-				w = 1;
-			}
-			d[0] = foundationStr[2];
-			d[1] = 0;
-			h = atoi(d);
-			if (h == 0) {
-				h = 1;
-			}
+			auto const foundation = getBuildingFoundation(artname);
 
 			int n = GetUnitTypeID(type);
 
 			if (n >= 0 && n < 0x0F00)
 			{
-				treeinfo[n].w = w;
-				treeinfo[n].h = h;
+				treeinfo[n].w = foundation.Width;
+				treeinfo[n].h = foundation.Height;
 
 				CString lpPicFile = GetUnitPictureFilename(type, 0);
 
@@ -3745,29 +3722,14 @@ void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 			auto const& type = id;
 			auto artname = ini.GetStringOr(type, "Image", type);
 
-			int w, h;
-			char d[6];
-			auto const& foundationStr = art[artname].GetString("Foundation");
-			// TODO: foundationStr == "Custom"
-			d[0] = foundationStr[0];
-			d[1] = 0;
-			w = atoi(d);
-			if (w == 0) {
-				w = 1;
-			}
-			d[0] = foundationStr[2];
-			d[1] = 0;
-			h = atoi(d);
-			if (h == 0) {
-				h = 1;
-			}
+			auto const foundation = getBuildingFoundation(artname);
 
 			int n = Map->GetUnitTypeID(type);
 
 			if (n >= 0 && n < 0x0F00)
 			{
-				treeinfo[n].w = w;
-				treeinfo[n].h = h;
+				treeinfo[n].w = foundation.Width;
+				treeinfo[n].h = foundation.Height;
 
 				CString lpPicFile = GetUnitPictureFilename(type, 0);
 
@@ -3787,27 +3749,13 @@ void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 	auto artname = rules.GetStringOr(type, "Image", type);
 	artname = ini.GetStringOr(type, "Image", artname);
 
-	int w, h;
-	char d[6];
-	auto const& foundationStr = art[artname].GetString("Foundation");
-	// TODO: foundationStr == "Custom"
-	d[0] = foundationStr[0];
-	d[1] = 0;
-	w = atoi(d);
-	if (w == 0) {
-		w = 1;
-	}
-	d[0] = foundationStr[2];
-	d[1] = 0;
-	h = atoi(d);
-	if (h == 0) {
-		h = 1;
-	}
+	auto const foundation = getBuildingFoundation(artname);
+
 	int n = Map->GetUnitTypeID(type);
 
 	if (n >= 0 && n < 0x0F00) {
-		treeinfo[n].w = w;
-		treeinfo[n].h = h;
+		treeinfo[n].w = foundation.Width;
+		treeinfo[n].h = foundation.Height;
 
 		CString lpPicFile = GetUnitPictureFilename(type, 0);
 		if (pics.find(lpPicFile) != pics.end()) {
