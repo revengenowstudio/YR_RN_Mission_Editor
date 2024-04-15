@@ -435,7 +435,7 @@ CString GetLanguageStringACP(CString name)
 	auto const defSec = theApp.m_Options.LanguageName + "-Strings";
 	auto const translated = language.GetSection(defSec).TryGetString(name);
 	if(!translated) {
-		CString s = language.GetSection("English-Strings").GetString(name);
+		CString s = language.GetSection("English-Strings").GetStringOr(name, name);
 #ifndef RA2_MODE
 		s = TranslateStringVariables(9, s, "FinalSun");
 #else
