@@ -12,10 +12,11 @@ jobs:
       CONFIGURATION: FinalAlertDebug YR
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 1
         submodules: recursive
+        lfs: true
     - name: setup-msvc
       uses: egor-tensin/vs-shell@v2
       with:
