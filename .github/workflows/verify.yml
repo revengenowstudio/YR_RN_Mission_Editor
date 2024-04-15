@@ -2,7 +2,12 @@ name: Basic verify
 
 on:
   pull_request:
-    branches: [ "main", "RN" ]
+    branches: 
+      - "main"
+      - "RN"
+    types:
+      - opened
+      - synchronize
   workflow_dispatch:
 
 jobs:
