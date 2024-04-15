@@ -1,8 +1,13 @@
-# FinalSun / FinalAlert (YR) 2 Mission Editor
+# FinalAlert (YR) 2 Mission Editor - RN Special Edition
 
-This repository contains the source code for the FinalSun/FinalAlert (YR) Mission Editor.
+This repository contains the source code for the FinalAlert (YR) Mission Editor, modified mainly for RN team use.
 
 The official version for both applications has been increased to v2.0 in order to illustrate they now run properly on modern operating systems. We also used this opporunity to update the application and fix some known issues.
+
+# Ongoing Changes:
+- Refactored most of Ini handling, using safe and efficient ways. Most importantly, aligned with game Ini sequencing especially for type items (e.g. Animation)
+- Transformed to x86_64 architecture
+- Introduced unit test by using unit test (works on x64 environment only)
 
 # Fixes and Changes
 - Fixed a few code issues to allow the application to run on modern operating systems.
