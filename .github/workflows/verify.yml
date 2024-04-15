@@ -3,6 +3,8 @@ name: Basic verify
 on:
   push:
     branches: [ "!main", "!RN", "*" ]
+  workflow_dispatch:
+
 
 jobs:
   compile-check:
