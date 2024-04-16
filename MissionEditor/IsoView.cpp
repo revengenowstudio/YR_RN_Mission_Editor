@@ -6380,7 +6380,7 @@ void CIsoView::DrawMap()
 					}
 				}
 
-				if (pic.pic);
+				if (pic.pic)
 				{
 
 					auto drawCoordsTerrain = drawCoords + ProjectedVec(f_x / 2 - (pic.wMaxWidth / 2), f_y / 2 - 3 - (pic.wMaxHeight / 2));
