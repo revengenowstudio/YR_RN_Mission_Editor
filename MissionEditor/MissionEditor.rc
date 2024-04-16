@@ -1154,16 +1154,16 @@ IDD_TRIGGEROPTIONS DIALOGEX 0, 0, 365, 204
 STYLE DS_SETFONT | WS_CHILD
 FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
-LTEXT           "Type (modifies all attached Tags!):", IDC_STATIC, 231, 30, 125, 9
+LTEXT           "Type (modifies all attached Tags!):", IDC_TRIGGER_OPTION_TYPE_STR, 231, 30, 125, 9
 COMBOBOX        IDC_TRIGGERTYPE, 231, 41, 125, 71, CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-LTEXT           "Name", IDC_STATIC, 7, 2, 264, 10
+LTEXT           "Name", IDC_TRIGGER_OPTION_NAME, 7, 2, 264, 10
 EDITTEXT        IDC_NAME, 6, 12, 350, 13, ES_AUTOHSCROLL
-LTEXT           "House:", IDC_STATIC, 4, 31, 125, 9
+LTEXT           "House:", IDC_TRIGGER_OPTION_HOUSE, 4, 31, 125, 9
 COMBOBOX        IDC_HOUSE, 4, 41, 186, 78, CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-LTEXT           "Attached trigger:", IDC_STATIC, 4, 59, 125, 8
+LTEXT           "Attached trigger:", IDC_TRIGGER_OPTION_ATTACHED_TRIGGER, 4, 59, 125, 8
 COMBOBOX        IDC_ATTACHEDTRIGGER, 4, 68, 352, 133, CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
 CONTROL         "Disabled", IDC_DISABLED, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 4, 90, 124, 9
-LTEXT           "Disabled triggers must be enabled using other triggers before they fire.", IDC_STATIC, 4, 102, 260, 9
+LTEXT           "Disabled triggers must be enabled using other triggers before they fire.", IDC_TRIGGER_OPTION_TRIGGER_DIS_TIP, 4, 102, 260, 9
 CONTROL         "Easy", IDC_EASY, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 4, 115, 58, 13
 CONTROL         "Medium", IDC_MEDIUM, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 68, 115, 58, 13
 CONTROL         "Hard", IDC_HARD, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 140, 115, 58, 13

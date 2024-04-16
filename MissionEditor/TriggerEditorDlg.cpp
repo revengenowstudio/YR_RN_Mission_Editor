@@ -91,6 +91,15 @@ BOOL CTriggerEditorDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	CString curCaption;
+	GetWindowText(curCaption);
+	SetWindowText(TranslateStringACP(curCaption));
+	SetDlgItemText(IDC_STATIC, GetLanguageStringACP("TriggerDesc"));
+	SetDlgItemText(IDC_NEWTRIGGER, GetLanguageStringACP("TriggerNew"));
+	SetDlgItemText(IDC_DELETETRIGGER, GetLanguageStringACP("TriggerDelete"));
+	SetDlgItemText(IDC_PLACEONMAP, GetLanguageStringACP("TriggerPlaceOnMap"));
+	SetDlgItemText(IDC_CLONE, GetLanguageStringACP("TriggerClone"));
+
 	m_tab.InsertItem(0, TranslateStringACP("Trigger options"));
 	m_tab.InsertItem(1, TranslateStringACP("Events"));
 	m_tab.InsertItem(2, TranslateStringACP("Actions"));
