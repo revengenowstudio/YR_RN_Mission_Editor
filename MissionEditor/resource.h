@@ -518,6 +518,8 @@
 #define IDC_TRIGGER_OPTION_HOUSE		1466
 #define IDC_TRIGGER_OPTION_ATTACHED_TRIGGER		1467
 #define IDC_TRIGGER_OPTION_TRIGGER_DIS_TIP		1468
+#define IDC_MAP_D_WIDTH					1469
+#define IDC_MAP_D_HEIGHT				1470
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
