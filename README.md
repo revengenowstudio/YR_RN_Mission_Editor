@@ -7,7 +7,7 @@ The official version for both applications has been increased to v2.0 in order t
 # Ongoing Changes:
 - Refactored most of Ini handling, using safe and efficient ways. Most importantly, aligned with game Ini sequencing especially for type items (e.g. Animation)
 - Transformed to x86_64 architecture
-- Introduced unit test by using unit test (works on x64 environment only)
+- Introduced unit test by using google test (works on x64 environment only)
 
 # Fixes and Changes
 - Fixed a few code issues to allow the application to run on modern operating systems.
