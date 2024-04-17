@@ -1336,10 +1336,7 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 				}
 				//hShpMix=20;
 
-				// seems to be ignored by TS, art.ini overwrites???
-				if (rules.GetBool(lpUnittype, "Bib")) {
-					LoadBuildingSubGraphic("BibShape", artSection, bAlwaysSetChar, theat, hShpMix, bib_h, bib);
-				}
+				LoadBuildingSubGraphic("BibShape", artSection, bAlwaysSetChar, theat, hShpMix, bib_h, bib);
 
 				LoadBuildingSubGraphic("ActiveAnim", artSection, bAlwaysSetChar, theat, hShpMix, activeanim_h, activeanim);
 				LoadBuildingSubGraphic("IdleAnim", artSection, bAlwaysSetChar, theat, hShpMix, idleanim_h, idleanim);
