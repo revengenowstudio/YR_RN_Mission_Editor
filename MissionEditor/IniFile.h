@@ -40,26 +40,6 @@
 
 using namespace std;
 
-class SortDummy
-{
-public:
-	bool operator()(const CString& x, const CString& y) const
-	{
-		// the length is more important than spelling (numbers!!!)...
-		if (x.GetLength() < y.GetLength()) {
-			return true;
-		}
-		if (x.GetLength() == y.GetLength()) {
-			if (x < y) {
-				return true;
-			}
-		}
-		return false;
-	}
-};
-
-
-
 class CIniFileSection
 {
 	static const CString EmptyValue;
@@ -216,9 +196,8 @@ public:
 	}
 
 private:
-	map<CString, int64_t, SortDummy> value_pos{};
+	map<CString, int64_t> value_pos{};
 	vector<std::pair<CString, CString>> value_pairs{};// sequenced
-	mutable bool isRegistry{ false };
 };
 
 class CIniFile

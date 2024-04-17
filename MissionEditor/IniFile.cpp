@@ -42,8 +42,6 @@ const CIniFileSection CIniFile::EmptySection;
 const CString CIniFileSection::EmptyValue;
 
 typedef map<CString, CIniFileSection>::iterator CIniI;
-typedef map<CString, CString, SortDummy>::iterator SI;
-typedef map<CString, int, SortDummy>::iterator SII;
 
 
 //////////////////////////////////////////////////////////////////////

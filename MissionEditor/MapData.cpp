@@ -39,10 +39,6 @@ static char THIS_FILE[] = __FILE__;
 #define new DEBUG_NEW
 #endif
 
-typedef map<CString, CString, SortDummy> OURMAP;
-
-
-
 void DoEvents()
 {
 	/*MSG msg;
