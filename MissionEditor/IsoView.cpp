@@ -3122,29 +3122,26 @@ COLORREF CIsoView::GetColor(const char* house, const char* vcolor)
 	COLORREF other = RGB(255, 255, 0);
 
 	CString color;
+	CString colorValues;
 	CIniFile& ini = Map->GetIniFile();
 	if (house && strlen(house)) {
-		auto const& localColorDef = ini.GetString(house, "Color");
-		if (!localColorDef.IsEmpty()) {
-			color = localColorDef;
-		} else {
-			color = rules.GetString(house, "Color");
-		}
+		color = rules.GetString(house, "Color");
+		color = ini.GetStringOr(house, "Color", color);//override
 	}
 
-	if (vcolor)
-		color = vcolor;
+	if (vcolor) {
+		colorValues = vcolor;
+	} else if (!color.IsEmpty()) {
+		colorValues = rules.GetString("Colors", color);
+		colorValues = ini.GetStringOr("Colors", color, colorValues);
+	}
+	auto colorArray = SplitParams(colorValues);
 
-	if (color) {
-		CString colorValues;
-		colorValues = ini.GetStringOr("Colors", color, rules.GetString("Colors", color));
-		auto colorArray = SplitParams(colorValues);
-		if (colorArray.size() == 3) {
-			unsigned char hsv[3] = { static_cast<unsigned char>(std::atoi(colorArray[0])), static_cast<unsigned char>(std::atoi(colorArray[1])), static_cast<unsigned char>(std::atoi(colorArray[2])) };
-			unsigned char rgb[3];
-			HSVToRGB(hsv, rgb);
-			return RGB(rgb[0], rgb[1], rgb[2]);
-		}
+	if (colorArray.size() == 3) {
+		unsigned char hsv[3] = { static_cast<unsigned char>(std::atoi(colorArray[0])), static_cast<unsigned char>(std::atoi(colorArray[1])), static_cast<unsigned char>(std::atoi(colorArray[2])) };
+		unsigned char rgb[3];
+		HSVToRGB(hsv, rgb);
+		return RGB(rgb[0], rgb[1], rgb[2]);
 	}
 
 #ifndef RA2_MODE
