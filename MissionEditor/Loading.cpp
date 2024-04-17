@@ -1261,7 +1261,7 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 	const auto& artSection = art[image];
 
 	// is it a shp graphic?
-	if (!artSection.GetBool(image, "Voxel")) {
+	if (!artSection.GetBool("Voxel")) {
 		try {
 
 			auto shp = FindUnitShp(image, cur_theat, artSection);
