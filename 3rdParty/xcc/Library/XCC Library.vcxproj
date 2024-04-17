@@ -292,34 +292,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\misc\aud_decode.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\aud_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\aud_file_write.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\audio_idx_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\avi_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\big_edit.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\big_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\big_file_write.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\misc\blowfish.cpp">
-    </ClCompile>
-    <ClCompile Include="..\misc\bmp_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\misc\cc_file.cpp">
       <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">false</ExcludedFromBuild>
@@ -327,152 +300,32 @@
     <ClCompile Include="..\misc\cc_structures.cpp">
       <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\misc\cps_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\csf_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\misc\ddpf_conversion.cpp">
-    </ClCompile>
-    <ClCompile Include="..\misc\dds_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\misc\file32.cpp">
     </ClCompile>
     <ClCompile Include="..\misc\fname.cpp">
-    </ClCompile>
-    <ClCompile Include="..\misc\fs_ini_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\misc\hva_file.cpp">
       <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\misc\id_log.cpp">
     </ClCompile>
-    <ClCompile Include="..\misc\ima_adpcm_wav_decode.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\ima_adpcm_wav_encode.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\image_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\image_tools.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\ini_reader.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\jpeg_file.cpp">
-      <ExcludedFromBuild Condition="'$(JPEG_SUPPORT)'==''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\map_ra_ini_reader.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\map_td_ini_reader.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\map_ts_encoder.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\map_ts_ini_reader.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\mix_cache.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\misc\mix_decode.cpp">
-    </ClCompile>
-    <ClCompile Include="..\misc\mix_edit.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\misc\mix_file.cpp">
     </ClCompile>
     <ClCompile Include="..\misc\mix_file_write.cpp">
-    </ClCompile>
-    <ClCompile Include="..\misc\mix_rg_edit.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\mix_rg_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\mix_rg_file_write.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\mix_sfl.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\mp3_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\mp3_frame_header.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\multi_line.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\neat_ini_reader.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\neat_key_list.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\ogg_file.cpp">
-      <ExcludedFromBuild Condition="'$(OGG_SUPPORT)'==''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\pak_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\misc\pal_file.cpp">
       <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\misc\palet.cpp">
     </ClCompile>
-    <ClCompile Include="..\misc\pcx_decode.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\pcx_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\pcx_file_write.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\pkt_ts_ini_reader.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\png_file.cpp">
-      <ExcludedFromBuild Condition="'$(PNG_SUPPORT)'==''">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\misc\reg_key.cpp" />
-    <ClCompile Include="..\misc\riff_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\rules_ts_ini_reader.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\misc\shp_decode.cpp">
     </ClCompile>
-    <ClCompile Include="..\misc\shp_dune2_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\shp_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\shp_images.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\misc\shp_ts_file.cpp">
-    </ClCompile>
-    <ClCompile Include="..\misc\shp_ts_file_write.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\sound_ts_ini_reader.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\st_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -485,18 +338,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseMinimal|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\misc\string_conversion.cpp">
-    </ClCompile>
-    <ClCompile Include="..\misc\tga_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\theme_ts_ini_reader.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\timer.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\tmp_ra.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\misc\tmp_ts_file.cpp">
     </ClCompile>
@@ -513,147 +354,39 @@
     <ClCompile Include="..\misc\virtual_tfile.cpp">
       <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\misc\voc_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\vqa_decode.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\vqa_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\misc\vxl_file.cpp">
-    </ClCompile>
-    <ClCompile Include="..\misc\wav_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\wav_header.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\misc\win_handle.cpp">
     </ClCompile>
-    <ClCompile Include="..\misc\wsa_dune2_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\wsa_file.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\xcc_apps.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\misc\xcc_dirs.cpp" />
-    <ClCompile Include="..\misc\xcc_draw.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\misc\xcc_lmd_file_write.cpp" />
-    <ClCompile Include="..\misc\xcc_log.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\xcc_mixs.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\misc\xcc_registry.cpp" />
-    <ClCompile Include="..\misc\xif_key.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\xif_key_r.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\xif_value.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\xse.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\misc\XSTE.cpp">
-      <ExcludedFromBuild Condition="'$(XCC_MINIMAL_BUILD)'!=''">true</ExcludedFromBuild>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\misc\xif_key_r.h" />
-    <ClInclude Include="..\misc\aud_decode.h" />
-    <ClInclude Include="..\misc\aud_file.h" />
-    <ClInclude Include="..\misc\aud_file_write.h" />
-    <ClInclude Include="..\misc\audio_idx_file.h" />
-    <ClInclude Include="..\misc\avi_file.h" />
-    <ClInclude Include="..\misc\big_edit.h" />
-    <ClInclude Include="..\misc\big_file_write.h" />
-    <ClInclude Include="..\misc\bin_file.h" />
-    <ClInclude Include="..\misc\bink_file.h" />
     <ClInclude Include="..\misc\blowfish.h" />
-    <ClInclude Include="..\misc\bmp_file.h" />
     <ClInclude Include="..\misc\cc_file.h" />
     <ClInclude Include="..\misc\cc_file_sh.h" />
     <ClInclude Include="..\misc\cc_file_small.h" />
     <ClInclude Include="..\misc\cc_structures.h" />
-    <ClInclude Include="..\misc\cps_file.h" />
     <ClInclude Include="..\misc\crc.h" />
-    <ClInclude Include="..\misc\csf_file.h" />
-    <ClInclude Include="..\misc\dd_window.h" />
     <ClInclude Include="..\misc\ddpf_conversion.h" />
-    <ClInclude Include="..\misc\dds_file.h" />
-    <ClInclude Include="..\misc\extract_object.h" />
     <ClInclude Include="..\misc\file32.h" />
     <ClInclude Include="..\misc\fname.h" />
-    <ClInclude Include="..\misc\fnt_file.h" />
-    <ClInclude Include="..\misc\fs_ini_file.h" />
     <ClInclude Include="..\misc\hva_file.h" />
     <ClInclude Include="..\misc\id_log.h" />
-    <ClInclude Include="..\misc\ima_adpcm_wav_decode.h" />
-    <ClInclude Include="..\misc\ima_adpcm_wav_encode.h" />
     <ClInclude Include="..\misc\image_file.h" />
-    <ClInclude Include="..\misc\image_tools.h" />
-    <ClInclude Include="..\misc\ini_reader.h" />
-    <ClInclude Include="..\misc\jpeg_file.h" />
-    <ClInclude Include="..\misc\map_ra_ini_reader.h" />
-    <ClInclude Include="..\misc\map_td_ini_reader.h" />
-    <ClInclude Include="..\misc\map_ts_encoder.h" />
-    <ClInclude Include="..\misc\map_ts_ini_reader.h" />
-    <ClInclude Include="..\misc\mix_cache.h" />
     <ClInclude Include="..\misc\mix_decode.h" />
-    <ClInclude Include="..\misc\mix_edit.h" />
     <ClInclude Include="..\misc\mix_file.h" />
     <ClInclude Include="..\misc\mix_file_write.h" />
-    <ClInclude Include="..\misc\mix_rg_edit.h" />
-    <ClInclude Include="..\misc\mix_rg_file_write.h" />
-    <ClInclude Include="..\misc\mix_sfl.h" />
-    <ClInclude Include="..\misc\mp3_file.h" />
-    <ClInclude Include="..\misc\mp3_frame_header.h" />
-    <ClInclude Include="..\misc\multi_line.h" />
-    <ClInclude Include="..\misc\neat_ini_reader.h" />
-    <ClInclude Include="..\misc\neat_key_list.h" />
     <ClInclude Include="..\misc\null_ini_reader.h" />
-    <ClInclude Include="..\misc\ogg_file.h" />
-    <ClInclude Include="..\misc\pak_file.h" />
     <ClInclude Include="..\misc\pal_file.h" />
     <ClInclude Include="..\misc\palet.h" />
-    <ClInclude Include="..\misc\pcx_decode.h" />
-    <ClInclude Include="..\misc\pcx_file.h" />
-    <ClInclude Include="..\misc\pcx_file_write.h" />
-    <ClInclude Include="..\misc\pkt_ts_ini_reader.h" />
-    <ClInclude Include="..\misc\png_file.h" />
     <ClInclude Include="..\misc\reg_key.h" />
-    <ClInclude Include="..\misc\riff_file.h" />
-    <ClInclude Include="..\misc\riff_structures.h" />
-    <ClInclude Include="..\misc\rules_ts_ini_reader.h" />
     <ClInclude Include="..\misc\shp_decode.h" />
-    <ClInclude Include="..\misc\shp_dune2_file.h" />
-    <ClInclude Include="..\misc\shp_file.h" />
-    <ClInclude Include="..\misc\shp_images.h" />
     <ClInclude Include="..\misc\shp_ts_file.h" />
-    <ClInclude Include="..\misc\shp_ts_file_write.h" />
-    <ClInclude Include="..\misc\sound_ts_ini_reader.h" />
-    <ClInclude Include="..\misc\st_file.h" />
     <ClInclude Include="StdAfx.h" />
-    <ClInclude Include="..\misc\stream_reader.h" />
-    <ClInclude Include="..\misc\stream_writer.h" />
     <ClInclude Include="..\misc\string_conversion.h" />
-    <ClInclude Include="..\misc\text_file.h" />
-    <ClInclude Include="..\misc\tga_file.h" />
-    <ClInclude Include="..\misc\theme_ts_ini_reader.h" />
-    <ClInclude Include="..\misc\timer.h" />
     <ClInclude Include="..\misc\tmp_file.h" />
-    <ClInclude Include="..\misc\tmp_ra_file.h" />
     <ClInclude Include="..\misc\tmp_ts_file.h" />
     <ClInclude Include="..\misc\vartypes.h" />
     <ClInclude Include="..\misc\virtual_audio.h" />
@@ -661,44 +394,14 @@
     <ClInclude Include="..\misc\virtual_file.h" />
     <ClInclude Include="..\misc\virtual_image.h" />
     <ClInclude Include="..\misc\virtual_tfile.h" />
-    <ClInclude Include="..\misc\voc_file.h" />
-    <ClInclude Include="..\misc\vqa_decode.h" />
-    <ClInclude Include="..\misc\vqa_file.h" />
-    <ClInclude Include="..\misc\vqa_play.h" />
-    <ClInclude Include="..\misc\vqp_file.h" />
     <ClInclude Include="..\misc\vxl_file.h" />
-    <ClInclude Include="..\misc\w3d_file.h" />
-    <ClInclude Include="..\misc\wav_file.h" />
-    <ClInclude Include="..\misc\wav_header.h" />
-    <ClInclude Include="..\misc\wav_structures.h" />
     <ClInclude Include="..\misc\win_handle.h" />
-    <ClInclude Include="..\misc\wsa_dune2_file.h" />
-    <ClInclude Include="..\misc\wsa_file.h" />
-    <ClInclude Include="..\misc\xcc_apps.h" />
-    <ClInclude Include="..\misc\xcc_cell.h" />
-    <ClInclude Include="..\misc\xcc_cell_manager.h" />
-    <ClInclude Include="..\misc\xcc_dd.h" />
-    <ClInclude Include="..\misc\xcc_dds.h" />
     <ClInclude Include="..\misc\xcc_dirs.h" />
-    <ClInclude Include="..\misc\xcc_draw.h" />
-    <ClInclude Include="..\misc\xcc_ds.h" />
-    <ClInclude Include="..\misc\xcc_dsb.h" />
     <ClInclude Include="..\misc\xcc_file.h" />
     <ClInclude Include="..\misc\xcc_file_sh.h" />
-    <ClInclude Include="..\misc\xcc_infantry.h" />
-    <ClInclude Include="..\misc\xcc_level.h" />
     <ClInclude Include="..\misc\xcc_lmd_file.h" />
     <ClInclude Include="..\misc\xcc_lmd_file_write.h" />
-    <ClInclude Include="..\misc\xcc_log.h" />
-    <ClInclude Include="..\misc\xcc_mixs.h" />
-    <ClInclude Include="..\misc\xcc_overlays.h" />
     <ClInclude Include="..\misc\xcc_registry.h" />
-    <ClInclude Include="..\misc\xcc_structures.h" />
-    <ClInclude Include="..\misc\xcc_templates.h" />
-    <ClInclude Include="..\misc\xcc_units.h" />
-    <ClInclude Include="..\misc\XCCSetDirectoriesDlg.h" />
-    <ClInclude Include="..\misc\xif_file.h" />
-    <ClInclude Include="..\misc\XSTE.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
