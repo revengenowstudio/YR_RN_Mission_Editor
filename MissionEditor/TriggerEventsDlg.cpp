@@ -113,8 +113,8 @@ void CTriggerEventsDlg::OnNewevent()
 	char c[50];
 	itoa(cval, c, 10);
 
-	sec.SetString(m_currentTrigger, SetParam(sec[m_currentTrigger], 0, c));
-	sec.SetString(m_currentTrigger, ",0,0,0");
+	auto&& defParam = SetParam(sec[m_currentTrigger], 0, c) + ",0,0,0";
+	sec.SetString(m_currentTrigger, std::move(defParam));
 
 
 	UpdateDialog();
