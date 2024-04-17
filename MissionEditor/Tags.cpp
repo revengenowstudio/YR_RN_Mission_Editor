@@ -131,19 +131,19 @@ void CTags::OnSelchangeTag()
 		type.SetAt(type.Find(" "), 0);
 	}
 
-	CString data = ini.GetString("Tags", type);
+	auto const& data = ini.GetString("Tags", type);
 	m_Name = GetParam(data, 1);
-	CString trigger = GetParam(data, 2);
-	CString typ = trigger;
+	CString triggerId = GetParam(data, 2);
+	CString desc = triggerId;
 
-	trigger += " (";
-	auto const& def = ini.GetString("Triggers", typ);
+	desc += " (";
+	auto const& def = ini.GetString("Triggers", triggerId);
 	if (!def.IsEmpty()) {
-		trigger += GetParam(def, 2);
+		desc += GetParam(def, 2);
 	}
-	trigger += ")";
+	desc += ")";
 
-	m_Trigger.SetWindowText(trigger);
+	m_Trigger.SetWindowText(desc);
 
 
 	m_Repeat.SetWindowText(GetParam(data, 0));
