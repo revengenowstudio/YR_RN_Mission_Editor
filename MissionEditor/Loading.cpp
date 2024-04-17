@@ -3057,7 +3057,7 @@ void CLoading::InitTMPs(CProgressCtrl* prog)
 			bMorph = TRUE;
 		}
 
-		if (!pSec->GetBool("AllowToPlace")) {
+		if (!pSec->GetBool("AllowToPlace", true)) {
 			bPlace = FALSE;
 		}
 

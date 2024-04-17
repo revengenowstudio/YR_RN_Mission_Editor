@@ -156,8 +156,8 @@ void CTerrainDlg::Update()
 			string += TranslateStringACP(pSec->GetString("SetName"));
 			string += ")";
 
-			BOOL bForced = FALSE;
-			BOOL bForcedNot = FALSE;
+			bool bForced = false;
+			bool bIgnore = false;
 
 
 			// force yes
@@ -165,16 +165,33 @@ void CTerrainDlg::Update()
 			auto tsetc = CString(std::to_string(atoi(tset)).c_str());
 
 			if (g_data["UseSet" + theaterType].HasValue(tsetc)) {
-				bForced = TRUE;
+				bForced = true;
 			}
 
 			// force no
 			if (g_data["IgnoreSet" + theaterType].HasValue(tsetc)) {
-				bForcedNot = TRUE;
+				bIgnore = true;
 			}
 
+			auto legal = false;
+			do {
+				if (bForced) {
+					legal = true;
+					break;
+				}
+				if (bIgnore) {
+					break;
+				}
+				auto const& tile = (*tiledata)[tilecount];
+				if (tile.bMarbleMadness) {
+					break;
+				}
+				if (tile.bAllowToPlace) {
+					legal = true;
+				}
+			} while (0);
 
-			if (bForced || (!bForcedNot && (*tiledata)[tilecount].bAllowToPlace && !(*tiledata)[tilecount].bMarbleMadness)) {
+			if (legal) {
 				TileSet->SetItemData(TileSet->AddString(string), i);
 			}
 
