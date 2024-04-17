@@ -60,7 +60,7 @@ CIniFile::~CIniFile()
 	sections.clear();
 }
 
-WORD CIniFile::LoadFile(const CString& filename,  BOOL bNoSpaces)
+WORD CIniFile::LoadFile(const CString& filename, BOOL bNoSpaces)
 {
 	return LoadFile(std::string(filename.GetString()), bNoSpaces);
 }
@@ -120,8 +120,7 @@ WORD CIniFile::InsertFile(const std::string& filename, const char* Section, BOOL
 
 	const auto npos = std::string::npos;
 
-	while (!file.eof())
-	{
+	while (!file.eof()) {
 		std::getline(file, cLine);
 
 		// strip to left side of newline or comment
@@ -131,23 +130,18 @@ WORD CIniFile::InsertFile(const std::string& filename, const char* Section, BOOL
 		const auto closeBracket = cLine.find(']');
 		const auto equals = cLine.find('=');
 
-		if (openBracket != npos && closeBracket != npos && openBracket < closeBracket && (equals == npos || equals > openBracket))
-		{
+		if (openBracket != npos && closeBracket != npos && openBracket < closeBracket && (equals == npos || equals > openBracket)) {
 			if ((Section != nullptr) && cSec == Section)
 				return 0; // the section we want to insert is finished
 
 			cSec = cLine.substr(openBracket + 1, closeBracket - openBracket - 1).c_str();
-		}
-		else if (equals != npos && !cSec.IsEmpty())
-		{
-			if (Section == NULL || cSec == Section)
-			{
+		} else if (equals != npos && !cSec.IsEmpty()) {
+			if (Section == NULL || cSec == Section) {
 				// a value is set and we have a valid current section!
 				CString name = cLine.substr(0, equals).c_str();
 				CString value = cLine.substr(equals + 1, cLine.size() - equals - 1).c_str();
 
-				if (bNoSpaces)
-				{
+				if (bNoSpaces) {
 					name.Trim();
 					value.Trim();
 				}
@@ -187,7 +181,7 @@ BOOL CIniFile::SaveFile(const std::string& Filename) const
 
 	file.open(Filename, ios::out | ios::trunc);
 
-	for (auto const& sec  : sections) {
+	for (auto const& sec : sections) {
 		file << "[" << sec.first << "]" << endl;
 		for (auto const& pair : sec.second) {
 			file << pair.first << "=" << pair.second << endl;

@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -27,8 +27,7 @@ int a2ip(const string& s)
 {
 	int r = 0;
 	int l = 0;
-	for (int i = 0; i < 3; i++)
-	{
+	for (int i = 0; i < 3; i++) {
 		int c = s.find('.', l);
 		r = r << 8 | atoi(s.substr(l, c - l).c_str());
 		l = c + 1;
@@ -117,8 +116,7 @@ string nh(int l, __int64 v)
 {
 	string s;
 	int w;
-	while (l)
-	{
+	while (l) {
 		w = v & 0xf;
 		if (w > 9)
 			w += 7;
@@ -133,16 +131,12 @@ string nwp(int l, unsigned int v)
 {
 	string r;
 	string s = n(v);
-	while (1)
-	{		
+	while (1) {
 		int l = s.size();
-		if (l > 3)
-		{
+		if (l > 3) {
 			r = '.' + s.substr(l - 3, 3) + r;
 			s.erase(l - 3, 3);
-		}
-		else
-		{
+		} else {
 			r = s + r;
 			break;
 		}
@@ -154,13 +148,10 @@ string nwp(int l, unsigned int v)
 void split_key(const string& key, string& name, string& value)
 {
 	size_t i = key.find('=');
-	if (i == string::npos)
-	{
+	if (i == string::npos) {
 		name = key;
 		value.erase();
-	}
-	else
-	{
+	} else {
 		name = key.substr(0, i);
 		value = key.substr(i + 1);
 	}
@@ -169,16 +160,13 @@ void split_key(const string& key, string& name, string& value)
 string tabs2spaces(const string& v)
 {
 	string r;
-	for (size_t i = 0; i < v.size(); i++)
-	{
+	for (size_t i = 0; i < v.size(); i++) {
 		char c = v[i];
-		if (c == '\t')
-		{
+		if (c == '\t') {
 			do
 				r += ' ';
 			while (r.size() & 3);
-		}
-		else
+		} else
 			r += c;
 	}
 	return r;
@@ -198,10 +186,8 @@ string time2a(time_t v)
 string js_encode(const string& v)
 {
 	string r;
-	for (size_t i = 0; i < v.size(); i++)
-	{
-		switch (v[i])
-		{
+	for (size_t i = 0; i < v.size(); i++) {
+		switch (v[i]) {
 		case '<':
 			r += "&lt;";
 			break;
@@ -220,16 +206,13 @@ string trim_field(const string& v)
 {
 	string r;
 	bool copy_white = false;
-	for (size_t i = 0; i < v.size(); i++)
-	{
+	for (size_t i = 0; i < v.size(); i++) {
 		if (isspace(v[i]))
 			copy_white = true;
-		else 
-		{
-			if (copy_white)
-			{
+		else {
+			if (copy_white) {
 				if (!r.empty())
-					r += ' ';				
+					r += ' ';
 				copy_white = false;
 			}
 			r += v[i];
@@ -242,18 +225,15 @@ string trim_text(const string& v)
 {
 	string r;
 	bool copy_white = false;
-	for (size_t i = 0; i < v.size(); )
-	{
+	for (size_t i = 0; i < v.size(); ) {
 		int p = v.find('\n', i);
 		if (p == string::npos)
 			p = v.size();
 		string line = trim_field(v.substr(i, p - i));
 		if (line.empty())
 			copy_white = true;
-		else
-		{
-			if (copy_white)
-			{
+		else {
+			if (copy_white) {
 				if (!r.empty())
 					r += '\n';
 				copy_white = false;

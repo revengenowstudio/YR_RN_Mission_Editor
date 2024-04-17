@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // SingleplayerSettings.cpp: implementation file
@@ -42,7 +42,7 @@ IMPLEMENT_DYNCREATE(CSingleplayerSettings, CDialog)
 CSingleplayerSettings::CSingleplayerSettings() : CDialog(IDD)
 {
 	//{{AFX_DATA_INIT(CSingleplayerSettings)
-		
+
 	//}}AFX_DATA_INIT
 }
 
@@ -90,7 +90,7 @@ END_MESSAGE_MAP()
 
 void CSingleplayerSettings::UpdateDialog()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	auto const& sec = ini["Basic"];
 
@@ -121,7 +121,7 @@ void CSingleplayerSettings::UpdateDialog()
 	ListMovies(m_PostScore, TRUE);
 	ListMovies(m_PreMapSelect, TRUE);
 
-	
+
 	UpdateStrings();
 }
 
@@ -131,63 +131,63 @@ void CSingleplayerSettings::OnEditchangeIntro()
 	ini.SetString("Basic", "Intro", GetText(&m_Intro));
 }
 
-void CSingleplayerSettings::OnEditchangeBrief() 
+void CSingleplayerSettings::OnEditchangeBrief()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "Brief", GetText(&m_Brief));
 }
 
-void CSingleplayerSettings::OnEditchangeWin() 
+void CSingleplayerSettings::OnEditchangeWin()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "Win", GetText(&m_Win));
 }
 
-void CSingleplayerSettings::OnEditchangeLose() 
+void CSingleplayerSettings::OnEditchangeLose()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "Lose", GetText(&m_Lose));
 }
 
-void CSingleplayerSettings::OnEditchangeAction() 
+void CSingleplayerSettings::OnEditchangeAction()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "Action", GetText(&m_Action));
 }
 
-void CSingleplayerSettings::OnEditchangePostscore() 
+void CSingleplayerSettings::OnEditchangePostscore()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "PostScore", GetText(&m_PostScore));
 }
 
-void CSingleplayerSettings::OnEditchangePremapselect() 
+void CSingleplayerSettings::OnEditchangePremapselect()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "PreMapSelect", GetText(&m_PreMapSelect));
 }
 
-void CSingleplayerSettings::OnEditchangeStartingdropships() 
+void CSingleplayerSettings::OnEditchangeStartingdropships()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "StartingDropships", GetText(&m_StartingDropships));
 }
 
-void CSingleplayerSettings::OnChangeCarryovermoney() 
+void CSingleplayerSettings::OnChangeCarryovermoney()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "CarryOverMoney", GetText(&m_CarryOverMoney));
 }
 
-void CSingleplayerSettings::OnEditchangeTimerinherit() 
+void CSingleplayerSettings::OnEditchangeTimerinherit()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "TimerInherit", GetText(&m_TimerInherit));
 }
 
-void CSingleplayerSettings::OnEditchangeFillsilos() 
+void CSingleplayerSettings::OnEditchangeFillsilos()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "FillSilos", GetText(&m_FillSilos));
 }
 
@@ -215,7 +215,7 @@ void CSingleplayerSettings::UpdateStrings()
 #endif
 }
 
-void CSingleplayerSettings::PostNcDestroy() 
+void CSingleplayerSettings::PostNcDestroy()
 {
 	// do not call CDialog::PostNcDestroy();	
 	// CDialog::PostNcDestroy();

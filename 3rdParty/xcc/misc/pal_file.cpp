@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -26,8 +26,7 @@ bool Cpal_file::is_valid() const
 	if (get_size() != sizeof(t_palet))
 		return false;
 	const t_palet_entry* p = get_palet();
-	for (int i = 0; i < 256; i++)
-	{
+	for (int i = 0; i < 256; i++) {
 		if ((p[i].r | p[i].g | p[i].b) & 0xc0)
 			return false;
 	}

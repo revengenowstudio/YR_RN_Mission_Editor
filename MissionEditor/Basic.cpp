@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // Basic.cpp: Implementierungsdatei
@@ -120,7 +120,7 @@ END_MESSAGE_MAP()
 
 void CBasic::UpdateDialog()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	auto const& basicSec = ini["Basic"];
 	m_AltNextScenario.SetWindowText(basicSec["AltNextScenario"]);
@@ -154,9 +154,9 @@ void CBasic::UpdateDialog()
 
 }
 
-void CBasic::OnChangeName() 
+void CBasic::OnChangeName()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "Name", GetText(&m_Name));
 }
 
@@ -168,123 +168,123 @@ void CBasic::UpdateData()
 }
 
 
-void CBasic::OnEditchangeNextscenario() 
+void CBasic::OnEditchangeNextscenario()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "NextScenario", GetText(&m_NextScenario));
 }
 
-void CBasic::OnEditchangeAltnextscenario() 
+void CBasic::OnEditchangeAltnextscenario()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "AltNextScenario", GetText(&m_AltNextScenario));
 }
 
-void CBasic::OnChangeNewiniformat() 
+void CBasic::OnChangeNewiniformat()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "NewINIFormat", GetText(&m_NewINIFormat));
 }
 
-void CBasic::OnChangeCarryovercap() 
+void CBasic::OnChangeCarryovercap()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "CarryOverCap", GetText(&m_CarryOverCap));
 }
 
-void CBasic::OnEditchangeEndofgame() 
+void CBasic::OnEditchangeEndofgame()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "EndOfGame", GetText(&m_EndOfGame));
 }
 
-void CBasic::OnEditchangeSkipscore() 
+void CBasic::OnEditchangeSkipscore()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "SkipScore", GetText(&m_SkipScore));
 }
 
-void CBasic::OnEditchangeOnetimeonly() 
+void CBasic::OnEditchangeOnetimeonly()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "OneTimeOnly", GetText(&m_OneTimeOnly));
 }
 
-void CBasic::OnEditchangeSkipmapselect() 
+void CBasic::OnEditchangeSkipmapselect()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "SkipMapSelect", GetText(&m_SkipMapSelect));
 }
 
-void CBasic::OnEditchangeOfficial() 
+void CBasic::OnEditchangeOfficial()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "Official", GetText(&m_Official));
 }
 
-void CBasic::OnEditchangeIgnoreglobalaitriggers() 
+void CBasic::OnEditchangeIgnoreglobalaitriggers()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "IgnoreGlobalAITriggers", GetText(&m_IgnoreGlobalAITriggers));
 }
 
-void CBasic::OnEditchangeTruckcrate() 
+void CBasic::OnEditchangeTruckcrate()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "TruckCrate", GetText(&m_TruckCrate));
 }
 
-void CBasic::OnEditchangeTraincrate() 
+void CBasic::OnEditchangeTraincrate()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "TrainCrate", GetText(&m_TrainCrate));
 }
 
-void CBasic::OnChangePercent() 
+void CBasic::OnChangePercent()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "Percent", GetText(&m_Percent));
 }
 
-void CBasic::OnChangeMultiplayeronly() 
+void CBasic::OnChangeMultiplayeronly()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "MultiplayerOnly", GetText(&m_MultiplayerOnly));
 }
 
-void CBasic::OnEditchangeTiberiumgrowthenabled() 
+void CBasic::OnEditchangeTiberiumgrowthenabled()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "TiberiumGrowthEnabled", GetText(&m_TiberiumGrowthEnabled));
 }
 
-void CBasic::OnEditchangeVeingrowthenabled() 
+void CBasic::OnEditchangeVeingrowthenabled()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "VeinGrowthEnabled", GetText(&m_VeinGrowthEnabled));
 }
 
-void CBasic::OnEditchangeIcegrowthenabled() 
+void CBasic::OnEditchangeIcegrowthenabled()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "IceGrowthEnabled", GetText(&m_IceGrowthEnabled));
 }
 
-void CBasic::OnEditchangeTiberiumdeathtovisceroid() 
+void CBasic::OnEditchangeTiberiumdeathtovisceroid()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "TiberiumDeathToVisceroid", GetText(&m_TiberiumDeathToVisceroid));
 }
 
-void CBasic::OnEditchangeFreeradar() 
+void CBasic::OnEditchangeFreeradar()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "FreeRadar", GetText(&m_FreeRadar));
 }
 
-void CBasic::OnChangeInittime() 
+void CBasic::OnChangeInittime()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "InitTime", GetText(&m_InitTime));
 }
 
@@ -332,7 +332,7 @@ void CBasic::UpdateStrings()
 	SetWindowText(TranslateStringACP("Basic"));
 }
 
-void CBasic::OnEditchangeRequiredaddon() 
+void CBasic::OnEditchangeRequiredaddon()
 {
 	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Basic", "RequiredAddOn", GetText(&m_RequiredAddOn));
@@ -342,7 +342,7 @@ void CBasic::OnEditchangeRequiredaddon()
 
 }
 
-void CBasic::PostNcDestroy() 
+void CBasic::PostNcDestroy()
 {
 	// do not call PostNcDestroy as this is a member of FinalSunDlg	
 	//CPropertyPage::PostNcDestroy();

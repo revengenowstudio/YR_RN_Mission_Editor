@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // ProgressDlg.cpp: Implementierungsdatei
@@ -43,7 +43,7 @@ CProgressDlg::CProgressDlg(CString lpDescription, CWnd* pParent /*=NULL*/)
 	m_ProgLabel = _T("");
 	//}}AFX_DATA_INIT
 
-	m_bCancel=FALSE;
+	m_bCancel = FALSE;
 
 	Create(CProgressDlg::IDD, pParent);
 }
@@ -77,35 +77,35 @@ void CProgressDlg::SetPosition(int nPos)
 {
 	m_Progress.SetPos(nPos);
 	m_Progress.UpdateWindow();
-	m_ProgLabel="Progress: ";
-	
-	
+	m_ProgLabel = "Progress: ";
 
-	float p=m_Progress.GetPos();
-	int min,max;
-	m_Progress.GetRange(min,max);
-	
-	if(max-min==0) return;
 
-	float f=p/((float)(max-min));
+
+	float p = m_Progress.GetPos();
+	int min, max;
+	m_Progress.GetRange(min, max);
+
+	if (max - min == 0) return;
+
+	float f = p / ((float)(max - min));
 	char c[50];
-	itoa(f*100, c, 10);
-	m_ProgLabel+=c;
-	m_ProgLabel+=" %";
+	itoa(f * 100, c, 10);
+	m_ProgLabel += c;
+	m_ProgLabel += " %";
 
 	UpdateData(FALSE);
 }
 
-void CProgressDlg::PostNcDestroy() 
+void CProgressDlg::PostNcDestroy()
 {
 	delete this;
-	
+
 	//CDialog::PostNcDestroy();
 }
 
-void CProgressDlg::OnCancel() 
+void CProgressDlg::OnCancel()
 {
-	m_bCancel=TRUE;
-	
+	m_bCancel = TRUE;
+
 	CDialog::OnCancel();
 }

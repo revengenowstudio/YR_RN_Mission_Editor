@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #if !defined(AFX_TREES_H__8ACDE600_72AB_11D3_99E1_95E76FDD1C05__INCLUDED_)
@@ -34,14 +34,14 @@ class CTrees : public CPropertyPage
 {
 	DECLARE_DYNCREATE(CTrees)
 
-// Konstruktion
+	// Konstruktion
 public:
 	void UpdateDialog();
 	CTrees();
 	~CTrees();
 
-// Dialogfelddaten
-	//{{AFX_DATA(CTrees)
+	// Dialogfelddaten
+		//{{AFX_DATA(CTrees)
 	enum { IDD = IDD_TREES };
 	CEdit	m_Pos;
 	CComboBox	m_Type;
@@ -52,7 +52,7 @@ public:
 // Überschreibungen
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
 	//{{AFX_VIRTUAL(CTrees)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
 	//}}AFX_VIRTUAL
 

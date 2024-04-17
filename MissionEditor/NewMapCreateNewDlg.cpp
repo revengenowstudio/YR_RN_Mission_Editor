@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // NewMapCreateNewDlg.cpp: Implementierungsdatei
@@ -68,16 +68,16 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CNewMapCreateNewDlg 
 
-BOOL CNewMapCreateNewDlg::OnInitDialog() 
+BOOL CNewMapCreateNewDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	CComboBox& theater=*((CComboBox*)GetDlgItem(IDC_THEATER));
+	CComboBox& theater = *((CComboBox*)GetDlgItem(IDC_THEATER));
 	theater.AddString(THEATER0);
 	theater.AddString(THEATER1);
 #ifdef RA2_MODE
 	theater.AddString(THEATER2);
-	if(yuri_mode) // MW YR support
+	if (yuri_mode) // MW YR support
 	{
 		theater.AddString(THEATER3);
 		theater.AddString(THEATER4);
@@ -86,36 +86,34 @@ BOOL CNewMapCreateNewDlg::OnInitDialog()
 
 #endif
 
-	m_Theater=0;
-	m_Width=50;
-	m_Height=50;
-	m_StartingHeight=0;
+	m_Theater = 0;
+	m_Width = 50;
+	m_Height = 50;
+	m_StartingHeight = 0;
 
 	UpdateData(FALSE);
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }
 
-void CNewMapCreateNewDlg::OnOK() 
+void CNewMapCreateNewDlg::OnOK()
 {
-	
+
 	UpdateData(TRUE);
 
-	if(m_Width>400 || m_Height>400 || m_Width<16 || m_Height<16 || (m_Width + m_Height) > 512)
-	{
-		MessageBox("Width and Height must both be between 16 and 400 and both added must be less than 512.","Error");
+	if (m_Width > 400 || m_Height > 400 || m_Width < 16 || m_Height < 16 || (m_Width + m_Height) > 512) {
+		MessageBox("Width and Height must both be between 16 and 400 and both added must be less than 512.", "Error");
 		return;
 	}
 
-	if(m_Width+m_Height>256)
-	{
+	if (m_Width + m_Height > 256) {
 #ifdef RA2_MODE
-		int res=MessageBox("Width + height is bigger than 256, this may cause problems in RA2. Continue?","Warning",MB_YESNO);
+		int res = MessageBox("Width + height is bigger than 256, this may cause problems in RA2. Continue?", "Warning", MB_YESNO);
 #else
-		int res=MessageBox("Width + height is bigger than 256, this may cause problems in TS. Continue?","Warning",MB_YESNO);
+		int res = MessageBox("Width + height is bigger than 256, this may cause problems in TS. Continue?", "Warning", MB_YESNO);
 #endif
-		if(res==IDNO) return;
+		if (res == IDNO) return;
 	}
 
 	CDialog::OnOK();

@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #pragma once
@@ -24,7 +24,7 @@
 #include "video_file.h"
 #include "virtual_image.h"
 
-class Cshp_ts_file : public Cvideo_file<t_shp_ts_header>  
+class Cshp_ts_file : public Cvideo_file<t_shp_ts_header>
 {
 public:
 	Cvideo_decoder* decoder(const t_palet_entry*);
@@ -74,10 +74,10 @@ public:
 		return get_image_header(i)->cy;
 	}
 
-    int get_cb_index() const
-    {
-        return sizeof(t_shp_ts_image_header) * cf();
-    }
+	int get_cb_index() const
+	{
+		return sizeof(t_shp_ts_image_header) * cf();
+	}
 
 	bool is_compressed(int i) const
 	{

@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // TriggerOptionsDlg.cpp: Implementierungsdatei
@@ -146,8 +146,7 @@ void CTriggerOptionsDlg::OnChangeName()
 		newName = " ";
 	}
 
-	if (newName.Find(",", 0) >= 0)
-	{//newName.SetAt(newName.Find(",",0), 0);
+	if (newName.Find(",", 0) >= 0) {//newName.SetAt(newName.Find(",",0), 0);
 		newName = newName.Left(newName.Find(",", 0));
 
 		m_Name.SetWindowText(newName);
@@ -177,20 +176,20 @@ void CTriggerOptionsDlg::OnChangeName()
 	}
 }
 
-void CTriggerOptionsDlg::OnEditchangeHouse() 
+void CTriggerOptionsDlg::OnEditchangeHouse()
 {
-	CIniFile& ini=Map->GetIniFile();
-	
+	CIniFile& ini = Map->GetIniFile();
+
 	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
 		return;
 	}
 
 	CString newHouse;
 	m_House.GetWindowText(newHouse);
-	
-	
-	
-	newHouse=TranslateHouse(newHouse);
+
+
+
+	newHouse = TranslateHouse(newHouse);
 
 	newHouse.TrimLeft();
 	TruncSpace(newHouse);
@@ -199,17 +198,17 @@ void CTriggerOptionsDlg::OnEditchangeHouse()
 	}
 
 	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 0, newHouse));
-	
+
 	auto triggerCopy = ini["Triggers"][m_currentTrigger];
 	if (RepairTrigger(triggerCopy)) {
 		ini.SetString("Triggers", m_currentTrigger, triggerCopy);
 	}
 }
 
-void CTriggerOptionsDlg::OnEditchangeAttachedtrigger() 
+void CTriggerOptionsDlg::OnEditchangeAttachedtrigger()
 {
-	CIniFile& ini=Map->GetIniFile();
-	
+	CIniFile& ini = Map->GetIniFile();
+
 	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
 		return;
 	}
@@ -222,24 +221,24 @@ void CTriggerOptionsDlg::OnEditchangeAttachedtrigger()
 	if (newTrigger.Find(",", 0) >= 0) {
 		newTrigger.SetAt(newTrigger.Find(",", 0), 0);
 	}
-	
+
 
 	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 1, newTrigger));
 
-	
-	
+
+
 }
 
-void CTriggerOptionsDlg::OnKillfocusName() 
+void CTriggerOptionsDlg::OnKillfocusName()
 {
-	((CTriggerEditorDlg*)(this->GetOwner()->GetOwner()))->UpdateDialog();	
+	((CTriggerEditorDlg*)(this->GetOwner()->GetOwner()))->UpdateDialog();
 }
 
-void CTriggerOptionsDlg::OnKillFocus(CWnd* pNewWnd) 
+void CTriggerOptionsDlg::OnKillFocus(CWnd* pNewWnd)
 {
 	CDialog::OnKillFocus(pNewWnd);
-	
-	((CTriggerEditorDlg*)(this->GetOwner()->GetOwner()))->UpdateDialog();	
+
+	((CTriggerEditorDlg*)(this->GetOwner()->GetOwner()))->UpdateDialog();
 }
 
 void CTriggerOptionsDlg::OnEditchangeTriggertype()
@@ -307,15 +306,15 @@ void CTriggerOptionsDlg::OnDisabled()
 	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 3, param));
 }
 
-void CTriggerOptionsDlg::OnEasy() 
+void CTriggerOptionsDlg::OnEasy()
 {
-	CIniFile& ini=Map->GetIniFile();
-	
+	CIniFile& ini = Map->GetIniFile();
+
 	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
 		return;
 	}
 
-	BOOL bEasy=FALSE;
+	BOOL bEasy = FALSE;
 	if (m_Easy.GetCheck() == 0) {
 		bEasy = FALSE;
 	} else {
@@ -326,40 +325,40 @@ void CTriggerOptionsDlg::OnEasy()
 	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 4, param));
 }
 
-void CTriggerOptionsDlg::OnMedium() 
+void CTriggerOptionsDlg::OnMedium()
 {
-	CIniFile& ini=Map->GetIniFile();
-	
+	CIniFile& ini = Map->GetIniFile();
+
 	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
 		return;
 	}
 
-	BOOL bMedium=FALSE;
+	BOOL bMedium = FALSE;
 	if (m_Medium.GetCheck() == 0) {
 		bMedium = FALSE;
 	} else {
 		bMedium = TRUE;
 	}
-	
+
 	auto const param = bMedium ? "1" : "0";
 	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 5, param));
 }
 
-void CTriggerOptionsDlg::OnHard() 
+void CTriggerOptionsDlg::OnHard()
 {
-	CIniFile& ini=Map->GetIniFile();
-	
+	CIniFile& ini = Map->GetIniFile();
+
 	if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
 		return;
 	}
 
-	BOOL bHard=FALSE;
+	BOOL bHard = FALSE;
 	if (m_Hard.GetCheck() == 0) {
 		bHard = FALSE;
 	} else {
 		bHard = TRUE;
 	}
-	
+
 	auto const param = bHard ? "1" : "0";
 	ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 6, param));
 }
@@ -367,5 +366,5 @@ void CTriggerOptionsDlg::OnHard()
 //MW 07/20/01
 void CTriggerOptionsDlg::Clear()
 {
-	
+
 }

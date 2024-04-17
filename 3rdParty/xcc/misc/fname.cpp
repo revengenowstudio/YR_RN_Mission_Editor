@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -136,16 +136,14 @@ const Cfname& Cfname::operator=(string_view s)
 	long p1 = s.rfind('\\');
 	long p2 = s.rfind('.');
 	char t[MAX_PATH];
-	if (p1 != string::npos)
-	{
+	if (p1 != string::npos) {
 		//copy last \ also
 		t[s.copy(t, p1 + 1)] = 0;
 		path = t;
 	}
 	t[s.copy(t, p2 - p1 - 1, p1 + 1)] = 0;
 	title = t;
-	if (p2 != s.npos && p1 < p2)
-	{
+	if (p2 != s.npos && p1 < p2) {
 		t[s.copy(t, s.npos, p2)] = 0;
 		ext = t;
 	}
@@ -166,8 +164,7 @@ void create_deep_dir(string dir, const string& name)
 {
 	int a = 0;
 	int b;
-	while ((b = name.find_first_of("/\\", a)) != string::npos)
-	{
+	while ((b = name.find_first_of("/\\", a)) != string::npos) {
 		dir += '/' + name.substr(a, b - a);
 		create_dir(dir);
 		a = b + 1;
@@ -192,19 +189,15 @@ int move_file(string s, string d)
 bool fname_filter(const string& fname, const string& filter)
 {
 	size_t i;
-	for (i = 0; i < filter.size(); i++)
-	{
+	for (i = 0; i < filter.size(); i++) {
 		char c = filter[i];
-		if (c == '*')
-		{
-			if (filter.find('*', i + 1) == string::npos)
-			{
+		if (c == '*') {
+			if (filter.find('*', i + 1) == string::npos) {
 				int j = fname.length() - filter.length() + 1;
 				return j < 0 ? false : fname_filter(fname.substr(i + j), filter.substr(i + 1));
 			}
 			// for (int j = 0; j < min(fname.length(), filter.length()) - i; j++)
-			for (size_t j = 0; j < fname.size(); j++)
-			{
+			for (size_t j = 0; j < fname.size(); j++) {
 				if (fname_filter(fname.substr(i + j), filter.substr(i + 1)))
 					return true;
 			}

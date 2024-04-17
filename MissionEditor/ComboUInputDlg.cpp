@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -42,8 +42,8 @@ CComboUInputDlg::CComboUInputDlg(CWnd* pParent /*=NULL*/)
 	m_Combo = _T("");
 	//}}AFX_DATA_INIT
 
-	m_type=0;
-	bTruncateStrings=FALSE;
+	m_type = 0;
+	bTruncateStrings = FALSE;
 }
 
 
@@ -65,71 +65,67 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CComboUInputDlg 
 
-BOOL CComboUInputDlg::OnInitDialog() 
+BOOL CComboUInputDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
-	CComboBox* box=(CComboBox*)GetDlgItem(IDC_COMBO1);
 
-	switch(m_type)
+	CComboBox* box = (CComboBox*)GetDlgItem(IDC_COMBO1);
+
+	switch (m_type) {
+	case COMBOUINPUT_HOUSES:
 	{
-		case COMBOUINPUT_HOUSES:
-		{
-			ListHouses(*box, FALSE, FALSE);
-			break;
-		}
-		case COMBOUINPUT_COUNTRIES:
-			ListHouses(*box, FALSE, TRUE);
-			break;
-		case COMBOUINPUT_TRIGGERS:
-			ListTriggers(*box);
-			break;
-		case COMBOUINPUT_TAGS:
-			ListTags(*box, FALSE);
-			break;
-		case COMBOUINPUT_HOUSES_N:
-		{
-			ListHouses(*box, TRUE, FALSE);
-			break;
-		}
-		case COMBOUINPUT_COUNTRIES_N:
-			ListHouses(*box, TRUE, TRUE);
-			break;
-		case COMBOUINPUT_MANUAL:
-			int i;
-			for(i=0;i<m_ManualStrings.size();i++)
-				box->AddString(m_ManualStrings[i]);
+		ListHouses(*box, FALSE, FALSE);
+		break;
+	}
+	case COMBOUINPUT_COUNTRIES:
+		ListHouses(*box, FALSE, TRUE);
+		break;
+	case COMBOUINPUT_TRIGGERS:
+		ListTriggers(*box);
+		break;
+	case COMBOUINPUT_TAGS:
+		ListTags(*box, FALSE);
+		break;
+	case COMBOUINPUT_HOUSES_N:
+	{
+		ListHouses(*box, TRUE, FALSE);
+		break;
+	}
+	case COMBOUINPUT_COUNTRIES_N:
+		ListHouses(*box, TRUE, TRUE);
+		break;
+	case COMBOUINPUT_MANUAL:
+		int i;
+		for (i = 0; i < m_ManualStrings.size(); i++)
+			box->AddString(m_ManualStrings[i]);
 	}
 
 	box->SetCurSel(0);
 
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }
 
-void CComboUInputDlg::OnOK() 
+void CComboUInputDlg::OnOK()
 {
 	UpdateData(TRUE);
-	
-	if(m_type==COMBOUINPUT_TRIGGERS || m_type==COMBOUINPUT_TAGS || m_type==COMBOUINPUT_HOUSES_N || m_type==COMBOUINPUT_COUNTRIES_N) TruncSpace(m_Combo);
-	else if(m_type==COMBOUINPUT_MANUAL)
-	{
-		if(bTruncateStrings) TruncSpace(m_Combo);
-	}
-	else
-	{
-		m_Combo=TranslateHouse(m_Combo, FALSE);
+
+	if (m_type == COMBOUINPUT_TRIGGERS || m_type == COMBOUINPUT_TAGS || m_type == COMBOUINPUT_HOUSES_N || m_type == COMBOUINPUT_COUNTRIES_N) TruncSpace(m_Combo);
+	else if (m_type == COMBOUINPUT_MANUAL) {
+		if (bTruncateStrings) TruncSpace(m_Combo);
+	} else {
+		m_Combo = TranslateHouse(m_Combo, FALSE);
 	}
 
-	EndDialog(0);	
+	EndDialog(0);
 
 	//CDialog::OnOK();
 }
 
-void CComboUInputDlg::OnCancel() 
+void CComboUInputDlg::OnCancel()
 {
 	// TODO: Zusätzlichen Bereinigungscode hier einfügen
-	
+
 	//CDialog::OnCancel();
 }

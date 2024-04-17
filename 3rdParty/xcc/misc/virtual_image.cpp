@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -47,13 +47,11 @@ Cvirtual_image::Cvirtual_image(const void* image, int cx, int cy, int cb_pixel, 
 
 const Cvirtual_image& Cvirtual_image::palet(const t_palet_entry* palet, bool inflate)
 {
-	if (palet)
-	{
+	if (palet) {
 		memcpy(m_palet.write_start(sizeof(t_palet)), palet, sizeof(t_palet));
 		if (inflate)
 			convert_palet_18_to_24(reinterpret_cast<t_palet_entry*>(m_palet.data_edit()));
-	}
-	else
+	} else
 		m_palet.clear();
 	return *this;
 }
@@ -99,25 +97,21 @@ int Cvirtual_image::load(const Cvirtual_binary& s)
 		return png_f.decode(*this);
 	else if (tga_f.load(s), tga_f.is_valid())
 		return tga_f.decode(*this);
-	else
-	{
+	else {
 		IStream* is = SHCreateMemStream(s.data(), s.size());
 		Gdiplus::Bitmap bmp(is);
 		is->Release();
 		if (bmp.GetLastStatus() != Ok)
 			return 1;
 		PixelFormat pf = bmp.GetPixelFormat();
-		if (bmp.GetPixelFormat() & PixelFormatIndexed)
-		{
+		if (bmp.GetPixelFormat() & PixelFormatIndexed) {
 			load(NULL, bmp.GetWidth(), bmp.GetHeight(), 1, NULL);
 			BitmapData d;
 			d.Stride = bmp.GetWidth();
 			d.Scan0 = image_edit();
 			bmp.LockBits(NULL, ImageLockModeRead | ImageLockModeUserInputBuf, PixelFormat8bppIndexed, &d);
 			bmp.UnlockBits(&d);
-		}
-		else
-		{
+		} else {
 			load(NULL, bmp.GetWidth(), bmp.GetHeight(), 3, NULL);
 			BitmapData d;
 			d.Stride = bmp.GetWidth() * 3;
@@ -163,8 +157,7 @@ void Cvirtual_image::swap_rb()
 {
 	int count = m_cx * m_cy;
 	t_palet_entry* r = reinterpret_cast<t_palet_entry*>(m_image.data_edit());
-	while (count--)
-	{
+	while (count--) {
 		swap(r->r, r->b);
 		r++;
 	}
@@ -175,8 +168,7 @@ static void flip_frame(const byte* s, byte* d, int cx, int cy, int cb_pixel)
 	int cb_line = cx * cb_pixel;
 	const byte* r = s;
 	byte* w = d + cb_line * cy;
-	while (cy--)
-	{
+	while (cy--) {
 		w -= cb_line;
 		memcpy(w, r, cb_line);
 		r += cb_line;
@@ -200,8 +192,7 @@ void Cvirtual_image::cb_pixel(int cb_pixel, const t_palet_entry* palet)
 
 void Cvirtual_image::decrease_color_depth(int new_cb_pixel, const t_palet_entry* palet)
 {
-	if (new_cb_pixel == 3)
-	{
+	if (new_cb_pixel == 3) {
 		remove_alpha();
 		return;
 	}
@@ -211,21 +202,16 @@ void Cvirtual_image::decrease_color_depth(int new_cb_pixel, const t_palet_entry*
 	load(NULL, cx(), cy(), new_cb_pixel, palet);
 	byte* w = image_edit();
 	int count = m_cx * m_cy;
-	if (old_cb_pixel == 3)
-	{
+	if (old_cb_pixel == 3) {
 		const t_palet_entry* r = reinterpret_cast<const t_palet_entry*>(t.data());
-		while (count--)
-		{
+		while (count--) {
 			*w++ = find_color(r->r, r->g, r->b, palet);
 			r++;
 		}
-	}
-	else
-	{
+	} else {
 		assert(old_cb_pixel == 4);
 		const t_palet32entry* r = reinterpret_cast<const t_palet32entry*>(t.data());
-		while (count--)
-		{
+		while (count--) {
 			*w++ = r->a < 0x80 ? find_color(r->r, r->g, r->b, palet) : 0;
 			r++;
 		}
@@ -254,8 +240,7 @@ static t_palet32entry p32e(const t_palet palet, int i)
 
 void Cvirtual_image::increase_color_depth(int new_cb_pixel)
 {
-	if (cb_pixel() == 3)
-	{
+	if (cb_pixel() == 3) {
 		if (new_cb_pixel == 4)
 			add_alpha();
 		return;
@@ -265,14 +250,11 @@ void Cvirtual_image::increase_color_depth(int new_cb_pixel)
 	const byte* r = t.image();
 	load(NULL, cx(), cy(), new_cb_pixel, NULL);
 	int count = m_cx * m_cy;
-	if (cb_pixel() == 3)
-	{
+	if (cb_pixel() == 3) {
 		t_palet_entry* w = reinterpret_cast<t_palet_entry*>(image_edit());
 		while (count--)
 			*w++ = t.palet()[*r++];
-	}
-	else
-	{
+	} else {
 		assert(cb_pixel() == 4);
 		t_palet32entry* w = reinterpret_cast<t_palet32entry*>(image_edit());
 		while (count--)
@@ -288,8 +270,7 @@ void Cvirtual_image::add_alpha()
 	int count = m_cx * m_cy;
 	const byte* r = t.data();
 	byte* w = image_edit();
-	while (count--)
-	{
+	while (count--) {
 		*w++ = *r++;
 		*w++ = *r++;
 		*w++ = *r++;
@@ -306,8 +287,7 @@ void Cvirtual_image::remove_alpha()
 	int count = m_cx * m_cy;
 	const byte* r = t.data();
 	byte* w = image_edit();
-	while (count--)
-	{
+	while (count--) {
 		*w++ = *r++;
 		*w++ = *r++;
 		*w++ = *r++;
@@ -321,8 +301,7 @@ void Cvirtual_image::increase_palet_depth()
 	Cvirtual_binary t = m_palet;
 	const t_palet_entry* s = reinterpret_cast<const t_palet_entry*>(t.data());
 	t_palet_entry* d = reinterpret_cast<t_palet_entry*>(t.data_edit());
-	for (int i = 0; i < 256; i++)
-	{
+	for (int i = 0; i < 256; i++) {
 		d[i].r = (s[i].r & 63) * 255 / 63;
 		d[i].g = (s[i].g & 63) * 255 / 63;
 		d[i].b = (s[i].b & 63) * 255 / 63;

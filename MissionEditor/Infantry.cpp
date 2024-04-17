@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // Infantrie.cpp: Implementierungsdatei
@@ -84,72 +84,70 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CInfantrie 
 
-BOOL CInfantrie::OnInitDialog() 
+BOOL CInfantrie::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	// init the common (!) dialog things
 	int i;
-	CComboBox* house, *tag;
-	house=(CComboBox*)GetDlgItem(IDC_HOUSE);
-	tag=(CComboBox*)GetDlgItem(IDC_TAG);
-	
+	CComboBox* house, * tag;
+	house = (CComboBox*)GetDlgItem(IDC_HOUSE);
+	tag = (CComboBox*)GetDlgItem(IDC_TAG);
+
 	ListHouses(*house, FALSE);
 	ListTags(*tag, TRUE);
-	
-	
+
+
 	UpdateData(FALSE);
-	m_strength_ctrl.SetRange(0,256);
+	m_strength_ctrl.SetRange(0, 256);
 	m_strength_ctrl.SetPos(atoi(m_strength));
 
-	
+
 	UpdateStrings();
 
-	return TRUE;  
+	return TRUE;
 }
 
-void CInfantrie::OnOK() 
+void CInfantrie::OnOK()
 {
 	CDialog::OnOK();
-	m_strength=GetText(&m_strength_ctrl);
+	m_strength = GetText(&m_strength_ctrl);
 
-	UpdateData();	
+	UpdateData();
 	TruncSpace(m_tag);
-	m_house=TranslateHouse(m_house);
-	
+	m_house = TranslateHouse(m_house);
 
-	
+
+
 }
 
 void CInfantrie::Init(CString house, CString strength, CString action, CString direction, CString tag, CString flag1, CString flag2, CString flag3, CString flag4, CString flag5)
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	if(house=="") 
-	{
+	if (house == "") {
 		/*m_house=*rules.sections[HOUSES].GetValue(0);
 		if(ini.sections.find(HOUSES)!=ini.sections.end())
 			if(ini.sections[HOUSES].values.size()>0)
 				m_house=*ini.sections[HOUSES].GetValue(0);*/
-		m_house=TranslateHouse(Map->GetHouseID(0), TRUE);
-	}
-	else
-		m_house=TranslateHouse(house, TRUE);
+		m_house = TranslateHouse(Map->GetHouseID(0), TRUE);
+	} else
+		m_house = TranslateHouse(house, TRUE);
 
-	
 
-	m_flag1=flag1;
-	m_flag2=flag2;
-	m_flag3=flag3;
-	m_flag4=flag4;
-	m_flag5=flag5;
+
+	m_flag1 = flag1;
+	m_flag2 = flag2;
+	m_flag3 = flag3;
+	m_flag4 = flag4;
+	m_flag5 = flag5;
 	// m_pos=pos;
-	m_action=action;
-	m_strength=strength;
-	
-	m_tag=tag;
-	m_direction=direction;
-	
+	m_action = action;
+	m_strength = strength;
+
+	m_tag = tag;
+	m_direction = direction;
+
 }
 
 void CInfantrie::UpdateStrings()

@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #pragma once
@@ -201,9 +201,9 @@ struct t_mix_index_entry
 		size = size_;
 	}
 
-    unsigned __int32 id;
-    __int32 offset;
-    __int32 size;
+	unsigned __int32 id;
+	__int32 offset;
+	__int32 size;
 };
 
 struct t_mix_rg_header
@@ -276,14 +276,14 @@ const char png_id[] = "\x89PNG\r\n\x1A\n";
 
 struct t_shp_dune2_header
 {
-    __int16 c_images;
+	__int16 c_images;
 };
 
 struct t_shp_dune2_image_header
 {
 	__int16 compression;
-    unsigned __int8 cy;
-    unsigned __int16 cx;
+	unsigned __int8 cy;
+	unsigned __int16 cx;
 	unsigned __int8 cy2;
 	unsigned __int16 size_in;
 	unsigned __int16 size_out;
@@ -291,29 +291,29 @@ struct t_shp_dune2_image_header
 
 struct t_shp_header
 {
-    __int16 c_images;
-    __int16 unknown1;
-    __int16 unknown2;
-    __int16 cx;
-    __int16 cy;
-    __int32 unknown3;
+	__int16 c_images;
+	__int16 unknown1;
+	__int16 unknown2;
+	__int16 cx;
+	__int16 cy;
+	__int32 unknown3;
 };
 
 struct t_shp_ts_header
 {
-    __int16 zero;
-    __int16 cx;
-    __int16 cy;
-    __int16 c_images;
+	__int16 zero;
+	__int16 cx;
+	__int16 cy;
+	__int16 c_images;
 };
 
 struct t_shp_ts_image_header
 {
 	__int16 x;
 	__int16 y;
-    __int16 cx;
-    __int16 cy;
-    __int32 compression;
+	__int16 cx;
+	__int16 cy;
+	__int32 compression;
 	__int32 unknown;
 	__int32 zero;
 	__int32 offset;
@@ -321,7 +321,7 @@ struct t_shp_ts_image_header
 
 struct t_tga_header
 {
-    byte id_size;
+	byte id_size;
 	byte map_t;
 	byte image_t;
 	unsigned __int16 map_first;
@@ -332,9 +332,9 @@ struct t_tga_header
 	unsigned __int16 cx;
 	unsigned __int16 cy;
 	byte cb_pixel;
-	byte alpha:4;
-	byte horizontal:1;
-	byte vertical:1;
+	byte alpha : 4;
+	byte horizontal : 1;
+	byte vertical : 1;
 };
 
 struct t_tmp_header
@@ -387,9 +387,9 @@ struct t_tmp_image_header
 	__int32 y_extra;
 	__int32 cx_extra;
 	__int32 cy_extra;
-	unsigned int has_extra_data: 1;
-	unsigned int has_z_data: 1;
-	unsigned int has_damaged_data: 1;
+	unsigned int has_extra_data : 1;
+	unsigned int has_z_data : 1;
+	unsigned int has_damaged_data : 1;
 	__int8 height;
 	__int8 terrain_type;
 	__int8 ramp_type;
@@ -451,7 +451,7 @@ struct t_vqa_header
 const __int32 vqa_c_mask = 0xff000000;
 const __int32 vqa_t_mask = 0x00ffffff;
 const __int32 vqa_file_id = *(__int32*)"FORM";
-const __int64 vqa_form_id = {*(__int64*)"WVQAVQHD"};
+const __int64 vqa_form_id = { *(__int64*)"WVQAVQHD" };
 const __int32 vqa_cbf_id = *(__int32*)"CBF\0";
 const __int32 vqa_cbp_id = *(__int32*)"CBP\0";
 const __int32 vqa_cpl_id = *(__int32*)"CPL\0";
@@ -465,7 +465,7 @@ const __int32 vqa_vqfr_id = *(__int32*)"VQFR";
 
 struct t_vqp_header
 {
-    unsigned __int32 c_tables;
+	unsigned __int32 c_tables;
 };
 
 struct t_vxl_header
@@ -489,9 +489,9 @@ struct t_vxl_section_header
 
 struct t_vxl_section_tailer
 {
-    __int32 span_start_ofs;
-    __int32 span_end_ofs;
-    __int32 span_data_ofs;
+	__int32 span_start_ofs;
+	__int32 span_end_ofs;
+	__int32 span_data_ofs;
 	float scale;
 	float transform[3][4];
 	float x_min_scale;
@@ -526,20 +526,20 @@ struct t_w3d_header
 
 struct t_wsa_dune2_header
 {
-    __int16 c_frames;
-    __int16 cx;
-    __int16 cy;
+	__int16 c_frames;
+	__int16 cx;
+	__int16 cy;
 	__int16 delta;
 };
 
 struct t_wsa_header
 {
-    __int16 c_frames;
-    __int16 x;
-    __int16 y;
-    __int16 cx;
-    __int16 cy;
-    __int32 delta;
+	__int16 c_frames;
+	__int16 x;
+	__int16 y;
+	__int16 cx;
+	__int16 cy;
+	__int32 delta;
 };
 
 struct t_xcc_header

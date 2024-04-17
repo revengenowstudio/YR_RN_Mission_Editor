@@ -48,9 +48,9 @@ public:
 	static CString ToString(const T& origin);// { static_assert(false, "T must have specialized implementations!"); }
 
 	template<>
-	static CString ToString<bool>(const bool& origin) 
+	static CString ToString<bool>(const bool& origin)
 	{
-		static CString result[] = {  "no", "yes" };
+		static CString result[] = { "no", "yes" };
 		return result[origin];
 	}
 

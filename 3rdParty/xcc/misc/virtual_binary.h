@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2001  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2001  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #pragma once
@@ -61,10 +61,10 @@ public:
 		m_size = v;
 	}
 
-  bool unique() const
-  {
-    return mc_references == 1;
-  }
+	bool unique() const
+	{
+		return mc_references == 1;
+	}
 private:
 	byte* m_data;
 	size_t m_size;
@@ -102,15 +102,15 @@ public:
 		return m_source ? m_source->data_end() : NULL;
 	}
 
-  const byte* begin() const
-  {
-    return data();
-  }
+	const byte* begin() const
+	{
+		return data();
+	}
 
-  const byte* end() const
-  {
-    return data_end();
-  }
+	const byte* end() const
+	{
+		return data_end();
+	}
 
 	byte* data_edit()
 	{

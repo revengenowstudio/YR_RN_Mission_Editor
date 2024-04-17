@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // NewMapImportDlg.cpp: Implementierungsdatei
@@ -69,50 +69,49 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CNewMapImportDlg 
 
-void CNewMapImportDlg::OnBrowse() 
+void CNewMapImportDlg::OnBrowse()
 {
 	UpdateData();
 
 	//CComboBox* m_ImportFile=(CComboBox*)GetDlgItem(IDC_IMPORTFILE);
 
-	CFileDialog dlg(TRUE, NULL, NULL,  OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, "All files|*.mpr;*.map;*.bmp|TS/RA2 multi maps|*.mpr|TS/RA2 single maps|*.map|Windows bitmaps|*.bmp|");
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, "All files|*.mpr;*.map;*.bmp|TS/RA2 multi maps|*.mpr|TS/RA2 single maps|*.map|Windows bitmaps|*.bmp|");
 
 	char cuPath[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, cuPath);
-	dlg.m_ofn.lpstrInitialDir=cuPath;
+	dlg.m_ofn.lpstrInitialDir = cuPath;
 
-	if(theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir=(char*)(LPCTSTR)theApp.m_Options.TSExe;
+	if (theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir = (char*)(LPCTSTR)theApp.m_Options.TSExe;
 
 
-	if(dlg.DoModal()==IDCANCEL) return;	
-	
-	m_ImportFile=dlg.GetPathName();
+	if (dlg.DoModal() == IDCANCEL) return;
+
+	m_ImportFile = dlg.GetPathName();
 
 	UpdateData(FALSE);
 }
 
-BOOL CNewMapImportDlg::OnInitDialog() 
+BOOL CNewMapImportDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
-	CComboBox* m_ImportFile=(CComboBox*)GetDlgItem(IDC_IMPORTFILE);
+
+	CComboBox* m_ImportFile = (CComboBox*)GetDlgItem(IDC_IMPORTFILE);
 
 	CString maps = CString(u8AppDataPath.c_str()) + "\\stdmaps\\*.mpr";
 	CFileFind ff;
-	
-	if(ff.FindFile(maps))
-	{
-		BOOL bFileAvailable=TRUE;
-		while(bFileAvailable) {
-			bFileAvailable=ff.FindNextFile();
 
-			CString file=ff.GetFileName();
+	if (ff.FindFile(maps)) {
+		BOOL bFileAvailable = TRUE;
+		while (bFileAvailable) {
+			bFileAvailable = ff.FindNextFile();
+
+			CString file = ff.GetFileName();
 			m_ImportFile->AddString(file);
 		}
 
 		m_ImportFile->SetCurSel(0);
 	}
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }

@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // TSOptions.cpp: implementation
@@ -72,7 +72,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CTSOptions 
 
-void CTSOptions::OnChoose() 
+void CTSOptions::OnChoose()
 {
 #ifndef RA2_MODE
 	CFileDialog fd(TRUE, NULL, "Sun.exe", OFN_FILEMUSTEXIST, "Tiberian Sun EXE|Sun.exe|");
@@ -87,24 +87,24 @@ void CTSOptions::OnChoose()
 	delete fd;
 }
 
-void CTSOptions::OnOK() 
+void CTSOptions::OnOK()
 {
 	this->GetDlgItem(IDC_EDIT1)->GetWindowText(m_TSEXE);
-	int n=m_Language.GetItemData(m_Language.GetCurSel()); 
-	
+	int n = m_Language.GetItemData(m_Language.GetCurSel());
+
 	m_LanguageName = language["Languages"].Nth(n).second;
 
 	CDialog::OnOK();
 }
 
-BOOL CTSOptions::OnInitDialog() 
+BOOL CTSOptions::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	m_TSExe.SetWindowText((LPCTSTR)theApp.m_Options.TSExe);
-	
-	if(theApp.m_Options.bSearchLikeTS) m_LikeTS=0;
-	else m_LikeTS=1;
+
+	if (theApp.m_Options.bSearchLikeTS) m_LikeTS = 0;
+	else m_LikeTS = 1;
 
 	m_PreferLocalTheaterFiles = theApp.m_Options.bPreferLocalTheaterFiles ? TRUE : FALSE;
 
@@ -119,6 +119,6 @@ BOOL CTSOptions::OnInitDialog()
 			m_Language.SetCurSel(i);
 		}
 	}
-	
-	return TRUE;  
+
+	return TRUE;
 }

@@ -164,8 +164,8 @@ public:
 	}
 
 	void Insert(const CString& key, CString&& value) {
-		 value_pairs.push_back({ key, value });
-		 value_pos.insert_or_assign(key, value_pairs.size() - 1);
+		value_pairs.push_back({ key, value });
+		value_pos.insert_or_assign(key, value_pairs.size() - 1);
 	}
 
 	// ==================== Delete
@@ -218,7 +218,7 @@ public:
 private:
 	map<CString, int64_t, SortDummy> value_pos{};
 	vector<std::pair<CString, CString>> value_pairs{};// sequenced
-	mutable bool isRegistry{false};
+	mutable bool isRegistry{ false };
 };
 
 class CIniFile
@@ -310,7 +310,7 @@ public:
 
 	// ============== Writer and Helper converter ============================
 	CIniFileSection& AddSection(CString&& sectionName) {
-		auto const ret = this->sections.insert({ std::move(sectionName), {}});
+		auto const ret = this->sections.insert({ std::move(sectionName), {} });
 		return ret.first->second;
 	}
 	CIniFileSection& AddSection(const CString& sectionName) {
@@ -337,7 +337,7 @@ public:
 	}
 
 	void SetBool(const CString& section, const CString& key, const bool value) {
-		 this->SetString(section, key, INIHelper::ToString(value));
+		this->SetString(section, key, INIHelper::ToString(value));
 	}
 	void SetInteger(const CString& section, const CString& key, const int value) {
 		this->SetString(section, key, INIHelper::ToString(value));

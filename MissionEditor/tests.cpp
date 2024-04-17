@@ -55,17 +55,12 @@ bool ReportTest(const char* file, int line, const char* function, const char* as
 
 bool run_test(const std::function<void()>& f)
 {
-	try
-	{
+	try {
 		f();
 		return true;
-	}
-	catch(const TestError& e)
-	{
+	} catch (const TestError& e) {
 		std::cout << e.what() << std::endl;
-	}
-	catch (const std::exception& e)
-	{
+	} catch (const std::exception& e) {
 		std::cout << "ERROR: Exception occurred: " << e.what() << std::endl;
 	}
 	return false;
@@ -80,7 +75,7 @@ int main(int argc, char* argv[])
 int Tests::run()
 {
 	int failed_tests = 0;
-	std::vector<std::function<void()>> test_functions({ 
+	std::vector<std::function<void()>> test_functions({
 		[this]() { test_inlines(); },
 		[this]() { test_tube_create(); },
 		[this]() { test_tube_reverse(); },
@@ -88,9 +83,8 @@ int Tests::run()
 		[this]() { test_tube_delimiter(); },
 		[this]() { test_hsv(); },
 		[this]() { test_iso(); },
-	});
-	for (const auto f : test_functions)
-	{
+		});
+	for (const auto f : test_functions) {
 		if (!run_test(f))
 			++failed_tests;
 	}
@@ -137,7 +131,7 @@ void Tests::test_tube_create()
 	using namespace TubeDirections;
 
 	REPORT_TEST(CTube::autocreate(50, 50, 50, 50) == CTube(50, 50, XX, 50, 50, std::vector<ETubeDirection>({ XX })));
-	REPORT_TEST(CTube::autocreate(50, 50, 55, 50) == CTube(50, 50, BC, 55, 50, std::vector<ETubeDirection>({ BC, BC, BC, BC, BC, XX})));
+	REPORT_TEST(CTube::autocreate(50, 50, 55, 50) == CTube(50, 50, BC, 55, 50, std::vector<ETubeDirection>({ BC, BC, BC, BC, BC, XX })));
 	REPORT_TEST(CTube::autocreate(50, 50, 45, 50) == CTube(50, 50, TC, 45, 50, std::vector<ETubeDirection>({ TC, TC, TC, TC, TC, XX })));
 	REPORT_TEST(CTube::autocreate(50, 50, 45, 45, 0) == CTube(50, 50, CL, 45, 45, std::vector<ETubeDirection>({ TL, TL, TL, TL, TL, XX })));
 	REPORT_TEST(CTube::autocreate(50, 50, 45, 45) == CTube(50, 50, CL, 45, 45, std::vector<ETubeDirection>({ CL, TL, TL, TL, TL, TC, XX })));
@@ -151,14 +145,14 @@ void Tests::test_tube_reverse()
 {
 	using namespace TubeDirections;
 
-	REPORT_TEST(CTube(50, 50, BC, 55, 50, std::vector<ETubeDirection>({ BC, BC, BC, BC, BC, XX})).reverse() ==
-				CTube(55, 50, TC, 50, 50, std::vector<ETubeDirection>({ TC, TC, TC, TC, TC, XX })));
+	REPORT_TEST(CTube(50, 50, BC, 55, 50, std::vector<ETubeDirection>({ BC, BC, BC, BC, BC, XX })).reverse() ==
+		CTube(55, 50, TC, 50, 50, std::vector<ETubeDirection>({ TC, TC, TC, TC, TC, XX })));
 	REPORT_TEST(CTube(50, 50, TC, 45, 46, std::vector<ETubeDirection>({ TC, TL, TL, TL, TL, XX })).reverse() ==
-				CTube(45, 46, BR, 50, 50, std::vector<ETubeDirection>({ BR, BR, BR, BR, BC, XX })));
+		CTube(45, 46, BR, 50, 50, std::vector<ETubeDirection>({ BR, BR, BR, BR, BC, XX })));
 	REPORT_TEST(CTube(50, 50, BC, 51, 50, std::vector<ETubeDirection>({ BC, XX })).reverse() ==
-		        CTube(51, 50, TC, 50, 50, std::vector<ETubeDirection>({ TC, XX })));
+		CTube(51, 50, TC, 50, 50, std::vector<ETubeDirection>({ TC, XX })));
 	REPORT_TEST(CTube(50, 50, BC, 52, 50, std::vector<ETubeDirection>({ BC, BC, XX })).reverse() ==
-				CTube(52, 50, TC, 50, 50, std::vector<ETubeDirection>({ TC, TC, XX })));
+		CTube(52, 50, TC, 50, 50, std::vector<ETubeDirection>({ TC, TC, XX })));
 
 }
 
@@ -243,5 +237,5 @@ void Tests::test_iso()
 	REPORT_TEST(d.ProjectCoords3d(MapCoords(1, 1), 1) == ProjectedCoords((26 - 2) * f_x / 2, f_y / 2));
 
 	REPORT_TEST(d.ToMapCoords3d(ProjectedCoords((26 - 2) * f_x / 2, 0), 0) == MapCoords(0, 0));
-	
+
 }

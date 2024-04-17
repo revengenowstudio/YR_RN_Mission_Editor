@@ -13,17 +13,17 @@ class IniTestHelper
 		iniFile.close();
 	}
 
-	public :
-		IniTestHelper(std::string&& name, const char* pContent) :
-			m_fileName(std::move(name))
-		{
-			ASSERT(!m_fileName.empty());
-			ASSERT(pContent != nullptr);
-			writeDownContent(pContent);
-		}
-		~IniTestHelper() {
-			remove(m_fileName.c_str());
-		}
+public:
+	IniTestHelper(std::string&& name, const char* pContent) :
+		m_fileName(std::move(name))
+	{
+		ASSERT(!m_fileName.empty());
+		ASSERT(pContent != nullptr);
+		writeDownContent(pContent);
+	}
+	~IniTestHelper() {
+		remove(m_fileName.c_str());
+	}
 
 };
 

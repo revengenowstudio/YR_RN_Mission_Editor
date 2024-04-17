@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // Tags.cpp: Implementierungsdatei
@@ -81,12 +81,12 @@ END_MESSAGE_MAP()
 
 void CTags::UpdateDialog()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int sel=m_Tag.GetCurSel();
-	
-	while(m_Tag.DeleteString(0)!=CB_ERR);
-	while(m_Trigger.DeleteString(0)!=CB_ERR);
+	int sel = m_Tag.GetCurSel();
+
+	while (m_Tag.DeleteString(0) != CB_ERR);
+	while (m_Trigger.DeleteString(0) != CB_ERR);
 
 	int i;
 	for (auto const& [type, def] : ini["Tags"]) {
@@ -106,24 +106,22 @@ void CTags::UpdateDialog()
 		m_Trigger.AddString(s);
 	}
 
-	if(m_Tag.SetCurSel(0)!=CB_ERR)
+	if (m_Tag.SetCurSel(0) != CB_ERR)
 		OnSelchangeTag();
 
-	if(sel!=-1)
-	{
-		if(m_Tag.SetCurSel(sel)!=CB_ERR)
-		{
+	if (sel != -1) {
+		if (m_Tag.SetCurSel(sel) != CB_ERR) {
 			OnSelchangeTag();
 		}
 	}
 
 }
 
-void CTags::OnSelchangeTag() 
+void CTags::OnSelchangeTag()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int index=m_Tag.GetCurSel();
+	int index = m_Tag.GetCurSel();
 	if (index < 0) {
 		return;
 	}
@@ -134,59 +132,59 @@ void CTags::OnSelchangeTag()
 	}
 
 	CString data = ini.GetString("Tags", type);
-	m_Name=GetParam(data,1);
-	CString trigger=GetParam(data,2);
-	CString typ=trigger;
+	m_Name = GetParam(data, 1);
+	CString trigger = GetParam(data, 2);
+	CString typ = trigger;
 
-	trigger+=" (";
+	trigger += " (";
 	auto const& def = ini.GetString("Triggers", typ);
-	if(!def.IsEmpty()) {
+	if (!def.IsEmpty()) {
 		trigger += GetParam(def, 2);
 	}
-	trigger+=")";
+	trigger += ")";
 
 	m_Trigger.SetWindowText(trigger);
-	
-		
-	m_Repeat.SetWindowText(GetParam(data,0));
 
-	
+
+	m_Repeat.SetWindowText(GetParam(data, 0));
+
+
 
 	UpdateData(FALSE);
 }
 
-void CTags::OnChangeName() 
+void CTags::OnChangeName()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData();
 
-	CEdit&  name=*(CEdit*)GetDlgItem(IDC_NAME);
-	int sel2=name.GetSel();
+	CEdit& name = *(CEdit*)GetDlgItem(IDC_NAME);
+	int sel2 = name.GetSel();
 
-	int index=m_Tag.GetCurSel();
-	if(index<0) return;
+	int index = m_Tag.GetCurSel();
+	if (index < 0) return;
 	CString type;
 	m_Tag.GetLBText(index, type);
-	if(type.Find(" ")>=0) type.SetAt(type.Find(" "),0);
+	if (type.Find(" ") >= 0) type.SetAt(type.Find(" "), 0);
 
 	auto const& data = ini.GetString("Tags", type);
-	
+
 	CString tag, repeat;
 	tag = GetParam(data, 2);
 	repeat = GetParam(data, 0);
-	auto const& constructed = repeat + "," +  m_Name + "," + tag;
+	auto const& constructed = repeat + "," + m_Name + "," + tag;
 	ini.SetString("Tags", type, constructed);
 
 	UpdateDialog();
 	name.SetSel(sel2);
 }
 
-void CTags::OnEditchangeRepeat() 
+void CTags::OnEditchangeRepeat()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int index=m_Tag.GetCurSel();
+	int index = m_Tag.GetCurSel();
 	if (index < 0) {
 		return;
 	}
@@ -200,31 +198,31 @@ void CTags::OnEditchangeRepeat()
 		type.SetAt(type.Find(" "), 0);
 	}
 
-	auto const data=ini.GetString("Tags", type);
-	
+	auto const data = ini.GetString("Tags", type);
+
 	CString trigger, name;
 	trigger = GetParam(data, 2);
 	name = GetParam(data, 1);
-	auto const constructed =  str + "," + name + "," + trigger;
+	auto const constructed = str + "," + name + "," + trigger;
 	ini.SetString("Tags", type, constructed);
-	
+
 
 	UpdateDialog();
 
 }
 
-void CTags::OnSelchangeRepeat() 
+void CTags::OnSelchangeRepeat()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int index=m_Tag.GetCurSel();
-	if(index<0) return;
+	int index = m_Tag.GetCurSel();
+	if (index < 0) return;
 
-	int v=m_Repeat.GetCurSel();
+	int v = m_Repeat.GetCurSel();
 	CString str;
 
-	
-	m_Repeat.GetLBText(v,str);
+
+	m_Repeat.GetLBText(v, str);
 
 
 	CString type;
@@ -240,54 +238,54 @@ void CTags::OnSelchangeRepeat()
 	name = GetParam(data, 1);
 	auto const constructed = str + "," + name + "," + trigger;
 	ini.SetString("Tags", type, constructed);
-	
+
 
 	UpdateDialog();
 }
 
-void CTags::OnEditchangeTrigger() 
+void CTags::OnEditchangeTrigger()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int index=m_Tag.GetCurSel();
-	if(index<0) return;
+	int index = m_Tag.GetCurSel();
+	if (index < 0) return;
 
 	CString str;
 	m_Trigger.GetWindowText(str);
-	if(str.Find(" ")>=0) str.SetAt(str.Find(" "),0);
+	if (str.Find(" ") >= 0) str.SetAt(str.Find(" "), 0);
 
 	CString type;
 	m_Tag.GetLBText(index, type);
-	if(type.Find(" ")>=0) type.SetAt(type.Find(" "),0);
+	if (type.Find(" ") >= 0) type.SetAt(type.Find(" "), 0);
 
 	auto const data = ini.GetString("Tags", type);
-	
+
 	CString repeat, name;
 	repeat = GetParam(data, 0);
 	name = GetParam(data, 1);
 	auto const constructed = repeat + "," + name + "," + (LPCTSTR)str;
 	ini.SetString("Tags", type, constructed);
-	
+
 
 	//UpdateDialog();
-		
+
 }
 
-void CTags::OnSelchangeTrigger() 
+void CTags::OnSelchangeTrigger()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int index=m_Tag.GetCurSel();
+	int index = m_Tag.GetCurSel();
 	if (index < 0) {
 		return;
 	}
 
-	int v=m_Trigger.GetCurSel();
+	int v = m_Trigger.GetCurSel();
 	CString str;
 
-	
-	m_Trigger.GetLBText(v,str);	
-	
+
+	m_Trigger.GetLBText(v, str);
+
 	if (str.Find(" ") >= 0) {
 		str.SetAt(str.Find(" "), 0);
 	}
@@ -299,21 +297,21 @@ void CTags::OnSelchangeTrigger()
 	}
 
 	auto const data = ini.GetString("Tags", type);
-	
+
 	CString repeat, name;
-	repeat=GetParam(data,0);
-	name=GetParam(data,1);
-	auto const constructed =repeat+","+name+","+(LPCTSTR)str;
+	repeat = GetParam(data, 0);
+	name = GetParam(data, 1);
+	auto const constructed = repeat + "," + name + "," + (LPCTSTR)str;
 	ini.SetString("Tags", type, constructed);
 
 	//UpdateDialog();
 }
 
-void CTags::OnDelete() 
+void CTags::OnDelete()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int index=m_Tag.GetCurSel();
+	int index = m_Tag.GetCurSel();
 	if (index < 0) {
 		return;
 	}
@@ -324,23 +322,23 @@ void CTags::OnDelete()
 		type.SetAt(type.Find(" "), 0);
 	}
 
-	int res=MessageBox("Are you sure to delete the selected tag? This may cause the attached trigger to don´t work anymore, if no other tag has the trigger attached.","Delete tag", MB_YESNO);
+	int res = MessageBox("Are you sure to delete the selected tag? This may cause the attached trigger to don´t work anymore, if no other tag has the trigger attached.", "Delete tag", MB_YESNO);
 	if (res == IDNO) {
 		return;
 	}
-	
+
 	ini.RemoveValueByKey("Tags", type);
 	UpdateDialog();
 }
 
-void CTags::OnAdd() 
+void CTags::OnAdd()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	CString ID=GetFreeID();	
+	CString ID = GetFreeID();
 
 	if (ini["Triggers"].Size() < 1) {
-		MessageBox("Before creating tags, you need at least one trigger.","Error");
+		MessageBox("Before creating tags, you need at least one trigger.", "Error");
 		return;
 	};
 
@@ -349,18 +347,16 @@ void CTags::OnAdd()
 	data += ini["Triggers"].Nth(0).first;
 	ini.SetString("Tags", ID, data);
 
-	
+
 	UpdateDialog();
 
 	int i;
-	for(i=0;i<m_Tag.GetCount();i++)
-	{
+	for (i = 0; i < m_Tag.GetCount(); i++) {
 		CString j;
-		m_Tag.GetLBText(i,j);
-		if(j.Find(" ")>=0) j.SetAt(j.Find(" "),0);
+		m_Tag.GetLBText(i, j);
+		if (j.Find(" ") >= 0) j.SetAt(j.Find(" "), 0);
 
-		if(j==ID)
-		{
+		if (j == ID) {
 			m_Tag.SetCurSel(i);
 			break;
 		}

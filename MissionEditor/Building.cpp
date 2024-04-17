@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // Building.cpp: Implementierungsdatei
@@ -81,7 +81,7 @@ void CBuilding::DoDataExchange(CDataExchange* pDX)
 	DDX_CBString(pDX, IDC_TAG, m_tag);
 	//}}AFX_DATA_MAP
 
-	
+
 }
 
 
@@ -98,19 +98,19 @@ CString GetName(CString id)
 	return rules.GetString(id, "Name");
 }
 
-void CBuilding::OnOK() 
+void CBuilding::OnOK()
 {
 	CDialog::OnOK();
 
-	m_strength=GetText(&m_strength_ctrl);
+	m_strength = GetText(&m_strength_ctrl);
 	UpdateData();
 
 	char d[50];
 	TruncSpace(m_spotlight);
 	itoa(atoi(m_spotlight), d, 10);
-	m_spotlight=d;
-		
-	m_house=TranslateHouse(m_house);
+	m_spotlight = d;
+
+	m_house = TranslateHouse(m_house);
 	TruncSpace(m_upgrade1);
 	TruncSpace(m_upgrade2);
 	TruncSpace(m_upgrade3);
@@ -119,38 +119,38 @@ void CBuilding::OnOK()
 	TruncSpace(m_flag2);
 	TruncSpace(m_flag3);
 	TruncSpace(m_flag4);
-	
+
 	// 
 }
 
-BOOL CBuilding::OnInitDialog() 
+BOOL CBuilding::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
-	CIniFile& ini=Map->GetIniFile();
+
+	CIniFile& ini = Map->GetIniFile();
 
 	int i;
-	CComboBox* chouse, *ctag;
-	chouse=(CComboBox*)GetDlgItem(IDC_HOUSE);
-	ctag=(CComboBox*)GetDlgItem(IDC_TAG);
-	
+	CComboBox* chouse, * ctag;
+	chouse = (CComboBox*)GetDlgItem(IDC_HOUSE);
+	ctag = (CComboBox*)GetDlgItem(IDC_TAG);
+
 	ListHouses(*chouse, FALSE);
 	ListTags(*ctag, TRUE);
-	
-	
-	
-	m_strength_ctrl.SetRange(0,256);
+
+
+
+	m_strength_ctrl.SetRange(0, 256);
 	m_strength_ctrl.SetPos(atoi(m_strength));
 
 	UpdateData(FALSE);
 
-	int upgradecount=0;
+	int upgradecount = 0;
 	if (strcmp(m_type, "GACTWR") == NULL) {
 		upgradecount = 1;
 	}
 
 	upgradecount = ini.GetInteger(m_type, "Upgrades");
-	
+
 	GetDlgItem(IDC_P5)->SendMessage(CB_SETCURSEL, atoi(m_spotlight), 0);
 
 	if (upgradecount > 0) {
@@ -174,50 +174,47 @@ BOOL CBuilding::OnInitDialog()
 	GetDlgItem(IDC_P6)->EnableWindow(TRUE);
 	GetDlgItem(IDC_P4)->EnableWindow(TRUE);
 
-	if(upgradecount<3)
+	if (upgradecount < 3)
 		GetDlgItem(IDC_P8)->EnableWindow(FALSE);
-	if(upgradecount<2)
+	if (upgradecount < 2)
 		GetDlgItem(IDC_P7)->EnableWindow(FALSE);
-	if(upgradecount<1)
-	{
+	if (upgradecount < 1) {
 		GetDlgItem(IDC_P6)->EnableWindow(FALSE);
 		GetDlgItem(IDC_P4)->EnableWindow(FALSE);
 	}
-	
+
 
 	UpdateStrings();
-	
-	return TRUE;  
+
+	return TRUE;
 }
 
 void CBuilding::Init(CString house, CString strength, CString direction, CString tag, CString flag1, CString flag2, CString energy, CString upgradecount, CString spotlight, CString upgrade1, CString upgrade2, CString upgrade3, CString flag3, CString flag4)
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	if(house=="") 
-	{
-		house=TranslateHouse(Map->GetHouseID(0), TRUE);
-	}
-	else
-		m_house=TranslateHouse(house, TRUE);
-				
+	if (house == "") {
+		house = TranslateHouse(Map->GetHouseID(0), TRUE);
+	} else
+		m_house = TranslateHouse(house, TRUE);
 
-	
 
-	m_house=TranslateHouse(house, TRUE);
-	m_flag1=flag1;
-	m_flag2=flag2;
-	m_flag3=flag3;
-	m_flag4=flag4;
-	m_spotlight=spotlight;	
-	m_energy=energy;
-	m_upgrade1=upgrade1;
-	m_upgrade2=upgrade2;
-	m_upgrade3=upgrade3;
-	m_upgradecount=upgradecount;
-	m_strength=strength;
-	m_tag=tag;
-	m_direction=direction;
+
+
+	m_house = TranslateHouse(house, TRUE);
+	m_flag1 = flag1;
+	m_flag2 = flag2;
+	m_flag3 = flag3;
+	m_flag4 = flag4;
+	m_spotlight = spotlight;
+	m_energy = energy;
+	m_upgrade1 = upgrade1;
+	m_upgrade2 = upgrade2;
+	m_upgrade3 = upgrade3;
+	m_upgradecount = upgradecount;
+	m_strength = strength;
+	m_tag = tag;
+	m_direction = direction;
 
 }
 

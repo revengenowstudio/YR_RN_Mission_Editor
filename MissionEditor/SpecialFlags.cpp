@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // SpecialFlags.cpp: Implementierungsdatei
@@ -103,7 +103,7 @@ END_MESSAGE_MAP()
 
 void CSpecialFlags::UpdateDialog()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	auto const& sec = ini["SpecialFlags"];
 	m_DestroyableBridges.SetWindowText(sec.GetString("DestroyableBridges"));
@@ -121,8 +121,8 @@ void CSpecialFlags::UpdateDialog()
 	m_Visceroids.SetWindowText(sec.GetString("Visceroids"));
 
 #ifdef RA2_MODE
-	SetDlgItemText(IDC_LTIBERIUMGROWS,"Ore grows:");
-	SetDlgItemText(IDC_LTIBERIUMSPREADS,"Ore spreads:");
+	SetDlgItemText(IDC_LTIBERIUMGROWS, "Ore grows:");
+	SetDlgItemText(IDC_LTIBERIUMSPREADS, "Ore spreads:");
 	GetDlgItem(IDC_LTIBERIUMEXPLOSIVE)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_TIBERIUMEXPLOSIVE)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_HARVESTERIMMUNE)->ShowWindow(SW_HIDE);
@@ -140,106 +140,106 @@ void CSpecialFlags::UpdateDialog()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CSpecialFlags 
 
-void CSpecialFlags::OnEditchangeTiberiumgrows() 
+void CSpecialFlags::OnEditchangeTiberiumgrows()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_TiberiumGrows);
+	str = GetText(&m_TiberiumGrows);
 	ini.SetString("SpecialFlags", "TiberiumGrows", str);
 }
 
-void CSpecialFlags::OnEditchangeTiberiumspreads() 
+void CSpecialFlags::OnEditchangeTiberiumspreads()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_TiberiumSpreads);
+	str = GetText(&m_TiberiumSpreads);
 	ini.SetString("SpecialFlags", "TiberiumSpreads", str);
 }
 
-void CSpecialFlags::OnEditchangeTiberiumexplosive() 
+void CSpecialFlags::OnEditchangeTiberiumexplosive()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_TiberiumExplosive);
+	str = GetText(&m_TiberiumExplosive);
 	ini.SetString("SpecialFlags", "TiberiumExplosive", str);
 }
 
-void CSpecialFlags::OnEditchangeDestroyablebridges() 
+void CSpecialFlags::OnEditchangeDestroyablebridges()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_DestroyableBridges);
+	str = GetText(&m_DestroyableBridges);
 	ini.SetString("SpecialFlags", "DestroyableBridges", str);
 }
 
-void CSpecialFlags::OnEditchangeMcvdeploy() 
+void CSpecialFlags::OnEditchangeMcvdeploy()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_MCVDeploy);
+	str = GetText(&m_MCVDeploy);
 	ini.SetString("SpecialFlags", "MCVDeploy", str);
 }
 
-void CSpecialFlags::OnEditchangeInitialveteran() 
+void CSpecialFlags::OnEditchangeInitialveteran()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_InitialVeteran);
+	str = GetText(&m_InitialVeteran);
 	ini.SetString("SpecialFlags", "InitialVeteran", str);
 }
 
-void CSpecialFlags::OnEditchangeFixedalliance() 
+void CSpecialFlags::OnEditchangeFixedalliance()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_FixedAlliance);
+	str = GetText(&m_FixedAlliance);
 	ini.SetString("SpecialFlags", "FixedAlliance", str);
 }
 
-void CSpecialFlags::OnEditchangeHarvesterimmune() 
+void CSpecialFlags::OnEditchangeHarvesterimmune()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_HarvesterImmune);
+	str = GetText(&m_HarvesterImmune);
 	ini.SetString("SpecialFlags", "HarvesterImmune", str);
 }
 
-void CSpecialFlags::OnEditchangeFogofwar() 
+void CSpecialFlags::OnEditchangeFogofwar()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_FogOfWar);
+	str = GetText(&m_FogOfWar);
 	ini.SetString("SpecialFlags", "FogOfWar", str);
 }
 
-void CSpecialFlags::OnEditchangeInert() 
+void CSpecialFlags::OnEditchangeInert()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_Inert);
+	str = GetText(&m_Inert);
 	ini.SetString("SpecialFlags", "Inert", str);
 }
 
-void CSpecialFlags::OnEditchangeIonstorms() 
+void CSpecialFlags::OnEditchangeIonstorms()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_IonStorms);
+	str = GetText(&m_IonStorms);
 	ini.SetString("SpecialFlags", "IonStorms", str);
 }
 
-void CSpecialFlags::OnEditchangeMeteorites() 
+void CSpecialFlags::OnEditchangeMeteorites()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_Meteorites);
+	str = GetText(&m_Meteorites);
 	ini.SetString("SpecialFlags", "Meteorites", str);
 }
 
-void CSpecialFlags::OnEditchangeVisceroids() 
+void CSpecialFlags::OnEditchangeVisceroids()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
-	str=GetText(&m_Visceroids);
+	str = GetText(&m_Visceroids);
 	ini.SetString("SpecialFlags", "Visceroids", str);
 }

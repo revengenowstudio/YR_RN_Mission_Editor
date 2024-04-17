@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // Unit.cpp: Implementierungsdatei
@@ -86,7 +86,7 @@ END_MESSAGE_MAP()
 
 void CUnit::Init(CString house, CString strength, CString direction, CString action, CString tag, CString flag1, CString flag2, CString flag3, CString flag4, CString flag5, CString flag6)
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	if (house.IsEmpty()) {
 		auto const& houseSec = rules["Houses"];
@@ -98,52 +98,52 @@ void CUnit::Init(CString house, CString strength, CString direction, CString act
 		m_house = TranslateHouse(house, TRUE);
 	}
 
-	m_flag1=flag1;
-	m_flag2=flag2;
-	m_flag3=flag3;
-	m_flag4=flag4;
-	m_flag5=flag5;
-	m_flag6=flag6;
-	m_action=action;
-	m_strength=strength;
-	m_tag=tag;
-	m_direction=direction;
+	m_flag1 = flag1;
+	m_flag2 = flag2;
+	m_flag3 = flag3;
+	m_flag4 = flag4;
+	m_flag5 = flag5;
+	m_flag6 = flag6;
+	m_action = action;
+	m_strength = strength;
+	m_tag = tag;
+	m_direction = direction;
 }
 
-BOOL CUnit::OnInitDialog() 
+BOOL CUnit::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	// init the common (!) dialog things
 	int i;
-	CComboBox* house, *tag;
-	house=(CComboBox*)GetDlgItem(IDC_HOUSE);
-	tag=(CComboBox*)GetDlgItem(IDC_TAG);
+	CComboBox* house, * tag;
+	house = (CComboBox*)GetDlgItem(IDC_HOUSE);
+	tag = (CComboBox*)GetDlgItem(IDC_TAG);
 
 	ListHouses(*house, FALSE);
-	ListTags(*tag,TRUE);
+	ListTags(*tag, TRUE);
 
-	
-	
+
+
 	UpdateData(FALSE);
-	m_strength_ctrl.SetRange(0,256);
+	m_strength_ctrl.SetRange(0, 256);
 	m_strength_ctrl.SetPos(atoi(m_strength));
-	
+
 	UpdateStrings();
 
-	return TRUE;  
+	return TRUE;
 }
 
-void CUnit::OnOK() 
+void CUnit::OnOK()
 {
 	CDialog::OnOK();
-	m_strength=GetText(&m_strength_ctrl);
+	m_strength = GetText(&m_strength_ctrl);
 	UpdateData();
-	TruncSpace(m_tag);	
-	m_house=TranslateHouse(m_house);
-	
+	TruncSpace(m_tag);
+	m_house = TranslateHouse(m_house);
 
-	
+
+
 }
 
 void CUnit::UpdateStrings()

@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // Lighting.cpp: Implementierungsdatei
@@ -87,7 +87,7 @@ END_MESSAGE_MAP()
 
 void CLighting::UpdateDialog()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	m_Ambient.SetWindowText(ini.GetString("Lighting", "Ambient"));
 	m_Ambient2.SetWindowText(ini.GetString("Lighting", "IonAmbient"));
@@ -102,123 +102,123 @@ void CLighting::UpdateDialog()
 	//MessageBox(ini.GetString("Lightning", "Ambient"));
 }
 
-BOOL CLighting::OnInitDialog() 
+BOOL CLighting::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 #ifdef RA2_MODE
 	SetDlgItemText(IDC_LIONSTORM, "Weather Storm Settings");
 #endif
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }
 
 
 
 
 
-void CLighting::OnChangeAmbient() 
+void CLighting::OnChangeAmbient()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString ctext;
 	m_Ambient.GetWindowText(ctext);
-	CString text=(char*)(LPCTSTR)ctext;
+	CString text = (char*)(LPCTSTR)ctext;
 	ini.SetString("Lighting", "Ambient", text);
 }
 
-void CLighting::OnChangeLevel() 
+void CLighting::OnChangeLevel()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString ctext;
 	m_Level.GetWindowText(ctext);
-	CString text=(char*)(LPCTSTR)ctext;
+	CString text = (char*)(LPCTSTR)ctext;
 	ini.SetString("Lighting", "Level", text);
 }
 
-void CLighting::OnKillfocusAmbient() 
+void CLighting::OnKillfocusAmbient()
 {
-	
+
 }
 
-void CLighting::OnChangeRed() 
+void CLighting::OnChangeRed()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString ctext;
 	m_Red.GetWindowText(ctext);
-	CString text=(char*)(LPCTSTR)ctext;
+	CString text = (char*)(LPCTSTR)ctext;
 	ini.SetString("Lighting", "Red", text);
 }
 
-void CLighting::OnChangeGreen() 
+void CLighting::OnChangeGreen()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString ctext;
 	m_Green.GetWindowText(ctext);
-	CString text=(char*)(LPCTSTR)ctext;
+	CString text = (char*)(LPCTSTR)ctext;
 	ini.SetString("Lighting", "Green", text);
 }
 
-void CLighting::OnChangeBlue() 
+void CLighting::OnChangeBlue()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString ctext;
 	m_Blue.GetWindowText(ctext);
-	CString text=(char*)(LPCTSTR)ctext;
+	CString text = (char*)(LPCTSTR)ctext;
 	ini.SetString("Lighting", "Blue", text);
 }
 
-void CLighting::OnChangeAmbient2() 
+void CLighting::OnChangeAmbient2()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString ctext;
 	m_Ambient2.GetWindowText(ctext);
-	CString text=(char*)(LPCTSTR)ctext;
+	CString text = (char*)(LPCTSTR)ctext;
 	ini.SetString("Lighting", "IonAmbient", text);
 }
 
-void CLighting::OnChangeLevel2() 
+void CLighting::OnChangeLevel2()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString ctext;
 	m_Level2.GetWindowText(ctext);
-	CString text=(char*)(LPCTSTR)ctext;
+	CString text = (char*)(LPCTSTR)ctext;
 	ini.SetString("Lighting", "IonLevel", text);
 }
 
-void CLighting::OnChangeRed2() 
+void CLighting::OnChangeRed2()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString ctext;
 	m_Red2.GetWindowText(ctext);
-	CString text=(char*)(LPCTSTR)ctext;
+	CString text = (char*)(LPCTSTR)ctext;
 	ini.SetString("Lighting", "IonRed", text);
 }
 
-void CLighting::OnChangeGreen2() 
+void CLighting::OnChangeGreen2()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString ctext;
 	m_Green2.GetWindowText(ctext);
-	CString text=(char*)(LPCTSTR)ctext;
+	CString text = (char*)(LPCTSTR)ctext;
 	ini.SetString("Lighting", "IonGreen", text);
 }
 
-void CLighting::OnChangeBlue2() 
+void CLighting::OnChangeBlue2()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString ctext;
 	m_Blue2.GetWindowText(ctext);
-	CString text=(char*)(LPCTSTR)ctext;
+	CString text = (char*)(LPCTSTR)ctext;
 	ini.SetString("Lighting", "IonBlue", text);
 }

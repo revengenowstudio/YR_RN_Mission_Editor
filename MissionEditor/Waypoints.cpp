@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // Waypoints.cpp: Implementierungsdatei
@@ -76,38 +76,37 @@ void CWaypoints::UpdateDialog()
 	m_Waypoints.SetRedraw(FALSE);
 
 	// first clear the list
-	while(m_Waypoints.DeleteString(0)!=LB_ERR);
+	while (m_Waypoints.DeleteString(0) != LB_ERR);
 
 	// okay add all trees
 
 	int i;
-	CIniFileSection& sec=ini.sections["Waypoints"];
-	
+	CIniFileSection& sec = ini.sections["Waypoints"];
+
 	char c[50];
-	for(i=0;i<sec.values.size();i++)
-	{
+	for (i = 0; i < sec.values.size(); i++) {
 		CString str;
-		str=sec.GetValueName(i)->data();
+		str = sec.GetValueName(i)->data();
 
-		
-		str+=", ";
-		str+=sec.GetValue(i)->data();
 
-		int x,y,z;
+		str += ", ";
+		str += sec.GetValue(i)->data();
+
+		int x, y, z;
 		GetXYPos((char*)sec.GetValue(i)->data(), &x, &y);
 
-		
-		itoa(x, c,10);
-		str+=", ";
-		str+=c;
-		itoa(y, c,10);
-		str+="/";
-		str+=c;
-		
-		z=GetPos(x, y, 0);
+
+		itoa(x, c, 10);
+		str += ", ";
+		str += c;
+		itoa(y, c, 10);
+		str += "/";
+		str += c;
+
+		z = GetPos(x, y, 0);
 		itoa(z, c, 10);
-		str+="/";
-		str+=c;
+		str += "/";
+		str += c;
 
 		/*int pos=atoi(str);
 
@@ -122,7 +121,7 @@ void CWaypoints::UpdateDialog()
 		itoa(y, c, 10);
 		str+=c;
 		str+=")";*/
-		
+
 		m_Waypoints.InsertString(-1, str);
 
 	}
@@ -131,69 +130,69 @@ void CWaypoints::UpdateDialog()
 
 }
 
-void CWaypoints::OnSelchangeWaypoints() 
+void CWaypoints::OnSelchangeWaypoints()
 {
-	int i=m_Waypoints.GetCurSel();
-	if(i==-1) return;
+	int i = m_Waypoints.GetCurSel();
+	if (i == -1) return;
 
 	CString str;
 	m_Waypoints.GetText(i, str);
 
-	str.SetAt(str.Find(",",0), 0);
+	str.SetAt(str.Find(",", 0), 0);
 
 	// ok str now specifies the waypoint id
 	m_Pos.SetWindowText(ini.sections["Waypoints"].values[(char*)(LPCTSTR)str].data());
 }
 
-void CWaypoints::OnKillfocusPos() 
+void CWaypoints::OnKillfocusPos()
 {
-	int i=m_Waypoints.GetCurSel();
-	if(i==-1) return;
+	int i = m_Waypoints.GetCurSel();
+	if (i == -1) return;
 
 	CString str;
 	m_Waypoints.GetText(i, str);
 
-	str.SetAt(str.Find(",",0), 0);
+	str.SetAt(str.Find(",", 0), 0);
 
 	// ok str now specifies the waypoint id
-	ini.sections["Waypoints"].values[(char*)(LPCTSTR)str]=GetText(&m_Pos);
+	ini.sections["Waypoints"].values[(char*)(LPCTSTR)str] = GetText(&m_Pos);
 
 	UpdateDialog();
 	m_Waypoints.SetCurSel(i);
 }
 
-void CWaypoints::OnKillFocus(CWnd* pNewWnd) 
+void CWaypoints::OnKillFocus(CWnd* pNewWnd)
 {
 	CPropertyPage::OnKillFocus(pNewWnd);
-	
-	
+
+
 }
 
-void CWaypoints::OnShowWindow(BOOL bShow, UINT nStatus) 
+void CWaypoints::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CPropertyPage::OnShowWindow(bShow, nStatus);
-	
-	OnKillfocusPos();	
+
+	OnKillfocusPos();
 }
 
-void CWaypoints::OnDelete() 
+void CWaypoints::OnDelete()
 {
-	int pos=m_Waypoints.GetCurSel();
-	if(pos==-1) return;
-	
+	int pos = m_Waypoints.GetCurSel();
+	if (pos == -1) return;
+
 	CString cuwayp;
 	//m_TreeList.GetText(pos, cutree);
-	cuwayp=ini.sections["Waypoints"].GetValueName(pos)->data();
+	cuwayp = ini.sections["Waypoints"].GetValueName(pos)->data();
 
-	ini.sections["Waypoints"].values.erase((string)(char*)(LPCTSTR) cuwayp);
+	ini.sections["Waypoints"].values.erase((string)(char*)(LPCTSTR)cuwayp);
 
 	m_Waypoints.SetRedraw(FALSE);
 	UpdateDialog();
 	m_Waypoints.SetCurSel(pos);
-	m_Waypoints.SetRedraw(TRUE);	
+	m_Waypoints.SetRedraw(TRUE);
 }
 
-BOOL CWaypoints::OnInitDialog() 
+BOOL CWaypoints::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	CBitmap m;
@@ -201,5 +200,5 @@ BOOL CWaypoints::OnInitDialog()
 	m_dbg.SetBitmap(m);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }

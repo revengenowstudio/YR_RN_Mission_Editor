@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -55,12 +55,12 @@ CTipDlg::CTipDlg(CWnd* pParent /*=NULL*/)
 
 	CIniFile optini;
 	CString iniFile;
-		
-	iniFile=AppPath;
+
+	iniFile = AppPath;
 #ifndef RA2_MODE
-	iniFile+="\\FinalSun.ini";
+	iniFile += "\\FinalSun.ini";
 #else
-	iniFile+="\\FinalAlert.ini";
+	iniFile += "\\FinalAlert.ini";
 #endif
 	optini.LoadFile(iniFile);
 
@@ -69,16 +69,15 @@ CTipDlg::CTipDlg(CWnd* pParent /*=NULL*/)
 	UINT iFilePos = optini.GetInteger(szSection, szIntFilePos);
 
 	// try top open the tips file
-	CString tipsfile=AppPath;
-	tipsfile+="\\tips.";
+	CString tipsfile = AppPath;
+	tipsfile += "\\tips.";
 	tipsfile += language.GetString(theApp.m_Options.LanguageName + "Header", "ExtensionName");
 
 	m_pStream = fopen(tipsfile, "r");
-	if (m_pStream == NULL) 
-	{
-		m_strTip=GetLanguageStringACP("CG_IDS_FILE_ABSENT");
+	if (m_pStream == NULL) {
+		m_strTip = GetLanguageStringACP("CG_IDS_FILE_ABSENT");
 		return;
-	} 
+	}
 
 	//now check if the tips file is changed! (check the date the tips file was created)
 	struct _stat buf;
@@ -93,7 +92,7 @@ CTipDlg::CTipDlg(CWnd* pParent /*=NULL*/)
 
 	if (fseek(m_pStream, iFilePos, SEEK_SET) != 0) {
 		AfxMessageBox(GetLanguageStringACP("CG_IDP_FILE_CORRUPT"));
-	} else  {
+	} else {
 		GetNextTipString(m_strTip);
 	}
 
@@ -102,17 +101,16 @@ CTipDlg::CTipDlg(CWnd* pParent /*=NULL*/)
 
 CTipDlg::~CTipDlg()
 {
-	if (m_pStream != NULL) 
-	{
+	if (m_pStream != NULL) {
 
 		CIniFile optini;
 		CString iniFile;
-		
-		iniFile=AppPath;
+
+		iniFile = AppPath;
 #ifndef RA2_MODE
-		iniFile+="\\FinalSun.ini";
+		iniFile += "\\FinalSun.ini";
 #else
-		iniFile+="\\FinalAlert.ini";
+		iniFile += "\\FinalAlert.ini";
 #endif
 		optini.LoadFile(iniFile);
 
@@ -121,7 +119,7 @@ CTipDlg::~CTipDlg()
 		fclose(m_pStream);
 	}
 }
-        
+
 void CTipDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
@@ -153,18 +151,13 @@ void CTipDlg::GetNextTipString(CString& strNext)
 	LPTSTR lpsz = strNext.GetBuffer(MAX_BUFLEN);
 
 	BOOL bStop = FALSE;
-	while (!bStop) 
-	{
-		if (_fgetts(lpsz, MAX_BUFLEN, m_pStream) == NULL) 
-		{
-			if (fseek(m_pStream, 0, SEEK_SET) != 0) 
+	while (!bStop) {
+		if (_fgetts(lpsz, MAX_BUFLEN, m_pStream) == NULL) {
+			if (fseek(m_pStream, 0, SEEK_SET) != 0)
 				AfxMessageBox(GetLanguageStringACP("CG_IDP_FILE_CORRUPT"));
-		} 
-		else 
-		{
-			if (*lpsz != ' ' && *lpsz != '\t' && 
-				*lpsz != '\n' && *lpsz != ';') 
-			{
+		} else {
+			if (*lpsz != ' ' && *lpsz != '\t' &&
+				*lpsz != '\n' && *lpsz != ';') {
 				bStop = TRUE;
 			}
 		}
@@ -183,16 +176,16 @@ HBRUSH CTipDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 void CTipDlg::OnOK()
 {
 	CDialog::OnOK();
-	
-    // actualize startup
+
+	// actualize startup
 	CIniFile optini;
 	CString iniFile;
-		
-	iniFile=AppPath;
+
+	iniFile = AppPath;
 #ifndef RA2_MODE
-	iniFile+="\\FinalSun.ini";
+	iniFile += "\\FinalSun.ini";
 #else
-	iniFile+="\\FinalAlert.ini";
+	iniFile += "\\FinalAlert.ini";
 #endif
 
 	optini.LoadFile(iniFile);
@@ -213,7 +206,7 @@ BOOL CTipDlg::OnInitDialog()
 	SetDlgItemText(IDOK, GetLanguageStringACP("TipDialogClose"));
 	SetWindowText(GetLanguageStringACP("TipDialogCaption"));
 
-	return TRUE;  
+	return TRUE;
 }
 
 void CTipDlg::OnPaint()
@@ -242,15 +235,15 @@ void CTipDlg::OnPaint()
 	dcTmp.CreateCompatibleDC(&dc);
 	dcTmp.SelectObject(&bmp);
 	rect.bottom = bmpInfo.bmHeight + rect.top;
-	dc.BitBlt(rect.left, rect.top, rect.Width(), rect.Height(), 
+	dc.BitBlt(rect.left, rect.top, rect.Width(), rect.Height(),
 		&dcTmp, 0, 0, SRCCOPY);
 
 	// draw "Did you know" in the correct language
 	CString strMessage;
-	strMessage=GetLanguageStringACP("CG_IDS_DIDYOUKNOW");
+	strMessage = GetLanguageStringACP("CG_IDS_DIDYOUKNOW");
 	rect.left += bmpInfo.bmWidth;
 	dc.DrawText(strMessage, rect, DT_VCENTER | DT_SINGLELINE);
 
-	
+
 }
 

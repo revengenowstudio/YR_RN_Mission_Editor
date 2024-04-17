@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // AiTriggerTypesEnable.cpp: Implementierungsdatei
@@ -75,17 +75,17 @@ END_MESSAGE_MAP()
 
 void CAiTriggerTypesEnable::UpdateDialog()
 {
-	int sel=m_AITriggerType.GetCurSel();
-	if(sel<0) sel=0;
+	int sel = m_AITriggerType.GetCurSel();
+	if (sel < 0) sel = 0;
 
-	while(m_AITriggerType.DeleteString(0)!=CB_ERR);
+	while (m_AITriggerType.DeleteString(0) != CB_ERR);
 
 	CIniFile& ini = Map->GetIniFile();
 
 	int i;
-	for(auto const[aitrigger, val] : ini["AITriggerTypesEnable"]) {
+	for (auto const [aitrigger, val] : ini["AITriggerTypesEnable"]) {
 		CString str = aitrigger;
-		str+=" (";
+		str += " (";
 		// parse from map definition first
 		auto const& aiDef = ini.GetString("AITriggerTypes", aitrigger);
 		if (!aiDef.IsEmpty()) {
@@ -103,22 +103,22 @@ void CAiTriggerTypesEnable::UpdateDialog()
 			}
 		}
 
-		str+=")";
+		str += ")";
 
 		m_AITriggerType.AddString(str);
 	}
 
-	if(m_AITriggerType.SetCurSel(sel)==CB_ERR)
+	if (m_AITriggerType.SetCurSel(sel) == CB_ERR)
 		m_AITriggerType.SetCurSel(0);
 
 	OnSelchangeAitriggertype();
-	
+
 }
 
-void CAiTriggerTypesEnable::OnEnableall() 
+void CAiTriggerTypesEnable::OnEnableall()
 {
 	// enable all standard ai triggers
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	int i;
 	for (auto const& [id, def] : ai["AITriggerTypes"]) {
 		ini.SetBool("AITriggerTypesEnable", id, true);
@@ -127,36 +127,36 @@ void CAiTriggerTypesEnable::OnEnableall()
 	UpdateDialog();
 }
 
-void CAiTriggerTypesEnable::OnSelchangeAitriggertype() 
+void CAiTriggerTypesEnable::OnSelchangeAitriggertype()
 {
-	int sel=m_AITriggerType.GetCurSel();
-	if(sel<0) return;
-		
+	int sel = m_AITriggerType.GetCurSel();
+	if (sel < 0) return;
+
 }
 
-void CAiTriggerTypesEnable::OnDelete() 
+void CAiTriggerTypesEnable::OnDelete()
 {
-	int sel=m_AITriggerType.GetCurSel();
+	int sel = m_AITriggerType.GetCurSel();
 	if (sel < 0) {
 		return;
 	}
 	CString aitrigger;
-	m_AITriggerType.GetLBText(sel,aitrigger);
+	m_AITriggerType.GetLBText(sel, aitrigger);
 	if (aitrigger.Find(" ") >= 0) {
 		aitrigger.SetAt(aitrigger.Find(" "), 0);
 	}
-	
-	CIniFile& ini=Map->GetIniFile();
+
+	CIniFile& ini = Map->GetIniFile();
 
 	ini.RemoveValueByKey("AITriggerTypesEnable", aitrigger);
 	UpdateDialog();
 }
 
-void CAiTriggerTypesEnable::OnAdd() 
+void CAiTriggerTypesEnable::OnAdd()
 {
 	//CString newTriggerId=InputBox("Please enter the ID of the AITriggerType (for a list of all AITriggerType-IDs use the All-Section)","Enable AITriggerType");
 	CAITriggerAddDlg dlg;
-	if(dlg.DoModal()==IDCANCEL) return;
+	if (dlg.DoModal() == IDCANCEL) return;
 
 	CString newTriggerId = dlg.m_AITrigger;
 	TruncSpace(newTriggerId);
@@ -164,7 +164,7 @@ void CAiTriggerTypesEnable::OnAdd()
 		return;
 	}
 
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	ini.SetBool("AITriggerTypesEnable", newTriggerId, true);
 	UpdateDialog();

@@ -126,11 +126,10 @@ void CTerrainDlg::Update()
 
 	while (TileSet->DeleteString(0) != CB_ERR);
 
-	if (tiles)
-	{
+	if (tiles) {
 		int i;
 		int tilecount = 0;
-		for (i = 0;i < 10000;i++) {
+		for (i = 0; i < 10000; i++) {
 			CString tset;
 			char c[50];
 			itoa(i, c, 10);
@@ -232,8 +231,7 @@ DWORD CTerrainDlg::GetTileID(DWORD dwTileSet, int iTile)
 {
 	int i, e;
 	DWORD tilecount = 0;
-	for (i = 0; i < 10000; i++)
-	{
+	for (i = 0; i < 10000; i++) {
 		CString tset;
 		char c[50];
 		itoa(i, c, 10);

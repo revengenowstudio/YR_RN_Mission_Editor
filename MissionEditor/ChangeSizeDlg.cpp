@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // ChangeSizeDlg.cpp: Implementierungsdatei
@@ -45,8 +45,8 @@ CChangeSizeDlg::CChangeSizeDlg(CWnd* pParent /*=NULL*/)
 	m_Top = 0;
 	m_Width = 0;
 	//}}AFX_DATA_INIT
-	m_Width=Map->GetWidth();
-	m_Height=Map->GetHeight();
+	m_Width = Map->GetWidth();
+	m_Height = Map->GetHeight();
 }
 
 
@@ -74,20 +74,18 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CChangeSizeDlg 
 
-void CChangeSizeDlg::OnChangeWidth() 
-{	
-	if(UpdateData(TRUE))
-	{
-		m_Left=(m_Width-Map->GetWidth())/2;
+void CChangeSizeDlg::OnChangeWidth()
+{
+	if (UpdateData(TRUE)) {
+		m_Left = (m_Width - Map->GetWidth()) / 2;
 		UpdateData(FALSE);
 	}
 }
 
-void CChangeSizeDlg::OnChangeHeight() 
+void CChangeSizeDlg::OnChangeHeight()
 {
-	if(UpdateData(TRUE))
-	{
-		m_Top=(m_Height-Map->GetHeight())/2;
+	if (UpdateData(TRUE)) {
+		m_Top = (m_Height - Map->GetHeight()) / 2;
 		UpdateData(FALSE);
-	}		
+	}
 }

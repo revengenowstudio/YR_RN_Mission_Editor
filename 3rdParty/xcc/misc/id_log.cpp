@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -36,8 +36,7 @@ t_id_list td_list, ra_list, ts_list, dune2_list, ra2_list;
 
 static t_id_list& get_list(t_game game)
 {
-	switch (game)
-	{
+	switch (game) {
 	case game_ra:
 		return ra_list;
 	case game_ts:
@@ -56,8 +55,7 @@ static void read_list(t_game game, const char*& s)
 	int count = *reinterpret_cast<const int*>(s);
 	s += 4;
 	t_idinfo idinfo;
-	while (count--)
-	{
+	while (count--) {
 		idinfo.name = s;
 		s += idinfo.name.length() + 1;
 		idinfo.description = s;
@@ -78,8 +76,7 @@ int mix_database::load()
 	read_list(game_ra, data);
 	read_list(game_ts, data);
 	read_list(game_ra2, data);
-	if (0)
-	{
+	if (0) {
 		ofstream log_f("c:\\log.txt");
 		for (auto& i : ts_list)
 			log_f << i.second.name << '\t' << i.second.description << endl;
@@ -89,21 +86,16 @@ int mix_database::load()
 	const char char1[] = "bgjm";
 	const char char2[] = "ew";
 	const char char3[] = "abc";
-	for (int i = 0; i < 2; i++)
-	{
+	for (int i = 0; i < 2; i++) {
 		if (i)
 			strcpy(name + 8, "ini");
-		for (int j = 0; j < 4; j++)
-		{
+		for (int j = 0; j < 4; j++) {
 			name[2] = char1[j];
-			for (int k = 0; k < 100; k++)
-			{
+			for (int k = 0; k < 100; k++) {
 				memcpy(name + 3, nwzl(2, k).c_str(), 2);
-				for (int l = 0; l < 2; l++)
-				{
+				for (int l = 0; l < 2; l++) {
 					name[5] = char2[l];
-					for (int m = 0; m < 3; m++)
-					{
+					for (int m = 0; m < 3; m++) {
 						name[6] = char3[m];
 						mix_database::add_name(game_td, name, "");
 						mix_database::add_name(game_ra, name, "");

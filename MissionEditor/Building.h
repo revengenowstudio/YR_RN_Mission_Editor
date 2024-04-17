@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #if !defined(AFX_BUILDING_H__44A11CC0_84B6_11D3_B63B_F881F458F743__INCLUDED_)
@@ -32,12 +32,12 @@
 
 class CBuilding : public CDialog
 {
-// Konstruktion
+	// Konstruktion
 public:
 	void UpdateStrings();
 	CString m_type;
 	CString m_strength;
-	void Init(CString house="", CString strength="256", CString direction="0", CString tag="None", CString flag1="0", CString flag2="0", CString energy="1", CString upgradecount="0", CString spotlight="0", CString upgrade1="None", CString upgrade2="None", CString upgrade3="None", CString flag3="0", CString flag4="0");
+	void Init(CString house = "", CString strength = "256", CString direction = "0", CString tag = "None", CString flag1 = "0", CString flag2 = "0", CString energy = "1", CString upgradecount = "0", CString spotlight = "0", CString upgrade1 = "None", CString upgrade2 = "None", CString upgrade3 = "None", CString flag3 = "0", CString flag4 = "0");
 	CBuilding(CWnd* pParent = NULL);   // Standardkonstruktor
 
 // Dialogfelddaten
@@ -63,7 +63,7 @@ public:
 // Überschreibungen
 	// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
 	//{{AFX_VIRTUAL(CBuilding)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
 	//}}AFX_VIRTUAL
 

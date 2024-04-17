@@ -22,7 +22,7 @@
 
 #include <cinttypes>
 
-enum class LineStyle: int
+enum class LineStyle : int
 {
 	Standard,
 	Dotted_2,

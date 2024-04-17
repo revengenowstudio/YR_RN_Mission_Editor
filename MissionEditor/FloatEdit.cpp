@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 //
@@ -59,44 +59,42 @@ END_MESSAGE_MAP()
 
 
 
-void CFloatEdit::OnKillfocus() 
+void CFloatEdit::OnKillfocus()
 {
 
 	// okay, we need to convert it to a float
 	CString text, originaltext;
 	GetWindowText(text);
-	originaltext=text;
+	originaltext = text;
 
-	if(strlen(text)<1)
-	{
+	if (strlen(text) < 1) {
 		//SetWindowText("0.000000");
 		return;
 	}
-	
-	double res=atof(text);
-	int c,d;
-	char* j=_fcvt(res, 6, &c, &d);
-	
-	int i, slen=strlen(j);
+
+	double res = atof(text);
+	int c, d;
+	char* j = _fcvt(res, 6, &c, &d);
+
+	int i, slen = strlen(j);
 	char j2[50];
 
-	for(i=0;i<6-slen;i++)
-	{
-		strcpy(j2, j+i);
-		j[i]=0;
+	for (i = 0; i < 6 - slen; i++) {
+		strcpy(j2, j + i);
+		j[i] = 0;
 		strcat(j, "0");
-		strcat(j,j2);
+		strcat(j, j2);
 	}
 
-	if(j==NULL) return;
+	if (j == NULL) return;
 	//MessageBox(j,text);
-	text=j;
+	text = j;
 	text.Insert(c, ".");
-	
+
 	//MessageBox(text);
-	if(strchr(text, '.')==text) text.Insert(0, "0");
+	if (strchr(text, '.') == text) text.Insert(0, "0");
 	//delete[](j);	
-	if(originaltext==text) return;
+	if (originaltext == text) return;
 	SetWindowText(text);
 
 }

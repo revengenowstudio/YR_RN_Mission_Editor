@@ -30,7 +30,7 @@ static int ModLookup[] = {
 	4
 };
 
-LineDrawer::LineDrawer(void* dest, int bytes_per_pixel, int width, int height, int pitch):
+LineDrawer::LineDrawer(void* dest, int bytes_per_pixel, int width, int height, int pitch) :
 	m_dest(dest),
 	m_bytes_per_pixel(bytes_per_pixel),
 	m_width(width),
@@ -60,8 +60,7 @@ void LineDrawer::DrawLine(int from_x, int from_y, int to_x, int to_y, int color,
 	m_last_y = to_y;
 	if (abs(w) >= abs(h)) {
 		return w >= 0 ? DrawLineImplX(from_x, from_y, to_x, to_y, color, style) : DrawLineImplX(to_x, to_y, from_x, from_y, color, style);
-	}
-	else {
+	} else {
 		return h >= 0 ? DrawLineImplY(from_x, from_y, to_x, to_y, color, style) : DrawLineImplY(to_x, to_y, from_x, from_y, color, style);
 	}
 }
@@ -83,12 +82,12 @@ void LineDrawer::SetPixel(char* const dest, const int cur_x, const int cur_y, co
 
 void LineDrawer::DrawLineImplX(const int from_x, const int from_y, const int to_x, const int to_y, const int color, const LineStyle style)
 {
-    // X major line drawing
+	// X major line drawing
 
-	assert (from_x <= to_x);
+	assert(from_x <= to_x);
 	const int w = to_x - from_x;
 	const int h = abs(to_y - from_y);
-	assert (w >= h);
+	assert(w >= h);
 	const int increment_e = 2 * h;
 	const int increment_ne = 2 * (h - w);
 	const int y_inc = (to_y - from_y) < 0 ? -1 : 1;
@@ -100,12 +99,10 @@ void LineDrawer::DrawLineImplX(const int from_x, const int from_y, const int to_
 	char* dest = reinterpret_cast<char*>(m_dest);
 	SetPixel(dest, cur_x, cur_y, color);
 
-	for(; cur_x < to_x; ++cur_x)
-	{
+	for (; cur_x < to_x; ++cur_x) {
 		if (d < 0) {
 			d += increment_e;
-		}
-		else {
+		} else {
 			d += increment_ne;
 			cur_y += y_inc;
 		}
@@ -133,12 +130,10 @@ void LineDrawer::DrawLineImplY(const int from_x, const int from_y, const int to_
 	char* dest = reinterpret_cast<char*>(m_dest);
 	SetPixel(dest, cur_x, cur_y, color);
 
-	for (; cur_y < to_y; ++cur_y)
-	{
+	for (; cur_y < to_y; ++cur_y) {
 		if (d < 0) {
 			d += increment_e;
-		}
-		else {
+		} else {
 			d += increment_ne;
 			cur_x += x_inc;
 		}

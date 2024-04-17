@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2001  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2001  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -23,14 +23,11 @@
 
 Cvirtual_binary_source::Cvirtual_binary_source(const void* d, size_t cb_d, const std::shared_ptr<const void>& source)
 {
-	if (source)
-	{
+	if (source) {
 		m_data = const_cast<byte*>(reinterpret_cast<const byte*>(d));
 		m_size = cb_d;
 		m_source = source;
-	}
-	else
-	{
+	} else {
 		m_data = new byte[cb_d];
 		m_size = cb_d;
 		if (d)
@@ -62,7 +59,7 @@ Cvirtual_binary_source* Cvirtual_binary_source::pre_edit()
 	Cvirtual_binary_source* t = new Cvirtual_binary_source(m_data, m_size, NULL);
 	detach();
 	return t;
-}	
+}
 
 Cvirtual_binary::Cvirtual_binary()
 {
@@ -102,8 +99,7 @@ Cvirtual_binary::~Cvirtual_binary()
 
 const Cvirtual_binary& Cvirtual_binary::operator=(const Cvirtual_binary& v)
 {
-	if (this != &v)
-	{
+	if (this != &v) {
 		m_source->detach();
 		m_source = v.m_source->attach();
 	}
@@ -119,11 +115,10 @@ int Cvirtual_binary::load(const string& fname, bool use_mm)
 {
 	if (use_mm)
 		*this = file32_read(fname);
-	else
-  {
-    Cvirtual_binary d = file32_read(fname);
-    *this = Cvirtual_binary(d.data(), d.size());
-  }
+	else {
+		Cvirtual_binary d = file32_read(fname);
+		*this = Cvirtual_binary(d.data(), d.size());
+	}
 	return !data();
 }
 

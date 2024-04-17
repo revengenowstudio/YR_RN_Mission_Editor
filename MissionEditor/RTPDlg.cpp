@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // RTPDlg.cpp: Implementierungsdatei
@@ -72,47 +72,47 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CRTPDlg 
 
-BOOL CRTPDlg::OnInitDialog() 
+BOOL CRTPDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
 	for (auto const& [seq, unitname] : rules["TerrainTypes"]) {
-		CString addedString=unitname;
+		CString addedString = unitname;
 
 		if (g_data["IgnoreRA2"].HasValue(unitname)) {
 			continue;
 		}
-		addedString=TranslateStringACP(addedString);
-			
+		addedString = TranslateStringACP(addedString);
+
 		if (unitname.Find("TREE") >= 0) {
-			if(unitname.GetLength()>0 && unitname!="VEINTREE") // out with it :-)
+			if (unitname.GetLength() > 0 && unitname != "VEINTREE") // out with it :-)
 			{
 				auto const& theaterType = Map->GetTheater();
 				int TreeMin = g_data.GetInteger(theaterType + "Limits", "TreeMin");
 				int TreeMax = g_data.GetInteger(theaterType + "Limits", "TreeMax");
-				
-				CString id=unitname;
-				id.Delete(0, 4);
-				int n=atoi(id);
 
-				
+				CString id = unitname;
+				id.Delete(0, 4);
+				int n = atoi(id);
+
+
 				if (n<TreeMin || n>TreeMax) {
 					continue;
 				}
 
-				m_Available.AddString(unitname);			
+				m_Available.AddString(unitname);
 			}
 		}
 	}
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }
 
-void CRTPDlg::OnAdd() 
+void CRTPDlg::OnAdd()
 {
-	int sel=m_Available.GetCurSel();
-	if(sel<0) return;
+	int sel = m_Available.GetCurSel();
+	if (sel < 0) return;
 
 	CString currentname;
 	m_Available.GetText(sel, currentname);
@@ -121,10 +121,10 @@ void CRTPDlg::OnAdd()
 	m_Used.AddString(currentname);
 }
 
-void CRTPDlg::OnRemove() 
+void CRTPDlg::OnRemove()
 {
-	int sel=m_Used.GetCurSel();
-	if(sel<0) return;
+	int sel = m_Used.GetCurSel();
+	if (sel < 0) return;
 
 	CString currentname;
 	m_Used.GetText(sel, currentname);
@@ -133,10 +133,9 @@ void CRTPDlg::OnRemove()
 	m_Available.AddString(currentname);
 }
 
-void CRTPDlg::OnOK() 
+void CRTPDlg::OnOK()
 {
-	if(m_Used.GetCount()<=0)
-	{
+	if (m_Used.GetCount() <= 0) {
 		//AfxMessageBox("Please select at least one tree","Error", MB_OK);
 		return;
 	}
@@ -144,38 +143,36 @@ void CRTPDlg::OnOK()
 	rndterrainsrc.clear();
 
 	int i;
-	for(i=0;i<m_Used.GetCount();i++)
-	{
+	for (i = 0; i < m_Used.GetCount(); i++) {
 		CString str;
 		m_Used.GetText(i, str);
 		rndterrainsrc.push_back(str);
 	}
-	
+
 	CDialog::OnOK();
 }
 
-void CRTPDlg::OnSelchangeAvail() 
+void CRTPDlg::OnSelchangeAvail()
 {
-	int sel=m_Available.GetCurSel();
+	int sel = m_Available.GetCurSel();
 
-	if(sel<0)
-	{
-		m_LastSelected="";
+	if (sel < 0) {
+		m_LastSelected = "";
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		return;
 	}
 
 	CString s;
 	m_Available.GetText(sel, s);
-	m_LastSelected=s;
+	m_LastSelected = s;
 	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	
+
 }
 
-void CRTPDlg::OnDblclkAvail() 
+void CRTPDlg::OnDblclkAvail()
 {
-	int sel=m_Available.GetCurSel();
-	if(sel<0) return;
+	int sel = m_Available.GetCurSel();
+	if (sel < 0) return;
 
 	CString currentname;
 	m_Available.GetText(sel, currentname);
@@ -184,28 +181,27 @@ void CRTPDlg::OnDblclkAvail()
 	m_Used.AddString(currentname);
 }
 
-void CRTPDlg::OnSelchangeUsed() 
+void CRTPDlg::OnSelchangeUsed()
 {
-	int sel=m_Used.GetCurSel();
+	int sel = m_Used.GetCurSel();
 
-	if(sel<0)
-	{
-		m_LastSelected="";
+	if (sel < 0) {
+		m_LastSelected = "";
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		return;
 	}
 
 	CString s;
 	m_Used.GetText(sel, s);
-	m_LastSelected=s;
+	m_LastSelected = s;
 	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	
+
 }
 
-void CRTPDlg::OnDblclkUsed() 
+void CRTPDlg::OnDblclkUsed()
 {
-	int sel=m_Used.GetCurSel();
-	if(sel<0) return;
+	int sel = m_Used.GetCurSel();
+	if (sel < 0) return;
 
 	CString currentname;
 	m_Used.GetText(sel, currentname);
@@ -214,75 +210,68 @@ void CRTPDlg::OnDblclkUsed()
 	m_Available.AddString(currentname);
 }
 
-void CRTPDlg::OnPaint() 
+void CRTPDlg::OnPaint()
 {
-	
-	if(m_LastSelected=="") return;
+
+	if (m_LastSelected == "") return;
 
 	CPaintDC dc(this); // device context for painting
-	
-	int id=Map->GetUnitTypeID(m_LastSelected);
-	
-	PICDATA* p=&treeinfo[id].pic; //ovrlpics[m_currentOverlay][i];
-			
 
-	if(p->pic==NULL)
-	{
+	int id = Map->GetUnitTypeID(m_LastSelected);
+
+	PICDATA* p = &treeinfo[id].pic; //ovrlpics[m_currentOverlay][i];
+
+
+	if (p->pic == NULL) {
 		CString type;
-		type=m_LastSelected;
+		type = m_LastSelected;
 
-		if(missingimages.find(type)==missingimages.end())
-		{			
+		if (missingimages.find(type) == missingimages.end()) {
 			theApp.m_loading->LoadUnitGraphic(type);
 			Map->UpdateTreeInfo(&type);
-			p=&treeinfo[id].pic;
+			p = &treeinfo[id].pic;
 		}
-		if(p->pic==NULL)
-		{
-		  missingimages[type]=TRUE;
+		if (p->pic == NULL) {
+			missingimages[type] = TRUE;
 		}
 	}
 
-	int curwidth=p->wMaxWidth;
-	int curheight=p->wMaxHeight;
+	int curwidth = p->wMaxWidth;
+	int curheight = p->wMaxHeight;
 
 	BITMAPINFO biinfo;
 	memset(&biinfo, 0, sizeof(BITMAPINFO));
-	biinfo.bmiHeader.biBitCount=24;
-	biinfo.bmiHeader.biWidth=curwidth;
-	biinfo.bmiHeader.biHeight=curheight;
-	biinfo.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);
-	biinfo.bmiHeader.biClrUsed=0;
-	biinfo.bmiHeader.biPlanes=1;
-	biinfo.bmiHeader.biCompression=BI_RGB;
-	biinfo.bmiHeader.biClrImportant=0;
+	biinfo.bmiHeader.biBitCount = 24;
+	biinfo.bmiHeader.biWidth = curwidth;
+	biinfo.bmiHeader.biHeight = curheight;
+	biinfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	biinfo.bmiHeader.biClrUsed = 0;
+	biinfo.bmiHeader.biPlanes = 1;
+	biinfo.bmiHeader.biCompression = BI_RGB;
+	biinfo.bmiHeader.biClrImportant = 0;
 
 
-	int pitch=curwidth*3;
-	if(pitch==0) return;
+	int pitch = curwidth * 3;
+	if (pitch == 0) return;
 
-	if(pitch%sizeof(DWORD))
-	{
-		pitch+=sizeof(DWORD)-(curwidth*3)%sizeof(DWORD);
+	if (pitch % sizeof(DWORD)) {
+		pitch += sizeof(DWORD) - (curwidth * 3) % sizeof(DWORD);
 	}
 
-	BYTE* colors=new(BYTE[pitch*curheight]);
-	memset(colors, 255, pitch*(curheight));
+	BYTE* colors = new(BYTE[pitch * curheight]);
+	memset(colors, 255, pitch * (curheight));
 
-	RGBTRIPLE* pal=palIso;
+	RGBTRIPLE* pal = palIso;
 #ifdef NOSURFACES
-	if(p->pal==iPalTheater) pal=palTheater;
-	if(p->pal==iPalUnit) pal=palUnit;
+	if (p->pal == iPalTheater) pal = palTheater;
+	if (p->pal == iPalUnit) pal = palUnit;
 #endif
 
-	int k,l;
-	for(k=0;k<curheight;k++)
-	{
-		for(l=0;l<curwidth;l++)
-		{
-			if(((BYTE*)p->pic)[l+k*curwidth])
-			{
-				memcpy(&colors[l*3+(curheight-k-1)*pitch], &pal[((BYTE*)p->pic)[l+k*curwidth]], 3);
+	int k, l;
+	for (k = 0; k < curheight; k++) {
+		for (l = 0; l < curwidth; l++) {
+			if (((BYTE*)p->pic)[l + k * curwidth]) {
+				memcpy(&colors[l * 3 + (curheight - k - 1) * pitch], &pal[((BYTE*)p->pic)[l + k * curwidth]], 3);
 			}
 		}
 	}
@@ -298,14 +287,14 @@ void CRTPDlg::OnPaint()
 
 	CBrush f;
 	f.Attach(GetStockObject(WHITE_BRUSH));
-	dc.FillRect(&pr,&f);
+	dc.FillRect(&pr, &f);
 	f.Detach();
 
 	auto clientDC = m_Preview.GetWindowDC();
-	StretchDIBits(clientDC->GetSafeHdc(), 20, 30,curwidth, curheight,
+	StretchDIBits(clientDC->GetSafeHdc(), 20, 30, curwidth, curheight,
 		0, 0, curwidth, curheight, colors, &biinfo, DIB_RGB_COLORS, SRCCOPY);
 
 	delete[] colors;
-	
+
 	// Kein Aufruf von CDialog::OnPaint() für Zeichnungsnachrichten
 }

@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // MapD.cpp: Implementierungsdatei
@@ -80,7 +80,7 @@ END_MESSAGE_MAP()
 
 void CMapD::UpdateDialog()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	m_LocalSize.SetWindowText(ini.GetString("Map", "LocalSize"));
 	//m_Size.SetWindowText( ini.sections["Map"].values["Size"] );
@@ -88,9 +88,9 @@ void CMapD::UpdateDialog()
 
 	char c[50];
 	itoa(Map->GetWidth(), c, 10);
-	m_Width=c;
+	m_Width = c;
 	itoa(Map->GetHeight(), c, 10);
-	m_Height=c;
+	m_Height = c;
 
 	CDialog::UpdateData(FALSE);
 }
@@ -100,14 +100,14 @@ void CMapD::UpdateData()
 	//MessageBox("This function ( UpdateData() ) should not be called, please contact the author.");
 }
 
-void CMapD::OnChangeUsesize() 
+void CMapD::OnChangeUsesize()
 {
-	
+
 }
 
-void CMapD::OnEditchangeTheater() 
+void CMapD::OnEditchangeTheater()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Map", "Theater", GetText(&m_Theater));
 }
 
@@ -122,16 +122,16 @@ void CMapD::UpdateStrings()
 	GetDlgItem(IDC_LTHEATER)->SetWindowText(GetLanguageStringACP("MapTheater"));
 }
 
-void CMapD::OnChangelocal() 
+void CMapD::OnChangelocal()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	ini.SetString("Map", "LocalSize", GetText(&m_LocalSize));
-	
+
 	Map->CalcMapRect();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
-void CMapD::OnChange() 
+void CMapD::OnChange()
 {
 	/*
 	CDialog::UpdateData(TRUE);
@@ -145,10 +145,9 @@ void CMapD::OnChange()
 	*/
 
 	CChangeSizeDlg dlg;
-	if(dlg.DoModal()==IDCANCEL) return;
+	if (dlg.DoModal() == IDCANCEL) return;
 
-	if(dlg.m_Width<16 || dlg.m_Width>400 || dlg.m_Height<16 || dlg.m_Height>400 || (dlg.m_Width + dlg.m_Height) > 512)
-	{
+	if (dlg.m_Width < 16 || dlg.m_Width>400 || dlg.m_Height < 16 || dlg.m_Height>400 || (dlg.m_Width + dlg.m_Height) > 512) {
 		MessageBox("Width and Height must both be between 16 and 400 and both added must be less than 512.", "Error");
 		return;
 	}
@@ -161,9 +160,9 @@ void CMapD::OnChange()
 
 	char c[50];
 	itoa(dlg.m_Width, c, 10);
-	
-	m_Width=c;
+
+	m_Width = c;
 	itoa(dlg.m_Height, c, 10);
-	m_Height=c;
+	m_Height = c;
 	CDialog::UpdateData(FALSE);
 }

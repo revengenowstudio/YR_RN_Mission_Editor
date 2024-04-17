@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // NewMapSpDlg.cpp: Implementierungsdatei
@@ -68,37 +68,37 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CNewMapSpDlg 
 
-void CNewMapSpDlg::OnPreparehouses() 
+void CNewMapSpDlg::OnPreparehouses()
 {
 	UpdateData(TRUE);
-	BOOL bEnable=m_PrepareHouses;
+	BOOL bEnable = m_PrepareHouses;
 
 	GetDlgItem(IDC_AUTOPROD)->EnableWindow(bEnable);
 	GetDlgItem(IDC_HOUSE)->EnableWindow(bEnable);
-	
+
 }
 
-BOOL CNewMapSpDlg::OnInitDialog() 
+BOOL CNewMapSpDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
-	CComboBox& house=*((CComboBox*)(GetDlgItem(IDC_HOUSE)));
+
+	CComboBox& house = *((CComboBox*)(GetDlgItem(IDC_HOUSE)));
 	int i;
 	for (auto const& [seq, id] : rules[HOUSES]) {
 		house.AddString(TranslateHouse(id, TRUE));
 	}
 
-	m_PrepareHouses=TRUE;
-	m_AutoProd=TRUE;
-	m_House=0;
+	m_PrepareHouses = TRUE;
+	m_AutoProd = TRUE;
+	m_House = 0;
 	UpdateData(FALSE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }
 
-void CNewMapSpDlg::OnOK() 
-{	
+void CNewMapSpDlg::OnOK()
+{
 	CDialog::OnOK();
 	//m_House=TranslateHouse(m_House);
 }

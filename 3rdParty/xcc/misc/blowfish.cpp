@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -21,7 +21,7 @@
 
 #include <memory.h>
 
-const Cblowfish::t_bf_p g_p = 
+const Cblowfish::t_bf_p g_p =
 {
 	0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344,
 	0xa4093822, 0x299f31d0, 0x082efa98, 0xec4e6c89,
@@ -30,7 +30,7 @@ const Cblowfish::t_bf_p g_p =
 	0x9216d5d9, 0x8979fb1b,
 };
 
-const Cblowfish::t_bf_s g_s = 
+const Cblowfish::t_bf_s g_s =
 {
 	0xd1310ba6, 0x98dfb5ac, 0x2ffd72db, 0xd01adfb7,
 	0xb8e1afed, 0x6a267e96, 0xba7c9045, 0xf12c7f99,
@@ -296,8 +296,7 @@ void Cblowfish::set_key(data_ref key)
 	memcpy(m_s, g_s, sizeof(t_bf_s));
 
 	int j = 0;
-	for (int i = 0; i < 18; i++)
-	{
+	for (int i = 0; i < 18; i++) {
 		int a = key[j++]; j %= key.size();
 		int b = key[j++]; j %= key.size();
 		int c = key[j++]; j %= key.size();
@@ -308,18 +307,15 @@ void Cblowfish::set_key(data_ref key)
 	uint32_t datal = 0;
 	uint32_t datar = 0;
 
-	for (int i = 0; i < 18; )
-	{
+	for (int i = 0; i < 18; ) {
 		encipher(datal, datar);
 
 		m_p[i++] = datal;
 		m_p[i++] = datar;
 	}
 
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 256; )
-		{
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 256; ) {
 			encipher(datal, datar);
 
 			m_s[i][j++] = datal;
@@ -349,14 +345,14 @@ void Cblowfish::encipher(uint32_t& xl, uint32_t& xr) const
 	uint32_t Xr = xr;
 
 	Xl ^= m_p[0];
-	ROUND (Xr, Xl, 1);  ROUND (Xl, Xr, 2);
-	ROUND (Xr, Xl, 3);  ROUND (Xl, Xr, 4);
-	ROUND (Xr, Xl, 5);  ROUND (Xl, Xr, 6);
-	ROUND (Xr, Xl, 7);  ROUND (Xl, Xr, 8);
-	ROUND (Xr, Xl, 9);  ROUND (Xl, Xr, 10);
-	ROUND (Xr, Xl, 11); ROUND (Xl, Xr, 12);
-	ROUND (Xr, Xl, 13); ROUND (Xl, Xr, 14);
-	ROUND (Xr, Xl, 15); ROUND (Xl, Xr, 16);
+	ROUND(Xr, Xl, 1);  ROUND(Xl, Xr, 2);
+	ROUND(Xr, Xl, 3);  ROUND(Xl, Xr, 4);
+	ROUND(Xr, Xl, 5);  ROUND(Xl, Xr, 6);
+	ROUND(Xr, Xl, 7);  ROUND(Xl, Xr, 8);
+	ROUND(Xr, Xl, 9);  ROUND(Xl, Xr, 10);
+	ROUND(Xr, Xl, 11); ROUND(Xl, Xr, 12);
+	ROUND(Xr, Xl, 13); ROUND(Xl, Xr, 14);
+	ROUND(Xr, Xl, 15); ROUND(Xl, Xr, 16);
 	Xr ^= m_p[17];
 
 	xr = Xl;
@@ -369,14 +365,14 @@ void Cblowfish::decipher(uint32_t& xl, uint32_t& xr) const
 	uint32_t  Xr = xr;
 
 	Xl ^= m_p[17];
-	ROUND (Xr, Xl, 16);  ROUND (Xl, Xr, 15);
-	ROUND (Xr, Xl, 14);  ROUND (Xl, Xr, 13);
-	ROUND (Xr, Xl, 12);  ROUND (Xl, Xr, 11);
-	ROUND (Xr, Xl, 10);  ROUND (Xl, Xr, 9);
-	ROUND (Xr, Xl, 8);   ROUND (Xl, Xr, 7);
-	ROUND (Xr, Xl, 6);   ROUND (Xl, Xr, 5);
-	ROUND (Xr, Xl, 4);   ROUND (Xl, Xr, 3);
-	ROUND (Xr, Xl, 2);   ROUND (Xl, Xr, 1);
+	ROUND(Xr, Xl, 16);  ROUND(Xl, Xr, 15);
+	ROUND(Xr, Xl, 14);  ROUND(Xl, Xr, 13);
+	ROUND(Xr, Xl, 12);  ROUND(Xl, Xr, 11);
+	ROUND(Xr, Xl, 10);  ROUND(Xl, Xr, 9);
+	ROUND(Xr, Xl, 8);   ROUND(Xl, Xr, 7);
+	ROUND(Xr, Xl, 6);   ROUND(Xl, Xr, 5);
+	ROUND(Xr, Xl, 4);   ROUND(Xl, Xr, 3);
+	ROUND(Xr, Xl, 2);   ROUND(Xl, Xr, 1);
 	Xr ^= m_p[0];
 
 	xl = Xr;
@@ -395,8 +391,7 @@ void Cblowfish::encipher(const void* s, void* d, int size) const
 	const uint32_t* r = reinterpret_cast<const uint32_t*>(s);
 	uint32_t* w = reinterpret_cast<uint32_t*>(d);
 	size >>= 3;
-	while (size--)
-	{
+	while (size--) {
 		uint32_t a = reverse(*r++);
 		uint32_t b = reverse(*r++);
 		encipher(a, b);
@@ -410,8 +405,7 @@ void Cblowfish::decipher(const void* s, void* d, int size) const
 	const uint32_t* r = reinterpret_cast<const uint32_t*>(s);
 	uint32_t* w = reinterpret_cast<uint32_t*>(d);
 	size >>= 3;
-	while (size--)
-	{
+	while (size--) {
 		uint32_t a = reverse(*r++);
 		uint32_t b = reverse(*r++);
 		decipher(a, b);

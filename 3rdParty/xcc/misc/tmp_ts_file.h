@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #pragma once
@@ -35,16 +35,14 @@ public:
 	{
 		const t_tmp_ts_header& h = header();
 		auto const size = get_size();
-		if (sizeof(t_tmp_ts_header) > size || 
+		if (sizeof(t_tmp_ts_header) > size ||
 			!h.cblocks_x || !h.cblocks_y ||
 			h.cx != 48 && h.cx != 60 ||
 			2 * h.cy != h.cx ||
 			sizeof(t_tmp_ts_header) + 4 * get_c_tiles() > size)
 			return false;
-		for (int i = 0; i < min(get_c_tiles(), 64); i++)
-		{
-			if (get_index()[i])
-			{
+		for (int i = 0; i < min(get_c_tiles(), 64); i++) {
+			if (get_index()[i]) {
 				const t_tmp_image_header& image_header = *get_image_header(i);
 			}
 		}
@@ -114,14 +112,12 @@ public:
 	{
 		return get_image_header(i)->x_extra;
 	}
-	
+
 	int get_height() const
 	{
 		int height = 0;
-		for (int i = 0; i < get_c_tiles(); i++)
-		{
-			if (get_index()[i])
-			{
+		for (int i = 0; i < get_c_tiles(); i++) {
+			if (get_index()[i]) {
 				if (get_height(i) > height)
 					height = get_height(i);
 			}
@@ -188,7 +184,7 @@ public:
 		assert(a == b);
 		return data() + get_index()[i] + get_image_header(i)->z_ofs;
 	}
-	
+
 	const byte* get_extra_data(int i) const
 	{
 		return data() + get_index()[i] + get_image_header(i)->extra_ofs;

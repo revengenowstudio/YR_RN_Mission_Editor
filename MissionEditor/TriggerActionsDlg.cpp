@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // TriggerActionsDlg.cpp: Implementierungsdatei
@@ -41,9 +41,9 @@ static char THIS_FILE[] = __FILE__;
 
 BOOL IsWaypointFormat(CString s)
 {
-	if(s.GetLength()==0) return TRUE;
-	
-	if(s[0]>='A' && s[0]<='Z')
+	if (s.GetLength() == 0) return TRUE;
+
+	if (s[0] >= 'A' && s[0] <= 'Z')
 		return TRUE;
 
 	return FALSE;
@@ -90,70 +90,68 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CTriggerActionsDlg 
 
-void CTriggerActionsDlg::OnSelchangeAction() 
+void CTriggerActionsDlg::OnSelchangeAction()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	if(m_currentTrigger.GetLength()==0) return;
-	int selev=m_Action.GetCurSel();
-	if(selev<0) return;
-	int curev=m_Action.GetItemData(selev);
+	if (m_currentTrigger.GetLength() == 0) return;
+	int selev = m_Action.GetCurSel();
+	if (selev < 0) return;
+	int curev = m_Action.GetItemData(selev);
 
-	
+
 	int i;
 
 	CString ActionData;
 	ActionData = ini.GetString("Actions", m_currentTrigger);
-	
-	int startpos=1+curev*8;
-	CString ActionType=GetParam(ActionData,startpos);
+
+	int startpos = 1 + curev * 8;
+	CString ActionType = GetParam(ActionData, startpos);
 	m_ActionType.SetWindowText(ActionType);
-	for(i=0;i<m_ActionType.GetCount();i++)
-	{
+	for (i = 0; i < m_ActionType.GetCount(); i++) {
 		CString tmp;
-		m_ActionType.GetLBText(i,tmp);
+		m_ActionType.GetLBText(i, tmp);
 		TruncSpace(tmp);
-		if(tmp==ActionType)
+		if (tmp == ActionType)
 			m_ActionType.SetCurSel(i);
 	}
 
 	OnEditchangeActiontype();
-	
+
 }
 
-void CTriggerActionsDlg::OnEditchangeActiontype() 
+void CTriggerActionsDlg::OnEditchangeActiontype()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	if(m_currentTrigger.GetLength()==0) return;
-	int selev=m_Action.GetCurSel();
-	if(selev<0) return;
-	int curev=m_Action.GetItemData(selev);
+	if (m_currentTrigger.GetLength() == 0) return;
+	int selev = m_Action.GetCurSel();
+	if (selev < 0) return;
+	int curev = m_Action.GetItemData(selev);
 
-	CString e1,e2;
-	while(m_Parameter.DeleteString(0)!=CB_ERR);
+	CString e1, e2;
+	while (m_Parameter.DeleteString(0) != CB_ERR);
 
 
-	CString eventtype,eventdata;
+	CString eventtype, eventdata;
 	m_ActionType.GetWindowText(eventtype);
 	TruncSpace(eventtype);
 
-	if(eventtype.GetLength()==0)
-	{
-		eventtype="0";
+	if (eventtype.GetLength() == 0) {
+		eventtype = "0";
 		m_ActionType.SetWindowText(eventtype);
 	}
 
 
-	CString acsec="Actions";
+	CString acsec = "Actions";
 #ifdef RA2_MODE
-	acsec="ActionsRA2";
+	acsec = "ActionsRA2";
 #endif
-	
 
-	int pos=1+8*curev;
-	
-	ini.SetString("Actions",m_currentTrigger, SetParam(ini.GetString("Actions", m_currentTrigger), pos, (LPCTSTR)eventtype));
+
+	int pos = 1 + 8 * curev;
+
+	ini.SetString("Actions", m_currentTrigger, SetParam(ini.GetString("Actions", m_currentTrigger), pos, (LPCTSTR)eventtype));
 
 	auto const& eventDef = g_data[acsec][eventtype];
 	if (eventDef.IsEmpty()) {
@@ -169,20 +167,20 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 	}
 #endif
 
-	CString desc=GetParam(eventdata,10);
-	desc.Replace("%1",",");
-	m_ActionDescription.SetWindowText(desc); 
-	
+	CString desc = GetParam(eventdata, 10);
+	desc.Replace("%1", ",");
+	m_ActionDescription.SetWindowText(desc);
+
 	CString ptype[6];
-	ptype[0]=GetParam(eventdata,1);
-	ptype[1]=GetParam(eventdata,2);
-	ptype[2]=GetParam(eventdata,3);
-	ptype[3]=GetParam(eventdata,4);
-	ptype[4]=GetParam(eventdata,5);
-	ptype[5]=GetParam(eventdata,6);
+	ptype[0] = GetParam(eventdata, 1);
+	ptype[1] = GetParam(eventdata, 2);
+	ptype[2] = GetParam(eventdata, 3);
+	ptype[3] = GetParam(eventdata, 4);
+	ptype[4] = GetParam(eventdata, 5);
+	ptype[5] = GetParam(eventdata, 6);
 
 	int pListType[6];
-	memset(pListType, 0, 6*sizeof(int));
+	memset(pListType, 0, 6 * sizeof(int));
 
 	if (atoi(ptype[0]) >= 0) {
 		pListType[0] = atoi(GetParam(g_data.GetString("ParamTypes", ptype[0]), 1));
@@ -219,7 +217,7 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 
 	// MW fix for waypoint/number issue
 	CString code;
-	BOOL bNoWP=FALSE;
+	BOOL bNoWP = FALSE;
 	code = GetParam(ini["Actions"][m_currentTrigger], pos + 1);
 	if (g_data["DontSaveAsWP"].HasValue(code)) {
 		bNoWP = TRUE;
@@ -227,16 +225,16 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 
 	// conversion below:
 	if (IsWaypointFormat(
-			GetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6)
-		) 
+		GetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6)
+	)
 		&& bNoWP) {
 		int number = GetWaypoint(GetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6));
 		char c[50];
 		itoa(number, c, 10);
 		ini.SetString("Actions", m_currentTrigger, SetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6, c));
 	} else if (!IsWaypointFormat(
-			GetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6)
-		) 
+		GetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6)
+	)
 		&& !bNoWP) {
 		int wp = atoi(GetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6));
 		CString s = GetWaypoint(wp);
@@ -244,51 +242,49 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 	};
 
 
-	if(atoi(GetParam(eventdata, 7))==1)
-	{
-		if(bNoWP)
+	if (atoi(GetParam(eventdata, 7)) == 1) {
+		if (bNoWP)
 			m_Parameter.SetItemData(m_Parameter.AddString(TranslateStringACP("Number")), -1);
 		else
 			m_Parameter.SetItemData(m_Parameter.AddString(TranslateStringACP("Waypoint")), -1);
 	}
 
 	m_ParamValue.SetWindowText("");
-	if(m_Parameter.GetCount()>0) {
+	if (m_Parameter.GetCount() > 0) {
 		m_Parameter.SetCurSel(0);
 		OnSelchangeParameter();
 	}
 }
 
-void CTriggerActionsDlg::OnSelchangeParameter() 
+void CTriggerActionsDlg::OnSelchangeParameter()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	if(m_currentTrigger.GetLength()==0) return;
-	int selev=m_Action.GetCurSel();
-	if(selev<0) return;
-	int curev=m_Action.GetItemData(selev);
+	if (m_currentTrigger.GetLength() == 0) return;
+	int selev = m_Action.GetCurSel();
+	if (selev < 0) return;
+	int curev = m_Action.GetItemData(selev);
 
-	int curselparam=m_Parameter.GetCurSel();
-	if(curselparam<0) 
-	{
+	int curselparam = m_Parameter.GetCurSel();
+	if (curselparam < 0) {
 		m_ParamValue.SetWindowText("");
 		return;
 	}
 
-	
 
-	int curparam=m_Parameter.GetItemData(curselparam);
-	
-	
-	
+
+	int curparam = m_Parameter.GetItemData(curselparam);
+
+
+
 	auto const& ActionData = ini["Actions"][m_currentTrigger];
 
-	
-	int startpos=1+curev*8;
+
+	int startpos = 1 + curev * 8;
 
 	CString code;
-	BOOL bNoWP=FALSE;
-	code=GetParam(ActionData, startpos+1);
+	BOOL bNoWP = FALSE;
+	code = GetParam(ActionData, startpos + 1);
 	if (g_data["DontSaveAsWP"].HasValue(code)) {
 		bNoWP = TRUE;
 	}
@@ -311,8 +307,7 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 				CString tmp;
 				m_ParamValue.GetLBText(i, tmp);
 				TruncSpace(tmp);
-				if (tmp == GetParam(ActionData, startpos + 1 + curparam))
-				{
+				if (tmp == GetParam(ActionData, startpos + 1 + curparam)) {
 					m_ParamValue.SetCurSel(i);
 					bFound = TRUE;
 					break;
@@ -361,32 +356,31 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 	}
 }
 
-void CTriggerActionsDlg::OnEditchangeParamvalue() 
+void CTriggerActionsDlg::OnEditchangeParamvalue()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	if(m_currentTrigger.GetLength()==0) return;
-	int selev=m_Action.GetCurSel();
-	if(selev<0) return;
-	int curev=m_Action.GetItemData(selev);
+	if (m_currentTrigger.GetLength() == 0) return;
+	int selev = m_Action.GetCurSel();
+	if (selev < 0) return;
+	int curev = m_Action.GetItemData(selev);
 
-	int curselparam=m_Parameter.GetCurSel();
-	if(curselparam<0) 
-	{
+	int curselparam = m_Parameter.GetCurSel();
+	if (curselparam < 0) {
 		m_ParamValue.SetWindowText("");
 		return;
 	}
 
-	int curparam=m_Parameter.GetItemData(curselparam);
-	
+	int curparam = m_Parameter.GetItemData(curselparam);
+
 	auto const& ActionData = ini["Actions"][m_currentTrigger];
-	
-	int startpos=1+curev*8;
+
+	int startpos = 1 + curev * 8;
 
 
 	CString code;
-	BOOL bNoWP=FALSE;
-	code=GetParam(ActionData, startpos+1);
+	BOOL bNoWP = FALSE;
+	code = GetParam(ActionData, startpos + 1);
 	if (g_data["DontSaveAsWP"].HasValue(code)) {
 		bNoWP = TRUE;
 	}
@@ -396,12 +390,12 @@ void CTriggerActionsDlg::OnEditchangeParamvalue()
 	TruncSpace(newVal);
 	newVal.TrimLeft();
 
-	if(newVal.Find(",",0)>=0) newVal.SetAt(newVal.Find(",",0), 0);
+	if (newVal.Find(",", 0) >= 0) newVal.SetAt(newVal.Find(",", 0), 0);
 
-	if(curparam>=0) {
+	if (curparam >= 0) {
 		ini.SetString("Actions", m_currentTrigger, SetParam(ActionData, startpos + 1 + curparam, newVal));
 		// waypoint FIX MW: OR NUMBER!!!
-	} else if (curparam == -1)  {
+	} else if (curparam == -1) {
 		int pos = 1 + 8 * curev + 7;
 		CString waypoint = newVal;
 
@@ -414,9 +408,9 @@ void CTriggerActionsDlg::OnEditchangeParamvalue()
 
 }
 
-void CTriggerActionsDlg::OnNewaction() 
+void CTriggerActionsDlg::OnNewaction()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	if (m_currentTrigger.GetLength() == 0) {
 		return;
@@ -428,27 +422,27 @@ void CTriggerActionsDlg::OnNewaction()
 	int cval = atoi(GetParam(sec.GetString(m_currentTrigger), 0));
 	cval++;
 	char c[50];
-	itoa(cval,c,10);
-	
+	itoa(cval, c, 10);
+
 	auto action = SetParam(sec.GetString(m_currentTrigger), 0, c);
 	action += ",0,0,0,0,0,0,0,A";
 	sec.SetString(m_currentTrigger, action);
 
 	UpdateDialog();
 
-	m_Action.SetCurSel(cval-1);
-	OnSelchangeAction();	
+	m_Action.SetCurSel(cval - 1);
+	OnSelchangeAction();
 }
 
-void CTriggerActionsDlg::OnDeleteaction() 
+void CTriggerActionsDlg::OnDeleteaction()
 {
-	CIniFile& ini=Map->GetIniFile();
-	if(m_currentTrigger.GetLength()==0) return;
+	CIniFile& ini = Map->GetIniFile();
+	if (m_currentTrigger.GetLength() == 0) return;
 
-	int sel2=m_Action.GetCurSel();
-	if(sel2<0) return;
-	int curev=m_Action.GetItemData(sel2);
-	if(MessageBox("Do you really want to delete this action?","Delete action", MB_YESNO)==IDNO) return;
+	int sel2 = m_Action.GetCurSel();
+	if (sel2 < 0) return;
+	int curev = m_Action.GetItemData(sel2);
+	if (MessageBox("Do you really want to delete this action?", "Delete action", MB_YESNO) == IDNO) return;
 
 
 	auto sec = ini.TryGetSection("Actions");
@@ -457,14 +451,14 @@ void CTriggerActionsDlg::OnDeleteaction()
 	CString data;
 	data = sec->GetString(m_currentTrigger);
 
-	int v=atoi(GetParam(data,0));
+	int v = atoi(GetParam(data, 0));
 	char c[50];
 	v--;
-	itoa(v,c,10);
-	data=SetParam(data,0, c);
+	itoa(v, c, 10);
+	data = SetParam(data, 0, c);
 
-	int pos=1+curev*8;
-	int posc=1+v*8;
+	int pos = 1 + curev * 8;
+	int posc = 1 + v * 8;
 	int i;
 	for (i = 0; i < 8; i++) {
 		data = SetParam(data, pos + i, GetParam(data, posc + i));
@@ -473,15 +467,13 @@ void CTriggerActionsDlg::OnDeleteaction()
 	// MW April 17th, 2002:
 	// fixed: (char*)(LPCTSTR)data should not be modified directly,
 	// Instead, moving to a buffer
-	char* str_act=new(char[data.GetLength()+1]);
-	strcpy(str_act, (LPCSTR) data);
-	char* cupos=str_act;//(char*)(LPCTSTR)data;
-	for(i=0;i<posc;i++)
-	{
-		cupos=strchr(cupos+1, ',');
-		if(i==posc-1)
-		{
-			cupos[0]=0;
+	char* str_act = new(char[data.GetLength() + 1]);
+	strcpy(str_act, (LPCSTR)data);
+	char* cupos = str_act;//(char*)(LPCTSTR)data;
+	for (i = 0; i < posc; i++) {
+		cupos = strchr(cupos + 1, ',');
+		if (i == posc - 1) {
+			cupos[0] = 0;
 			break;
 		}
 	}
@@ -490,7 +482,7 @@ void CTriggerActionsDlg::OnDeleteaction()
 	sec->SetString(m_currentTrigger, str_act);
 	delete[] str_act;
 	UpdateDialog();
-		
+
 }
 
 void CTriggerActionsDlg::UpdateDialog()
@@ -498,22 +490,21 @@ void CTriggerActionsDlg::UpdateDialog()
 	// MW 07/20/01
 	Clear();
 
-	if(m_currentTrigger.GetLength()==0) 
-	{
-		while(m_Action.DeleteString(0)!=CB_ERR);
+	if (m_currentTrigger.GetLength() == 0) {
+		while (m_Action.DeleteString(0) != CB_ERR);
 		return;
 	}
 
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	// 9.3.2001: Only support specified section
 #ifndef RA2_MODE
-	CString sec="Actions";
+	CString sec = "Actions";
 #else
-	CString sec="ActionsRA2";
+	CString sec = "ActionsRA2";
 #endif
 
-	while(m_ActionType.DeleteString(0)!=CB_ERR);
+	while (m_ActionType.DeleteString(0) != CB_ERR);
 	int i;
 	for (auto const& [eventid, eventdata] : g_data[sec]) {
 		//GetParam(*g_data.sections["Actions"].GetValue(i),13);
@@ -531,11 +522,11 @@ void CTriggerActionsDlg::UpdateDialog()
 #endif
 			m_ActionType.AddString(text);
 		}
-	}
+		}
 
-	int cur_sel=m_Action.GetCurSel();
-	while(m_Action.DeleteString(0)!=CB_ERR);
-	
+	int cur_sel = m_Action.GetCurSel();
+	while (m_Action.DeleteString(0) != CB_ERR);
+
 	auto const& Data = ini["Actions"][m_currentTrigger];
 	int count = atoi(GetParam(Data, 0));
 
@@ -550,20 +541,20 @@ void CTriggerActionsDlg::UpdateDialog()
 		m_Action.SetItemData(m_Action.AddString(s), i);
 	}
 
-	if(cur_sel<0) cur_sel=0;
-	if(cur_sel>=count) cur_sel=count-1;
+	if (cur_sel < 0) cur_sel = 0;
+	if (cur_sel >= count) cur_sel = count - 1;
 
 	m_Action.SetCurSel(cur_sel);
 
 
 	OnSelchangeAction();
-}
+	}
 
 // MW 07/20/01
 void CTriggerActionsDlg::Clear()
 {
-	m_ActionType.SetWindowText("");	
-	while(m_Parameter.DeleteString(0)!=LB_ERR);
+	m_ActionType.SetWindowText("");
+	while (m_Parameter.DeleteString(0) != LB_ERR);
 	m_ParamValue.SetWindowText("");
 	m_ActionDescription.SetWindowText("");
 }

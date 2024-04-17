@@ -81,16 +81,13 @@ inline CString GetUnitPictureFilename(LPCTSTR lpUnitName, DWORD dwPicIndex)
 	itoa(dwPicIndex, n, 10);
 
 
-	if (pics.find(artname + n) != pics.end())
-	{
+	if (pics.find(artname + n) != pics.end()) {
 		filename = artname; // yes, found
 		filename += n;
-	}
-	else if (pics.find(artname + ".bmp") != pics.end()) // since June, 15th (Matze): Only use BMP if no SHP/VXL exists
+	} else if (pics.find(artname + ".bmp") != pics.end()) // since June, 15th (Matze): Only use BMP if no SHP/VXL exists
 	{
 		filename = (CString)artname + ".bmp";
-	}
-	else
+	} else
 		filename = "";
 
 	return filename;
@@ -101,8 +98,7 @@ inline CString GetParam(const CString& data, const int param)
 	int paramStrPos = 0;
 	int curParam = param;
 
-	while (curParam--)
-	{
+	while (curParam--) {
 		auto nextComma = data.Find(',', paramStrPos);
 		if (nextComma < 0)
 			return CString(); // RVO; param not found
@@ -119,8 +115,7 @@ inline std::string GetParam(const std::string& data, const int param)
 	int paramStrPos = 0;
 	int curParam = param;
 
-	while (curParam--)
-	{
+	while (curParam--) {
 		auto nextComma = data.find(',', paramStrPos);
 		if (nextComma == std::string::npos)
 			return std::string(); // RVO; param not found
@@ -143,11 +138,9 @@ inline std::vector<CString> Split(const CString& data, char separator)
 	int lastComma = -1;
 	const auto len = data.GetLength();
 	std::vector<CString> res;
-	while (lastComma < len)
-	{
+	while (lastComma < len) {
 		nextComma = data.Find(separator, lastComma + 1);
-		if (nextComma < 0)
-		{
+		if (nextComma < 0) {
 			res.push_back(data.Mid(lastComma + 1));
 			break;
 		}
@@ -172,8 +165,7 @@ inline CString Join(const CString& join, const std::vector<CString>& strings)
 		len += s.GetLength() + join.GetLength();
 	res.Preallocate(len + 1);
 	int remaining = strings.size();
-	for (auto& s : strings)
-	{
+	for (auto& s : strings) {
 		res += s;
 		if (--remaining)
 			res += join;
@@ -189,8 +181,7 @@ inline std::string Join(const std::string& join, const std::ranges::input_range 
 		len += s.size() + join.size();
 	res.reserve(len + 1);
 	int remaining = strings.size();
-	for (const auto& s : strings)
-	{
+	for (const auto& s : strings) {
 		res += s;
 		if (--remaining)
 			res += join;

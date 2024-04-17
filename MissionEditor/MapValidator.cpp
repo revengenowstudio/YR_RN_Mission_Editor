@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // MapValidator.cpp: implementation file
@@ -45,7 +45,7 @@ CMapValidator::CMapValidator(CWnd* pParent /*=NULL*/)
 	: CDialog(CMapValidator::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CMapValidator)
-		
+
 	//}}AFX_DATA_INIT
 }
 
@@ -75,43 +75,42 @@ void CMapValidator::UpdateStrings()
 	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
 }
 
-BOOL CMapValidator::OnInitDialog() 
+BOOL CMapValidator::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	UpdateStrings();
 
-	m_ProblemImages.Create(16,16,ILC_COLOR8 | ILC_MASK,0, 50 );
-	
+	m_ProblemImages.Create(16, 16, ILC_COLOR8 | ILC_MASK, 0, 50);
+
 	CBitmap bmpIcons;
 	bmpIcons.LoadBitmap(IDB_MV_ICONS);
 
-	m_ProblemImages.Add(&bmpIcons, RGB(255,255,255));
-	m_MapProblemList.SetImageList(&m_ProblemImages,LVSIL_SMALL);
-	m_MapProblemList.SetImageList(&m_ProblemImages,LVSIL_NORMAL);
+	m_ProblemImages.Add(&bmpIcons, RGB(255, 255, 255));
+	m_MapProblemList.SetImageList(&m_ProblemImages, LVSIL_SMALL);
+	m_MapProblemList.SetImageList(&m_ProblemImages, LVSIL_NORMAL);
 
 	auto col = m_MapProblemList.InsertColumn(0, "");
 	//RECT r;
 	//m_MapProblemList.GetClientRect(&r);
-	
 
 
-	BOOL bSaveAble=CheckMap();
+
+	BOOL bSaveAble = CheckMap();
 
 	m_MapProblemList.SetColumnWidth(col, LVSCW_AUTOSIZE);
 
 
-	if(bSaveAble==FALSE) GetDlgItem(IDOK)->EnableWindow(FALSE);
-	
-	return TRUE;  
+	if (bSaveAble == FALSE) GetDlgItem(IDOK)->EnableWindow(FALSE);
+
+	return TRUE;
 }
 
 void AddItemWithNewLine(CListCtrl& ctrl, CString s, int image)
 {
 	s.Replace("\\n", "\n");
 	int n = ctrl.GetItemCount();
-	for (const auto& line : Split(s, '\n'))
-	{
+	for (const auto& line : Split(s, '\n')) {
 		ctrl.InsertItem(n++, line, image);
 		image = 2;
 	}
@@ -125,12 +124,12 @@ If FALSE is returned, you should not anymore allow to save the map.
 */
 BOOL CMapValidator::CheckMap()
 {
-	BOOL bAllow=TRUE;
+	BOOL bAllow = TRUE;
 
 	// now check the map
 
 	Map->UpdateIniFile(MAPDATA_UPDATE_TO_INI);
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	if (!ini.TryGetSection("Map")) {
 		bAllow = FALSE;
@@ -140,14 +139,13 @@ BOOL CMapValidator::CheckMap()
 		bAllow = FALSE;
 		AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_NoBasic"), 0);
 	} else {
-		if (ini.GetString("Basic","Name").IsEmpty()) {
+		if (ini.GetString("Basic", "Name").IsEmpty()) {
 			AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_NoName"), 1);
 		}
 
 #ifdef TS_MODE
 		if (ini.GetString("Basic", "Player").IsEmpty()) {
-			if(ini.sections.find(MAPHOUSES)!=ini.sections.end() && ini.sections["Houses"].values.size()>0)
-			{
+			if (ini.sections.find(MAPHOUSES) != ini.sections.end() && ini.sections["Houses"].values.size() > 0) {
 				AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_HousesButNoPlayer"), 1);
 				AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_HousesInMultiplayer"), 1);
 			}
@@ -156,21 +154,19 @@ BOOL CMapValidator::CheckMap()
 
 		if (!ini.TryGetSection(MAPHOUSES)) {
 			int d = Map->GetWaypointCount();
-			int below8found=0;
+			int below8found = 0;
 			int i;
-			for(i=0;i<d;i++)
-			{
+			for (i = 0; i < d; i++) {
 				DWORD pos;
 				CString id;
 				Map->GetWaypointData(i, &id, &pos);
-				if(atoi(id)<8)
-				{
+				if (atoi(id) < 8) {
 					below8found++;
 				}
 			}
 
 			if (below8found < 8) {
-				if(!ini.GetBool("Basic", "Official")) {
+				if (!ini.GetBool("Basic", "Official")) {
 					AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_Not8Waypoints"), 1);
 				}
 
@@ -178,7 +174,7 @@ BOOL CMapValidator::CheckMap()
 					AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_HousesNoWaypoints"), 1);
 				}
 			}
-			
+
 #ifdef RA2_MODE
 			if (ini.GetBool("Basic", "Official")) {
 				AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_OfficialYes"), 1);
@@ -252,25 +248,25 @@ BOOL CMapValidator::CheckMap()
 			}
 		}
 
-		for (auto i = 0; i < Map->GetCelltagCount(); i++) {		
+		for (auto i = 0; i < Map->GetCelltagCount(); i++) {
 			CString tag;
 			DWORD pos;
 			Map->GetCelltagData(i, &tag, &pos);
-			int x=pos%Map->GetIsoSize();
-			int y=pos/Map->GetIsoSize();
+			int x = pos % Map->GetIsoSize();
+			int y = pos / Map->GetIsoSize();
 			char cx[50];
 			char cy[50];
 			itoa(x, cx, 10);
 			itoa(y, cy, 10);
-			CString p=cx;
-			p+="/";
-			p+=cy;
+			CString p = cx;
+			p += "/";
+			p += cy;
 			if (!ini["Tags"].Exists(tag)) {
 				CString error;
-				error=GetLanguageStringACP("MV_TagMissing");
-				error=TranslateStringVariables(1, error, tag);
-				error=TranslateStringVariables(2, error, "Celltag");
-				error=TranslateStringVariables(3, error, p);
+				error = GetLanguageStringACP("MV_TagMissing");
+				error = TranslateStringVariables(1, error, tag);
+				error = TranslateStringVariables(2, error, "Celltag");
+				error = TranslateStringVariables(3, error, p);
 				AddItemWithNewLine(m_MapProblemList, error, 1);
 			}
 		}
@@ -278,11 +274,9 @@ BOOL CMapValidator::CheckMap()
 	}
 
 	const auto& tubes = Map->GetTubes();
-	for (auto& tube : tubes)
-	{
+	for (auto& tube : tubes) {
 		auto n_reverse = std::count_if(tubes.begin(), tubes.end(), [&tube](const auto& other) { return tube->isCounterpart(*other); });
-		if (n_reverse == 0)
-		{
+		if (n_reverse == 0) {
 			CString error = TranslateTubeString(
 				GetLanguageStringACP("MV_TubeCounterpartMissing"),
 				*tube,
@@ -291,8 +285,7 @@ BOOL CMapValidator::CheckMap()
 			AddItemWithNewLine(m_MapProblemList, error, 0);
 		}
 		auto n_same_start = std::count_if(tubes.begin(), tubes.end(), [&tube](const auto& other) { return tube->getStartCoords() == other->getStartCoords() && *tube != *other; });
-		if (n_same_start)
-		{
+		if (n_same_start) {
 			CString error = TranslateTubeString(
 				GetLanguageStringACP("MV_TubeStartNotUnique"),
 				*tube,
@@ -301,8 +294,7 @@ BOOL CMapValidator::CheckMap()
 			AddItemWithNewLine(m_MapProblemList, error, 0);
 		}
 		auto n_same_end = std::count_if(tubes.begin(), tubes.end(), [&tube](const auto& other) { return tube->getEndCoords() == other->getEndCoords() && *tube != *other; });
-		if (n_same_end)
-		{
+		if (n_same_end) {
 			CString error = TranslateTubeString(
 				GetLanguageStringACP("MV_TubeEndNotUnique"),
 				*tube,
@@ -311,8 +303,7 @@ BOOL CMapValidator::CheckMap()
 			AddItemWithNewLine(m_MapProblemList, error, 0);
 		}
 		auto n_invalid_counterpart_end = std::count_if(tubes.begin(), tubes.end(), [&tube](const auto& other) { return tube->getEndCoords() == other->getStartCoords() && tube->getStartCoords() != other->getEndCoords(); });
-		if (n_invalid_counterpart_end)
-		{
+		if (n_invalid_counterpart_end) {
 			CString error = TranslateTubeString(
 				GetLanguageStringACP("MV_TubeInvalidCounterpartEnd"),
 				*tube,
@@ -321,8 +312,7 @@ BOOL CMapValidator::CheckMap()
 			AddItemWithNewLine(m_MapProblemList, error, 0);
 		}
 		auto n_invalid_counterpart_start = std::count_if(tubes.begin(), tubes.end(), [&tube](const auto& other) { return tube->getStartCoords() == other->getEndCoords() && tube->getEndCoords() != other->getStartCoords(); });
-		if (n_invalid_counterpart_start)
-		{
+		if (n_invalid_counterpart_start) {
 			CString error = TranslateTubeString(
 				GetLanguageStringACP("MV_TubeInvalidCounterpartStart"),
 				*tube,
@@ -333,26 +323,24 @@ BOOL CMapValidator::CheckMap()
 	}
 
 	int i;
-	BOOL bWaypBig=FALSE;
-	for(i=0;i<Map->GetWaypointCount();i++)
-	{
+	BOOL bWaypBig = FALSE;
+	for (i = 0; i < Map->GetWaypointCount(); i++) {
 		DWORD pos;
 		CString id;
 
 		Map->GetWaypointData(i, &id, &pos);
 
-		if(atoi(id)>99) bWaypBig=TRUE;
+		if (atoi(id) > 99) bWaypBig = TRUE;
 	}
 
-	if(bWaypBig)
+	if (bWaypBig)
 		AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("MV_>100Waypoint"), 1);
-	
-	if(Map->IsYRMap())
-	{
+
+	if (Map->IsYRMap()) {
 		AddItemWithNewLine(m_MapProblemList, GetLanguageStringACP("NeedsYR"), 1);
 	}
 
-	return bAllow;	
+	return bAllow;
 }
 
 CString TranslateTubeString(const char* error_, const CTube& tube, int count)

@@ -132,8 +132,7 @@ public:
 
 	void ensure_unlocked()
 	{
-		if (m_locked)
-		{
+		if (m_locked) {
 			m_pDDS->Unlock(m_hasRect ? &m_rect : nullptr);
 		}
 		m_locked = false;
@@ -295,26 +294,22 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, int
 	blrect.left = x;
 
 
-	if (blrect.left < 0)
-	{
+	if (blrect.left < 0) {
 		srcRect.left = 1 - blrect.left;
 		blrect.left = 1;
 	}
 	blrect.top = y;
-	if (blrect.top < 0)
-	{
+	if (blrect.top < 0) {
 		srcRect.top = 1 - blrect.top;
 		blrect.top = 1;
 	}
 	blrect.right = (x + swidth);
-	if (x + swidth > dright)
-	{
+	if (x + swidth > dright) {
 		srcRect.right = dright - x;//swidth-((x+swidth)-dright);
 		blrect.right = dright;
 	}
 	blrect.bottom = (y + sheight);
-	if (y + sheight > dbottom)
-	{
+	if (y + sheight > dbottom) {
 		srcRect.bottom = dbottom - y;//sheight-((y+sheight)-dbottom);
 		blrect.bottom = dbottom;
 	}
@@ -325,10 +320,8 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, int
 
 #ifdef NOSURFACES_EXTRACT
 	int pos = 0;
-	if (!st.bNotExtracted)
-	{
-		for (e = srcRect.top;e < srcRect.bottom;e++)
-		{
+	if (!st.bNotExtracted) {
+		for (e = srcRect.top; e < srcRect.bottom; e++) {
 			short left = st.vborder[e].left;
 			short right = st.vborder[e].right;
 
@@ -337,8 +330,7 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, int
 			//short addx_s=0;
 
 			if (right >= srcRect.right) right = srcRect.right - 1;
-			if (srcRect.left > 0)
-			{
+			if (srcRect.left > 0) {
 				pos += (realright - left + 1) * bpp;
 				continue; // just cancel. this area is used by object browser. saves some performance
 				//addx_s=srcRect.left;
@@ -346,10 +338,8 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, int
 				//left=//addx=left-srcRect.left;
 			}
 
-			if (realright >= left)
-			{
-				if (/*left<srcRect.left ||*/ left >= srcRect.right)
-				{
+			if (realright >= left) {
+				if (/*left<srcRect.left ||*/ left >= srcRect.right) {
 					pos += (realright - left + 1) * bpp;
 					continue;
 				}
@@ -361,19 +351,16 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, int
 				pos += (realright - left + 1) * bpp;
 			}
 		}
-	}
-	else
+	} else
 
 #endif
-		for (e = srcRect.top;e < srcRect.bottom;e++)
-		{
+		for (e = srcRect.top; e < srcRect.bottom; e++) {
 			short& left = st.vborder[e].left;
 			short& right = st.vborder[e].right;
 
 			auto l = max(left, srcRect.left);
 			auto r = min(right, static_cast<short>(srcRect.right - 1));
-			for (i = l;i <= r;i++)
-			{
+			for (i = l; i <= r; i++) {
 				//if (i < srcRect.left || i >= srcRect.right)
 				{
 					//dest+=bpp;
@@ -382,8 +369,7 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, int
 				{
 
 					BYTE& val = src[i + e * swidth];
-					if (val)
-					{
+					if (val) {
 						void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * dpitch);
 
 						memcpy(dest, &iPalIso[val], bpp);
@@ -422,26 +408,22 @@ __forceinline void BlitTerrainHalfTransp(void* dst, int x, int y, int dleft, int
 	blrect.left = x;
 
 
-	if (blrect.left < 0)
-	{
+	if (blrect.left < 0) {
 		srcRect.left = 1 - blrect.left;
 		blrect.left = 1;
 	}
 	blrect.top = y;
-	if (blrect.top < 0)
-	{
+	if (blrect.top < 0) {
 		srcRect.top = 1 - blrect.top;
 		blrect.top = 1;
 	}
 	blrect.right = (x + swidth);
-	if (x + swidth > dright)
-	{
+	if (x + swidth > dright) {
 		srcRect.right = dright - x;//swidth-((x+swidth)-dright);
 		blrect.right = dright;
 	}
 	blrect.bottom = (y + sheight);
-	if (y + sheight > dbottom)
-	{
+	if (y + sheight > dbottom) {
 		srcRect.bottom = dbottom - y;//sheight-((y+sheight)-dbottom);
 		blrect.bottom = dbottom;
 	}
@@ -452,29 +434,24 @@ __forceinline void BlitTerrainHalfTransp(void* dst, int x, int y, int dleft, int
 
 #ifdef NOSURFACES_EXTRACT
 	int pos = 0;
-	if (!st.bNotExtracted)
-	{
+	if (!st.bNotExtracted) {
 		int a = 0;
-		for (e = srcRect.top;e < srcRect.bottom;e += 1)
-		{
+		for (e = srcRect.top; e < srcRect.bottom; e += 1) {
 			short left = st.vborder[e].left;
 			short right = st.vborder[e].right;
 
 			short realright = right;
 
 			if (right >= srcRect.right) right = srcRect.right - 1;
-			if (srcRect.left > 0)
-			{
+			if (srcRect.left > 0) {
 				pos += (realright - left + 1) * bpp;
 				continue; // just cancel. this area is used by object browser. saves some performance
 			}
 
 			a++;
 
-			if (realright >= left)
-			{
-				if (/*left<srcRect.left ||*/ left >= srcRect.right)
-				{
+			if (realright >= left) {
+				if (/*left<srcRect.left ||*/ left >= srcRect.right) {
 					pos += (realright - left + 1) * bpp;
 					continue;
 				}
@@ -485,14 +462,10 @@ __forceinline void BlitTerrainHalfTransp(void* dst, int x, int y, int dleft, int
 				//memcpy(dest, &st.pic[pos], bpp*(right-left+1));
 				//pos+=(right-left+1)*bpp;
 
-				for (i = left + a % 2;i <= right;i += 2)
-				{
-					if (i < srcRect.left || i >= srcRect.right)
-					{
+				for (i = left + a % 2; i <= right; i += 2) {
+					if (i < srcRect.left || i >= srcRect.right) {
 						//dest+=bpp;
-					}
-					else
-					{
+					} else {
 
 						//BYTE& val=st.pic[pos+i*bpp];
 						//if(val)
@@ -507,32 +480,25 @@ __forceinline void BlitTerrainHalfTransp(void* dst, int x, int y, int dleft, int
 				pos += (realright - left + 1) * bpp;
 			}
 		}
-	}
-	else
+	} else
 
 #endif
 	{
 		int a = 0;
-		for (e = srcRect.top;e < srcRect.bottom;e++)
-		{
+		for (e = srcRect.top; e < srcRect.bottom; e++) {
 			short& left = st.vborder[e].left;
 			short& right = st.vborder[e].right;
 
 
 			a++;
 
-			for (i = left + a % 2;i <= right;i += 2)
-			{
-				if (i < srcRect.left || i >= srcRect.right)
-				{
+			for (i = left + a % 2; i <= right; i += 2) {
+				if (i < srcRect.left || i >= srcRect.right) {
 					//dest+=bpp;
-				}
-				else
-				{
+				} else {
 
 					BYTE& val = src[i + e * swidth];
-					if (val)
-					{
+					if (val) {
 						void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * dpitch);
 
 						memcpy(dest, &iPalIso[val], bpp);
@@ -553,12 +519,9 @@ const int houseColorRelMax = houseColorMax - houseColorMin;
 
 inline void CalculateHouseColorPalette(int house_pal[houseColorRelMax + 1], const int* default_pal, const int* color = NULL)
 {
-	if (color)
-	{
-		if (bpp == 4)
-		{
-			for (int n = 0; n <= houseColorRelMax; ++n)
-			{
+	if (color) {
+		if (bpp == 4) {
+			for (int n = 0; n <= houseColorRelMax; ++n) {
 				const int v = (houseColorRelMax - n);
 				auto src = reinterpret_cast<const BYTE*>(color);
 				auto bdest = reinterpret_cast<BYTE*>(&house_pal[n]);
@@ -567,20 +530,14 @@ inline void CalculateHouseColorPalette(int house_pal[houseColorRelMax + 1], cons
 				bdest[2] = src[2] * v / houseColorRelMax;
 				bdest[3] = src[3];
 			}
-		}
-		else
-		{
+		} else {
 			// nowadays only 32 bit rendering should be used, so we take a shortcut here
-			for (int n = 0; n <= houseColorRelMax; ++n)
-			{
+			for (int n = 0; n <= houseColorRelMax; ++n) {
 				house_pal[n] = *color;
 			}
 		}
-	}
-	else
-	{
-		for (int n = 0; n <= houseColorRelMax; ++n)
-		{
+	} else {
+		for (int n = 0; n <= houseColorRelMax; ++n) {
 			house_pal[n] = default_pal[n + houseColorMin];
 		}
 	}
@@ -617,26 +574,22 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpi
 	srcRect.right = swidth;
 	srcRect.bottom = sheight;
 	blrect.left = x;
-	if (blrect.left < 0)
-	{
+	if (blrect.left < 0) {
 		srcRect.left = 1 - blrect.left;
 		//blrect.left=1;
 	}
 	blrect.top = y;
-	if (blrect.top < 0)
-	{
+	if (blrect.top < 0) {
 		srcRect.top = 1 - blrect.top;
 		//blrect.top=1;
 	}
 	blrect.right = (x + swidth);
-	if (x + swidth > dright)
-	{
+	if (x + swidth > dright) {
 		srcRect.right = swidth - ((x + swidth) - dright);
 		blrect.right = dright;
 	}
 	blrect.bottom = (y + sheight);
-	if (y + sheight > dbottom)
-	{
+	if (y + sheight > dbottom) {
 		srcRect.bottom = sheight - ((y + sheight) - dbottom);
 		blrect.bottom = dbottom;
 	}
@@ -652,8 +605,7 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpi
 	CalculateHouseColorPalette(houseColors, newPal, color);
 	const BYTE* const pLighting = (bpp == 4 && pd.lighting && !pd.lighting->empty()) ? pd.lighting->data() : nullptr;
 
-	for (e = srcRect.top;e < srcRect.bottom;e++)
-	{
+	for (e = srcRect.top; e < srcRect.bottom; e++) {
 		int left = pd.vborder[e].left;
 		int right = pd.vborder[e].right;
 
@@ -662,34 +614,27 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpi
 		if (right >= srcRect.right)
 			right = srcRect.right - 1;
 
-		for (i = left;i <= right;i++)
-		{
+		for (i = left; i <= right; i++) {
 			if (blrect.left + i < 0)
 				continue;
 
 			const int spos = i + e * swidth;
 			BYTE val = src[spos];
 
-			if (val)
-			{
+			if (val) {
 				void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * dpitch);
 
-				if (dest >= dst)
-				{
+				if (dest >= dst) {
 					int c;
-					if (!color || newPal != iPalUnit || val < houseColorMin || val > houseColorMax)
-					{
+					if (!color || newPal != iPalUnit || val < houseColorMin || val > houseColorMax) {
 						c = newPal[val];
-					}
-					else
-					{
+					} else {
 						// Replace the original palette color with the house color
 						ASSERT(val >= houseColorMin && val <= houseColorMax);
 						const int v = (val - houseColorMin);
 						c = houseColors[v];
 					}
-					if (pLighting)
-					{
+					if (pLighting) {
 						// bpp == 4
 						ASSERT(bpp == 4);
 						int l = pLighting[spos];
@@ -732,26 +677,22 @@ __forceinline void BlitPicHalfTransp(void* dst, int x, int y, int dleft, int dto
 	srcRect.right = swidth;
 	srcRect.bottom = sheight;
 	blrect.left = x;
-	if (blrect.left < 0)
-	{
+	if (blrect.left < 0) {
 		srcRect.left = 1 - blrect.left;
 		//blrect.left=1;
 	}
 	blrect.top = y;
-	if (blrect.top < 0)
-	{
+	if (blrect.top < 0) {
 		srcRect.top = 1 - blrect.top;
 		//blrect.top=1;
 	}
 	blrect.right = (x + swidth);
-	if (x + swidth > dright)
-	{
+	if (x + swidth > dright) {
 		srcRect.right = swidth - ((x + swidth) - dright);
 		blrect.right = dright;
 	}
 	blrect.bottom = (y + sheight);
-	if (y + sheight > dbottom)
-	{
+	if (y + sheight > dbottom) {
 		srcRect.bottom = sheight - ((y + sheight) - dbottom);
 		blrect.bottom = dbottom;
 	}
@@ -762,8 +703,7 @@ __forceinline void BlitPicHalfTransp(void* dst, int x, int y, int dleft, int dto
 
 
 
-	for (e = srcRect.top;e < srcRect.bottom;e++)
-	{
+	for (e = srcRect.top; e < srcRect.bottom; e++) {
 
 
 		int left = pd.vborder[e].left;
@@ -773,8 +713,7 @@ __forceinline void BlitPicHalfTransp(void* dst, int x, int y, int dleft, int dto
 
 		int a = e % 2 + left % 2;
 
-		for (i = left + a;i <= right;i += 2)
-		{
+		for (i = left + a; i <= right; i += 2) {
 			//a++;
 
 			if (blrect.left + i < 0) continue;
@@ -782,18 +721,13 @@ __forceinline void BlitPicHalfTransp(void* dst, int x, int y, int dleft, int dto
 
 			BYTE& val = src[i + e * swidth];
 			//0x10-0x1f,
-			if (val)
-			{
+			if (val) {
 				void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * dpitch);
 				//*dest=newPal[val];
-				if (dest >= dst)
-				{
-					if (!color || newPal != iPalUnit || val < 0x10 || val>0x1f)
-					{
+				if (dest >= dst) {
+					if (!color || newPal != iPalUnit || val < 0x10 || val>0x1f) {
 						memcpy(dest, &newPal[val], bpp);
-					}
-					else
-					{
+					} else {
 						//int col=0;
 						memcpy(dest, color, bpp);
 					}
@@ -831,9 +765,8 @@ void CIsoView::updateFontScaled()
 	m_fontDefaultHeight = -MulDiv(12, dc->GetDeviceCaps(LOGPIXELSY), 72);
 	m_Font9Height = -MulDiv(9, dc->GetDeviceCaps(LOGPIXELSY), 72);
 
-	if (dd)
-	{
-		m_textDefault.reset(new TextDrawer(dd, m_fontDefaultHeight, RGB(0,0,0), RGB(255, 255, 255)));
+	if (dd) {
+		m_textDefault.reset(new TextDrawer(dd, m_fontDefaultHeight, RGB(0, 0, 0), RGB(255, 255, 255)));
 		m_text9.reset(new TextDrawer(dd, m_Font9Height, RGB(0, 0, 0), RGB(255, 255, 255)));
 		m_textScaled.reset(new TextDrawer(dd, m_fontDefaultHeight / m_viewScale.y, RGB(0, 0, 0), RGB(255, 255, 255)));
 		m_text9Scaled.reset(new TextDrawer(dd, m_Font9Height / m_viewScale.y, RGB(0, 0, 0), RGB(255, 255, 255)));
@@ -860,8 +793,7 @@ BOOL CIsoView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwSty
 void CIsoView::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	// TODO: Code für die Behandlungsroutine für Nachrichten hier einfügen und/oder Standard aufrufen
-	if (nID == SC_CLOSE)
-	{
+	if (nID == SC_CLOSE) {
 		// ok now just hide the window
 		ShowWindow(SW_HIDE);
 		return;
@@ -878,8 +810,7 @@ inline int GetScrPos(CWnd* pOwner, UINT nSB, UINT nSBCode, UINT& nPos)
 
 	pOwner->GetScrollInfo(nSB, &scr);
 
-	switch (nSBCode)
-	{
+	switch (nSBCode) {
 	case SB_LEFT:
 	{
 		nPos = scr.nMin;
@@ -969,13 +900,12 @@ void CIsoView::UpdateDialog(BOOL bRepos)
 	UpdateOverlayPictures();
 
 
-	if (bRepos && Map->GetIsoSize() != 0)
-	{
+	if (bRepos && Map->GetIsoSize() != 0) {
 		m_viewScale = Vec2<CSProjected, float>(1.0f, 1.0f);
 		m_viewScaleControl = 1.0f;
 		auto r = GetScaledDisplayRect();
 		UpdateScrollRanges();
-		SetScroll((Map->GetIsoSize() / 2 - r.right / f_x / 2) * f_x, (Map->GetIsoSize() / 2 - r.bottom / f_y / 2) * f_y);		
+		SetScroll((Map->GetIsoSize() / 2 - r.right / f_x / 2) * f_x, (Map->GetIsoSize() / 2 - r.bottom / f_y / 2) * f_y);
 	}
 
 	RedrawWindow(NULL, NULL, RDW_INVALIDATE);
@@ -1018,10 +948,8 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 	if (!(nFlags & MK_RBUTTON)) bDoNotAllowScroll = FALSE;
 
-	if (rscroll)
-	{
-		if (!(nFlags & MK_RBUTTON))
-		{
+	if (rscroll) {
+		if (!(nFlags & MK_RBUTTON)) {
 			ReleaseCapture();
 			KillTimer(11);
 			rscroll = FALSE;
@@ -1030,9 +958,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			CMyViewFrame& dlg = *(CMyViewFrame*)owner;
 			dlg.m_minimap.RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
-		}
-		else
-		{
+		} else {
 
 			isMoving = FALSE;
 			return;
@@ -1041,8 +967,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 	if (!bDoNotAllowScroll && (nFlags & MK_RBUTTON) && !rscroll) // check if scroll should start
 	{
-		if (abs(point.x - rclick_x) > 2 || abs(point.y - rclick_y) > 2)
-		{
+		if (abs(point.x - rclick_x) > 2 || abs(point.y - rclick_y) > 2) {
 			// yes, begin scrolling!
 
 			rscroll = TRUE;
@@ -1057,10 +982,8 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 	if ((nFlags & MK_MBUTTON) == 0)
 		m_zooming = false;
 
-	if (!bDoNotAllowScroll && m_zooming)
-	{
-		if ((nFlags & MK_MBUTTON) == MK_MBUTTON)
-		{
+	if (!bDoNotAllowScroll && m_zooming) {
+		if ((nFlags & MK_MBUTTON) == MK_MBUTTON) {
 			auto diff = point - m_MButtonMoveZooming;
 			m_MButtonMoveZooming = point;
 			Zoom(m_MButtonDown, -diff.cy / 1000.0f);
@@ -1095,21 +1018,15 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 	BOOL bOutside = FALSE;
 
-	if (AD.mode != ACTIONMODE_COPY && AD.mode != ACTIONMODE_PASTE)
-	{
-		if (x < 1 || y < 1 || x + y<mapwidth + 1 || x + y>mapwidth + mapheight * 2 || (y + 1 > mapwidth && x - 1 < y - mapwidth) || (x + 1 > mapwidth && y + mapwidth - 1 < x))
-		{
+	if (AD.mode != ACTIONMODE_COPY && AD.mode != ACTIONMODE_PASTE) {
+		if (x < 1 || y < 1 || x + y<mapwidth + 1 || x + y>mapwidth + mapheight * 2 || (y + 1 > mapwidth && x - 1 < y - mapwidth) || (x + 1 > mapwidth && y + mapwidth - 1 < x)) {
 			isMoving = FALSE;
 			return;
 		}
-	}
-	else
-	{
-		if (x < 1 || y < 1 || x >= mapwidth + mapheight - 1 || y >= mapwidth + mapheight - 1)
-		{
+	} else {
+		if (x < 1 || y < 1 || x >= mapwidth + mapheight - 1 || y >= mapwidth + mapheight - 1) {
 			bOutside = TRUE;
-			if (AD.mode == ACTIONMODE_COPY || AD.mode == ACTIONMODE_PASTE)
-			{
+			if (AD.mode == ACTIONMODE_COPY || AD.mode == ACTIONMODE_PASTE) {
 				isMoving = FALSE;
 				return;
 			}
@@ -1121,15 +1038,14 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 	if (lpdsBack)
 		// reset back buffer to last DrawMap()
 		lpdsBack->BltFast(0, 0, lpdsTemp, NULL, DDBLTFAST_WAIT);
-		//lpdsBack->Blt(NULL, lpdsTemp, NULL, 0, 0);
+	//lpdsBack->Blt(NULL, lpdsTemp, NULL, 0, 0);
 
-	//int cell_x = x;
-	//int cell_y = y;
+//int cell_x = x;
+//int cell_y = y;
 
 	{
 		// Preview rendering
-		if (AD.mode == ACTIONMODE_SETTILE && !((nFlags & MK_LBUTTON) && !(nFlags & MK_CONTROL) && (nFlags & MK_SHIFT)))
-		{
+		if (AD.mode == ACTIONMODE_SETTILE && !((nFlags & MK_LBUTTON) && !(nFlags & MK_CONTROL) && (nFlags & MK_SHIFT))) {
 			// No placement, just preview
 
 			bCancelDraw = TRUE;
@@ -1152,15 +1068,12 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			int height_add = height * isosize;
 			char c[50];
 			itoa(AD.data, c, 10);
-			for (f = 0;f < m_BrushSize_x;f++)
-			{
-				for (n = 0;n < m_BrushSize_y;n++)
-				{
+			for (f = 0; f < m_BrushSize_x; f++) {
+				for (n = 0; n < m_BrushSize_y; n++) {
 
 					int tile = AD.type;
 
-					if (AD.data == 1)
-					{
+					if (AD.data == 1) {
 						int n = rand() * 5 / RAND_MAX;
 						tile += n;
 					}
@@ -1169,17 +1082,12 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 					cur_pos = pos + f * width + n * height_add;
 					p = 0;
-					for (i = 0;i < td.cx;i++)
-					{
-						for (e = 0;e < td.cy;e++)
-						{
+					for (i = 0; i < td.cx; i++) {
+						for (e = 0; e < td.cy; e++) {
 							if (x - width + 1 + f * width + i >= Map->GetIsoSize() ||
-								y - height + 1 + n * height + e >= Map->GetIsoSize())
-							{
-							}
-							else
-								if (td.tiles[p].pic != NULL)
-								{
+								y - height + 1 + n * height + e >= Map->GetIsoSize()) {
+							} else
+								if (td.tiles[p].pic != NULL) {
 									int mypos = cur_pos + i + e * isosize;
 
 									Map->SetHeightAt(mypos, startheight + td.tiles[p].bZHeight);
@@ -1197,20 +1105,15 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 				}
 			}
 
-			if (!((nFlags & MK_CONTROL) && (nFlags & MK_SHIFT)))
-			{
+			if (!((nFlags & MK_CONTROL) && (nFlags & MK_SHIFT))) {
 				if (!theApp.m_Options.bDisableAutoShore) Map->CreateShore(x - width - 2, y - height - 2, x - width + td.cx * m_BrushSize_x + 5, y - height + td.cy * m_BrushSize_y + 5, FALSE);
 
-				for (f = 0;f < m_BrushSize_x;f++)
-				{
-					for (n = 0;n < m_BrushSize_y;n++)
-					{
+				for (f = 0; f < m_BrushSize_x; f++) {
+					for (n = 0; n < m_BrushSize_y; n++) {
 						cur_pos = pos + f * width + n * height_add;
 						p = 0;
-						for (i = -1;i < td.cx + 1;i++)
-						{
-							for (e = -1;e < td.cy + 1;e++)
-							{
+						for (i = -1; i < td.cx + 1; i++) {
+							for (e = -1; e < td.cy + 1; e++) {
 								Map->SmoothAllAt(cur_pos + i + (e)*isosize);
 							}
 						}
@@ -1230,9 +1133,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 			m_drag = FALSE;
 
-		}
-		else if (m_drag && AD.mode == ACTIONMODE_CLIFFFRONT)
-		{
+		} else if (m_drag && AD.mode == ACTIONMODE_CLIFFFRONT) {
 			RECT affect;
 			if (m_mapx < x) affect.left = m_mapx - 2; else affect.left = x - 2;
 			if (m_mapx < x) affect.right = x + 2; else affect.right = m_mapx + 2;
@@ -1251,9 +1152,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->TakeSnapshot(TRUE, affect.left, affect.top, affect.right, affect.bottom);
 			Map->Undo();
 			Map->Undo();
-		}
-		else if (m_drag && AD.mode == ACTIONMODE_CLIFFBACK)
-		{
+		} else if (m_drag && AD.mode == ACTIONMODE_CLIFFBACK) {
 			RECT affect;
 			if (m_mapx < x) affect.left = m_mapx - 2; else affect.left = x - 2;
 			if (m_mapx < x) affect.right = x + 2; else affect.right = m_mapx + 2;
@@ -1272,29 +1171,21 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->TakeSnapshot(TRUE, affect.left, affect.top, affect.right, affect.bottom);
 			Map->Undo();
 			Map->Undo();
-		}
-		else if (AD.mode == ACTIONMODE_COPY && m_drag)
-		{
+		} else if (AD.mode == ACTIONMODE_COPY && m_drag) {
 			last_succeeded_operation = 80301; //bugtracing once more
 
 			int x1, x2, y1, y2;
-			if (m_mapx < x)
-			{
+			if (m_mapx < x) {
 				x1 = m_mapx;
 				x2 = x;
-			}
-			else
-			{
+			} else {
 				x1 = x;
 				x2 = m_mapx;
 			}
-			if (m_mapy < y)
-			{
+			if (m_mapy < y) {
 				y1 = m_mapy;
 				y2 = y;
-			}
-			else
-			{
+			} else {
 				y1 = y;
 				y2 = m_mapy;
 			}
@@ -1311,10 +1202,8 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 			int i, e;
 			int isosize = Map->GetIsoSize();
-			for (i = 0;i < x2 - x1 + 1;i++)
-			{
-				for (e = 0;e < y2 - y1 + 1;e++)
-				{
+			for (i = 0; i < x2 - x1 + 1; i++) {
+				for (e = 0; e < y2 - y1 + 1; e++) {
 					last_succeeded_operation = 80302;
 					int x_s = x1 + i;
 					int y_s = y1 + e;
@@ -1337,15 +1226,12 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			RenderUIOverlay();
 			FlipHighResBuffer();
 			last_succeeded_operation = 80304;
-		}
-		else if (AD.mode == ACTIONMODE_PASTE)
-		{
+		} else if (AD.mode == ACTIONMODE_PASTE) {
 			Map->TakeSnapshot();
 			Map->Paste(x, y, AD.z_data);
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 			Map->Undo();
-		}
-		else if ((AD.mode == ACTIONMODE_PLACE || AD.mode == ACTIONMODE_RANDOMTERRAIN) && (nFlags & ~MK_CONTROL) == 0 && AD.type != 7 && (AD.type != 6 || (AD.type == 6 && ((AD.data >= 30 && AD.data <= 33) || AD.data == 2 || AD.data == 3)))) // everything placing but not overlay!
+		} else if ((AD.mode == ACTIONMODE_PLACE || AD.mode == ACTIONMODE_RANDOMTERRAIN) && (nFlags & ~MK_CONTROL) == 0 && AD.type != 7 && (AD.type != 6 || (AD.type == 6 && ((AD.data >= 30 && AD.data <= 33) || AD.data == 2 || AD.data == 3)))) // everything placing but not overlay!
 		{
 			FIELDDATA oldData[32][32];
 			INFANTRY infData[SUBPOS_COUNT][32][32];
@@ -1353,13 +1239,11 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 			//if(AD.type!=1 || Map->GetInfantryCountAt(x+y*Map->GetIsoSize())==0)
 			{
-				for (i = 0;i < 32;i++)
-				{
-					for (e = 0;e < 32;e++)
-					{
+				for (i = 0; i < 32; i++) {
+					for (e = 0; e < 32; e++) {
 						oldData[i][e] = *Map->GetFielddataAt(i + x + (e + y) * Map->GetIsoSize());
 						int z;
-						for (z = 0;z < SUBPOS_COUNT;z++)
+						for (z = 0; z < SUBPOS_COUNT; z++)
 							if (oldData[i][e].infantry[z] > -1)
 								Map->GetInfantryData(oldData[i][e].infantry[z], &infData[z][i][e]);
 					}
@@ -1368,10 +1252,8 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 				PlaceCurrentObjectAt(x, y);
 				RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
-				for (i = 0;i < 32;i++)
-				{
-					for (e = 0;e < 32;e++)
-					{
+				for (i = 0; i < 32; i++) {
+					for (e = 0; e < 32; e++) {
 						DWORD dwPos = i + x + (e + y) * Map->GetIsoSize();
 						FIELDDATA cur_field;
 						cur_field = *Map->GetFielddataAt(dwPos);
@@ -1379,14 +1261,12 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 						if (cur_field.aircraft != oldData[i][e].aircraft)
 							Map->DeleteAircraft(cur_field.aircraft);
 						int z;
-						for (z = 0;z < SUBPOS_COUNT;z++)
-							if (cur_field.infantry[z] != oldData[i][e].infantry[z])
-							{
+						for (z = 0; z < SUBPOS_COUNT; z++)
+							if (cur_field.infantry[z] != oldData[i][e].infantry[z]) {
 								Map->DeleteInfantry(cur_field.infantry[z]);
 							}
 
-						if (cur_field.node.index != oldData[i][e].node.index)
-						{
+						if (cur_field.node.index != oldData[i][e].node.index) {
 							CString house;
 							int id = Map->GetNodeAt(dwPos, house);
 							Map->DeleteNode(house, id);
@@ -1414,9 +1294,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			//else
 			//	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
-		}
-		else
-		{
+		} else {
 
 			SurfaceLocker locker(lpdsBack);
 			auto desc = locker.ensure_locked();
@@ -1431,7 +1309,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			FlipHighResBuffer();
 		}
 	}
-	
+
 
 
 
@@ -1454,8 +1332,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 
 	// drag
-	if (m_drag && AD.mode == 0)
-	{
+	if (m_drag && AD.mode == 0) {
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE);
 
 		CPaintDC dc(this);
@@ -1467,31 +1344,24 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 		dc.MoveTo(from.x, from.y);
 		dc.LineTo(to.x, to.y);
-	}
-	else if (AD.mode == ACTIONMODE_SETTILE && (nFlags & MK_LBUTTON) && ((nFlags & MK_SHIFT) || Map->hasLat(AD.type)) && !(nFlags & MK_CONTROL))
-	{
+	} else if (AD.mode == ACTIONMODE_SETTILE && (nFlags & MK_LBUTTON) && ((nFlags & MK_SHIFT) || Map->hasLat(AD.type)) && !(nFlags & MK_CONTROL)) {
 		// Sound(SOUND_LAYDOWNTILE);  // too many sounds
 
 		PlaceTile(x, y, nFlags);
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		isMoving = FALSE;
 		return;
-	}
-	else if ((nFlags & MK_LBUTTON) && (nFlags & MK_SHIFT) && AD.mode == ACTIONMODE_HEIGHTEN)
-	{
+	} else if ((nFlags & MK_LBUTTON) && (nFlags & MK_SHIFT) && AD.mode == ACTIONMODE_HEIGHTEN) {
 		OnLButtonDown(nFlags, point);
 		isMoving = FALSE;
 		return;
-	}
-	else if ((nFlags & MK_LBUTTON) && (nFlags & MK_SHIFT) && AD.mode == ACTIONMODE_LOWER)
-	{
+	} else if ((nFlags & MK_LBUTTON) && (nFlags & MK_SHIFT) && AD.mode == ACTIONMODE_LOWER) {
 		OnLButtonDown(nFlags, point);
 		isMoving = FALSE;
 		return;
 	}
 
-	else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_FLATTENGROUND)
-	{
+	else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_FLATTENGROUND) {
 		m_TileChangeCount = 0;
 
 		// if(abs(m_FlattenLastX-x)<2 && abs(m_FlattenLastY-y)<2) //ReachableFrom(x+y*Map->GetIsoSize(), m_mapx+m_mapy*Map->GetIsoSize()))
@@ -1510,10 +1380,8 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			int n, m;
 			int isosize = Map->GetIsoSize();
 
-			for (m = left;m < right;m++)
-			{
-				for (n = top;n < bottom;n++)
-				{
+			for (m = left; m < right; m++) {
+				for (n = top; n < bottom; n++) {
 					int pos = x + m + (y + n) * isosize;
 
 					int ground = Map->GetFielddataAt(pos)->wGround;
@@ -1525,8 +1393,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 
 
-					if (!(*tiledata)[ground].bMorphable)
-					{
+					if (!(*tiledata)[ground].bMorphable) {
 
 						{
 							if (n <= 0 /*&& !(*tiledata)[ground1].bMorphable*/) top = n + 1;
@@ -1537,13 +1404,11 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 					}
 
-					if (n < top)
-					{
+					if (n < top) {
 						m = left;
 						n = top;
 					}
-					if (m < left)
-					{
+					if (m < left) {
 						n = top;
 						m = left;
 					}
@@ -1555,20 +1420,17 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			m_funcRect.bottom = y;
 			m_funcRect.right = x;
 
-			for (m = left;m < right;m++)
-			{
-				for (n = top;n < bottom;n++)
-				{
+			for (m = left; m < right; m++) {
+				for (n = top; n < bottom; n++) {
 					int ground = Map->GetFielddataAt(x + m + (y + n) * Map->GetIsoSize())->wGround;
 					if (ground == 0xFFFF) ground = 0;
 
 
 
-					if ((*tiledata)[ground].bMorphable)
-					{
+					if ((*tiledata)[ground].bMorphable) {
 						int i;
 						int max = isosize * isosize;
-						for (i = 0;i < max;i++)
+						for (i = 0; i < max; i++)
 							Map->SetReserved(i, 0);
 
 
@@ -1578,9 +1440,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 
 
-					}
-					else
-					{
+					} else {
 						if (n == 0 && m == 0)
 							doNotSave = TRUE;
 
@@ -1597,46 +1457,35 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			*/
 			ASSERT(m_funcRect.left <= m_funcRect.right);
 			ASSERT(m_funcRect.top <= m_funcRect.bottom);
-			for (m = m_funcRect.left - 1;m <= m_funcRect.right + 1;m++)
-				for (n = m_funcRect.top - 1;n <= m_funcRect.bottom + 1;n++)
+			for (m = m_funcRect.left - 1; m <= m_funcRect.right + 1; m++)
+				for (n = m_funcRect.top - 1; n <= m_funcRect.bottom + 1; n++)
 					Map->CreateSlopesAt(m + n * isosize);
 
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-			if (!doNotSave)
-			{
+			if (!doNotSave) {
 				m_FlattenLastX = x;
 				m_FlattenLastY = y;
 			}
 		}
-	}
-	else if ((nFlags & MK_LBUTTON) && (nFlags & MK_SHIFT) && AD.mode == ACTIONMODE_HEIGHTENTILE)
-	{
+	} else if ((nFlags & MK_LBUTTON) && (nFlags & MK_SHIFT) && AD.mode == ACTIONMODE_HEIGHTENTILE) {
 		OnLButtonDown(nFlags, point);
-	}
-	else if ((nFlags & MK_LBUTTON) && (nFlags & MK_SHIFT) && AD.mode == ACTIONMODE_LOWERTILE)
-	{
+	} else if ((nFlags & MK_LBUTTON) && (nFlags & MK_SHIFT) && AD.mode == ACTIONMODE_LOWERTILE) {
 		OnLButtonDown(nFlags, point);
-	}
-	else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_WAYPOINT) // waypoints
+	} else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_WAYPOINT) // waypoints
 	{
-		if (AD.type == 1)
-		{
+		if (AD.type == 1) {
 			//delete waypoint
 			int w = Map->GetWaypointAt(x + y * Map->GetIsoSize());
-			if (w < 0)
-			{
+			if (w < 0) {
 				isMoving = FALSE;
 				return;
 			}
 
 			Map->DeleteWaypoint(w);
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-		}
-		else if (AD.type == 0)
-		{
+		} else if (AD.type == 0) {
 			int n = Map->GetWaypointAt(x + y * Map->GetIsoSize());
-			if (n >= 0)
-			{
+			if (n >= 0) {
 				isMoving = FALSE;
 				return;
 			}
@@ -1644,12 +1493,9 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->AddWaypoint("", x + y * Map->GetIsoSize());
 
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-		}
-		else if (AD.type >= 3)
-		{
+		} else if (AD.type >= 3) {
 			int n = Map->GetWaypointAt(x + y * Map->GetIsoSize());
-			if (n >= 0)
-			{
+			if (n >= 0) {
 				isMoving = FALSE;
 				return;
 			}
@@ -1666,20 +1512,17 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			int i;
 			int e;
 			int notfound = -1;
-			for (e = 0;e < max;e++)
-			{
+			for (e = 0; e < max; e++) {
 				BOOL bFound = FALSE;
 
-				for (i = 0;i < Map->GetWaypointCount();i++)
-				{
+				for (i = 0; i < Map->GetWaypointCount(); i++) {
 					CString id;
 					DWORD pos;
 					Map->GetWaypointData(i, &id, &pos);
 					if (atoi(id) == e) bFound = TRUE;
 					if (bFound) break;
 				}
-				if (!bFound)
-				{
+				if (!bFound) {
 					notfound = e;
 					break;
 				}
@@ -1691,47 +1534,37 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 			itoa(max, c, 10);
 
-			if (!Map->IsMultiplayer())
-			{
+			if (!Map->IsMultiplayer()) {
 				Map->AddWaypoint("99", x + (y + 1) * Map->GetIsoSize());
 				Map->AddWaypoint("98", x + (y)*Map->GetIsoSize());
-			}
-			else
-			{
+			} else {
 				Map->AddWaypoint(c, x + y * Map->GetIsoSize());
 			}
 
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		}
 
-	}
-	else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_CELLTAG) // celltags
+	} else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_CELLTAG) // celltags
 	{
-		if (AD.type == 1)
-		{
+		if (AD.type == 1) {
 			int n = Map->GetCelltagAt(x + y * Map->GetIsoSize());
-			if (n < 0)
-			{
+			if (n < 0) {
 				isMoving = FALSE;
 				return;
 			}
 			Map->DeleteCelltag(n);
 
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-		}
-		else if (AD.type == 4)
-		{
+		} else if (AD.type == 4) {
 			Map->AddCelltag(AD.data_s, x + y * Map->GetIsoSize());
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		}
-	}
-	else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_NODE) // nodes
+	} else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_NODE) // nodes
 	{
 		if (AD.type == 1) // create node, delete building
 		{
 			int n = Map->GetStructureAt(x + y * Map->GetIsoSize());
-			if (n < 0)
-			{
+			if (n < 0) {
 				isMoving = FALSE;
 				return;
 			}
@@ -1740,8 +1573,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->GetStdStructureData(n, &sod);
 
 			CString tmp;
-			if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0)
-			{
+			if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0) {
 				SetError("You cannot place a node on another node");
 				{
 					isMoving = FALSE;
@@ -1760,12 +1592,10 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->AddNode(&node, 0);
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
-		}
-		else if (AD.type == 0) // create node, don´t delete building
+		} else if (AD.type == 0) // create node, don´t delete building
 		{
 			int n = Map->GetStructureAt(x + y * Map->GetIsoSize());
-			if (n < 0)
-			{
+			if (n < 0) {
 				isMoving = FALSE;
 				return;
 			}
@@ -1774,8 +1604,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->GetStdStructureData(n, &sod);
 
 			CString tmp;
-			if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0)
-			{
+			if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0) {
 				SetError("You cannot place a node on another node");
 				{
 					isMoving = FALSE;
@@ -1792,13 +1621,11 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->AddNode(&node, 0);
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
-		}
-		else if (AD.type == 2) // delete node
+		} else if (AD.type == 2) // delete node
 		{
 			CString owner;
 			int n = Map->GetNodeAt(x + y * Map->GetIsoSize(), owner);
-			if (n < 0)
-			{
+			if (n < 0) {
 				isMoving = FALSE;
 				return;
 			}
@@ -1807,60 +1634,48 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
 		}
-	}
-	else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_ERASEFIELD)
-	{
+	} else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_ERASEFIELD) {
 		int h;
 		DWORD dwPos = x + y * Map->GetIsoSize();
 		h = Map->GetInfantryAt(dwPos);
-		if (h > -1)
-		{
+		if (h > -1) {
 			Map->DeleteInfantry(h);
 		}
 
 		h = Map->GetUnitAt(dwPos);
-		if (h > -1)
-		{
+		if (h > -1) {
 			Map->DeleteUnit(h);
 		}
 
 		h = Map->GetStructureAt(dwPos);
-		if (h > -1)
-		{
+		if (h > -1) {
 			Map->DeleteStructure(h);
 		}
 
 		h = Map->GetAirAt(dwPos);
-		if (h > -1)
-		{
+		if (h > -1) {
 			Map->DeleteAircraft(h);
 		}
 
 		h = Map->GetTerrainAt(dwPos);
-		if (h > -1)
-		{
+		if (h > -1) {
 			Map->DeleteTerrain(h);
 		}
 
 #ifdef SMUDGE_SUPP
 		const FIELDDATA& fd = *Map->GetFielddataAt(dwPos);
 		h = fd.smudge;
-		if (h > -1)
-		{
+		if (h > -1) {
 			Map->DeleteSmudge(h);
 		}
 #endif
 
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
-	}
-	else if (AD.mode == ACTIONMODE_MAPTOOL)
-	{
+	} else if (AD.mode == ACTIONMODE_MAPTOOL) {
 		if (AD.tool)
 			AD.tool->onMouseMove(projCoords, mapCoords, MapToolMouseFlagsFromWin32(nFlags));
-	}
-	else if ((nFlags & MK_LBUTTON) == MK_LBUTTON && (AD.mode == ACTIONMODE_PLACE || AD.mode == ACTIONMODE_RANDOMTERRAIN))
-	{
+	} else if ((nFlags & MK_LBUTTON) == MK_LBUTTON && (AD.mode == ACTIONMODE_PLACE || AD.mode == ACTIONMODE_RANDOMTERRAIN)) {
 		// ADD OBJECTS
 
 		if (AD.mode == ACTIONMODE_PLACE && AD.type == 6) Map->TakeSnapshot();
@@ -1873,13 +1688,10 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			int x = mapCoords.x;
 			int y = mapCoords.y;
 
-			if (abs(x - m_mapx) >= abs(y - m_mapy))
-			{
+			if (abs(x - m_mapx) >= abs(y - m_mapy)) {
 				// it´s from bottom left to top right
 				y = m_mapy;
-			}
-			else
-			{
+			} else {
 				// from bottom right to top left
 				x = m_mapx;
 			}
@@ -1926,16 +1738,13 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			FlipHighResBuffer();
 			//lpds->Blt(NULL, lpdsBack, NULL, 0, 0);
 
-		}
-		else
-		{
+		} else {
 			PlaceCurrentObjectAt(x, y);
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		}
 
 
-		if (AD.mode == ACTIONMODE_PLACE && AD.type == 6)
-		{
+		if (AD.mode == ACTIONMODE_PLACE && AD.type == 6) {
 			Map->TakeSnapshot();
 			Map->Undo();
 		}
@@ -1957,13 +1766,13 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 void CIsoView::DrawCellCursor(const MapCoords& mapCoords, const DDSURFACEDESC2& desc)
 {
-	ProjectedVec drawOffset(0*4, 0*3);
+	ProjectedVec drawOffset(0 * 4, 0 * 3);
 	ProjectedCoords drawCoords2d = GetRenderTargetCoordinates(mapCoords, 0) + drawOffset;
 	ProjectedCoords drawCoords = GetRenderTargetCoordinates(mapCoords) + drawOffset;
 
-	static const COLORREF _cell_hilight_colors[16] = { 
+	static const COLORREF _cell_hilight_colors[16] = {
 		RGB(255, 255, 255),	// level 0
-		RGB( 170, 0, 170),	// level 1
+		RGB(170, 0, 170),	// level 1
 		RGB(0, 170, 170),	// level 2
 		RGB(0, 170, 0),		// level 3
 		RGB(90, 255, 90),	// level 4
@@ -1985,7 +1794,7 @@ void CIsoView::DrawCellCursor(const MapCoords& mapCoords, const DDSURFACEDESC2& 
 	int new_tileheight = std::clamp(tileheight, 0, 16);
 
 	DrawCell(desc.lpSurface, desc.dwWidth, desc.dwHeight, desc.lPitch, drawCoords.x, drawCoords.y, 1, 1, m_color_converter->GetColor(_cell_hilight_colors[new_tileheight]), false, true, m_color_converter->GetColor(60, 60, 255));
-	
+
 	LineDrawer l(desc.lpSurface, bpp, desc.dwWidth, desc.dwHeight, desc.lPitch);
 
 	POINT p1, p2, p3, p4;
@@ -2005,10 +1814,8 @@ void CIsoView::DrawCellCursor(const MapCoords& mapCoords, const DDSURFACEDESC2& 
 	p8.y = drawCoords.y + 1 * f_y / 2 - 1;
 
 	auto col = m_color_converter->GetColor(60, 60, 60);
-	if (drawCoords2d != drawCoords)
-	{
-		for (int y = 0; y < 2; ++y)
-		{
+	if (drawCoords2d != drawCoords) {
+		for (int y = 0; y < 2; ++y) {
 			l.MoveTo(p2.x + 1, p2.y + y);
 			l.LineTo(p6.x + 1, p6.y + y, col, LineStyle::Dotted_4);
 			l.MoveTo(p3.x, p3.y + 1 + y);
@@ -2031,8 +1838,7 @@ const int valadded = 10000;
 
 void CIsoView::OnRButtonUp(UINT nFlags, CPoint point)
 {
-	if (rscroll)
-	{
+	if (rscroll) {
 		if (b_IsLoading) return;
 
 		ReleaseCapture();
@@ -2044,8 +1850,7 @@ void CIsoView::OnRButtonUp(UINT nFlags, CPoint point)
 	}
 
 
-	if (nFlags == 0 && point.x == 0 && point.y == 0)
-	{
+	if (nFlags == 0 && point.x == 0 && point.y == 0) {
 		m_drag = FALSE; return;
 	}
 
@@ -2062,17 +1867,14 @@ void CIsoView::OnRButtonUp(UINT nFlags, CPoint point)
 	const int y = mapCoords.y;
 
 	// context menu
-	if (AD.mode != 0 && !rscroll)
-	{
+	if (AD.mode != 0 && !rscroll) {
 		bool ignoreClick = false;
-		if (AD.mode == ACTIONMODE_MAPTOOL)
-		{
+		if (AD.mode == ACTIONMODE_MAPTOOL) {
 			if (AD.tool)
 				ignoreClick = AD.tool->onRButtonUp(projCoords, mapCoords, MapToolMouseFlagsFromWin32(nFlags));
 		}
 
-		if (!ignoreClick)
-		{
+		if (!ignoreClick) {
 			AD.reset();
 
 			CMyViewFrame& frame = *((CMyViewFrame*)owner);
@@ -2101,33 +1903,24 @@ BOOL CIsoView::OnCommand(WPARAM wParam, LPARAM lParam)
 	CIniFile& ini = Map->GetIniFile();
 
 
-	if (wID < valadded)
-	{
+	if (wID < valadded) {
 		// a standard menu, no popup!
 
-		switch (wID)
-		{
+		switch (wID) {
 		case 4:
 		{
 			last_succeeded_operation = 54310;
 			//get the number
-			if (Map->GetAirAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1)
-			{
+			if (Map->GetAirAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
 				HandleProperties(Map->GetAirAt(m_mapx + m_mapy * Map->GetIsoSize()), 2);
-			}
-			else if (Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1)
-			{
+			} else if (Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
 				last_succeeded_operation = 54311;
 				int z;
-				for (z = 0;z < SUBPOS_COUNT;z++)
+				for (z = 0; z < SUBPOS_COUNT; z++)
 					if (Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize(), z) != -1) HandleProperties(Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize(), z), 0);
-			}
-			else if (Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1)
-			{
+			} else if (Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
 				HandleProperties(Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()), 3);
-			}
-			else if (Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1)
-			{
+			} else if (Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
 				HandleProperties(Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize()), 1);
 			}
 
@@ -2152,8 +1945,7 @@ void CIsoView::HandleProperties(int n, int type)
 	CIniFile& ini = Map->GetIniFile();
 
 	if (n < 0) return;
-	switch (type)
-	{
+	switch (type) {
 	case 0:
 	{
 		last_succeeded_operation = 54312;
@@ -2321,13 +2113,10 @@ void CIsoView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	const auto projCoords = GetProjectedCoordinatesFromClientCoordinates(point);
 	const MapCoords mapCoords = GetMapCoordinatesFromClientCoordinates(point, (nFlags & MK_CONTROL) == MK_CONTROL);
 
-	if (AD.mode == ACTIONMODE_MAPTOOL)
-	{
+	if (AD.mode == ACTIONMODE_MAPTOOL) {
 		if (AD.tool)
 			AD.tool->onLButtonDblClick(projCoords, mapCoords, MapToolMouseFlagsFromWin32(nFlags));
-	}
-	else
-	{
+	} else {
 		if (!Map->isInside(mapCoords))
 			return;
 
@@ -2335,11 +2124,9 @@ void CIsoView::OnLButtonDblClk(UINT nFlags, CPoint point)
 		m_mapy = mapCoords.y;
 
 		int pos = m_mapx + m_mapy * Map->GetIsoSize();
-		if (Map->GetCelltagAt(pos) < 0)
-		{
+		if (Map->GetCelltagAt(pos) < 0) {
 			OnCommand(4, 0);
-		}
-		else
+		} else
 			OnCommand(9, 0);
 	}
 
@@ -2359,7 +2146,7 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 	const auto projCoords = GetProjectedCoordinatesFromClientCoordinates(point);
 	const MapCoords mapCoords = GetMapCoordinatesFromClientCoordinates(point, (nFlags & MK_CONTROL) == MK_CONTROL);
 
-	
+
 
 	const int x = mapCoords.x; // compat
 	const int y = mapCoords.y;
@@ -2368,8 +2155,7 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 	int mapwidth = Map->GetWidth();
 	int mapheight = Map->GetHeight();
 	//if(x>=Map->GetIsoSize() || y>=Map->GetIsoSize() || x<0 || y<0) return;
-	if (AD.mode != ACTIONMODE_COPY && AD.mode != ACTIONMODE_PASTE && AD.mode != ACTIONMODE_MAPTOOL)
-	{
+	if (AD.mode != ACTIONMODE_COPY && AD.mode != ACTIONMODE_PASTE && AD.mode != ACTIONMODE_MAPTOOL) {
 		if (!Map->isInside(mapCoords))
 			return;
 		if (x < 1 || y < 1 || x + y<mapwidth + 1 || x + y>mapwidth + mapheight * 2 || (y + 1 > mapwidth && x - 1 < y - mapwidth) || (x + 1 > mapwidth && y + mapwidth - 1 < x))
@@ -2384,44 +2170,31 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 
 	CStatusBarCtrl& stat = ((CMyViewFrame*)owner)->m_statbar.GetStatusBarCtrl();
 
-	if (AD.mode == ACTIONMODE_CLIFFFRONT || AD.mode == ACTIONMODE_CLIFFBACK)
-	{
+	if (AD.mode == ACTIONMODE_CLIFFFRONT || AD.mode == ACTIONMODE_CLIFFBACK) {
 		m_drag = TRUE;
-	}
-	else if (AD.mode == ACTIONMODE_PASTE)
-	{
+	} else if (AD.mode == ACTIONMODE_PASTE) {
 		Map->TakeSnapshot();
 		Map->Paste(m_mapx, m_mapy, AD.z_data);
 		Map->TakeSnapshot();
 		Map->Undo();
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.mode == ACTIONMODE_COPY)
-	{
-		if (!m_drag)
-		{
+	} else if (AD.mode == ACTIONMODE_COPY) {
+		if (!m_drag) {
 			m_drag = TRUE;
-		}
-		else // 2nd click
+		} else // 2nd click
 		{
 			int x1, x2, y1, y2;
-			if (px < x)
-			{
+			if (px < x) {
 				x1 = px;
 				x2 = x;
-			}
-			else
-			{
+			} else {
 				x1 = x;
 				x2 = px;
 			}
-			if (py < y)
-			{
+			if (py < y) {
 				y1 = py;
 				y2 = y;
-			}
-			else
-			{
+			} else {
 				y1 = y;
 				y2 = py;
 			}
@@ -2431,30 +2204,24 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 
 			m_drag = FALSE;
 		}
-	}
-	else if (Map->IsGroundObjectAt(m_mapx + m_mapy * Map->GetIsoSize()) && AD.mode == 0 && m_NoMove == FALSE)
-	{
+	} else if (Map->IsGroundObjectAt(m_mapx + m_mapy * Map->GetIsoSize()) && AD.mode == 0 && m_NoMove == FALSE) {
 		m_drag = TRUE;
 		m_moved = FALSE;
 		m_id = Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize());
 		m_type = 0;
-		if (m_id < 0)
-		{
+		if (m_id < 0) {
 			m_id = Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize());
 			m_type = 3;
 		}
-		if (m_id < 0)
-		{
+		if (m_id < 0) {
 			m_id = Map->GetAirAt(m_mapx + m_mapy * Map->GetIsoSize());
 			m_type = 2;
 		}
-		if (m_id < 0)
-		{
+		if (m_id < 0) {
 			m_id = Map->GetTerrainAt(m_mapx + m_mapy * Map->GetIsoSize());
 			m_type = 4;
 		}
-		if (m_id < 0)
-		{
+		if (m_id < 0) {
 			m_id = Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize());
 
 			STDOBJECTDATA sod;
@@ -2465,31 +2232,25 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 			m_type = 1;
 		}
 
-	}
-	else if (AD.mode == ACTIONMODE_SETTILE)
-	{
+	} else if (AD.mode == ACTIONMODE_SETTILE) {
 
 
-		if ((nFlags & MK_CONTROL) && !(nFlags & MK_SHIFT))
-		{
+		if ((nFlags & MK_CONTROL) && !(nFlags & MK_SHIFT)) {
 			// Fill the whole area
 			Sound(SOUND_LAYDOWNTILE);
 
 			Map->TakeSnapshot();
 			int i;
-			for (i = 0;i < Map->GetIsoSize() * Map->GetIsoSize();i++)
+			for (i = 0; i < Map->GetIsoSize() * Map->GetIsoSize(); i++)
 				Map->SetReserved(i, 0);
 
 			FillArea(x, y, AD.type, 0);
 			Map->TakeSnapshot();
 			Map->Undo();
-		}
-		else
-		{
+		} else {
 			// just place a single tile
 
-			if (!(nFlags & MK_SHIFT))
-			{
+			if (!(nFlags & MK_SHIFT)) {
 				Sound(SOUND_LAYDOWNTILE);
 			}
 
@@ -2500,23 +2261,17 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 
 
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.mode == ACTIONMODE_HIDETILESET)
-	{
+	} else if (AD.mode == ACTIONMODE_HIDETILESET) {
 		int ground = Map->GetFielddataAt(x + (y)*Map->GetIsoSize())->wGround;
 		if (ground == 0xFFFF) ground = 0;
 
 		//if(ground!=0)
 		HideTileSet((*tiledata)[ground].wTileSet);
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.mode == ACTIONMODE_HIDEFIELD)
-	{
+	} else if (AD.mode == ACTIONMODE_HIDEFIELD) {
 		Map->HideField(x + y * Map->GetIsoSize(), TRUE);
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.mode == ACTIONMODE_HEIGHTEN)
-	{
+	} else if (AD.mode == ACTIONMODE_HEIGHTEN) {
 		Map->TakeSnapshot();
 
 		m_TileChangeCount = 0;
@@ -2526,8 +2281,7 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 			int ground = Map->GetFielddataAt(x + (y)*Map->GetIsoSize())->wGround;
 			if (ground == 0xFFFF) ground = 0;
 
-			if ((nFlags & MK_CONTROL) && !(*tiledata)[ground].bMorphable)
-			{
+			if ((nFlags & MK_CONTROL) && !(*tiledata)[ground].bMorphable) {
 				SetError("Applying non-morphable terrain height change, please wait...");
 				stat.RedrawWindow();
 				stat.UpdateWindow();
@@ -2538,65 +2292,51 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 			m_funcRect.bottom = y;
 			m_funcRect.right = x;
 
-			if ((*tiledata)[ground].bMorphable)
-			{
+			if ((*tiledata)[ground].bMorphable) {
 				int f, n;
 				int oheight = Map->GetHeightAt(x + y * Map->GetIsoSize());
-				for (f = -m_BrushSize_x / 2;f < m_BrushSize_x / 2 + 1;f++)
-				{
-					for (n = -m_BrushSize_y / 2;n < m_BrushSize_y / 2 + 1;n++)
-					{
+				for (f = -m_BrushSize_x / 2; f < m_BrushSize_x / 2 + 1; f++) {
+					for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
 						int pos = x + f + (y + n) * Map->GetIsoSize();
 						int ground = Map->GetFielddataAt(pos)->wGround;
 						if (ground == 0xFFFF) ground = 0;
 
-						if ((*tiledata)[ground].bMorphable && Map->GetHeightAt(pos) == oheight)
-						{
+						if ((*tiledata)[ground].bMorphable && Map->GetHeightAt(pos) == oheight) {
 							Map->SetHeightAt(pos, oheight + 1);
 						}
 					}
 				}
-				for (f = -m_BrushSize_x / 2;f < m_BrushSize_x / 2 + 1;f++)
-				{
-					for (n = -m_BrushSize_y / 2;n < m_BrushSize_y / 2 + 1;n++)
-					{
+				for (f = -m_BrushSize_x / 2; f < m_BrushSize_x / 2 + 1; f++) {
+					for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
 						int pos = x + f + (y + n) * Map->GetIsoSize();
 						int ground = Map->GetFielddataAt(pos)->wGround;
 						if (ground == 0xFFFF) ground = 0;
 
-						if ((*tiledata)[ground].bMorphable && Map->GetHeightAt(x + f + (y + n) * Map->GetIsoSize()) == oheight + 1)
-						{
+						if ((*tiledata)[ground].bMorphable && Map->GetHeightAt(x + f + (y + n) * Map->GetIsoSize()) == oheight + 1) {
 							int i;
-							for (i = 0;i < Map->GetIsoSize() * Map->GetIsoSize();i++)
+							for (i = 0; i < Map->GetIsoSize() * Map->GetIsoSize(); i++)
 								Map->SetReserved(i, 0);
 
 							ChangeTileHeight(x + f + (y + n) * Map->GetIsoSize(), oheight + 1, FALSE, (nFlags & MK_CONTROL), TRUE);
 						}
 					}
 				}
-			}
-			else
-			{
+			} else {
 				int i;
-				for (i = 0;i < Map->GetIsoSize() * Map->GetIsoSize();i++)
+				for (i = 0; i < Map->GetIsoSize() * Map->GetIsoSize(); i++)
 					Map->SetReserved(i, 0);
 
 				// TODO: replace recursion, otherwise be aware of stack issues!
-				try
-				{
+				try {
 					ChangeTileHeight(x + (y)*Map->GetIsoSize(), Map->GetHeightAt(x + y * Map->GetIsoSize()) + 1, FALSE, !(nFlags & MK_CONTROL));
-				}
-				catch (...)
-				{
+				} catch (...) {
 					MessageBox("Stack is too small to complete operation!", "Error");
 				}
 			}
 
 			int f, n;
-			for (f = m_funcRect.left - 1;f <= m_funcRect.right + 1;f++)
-			{
-				for (n = m_funcRect.top - 1;n <= m_funcRect.bottom + 1;n++)
-				{
+			for (f = m_funcRect.left - 1; f <= m_funcRect.right + 1; f++) {
+				for (n = m_funcRect.top - 1; n <= m_funcRect.bottom + 1; n++) {
 					int pos = f + (n)*Map->GetIsoSize();
 					Map->CreateSlopesAt(pos);
 				}
@@ -2622,9 +2362,7 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 		{
 			//	MessageBox("Error occured","Error");
 		}
-	}
-	else if (AD.mode == ACTIONMODE_LOWER)
-	{
+	} else if (AD.mode == ACTIONMODE_LOWER) {
 		Map->TakeSnapshot();
 
 		m_TileChangeCount = 0;
@@ -2634,8 +2372,7 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 			int ground = Map->GetFielddataAt(x + (y)*Map->GetIsoSize())->wGround;
 			if (ground == 0xFFFF) ground = 0;
 
-			if ((nFlags & MK_CONTROL) && !(*tiledata)[ground].bMorphable)
-			{
+			if ((nFlags & MK_CONTROL) && !(*tiledata)[ground].bMorphable) {
 				SetError("Applying non-morphable terrain height change, please wait...");
 				stat.RedrawWindow();
 				stat.UpdateWindow();
@@ -2648,62 +2385,48 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 			m_funcRect.bottom = y;
 			m_funcRect.right = x;
 
-			if ((*tiledata)[ground].bMorphable)
-			{
+			if ((*tiledata)[ground].bMorphable) {
 				int f, n;
 				int oheight = Map->GetHeightAt(x + y * Map->GetIsoSize());
-				for (f = -m_BrushSize_x / 2;f < m_BrushSize_x / 2 + 1;f++)
-				{
-					for (n = -m_BrushSize_y / 2;n < m_BrushSize_y / 2 + 1;n++)
-					{
+				for (f = -m_BrushSize_x / 2; f < m_BrushSize_x / 2 + 1; f++) {
+					for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
 						int pos = x + f + (y + n) * Map->GetIsoSize();
 						int ground = Map->GetFielddataAt(pos)->wGround;
 						if (ground == 0xFFFF) ground = 0;
 
-						if ((*tiledata)[ground].bMorphable && Map->GetHeightAt(pos) == oheight)
-						{
+						if ((*tiledata)[ground].bMorphable && Map->GetHeightAt(pos) == oheight) {
 							Map->SetHeightAt(pos, oheight - 1);
 						}
 					}
 				}
-				for (f = -m_BrushSize_x / 2;f < m_BrushSize_x / 2 + 1;f++)
-				{
-					for (n = -m_BrushSize_y / 2;n < m_BrushSize_y / 2 + 1;n++)
-					{
+				for (f = -m_BrushSize_x / 2; f < m_BrushSize_x / 2 + 1; f++) {
+					for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
 						int pos = x + f + (y + n) * Map->GetIsoSize();
 						int ground = Map->GetFielddataAt(pos)->wGround;
 						if (ground == 0xFFFF) ground = 0;
 
-						if ((*tiledata)[ground].bMorphable && Map->GetHeightAt(x + f + (y + n) * Map->GetIsoSize()) == oheight - 1)
-						{
-							for (i = 0;i < Map->GetIsoSize() * Map->GetIsoSize();i++)
+						if ((*tiledata)[ground].bMorphable && Map->GetHeightAt(x + f + (y + n) * Map->GetIsoSize()) == oheight - 1) {
+							for (i = 0; i < Map->GetIsoSize() * Map->GetIsoSize(); i++)
 								Map->SetReserved(i, 0);
 
 							ChangeTileHeight(x + f + (y + n) * Map->GetIsoSize(), oheight - 1, FALSE, (nFlags & MK_CONTROL), TRUE);
 						}
 					}
 				}
-			}
-			else
-			{
-				for (i = 0;i < Map->GetIsoSize() * Map->GetIsoSize();i++)
+			} else {
+				for (i = 0; i < Map->GetIsoSize() * Map->GetIsoSize(); i++)
 					Map->SetReserved(i, 0);
 
-				try
-				{
+				try {
 					ChangeTileHeight(x + (y)*Map->GetIsoSize(), Map->GetHeightAt(x + y * Map->GetIsoSize()) - 1, FALSE, !(nFlags & MK_CONTROL));
-				}
-				catch (...)
-				{
+				} catch (...) {
 					MessageBox("Stack is too small to complete operation!", "Error");
 				}
 			}
 
 			int f, n;
-			for (f = m_funcRect.left - 1;f <= m_funcRect.right + 1;f++)
-			{
-				for (n = m_funcRect.top - 1;n <= m_funcRect.bottom + 1;n++)
-				{
+			for (f = m_funcRect.left - 1; f <= m_funcRect.right + 1; f++) {
+				for (n = m_funcRect.top - 1; n <= m_funcRect.bottom + 1; n++) {
 					int pos = f + (n)*Map->GetIsoSize();
 					Map->CreateSlopesAt(pos);
 				}
@@ -2727,25 +2450,19 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 
 		Map->TakeSnapshot();
 		Map->Undo();
-	}
-	else if (AD.mode == ACTIONMODE_HEIGHTENTILE)
-	{
+	} else if (AD.mode == ACTIONMODE_HEIGHTENTILE) {
 		Map->TakeSnapshot();
 
 		int n, m;
-		for (m = -m_BrushSize_x / 2;m < m_BrushSize_x / 2 + 1;m++)
-		{
-			for (n = -m_BrushSize_y / 2;n < m_BrushSize_y / 2 + 1;n++)
-			{
+		for (m = -m_BrushSize_x / 2; m < m_BrushSize_x / 2 + 1; m++) {
+			for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
 				Map->SetHeightAt(x + m + (y + n) * Map->GetIsoSize(), Map->GetHeightAt(x + m + (y + n) * Map->GetIsoSize()) + 1);
 			}
 		}
 
 		if (nFlags & MK_CONTROL)
-			for (m = -m_BrushSize_x / 2 - 1;m < m_BrushSize_x / 2 + 2;m++)
-			{
-				for (n = -m_BrushSize_y / 2 - 1;n < m_BrushSize_y / 2 + 2;n++)
-				{
+			for (m = -m_BrushSize_x / 2 - 1; m < m_BrushSize_x / 2 + 2; m++) {
+				for (n = -m_BrushSize_y / 2 - 1; n < m_BrushSize_y / 2 + 2; n++) {
 					Map->CreateSlopesAt(x + m + (y + n) * Map->GetIsoSize());
 				}
 			}
@@ -2754,25 +2471,19 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 		Map->Undo();
 
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.mode == ACTIONMODE_LOWERTILE)
-	{
+	} else if (AD.mode == ACTIONMODE_LOWERTILE) {
 		Map->TakeSnapshot();
 
 		int n, m;
-		for (m = -m_BrushSize_x / 2;m < m_BrushSize_x / 2 + 1;m++)
-		{
-			for (n = -m_BrushSize_y / 2;n < m_BrushSize_y / 2 + 1;n++)
-			{
+		for (m = -m_BrushSize_x / 2; m < m_BrushSize_x / 2 + 1; m++) {
+			for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
 				Map->SetHeightAt(x + m + (y + n) * Map->GetIsoSize(), Map->GetHeightAt(x + m + (y + n) * Map->GetIsoSize()) - 1);
 			}
 		}
 
 		if (nFlags & MK_CONTROL)
-			for (m = -m_BrushSize_x / 2 - 1;m < m_BrushSize_x / 2 + 2;m++)
-			{
-				for (n = -m_BrushSize_y / 2 - 1;n < m_BrushSize_y / 2 + 2;n++)
-				{
+			for (m = -m_BrushSize_x / 2 - 1; m < m_BrushSize_x / 2 + 2; m++) {
+				for (n = -m_BrushSize_y / 2 - 1; n < m_BrushSize_y / 2 + 2; n++) {
 					Map->CreateSlopesAt(x + m + (y + n) * Map->GetIsoSize());
 				}
 			}
@@ -2781,9 +2492,7 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 		Map->Undo();
 
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.mode == ACTIONMODE_FLATTENGROUND)
-	{
+	} else if (AD.mode == ACTIONMODE_FLATTENGROUND) {
 		Map->TakeSnapshot();
 
 		m_FlattenHeight = Map->GetHeightAt(x + y * Map->GetIsoSize());
@@ -2792,31 +2501,21 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 
 		Map->TakeSnapshot();
 		Map->Undo();
-	}
-	else if (Map->GetWaypointAt(m_mapx + m_mapy * Map->GetIsoSize()) >= 0 && AD.mode == 0)
-	{
+	} else if (Map->GetWaypointAt(m_mapx + m_mapy * Map->GetIsoSize()) >= 0 && AD.mode == 0) {
 		m_drag = TRUE;
 		m_id = Map->GetWaypointAt(m_mapx + m_mapy * Map->GetIsoSize());
 		m_type = 6;
-	}
-	else if (Map->GetCelltagAt(m_mapx + m_mapy * Map->GetIsoSize()) >= 0 && AD.mode == 0)
-	{
+	} else if (Map->GetCelltagAt(m_mapx + m_mapy * Map->GetIsoSize()) >= 0 && AD.mode == 0) {
 		m_drag = TRUE;
 		m_id = Map->GetCelltagAt(m_mapx + m_mapy * Map->GetIsoSize());
 		m_type = 5;
-	}
-	else if ((AD.mode < 3 || AD.mode>4) || (AD.mode == 3 && AD.type == 0) || (AD.mode >= 3 && AD.mode <= 4 && AD.type == 1))
-	{
+	} else if ((AD.mode < 3 || AD.mode>4) || (AD.mode == 3 && AD.type == 0) || (AD.mode >= 3 && AD.mode <= 4 && AD.type == 1)) {
 		OnMouseMove(nFlags, point);
-	}
-	else if (AD.mode == 3)
-	{
-		if (AD.type == 2)
-		{
+	} else if (AD.mode == 3) {
+		if (AD.type == 2) {
 			// create waypoint
 			CWaypointID w(this);
-			if (w.DoModal() != IDCANCEL)
-			{
+			if (w.DoModal() != IDCANCEL) {
 				int n = w.m_value;
 
 				char id[50];
@@ -2829,21 +2528,17 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 
 	}
 
-	else if (AD.mode == 4)
-	{
-		if (AD.type == 0)
-		{
+	else if (AD.mode == 4) {
+		if (AD.type == 0) {
 			// create celltag
 			CCellTag w(this);
-			if (w.DoModal() != IDCANCEL)
-			{
+			if (w.DoModal() != IDCANCEL) {
 				Map->AddCelltag(w.m_tag, x + y * Map->GetIsoSize());
 
 				RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 			}
 		}
-		if (AD.type == 2)
-		{
+		if (AD.type == 2) {
 			// change celltag properties
 			int n = Map->GetCelltagAt(x + y * Map->GetIsoSize());
 			if (n < 0) return;
@@ -2890,31 +2585,23 @@ void CIsoView::PlaceTile(const int x, const int y, const UINT nMouseFlags)
 	int ground = Map->GetFielddataAt(x + y * Map->GetIsoSize())->wGround;
 	if (ground == 0xFFFF) ground = 0;
 	startheight -= (*tiledata)[ground].tiles[Map->GetFielddataAt(x + y * Map->GetIsoSize())->bSubTile].bZHeight;
-	for (f = 0;f < m_BrushSize_x;f++)
-	{
-		for (n = 0;n < m_BrushSize_y;n++)
-		{
+	for (f = 0; f < m_BrushSize_x; f++) {
+		for (n = 0; n < m_BrushSize_y; n++) {
 			int tile = AD.type;
-			if (AD.data == 1)
-			{
+			if (AD.data == 1) {
 				int n = rand() * 5 / RAND_MAX;
 				tile += n;
 
 			}
 			p = 0;
-			for (i = 0;i < (*tiledata)[AD.type].cx;i++)
-			{
-				for (e = 0;e < (*tiledata)[AD.type].cy;e++)
-				{
+			for (i = 0; i < (*tiledata)[AD.type].cx; i++) {
+				for (e = 0; e < (*tiledata)[AD.type].cy; e++) {
 
 					if (x - width + 1 + f * width + i >= Map->GetIsoSize() ||
-						y - height + 1 + n * height + e >= Map->GetIsoSize())
-					{
+						y - height + 1 + n * height + e >= Map->GetIsoSize()) {
 
-					}
-					else
-						if ((*tiledata)[AD.type].tiles[p].pic != NULL)
-						{
+					} else
+						if ((*tiledata)[AD.type].tiles[p].pic != NULL) {
 							Map->SetHeightAt(pos + i + f * width + (e + n * height) * Map->GetIsoSize(), startheight + (*tiledata)[AD.type].tiles[p].bZHeight);
 							Map->SetTileAt(pos + i + f * width + (e + n * height) * Map->GetIsoSize(), tile, p);
 
@@ -2926,20 +2613,15 @@ void CIsoView::PlaceTile(const int x, const int y, const UINT nMouseFlags)
 		}
 	}
 
-	if (!((nMouseFlags & MK_CONTROL) && (nMouseFlags & MK_SHIFT)))
-	{
+	if (!((nMouseFlags & MK_CONTROL) && (nMouseFlags & MK_SHIFT))) {
 		if (!theApp.m_Options.bDisableAutoShore) Map->CreateShore(x - 5, y - 5, x + (*tiledata)[AD.type].cx * m_BrushSize_x + 5, y + (*tiledata)[AD.type].cy * m_BrushSize_y + 5, FALSE);
 		//Map->CreateShore(0,0,Map->GetIsoSize(), Map->GetIsoSize());
 
-		for (f = 0;f < m_BrushSize_x;f++)
-		{
-			for (n = 0;n < m_BrushSize_y;n++)
-			{
+		for (f = 0; f < m_BrushSize_x; f++) {
+			for (n = 0; n < m_BrushSize_y; n++) {
 				p = 0;
-				for (i = -1;i < (*tiledata)[AD.type].cx + 1;i++)
-				{
-					for (e = -1;e < (*tiledata)[AD.type].cy + 1;e++)
-					{
+				for (i = -1; i < (*tiledata)[AD.type].cx + 1; i++) {
+					for (e = -1; e < (*tiledata)[AD.type].cy + 1; e++) {
 
 						Map->SmoothAllAt(pos + i + f * width + (e + n * height) * Map->GetIsoSize());
 
@@ -2969,15 +2651,14 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 	const auto projCoords = GetProjectedCoordinatesFromClientCoordinates(point);
 	const MapCoords mapCoords = GetMapCoordinatesFromClientCoordinates(point, (nFlags & MK_CONTROL) == MK_CONTROL);
 
-		const int dx = mapCoords.x; // compat
+	const int dx = mapCoords.x; // compat
 	const int dy = mapCoords.y;
 
 
 	//if(dx>=Map->GetIsoSize() || dy>=Map->GetIsoSize() || dx<0 || dy<0) return;
 	int mapwidth = Map->GetWidth();
 	int mapheight = Map->GetHeight();
-	if (AD.mode != ACTIONMODE_COPY && AD.mode != ACTIONMODE_PASTE && AD.mode != ACTIONMODE_MAPTOOL)
-	{
+	if (AD.mode != ACTIONMODE_COPY && AD.mode != ACTIONMODE_PASTE && AD.mode != ACTIONMODE_MAPTOOL) {
 		if (!Map->isInside(mapCoords))
 			return;
 		if (dx < 1 || dy < 1 || dx + dy<mapwidth + 1 || dx + dy>mapwidth + mapheight * 2 || (dy + 1 > mapwidth && dx - 1 < dy - mapwidth) || (dx + 1 > mapwidth && dy + mapwidth - 1 < dx))
@@ -2994,20 +2675,17 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 	y = dy;
 
 	// check if user did select something else than 0 in object browser
-	if (AD.mode != 0 && AD.mode != ACTIONMODE_COPY)
-	{
+	if (AD.mode != 0 && AD.mode != ACTIONMODE_COPY) {
 		if (m_moved)
 			m_drag = FALSE;
 		m_moved = FALSE;
 	}
 
-	if (AD.mode == ACTIONMODE_FLATTENGROUND)
-	{
+	if (AD.mode == ACTIONMODE_FLATTENGROUND) {
 		Map->TakeSnapshot();
 		Map->Undo();
 	}
-	if (AD.mode == ACTIONMODE_CLIFFFRONT || AD.mode == ACTIONMODE_CLIFFBACK)
-	{
+	if (AD.mode == ACTIONMODE_CLIFFFRONT || AD.mode == ACTIONMODE_CLIFFBACK) {
 		m_drag = FALSE;
 		Map->Redo();
 		/*Map->TakeSnapshot();
@@ -3026,8 +2704,7 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 	}
 
-	if (AD.mode == ACTIONMODE_COPY && m_drag)
-	{
+	if (AD.mode == ACTIONMODE_COPY && m_drag) {
 		/*m_drag=FALSE;
 
 		int x1, x2, y1, y2;
@@ -3039,8 +2716,7 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 		m_moved = FALSE;
 	}
 
-	if (m_drag && m_moved)
-	{
+	if (m_drag && m_moved) {
 		m_moved = FALSE;
 
 		// ok, drag the object at m_mapx/m_mapy to x/y
@@ -3048,8 +2724,7 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 		char strX[15], strY[15];
 		itoa(x, strX, 10);
 		itoa(y, strY, 10);
-		switch (m_type)
-		{
+		switch (m_type) {
 		case 0: // drag infantry
 		{
 			INFANTRY infantry;
@@ -3058,8 +2733,7 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 			infantry.y = strY;
 			infantry.pos = "-1";
 
-			if ((nFlags != MK_SHIFT))
-			{
+			if ((nFlags != MK_SHIFT)) {
 				Map->DeleteInfantry(m_id);
 			}
 
@@ -3074,8 +2748,7 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 			structure.x = strX;
 			structure.y = strY;
 
-			if ((nFlags != MK_SHIFT))
-			{
+			if ((nFlags != MK_SHIFT)) {
 				Map->DeleteStructure(m_id);
 			}
 
@@ -3091,8 +2764,7 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 			aircraft.y = strY;
 
 
-			if ((nFlags != MK_SHIFT))
-			{
+			if ((nFlags != MK_SHIFT)) {
 				Map->DeleteAircraft(m_id);
 			}
 
@@ -3107,8 +2779,7 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 			unit.x = strX;
 			unit.y = strY;
 
-			if (!(nFlags == MK_SHIFT))
-			{
+			if (!(nFlags == MK_SHIFT)) {
 				Map->DeleteUnit(m_id);
 			}
 
@@ -3122,8 +2793,7 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 
 			Map->GetTerrainData(m_id, &type);
 
-			if ((nFlags != MK_SHIFT))
-			{
+			if ((nFlags != MK_SHIFT)) {
 				Map->DeleteTerrain(m_id);
 			}
 
@@ -3137,8 +2807,7 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 			DWORD dwPos;
 			Map->GetCelltagData(m_id, &tag, &dwPos);
 
-			if ((nFlags != MK_SHIFT))
-			{
+			if ((nFlags != MK_SHIFT)) {
 				Map->DeleteCelltag(m_id);
 			}
 
@@ -3152,8 +2821,7 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 
 			Map->GetWaypointData(m_id, &ID, &dwPos);
 
-			if (!(nFlags == MK_SHIFT))
-			{
+			if (!(nFlags == MK_SHIFT)) {
 				Map->DeleteWaypoint(m_id);
 			}
 
@@ -3172,13 +2840,10 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 		line.bottom = 0;
 
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.mode == ACTIONMODE_MAPTOOL)
-	{
+	} else if (AD.mode == ACTIONMODE_MAPTOOL) {
 		if (AD.tool)
 			AD.tool->onLButtonUp(projCoords, mapCoords, MapToolMouseFlagsFromWin32(nFlags));
-	}
-	else if (AD.mode == ACTIONMODE_PLACE) // painting stuff
+	} else if (AD.mode == ACTIONMODE_PLACE) // painting stuff
 	{
 		m_moved = FALSE;
 		if (AD.type == 6) // Overlay
@@ -3188,14 +2853,11 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 				if (x == m_mapx && y == m_mapy) return;
 
 				int ovrltype = 0x18;
-				if (abs(x - m_mapx) >= abs(y - m_mapy))
-				{
+				if (abs(x - m_mapx) >= abs(y - m_mapy)) {
 					// it´s from bottom left to top right
 					y = m_mapy;
 					ovrltype = 0x19;
-				}
-				else
-				{
+				} else {
 					// from bottom right to top left
 					x = m_mapx;
 					ovrltype = 0x18;
@@ -3203,14 +2865,12 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 
 				int tmp;
 
-				if (x < m_mapx)
-				{
+				if (x < m_mapx) {
 					tmp = m_mapx;
 					m_mapx = x;
 					x = tmp;
 				}
-				if (y < m_mapy)
-				{
+				if (y < m_mapy) {
 					tmp = m_mapy;
 					m_mapy = y;
 					y = tmp;
@@ -3222,46 +2882,32 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 				{
 					int startheight = Map->GetFielddataAt(m_mapx + m_mapy * Map->GetIsoSize())->bHeight;
 
-					if (y == m_mapy)
-					{
-						for (i = m_mapx;i <= x;i++)
-						{
-							if (Map->GetFielddataAt(i + m_mapy * Map->GetIsoSize())->bHeight == startheight - 4)
-							{
+					if (y == m_mapy) {
+						for (i = m_mapx; i <= x; i++) {
+							if (Map->GetFielddataAt(i + m_mapy * Map->GetIsoSize())->bHeight == startheight - 4) {
 								startheight = Map->GetFielddataAt(i + m_mapy * Map->GetIsoSize())->bHeight;
 								break;
 							}
 						}
-					}
-					else
-					{
-						for (i = m_mapy;i <= y;i++)
-						{
-							if (Map->GetFielddataAt(m_mapx + i * Map->GetIsoSize())->bHeight == startheight - 4)
-							{
+					} else {
+						for (i = m_mapy; i <= y; i++) {
+							if (Map->GetFielddataAt(m_mapx + i * Map->GetIsoSize())->bHeight == startheight - 4) {
 								startheight = Map->GetFielddataAt(m_mapx + i * Map->GetIsoSize())->bHeight;
 								break;
 							}
 						}
 					}
 
-					if (y == m_mapy)
-					{
-						for (i = m_mapx;i <= x;i++)
-						{
-							if (Map->GetFielddataAt(i + m_mapy * Map->GetIsoSize())->bHeight == startheight)
-							{
+					if (y == m_mapy) {
+						for (i = m_mapx; i <= x; i++) {
+							if (Map->GetFielddataAt(i + m_mapy * Map->GetIsoSize())->bHeight == startheight) {
 								Map->SetOverlayAt(i + m_mapy * Map->GetIsoSize(), ovrltype);
 								Map->SetOverlayDataAt(i + m_mapy * Map->GetIsoSize(), 0x9);
 							}
 						}
-					}
-					else
-					{
-						for (i = m_mapy;i <= y;i++)
-						{
-							if (Map->GetFielddataAt(m_mapx + i * Map->GetIsoSize())->bHeight == startheight)
-							{
+					} else {
+						for (i = m_mapy; i <= y; i++) {
+							if (Map->GetFielddataAt(m_mapx + i * Map->GetIsoSize())->bHeight == startheight) {
 								Map->SetOverlayAt(m_mapx + i * Map->GetIsoSize(), ovrltype);
 								Map->SetOverlayDataAt(m_mapx + i * Map->GetIsoSize(), 0x0);
 							}
@@ -3272,35 +2918,25 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 				{
 					int startheight = Map->GetFielddataAt(m_mapx + m_mapy * Map->GetIsoSize())->bHeight;
 
-					if (y == m_mapy)
-					{
-						for (i = m_mapx;i <= x;i++)
-						{
-							if (Map->GetFielddataAt(i + m_mapy * Map->GetIsoSize())->bHeight == startheight - 4)
-							{
+					if (y == m_mapy) {
+						for (i = m_mapx; i <= x; i++) {
+							if (Map->GetFielddataAt(i + m_mapy * Map->GetIsoSize())->bHeight == startheight - 4) {
 								startheight = Map->GetFielddataAt(i + m_mapy * Map->GetIsoSize())->bHeight;
 								break;
 							}
 						}
-					}
-					else
-					{
-						for (i = m_mapy;i <= y;i++)
-						{
-							if (Map->GetFielddataAt(m_mapx + i * Map->GetIsoSize())->bHeight == startheight - 4)
-							{
+					} else {
+						for (i = m_mapy; i <= y; i++) {
+							if (Map->GetFielddataAt(m_mapx + i * Map->GetIsoSize())->bHeight == startheight - 4) {
 								startheight = Map->GetFielddataAt(m_mapx + i * Map->GetIsoSize())->bHeight;
 								break;
 							}
 						}
 					}
 
-					if (y == m_mapy)
-					{
-						for (i = m_mapx;i <= x;i++)
-						{
-							if (Map->GetFielddataAt(i + m_mapy * Map->GetIsoSize())->bHeight == startheight)
-							{
+					if (y == m_mapy) {
+						for (i = m_mapx; i <= x; i++) {
+							if (Map->GetFielddataAt(i + m_mapy * Map->GetIsoSize())->bHeight == startheight) {
 
 								Map->SetOverlayAt(i + m_mapy * Map->GetIsoSize(), 0x3c);
 #ifdef RA2_MODE
@@ -3309,13 +2945,9 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 								Map->SetOverlayDataAt(i + m_mapy * Map->GetIsoSize(), 0x9);
 							}
 						}
-					}
-					else
-					{
-						for (i = m_mapy;i <= y;i++)
-						{
-							if (Map->GetFielddataAt(m_mapx + i * Map->GetIsoSize())->bHeight == startheight)
-							{
+					} else {
+						for (i = m_mapy; i <= y; i++) {
+							if (Map->GetFielddataAt(m_mapx + i * Map->GetIsoSize())->bHeight == startheight) {
 								Map->SetOverlayAt(m_mapx + i * Map->GetIsoSize(), 0x3b);
 #ifdef RA2_MODE
 								Map->SetOverlayAt(m_mapx + i * Map->GetIsoSize(), 0xed);
@@ -3341,17 +2973,14 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 							Map->SetOverlayDataAt(m_mapx+i*Map->GetIsoSize(), 0x0);
 						}
 					}*/
-				}
-				else if (AD.data2 == 1 || AD.data2 == 3) // small bridge
+				} else if (AD.data2 == 1 || AD.data2 == 3) // small bridge
 				{
 					int start = 0x4a;
 					if (AD.data2 == 3) start = 0xcd;
 
-					if (y == m_mapy)
-					{
+					if (y == m_mapy) {
 						srand((unsigned)time(NULL));
-						for (i = m_mapx + 1;i <= x - 1;i++)
-						{
+						for (i = m_mapx + 1; i <= x - 1; i++) {
 
 							int v2 = ((float)rand() / (float)RAND_MAX) * 4;
 
@@ -3377,13 +3006,10 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 						Map->SetOverlayDataAt(x + (m_mapy + 1) * Map->GetIsoSize(), 0x2);
 
 
-					}
-					else
-					{
+					} else {
 						srand((unsigned)time(NULL));
 
-						for (i = m_mapy + 1;i <= y - 1;i++)
-						{
+						for (i = m_mapy + 1; i <= y - 1; i++) {
 
 							int v2 = ((float)rand() / (float)RAND_MAX) * 4;
 
@@ -3465,7 +3091,7 @@ void CIsoView::OnMove(int x, int y)
 	ddc->SetHWnd(0, m_hWnd);
 	updateFontScaled();
 
-	RedrawWindow();	
+	RedrawWindow();
 }
 
 void CIsoView::OnSize(UINT nType, int cx, int cy)
@@ -3497,8 +3123,7 @@ COLORREF CIsoView::GetColor(const char* house, const char* vcolor)
 
 	CString color;
 	CIniFile& ini = Map->GetIniFile();
-	if (house && strlen(house))
-	{
+	if (house && strlen(house)) {
 		auto const& localColorDef = ini.GetString(house, "Color");
 		if (!localColorDef.IsEmpty()) {
 			color = localColorDef;
@@ -3514,8 +3139,7 @@ COLORREF CIsoView::GetColor(const char* house, const char* vcolor)
 		CString colorValues;
 		colorValues = ini.GetStringOr("Colors", color, rules.GetString("Colors", color));
 		auto colorArray = SplitParams(colorValues);
-		if (colorArray.size() == 3)
-		{
+		if (colorArray.size() == 3) {
 			unsigned char hsv[3] = { static_cast<unsigned char>(std::atoi(colorArray[0])), static_cast<unsigned char>(std::atoi(colorArray[1])), static_cast<unsigned char>(std::atoi(colorArray[2])) };
 			unsigned char rgb[3];
 			HSVToRGB(hsv, rgb);
@@ -3524,30 +3148,20 @@ COLORREF CIsoView::GetColor(const char* house, const char* vcolor)
 	}
 
 #ifndef RA2_MODE
-	if (strstr(house, houses[0].name) != NULL)
-	{
+	if (strstr(house, houses[0].name) != NULL) {
 		return GDI;
-	}
-	else if (strstr(house, houses[1].name) != NULL)
-	{
+	} else if (strstr(house, houses[1].name) != NULL) {
 		return Nod;
-	}
-	else if (strstr(house, houses[2].name) != NULL)
-	{
+	} else if (strstr(house, houses[2].name) != NULL) {
 		return neutral;
-	}
-	else
-	{
-		if (isIncluded(color, "darkred") != NULL)
-		{
+	} else {
+		if (isIncluded(color, "darkred") != NULL) {
 			return Nod;
 		}
-		if (isIncluded(color, "grey") != NULL)
-		{
+		if (isIncluded(color, "grey") != NULL) {
 			return RGB(120, 120, 120);
 		}
-		if (isIncluded(color, "gold") != NULL)
-		{
+		if (isIncluded(color, "gold") != NULL) {
 			return GDI;
 		}
 
@@ -3555,52 +3169,40 @@ COLORREF CIsoView::GetColor(const char* house, const char* vcolor)
 		return other;
 	}
 #else
-	if (isIncluded(color, "darkred") != NULL)
-	{
+	if (isIncluded(color, "darkred") != NULL) {
 		return RGB(130, 20, 20);
 	}
-	if (isIncluded(color, "grey") != NULL)
-	{
+	if (isIncluded(color, "grey") != NULL) {
 		return RGB(120, 120, 120);
 	}
-	if (isIncluded(color, "red") != NULL)
-	{
+	if (isIncluded(color, "red") != NULL) {
 		return RGB(240, 20, 20);
 	}
-	if (isIncluded(color, "lightgold") != NULL)
-	{
+	if (isIncluded(color, "lightgold") != NULL) {
 		return RGB(220, 220, 150);
 	}
-	if (isIncluded(color, "yellow") != NULL)
-	{
+	if (isIncluded(color, "yellow") != NULL) {
 		return RGB(240, 240, 0);
 	}
-	if (isIncluded(color, "gold") != NULL)
-	{
+	if (isIncluded(color, "gold") != NULL) {
 		return RGB(230, 200, 0);
 	}
-	if (isIncluded(color, "darkgreen") != NULL)
-	{
+	if (isIncluded(color, "darkgreen") != NULL) {
 		return RGB(50, 160, 70);
 	}
-	if (isIncluded(color, "neongreen") != NULL)
-	{
+	if (isIncluded(color, "neongreen") != NULL) {
 		return RGB(10, 255, 10);
 	}
-	if (isIncluded(color, "green") != NULL)
-	{
+	if (isIncluded(color, "green") != NULL) {
 		return RGB(50, 200, 70);
 	}
-	if (isIncluded(color, "darkblue") != NULL)
-	{
+	if (isIncluded(color, "darkblue") != NULL) {
 		return RGB(30, 30, 150);
 	}
-	if (isIncluded(color, "lightblue") != NULL)
-	{
+	if (isIncluded(color, "lightblue") != NULL) {
 		return RGB(100, 100, 200);
 	}
-	if (isIncluded(color, "neonblue") != NULL)
-	{
+	if (isIncluded(color, "neonblue") != NULL) {
 		return RGB(35, 205, 255);
 	}
 
@@ -3663,10 +3265,8 @@ void CIsoView::ReInitializeDDraw()
 
 
 #ifdef NOSURFACES
-	while ((GetDeviceCaps(::GetDC(::GetDesktopWindow()), BITSPIXEL) <= 8))
-	{
-		if (MessageBox("You currently only have 8 bit color mode enabled. FinalAlert 2 does not work in 8 bit color mode. Please change the color mode and then click on OK. Click Cancel to quit (and save the map as backup.map).", "Error", MB_OKCANCEL) == IDCANCEL)
-		{
+	while ((GetDeviceCaps(::GetDC(::GetDesktopWindow()), BITSPIXEL) <= 8)) {
+		if (MessageBox("You currently only have 8 bit color mode enabled. FinalAlert 2 does not work in 8 bit color mode. Please change the color mode and then click on OK. Click Cancel to quit (and save the map as backup.map).", "Error", MB_OKCANCEL) == IDCANCEL) {
 			((CFinalSunDlg*)theApp.m_pMainWnd)->SaveMap((u8AppDataPath + "\\backup.map").c_str());
 			PostQuitMessage(0);
 			return;
@@ -3833,7 +3433,7 @@ int CIsoView::GetOverlayDirection(int x, int y)
 
 	BOOL isTrail = FALSE;
 	int i;
-	for (i = 0;i < overlay_count;i++)
+	for (i = 0; i < overlay_count; i++)
 		if (overlay_number[i] == type)
 			if (overlay_trail[i]) isTrail = TRUE;
 
@@ -3883,8 +3483,7 @@ int CIsoView::GetOverlayDirection(int x, int y)
 			return 3;
 
 		return 0;
-	}
-	else if (isTrail) // handling something like a sandbag
+	} else if (isTrail) // handling something like a sandbag
 	{
 		p = 0;
 		if (Map->GetOverlayAt(x - 1 + (y - 0) * dwIsoSize) == type) p |= 0x1;
@@ -3905,24 +3504,18 @@ void CIsoView::HandleTrail(int x, int y)
 	if (isTrack(type)) // is a track (overlay must be changed)
 	{
 
-		for (i = x - 2;i <= x + 2;i++)
-		{
-			for (e = y - 1;e <= y + 1;e++)
-			{
+		for (i = x - 2; i <= x + 2; i++) {
+			for (e = y - 1; e <= y + 1; e++) {
 				if (isTrack(Map->GetOverlayAt(i + e * Map->GetIsoSize())))
 					Map->SetOverlayAt(i + e * Map->GetIsoSize(), 0x27 + GetOverlayDirection(i, e));
 			}
 		}
-	}
-	else // something like a sandbag (overlaydata must be changed)
+	} else // something like a sandbag (overlaydata must be changed)
 	{
 
-		for (i = x - 2;i <= x + 2;i++)
-		{
-			for (e = y - 1;e <= y + 1;e++)
-			{
-				if (Map->GetOverlayAt(i + e * Map->GetIsoSize()) == type)
-				{
+		for (i = x - 2; i <= x + 2; i++) {
+			for (e = y - 1; e <= y + 1; e++) {
+				if (Map->GetOverlayAt(i + e * Map->GetIsoSize()) == type) {
 					int dir = GetOverlayDirection(i, e);
 					if (dir >= 0)	Map->SetOverlayDataAt(i + e * Map->GetIsoSize(), dir);
 				}
@@ -3972,8 +3565,7 @@ void CIsoView::DrawCell(int x, int y, int w, int h, COLORREF col, BOOL dotted, H
 
 	SelectObject(hDC, p);
 
-	if (dotted)
-	{
+	if (dotted) {
 		SetBkMode(hDC, TRANSPARENT);
 		MoveToEx(hDC, p1.x, p1.y - 1, NULL);
 		LineTo(hDC, p2.x + 1, p2.y);
@@ -3982,8 +3574,7 @@ void CIsoView::DrawCell(int x, int y, int w, int h, COLORREF col, BOOL dotted, H
 		LineTo(hDC, p1.x, p1.y - 1);
 	}
 
-	if (!dotted)
-	{
+	if (!dotted) {
 		MoveToEx(hDC, p1.x, p1.y, NULL);
 		LineTo(hDC, p2.x, p2.y);
 		LineTo(hDC, p3.x, p3.y);
@@ -4025,8 +3616,7 @@ void CIsoView::DrawCell(void* dest, int dest_width, int dest_height, int dest_pi
 
 	for (int x = 0; x < 1; ++x)  // you could use this loop for more thickness
 	{
-		for (int y = 0; y < 1; ++y)
-		{
+		for (int y = 0; y < 1; ++y) {
 			// inside the MM tile
 			drawer.MoveTo(p1.x + x + 1, p1.y + y + 1);
 			drawer.LineTo(p2.x + x - 2, p2.y + y - 1, col, style);
@@ -4050,12 +3640,10 @@ void CIsoView::DrawCell(void* dest, int dest_width, int dest_height, int dest_pi
 	}
 
 	//  pixels of neighboured MM tiles boundary
-	if (touchNeighbours)
-	{
+	if (touchNeighbours) {
 		for (int x = 0; x < 1; ++x)  // you could use this loop for more thickness
 		{
-			for (int y = 0; y < 1; ++y)
-			{				
+			for (int y = 0; y < 1; ++y) {
 				drawer.MoveTo(p1.x + x + 1, p1.y + y - 1);
 				drawer.LineTo(p2.x + x - 2, p2.y + y - 3, colNeighbour, style);
 				drawer.MoveTo(p2.x + x - 2, p2.y + y - 2);
@@ -4076,8 +3664,7 @@ void CIsoView::DrawTube(const CTube& tube, const DDSURFACEDESC2* lockedDDSD, con
 {
 	SurfaceLocker locker(lpdsBack);
 
-	if (!lockedDDSD || !lockedDDSD->lpSurface)
-	{
+	if (!lockedDDSD || !lockedDDSD->lpSurface) {
 		lockedDDSD = locker.ensure_locked();
 	}
 	if (!lockedDDSD)
@@ -4094,26 +3681,24 @@ void CIsoView::DrawTube(const CTube& tube, const DDSURFACEDESC2* lockedDDSD, con
 	LineDrawer ld(lockedDDSD->lpSurface, bpp, lockedDDSD->dwWidth, lockedDDSD->dwHeight, lockedDDSD->lPitch);
 	auto startDraw = GetRenderTargetCoordinates(tube.getStartCoords(), lowestHeight);
 	ld.MoveTo(startDraw.x + f_x / 2 + lineOffset.x, startDraw.y + f_y / 2 + lineOffset.y);
-	
+
 
 	tube.walk([this, &tube, lockedDDSD, &ld, lowestHeight, col, lineOffset](const auto& wi) {
 		auto draw = GetRenderTargetCoordinates(wi.pos, lowestHeight);
-		if (wi.pos == tube.getEndCoords())
-		{
+		if (wi.pos == tube.getEndCoords()) {
 			// end coordinates are drawn as cross
 			LineDrawer startLD(lockedDDSD->lpSurface, bpp, lockedDDSD->dwWidth, lockedDDSD->dwHeight, lockedDDSD->lPitch);
 			ProjectedVec off(7, 4);
 			startLD.DrawLine(draw.x + off.x, draw.y + f_y / 2, draw.x + f_x - off.x, draw.y + f_y / 2, col);
 			startLD.DrawLine(draw.x + f_x / 2 - 1, draw.y + off.y, draw.x + f_x / 2 - 1, draw.y + f_y - off.y, col);
 		}
-		if (wi.pos == tube.getStartCoords())
-		{
+		if (wi.pos == tube.getStartCoords()) {
 			// Start coordinates are drawn as cell
 			DrawCell(lockedDDSD->lpSurface, lockedDDSD->dwWidth, lockedDDSD->dwHeight, lockedDDSD->lPitch, draw.x, draw.y, 1, 1, col, true);
 		}
 		ld.LineTo(draw.x + f_x / 2 + lineOffset.x, draw.y + f_y / 2 + lineOffset.y, col);
 		return true;
-	});
+		});
 }
 
 MapCoords CIsoView::GetMapCoordinates(const ProjectedCoords& projCoords, bool bAllowAccessBehindCliffs, bool ignoreHideFlagsAndOutside) const
@@ -4199,8 +3784,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	FIELDDATA m = *Map->GetFielddataAt(x + y * Map->GetIsoSize());
 	if (m.wGround == 0xFFFF) m.wGround = 0;
 
-	if (m.wGround < (*tiledata_count) && m.bSubTile < (*tiledata)[m.wGround].wTileCount)
-	{
+	if (m.wGround < (*tiledata_count) && m.bSubTile < (*tiledata)[m.wGround].wTileCount) {
 		statusbar = "Terrain type: 0x";
 		char c[50];
 		itoa((*tiledata)[m.wGround].tiles[m.bSubTile].bTerrainType, c, 16);
@@ -4212,8 +3796,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	}
 
 
-	if (Map->GetOverlayAt(x + y * Map->GetIsoSize()) != 0xFF)
-	{
+	if (Map->GetOverlayAt(x + y * Map->GetIsoSize()) != 0xFF) {
 		char ov[50];
 		itoa(Map->GetOverlayAt(x + y * Map->GetIsoSize()), ov, 16);
 
@@ -4221,8 +3804,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 		CString name;
 		name = "0x";
 		name += ov;
-		for (i = 0;i < overlay_count;i++)
-		{
+		for (i = 0; i < overlay_count; i++) {
 			if (overlay_number[i] == Map->GetOverlayAt(x + y * Map->GetIsoSize()))
 				name = overlay_name[i];
 		}
@@ -4241,8 +3823,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 
 	int n = Map->GetStructureAt(x + y * Map->GetIsoSize());
 	int on = -1;
-	if (n >= 0)
-	{
+	if (n >= 0) {
 
 		Map->GetStdStructureData(n, &sod);
 		statusbar = GetLanguageStringACP("StructStatus");
@@ -4250,8 +3831,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	}
 
 	n = Map->GetUnitAt(x + y * Map->GetIsoSize());
-	if (n >= 0)
-	{
+	if (n >= 0) {
 
 		Map->GetStdUnitData(n, &sod);
 		statusbar = GetLanguageStringACP("UnitStatus");
@@ -4260,8 +3840,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	}
 
 	n = Map->GetAirAt(x + y * Map->GetIsoSize());
-	if (n >= 0)
-	{
+	if (n >= 0) {
 
 		Map->GetStdAircraftData(n, &sod);
 		statusbar = GetLanguageStringACP("AirStatus");
@@ -4269,15 +3848,13 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	}
 
 	n = Map->GetInfantryAt(x + y * Map->GetIsoSize());
-	if (n >= 0)
-	{
+	if (n >= 0) {
 		Map->GetStdInfantryData(n, &sod);
 		statusbar = GetLanguageStringACP("InfStatus");
 		on = n;
 	}
 
-	if (sod.type.GetLength() > 0)
-	{
+	if (sod.type.GetLength() > 0) {
 		char c[50];
 		itoa(on, c, 10);
 		statusbar += "ID ";
@@ -4320,8 +3897,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 
 
 	n = Map->GetCelltagAt(x + y * Map->GetIsoSize());
-	if (n >= 0)
-	{
+	if (n >= 0) {
 		CString type;
 		CString name;
 		DWORD pos;
@@ -4339,8 +3915,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 		statusbar += ")";
 	}
 
-	if (AD.mode == ACTIONMODE_SETTILE)
-	{
+	if (AD.mode == ACTIONMODE_SETTILE) {
 		statusbar = GetLanguageStringACP("TilePlaceStatus");
 	}
 
@@ -4354,15 +3929,12 @@ void CIsoView::UpdateStatusBar(int x, int y)
 
 void CIsoView::UpdateOverlayPictures(int id)
 {
-	if (id < 0)
-	{
+	if (id < 0) {
 		memset(ovrlpics, 0, max_ovrl_img * 0xFF * sizeof(LPDIRECTDRAWSURFACE4));
 
 		int i, e;
-		for (i = 0;i < 0xFF;i++)
-		{
-			for (e = 0;e < max_ovrl_img;e++)
-			{
+		for (i = 0; i < 0xFF; i++) {
+			for (e = 0; e < max_ovrl_img; e++) {
 				/*PICDATA& p=GetOverlayPic(i, e);
 				if(p.pic!=NULL)		ovrlpics[i][e]=&p;
 				else
@@ -4370,12 +3942,9 @@ void CIsoView::UpdateOverlayPictures(int id)
 				ovrlpics[i][e] = GetOverlayPic(i, e);
 			}
 		}
-	}
-	else
-	{
+	} else {
 		int e;
-		for (e = 0;e < max_ovrl_img;e++)
-		{
+		for (e = 0; e < max_ovrl_img; e++) {
 			ovrlpics[id][e] = GetOverlayPic(id, e);
 		}
 	}
@@ -4392,23 +3961,19 @@ __forceinline void FixTileHeight(DWORD dwPos, int x, int y)
 	char bHeightDiff[9];
 
 	int i, e;
-	for (i = -1;i < 2;i++)
-	{
-		for (e = -1;e < 2;e++)
-		{
+	for (i = -1; i < 2; i++) {
+		for (e = -1; e < 2; e++) {
 			if (x + i < 0 || y + e < 0 || x + i >= isosize || y + e >= isosize) bHeightDiff[i + 1 + (e + 1) * 3] = 0;
 			else
 				bHeightDiff[i + 1 + (e + 1) * 3] = oheight - Map->GetHeightAt(dwPos + i + e * isosize);
 		}
 	}
 
-	if (bHeightDiff[1] < 0 && bHeightDiff[7] < 0)
-	{
+	if (bHeightDiff[1] < 0 && bHeightDiff[7] < 0) {
 		Map->SetHeightAt(dwPos, oheight + 1);
 		return;
 	}
-	if (bHeightDiff[3] < 0 && bHeightDiff[5] < 0)
-	{
+	if (bHeightDiff[3] < 0 && bHeightDiff[5] < 0) {
 		Map->SetHeightAt(dwPos, oheight + 1);
 		return;
 	}
@@ -4422,8 +3987,7 @@ __forceinline void FixTileHeight(DWORD dwPos, int x, int y)
 		(bHeightDiff[5]<0 && bHeightDiff[6]<0) ||
 		(bHeightDiff[7]<0 && bHeightDiff[0]<0) ||
 		(bHeightDiff[7]<0 && bHeightDiff[2]<0) */
-		)
-	{
+		) {
 		Map->SetHeightAt(dwPos, oheight + 1);
 		return;
 	}
@@ -4501,10 +4065,8 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 
 
 	int i, e;
-	for (i = -1;i < 2;i++)
-	{
-		for (e = -1;e < 2;e++)
-		{
+	for (i = -1; i < 2; i++) {
+		for (e = -1; e < 2; e++) {
 
 			int pos = dwPos + i + (e)*isosize;
 
@@ -4519,12 +4081,10 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 			else if (dwY == isosize - 1 && e == 1) bAllowed = FALSE;
 
 
-			if (bOnlyThisTile)
-			{
+			if (bOnlyThisTile) {
 				if (fd.wGround != orig_fd.wGround) bAllowed = FALSE; // was another tile
 
-				else
-				{
+				else {
 					// we now need to check if it is really the same tile or just the same tile type (!)
 					int of = orig_fd.bSubTile;
 					int f = fd.bSubTile;
@@ -4543,8 +4103,7 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 			int ground = fd.wGround;
 
 
-			if (bAllowed && !fd.bReserved && pos > 0 && pos < mapsize)
-			{
+			if (bAllowed && !fd.bReserved && pos > 0 && pos < mapsize) {
 
 
 
@@ -4553,10 +4112,8 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 				TILEDATA destTile = (*tiledata)[fd.wGround];
 				TILEDATA sourceTile = (*tiledata)[orig_fd.wGround];
 
-				if (bAllowed && (!bNonMorpheableMove || bDestMorphable))
-				{
-					if (e == 1 && i == 1)
-					{
+				if (bAllowed && (!bNonMorpheableMove || bDestMorphable)) {
+					if (e == 1 && i == 1) {
 						int leftGround = Map->GetFielddataAt(dwPos + 1)->wGround;
 						int rightGround = Map->GetFielddataAt(dwPos + isosize)->wGround;
 						if (leftGround == 0xFFFF) leftGround = 0;
@@ -4564,8 +4121,7 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 						if (!(*tiledata)[leftGround].bMorphable && !(*tiledata)[rightGround].bMorphable)
 							bAllowed = FALSE;
 					}
-					if (e == -1 && i == -1)
-					{
+					if (e == -1 && i == -1) {
 						int leftGround = Map->GetFielddataAt(dwPos - 1)->wGround;
 						int rightGround = Map->GetFielddataAt(dwPos - isosize)->wGround;
 						if (leftGround == 0xFFFF) leftGround = 0;
@@ -4573,8 +4129,7 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 						if (!(*tiledata)[leftGround].bMorphable && !(*tiledata)[rightGround].bMorphable)
 							bAllowed = FALSE;
 					}
-					if (e == -1 && i == 1)
-					{
+					if (e == -1 && i == 1) {
 						int leftGround = Map->GetFielddataAt(dwPos - 1)->wGround;
 						int rightGround = Map->GetFielddataAt(dwPos + isosize)->wGround;
 						if (leftGround == 0xFFFF) leftGround = 0;
@@ -4582,8 +4137,7 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 						if (!(*tiledata)[leftGround].bMorphable && !(*tiledata)[rightGround].bMorphable)
 							bAllowed = FALSE;
 					}
-					if (e == 1 && i == -1)
-					{
+					if (e == 1 && i == -1) {
 						int leftGround = Map->GetFielddataAt(dwPos + 1)->wGround;
 						int rightGround = Map->GetFielddataAt(dwPos - isosize)->wGround;
 						if (leftGround == 0xFFFF) leftGround = 0;
@@ -4598,8 +4152,7 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 
 
 
-				if (/*(*tiledata)[ground].bMorphable &&*/ bAllowed)
-				{
+				if (/*(*tiledata)[ground].bMorphable &&*/ bAllowed) {
 					int need_diff = (*tiledata)[ground].tiles[fd.bSubTile].bZHeight - (*tiledata)[orig_ground].tiles[orig_fd.bSubTile].bZHeight;
 
 
@@ -4619,8 +4172,7 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 						}*/
 
 
-						if (!bNonMorpheableMove && bDestMorphable)
-						{
+						if (!bNonMorpheableMove && bDestMorphable) {
 							//if(!bOnlyHeighten)//!bCliffNext)
 							{
 								if (diff < -1)
@@ -4632,26 +4184,17 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 							{
 								ChangeTileHeight(pos, dwNewHeight, bNonMorpheableMove, bOnlyThisTile, bOnlyHeighten);
 							}*/
-						}
-						else if (bNonMorpheableMove)
-						{
-							if (!bDestMorphable /*&& (*tiledata)[fd.wGround].wTileSet==(*tiledata)[orig_fd.wGround].wTileSet*/ /*&& need_diff!=fd.bHeight-orig_fd.bHeight*/)
-							{
-								if (destTile.tiles[fd.bSubTile].bTerrainType == sourceTile.tiles[orig_fd.bSubTile].bTerrainType || destTile.wTileSet == sourceTile.wTileSet)
-								{
+						} else if (bNonMorpheableMove) {
+							if (!bDestMorphable /*&& (*tiledata)[fd.wGround].wTileSet==(*tiledata)[orig_fd.wGround].wTileSet*/ /*&& need_diff!=fd.bHeight-orig_fd.bHeight*/) {
+								if (destTile.tiles[fd.bSubTile].bTerrainType == sourceTile.tiles[orig_fd.bSubTile].bTerrainType || destTile.wTileSet == sourceTile.wTileSet) {
 									ChangeTileHeight(pos, dwNewHeight + need_diff, TRUE, bOnlyThisTile, bNoSlopes);
 								}
-							}
-							else if (bDestMorphable /*&& need_diff!=fd.bHeight-orig_fd.bHeight*/)
-							{
+							} else if (bDestMorphable /*&& need_diff!=fd.bHeight-orig_fd.bHeight*/) {
 								//diff-=need_diff;
 
-								if ((sourceTile.cx > 1 && sourceTile.cy > 1 && (e < 0 && i < 0)) || ((sourceTile.cx < 2 || sourceTile.cy < 2) && (e > 0 && i > 0)))
-								{
+								if ((sourceTile.cx > 1 && sourceTile.cy > 1 && (e < 0 && i < 0)) || ((sourceTile.cx < 2 || sourceTile.cy < 2) && (e > 0 && i > 0))) {
 									ChangeTileHeight(pos, dwNewHeight, FALSE, bOnlyThisTile, bNoSlopes);
-								}
-								else
-								{
+								} else {
 									if (diff - need_diff > 0)
 										ChangeTileHeight(pos, dwNewHeight + need_diff, FALSE, bOnlyThisTile, bNoSlopes);
 									else if (diff - need_diff < 0)
@@ -4675,12 +4218,9 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 		}
 	}*/
 
-	if (!bNoSlopes)
-	{
-		for (i = -1;i < 2;i++)
-		{
-			for (e = -1;e < 2;e++)
-			{
+	if (!bNoSlopes) {
+		for (i = -1; i < 2; i++) {
+			for (e = -1; e < 2; e++) {
 				int pos = dwPos + i + (e)*isosize;
 				if (pos > 0 && pos < mapsize)
 					Map->CreateSlopesAt(pos);
@@ -4703,10 +4243,8 @@ BOOL CIsoView::ReachableFrom(DWORD dwStart, DWORD dwEnd)
 
 
 	int i, e;
-	for (i = -1;i < 2;i++)
-	{
-		for (e = -1;e < 2;e++)
-		{
+	for (i = -1; i < 2; i++) {
+		for (e = -1; e < 2; e++) {
 			int new_ground = orig_fd.wGround;
 			if (new_ground == 0xFFFF) new_ground = 0;
 
@@ -4726,8 +4264,7 @@ void CIsoView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CIsoView::HideTileSet(DWORD dwTileSet)
 {
 	int i;
-	for (i = 0;i < *tiledata_count;i++)
-	{
+	for (i = 0; i < *tiledata_count; i++) {
 		if ((*tiledata)[i].wTileSet == dwTileSet) (*tiledata)[i].bHide = TRUE;
 	}
 }
@@ -4745,32 +4282,26 @@ void CIsoView::BlitBackbufferToHighRes()
 	// This is a simple scaling and also scales any text that has already been rendered to the backbuffer (which is why we're usually rendering text afterwards to the HighRes backbuffer).
 	// Altogether it'd probably be best to move from DirectDraw to Direct3D, support high DPI awareness and do the scaling right when initially drawing the map.
 
-	
-	if (m_viewScale != Vec2<CSProjected, float>(1.0f, 1.0f) && lpdsBackHighRes)
-	{
+
+	if (m_viewScale != Vec2<CSProjected, float>(1.0f, 1.0f) && lpdsBackHighRes) {
 		// copy scene backbuffer to the high-res buffer that will receive text rendering
 		RECT dr;
 		GetWindowRect(&dr);
 		auto cr = GetScaledDisplayRect();
 		lpdsBackHighRes->Blt(&dr, lpdsBack, &cr, DDBLT_WAIT, 0);
-	}
-	else
-	{
+	} else {
 		// do nothing, backbuffer will receive additional text rendering as text doesn't have to be scaled
 	}
 }
 
 void CIsoView::FlipHighResBuffer()
 {
-	if (m_viewScale != Vec2<CSProjected, float>(1.0f, 1.0f) && lpdsBackHighRes)
-	{
+	if (m_viewScale != Vec2<CSProjected, float>(1.0f, 1.0f) && lpdsBackHighRes) {
 		// This flip copies the high-res backbuffer to the front buffer
 		RECT dr;
 		GetWindowRect(&dr);
 		lpds->Blt(&dr, lpdsBackHighRes, &dr, DDBLT_WAIT, 0);
-	}
-	else
-	{
+	} else {
 		// copy scene backbuffer to the front buffer that will receive text/gdi rendering
 		RECT dr;
 		GetWindowRect(&dr);
@@ -4782,8 +4313,7 @@ void CIsoView::FlipHighResBuffer()
 void CIsoView::ShowAllTileSets()
 {
 	int i;
-	for (i = 0;i < *tiledata_count;i++)
-	{
+	for (i = 0; i < *tiledata_count; i++) {
 		(*tiledata)[i].bHide = FALSE;
 	}
 }
@@ -4792,10 +4322,8 @@ void CIsoView::ShowAllTileSets()
 
 void CIsoView::PlaceCurrentObjectAt(int x, int y)
 {
-	if (AD.mode == ACTIONMODE_RANDOMTERRAIN)
-	{
-		if (Map->GetTerrainAt(x + y * Map->GetIsoSize()) >= 0)
-		{
+	if (AD.mode == ACTIONMODE_RANDOMTERRAIN) {
+		if (Map->GetTerrainAt(x + y * Map->GetIsoSize()) >= 0) {
 			return;
 		}
 
@@ -4816,23 +4344,19 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 
 	if (AD.type == 1) // ADD INFANTRY
 	{
-		if (Map->GetInfantryCountAt(x + y * Map->GetIsoSize()) >= SUBPOS_COUNT)
-		{
+		if (Map->GetInfantryCountAt(x + y * Map->GetIsoSize()) >= SUBPOS_COUNT) {
 			return;
 		}
 
 		Map->AddInfantry(NULL, AD.data_s, currentOwner, x + y * Map->GetIsoSize());
 		//RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.type == 2) // add structure
+	} else if (AD.type == 2) // add structure
 	{
 		int n = Map->GetStructureAt(x + y * Map->GetIsoSize());
-		if (n >= 0)
-		{
+		if (n >= 0) {
 			STDOBJECTDATA sod;
 			Map->GetStdStructureData(n, &sod);
-			if (strcmp(sod.type, "GAPAVE") != NULL)
-			{
+			if (strcmp(sod.type, "GAPAVE") != NULL) {
 				//isMoving=FALSE;
 				return;
 			}
@@ -4841,43 +4365,35 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 
 		Map->AddStructure(NULL, AD.data_s, currentOwner, x + y * Map->GetIsoSize());
 		//RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.type == 3) // add aircraft
+	} else if (AD.type == 3) // add aircraft
 	{
 
-		if (Map->GetAirAt(x + y * Map->GetIsoSize()) >= 0)
-		{
+		if (Map->GetAirAt(x + y * Map->GetIsoSize()) >= 0) {
 			return;
 		}
 
 		Map->AddAircraft(NULL, AD.data_s, currentOwner, x + y * Map->GetIsoSize());
 
 		//RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.type == 4) // add vehicle
+	} else if (AD.type == 4) // add vehicle
 	{
-		if (Map->GetUnitAt(x + y * Map->GetIsoSize()) >= 0)
-		{
+		if (Map->GetUnitAt(x + y * Map->GetIsoSize()) >= 0) {
 			return;
 		}
 
 		Map->AddUnit(NULL, AD.data_s, currentOwner, x + y * Map->GetIsoSize());
 
 		//RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.type == 5) // add terrain
+	} else if (AD.type == 5) // add terrain
 	{
-		if (Map->GetTerrainAt(x + y * Map->GetIsoSize()) >= 0)
-		{
+		if (Map->GetTerrainAt(x + y * Map->GetIsoSize()) >= 0) {
 			return;
 		}
 
 		Map->AddTerrain(AD.data_s, x + y * Map->GetIsoSize());
 
 		//RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.type == 6)
-	{
+	} else if (AD.type == 6) {
 		// Overlay
 
 
@@ -4893,10 +4409,8 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 		if (AD.data == 1) // delete overlay
 		{
 			int gx, gy;
-			for (gx = x - AD.data2;gx <= x + AD.data2;gx++)
-			{
-				for (gy = y - AD.data2;gy <= y + AD.data2;gy++)
-				{
+			for (gx = x - AD.data2; gx <= x + AD.data2; gx++) {
+				for (gy = y - AD.data2; gy <= y + AD.data2; gy++) {
 					Map->SetOverlayDataAt(gx + gy * Map->GetIsoSize(), 0xFF);
 					Map->SetOverlayAt(gx + gy * Map->GetIsoSize(), 0xFF);
 
@@ -4913,23 +4427,18 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 			}
 
 
-		}
-		else if (AD.data == 2) // green tiberium mode
+		} else if (AD.data == 2) // green tiberium mode
 		{
 
 			{
-				if (AD.data2 == 0)
-				{
+				if (AD.data2 == 0) {
 					int i, e;
-					for (i = 0;i < m_BrushSize_x;i++)
-					{
-						for (e = 0;e < m_BrushSize_y;e++)
-						{
+					for (i = 0; i < m_BrushSize_x; i++) {
+						for (e = 0; e < m_BrushSize_y; e++) {
 							int curground = Map->GetFielddataAt(dwPos + i + e * Map->GetIsoSize())->wGround;
 							if (curground == 0xFFFF) curground = 0;
 
-							if ((*tiledata)[curground].bAllowTiberium)
-							{
+							if ((*tiledata)[curground].bAllowTiberium) {
 								//srand( GetTickCount()+i+e*5 );
 								int v1 = ((float)rand() / (float)RAND_MAX) * 8.0f + 0x68;
 								int v2 = ((float)rand() / (float)RAND_MAX) * 8.0f + 1;
@@ -4938,51 +4447,36 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 							}
 						}
 					}
-				}
-				else if (AD.data2 == 10)
-				{
+				} else if (AD.data2 == 10) {
 					int i, e;
-					for (i = 0;i < m_BrushSize_x;i++)
-					{
-						for (e = 0;e < m_BrushSize_y;e++)
-						{
+					for (i = 0; i < m_BrushSize_x; i++) {
+						for (e = 0; e < m_BrushSize_y; e++) {
 							int curground = Map->GetFielddataAt(dwPos + i + e * Map->GetIsoSize())->wGround;
 							if (curground == 0xFFFF) curground = 0;
 
-							if ((*tiledata)[curground].bAllowTiberium)
-							{
+							if ((*tiledata)[curground].bAllowTiberium) {
 								Map->SetOverlayAt(dwPos + i + e * Map->GetIsoSize(), 0x70);
 								Map->SetOverlayDataAt(dwPos + i + e * Map->GetIsoSize(), 0x5);
 							}
 						}
 					}
-				}
-				else if (AD.data2 == 20)
-				{
+				} else if (AD.data2 == 20) {
 					int i, e;
-					for (i = 0;i < m_BrushSize_x;i++)
-					{
-						for (e = 0;e < m_BrushSize_y;e++)
-						{
+					for (i = 0; i < m_BrushSize_x; i++) {
+						for (e = 0; e < m_BrushSize_y; e++) {
 							int ovrl = Map->GetOverlayAt(dwPos + i + e * Map->GetIsoSize());
-							if (ovrl > 0x65 && ovrl < 0x72)
-							{
+							if (ovrl > 0x65 && ovrl < 0x72) {
 								if (Map->GetOverlayDataAt(i + e * Map->GetIsoSize() + dwPos) < 9) Map->SetOverlayDataAt(dwPos + i + e * Map->GetIsoSize(), Map->GetOverlayDataAt(dwPos + i + e * Map->GetIsoSize()) + 1);
 							}
 						}
 					}
-				}
-				else if (AD.data2 == 21)
-				{
+				} else if (AD.data2 == 21) {
 
 					int i, e;
-					for (i = 0;i < m_BrushSize_x;i++)
-					{
-						for (e = 0;e < m_BrushSize_y;e++)
-						{
+					for (i = 0; i < m_BrushSize_x; i++) {
+						for (e = 0; e < m_BrushSize_y; e++) {
 							int ovrl = Map->GetOverlayAt(dwPos + i + e * Map->GetIsoSize());
-							if (ovrl > 0x65 && ovrl < 0x72)
-							{
+							if (ovrl > 0x65 && ovrl < 0x72) {
 								if (Map->GetOverlayDataAt(dwPos + i + e * Map->GetIsoSize()) > 0) Map->SetOverlayDataAt(dwPos + i + e * Map->GetIsoSize(), Map->GetOverlayDataAt(dwPos + i + e * Map->GetIsoSize()) - 1);
 							}
 						}
@@ -4990,8 +4484,7 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 				}
 			}
 
-		}
-		else if (AD.data == 3) // blue tiberium mode
+		} else if (AD.data == 3) // blue tiberium mode
 		{
 			int o = 0x7f;
 #ifdef RA2_MODE 
@@ -4999,19 +4492,15 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 #endif
 			//if((*tiledata)[m.wGround].bAllowTiberium)
 			{
-				if (AD.data2 == 0)
-				{
+				if (AD.data2 == 0) {
 
 					int i, e;
-					for (i = 0;i < m_BrushSize_x;i++)
-					{
-						for (e = 0;e < m_BrushSize_y;e++)
-						{
+					for (i = 0; i < m_BrushSize_x; i++) {
+						for (e = 0; e < m_BrushSize_y; e++) {
 							int curground = Map->GetFielddataAt(dwPos + i + e * Map->GetIsoSize())->wGround;
 							if (curground == 0xFFFF) curground = 0;
 
-							if ((*tiledata)[curground].bAllowTiberium)
-							{
+							if ((*tiledata)[curground].bAllowTiberium) {
 
 								int v2 = ((float)rand() / (float)RAND_MAX) * 8 + 1;
 								Map->SetOverlayAt(dwPos + i + e * Map->GetIsoSize(), o);
@@ -5020,50 +4509,35 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 						}
 					}
 
-				}
-				else if (AD.data2 == 10)
-				{
+				} else if (AD.data2 == 10) {
 					int i, e;
-					for (i = 0;i < m_BrushSize_x;i++)
-					{
-						for (e = 0;e < m_BrushSize_y;e++)
-						{
+					for (i = 0; i < m_BrushSize_x; i++) {
+						for (e = 0; e < m_BrushSize_y; e++) {
 							int curground = Map->GetFielddataAt(dwPos + i + e * Map->GetIsoSize())->wGround;
 							if (curground == 0xFFFF) curground = 0;
 
-							if ((*tiledata)[curground].bAllowTiberium)
-							{
+							if ((*tiledata)[curground].bAllowTiberium) {
 								Map->SetOverlayAt(dwPos + i + e * Map->GetIsoSize(), o);
 								Map->SetOverlayDataAt(dwPos + i + e * Map->GetIsoSize(), 0x5);
 							}
 						}
 					}
-				}
-				else if (AD.data2 == 20)
-				{
+				} else if (AD.data2 == 20) {
 					int i, e;
-					for (i = 0;i < m_BrushSize_x;i++)
-					{
-						for (e = 0;e < m_BrushSize_y;e++)
-						{
+					for (i = 0; i < m_BrushSize_x; i++) {
+						for (e = 0; e < m_BrushSize_y; e++) {
 							int ovrl = Map->GetOverlayAt(dwPos + i + e * Map->GetIsoSize());
-							if (ovrl == o)
-							{
+							if (ovrl == o) {
 								if (Map->GetOverlayDataAt(dwPos + i + e * Map->GetIsoSize()) < 9) Map->SetOverlayDataAt(dwPos + i + e * Map->GetIsoSize(), Map->GetOverlayDataAt(dwPos + i + e * Map->GetIsoSize()) + 1);
 							}
 						}
 					}
-				}
-				else if (AD.data2 == 21)
-				{
+				} else if (AD.data2 == 21) {
 					int i, e;
-					for (i = 0;i < m_BrushSize_x;i++)
-					{
-						for (e = 0;e < m_BrushSize_y;e++)
-						{
+					for (i = 0; i < m_BrushSize_x; i++) {
+						for (e = 0; e < m_BrushSize_y; e++) {
 							int ovrl = Map->GetOverlayAt(dwPos + i + e * Map->GetIsoSize());
-							if (ovrl == o)
-							{
+							if (ovrl == o) {
 								if (Map->GetOverlayDataAt(dwPos + i + e * Map->GetIsoSize()) > 0) Map->SetOverlayDataAt(dwPos + i + e * Map->GetIsoSize(), Map->GetOverlayDataAt(dwPos + i + e * Map->GetIsoSize()) - 1);
 							}
 						}
@@ -5071,16 +4545,13 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 				}
 			}
 
-		}
-		else if (AD.data == 4) // veinhole stuff mode
+		} else if (AD.data == 4) // veinhole stuff mode
 		{
 			if (AD.data2 == 0) // Set veinhole!
 			{
 				int gx, gy;
-				for (gx = x - 1;gx <= x + 1;gx++)
-				{
-					for (gy = y - 1;gy <= y + 1;gy++)
-					{
+				for (gx = x - 1; gx <= x + 1; gx++) {
+					for (gy = y - 1; gy <= y + 1; gy++) {
 						Map->SetOverlayAt(gx + gy * Map->GetIsoSize(), OVRL_VEINHOLEBORDER);
 						Map->SetOverlayDataAt(gx + gy * Map->GetIsoSize(), 0x0);
 					}
@@ -5088,63 +4559,48 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 				Map->SetOverlayAt(dwPos, OVRL_VEINHOLE);
 				Map->SetOverlayDataAt(dwPos, 0x0);
 				Map->SetHeightAt(dwPos, Map->GetHeightAt(dwPos) - 1);
-			}
-			else if (AD.data2 == 1) // set veins
+			} else if (AD.data2 == 1) // set veins
 			{
 				Map->SetOverlayAt(dwPos, OVRL_VEINS);
 				Map->SetOverlayDataAt(dwPos, 0x30);
 			}
 
-		}
-		else if (AD.data == 30) // any overlay
+		} else if (AD.data == 30) // any overlay
 		{
 			Map->SetOverlayAt(dwPos, AD.data2);
 			Map->SetOverlayDataAt(dwPos, 0);
 			int i;
-			for (i = 0;i < overlay_count;i++)
-			{
-				if (overlay_number[i] == AD.data2)
-				{
-					if (overlay_trail[i])
-					{
+			for (i = 0; i < overlay_count; i++) {
+				if (overlay_number[i] == AD.data2) {
+					if (overlay_trail[i]) {
 						// handle trail stuff!
 						HandleTrail(x, y);
 					}
 				}
 			}
-		}
-		else if (AD.data == 33)
-		{
+		} else if (AD.data == 33) {
 			int i, e;
-			for (i = 0;i < m_BrushSize_x;i++)
-			{
-				for (e = 0;e < m_BrushSize_y;e++)
-				{
+			for (i = 0; i < m_BrushSize_x; i++) {
+				for (e = 0; e < m_BrushSize_y; e++) {
 					Map->SetOverlayAt(dwPos + i + e * Map->GetIsoSize(), AD.data2);
 					Map->SetOverlayDataAt(dwPos + i + e * Map->GetIsoSize(), AD.data3);
 				}
 			}
 		}
 
-		else if (AD.data == 31)
-		{
+		else if (AD.data == 31) {
 			Map->SetOverlayAt(dwPos, AD.data2);
-		}
-		else if (AD.data == 32)
-		{
+		} else if (AD.data == 32) {
 			Map->SetOverlayDataAt(dwPos, AD.data2);
 		}
 
 		// RedrawWindow(NULL,NULL,RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else if (AD.type == 7)
-	{
+	} else if (AD.type == 7) {
 		// set owner!
 		BOOL bchanged = FALSE;
 
 		int t = Map->GetStructureAt(x + y * Map->GetIsoSize());
-		if (t >= 0)
-		{
+		if (t >= 0) {
 			STRUCTURE structure;
 			Map->GetStructureData(t, &structure);
 			Map->DeleteStructure(t);
@@ -5153,8 +4609,7 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 			bchanged = TRUE;
 		}
 		t = Map->GetUnitAt(x + y * Map->GetIsoSize());
-		if (t >= 0)
-		{
+		if (t >= 0) {
 			UNIT unit;
 			Map->GetUnitData(t, &unit);
 			Map->DeleteUnit(t);
@@ -5163,8 +4618,7 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 			bchanged = TRUE;
 		}
 		t = Map->GetAirAt(x + y * Map->GetIsoSize());
-		if (t >= 0)
-		{
+		if (t >= 0) {
 			AIRCRAFT aircraft;
 			Map->GetAircraftData(t, &aircraft);
 			Map->DeleteAircraft(t);
@@ -5173,11 +4627,9 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 			bchanged = TRUE;
 		}
 		int z;
-		for (z = 0;z < SUBPOS_COUNT;z++)
-		{
+		for (z = 0; z < SUBPOS_COUNT; z++) {
 			t = Map->GetInfantryAt(x + y * Map->GetIsoSize(), z);
-			if (t >= 0)
-			{
+			if (t >= 0) {
 				INFANTRY infantry;
 				Map->GetInfantryData(t, &infantry);
 				Map->DeleteInfantry(t);
@@ -5187,8 +4639,7 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 			}
 		}
 
-		if (bchanged)
-		{
+		if (bchanged) {
 			//RedrawWindow(NULL,NULL,RDW_INVALIDATE | RDW_UPDATENOW);
 		}
 
@@ -5198,8 +4649,7 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 	else if (AD.type == 8) // add smudge
 	{
 
-		if (Map->GetFielddataAt(x + y * Map->GetIsoSize())->smudge >= 0)
-		{
+		if (Map->GetFielddataAt(x + y * Map->GetIsoSize())->smudge >= 0) {
 			return;
 		}
 
@@ -5224,8 +4674,7 @@ void CIsoView::OnTimer(UINT_PTR nIDEvent)
 	last_succeeded_operation = 1000000;
 
 
-	if (nIDEvent == 11)
-	{
+	if (nIDEvent == 11) {
 		// BUGSEARCH
 		//if(b_IsLoading) return;	
 		// 
@@ -5234,9 +4683,7 @@ void CIsoView::OnTimer(UINT_PTR nIDEvent)
 		SetScroll(m_viewOffset.x, m_viewOffset.y);
 
 		InvalidateRect(NULL, FALSE);
-	}
-	else
-	{
+	} else {
 		errstream << "Timer calls InitTMPs()" << endl;
 		errstream.flush();
 
@@ -5253,8 +4700,7 @@ void CIsoView::OnTimer(UINT_PTR nIDEvent)
 
 void CIsoView::FillArea(DWORD dwX, DWORD dwY, DWORD dwID, BYTE bSubTile)
 {
-	if ((*tiledata)[dwID].cx != 1 || (*tiledata)[dwID].cy != 1)
-	{
+	if ((*tiledata)[dwID].cx != 1 || (*tiledata)[dwID].cy != 1) {
 		MessageBox("You can only use 1x1 tiles to fill areas.");
 		return;
 	}
@@ -5267,10 +4713,8 @@ void CIsoView::FillArea(DWORD dwX, DWORD dwY, DWORD dwID, BYTE bSubTile)
 	mapheight = Map->GetHeight();
 
 	int i, e;
-	for (i = -1;i < 2;i++)
-	{
-		for (e = -1;e < 2;e++)
-		{
+	for (i = -1; i < 2; i++) {
+		for (e = -1; e < 2; e++) {
 			if (abs(i) == abs(e)) continue;
 			int cur_x, cur_y;
 			cur_x = dwX + i;
@@ -5283,8 +4727,7 @@ void CIsoView::FillArea(DWORD dwX, DWORD dwY, DWORD dwID, BYTE bSubTile)
 
 
 
-			if (f2->wGround != dwID && f2->wGround == f->wGround && f2->bSubTile == f->bSubTile)
-			{
+			if (f2->wGround != dwID && f2->wGround == f->wGround && f2->bSubTile == f->bSubTile) {
 				FillArea(cur_x, cur_y, dwID, bSubTile);
 			}
 
@@ -5313,10 +4756,8 @@ void CIsoView::AutoLevel()
 
 	int i;
 
-	for (i = 0;i < *tiledata_count;i++)
-	{
-		if ((*tiledata)[i].wTileSet == cliffset)
-		{
+	for (i = 0; i < *tiledata_count; i++) {
+		if ((*tiledata)[i].wTileSet == cliffset) {
 			iCliffStart = i;
 			break;
 
@@ -5356,8 +4797,7 @@ void CIsoView::AutoLevel()
 		else if(s=="Top_2") bDirections[i]=7;
 	}*/
 
-	for (i = 0;i < mapsize;i++)
-	{
+	for (i = 0; i < mapsize; i++) {
 		FIELDDATA* f1 = Map->GetFielddataAt(i);
 		int o_ground = f1->wGround;
 		if (o_ground == 0xFFFF) o_ground = 0;
@@ -5370,10 +4810,8 @@ void CIsoView::AutoLevel()
 
 
 		int x, y;
-		for (x = -1;x < 2;x++)
-		{
-			for (y = -1;y < 2;y++)
-			{
+		for (x = -1; x < 2; x++) {
+			for (y = -1; y < 2; y++) {
 				if (x == -1 && y == -1) continue;
 				if (x == 1 && y == 1) continue;
 				if (x == 1 && y == -1) continue;
@@ -5384,10 +4822,8 @@ void CIsoView::AutoLevel()
 				int heights[32][32];
 				memset(heights, 0, 32 * 32 * sizeof(int));
 
-				for (p = 0;p < o_width;p++)
-				{
-					for (k = 0;k < o_height;k++)
-					{
+				for (p = 0; p < o_width; p++) {
+					for (k = 0; k < o_height; k++) {
 						count++;
 						heights[p][k] = (*tiledata)[o_ground].tiles[p + k * o_width].bZHeight;
 					}
@@ -5395,38 +4831,30 @@ void CIsoView::AutoLevel()
 
 
 
-				if (o_ground < 8 + iCliffStart || o_ground>13 + iCliffStart)
-				{
-					if (count < 4 || count>4)
-					{
+				if (o_ground < 8 + iCliffStart || o_ground>13 + iCliffStart) {
+					if (count < 4 || count>4) {
 						if (x < 0 || y < 0) continue;
 					}
 
 
 
 
-					if (heights[0][0] && !heights[1][1])
-					{
-						if (heights[1][0] && heights[0][1])
-						{
+					if (heights[0][0] && !heights[1][1]) {
+						if (heights[1][0] && heights[0][1]) {
 
 							if (x < 0 || y < 0) continue;
 
 						}
 					}
 
-					if (heights[0][0] && heights[1][1])
-					{
+					if (heights[0][0] && heights[1][1]) {
 						if (x < 0 || y>0)  continue;
 					}
 
-					if (!heights[0][0] && heights[1][0] && heights[0][1] && heights[1][1])
-					{
+					if (!heights[0][0] && heights[1][0] && heights[0][1] && heights[1][1]) {
 						if (x < 0 || y < 0) continue;
 					}
-				}
-				else
-				{
+				} else {
 					if (x > 0 || y > 0) continue;
 				}
 
@@ -5438,24 +4866,20 @@ void CIsoView::AutoLevel()
 				int cur_ground = cur_f->wGround;
 				if (cur_ground == 0xFFFF) cur_ground = 0;
 				int cur_set;
-				if ((*tiledata)[cur_ground].wTileSet != (*tiledata)[o_ground].wTileSet)
-				{
+				if ((*tiledata)[cur_ground].wTileSet != (*tiledata)[o_ground].wTileSet) {
 
-					if (((*tiledata)[o_ground].wTileSet == cliffset || (*tiledata)[o_ground].wTileSet == slopesetpiecesset) && (*tiledata)[cur_ground].bMorphable)
-					{
+					if (((*tiledata)[o_ground].wTileSet == cliffset || (*tiledata)[o_ground].wTileSet == slopesetpiecesset) && (*tiledata)[cur_ground].bMorphable) {
 						int height_diff = f1->bHeight - cur_f->bHeight;
 						if (o_ground >= 8 + iCliffStart && o_ground <= 13 + iCliffStart && (*tiledata)[o_ground].tiles[cur_f->bSubTile].bZHeight == 0) height_diff += 4;
 						int need_diff = height_diff;//(*tiledata)[o_ground].tiles[f1->bSubTile].bZHeight-(*tiledata)[cur_ground].tiles[cur_f->bSubTile].bZHeight;
 						//if((*tiledata)[o_ground].tiles[f1->bSubTile].bZ
-						if (abs(height_diff) > 1)
-						{
+						if (abs(height_diff) > 1) {
 							//ChangeTileHeight(i+x+y*mapedge,f1->bHeight,FALSE, FALSE);
 							int height = f1->bHeight;
 							if (o_ground >= 8 + iCliffStart && o_ground <= 13 + iCliffStart && (*tiledata)[o_ground].tiles[cur_f->bSubTile].bZHeight == 0) height = f1->bHeight + 4;
 							Map->SetHeightAt(i + x + y * mapedge, height);
 							bChanged[i + x + y * mapedge] = TRUE;
-						}
-						else if (height_diff)
+						} else if (height_diff)
 							Map->CreateSlopesAt(i + x + y * mapedge);
 						//bChanged[i+x+y*mapedge]=TRUE;
 					}
@@ -5464,13 +4888,11 @@ void CIsoView::AutoLevel()
 		}
 	}
 
-	for (i = 0;i < mapsize;i++)
-	{
+	for (i = 0; i < mapsize; i++) {
 
-		if (bChanged[i])
-		{
+		if (bChanged[i]) {
 			int e;
-			for (e = 0;e < Map->GetIsoSize() * Map->GetIsoSize();e++)
+			for (e = 0; e < Map->GetIsoSize() * Map->GetIsoSize(); e++)
 				Map->SetReserved(e, 0);
 			ChangeTileHeight(i, Map->GetHeightAt(i), FALSE, FALSE);
 		}
@@ -5497,10 +4919,8 @@ inline void ToIso3d_NoAccessCheck(int* x, int* y)
 	int i, e = 0;
 
 
-	for (i = 15;i >= 0;i--)
-	{
-		for (e = 0;e < 3;e++)
-		{
+	for (i = 15; i >= 0; i--) {
+		for (e = 0; e < 3; e++) {
 			int a;
 
 
@@ -5515,8 +4935,7 @@ inline void ToIso3d_NoAccessCheck(int* x, int* y)
 			px = m;
 			py = n;
 
-			if (m >= 0 && n >= 0 && m < Map->GetIsoSize() && n < Map->GetIsoSize())
-			{
+			if (m >= 0 && n >= 0 && m < Map->GetIsoSize() && n < Map->GetIsoSize()) {
 				FIELDDATA mfd = *Map->GetFielddataAt(px + py * Map->GetIsoSize());
 				int ground = mfd.wGround;
 				if (ground == 0xFFFF) ground = 0;
@@ -5537,8 +4956,7 @@ inline void ToIso3d_NoAccessCheck(int* x, int* y)
 						dx = ((float)dy1) / ((float)f_y) - ((float)dx1) / ((float)f_x) + 1.0f;//+ 1 + (float)0.5 +1;
 						dy = ((float)dx1) / ((float)f_x) + ((float)dy1) / ((float)f_y) + 0.0f;//- 1-(float)0.5 +1;
 
-						if (((dx == 0 && dy == 0) || (!bAllowAccessBehindCliffs && *y - n > f_y)))
-						{
+						if (((dx == 0 && dy == 0) || (!bAllowAccessBehindCliffs && *y - n > f_y))) {
 							*x = px - 0;
 							*y = py + 0;
 							return;
@@ -5586,7 +5004,7 @@ for(i=15;i>=0;i--)
 	}*/
 
 
-	*x = cx;//-1;
+	* x = cx;//-1;
 	*y = cy;//-1;
 }
 
@@ -5598,8 +5016,7 @@ void CIsoView::DrawMap()
 
 	if (bNoDraw) return;
 
-	if (bCancelDraw)
-	{
+	if (bCancelDraw) {
 		bCancelDraw = FALSE;
 		return;
 	}
@@ -5608,8 +5025,7 @@ void CIsoView::DrawMap()
 
 	if (lpds == NULL || b_IsLoading || tiledata == NULL || (*tiledata) == NULL || (*tiledata_count == 0)) return; // just to make sure...
 
-	if (lpds->IsLost() != DD_OK)
-	{
+	if (lpds->IsLost() != DD_OK) {
 		// we lost our surfaces, we need to reinitialize directdraw and all associated objects
 		ReInitializeDDraw();
 		return;
@@ -5630,15 +5046,15 @@ void CIsoView::DrawMap()
 
 
 	// get the window rect
-	
+
 	RECT r = GetScaledDisplayRect();
 
 	// the code here draws the coordinate system
 	int i;
 
-	
+
 	// now, we draw all the objects
-	
+
 
 	int left, right, top, bottom;
 
@@ -5699,16 +5115,13 @@ void CIsoView::DrawMap()
 	m_texts_to_render.clear();
 	m_waypoints_to_render.clear();
 
-	for (u = left;u < right;u++)
-	{
-		for (v = top;v < bottom;v++)
-		{
+	for (u = left; u < right; u++) {
+		for (v = top; v < bottom; v++) {
 			const MapCoords mapCoords(u, v);
-			if (bCancelDraw)
-			{
+			if (bCancelDraw) {
 				bCancelDraw = FALSE;
 			}
-				
+
 			if (u < 1 || v < 1 || u + v<mapwidth + 1 || u + v>mapwidth + mapheight * 2 || (v + 1 > mapwidth && u - 1 < v - mapwidth) || (u + 1 > mapwidth && v + mapwidth - 1 < u))
 				continue;
 
@@ -5722,15 +5135,11 @@ void CIsoView::DrawMap()
 
 			DWORD dwOrigGround = m.wGround;
 
-			if (theApp.m_Options.bMarbleMadness)
-			{
-				if ((*tiledata)[m.wGround].wMarbleGround != 0xFFFF)
-				{
+			if (theApp.m_Options.bMarbleMadness) {
+				if ((*tiledata)[m.wGround].wMarbleGround != 0xFFFF) {
 
 					m.wGround = (*tiledata)[m.wGround].wMarbleGround;
-				}
-				else if (bMarbleHeight)
-				{
+				} else if (bMarbleHeight) {
 					//drawy+=f_y*m.bHeight;
 
 					m.wGround = MM_heightstart + m.bHeight;
@@ -5738,33 +5147,27 @@ void CIsoView::DrawMap()
 				}
 			}
 
-			if (!m.bRedrawTerrain)
-			{
+			if (!m.bRedrawTerrain) {
 
 				TILEDATA* td = &(*tiledata)[m.wGround];
-				if (td->bReplacementCount)
-				{
-					if (m.bRNDImage > 0)
-					{
+				if (td->bReplacementCount) {
+					if (m.bRNDImage > 0) {
 						m.bRNDImage <= td->bReplacementCount ? td = &td->lpReplacements[m.bRNDImage - 1] : td = &td->lpReplacements[td->bReplacementCount - 1];
 					}
 				}
 
-				if (m.bSubTile < td->wTileCount && td->tiles[m.bSubTile].pic != NULL)
-				{
+				if (m.bSubTile < td->wTileCount && td->tiles[m.bSubTile].pic != NULL) {
 					const SUBTILE& st = td->tiles[m.bSubTile];
 					const auto stDrawCoords = drawCoords + st.drawOffset();
 
 
-					if (!m.bHide && (*tiledata)[dwOrigGround].bHide == FALSE)
-					{
+					if (!m.bHide && (*tiledata)[dwOrigGround].bHide == FALSE) {
 #ifndef NOSURFACES
 						Blit(st.pic, stDrawCoords.x, stDrawCoords.y, st.wWidth, st.wHeight);
 #else
 						BlitTerrain(ddsd.lpSurface, stDrawCoords.x, stDrawCoords.y, r.left, r.top, ddsd.lPitch, r.right, r.bottom, st);
 #endif
-					}
-					else // draw soemthing representing the tile
+					} else // draw soemthing representing the tile
 					{
 #ifndef NOSURFACES
 						DrawCell(stDrawCoords.x, stDrawCoords.y, 1, 1, RGB(0, 140, 0), FALSE, FALSE);
@@ -5781,13 +5184,10 @@ void CIsoView::DrawMap()
 	}
 
 
-	for (u = left;u < right;u++)
-	{
-		for (v = top;v < bottom;v++)
-		{
+	for (u = left; u < right; u++) {
+		for (v = top; v < bottom; v++) {
 			const MapCoords mapCoords(u, v);
-			if (bCancelDraw)
-			{
+			if (bCancelDraw) {
 				bCancelDraw = FALSE;
 			}
 
@@ -5802,56 +5202,44 @@ void CIsoView::DrawMap()
 
 			DWORD dwOrigGround = m.wGround;
 
-			if (theApp.m_Options.bMarbleMadness)
-			{
-				if ((*tiledata)[m.wGround].wMarbleGround != 0xFFFF)
-				{
+			if (theApp.m_Options.bMarbleMadness) {
+				if ((*tiledata)[m.wGround].wMarbleGround != 0xFFFF) {
 					m.wGround = (*tiledata)[m.wGround].wMarbleGround;
-				}
-				else if (bMarbleHeight)
-				{
+				} else if (bMarbleHeight) {
 					//y+=f_y*m.bHeight;										
 					m.wGround = MM_heightstart + m.bHeight;
 					m.bSubTile = 0;
 				}
 			}
 
-			if (m.bRedrawTerrain)
-			{
+			if (m.bRedrawTerrain) {
 				// draw cliff again to hide buildings behind
 
-				if (m.wGround < *tiledata_count)
-				{
+				if (m.wGround < *tiledata_count) {
 					TILEDATA* td = &(*tiledata)[m.wGround];
-					if (td->bReplacementCount)
-					{
-						if (m.bRNDImage > 0)
-						{
+					if (td->bReplacementCount) {
+						if (m.bRNDImage > 0) {
 							m.bRNDImage <= td->bReplacementCount ? td = &td->lpReplacements[m.bRNDImage - 1] : td = &td->lpReplacements[td->bReplacementCount - 1];
 						}
 					}
 
-					if (m.bSubTile < td->wTileCount && td->tiles[m.bSubTile].pic != NULL)
-					{
+					if (m.bSubTile < td->wTileCount && td->tiles[m.bSubTile].pic != NULL) {
 						const SUBTILE& st = td->tiles[m.bSubTile];
 						const auto stDrawCoords = drawCoords + st.drawOffset();
 
 
-						if (!m.bHide && (*tiledata)[dwOrigGround].bHide == FALSE)
-						{
+						if (!m.bHide && (*tiledata)[dwOrigGround].bHide == FALSE) {
 #ifndef NOSURFACES
 							Blit(st.pic, stDrawCoords.x, stDrawCoords.y, st.wWidth, st.wHeight);
 #else
 							BlitTerrain(ddsd.lpSurface, stDrawCoords.x, stDrawCoords.y, r.left, r.top, ddsd.lPitch, r.right, r.bottom, st);
-							if (st.anim)
-							{
+							if (st.anim) {
 								const auto animDrawCoords = drawCoords + ProjectedVec(f_x / 2 - st.anim->wMaxWidth / 2, f_y / 2 - st.anim->wMaxHeight / 2) + st.anim->drawOffset();
 								BlitPic(ddsd.lpSurface, animDrawCoords.x, animDrawCoords.y, r.left, r.top, ddsd.lPitch, r.right, r.bottom, *st.anim);
 							}
 #endif
 
-						}
-						else // draw soemthing representing the tile
+						} else // draw soemthing representing the tile
 						{
 #ifndef NOSURFACES
 							DrawCell(stDrawCoords.x, stDrawCoords.y, 1, 1, RGB(0, 140, 0), FALSE, FALSE);
@@ -5868,16 +5256,13 @@ void CIsoView::DrawMap()
 			// draw terrain animation (tunnel tops, waterfalls)
 			// tunnel tops might be repainted later so that units do not appear on top - this probably could be done in CLoading so that instead of a back tile a front tile is responsible for drawing the animation
 			{
-				if (m.wGround < *tiledata_count)
-				{
+				if (m.wGround < *tiledata_count) {
 					TILEDATA* td = &(*tiledata)[m.wGround];
 
-					if (m.bSubTile < td->wTileCount)
-					{
+					if (m.bSubTile < td->wTileCount) {
 						const SUBTILE& st = td->tiles[m.bSubTile];
 
-						if (!m.bHide && (*tiledata)[dwOrigGround].bHide == FALSE && st.anim)
-						{
+						if (!m.bHide && (*tiledata)[dwOrigGround].bHide == FALSE && st.anim) {
 #ifndef NOSURFACES
 #else
 							const auto animDrawCoords = drawCoords + ProjectedVec(f_x / 2 - st.anim->wMaxWidth / 2, f_y / 2 - st.anim->wMaxHeight / 2) + st.anim->drawOffset();
@@ -5890,21 +5275,17 @@ void CIsoView::DrawMap()
 			}
 
 			// draw overlay
-			if (m.overlay != 0xFF)
-			{
+			if (m.overlay != 0xFF) {
 				PICDATA pic;
 				pic.pic = NULL;
 
-				if (ovrlpics[m.overlay][m.overlaydata] != NULL)
-				{
+				if (ovrlpics[m.overlay][m.overlaydata] != NULL) {
 					pic = *ovrlpics[m.overlay][m.overlaydata];
 				}
 
 
-				if (pic.pic == NULL)
-				{
-					if (!pic.bTried)
-					{
+				if (pic.pic == NULL) {
+					if (!pic.bTried) {
 						auto const& overlayId = rules.GetSection("OverlayTypes").Nth(m.overlay).second;
 						if (!overlayId.IsEmpty()) {
 							SetError("Loading graphics");
@@ -5916,41 +5297,35 @@ void CIsoView::DrawMap()
 						}
 					}
 
-					if (pic.pic == NULL)
-					{
-						if (!(m.overlay >= 0x4a && m.overlay <= 0x65) && !(m.overlay >= 0xcd && m.overlay <= 0xec))
-						{
+					if (pic.pic == NULL) {
+						if (!(m.overlay >= 0x4a && m.overlay <= 0x65) && !(m.overlay >= 0xcd && m.overlay <= 0xec)) {
 							char cd[50];
 							cd[0] = '0';
 							cd[1] = 'x';
 							itoa(m.overlay, cd + 2, 16);
 
-							m_texts_to_render.push_back({ cd, drawCoords.x + f_x / 2, drawCoords.y + f_y / 2, RGB(0,0,0), false, true, true});
+							m_texts_to_render.push_back({ cd, drawCoords.x + f_x / 2, drawCoords.y + f_y / 2, RGB(0,0,0), false, true, true });
 							// TextOut(drawx,drawy, cd, RGB(0,0,0));
 						}
 					}
 				}
 
-				if (pic.pic != NULL)
-				{
+				if (pic.pic != NULL) {
 					ProjectedVec offset(f_x / 2 - pic.wMaxWidth / 2, -pic.wMaxHeight / 2);
 
 					if (m.overlay == OVRL_VEINHOLE) // veinhole, big, special case
 					{
 						offset.y -= f_y * 3 / 2;
-					}
-					else if (isBigBridge(m.overlay)) // bridge special case
+					} else if (isBigBridge(m.overlay)) // bridge special case
 					{
 						// drawy-=f_y;
-						if (m.overlaydata >= 0x09 && m.overlaydata <= 0x11)
-						{
+						if (m.overlaydata >= 0x09 && m.overlaydata <= 0x11) {
 							offset.y -= f_y / 2;
 						}
 
 						offset.x -= 1; // hmm... strange, but this is needed
 
-					}
-					else if (isTrack(m.overlay))
+					} else if (isTrack(m.overlay))
 						offset.y += f_y / 2;
 
 					if (m.overlay >= 0x4a && m.overlay <= 0x65) offset.y += f_y / 2;
@@ -5973,9 +5348,7 @@ void CIsoView::DrawMap()
 					{
 						int n = RGB(200, 0, 0);
 						BlitPic(ddsd.lpSurface, drawCoordsOvrl.x, drawCoordsOvrl.y, r.left, r.top, ddsd.lPitch, r.right, r.bottom, pic, &n);
-					}
-					else
-					{
+					} else {
 						int n = RGB(0, 200, 0);
 						BlitPic(ddsd.lpSurface, drawCoordsOvrl.x, drawCoordsOvrl.y, r.left, r.top, ddsd.lPitch, r.right, r.bottom, pic, &n);
 					}
@@ -5986,14 +5359,12 @@ void CIsoView::DrawMap()
 				}
 			}
 
-			if (m.structure != -1)
-			{
+			if (m.structure != -1) {
 				last_succeeded_operation = 10101;
 
 				// for structures we need to check if they weren´t drawn earlier
 				// (every field that this building achieves has this building as .structure)
-				if (Map->GetStructureAt(mapCoords - MapVec(-1, 0)) != m.structure && Map->GetStructureAt(mapCoords - MapVec(0, -1)) != m.structure)
-				{
+				if (Map->GetStructureAt(mapCoords - MapVec(-1, 0)) != m.structure && Map->GetStructureAt(mapCoords - MapVec(0, -1)) != m.structure) {
 
 					STRUCTUREPAINT objp;
 					Map->GetStructurePaint(m.structure, &objp);
@@ -6004,8 +5375,7 @@ void CIsoView::DrawMap()
 
 					int w = 1, h = 1;
 					PICDATA pic;
-					if (id > -1 && id < 0x0F00)
-					{
+					if (id > -1 && id < 0x0F00) {
 						w = buildinginfo[id].w;
 						h = buildinginfo[id].h;
 						int dir = objp.direction / 32;
@@ -6022,17 +5392,14 @@ void CIsoView::DrawMap()
 					DrawCell(drawCoordsBld.x, drawCoordsBld.y, w, h, colorref_conv[objp.col]);
 #else
 					// MW 07/19/01: Paint cell if user chose so...
-					if (theApp.m_Options.bShowCells)
-					{
+					if (theApp.m_Options.bShowCells) {
 						DrawCell(ddsd.lpSurface, ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch, drawCoordsBld.x, drawCoordsBld.y, w, h, colorref_conv[objp.col]);
 					}
 #endif
 
 
-					if (pic.pic == NULL)
-					{
-						if (!missingimages[objp.type])
-						{
+					if (pic.pic == NULL) {
+						if (!missingimages[objp.type]) {
 							SetError("Loading graphics");
 							theApp.m_loading->LoadUnitGraphic(objp.type);
 							::Map->UpdateBuildingInfo(&objp.type);
@@ -6040,8 +5407,7 @@ void CIsoView::DrawMap()
 							pic = buildinginfo[id].pic[dir];
 							if (pic.pic == NULL) pic = buildinginfo[id].pic[0];
 						}
-						if (pic.pic == NULL)
-						{
+						if (pic.pic == NULL) {
 #ifndef NOSURFACES
 							Blit(pics["HOUSE"].pic, drawCoordsBld.x, drawCoordsBld.y - 19); // draw a ugly house
 #endif
@@ -6062,8 +5428,7 @@ void CIsoView::DrawMap()
 						BlitPic(ddsd.lpSurface, drawCoordsBldShp.x, drawCoordsBldShp.y, r.left, r.top, ddsd.lPitch, r.right, r.bottom, pic, &colorref_conv[objp.col]);
 #endif
 
-						for (int upgrade = 0; upgrade < objp.upradecount; ++upgrade)
-						{
+						for (int upgrade = 0; upgrade < objp.upradecount; ++upgrade) {
 							const auto& upg = upgrade == 0 ? objp.upgrade1 : (upgrade == 1 ? objp.upgrade2 : objp.upgrade3);
 							if (upg.GetLength() == 0)
 								continue;
@@ -6071,8 +5436,7 @@ void CIsoView::DrawMap()
 							PICDATA pic;
 							int dir = (7 - objp.direction / 32) % 8;
 							pic = pics[GetUnitPictureFilename(upg, dir)];
-							if (!missingimages[upg] && pic.pic == NULL)
-							{
+							if (!missingimages[upg] && pic.pic == NULL) {
 								SetError("Loading graphics");
 								theApp.m_loading->LoadUnitGraphic(upg);
 								::Map->UpdateBuildingInfo(&upg);
@@ -6080,8 +5444,7 @@ void CIsoView::DrawMap()
 								if (pic.pic == NULL) missingimages[upg] = TRUE;
 							}
 
-							if (pic.pic != NULL)
-							{
+							if (pic.pic != NULL) {
 								static const CString LocLookup[3][2] = { {"PowerUp1LocXX", "PowerUp1LocYY"}, {"PowerUp2LocXX", "PowerUp2LocYY"}, {"PowerUp3LocXX", "PowerUp3LocYY"} };
 								const auto drawCoordsPowerUp = drawCoordsBldShp + ProjectedVec(
 									atoi(art.GetString(objp.type, LocLookup[upgrade][0])),
@@ -6104,15 +5467,13 @@ void CIsoView::DrawMap()
 			}
 
 
-			if (m.node.type > -1)
-			{
+			if (m.node.type > -1) {
 				last_succeeded_operation = 10102;
 
 				CString house = m.node.house;
 				CString tmp;
-						
-				if (Map->GetNodeAt(mapCoords + MapVec(1, 0), tmp) != m.node.index && Map->GetNodeAt(mapCoords + MapVec(0, 1), tmp) != m.node.index)
-				{
+
+				if (Map->GetNodeAt(mapCoords + MapVec(1, 0), tmp) != m.node.index && Map->GetNodeAt(mapCoords + MapVec(0, 1), tmp) != m.node.index) {
 					const auto drawCoordsBld = GetRenderTargetCoordinates(mapCoords - MapVec(buildinginfo[m.node.type].h - 1, buildinginfo[m.node.type].w - 1));
 
 					COLORREF c;
@@ -6122,8 +5483,7 @@ void CIsoView::DrawMap()
 					int id = m.node.type;
 					int w = 1, h = 1;
 					PICDATA pic;
-					if (id > -1 && id < 0x0F00)
-					{
+					if (id > -1 && id < 0x0F00) {
 						w = buildinginfo[id].w;
 						h = buildinginfo[id].h;
 						pic = buildinginfo[id].pic[0];
@@ -6143,8 +5503,7 @@ void CIsoView::DrawMap()
 #endif
 					//#endif
 
-					if (pic.pic == NULL)
-					{
+					if (pic.pic == NULL) {
 						auto const& buildingId = rules.GetSection("BuildingTypes").Nth(m.node.type).second;
 						if (!buildingId.IsEmpty() && !missingimages[buildingId]) {
 							SetError("Loading graphics");
@@ -6174,8 +5533,7 @@ void CIsoView::DrawMap()
 				}
 
 			}
-			if (m.unit != -1)
-			{
+			if (m.unit != -1) {
 
 				UNIT obj;
 				Map->GetUnitData(m.unit, &obj);
@@ -6191,22 +5549,19 @@ void CIsoView::DrawMap()
 
 				PICDATA p = pics[lpPicFile];
 
-				if (p.pic == NULL || lpPicFile.GetLength() == 0)
-				{
-					if (!missingimages[obj.type])
-					{
+				if (p.pic == NULL || lpPicFile.GetLength() == 0) {
+					if (!missingimages[obj.type]) {
 						SetError("Loading graphics");
 						theApp.m_loading->LoadUnitGraphic(obj.type);
 						lpPicFile = GetUnitPictureFilename(obj.type, atoi(obj.direction) / 32);
 						p = pics[lpPicFile];
 					}
 
-					if (p.pic == NULL)
-					{
+					if (p.pic == NULL) {
 #ifndef NOSURFACES
 						Blit(pics["TANK"].pic, drawCoords.x, drawCoords.y);
 						// TextOut(drawx+f_x/4,drawy+f_y/4, obj.type,c);
-						m_texts_to_render.push_back({ obj.type, drawCoords.x + f_x / 4, drawCoords.y + f_y / 4, m_color_converter->GetColor(c)});
+						m_texts_to_render.push_back({ obj.type, drawCoords.x + f_x / 4, drawCoords.y + f_y / 4, m_color_converter->GetColor(c) });
 #endif
 						missingimages[obj.type] = TRUE;
 					}
@@ -6225,8 +5580,7 @@ void CIsoView::DrawMap()
 #endif
 				}
 			}
-			if (m.aircraft != -1)
-			{
+			if (m.aircraft != -1) {
 				last_succeeded_operation = 10102;
 
 				AIRCRAFT obj;
@@ -6243,17 +5597,14 @@ void CIsoView::DrawMap()
 
 				PICDATA p = pics[lpPicFile];
 
-				if (p.pic == NULL)
-				{
-					if (!missingimages[obj.type])
-					{
+				if (p.pic == NULL) {
+					if (!missingimages[obj.type]) {
 						SetError("Loading graphics");
 						theApp.m_loading->LoadUnitGraphic(obj.type);
 						p = pics[lpPicFile];
 					}
 
-					if (p.pic == NULL)
-					{
+					if (p.pic == NULL) {
 #ifndef NOSURFACES
 						Blit(pics["TANK"].pic, drawCoords.x, drawCoords.y);
 						//TextOut(drawx+f_x/4,drawy+f_y/4, obj.type,c);
@@ -6277,9 +5628,8 @@ void CIsoView::DrawMap()
 				}
 			}
 			int ic;
-			for (ic = 0;ic < SUBPOS_COUNT;ic++)
-				if (m.infantry[ic] != -1)
-				{
+			for (ic = 0; ic < SUBPOS_COUNT; ic++)
+				if (m.infantry[ic] != -1) {
 					last_succeeded_operation = 10103;
 
 					//errstream << "GetInfantryData()" << endl;
@@ -6294,7 +5644,7 @@ void CIsoView::DrawMap()
 
 					COLORREF c = GetColor(obj.house);
 
-							
+
 					int dir = (7 - atoi(obj.direction) / 32) % 8;
 					CString lpPicFile = GetUnitPictureFilename(obj.type, dir);
 
@@ -6302,22 +5652,19 @@ void CIsoView::DrawMap()
 					DrawCell(drawCoords.x, drawCoords.y, 1, 1, c);
 #endif
 
-					static const ProjectedVec subPosLookup[5] = { ProjectedVec(0, -f_y / 4), ProjectedVec(f_x / 4 , 0), ProjectedVec(-f_x / 4, 0), ProjectedVec(0, f_y / 4), ProjectedVec()};
+					static const ProjectedVec subPosLookup[5] = { ProjectedVec(0, -f_y / 4), ProjectedVec(f_x / 4 , 0), ProjectedVec(-f_x / 4, 0), ProjectedVec(0, f_y / 4), ProjectedVec() };
 					auto drawCoordsInf = drawCoords + subPosLookup[ic > 4 ? 4 : ic];
 
 					PICDATA p = pics[lpPicFile];
 
-					if (p.pic == NULL)
-					{
-						if (!missingimages[obj.type])
-						{
+					if (p.pic == NULL) {
+						if (!missingimages[obj.type]) {
 							SetError("Loading graphics");
 							theApp.m_loading->LoadUnitGraphic(obj.type);
 							p = pics[lpPicFile];
 						}
 
-						if (p.pic == NULL)
-						{
+						if (p.pic == NULL) {
 #ifndef NOSURFACES
 							Blit(pics["MAN"].pic, drawCoordsInf.x, drawCoordsInf.y);
 							// TextOut(drawx+f_x/4,drawy+f_y/4, obj.type,c);
@@ -6342,16 +5689,14 @@ void CIsoView::DrawMap()
 					}
 
 				}
-			if (m.terrain != -1)
-			{
+			if (m.terrain != -1) {
 				last_succeeded_operation = 10104;
 
 
 				int id = m.terraintype;
 				int w = 1, h = 1;
 				PICDATA pic;
-				if (id > -1 && id < 0x0F00)
-				{
+				if (id > -1 && id < 0x0F00) {
 					w = treeinfo[id].w;
 					h = treeinfo[id].h;
 					pic = treeinfo[id].pic;
@@ -6359,20 +5704,17 @@ void CIsoView::DrawMap()
 
 				//CString lpPicFile=GetUnitPictureFilename(type, 0);				
 
-				if (pic.pic == NULL)
-				{
+				if (pic.pic == NULL) {
 					CString type;
 					Map->GetTerrainData(m.terrain, &type);
 
-					if (missingimages.find(type) == missingimages.end())
-					{
+					if (missingimages.find(type) == missingimages.end()) {
 						SetError("Loading graphics");
 						theApp.m_loading->LoadUnitGraphic(type);
 						::Map->UpdateTreeInfo(&type);
 						pic = treeinfo[id].pic;
 					}
-					if (pic.pic == NULL)
-					{
+					if (pic.pic == NULL) {
 #ifndef NOSURFACES
 						Blit(pics["TREE"].pic, drawCoords.x, drawCoords.y - 19);
 #endif
@@ -6380,8 +5722,7 @@ void CIsoView::DrawMap()
 					}
 				}
 
-				if (pic.pic)
-				{
+				if (pic.pic) {
 
 					auto drawCoordsTerrain = drawCoords + ProjectedVec(f_x / 2 - (pic.wMaxWidth / 2), f_y / 2 - 3 - (pic.wMaxHeight / 2));
 
@@ -6399,34 +5740,29 @@ void CIsoView::DrawMap()
 
 
 #ifdef SMUDGE_SUPP
-			if (m.smudge != -1)
-			{
+			if (m.smudge != -1) {
 				last_succeeded_operation = 10104;
 
 
 				int id = m.smudgetype;
 
 				PICDATA pic;
-				if (id > -1 && id < 0x0F00)
-				{
+				if (id > -1 && id < 0x0F00) {
 					pic = smudgeinfo[id].pic;
 				}
 
-				if (pic.pic == NULL)
-				{
+				if (pic.pic == NULL) {
 					SMUDGE data;
 					CString& type = data.type;
 					Map->GetSmudgeData(m.smudge, &data);
 
-					if (missingimages.find(type) == missingimages.end())
-					{
+					if (missingimages.find(type) == missingimages.end()) {
 						SetError("Loading graphics");
 						theApp.m_loading->LoadUnitGraphic(type);
 						::Map->UpdateSmudgeInfo(type);
 						pic = smudgeinfo[id].pic;
 					}
-					if (pic.pic == NULL)
-					{
+					if (pic.pic == NULL) {
 #ifndef NOSURFACES
 						// Blit(pics["TREE"].pic,drawCoords.x,drawCoords.y-19);
 #endif
@@ -6434,9 +5770,8 @@ void CIsoView::DrawMap()
 					}
 				}
 
-				if (pic.pic)
-				{
-					auto drawCoordsSmudge = drawCoords + ProjectedVec(f_x / 2 - (pic.wMaxWidth / 2), /*f_y / 2 - 3*/ - (pic.wMaxHeight / 2));
+				if (pic.pic) {
+					auto drawCoordsSmudge = drawCoords + ProjectedVec(f_x / 2 - (pic.wMaxWidth / 2), /*f_y / 2 - 3*/ -(pic.wMaxHeight / 2));
 
 #ifndef NOSURFACES
 					Blit(pic.pic, drawCoordsSmudge.x, drawCoordsSmudge.y);
@@ -6452,8 +5787,7 @@ void CIsoView::DrawMap()
 #endif
 
 
-			if (m.celltag != -1)
-			{
+			if (m.celltag != -1) {
 
 #ifdef NOSURFACES
 				lpdsBack->Unlock(NULL);
@@ -6465,8 +5799,7 @@ void CIsoView::DrawMap()
 #endif
 			}
 
-			if (m.waypoint != -1)
-			{
+			if (m.waypoint != -1) {
 
 				DWORD dwPos;
 				CString ID;
@@ -6500,7 +5833,7 @@ void CIsoView::DrawMap()
 				const auto waypointImageCoords = ProjectedCoords({ drawCoords.x, drawCoords.y }) + waypointImageOffset;
 				const auto waypointTextCoords = ProjectedCoords({ drawCoords.x, drawCoords.y }) + waypointTextOffset;
 				m_waypoints_to_render.push_back({ waypointImageCoords.x, waypointImageCoords.y });
-				m_texts_to_render.push_back({ ID.GetString(), waypointTextCoords.x, waypointTextCoords.y, RGB(0,0,255), false, useFont9, true});
+				m_texts_to_render.push_back({ ID.GetString(), waypointTextCoords.x, waypointTextCoords.y, RGB(0,0,255), false, useFont9, true });
 #ifdef NOSURFACES				
 				lpdsBack->Lock(NULL, &ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT | DDLOCK_NOSYSLOCK, NULL);
 #endif
@@ -6510,8 +5843,7 @@ void CIsoView::DrawMap()
 
 	}
 
-	for (const auto& tube : Map->GetTubes())
-	{
+	for (const auto& tube : Map->GetTubes()) {
 		DrawTube(*tube, &ddsd);
 	}
 
@@ -6520,22 +5852,19 @@ void CIsoView::DrawMap()
 #endif
 
 	// delayed waypoint rendering
-	for (const auto& wp : m_waypoints_to_render)
-	{
+	for (const auto& wp : m_waypoints_to_render) {
 		Blit((LPDIRECTDRAWSURFACE4)pics["FLAG"].pic, wp.drawx, wp.drawy);
 	}
 
 	// map tool rendering
-	if (AD.mode == ACTIONMODE_MAPTOOL)
-	{
+	if (AD.mode == ACTIONMODE_MAPTOOL) {
 		if (AD.tool)
 			AD.tool->render();
 	}
 
 	lpdsTemp->Blt(NULL, lpdsBack, NULL, 0, 0); // lpdsTemp always holds the scene drawn above, unscaled to the window
 
-	if (m_cellCursor != MapCoords(-1, -1))
-	{
+	if (m_cellCursor != MapCoords(-1, -1)) {
 		SurfaceLocker locker(lpdsBack);
 		auto desc = locker.ensure_locked();
 		if (desc)
@@ -6544,10 +5873,8 @@ void CIsoView::DrawMap()
 
 	auto renderDuration = std::chrono::duration_cast<std::chrono::duration<float>>(std::chrono::steady_clock::now() - startTime); // not including text output, ReleaseDC, waitForVerticalBlank etc below
 
-	if (bDrawStats)
-	{
-		if (theApp.m_Options.bShowStats)
-		{
+	if (bDrawStats) {
+		if (theApp.m_Options.bShowStats) {
 			auto systemStats = std::format("ms: {0}  Left: {1}  Top: {2}  Right: {3}  Bottom: {4}", renderDuration.count(), left, top, right, bottom);
 			m_texts_to_render.push_back({ systemStats.c_str(), r.left + 10, r.top + 10 + (-m_fontDefaultHeight) * 3 / 2, RGB(0,0,0), true });
 		}
@@ -6556,14 +5883,13 @@ void CIsoView::DrawMap()
 		m_texts_to_render.push_back({ moneyStr.c_str(), r.left + 10, r.top + 10, RGB(0,0,0), true });
 	}
 
-	if (rscroll)
-	{
+	if (rscroll) {
 		const auto& sc = pics["SCROLLCURSOR"];
 		Blit((LPDIRECTDRAWSURFACE4)sc.pic, rclick_x * m_viewScale.x + r.left - sc.wWidth / 2, rclick_y * m_viewScale.y + r.top - sc.wHeight / 2);
 	}
 
 	BlitBackbufferToHighRes(); // lpdsBackHighRes contains the same graphic, but scaled to the whole window
-		
+
 	RenderUIOverlay();
 	if (theApp.m_Options.bVSync)
 		dd->WaitForVerticalBlank(DDWAITVB_BLOCKBEGIN, NULL);
@@ -6579,8 +5905,7 @@ void CIsoView::RenderUIOverlay()
 
 	LPDIRECTDRAWSURFACE4 dds = lpdsBack;
 	bool useHighRes = false;
-	if (m_viewScale != Vec2<CSProjected, float>(1.0f, 1.0f) && lpdsBackHighRes)
-	{
+	if (m_viewScale != Vec2<CSProjected, float>(1.0f, 1.0f) && lpdsBackHighRes) {
 		dds = lpdsBackHighRes;
 		useHighRes = true;
 	}
@@ -6634,25 +5959,21 @@ void CIsoView::RenderUIOverlay()
 	auto red = m_color_converter->GetColor(255, 0, 0);
 	auto blue = m_color_converter->GetColor(0, 0, 255);
 	d.Rectangle(sllt.x, sllt.y, slbr.x, slbr.y, red);
-	d.Rectangle(sllt.x-1, sllt.y-1, slbr.x+1, slbr.y+1, red);
+	d.Rectangle(sllt.x - 1, sllt.y - 1, slbr.x + 1, slbr.y + 1, red);
 	d.Rectangle(ls_lt.x, ls_lt.y, ls_br.x, ls_br.y, blue);
-	d.Rectangle(ls_lt.x+1, ls_lt.y+1, ls_br.x-1, ls_br.y-1, blue);
+	d.Rectangle(ls_lt.x + 1, ls_lt.y + 1, ls_br.x - 1, ls_br.y - 1, blue);
 
 	dds->Unlock(NULL);
-	
+
 	RECT r;
 	GetWindowRect(&r);
 
-	for (const auto& s : m_texts_to_render)
-	{
+	for (const auto& s : m_texts_to_render) {
 		const bool blue = s.color == RGB(0, 0, 255);  // TODO: TextRenderer should support setting the color at render time
-		if (s.fixedScreenPos || !useHighRes)
-		{
+		if (s.fixedScreenPos || !useHighRes) {
 			auto textRenderer = s.useFont9 ? (blue ? *m_textBlue9 : *m_text9) : (blue ? *m_textBlue : *m_textDefault);
 			textRenderer.RenderText(dds, s.drawx, s.drawy, s.text, s.centered);
-		}
-		else
-		{
+		} else {
 			auto textRenderer = s.useFont9 ? (blue ? *m_textBlue9Scaled : *m_text9Scaled) : (blue ? *m_textBlueScaled : *m_textScaled);
 			textRenderer.RenderText(dds, r.left + (s.drawx - r.left) / m_viewScale.x, r.top + (s.drawy - r.top) / m_viewScale.y, s.text, s.centered);
 		}
@@ -6676,7 +5997,7 @@ void CIsoView::SetScroll(int xscroll, int yscroll)
 
 	m_viewOffset = ProjectedVec(xscroll, yscroll);
 
-	
+
 	if (m_viewOffset.x < (Map->GetHeight() / 2 - 14 - r.left / f_x) * f_x)
 		m_viewOffset.x = (Map->GetHeight() / 2 - 14 - r.left / f_x) * f_x;
 	if (m_viewOffset.x + r.right * m_viewScale.x > (Map->GetHeight() / 2 + Map->GetWidth() + 14) * f_x)
@@ -6710,8 +6031,7 @@ void CIsoView::OnKillFocus(CWnd* pNewWnd)
 {
 	CView::OnKillFocus(pNewWnd);
 
-	if (rscroll)
-	{
+	if (rscroll) {
 		errstream << "Killing scroll" << endl;
 		errstream.flush();
 
@@ -6741,7 +6061,7 @@ void CIsoView::FocusWaypoint(int index)
 	RECT r;
 	GetWindowRect(&r);
 
-	auto pos = ProjectedVec((x - (r.right - r.left) / 2 * m_viewScale.x)  - r.left, (y - (r.bottom - r.top) / 2 * m_viewScale.y) - r.top);
+	auto pos = ProjectedVec((x - (r.right - r.left) / 2 * m_viewScale.x) - r.left, (y - (r.bottom - r.top) / 2 * m_viewScale.y) - r.top);
 	SetScroll(pos.x, pos.y);
 
 	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
@@ -6761,7 +6081,7 @@ BOOL CIsoView::OnMouseWheel(UINT nFlags, short zDelta, CPoint ptScreen)
 	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 	CMyViewFrame& dlg = *(CMyViewFrame*)owner;
 	dlg.m_minimap.RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	
+
 	return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
 
@@ -6777,14 +6097,13 @@ void CIsoView::Zoom(CPoint& pt, float f)
 		m_viewScaleControl = 1.0f;
 	if (m_viewScaleControl < 0.1f)
 		m_viewScaleControl = 0.1f;
-		
+
 	if (!theApp.m_Options.viewScaleUseSteps)
 		m_viewScale.set(m_viewScaleControl, m_viewScaleControl);
-	else
-	{
+	else {
 		// find previous step
-		auto prevStepIt = std::find_if(theApp.m_Options.viewScaleSteps.rbegin(), theApp.m_Options.viewScaleSteps.rend(), [oldScale](auto f) {return f >= oldScale.x;});
-		auto stepIt = std::find_if(theApp.m_Options.viewScaleSteps.rbegin(), theApp.m_Options.viewScaleSteps.rend(), [this](auto f) {return f >= m_viewScaleControl;});
+		auto prevStepIt = std::find_if(theApp.m_Options.viewScaleSteps.rbegin(), theApp.m_Options.viewScaleSteps.rend(), [oldScale](auto f) {return f >= oldScale.x; });
+		auto stepIt = std::find_if(theApp.m_Options.viewScaleSteps.rbegin(), theApp.m_Options.viewScaleSteps.rend(), [this](auto f) {return f >= m_viewScaleControl; });
 		if (stepIt > prevStepIt)
 			stepIt = prevStepIt + 1;
 		if (stepIt < prevStepIt)
@@ -6792,7 +6111,7 @@ void CIsoView::Zoom(CPoint& pt, float f)
 		auto nextScale = stepIt == theApp.m_Options.viewScaleSteps.rend() ? 1.0f : *stepIt;
 		m_viewScale.set(nextScale, nextScale);
 	}
-	
+
 	auto newScaledMPos = GetProjectedCoordinatesFromClientCoordinates(pt);
 
 	m_viewOffset = m_viewOffset + ((oldScaledMPos - newScaledMPos)).convertT<std::int32_t>();  // this lets the mouse cursor pixel stay constant

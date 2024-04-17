@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // ScriptTypes.cpp: Implementierungsdatei
@@ -106,7 +106,7 @@ enum TeamMissionType {
 	TMISSION_MOVETO_OWN_BUILDING_WITH_PROPERTY,
 };
 
-char const * TMissions[TMISSION_COUNT] = {
+char const* TMissions[TMISSION_COUNT] = {
 	"Attack...",
 	"Attack Waypoint...",
 	"Go Berzerk",
@@ -168,7 +168,7 @@ char const * TMissions[TMISSION_COUNT] = {
 	"Move to own building",
 };
 
-char const * TMissionsHelp[TMISSION_COUNT] = {
+char const* TMissionsHelp[TMISSION_COUNT] = {
 	"Attack some general target",
 	"Attack anything nearby the specified waypoint",
 	"Cyborg members of the team will go berzerk.",
@@ -231,14 +231,14 @@ char const * TMissionsHelp[TMISSION_COUNT] = {
 };
 
 
-char const *TargetProperties[TPROPERTY_COUNT] = {
+char const* TargetProperties[TPROPERTY_COUNT] = {
 	"Least Threat",
 	"Greatest Threat",
 	"Nearest",
 	"Farthest",
 };
 
-char const *UnloadTypeNames[UNLOAD_COUNT] = {
+char const* UnloadTypeNames[UNLOAD_COUNT] = {
 	"Keep Transports, Keep Units",
 	"Keep Transports, Lose Units",
 	"Lose Transports, Keep Units",
@@ -299,23 +299,23 @@ END_MESSAGE_MAP()
 
 void CScriptTypes::UpdateDialog()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int sel=m_ScriptType.GetCurSel();
+	int sel = m_ScriptType.GetCurSel();
 
-	
-	while(m_ScriptType.DeleteString(0)!=CB_ERR);
+
+	while (m_ScriptType.DeleteString(0) != CB_ERR);
 
 
 	// MW 07/24/01: clear dialog
 	m_DescriptionEx.SetWindowText("");
-	m_Name="";
+	m_Name = "";
 	m_Param.SetWindowText("");
 	m_Action.SetWindowText("");
 	m_Type.SetCurSel(-1);
 
 	UpdateData(FALSE);
-	
+
 	for (auto const& [seq, type] : ini["ScriptTypes"]) {
 		CString desc = type;
 		desc += " (";
@@ -333,42 +333,42 @@ void CScriptTypes::UpdateDialog()
 
 }
 
-void CScriptTypes::OnEditchangeScripttype() 
+void CScriptTypes::OnEditchangeScripttype()
 {
-	
+
 }
 
-void CScriptTypes::OnSelchangeScripttype() 
+void CScriptTypes::OnSelchangeScripttype()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int sel=m_Action.GetCurSel();
-	while(m_Action.DeleteString(0)!=CB_ERR);
+	int sel = m_Action.GetCurSel();
+	while (m_Action.DeleteString(0) != CB_ERR);
 
 	CString Scripttype;
-	if(m_ScriptType.GetCurSel()<0) return;
+	if (m_ScriptType.GetCurSel() < 0) return;
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
-	
+
 	m_Name = ini.GetString(Scripttype, "Name");
 
 	int count = ini[Scripttype].Size() - 1;
 	int i;
 	for (i = 0; i < count; i++) {
 		char c[50];
-		itoa(i,c,10);
+		itoa(i, c, 10);
 		m_Action.AddString(c);
 	}
 
 
 	m_Action.SetCurSel(0);
-	if(sel>=0) m_Action.SetCurSel(sel);
+	if (sel >= 0) m_Action.SetCurSel(sel);
 	OnSelchangeAction();
-	
+
 	UpdateData(FALSE);
 }
 
-void CScriptTypes::OnSelchangeAction() 
+void CScriptTypes::OnSelchangeAction()
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -391,25 +391,25 @@ void CScriptTypes::OnSelchangeAction()
 
 	m_Param.SetWindowText(GetParam(ini.GetString(Scripttype, action), 1));
 
-	
+
 }
 
-void CScriptTypes::OnChangeName() 
+void CScriptTypes::OnChangeName()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData();
 
-	CEdit* n=(CEdit*)GetDlgItem(IDC_NAME);
+	CEdit* n = (CEdit*)GetDlgItem(IDC_NAME);
 
-	DWORD pos=n->GetSel();
+	DWORD pos = n->GetSel();
 	CString Scripttype;
 	if (m_ScriptType.GetCurSel() < 0) {
 		return;
 	}
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
-	
+
 
 
 	ini.SetString(Scripttype, "Name", m_Name);
@@ -418,15 +418,15 @@ void CScriptTypes::OnChangeName()
 	n->SetSel(pos);
 }
 
-void CScriptTypes::OnEditchangeType() 
+void CScriptTypes::OnEditchangeType()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	while(m_Param.DeleteString(0)!=CB_ERR);
+	while (m_Param.DeleteString(0) != CB_ERR);
 	CString Scripttype;
 	char action[50];
-	if(m_Action.GetCurSel()<0) return;
-	if(m_ScriptType.GetCurSel()<0) return;
+	if (m_Action.GetCurSel() < 0) return;
+	if (m_ScriptType.GetCurSel() < 0) return;
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 
@@ -434,13 +434,12 @@ void CScriptTypes::OnEditchangeType()
 	//m_Type.GetWindowText(type);
 	//TruncSpace(type);
 	//MessageBox("beep");
-	int type=m_Type.GetCurSel();
-	
+	int type = m_Type.GetCurSel();
+
 	int i;
 	char tmp[50];
 
-	switch(type)
-	{
+	switch (type) {
 	case 0:
 		ListTargets(m_Param);
 		m_Desc.SetWindowText("Target:");
@@ -467,23 +466,22 @@ void CScriptTypes::OnEditchangeType()
 		break;
 	case 6:
 		m_Desc.SetWindowText("Script action #:");
-		while(m_Param.DeleteString(0)!=CB_ERR);
+		while (m_Param.DeleteString(0) != CB_ERR);
 		for (i = 1; i <= ini[Scripttype].Size() - 1; i++) {
 			m_Param.AddString(itoa(i, tmp, 10));
 		}
 		break;
 	case 8:
 		m_Desc.SetWindowText("Split groups:");
-		while(m_Param.DeleteString(0)!=CB_ERR);
+		while (m_Param.DeleteString(0) != CB_ERR);
 		int i;
-		for(i=0;i<UNLOAD_COUNT;i++)
-		{
+		for (i = 0; i < UNLOAD_COUNT; i++) {
 			CString p;
 			char c[50];
-			itoa(i,c,10);
-			p=c;
-			p+=" - ";
-			p+=UnloadTypeNames[i];
+			itoa(i, c, 10);
+			p = c;
+			p += " - ";
+			p += UnloadTypeNames[i];
 
 			m_Param.AddString(p);
 		}
@@ -502,26 +500,26 @@ void CScriptTypes::OnEditchangeType()
 		break;
 	case 46:
 	case 47:
-		{
-			m_Desc.SetWindowText("Type to move/attack:");
-			auto const& bldTypeSec = rules["BuildingTypes"];
-			for (i = 0; i < bldTypeSec.Size(); i++) {
-				char c[50];
-				itoa(i,c,10);
-				CString s=c;
-				
-				s+=" ";
-				//s+=rules.sections[*rules.sections["BuildingTypes"].GetValue(i)].values["Name"];
-				s+=Map->GetUnitName(bldTypeSec.Nth(i).second);
-				m_Param.AddString(s);
-			}
-			break;
+	{
+		m_Desc.SetWindowText("Type to move/attack:");
+		auto const& bldTypeSec = rules["BuildingTypes"];
+		for (i = 0; i < bldTypeSec.Size(); i++) {
+			char c[50];
+			itoa(i, c, 10);
+			CString s = c;
+
+			s += " ";
+			//s+=rules.sections[*rules.sections["BuildingTypes"].GetValue(i)].values["Name"];
+			s += Map->GetUnitName(bldTypeSec.Nth(i).second);
+			m_Param.AddString(s);
 		}
+		break;
+	}
 
 	default:
 		m_Desc.SetWindowText("Parameter of action:");
 	}
-	
+
 	itoa(m_Action.GetCurSel(), action, 10);
 
 	char types[50];
@@ -529,30 +527,29 @@ void CScriptTypes::OnEditchangeType()
 	ini.SetString(Scripttype, action, SetParam(ini.GetString(Scripttype, action), 0, types));
 }
 
-void CScriptTypes::OnSelchangeType() 
+void CScriptTypes::OnSelchangeType()
 {
 	CString str;
-	if(m_Type.GetCurSel()>-1)
-	{
+	if (m_Type.GetCurSel() > -1) {
 		//m_Type.GetLBText(m_Type.GetCurSel(), str);
 		//m_Type.SetWindowText(str);
 
 		m_DescriptionEx.SetWindowText(TMissionsHelp[m_Type.GetCurSel()]);
 	}
 
-	
+
 
 	OnEditchangeType();
 }
 
-void CScriptTypes::OnEditchangeParam() 
+void CScriptTypes::OnEditchangeParam()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString Scripttype;
 	char action[50];
-	if(m_Action.GetCurSel()<0) return;
-	if(m_ScriptType.GetCurSel()<0) return;
+	if (m_Action.GetCurSel() < 0) return;
+	if (m_ScriptType.GetCurSel() < 0) return;
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 
@@ -560,62 +557,61 @@ void CScriptTypes::OnEditchangeParam()
 	m_Param.GetWindowText(param);
 	TruncSpace(param);
 
-	param=TranslateHouse(param);
+	param = TranslateHouse(param);
 
 	itoa(m_Action.GetCurSel(), action, 10);
 	ini.SetString(Scripttype, action, SetParam(ini.GetString(Scripttype, action), 1, param));
 }
 
-void CScriptTypes::OnSelchangeParam() 
+void CScriptTypes::OnSelchangeParam()
 {
 	m_Param.SetWindowText(GetText(&m_Param));
-	OnEditchangeParam();	
+	OnEditchangeParam();
 }
 
-void CScriptTypes::OnAddaction() 
+void CScriptTypes::OnAddaction()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString Scripttype;
-	if(m_ScriptType.GetCurSel()<0) return;
+	if (m_ScriptType.GetCurSel() < 0) return;
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 
 
 	char action[20];
 	int count = ini[Scripttype].Size() - 1;
-	itoa(count,action,10);
+	itoa(count, action, 10);
 	ini.SetString(Scripttype, action, "0,0");
 
 	UpdateDialog();
 }
 
-void CScriptTypes::OnDeleteaction() 
+void CScriptTypes::OnDeleteaction()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString Scripttype;
-	if(m_Action.GetCurSel()<0) return;
-	if(m_ScriptType.GetCurSel()<0) return;
+	if (m_Action.GetCurSel() < 0) return;
+	if (m_ScriptType.GetCurSel() < 0) return;
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 
-	
+
 	// okay, action is now the deleted one...
 	int i;
-	for(i=m_Action.GetCurSel(); i<m_Action.GetCount()-1;i++)
-	{
+	for (i = m_Action.GetCurSel(); i < m_Action.GetCount() - 1; i++) {
 		// okay, now move every action one number up.
 		char current[50];
 		char next[50];
-		
+
 		itoa(i, current, 10);
-		itoa(i+1, next, 10);
+		itoa(i + 1, next, 10);
 
 		ini.SetString(Scripttype, current, ini.GetString(Scripttype, next));
 	}
 	char last[50];
-	itoa(m_Action.GetCount()-1, last, 10);
+	itoa(m_Action.GetCount() - 1, last, 10);
 	ini.RemoveValueByKey(Scripttype, last);
 
 	UpdateDialog();
@@ -623,27 +619,25 @@ void CScriptTypes::OnDeleteaction()
 
 CString GetFree(const char* section);
 
-void CScriptTypes::OnAdd() 
+void CScriptTypes::OnAdd()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	CString ID=GetFreeID();
-	
-	CString p=GetFree("ScriptTypes");
+	CString ID = GetFreeID();
+
+	CString p = GetFree("ScriptTypes");
 	ini.SetString("ScriptTypes", p, ID);
 	ini.SetString(ID, "Name", "New script");
-	
 
-	
+
+
 	int i;
-	for(i=0;i<m_ScriptType.GetCount();i++)
-	{
+	for (i = 0; i < m_ScriptType.GetCount(); i++) {
 		CString data;
 		m_ScriptType.GetLBText(i, data);
 		TruncSpace(data);
 
-		if(data==ID)
-		{
+		if (data == ID) {
 			m_ScriptType.SetCurSel(i);
 			OnSelchangeScripttype(); // MW bugfix
 			break;
@@ -654,16 +648,16 @@ void CScriptTypes::OnAdd()
 	//UpdateDialog();
 }
 
-void CScriptTypes::OnDelete() 
+void CScriptTypes::OnDelete()
 {
-	CIniFile& ini=Map->GetIniFile();
-	
+	CIniFile& ini = Map->GetIniFile();
+
 	CString Scripttype;
-	if(m_ScriptType.GetCurSel()<0) return;
+	if (m_ScriptType.GetCurSel() < 0) return;
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 
-	int res=MessageBox("Are you sure to delete this ScriptType? Don´t forget to delete any references to this ScriptType","Delete ScriptType", MB_YESNO | MB_ICONQUESTION);
+	int res = MessageBox("Are you sure to delete this ScriptType? Don´t forget to delete any references to this ScriptType", "Delete ScriptType", MB_YESNO | MB_ICONQUESTION);
 	if (res != IDYES) {
 		return;
 	}
@@ -677,9 +671,9 @@ void CScriptTypes::OnDelete()
 
 
 
-void CScriptTypes::ListBehaviours(CComboBox &cb)
+void CScriptTypes::ListBehaviours(CComboBox& cb)
 {
-	while(cb.DeleteString(0)!=CB_ERR);
+	while (cb.DeleteString(0) != CB_ERR);
 
 	cb.AddString("0 - Sleep");
 	cb.AddString("1 - Attack nearest enemy");
@@ -711,40 +705,37 @@ void CScriptTypes::ListBehaviours(CComboBox &cb)
 	cb.AddString("27 - Paradrop overlay drop zone");
 	cb.AddString("28 - Wait");
 	cb.AddString("29 - Attack move");
-	if(yuri_mode)
-	{
-	//	cb.AddString("30 - Spyplane approach");
-	//	cb.AddString("31 - Spyplane retreat");
+	if (yuri_mode) {
+		//	cb.AddString("30 - Spyplane approach");
+		//	cb.AddString("31 - Spyplane retreat");
 	}
 }
 
-BOOL CScriptTypes::OnInitDialog() 
+BOOL CScriptTypes::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
-	while(m_Type.DeleteString(0)!=CB_ERR);
 
-	
+	while (m_Type.DeleteString(0) != CB_ERR);
+
+
 	int i;
-	for(i=0;i<TMISSION_COUNT;i++)
-	{
+	for (i = 0; i < TMISSION_COUNT; i++) {
 		CString p;
 		char c[50];
-		itoa(i,c,10);
-		
+		itoa(i, c, 10);
+
 		//p=c;
 
-		
-		//p+=" - ";
-		p+=TMissions[i];
 
-		if(strlen(TMissions[i])>0)
-		{
+		//p+=" - ";
+		p += TMissions[i];
+
+		if (strlen(TMissions[i]) > 0) {
 			m_Type.AddString(p);
 		}
 	}
 
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }

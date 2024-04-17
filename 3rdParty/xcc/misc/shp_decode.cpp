@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -25,24 +25,24 @@
 
 static const char* encode64_table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-static const int decode64_table[256] = 
+static const int decode64_table[256] =
 {
-    -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
-    -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
-    -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,62, -1,-1,-1,63,
-    52,53,54,55, 56,57,58,59, 60,61,-1,-1, -1,-1,-1,-1,
-    -1, 0, 1, 2,  3, 4, 5, 6,  7, 8, 9,10, 11,12,13,14,
-    15,16,17,18, 19,20,21,22, 23,24,25,-1, -1,-1,-1,-1,
-    -1,26,27,28, 29,30,31,32, 33,34,35,36, 37,38,39,40,
-    41,42,43,44, 45,46,47,48, 49,50,51,-1, -1,-1,-1,-1,
-    -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
-    -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
-    -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
-    -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
-    -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
-    -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
-    -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
-    -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1
+	-1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+	-1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+	-1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,62, -1,-1,-1,63,
+	52,53,54,55, 56,57,58,59, 60,61,-1,-1, -1,-1,-1,-1,
+	-1, 0, 1, 2,  3, 4, 5, 6,  7, 8, 9,10, 11,12,13,14,
+	15,16,17,18, 19,20,21,22, 23,24,25,-1, -1,-1,-1,-1,
+	-1,26,27,28, 29,30,31,32, 33,34,35,36, 37,38,39,40,
+	41,42,43,44, 45,46,47,48, 49,50,51,-1, -1,-1,-1,-1,
+	-1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+	-1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+	-1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+	-1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+	-1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+	-1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+	-1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+	-1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1
 };
 
 static int read_w(const byte*& r)
@@ -60,12 +60,9 @@ static void write_w(int v, byte*& w)
 
 static void write_v40(byte v, int count, byte*& d)
 {
-	while (count)
-	{
-		if (v)
-		{
-			if (count < 0x100)
-			{
+	while (count) {
+		if (v) {
+			if (count < 0x100) {
 				*d++ = 0x00;
 				*d++ = count;
 				*d++ = v;
@@ -76,19 +73,15 @@ static void write_v40(byte v, int count, byte*& d)
 			write_w(0xc000 | c_write, d);
 			count -= c_write;
 			*d++ = v;
-		}
-		else if (count < 0x80)
-		{
+		} else if (count < 0x80) {
 			*d++ = 0x80 | count;
 			count = 0;
-		}
-		else 
-		{
-			int c_write = count < 0x8000  ? count : 0x7fff;
+		} else {
+			int c_write = count < 0x8000 ? count : 0x7fff;
 			*d++ = 0x80;
 			write_w(c_write, d);
 			count -= c_write;
-		}		
+		}
 	}
 }
 
@@ -143,63 +136,50 @@ static void write40_c5(byte*& w, int count)
 
 static void write40_copy(byte*& w, int count, const byte* r)
 {
-	while (count)
-	{
-		if (count < 0x80)
-		{
+	while (count) {
+		if (count < 0x80) {
 			write40_c1(w, count, r);
 			count = 0;
-		}
-		else
-		{
+		} else {
 			int c_write = count < 0x4000 ? count : 0x3fff;
 			write40_c3(w, c_write, r);
 			r += c_write;
-			count  -= c_write;
+			count -= c_write;
 		}
 	}
 }
 
 static void write40_fill(byte*& w, int count, int v)
 {
-	while (count)
-	{
-		if (count < 0x100)
-		{
+	while (count) {
+		if (count < 0x100) {
 			write40_c0(w, count, v);
 			count = 0;
-		}
-		else
-		{
+		} else {
 			int c_write = count < 0x4000 ? count : 0x3fff;
 			write40_c4(w, c_write, v);
-			count  -= c_write;
+			count -= c_write;
 		}
 	}
 }
 
 static void write40_skip(byte*& w, int count)
 {
-	while (count)
-	{
-		if (count < 0x80)
-		{
+	while (count) {
+		if (count < 0x80) {
 			write40_c5(w, count);
 			count = 0;
-		}
-		else
-		{
+		} else {
 			int c_write = count < 0x8000 ? count : 0x7fff;
 			write40_c2(w, c_write);
-			count  -= c_write;
+			count -= c_write;
 		}
 	}
 }
 
 static void flush_copy(byte*& w, const byte* r, const byte*& copy_from)
 {
-	if (copy_from)
-	{
+	if (copy_from) {
 		write40_copy(w, r - copy_from, copy_from);
 		copy_from = NULL;
 	}
@@ -219,22 +199,16 @@ int encode40(const byte* last_s, const byte* x, byte* d, int cb_s)
 	const byte* r = s;
 	byte* w = d;
 	const byte* copy_from = NULL;
-	while (r < s_end)
-	{
+	while (r < s_end) {
 		int v = *r;
 		int t = get_run_length(r, s_end);
-		if (!v)
-		{
-			flush_copy(w, r, copy_from);			
+		if (!v) {
+			flush_copy(w, r, copy_from);
 			write40_skip(w, t);
-		}
-		else if (t > 2)
-		{
-			flush_copy(w, r, copy_from);			
+		} else if (t > 2) {
+			flush_copy(w, r, copy_from);
 			write40_fill(w, t, v);
-		}
-		else
-		{
+		} else {
 			if (!copy_from)
 				copy_from = r;
 		}
@@ -253,13 +227,11 @@ int encode40_y(const byte* last_r, const byte* r, byte* d, int cb_s)
 	int count = 0;
 	byte last = ~(*last_r ^ *r);
 
-	while (cb_s--)
-	{
+	while (cb_s--) {
 		byte v = *last_r++ ^ *r++;
 		if (last == v)
 			count++;
-		else
-		{
+		else {
 			write_v40(last, count, w);
 			count = 1;
 			last = v;
@@ -277,8 +249,7 @@ int encode40_z(const byte* last_s, const byte* s, byte* d, int cb_s)
 	const byte* last_r = last_s;
 	const byte* r = s;
 	byte* w = d;
-	while (cb_s)
-	{
+	while (cb_s) {
 		int c_write = cb_s > 0x3fff ? 0x3fff : cb_s;
 		cb_s -= c_write;
 		*w++ = 0x80;
@@ -288,7 +259,7 @@ int encode40_z(const byte* last_s, const byte* s, byte* d, int cb_s)
 			*w++ = *last_r++ ^ *r++;
 	}
 	*w++ = 0x80;
-	*w++ = 0x00;	
+	*w++ = 0x00;
 	*w++ = 0x00;
 	return w - d;
 }
@@ -301,57 +272,42 @@ int decode40(const byte* s, byte* d)
 	2 skip 10000000 c 0ccccccc
 	3 copy 10000000 c 10cccccc
 	4 fill 10000000 c 11cccccc v
-	5 skip 1ccccccc	
+	5 skip 1ccccccc
 	*/
 
 	const byte* r = s;
 	byte* w = d;
 	int count;
-	while (1)
-	{
+	while (1) {
 		int code = *r++;
-		if (code & 0x80)
-		{
-			if (count = code & 0x7f)
-			{
+		if (code & 0x80) {
+			if (count = code & 0x7f) {
 				w += count;
-			}
-			else
-			{
+			} else {
 				count = *(uint16_t*)r;
 				r += 2;
 				code = count >> 8;
-				if (code & 0x80)
-				{
+				if (code & 0x80) {
 					count &= 0x3fff;
-					if (code & 0x40)
-					{
+					if (code & 0x40) {
 						code = *r++;
 						while (count--)
 							*w++ ^= code;
-					}
-					else
-					{
+					} else {
 						while (count--)
 							*w++ ^= *r++;
 					}
-				}
-				else
-				{
+				} else {
 					if (!count)
 						break;
 					w += count;
-				}					
+				}
 			}
-		}
-		else if (code)
-		{
+		} else if (code) {
 			count = code;
 			while (count--)
 				*w++ ^= *r++;
-		}
-		else
-		{
+		} else {
 			count = *r++;
 			code = *r++;
 			while (count--)
@@ -363,14 +319,11 @@ int decode40(const byte* s, byte* d)
 
 static void write_v80(byte v, int count, byte*& d)
 {
-	if (count > 3)
-	{
+	if (count > 3) {
 		*d++ = 0xfe;
 		write_w(count, d);
 		*d++ = v;
-	}
-	else if (count)
-	{
+	} else if (count) {
 		*d++ = 0x80 | count;
 		while (count--)
 			*d++ = v;
@@ -415,7 +368,7 @@ end_line:
 	goto next_s;
 
 end0:
-	edi_ptr = reinterpret_cast<byte*>(& cb_p);
+	edi_ptr = reinterpret_cast<byte*>(&cb_p);
 	*edi_ptr = ecx_value;
 	// Restore registers
 }
@@ -428,16 +381,14 @@ static void write80_c0(byte*& w, int count, int p)
 
 static void write80_c1(byte*& w, int count, const byte* r)
 {
-	do
-	{
+	do {
 		int c_write = count < 0x40 ? count : 0x3f;
 		*w++ = 0x80 | c_write;
 		memcpy(w, r, c_write);
 		r += c_write;
 		w += c_write;
 		count -= c_write;
-	}
-	while (count);
+	} while (count);
 }
 
 static void write80_c2(byte*& w, int count, int p)
@@ -462,8 +413,7 @@ static void write80_c4(byte*& w, int count, int p)
 
 static void flush_c1(byte*& w, const byte* r, const byte*& copy_from)
 {
-	if (copy_from)
-	{
+	if (copy_from) {
 		write80_c1(w, r - copy_from, copy_from);
 		copy_from = NULL;
 	}
@@ -476,32 +426,25 @@ int encode80(const byte* s, byte* d, int cb_s)
 	const byte* r = s;
 	byte* w = d;
 	const byte* copy_from = NULL;
-	while (r < s_end)
-	{
+	while (r < s_end) {
 		byte* p;
 		int cb_p;
 		int t = get_run_length(r, s_end);
 		get_same(s, r, s_end, p, cb_p);
-		if (t < cb_p && cb_p > 2)
-		{
+		if (t < cb_p && cb_p > 2) {
 			flush_c1(w, r, copy_from);
 			if (cb_p - 3 < 8 && r - p < 0x1000)
 				write80_c0(w, cb_p, r - p);
 			else if (cb_p - 3 < 0x3e)
 				write80_c2(w, cb_p, p - s);
-			else 
-				write80_c4(w, cb_p, p - s);				
+			else
+				write80_c4(w, cb_p, p - s);
 			r += cb_p;
-		}
-		else
-		{
-			if (t < 3)
-			{
+		} else {
+			if (t < 3) {
 				if (!copy_from)
 					copy_from = r;
-			}
-			else
-			{
+			} else {
 				flush_c1(w, r, copy_from);
 				write80_c3(w, t, *r);
 			}
@@ -521,18 +464,16 @@ int encode80_y(const byte* s, byte* d, int cb_s)
 	int count = 0;
 	byte last = ~*r;
 
-	while (cb_s--)
-	{
+	while (cb_s--) {
 		byte v = *r++;
 		if (last == v)
 			count++;
-		else
-		{
+		else {
 			write_v80(last, count, w);
 			count = 1;
 			last = v;
 		}
-		
+
 	}
 	write_v80(last, count, w);
 	*w++ = 0x80;
@@ -548,30 +489,25 @@ int decode80c(const byte image_in[], byte image_out[], int cb_in)
 	3 fill 11111110 c c v
 	4 copy 11111111 c c p p
 	*/
-	
+
 	const byte* copyp;
 	const byte* r = image_in;
 	byte* w = image_out;
 	int code;
 	int count;
-	while (1)
-	{
+	while (1) {
 		code = *r++;
-		if (~code & 0x80)
-		{
+		if (~code & 0x80) {
 			//bit 7 = 0
 			//command 0 (0cccpppp p): copy
 			count = (code >> 4) + 3;
 			copyp = w - (((code & 0xf) << 8) + *r++);
 			while (count--)
 				*w++ = *copyp++;
-		}
-		else
-		{
+		} else {
 			//bit 7 = 1
 			count = code & 0x3f;
-			if (~code & 0x40)
-			{
+			if (~code & 0x40) {
 				//bit 6 = 0
 				if (!count)
 					//end of image
@@ -579,31 +515,24 @@ int decode80c(const byte image_in[], byte image_out[], int cb_in)
 				//command 1 (10cccccc): copy
 				while (count--)
 					*w++ = *r++;
-			}
-			else
-			{
+			} else {
 				//bit 6 = 1
-				if (count < 0x3e)
-				{
+				if (count < 0x3e) {
 					//command 2 (11cccccc p p): copy
 					count += 3;
 					copyp = &image_out[*(unsigned __int16*)r];
 					r += 2;
 					while (count--)
 						*w++ = *copyp++;
-				}
-				else
-					if (count == 0x3e)
-					{
+				} else
+					if (count == 0x3e) {
 						//command 3 (11111110 c c v): fill
 						count = *(unsigned __int16*)r;
 						r += 2;
 						code = *r++;
 						while (count--)
 							*w++ = byte(code);
-					}
-					else
-					{
+					} else {
 						//command 4 (copy 11111111 c c p p): copy
 						count = *(unsigned __int16*)r;
 						r += 2;
@@ -634,14 +563,11 @@ int __fastcall decode80(const byte image_in[], byte image_out[])
 	unsigned int v13; // ecx
 	char v14; // al
 
-	for (i = image_out; ; i += v10)
-	{
-		while (1)
-		{
+	for (i = image_out; ; i += v10) {
+		while (1) {
 			v4 = (unsigned __int8)*image_in;
 			v5 = image_in + 1;
-			if ((v4 & 0x80) == 0)
-			{
+			if ((v4 & 0x80) == 0) {
 				v6 = (v4 >> 4) + 3;
 				v7 = (v4 & 0xF) << 8;
 				v7 |= static_cast<unsigned char>(*v5);
@@ -654,23 +580,19 @@ int __fastcall decode80(const byte image_in[], byte image_out[])
 				break;
 			v11 = *(unsigned __int16*)v5;
 			v12 = v5 + 2;
-			if (v10 == 62)
-			{
+			if (v10 == 62) {
 				v13 = v11;
 				v14 = *v12;
 				image_in = v12 + 1;
 				memset(i, v14, v13);
 				i += v13;
-			} else
-			{
-				if (v10 > 0x3E)
-				{
+			} else {
+				if (v10 > 0x3E) {
 					v6 = v11;
 					v11 = *reinterpret_cast<const int16_t*>(v12);
 					v8 = v12 + 2;
 					v9 = &image_out[v11];
-				} else
-				{
+				} else {
 					v8 = v12;
 					v9 = &image_out[v11];
 					v6 = v10 + 3;
@@ -704,14 +626,11 @@ int __fastcall decode80r(const byte image_in[], byte image_out[])
 	unsigned int v13; // ecx
 	char v14; // al
 
-	for (i = image_out; ; i += v10)
-	{
-		while (1)
-		{
+	for (i = image_out; ; i += v10) {
+		while (1) {
 			v4 = (unsigned __int8)*image_in;
 			v5 = image_in + 1;
-			if ((v4 & 0x80) == 0)
-			{
+			if ((v4 & 0x80) == 0) {
 				v6 = (v4 >> 4) + 3;
 				v7 = (v4 & 0xF) << 8;
 				v7 |= static_cast<unsigned char>(*v5);
@@ -724,23 +643,19 @@ int __fastcall decode80r(const byte image_in[], byte image_out[])
 				break;
 			v11 = *(unsigned __int16*)v5;
 			v12 = v5 + 2;
-			if (v10 == 62)
-			{
+			if (v10 == 62) {
 				v13 = v11;
 				v14 = *v12;
 				image_in = v12 + 1;
 				memset(i, v14, v13);
 				i += v13;
-			} else
-			{
-				if (v10 > 0x3E)
-				{
+			} else {
+				if (v10 > 0x3E) {
 					v6 = v11;
 					v11 = *reinterpret_cast<const int16_t*>(v12);
 					v8 = v12 + 2;
 					v9 = &i[-v11];
-				} else
-				{
+				} else {
 					v8 = v12;
 					v9 = &i[-v11];
 					v6 = v10 + 3;
@@ -764,13 +679,11 @@ int decode2(const byte* s, byte* d, int cb_s, const byte* reference_palet)
 	const byte* r = s;
 	const byte* r_end = s + cb_s;
 	byte* w = d;
-	while (r < r_end)
-	{
+	while (r < r_end) {
 		int v = *r++;
 		if (v)
 			*w++ = v;
-		else
-		{
+		else {
 			v = *r++;
 			memset(w, 0, v);
 			w += v;
@@ -785,21 +698,16 @@ int decode3(const byte* s, byte* d, int cx, int cy)
 {
 	const byte* r = s;
 	byte* w = d;
-	for (int y = 0; y < cy; y++)
-	{
+	for (int y = 0; y < cy; y++) {
 		int count = *reinterpret_cast<const unsigned __int16*>(r) - 2;
 		r += 2;
 		int x = 0;
-		while (count--)
-		{
+		while (count--) {
 			int v = *r++;
-			if (v)
-			{
+			if (v) {
 				x++;
 				*w++ = v;
-			}
-			else
-			{
+			} else {
 				count--;
 				v = *r++;
 				if (x + v > cx)
@@ -817,20 +725,17 @@ int encode3(const byte* s, byte* d, int cx, int cy)
 {
 	const byte* r = s;
 	byte* w = d;
-	for (int y = 0; y < cy; y++)
-	{
+	for (int y = 0; y < cy; y++) {
 		const byte* r_end = r + cx;
 		byte* w_line = w;
 		w += 2;
-		while (r < r_end)
-		{
-			
+		while (r < r_end) {
+
 			int v = *r;
 			*w++ = v;
 			if (v)
 				r++;
-			else
-			{
+			else {
 				int c = get_run_length(r, r_end);
 				if (c > 0xff)
 					c = 0xff;
@@ -848,71 +753,66 @@ Cvirtual_binary encode64(data_ref s)
 	Cvirtual_binary d;
 	const byte* r = s.data();
 	int cb_s = s.size();
-    byte* w = d.write_start(s.size() << 1);
-    while (cb_s) 
-	{		
+	byte* w = d.write_start(s.size() << 1);
+	while (cb_s) {
 		int c1 = *r++;
-		*w++ = encode64_table[c1>>2];
-		
+		*w++ = encode64_table[c1 >> 2];
+
 		int c2 = --cb_s == 0 ? 0 : *r++;
-		*w++ = encode64_table[((c1 & 0x3) << 4) | ((c2 & 0xf0) >> 4)];		
-		if (cb_s == 0) 
-		{
+		*w++ = encode64_table[((c1 & 0x3) << 4) | ((c2 & 0xf0) >> 4)];
+		if (cb_s == 0) {
 			*w++ = '=';
 			*w++ = '=';
 			break;
 		}
-		
+
 		int c3 = --cb_s == 0 ? 0 : *r++;
-		
+
 		*w++ = encode64_table[((c2 & 0xf) << 2) | ((c3 & 0xc0) >> 6)];
-		if (cb_s == 0) 
-		{
+		if (cb_s == 0) {
 			*w++ = '=';
 			break;
-		}		
+		}
 		--cb_s;
 		*w++ = encode64_table[c3 & 0x3f];
-    }	
+	}
 	d.set_size(w - d.data());
-    return d;
+	return d;
 }
 
 Cvirtual_binary decode64(data_ref s)
 {
 	Cvirtual_binary d;
 	const byte* r = s.data();
-    byte* w = d.write_start(s.size() << 1);
-    while (*r)
-	{
+	byte* w = d.write_start(s.size() << 1);
+	while (*r) {
 		int c1 = *r++;
-		if (decode64_table[c1] == -1) 
+		if (decode64_table[c1] == -1)
 			return Cvirtual_binary();
 		int c2 = *r++;
-		if (decode64_table[c2] == -1) 
+		if (decode64_table[c2] == -1)
 			return Cvirtual_binary();
 		int c3 = *r++;
-		if (c3 != '=' && decode64_table[c3] == -1) 
+		if (c3 != '=' && decode64_table[c3] == -1)
 			return Cvirtual_binary();
 		int c4 = *r++;
-		if (c4 != '=' && decode64_table[c4] == -1) 
+		if (c4 != '=' && decode64_table[c4] == -1)
 			return Cvirtual_binary();
 		*w++ = (decode64_table[c1] << 2) | (decode64_table[c2] >> 4);
-		if (c3 == '=') 
+		if (c3 == '=')
 			break;
 		*w++ = ((decode64_table[c2] << 4) & 0xf0) | (decode64_table[c3] >> 2);
-		if (c4 == '=') 
+		if (c4 == '=')
 			break;
 		*w++ = ((decode64_table[c3] << 6) & 0xc0) | decode64_table[c4];
-    }	
+	}
 	d.set_size(w - d.data());
 	return d;
 }
 
 static void write5_count(byte*& w, int count)
 {
-	while (count > 255)
-	{
+	while (count > 255) {
 		*w++ = 0;
 		count -= 255;
 	}
@@ -923,8 +823,7 @@ static void write5_c0(byte*& w, int count, const byte* r, byte* small_copy)
 {
 	if (count < 4 && !small_copy)
 		count = count;
-	if ((count < 4 || count > 7) && small_copy)
-	{
+	if ((count < 4 || count > 7) && small_copy) {
 		int small_count = min(count, 3);
 		*small_copy |= small_count;
 		memcpy(w, r, small_count);
@@ -932,15 +831,12 @@ static void write5_c0(byte*& w, int count, const byte* r, byte* small_copy)
 		w += small_count;
 		count -= small_count;
 	}
-	if (count)
-	{
+	if (count) {
 		assert(count > 3);
-		if (count > 18)
-		{
+		if (count > 18) {
 			*w++ = 0;
 			write5_count(w, count - 18);
-		}
-		else 
+		} else
 			*w++ = count - 3;
 		memcpy(w, r, count);
 		w += count;
@@ -953,12 +849,10 @@ static void write5_c1(byte*& w, int count, int p)
 	assert(p >= 0);
 	assert(p < 32768);
 	count -= 2;
-	if (count > 7)
-	{
+	if (count > 7) {
 		*w++ = 0x10 | (p >> 11) & 8;
 		write5_count(w, count - 7);
-	}
-	else
+	} else
 		*w++ = 0x10 | (p >> 11) & 8 | count;
 	write_w((p << 2) & 0xfffc, w);
 }
@@ -970,12 +864,10 @@ static void write5_c2(byte*& w, int count, int p)
 	assert(p <= 16384);
 	count -= 2;
 	p--;
-	if (count > 31)
-	{
+	if (count > 31) {
 		*w++ = 0x20;
 		write5_count(w, count - 31);
-	}
-	else
+	} else
 		*w++ = 0x20 | count;
 	write_w(p << 2, w);
 }
@@ -996,19 +888,16 @@ int get_count(const byte*& r)
 {
 	int count = -255;
 	int v;
-	do
-	{
+	do {
 		count += 255;
 		v = *r++;
-	}
-	while (!v);
+	} while (!v);
 	return count + v;
 }
 
 static void flush_c0(byte*& w, const byte* r, const byte*& copy_from, byte* small_copy, bool start)
 {
-	if (copy_from)
-	{
+	if (copy_from) {
 		int count = r - copy_from;
 		/*
 		if (start)
@@ -1067,42 +956,34 @@ int decode5s(const byte* s, byte* d, int cb_s)
 	2 copy 001ccccc ppppppzz p
 	3 copy cccpppzz p
 	*/
-	
+
 	const byte* c;
 	const byte* r = s;
 	byte* w = d;
 	int code;
 	int count;
 	code = *r;
-	if (code > 17)
-	{
+	if (code > 17) {
 		r++;
 		count = code - 17;
 		while (count--)
 			*w++ = *r++;
 	}
-	while (1)
-	{
+	while (1) {
 		code = *r++;
-		if (code & 0xf0)
-		{
-			if (code & 0xc0)
-			{
+		if (code & 0xf0) {
+			if (code & 0xc0) {
 				count = (code >> 5) - 1;
 				c = w - (code >> 2 & 7);
 				c -= *r++ << 3;
 				c--;
-			}
-			else if (code & 0x20)
-			{
+			} else if (code & 0x20) {
 				count = code & 0x1f;
 				if (!count)
 					count = get_count(r) + 31;
 				c = w - (read_w(r) >> 2);
 				c--;
-			}
-			else
-			{
+			} else {
 				c = w - ((code & 8) << 11);
 				count = code & 7;
 				if (!count)
@@ -1112,27 +993,22 @@ int decode5s(const byte* s, byte* d, int cb_s)
 					break;
 			}
 			count += 2;
-			while (count--)
-			{
+			while (count--) {
 				if (*w != *c)
 					*w = *c;
 				w++;
 				c++;
 			}
 			count = *(r - 2) & 3;
-			while (count--)
-			{
+			while (count--) {
 				if (*w != *r)
 					*w = *r;
 				w++;
 				r++;
 			}
-		}
-		else
-		{
-			count = code ? code + 3: get_count(r) + 18;
-			while (count--)
-			{
+		} else {
+			count = code ? code + 3 : get_count(r) + 18;
+			while (count--) {
 				if (*w != *r)
 					*w = *r;
 				w++;
@@ -1149,8 +1025,7 @@ int encode5(const byte* s, byte* d, int cb_s, int format)
 	const byte* r = s;
 	const byte* r_end = s + cb_s;
 	byte* w = d;
-	while (r < r_end)
-	{
+	while (r < r_end) {
 		int cb_section = min<size_t>(r_end - r, 8192);
 		t_pack_section_header& header = *reinterpret_cast<t_pack_section_header*>(w);
 		w += sizeof(t_pack_section_header);
@@ -1165,8 +1040,7 @@ int decode5(const byte* s, byte* d, int cb_s, int format)
 	const byte* r = s;
 	const byte* r_end = s + cb_s;
 	byte* w = d;
-	while (r < r_end)
-	{
+	while (r < r_end) {
 		const t_pack_section_header& header = *reinterpret_cast<const t_pack_section_header*>(r);
 		r += sizeof(t_pack_section_header);
 		if (format == 80)

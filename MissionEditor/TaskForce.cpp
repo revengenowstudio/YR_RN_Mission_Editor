@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // TaskForce.cpp: Implementierungsdatei
@@ -90,29 +90,29 @@ END_MESSAGE_MAP()
 
 void CTaskForce::UpdateDialog()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int sel=m_TaskForces.GetCurSel();
-	int sel2=m_Units.GetCurSel();
+	int sel = m_TaskForces.GetCurSel();
+	int sel2 = m_Units.GetCurSel();
 
-	while(m_TaskForces.DeleteString(0)!=CB_ERR);
-	while(m_Units.DeleteString(0)!=LB_ERR);
-	while(m_UnitType.DeleteString(0)!=CB_ERR);
+	while (m_TaskForces.DeleteString(0) != CB_ERR);
+	while (m_Units.DeleteString(0) != LB_ERR);
+	while (m_UnitType.DeleteString(0) != CB_ERR);
 
 	// MW 07/24/01: Clear
-	m_Group="";
-	m_Name="";
-	m_NumberOfUnits=0;
+	m_Group = "";
+	m_Name = "";
+	m_NumberOfUnits = 0;
 	UpdateData(FALSE);
 
 	int i;
-	auto const& sec=ini["TaskForces"];
+	auto const& sec = ini["TaskForces"];
 	for (auto const& [seq, id] : sec) {
 		CString s;
-		s= id;
-		s+=" (";
+		s = id;
+		s += " (";
 		s += ini[id].GetString("Name");
-		s+=")";
+		s += ")";
 		m_TaskForces.AddString(s);
 	}
 
@@ -149,37 +149,36 @@ void CTaskForce::UpdateDialog()
 			OnSelchangeTaskforces();
 	}
 
-	
 
-	
 
-	if(!(sel2<0))
-	{
-		if(m_Units.SetCurSel(sel2)!=LB_ERR)
-		OnSelchangeUnits();
+
+
+	if (!(sel2 < 0)) {
+		if (m_Units.SetCurSel(sel2) != LB_ERR)
+			OnSelchangeUnits();
 	}
 
-			
+
 }
 
-void CTaskForce::OnEditchangeTaskforces() 
+void CTaskForce::OnEditchangeTaskforces()
 {
 	// TODO: Code für die Behandlungsroutine der Steuerelement-Benachrichtigung hier einfügen
-	
+
 }
 
-void CTaskForce::OnSelchangeTaskforces() 
+void CTaskForce::OnSelchangeTaskforces()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString tf;
-	tf=GetText(&m_TaskForces);
+	tf = GetText(&m_TaskForces);
 
 	TruncSpace(tf);
-	auto const & sec=ini[tf];
+	auto const& sec = ini[tf];
 	m_Name = sec.GetString("Name");
 	m_Group = sec.GetString("Group");
-	
+
 	int i;
 	while (m_Units.DeleteString(0) != LB_ERR);
 	for (i = 0; i < sec.Size() - 2; i++) {
@@ -205,42 +204,42 @@ void CTaskForce::OnSelchangeTaskforces()
 	}
 }
 
-void CTaskForce::OnSelchangeUnits() 
+void CTaskForce::OnSelchangeUnits()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int sel=m_Units.GetCurSel();
-	int u=m_Units.GetItemData(sel);
+	int sel = m_Units.GetCurSel();
+	int u = m_Units.GetItemData(sel);
 	CString tf;
-	tf=GetText(&m_TaskForces);
+	tf = GetText(&m_TaskForces);
 	TruncSpace(tf);
 	auto const& sec = ini[tf];
-	auto const& data=sec.Nth(u).second;
-	CString c=GetParam(data, 0);
-	
+	auto const& data = sec.Nth(u).second;
+	CString c = GetParam(data, 0);
+
 	CString s;
-	CString type=GetParam(data,1);
+	CString type = GetParam(data, 1);
 	/*if(ini.sections.find((char*)(LPCTSTR)type)!=ini.sections.end() && ini.sections[(char*)(LPCTSTR)type].values.find("Name")!=ini.sections[(char*)(LPCTSTR)type].values.end())
 		s=ini.sections[(char*)(LPCTSTR)type].values["Name"];
 	else
 		s=rules.sections[(char*)(LPCTSTR)type].values["Name"];*/
-	s=Map->GetUnitName(type);
+	s = Map->GetUnitName(type);
 
 	m_UnitType.SetWindowText(((CString)(LPCTSTR)type + (CString)" (" + s + (CString)")"));
-	m_NumberOfUnits=atoi(c);
+	m_NumberOfUnits = atoi(c);
 
 	UpdateData(FALSE);
 }
 
-void CTaskForce::OnDeleteunit() 
+void CTaskForce::OnDeleteunit()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int sel=m_Units.GetCurSel();
+	int sel = m_Units.GetCurSel();
 	if (sel < 0) {
 		return;
 	}
-	int u=m_Units.GetItemData(sel);
+	int u = m_Units.GetItemData(sel);
 	CString tf;
 	tf = GetText(&m_TaskForces);
 
@@ -266,53 +265,53 @@ void CTaskForce::OnDeleteunit()
 	sec->RemoveByKey(l);
 	sec->RemoveAt(lastpos);
 	m_Units.DeleteString(sel);
-	
+
 
 	UpdateDialog();
 	return;
 }
 
-void CTaskForce::OnChangeNumberunits() 
+void CTaskForce::OnChangeNumberunits()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData();
 
-	int sel=m_Units.GetCurSel();
+	int sel = m_Units.GetCurSel();
 	if (sel < 0) {
 		return;
 	}
-	int u=m_Units.GetItemData(sel);
+	int u = m_Units.GetItemData(sel);
 	CString tf;
-	tf=GetText(&m_TaskForces);
+	tf = GetText(&m_TaskForces);
 
 	TruncSpace(tf);
 	auto sec = ini.TryGetSection(tf);
-	
+
 	char k[50], n[50];
 	itoa(u, k, 10);
 	itoa(m_NumberOfUnits, n, 10);
-	auto const& data=sec->GetString(k);
-	CString c=GetParam(data, 1);
+	auto const& data = sec->GetString(k);
+	CString c = GetParam(data, 1);
 	sec->SetString(k, n + (CString)"," + c);
 	UpdateDialog();
 }
 
-void CTaskForce::OnChangeName() 
+void CTaskForce::OnChangeName()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData();
 
-	CEdit& n=*(CEdit*)GetDlgItem(IDC_NAME);
-	DWORD pos=n.GetSel();
+	CEdit& n = *(CEdit*)GetDlgItem(IDC_NAME);
+	DWORD pos = n.GetSel();
 
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
 	CString tf;
-	tf=GetText(&m_TaskForces);
-	
+	tf = GetText(&m_TaskForces);
+
 	TruncSpace(tf);
 
 	ini.SetString(tf, "Name", m_Name);
@@ -321,28 +320,28 @@ void CTaskForce::OnChangeName()
 	n.SetSel(pos);
 }
 
-void CTaskForce::OnEditchangeUnittype() 
+void CTaskForce::OnEditchangeUnittype()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int sel=m_Units.GetCurSel();
+	int sel = m_Units.GetCurSel();
 	if (sel < 0) {
 		return;
 	}
-	int u=m_Units.GetItemData(sel);
+	int u = m_Units.GetItemData(sel);
 	CString tf;
-	tf=GetText(&m_TaskForces);
+	tf = GetText(&m_TaskForces);
 
 	TruncSpace(tf);
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
 	char k[50];
 	itoa(u, k, 10);
-	
+
 	CString count = GetParam(sec->GetString(k), 0);
-	CString type=GetText(&m_UnitType);
+	CString type = GetText(&m_UnitType);
 	TruncSpace(type);
-	
+
 	sec->SetString(k, count + "," + (char*)(LPCTSTR)type);
 
 	CString ut;
@@ -350,20 +349,20 @@ void CTaskForce::OnEditchangeUnittype()
 	UpdateDialog();
 	m_UnitType.SetWindowText(ut);
 
-	
+
 }
 
-void CTaskForce::OnSelchangeUnittype() 
+void CTaskForce::OnSelchangeUnittype()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int sel=m_Units.GetCurSel();
+	int sel = m_Units.GetCurSel();
 	if (sel < 0) {
 		return;
 	}
-	int u=m_Units.GetItemData(sel);
+	int u = m_Units.GetItemData(sel);
 	CString tf;
-	tf=GetText(&m_TaskForces);
+	tf = GetText(&m_TaskForces);
 
 	TruncSpace(tf);
 	auto sec = ini.TryGetSection(tf);
@@ -371,76 +370,76 @@ void CTaskForce::OnSelchangeUnittype()
 
 	char k[50];
 	itoa(u, k, 10);
-	
-	CString count=GetParam(sec->GetString(k), 0);
-	CString type=GetText(&m_UnitType);
+
+	CString count = GetParam(sec->GetString(k), 0);
+	CString type = GetText(&m_UnitType);
 
 	TruncSpace(type);
-	
+
 	sec->SetString(k, count + "," + type);
 
-	UpdateDialog();	
+	UpdateDialog();
 	//m_UnitType.SetWindowText("H");
 }
 
-void CTaskForce::OnAddunit() 
+void CTaskForce::OnAddunit()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString tf;
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
-	tf=GetText(&m_TaskForces);
+	tf = GetText(&m_TaskForces);
 
 	TruncSpace(tf);
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
 
 	char k[50];
-	int c=m_Units.GetCount();
+	int c = m_Units.GetCount();
 	if (c == LB_ERR) {
 		c = 0;
 	}
 	itoa(c, k, 10);
-	
+
 	sec->SetString(k, "1" + (CString)"," + rules["InfantryTypes"].Nth(0).second);
-	
+
 	UpdateDialog();
 }
 
-void CTaskForce::OnDeletetaskforce() 
+void CTaskForce::OnDeletetaskforce()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	CString tf;
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
-	tf=GetText(&m_TaskForces);
+	tf = GetText(&m_TaskForces);
 
 	TruncSpace(tf);
 
 	int res;
-	res=MessageBox("Are you sure to delete the selected task force? If you delete it, make sure to eliminate ANY references to this task force in team-types.","Delete task force",MB_YESNO);
+	res = MessageBox("Are you sure to delete the selected task force? If you delete it, make sure to eliminate ANY references to this task force in team-types.", "Delete task force", MB_YESNO);
 	if (res == IDNO) {
 		return;
 	}
 
 	ini.RemoveValueByKey("TaskForces", tf);
 	ini.DeleteSection(tf);
-	while(m_Units.DeleteString(0)!=LB_ERR);
+	while (m_Units.DeleteString(0) != LB_ERR);
 	//UpdateDialog();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 }
 
 CString GetFree(const char* section);
-void CTaskForce::OnAddtaskforce() 
+void CTaskForce::OnAddtaskforce()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	CString ID=GetFreeID();
-	CString tf=GetFree("TaskForces");
+	CString ID = GetFreeID();
+	CString tf = GetFree("TaskForces");
 	ini.SetString("TaskForces", tf, ID);
 
 	ini.SetString(ID, "Name", "New task force");
@@ -451,27 +450,25 @@ void CTaskForce::OnAddtaskforce()
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 
 	int i;
-	for(i=0;i<m_TaskForces.GetCount();i++)
-	{
+	for (i = 0; i < m_TaskForces.GetCount(); i++) {
 		CString tf2;
-		m_TaskForces.GetLBText(i,tf2);
+		m_TaskForces.GetLBText(i, tf2);
 
 		TruncSpace(tf2);
 
-		if(strcmp(ID, tf2)==NULL)
-		{
+		if (strcmp(ID, tf2) == NULL) {
 			m_TaskForces.SetCurSel(i);
 			OnSelchangeTaskforces(); // MW bugfix
 			break;
 		}
 	}
-		
+
 
 }
 
-void CTaskForce::OnChangeGroup() 
+void CTaskForce::OnChangeGroup()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData();
 
@@ -479,7 +476,7 @@ void CTaskForce::OnChangeGroup()
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
-	tf=GetText(&m_TaskForces);
+	tf = GetText(&m_TaskForces);
 
 	TruncSpace(tf);
 

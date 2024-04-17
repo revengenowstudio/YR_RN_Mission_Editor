@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // MiniMap.cpp: implementaion file
@@ -41,7 +41,7 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNCREATE(CMiniMap, CView)
 
-CMiniMap::CMiniMap(): m_scale(theApp.m_Options.fMiniMapScale)
+CMiniMap::CMiniMap() : m_scale(theApp.m_Options.fMiniMapScale)
 {
 }
 
@@ -65,14 +65,14 @@ END_MESSAGE_MAP()
 
 void CMiniMap::OnDraw(CDC* pDC)
 {
-	
+
 	BYTE* colors;
 	BITMAPINFO biinfo;
 	int pitch;
 	DrawMinimap(&colors, biinfo, pitch);
 
-	if(!colors) return;
-	
+	if (!colors) return;
+
 	// set the bits
 	//SetDIBitsToDevice(pDC->m_hDC, 0, 0, Map->GetWidth()*2, Map->GetHeight(),0,0,0, Map->GetHeight(), colors, &biinfo, DIB_RGB_COLORS);
 	RECT r;
@@ -81,15 +81,15 @@ void CMiniMap::OnDraw(CDC* pDC)
 
 
 	// now draw the current position
-	CFinalSunDlg& dlg=*(CFinalSunDlg*)theApp.GetMainWnd();
-	CIsoView& isoview=*dlg.m_view.m_isoview;
+	CFinalSunDlg& dlg = *(CFinalSunDlg*)theApp.GetMainWnd();
+	CIsoView& isoview = *dlg.m_view.m_isoview;
 	RECT selRect;
 	auto isoRect = isoview.GetScaledDisplayRect();
-	
-	int mapwidth=Map->GetWidth();
-	int mapheight=Map->GetHeight();
 
-	
+	int mapwidth = Map->GetWidth();
+	int mapheight = Map->GetHeight();
+
+
 	// Get iso view display rectangle
 	RECT cr;
 	isoview.GetClientRect(&cr);
@@ -109,8 +109,8 @@ void CMiniMap::OnDraw(CDC* pDC)
 	selRect.bottom = bottom * m_scale;
 
 
-	pDC->Draw3dRect(&selRect, RGB(200,0,0), RGB(120,0,0));
-	
+	pDC->Draw3dRect(&selRect, RGB(200, 0, 0), RGB(120, 0, 0));
+
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -131,32 +131,32 @@ void CMiniMap::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // handlers
 
-BOOL CMiniMap::PreCreateWindow(CREATESTRUCT& cs) 
+BOOL CMiniMap::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// MW 07/17/2001: Style changed
 
 	cs.style = WS_CAPTION | WS_OVERLAPPED | WS_SYSMENU;// | WS_CHILD;
-	cs.cx=0;
-	cs.cy=0;
-	
-	CFinalSunDlg& dlg=*(CFinalSunDlg*)theApp.GetMainWnd();
+	cs.cx = 0;
+	cs.cy = 0;
+
+	CFinalSunDlg& dlg = *(CFinalSunDlg*)theApp.GetMainWnd();
 	//CIsoView& isoview=*dlg.m_view.m_isoview;
 	RECT r;
 	dlg.GetWindowRect(&r);
-	
-	cs.x=0;//r.right-250 ;
-	cs.y=r.bottom-250;
-	if(cs.y<0) cs.y=0;
+
+	cs.x = 0;//r.right-250 ;
+	cs.y = r.bottom - 250;
+	if (cs.y < 0) cs.y = 0;
 	//cs.dwExStyle=WS_EX_TOOLWINDOW;
 	//cs.dwExStyle=WS_EX_PALETTEWINDOW;
-	
-	// this here will cause an assert in debug mode, ignore it (window must be a child window)
-	int res=CWnd::PreCreateWindow(cs);
 
-	cs.style=WS_POPUPWINDOW | WS_CAPTION /*| WS_DLGFRAME */ | WS_THICKFRAME | WS_OVERLAPPED | DS_3DLOOK | WS_MINIMIZEBOX; //WS_CAPTION | WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX;
+	// this here will cause an assert in debug mode, ignore it (window must be a child window)
+	int res = CWnd::PreCreateWindow(cs);
+
+	cs.style = WS_POPUPWINDOW | WS_CAPTION /*| WS_DLGFRAME */ | WS_THICKFRAME | WS_OVERLAPPED | DS_3DLOOK | WS_MINIMIZEBOX; //WS_CAPTION | WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX;
 
 	return res;
-	
+
 }
 
 void CMiniMap::UpdateView()
@@ -164,15 +164,12 @@ void CMiniMap::UpdateView()
 	CRect r;
 	GetWindowRect(r);
 
-	if(Map->GetIsoSize()==0)
-	{
+	if (Map->GetIsoSize() == 0) {
 		ShowWindow(SW_HIDE);
-	}
-	else
-	{
+	} else {
 		// calculate the needed width=height
-		int axissizex=Map->GetWidth()*2;
-		int axissizey=Map->GetHeight();
+		int axissizex = Map->GetWidth() * 2;
+		int axissizey = Map->GetHeight();
 
 		SetIcon(theApp.m_pMainWnd->GetIcon(FALSE), FALSE);
 		SetIcon(theApp.m_pMainWnd->GetIcon(TRUE), TRUE);
@@ -180,31 +177,29 @@ void CMiniMap::UpdateView()
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 	}
 
-	
+
 }
 
 
-BOOL bMiniMapClosedByUser=FALSE;
+BOOL bMiniMapClosedByUser = FALSE;
 
-void CMiniMap::OnSysCommand(UINT nID, LPARAM lParam) 
+void CMiniMap::OnSysCommand(UINT nID, LPARAM lParam)
 {
 
-	if(nID==SC_CLOSE)
-	{
-		bMiniMapClosedByUser=TRUE;
+	if (nID == SC_CLOSE) {
+		bMiniMapClosedByUser = TRUE;
 		ShowWindow(SW_HIDE);
 		return;
 	}
-	
+
 	CWnd::OnSysCommand(nID, lParam);
 }
 
 
-void CMiniMap::OnMouseMove(UINT nFlags, CPoint point) 
+void CMiniMap::OnMouseMove(UINT nFlags, CPoint point)
 {
-	if(nFlags==MK_LBUTTON)
-	{
-		int x,y;
+	if (nFlags == MK_LBUTTON) {
+		int x, y;
 		int xiso;
 		int yiso;
 
@@ -225,35 +220,34 @@ void CMiniMap::OnMouseMove(UINT nFlags, CPoint point)
 		auto viewScale = isoview.GetViewScale();
 		auto viewOffset = isoview.GetViewOffset();
 
-		x = (point.x / m_scale / resizedXScale) / 2 +Map->GetHeight() / 2;
+		x = (point.x / m_scale / resizedXScale) / 2 + Map->GetHeight() / 2;
 		y = (point.y / m_scale / resizedYScale) + Map->GetWidth() / 2;
 
-		
+
 		RECT r = isoview.GetScaledDisplayRect();
 
-		
-		isoview.SetScroll((x-r.right/f_x/2)*f_x, (y-r.bottom/f_y/2)*f_y);
 
-		
+		isoview.SetScroll((x - r.right / f_x / 2) * f_x, (y - r.bottom / f_y / 2) * f_y);
+
+
 		isoview.RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 	}
 }
 
-void CMiniMap::OnLButtonDown(UINT nFlags, CPoint point) 
+void CMiniMap::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	
+
 	OnMouseMove(nFlags, point);
 }
 
-void CMiniMap::DrawMinimap(BYTE **lpData, BITMAPINFO &biinfo, int& Pitch)
+void CMiniMap::DrawMinimap(BYTE** lpData, BITMAPINFO& biinfo, int& Pitch)
 {
-	Map->GetMinimap(lpData, &biinfo, &Pitch);	
+	Map->GetMinimap(lpData, &biinfo, &Pitch);
 
 	// fix straw pixels
 	auto* data = *lpData;
-	if (data)
-	{
+	if (data) {
 		// fix bottom left and right top pixels in the bottom-up bitmap
 		memcpy(&data[0], &data[sizeof(RGBTRIPLE)], sizeof(RGBTRIPLE));
 		auto firstLine = (biinfo.bmiHeader.biHeight - 1) * Pitch;
@@ -271,17 +265,13 @@ void CMiniMap::OnSizing(UINT fwSide, LPRECT pRect)
 	int axissizey = Map->GetHeight();
 	float ratio = float(axissizex) / float(axissizey);
 
-	if (pRect)
-	{
+	if (pRect) {
 		int heightAdd = 2 * GetSystemMetrics(SM_CYFIXEDFRAME) + GetSystemMetrics(SM_CYCAPTION);
 		int widthAdd = 2 * GetSystemMetrics(SM_CXFIXEDFRAME);
 		if (fwSide == WMSZ_LEFT || fwSide == WMSZ_TOPLEFT || fwSide == WMSZ_BOTTOMLEFT ||
-			fwSide == WMSZ_RIGHT || fwSide == WMSZ_BOTTOMRIGHT)
-		{
+			fwSide == WMSZ_RIGHT || fwSide == WMSZ_BOTTOMRIGHT) {
 			pRect->bottom = pRect->top + (pRect->right - pRect->left - widthAdd) / ratio + heightAdd;
-		}
-		else
-		{
+		} else {
 			pRect->right = pRect->left + (pRect->bottom - pRect->top - heightAdd) * ratio + widthAdd;
 		}
 	}
@@ -289,7 +279,7 @@ void CMiniMap::OnSizing(UINT fwSide, LPRECT pRect)
 	//width = axissizex* m_scale + 2 * (GetSystemMetrics(SM_CXFIXEDFRAME))
 
 	m_scale = ((pRect->right - pRect->left) - 2 * GetSystemMetrics(SM_CXFIXEDFRAME)) / (float)axissizex;
-	
+
 	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 

@@ -193,17 +193,12 @@ public:
 		int ns = -1;
 		int i, e, p = 0;
 		int h[3][3];
-		for (i = 0;i < 3; i++)
-		{
-			for (e = 0;e < 3;e++)
-			{
+		for (i = 0; i < 3; i++) {
+			for (e = 0; e < 3; e++) {
 				int pos = dwPos + (i - 1) + (e - 1) * m_IsoSize;
-				if (pos < 0 || pos >= m_IsoSize * m_IsoSize)
-				{
+				if (pos < 0 || pos >= m_IsoSize * m_IsoSize) {
 					h[i][e] = 0;
-				}
-				else
-				{
+				} else {
 					FIELDDATA m2 = *GetFielddataAt(pos);
 
 					h[i][e] = m.bHeight - m2.bHeight;
@@ -214,8 +209,7 @@ public:
 		}
 
 		// check if the current tile must be heightened anyway
-		if (!theApp.m_Options.bDisableSlopeCorrection && d.bMorphable)
-		{
+		if (!theApp.m_Options.bDisableSlopeCorrection && d.bMorphable) {
 			if ((h[0][1] < 0 && h[2][1] < 0) || (h[1][0] < 0 && h[1][2] < 0)
 
 				|| (h[1][0] < 0 && h[0][2] < 0 && h[0][1] >= 0)
@@ -235,11 +229,10 @@ public:
 				|| (h[1][2] < 0 && h[2][1] < 0 && h[2][2] >= 0)
 				|| (h[2][1] < 0 && h[1][0] < 0 && h[2][0] >= 0)
 
-				)
-			{
+				) {
 				SetHeightAt(dwPos, m.bHeight + 1);
-				for (i = -1;i < 2;i++)
-					for (e = -1;e < 2;e++)
+				for (i = -1; i < 2; i++)
+					for (e = -1; e < 2; e++)
 						CreateSlopesAt(dwPos + i + e * m_IsoSize);
 
 				return;
@@ -258,99 +251,83 @@ public:
 
 
 		if (ns == -1)
-			if (h[1][0] == -1 && h[0][1] != -1 && h[1][2] != -1 && h[2][1] != -1)
-			{
+			if (h[1][0] == -1 && h[0][1] != -1 && h[1][2] != -1 && h[2][1] != -1) {
 				ns = SLOPE_UP_LEFT;
-			}
-			else if (h[0][1] == -1 && h[1][0] != -1 && h[2][1] != -1 && h[1][2] != -1)
-			{
+			} else if (h[0][1] == -1 && h[1][0] != -1 && h[2][1] != -1 && h[1][2] != -1) {
 				ns = SLOPE_UP_TOP;
-			}
-			else if (h[1][2] == -1 && h[0][1] != -1 && h[1][0] != -1 && h[2][1] != -1)
-			{
+			} else if (h[1][2] == -1 && h[0][1] != -1 && h[1][0] != -1 && h[2][1] != -1) {
 				ns = SLOPE_UP_RIGHT;
-			}
-			else if (h[2][1] == -1 && h[0][1] != -1 && h[1][0] != -1 && h[1][2] != -1)
-			{
+			} else if (h[2][1] == -1 && h[0][1] != -1 && h[1][0] != -1 && h[1][2] != -1) {
 				ns = SLOPE_UP_BOTTOM;
 			}
 
-		if (ns == -1)
-		{
-			if (h[0][0] == -2) ns = SLOPE_DOWN_BOTTOM;
-			if (h[2][0] == -2) ns = SLOPE_DOWN_RIGHT;
-			if (h[0][2] == -2) ns = SLOPE_DOWN_LEFT;
-			if (h[2][2] == -2) ns = SLOPE_DOWN_TOP;
-		}
-
-		if (ns == -1 && h[0][0] == -1)
-		{
-			if (h[1][0] == -1 && h[0][1] == -1) ns = SLOPE_DOWN_RIGHTBOTTOM;
-			else if (h[1][0] == 0 && h[0][1] == 0) ns = SLOPE_UP_LEFTTOP;
-			//else if(h[2][2]==1) ns=SLOPE_DOWN_BOTTOM;
-		}
-
-		if (ns == -1 && h[2][0] == -1)
-		{
-			if (h[1][0] == -1 && h[2][1] == -1) ns = SLOPE_DOWN_RIGHTTOP;
-			else if (h[1][0] == 0 && h[2][1] == 0) ns = SLOPE_UP_LEFTBOTTOM;
-			//else if(h[0][2]==1) ns=SLOPE_DOWN_RIGHT;
-		}
-		if (ns == -1 && h[0][2] == -1)
-		{
-			if (h[1][2] == -1 && h[0][1] == -1) ns = SLOPE_DOWN_LEFTBOTTOM;
-			else if (h[1][2] == 0 && h[0][1] == 0) ns = SLOPE_UP_RIGHTTOP;
-			//else if(h[2][0]==1) ns=SLOPE_DOWN_LEFT;
-		}
-		if (ns == -1 && h[2][2] == -1)
-		{
-			if (h[1][2] == -1 && h[2][1] == -1) ns = SLOPE_DOWN_LEFTTOP;
-			else if (h[1][2] == 0 && h[2][1] == 0) ns = SLOPE_UP_RIGHTBOTTOM;
-			//else if(h[0][0]==1) ns=SLOPE_DOWN_TOP;
-		}
-
-		if (ns == -1 && h[1][0] == -1 && h[2][1] == -1) ns = SLOPE_DOWN_RIGHTTOP;
-		if (ns == -1 && h[1][2] == -1 && h[2][1] == -1) ns = SLOPE_DOWN_LEFTTOP;
-		if (ns == -1 && h[1][0] == -1 && h[0][1] == -1) ns = SLOPE_DOWN_RIGHTBOTTOM;
-		if (ns == -1 && h[1][2] == -1 && h[0][1] == -1) ns = SLOPE_DOWN_LEFTBOTTOM;
-
-
-		int rampbase = rampset_start;//atoi((*tiles).sections["General"].values["RampBase"]);
-		int rampsmooth = tiles->GetInteger("General", "RampSmooth");
-
-		if (ns == -1 && (d.wTileSet == rampset || d.wTileSet == rampsmooth) && d.bMorphable)
-		{
-			SetTileAt(dwPos, 0, 0);
-		}
-		if (tiledata == &un_tiledata)
-		{
-			int r = ramp2set;
-			int m = pave2set;
-
-			if (ns == -1 && (d.wTileSet == r || d.wTileSet == m) && d.bMorphable)
-			{
-				SetTileAt(dwPos, pave2set_start/*GetTileID(m,0)*/, 0);
+			if (ns == -1) {
+				if (h[0][0] == -2) ns = SLOPE_DOWN_BOTTOM;
+				if (h[2][0] == -2) ns = SLOPE_DOWN_RIGHT;
+				if (h[0][2] == -2) ns = SLOPE_DOWN_LEFT;
+				if (h[2][2] == -2) ns = SLOPE_DOWN_TOP;
 			}
-		}
-		if (d.bMorphable && ns != -1)
-		{
-			if (tiledata == &un_tiledata) // NEW URBAN FIX FOR URBAN PAVEMENT
-			{
 
-				//[NewUrbanInfo]
-				//Morphable2=114
-				//Ramps2=117
+			if (ns == -1 && h[0][0] == -1) {
+				if (h[1][0] == -1 && h[0][1] == -1) ns = SLOPE_DOWN_RIGHTBOTTOM;
+				else if (h[1][0] == 0 && h[0][1] == 0) ns = SLOPE_UP_LEFTTOP;
+				//else if(h[2][2]==1) ns=SLOPE_DOWN_BOTTOM;
+			}
+
+			if (ns == -1 && h[2][0] == -1) {
+				if (h[1][0] == -1 && h[2][1] == -1) ns = SLOPE_DOWN_RIGHTTOP;
+				else if (h[1][0] == 0 && h[2][1] == 0) ns = SLOPE_UP_LEFTBOTTOM;
+				//else if(h[0][2]==1) ns=SLOPE_DOWN_RIGHT;
+			}
+			if (ns == -1 && h[0][2] == -1) {
+				if (h[1][2] == -1 && h[0][1] == -1) ns = SLOPE_DOWN_LEFTBOTTOM;
+				else if (h[1][2] == 0 && h[0][1] == 0) ns = SLOPE_UP_RIGHTTOP;
+				//else if(h[2][0]==1) ns=SLOPE_DOWN_LEFT;
+			}
+			if (ns == -1 && h[2][2] == -1) {
+				if (h[1][2] == -1 && h[2][1] == -1) ns = SLOPE_DOWN_LEFTTOP;
+				else if (h[1][2] == 0 && h[2][1] == 0) ns = SLOPE_UP_RIGHTBOTTOM;
+				//else if(h[0][0]==1) ns=SLOPE_DOWN_TOP;
+			}
+
+			if (ns == -1 && h[1][0] == -1 && h[2][1] == -1) ns = SLOPE_DOWN_RIGHTTOP;
+			if (ns == -1 && h[1][2] == -1 && h[2][1] == -1) ns = SLOPE_DOWN_LEFTTOP;
+			if (ns == -1 && h[1][0] == -1 && h[0][1] == -1) ns = SLOPE_DOWN_RIGHTBOTTOM;
+			if (ns == -1 && h[1][2] == -1 && h[0][1] == -1) ns = SLOPE_DOWN_LEFTBOTTOM;
+
+
+			int rampbase = rampset_start;//atoi((*tiles).sections["General"].values["RampBase"]);
+			int rampsmooth = tiles->GetInteger("General", "RampSmooth");
+
+			if (ns == -1 && (d.wTileSet == rampset || d.wTileSet == rampsmooth) && d.bMorphable) {
+				SetTileAt(dwPos, 0, 0);
+			}
+			if (tiledata == &un_tiledata) {
 				int r = ramp2set;
 				int m = pave2set;
-				if (d.wTileSet == r || d.wTileSet == m)
-					rampbase = ramp2set_start;
 
+				if (ns == -1 && (d.wTileSet == r || d.wTileSet == m) && d.bMorphable) {
+					SetTileAt(dwPos, pave2set_start/*GetTileID(m,0)*/, 0);
+				}
+			}
+			if (d.bMorphable && ns != -1) {
+				if (tiledata == &un_tiledata) // NEW URBAN FIX FOR URBAN PAVEMENT
+				{
+
+					//[NewUrbanInfo]
+					//Morphable2=114
+					//Ramps2=117
+					int r = ramp2set;
+					int m = pave2set;
+					if (d.wTileSet == r || d.wTileSet == m)
+						rampbase = ramp2set_start;
+
+
+				}
+
+				SetTileAt(dwPos, rampbase + ns - 1, 0);
 
 			}
-
-			SetTileAt(dwPos, rampbase + ns - 1, 0);
-
-		}
 
 
 	}
@@ -371,13 +348,10 @@ public:
 		int e;
 		fielddata[dwPos].bRedrawTerrain = FALSE;
 		int xx, yy;
-		for (xx = -2;xx < 0;xx++)
-		{
-			for (yy = -2;yy < 0;yy++)
-			{
+		for (xx = -2; xx < 0; xx++) {
+			for (yy = -2; yy < 0; yy++) {
 				int npos = dwPos + xx + yy * m_IsoSize;
-				if (npos > 0 && fielddata[dwPos].bHeight - fielddata[npos].bHeight >= 4)
-				{
+				if (npos > 0 && fielddata[dwPos].bHeight - fielddata[npos].bHeight >= 4) {
 					fielddata[dwPos].bRedrawTerrain = TRUE;
 					break;
 				}
@@ -494,10 +468,9 @@ public:
 	}
 	INT GetInfantryAt(DWORD dwPos, DWORD dwSubPos = 0xFFFFFFFF) const
 	{
-		if (dwSubPos == 0xFFFFFFFF)
-		{
+		if (dwSubPos == 0xFFFFFFFF) {
 			int i;
-			for (i = 0;i < SUBPOS_COUNT;i++)
+			for (i = 0; i < SUBPOS_COUNT; i++)
 				if (fielddata[dwPos].infantry[i] != -1)
 					return fielddata[dwPos].infantry[i];
 			return -1;
@@ -524,8 +497,7 @@ public:
 
 	const FIELDDATA* GetFielddataAt(DWORD dwPos) const
 	{
-		if (dwPos >= fielddata_size)
-		{
+		if (dwPos >= fielddata_size) {
 			outside_f.bReserved = 1;
 			return &outside_f;
 		}
@@ -535,8 +507,7 @@ public:
 
 	FIELDDATA* GetFielddataAt(DWORD dwPos)
 	{
-		if (dwPos >= fielddata_size)
-		{
+		if (dwPos >= fielddata_size) {
 			outside_f.bReserved = 1;
 			return &outside_f;
 		}
@@ -547,8 +518,7 @@ public:
 	const FIELDDATA* GetFielddataAt(const MapCoords& pos) const
 	{
 		auto dwPos = GetMapPos(pos);
-		if (dwPos >= fielddata_size)
-		{
+		if (dwPos >= fielddata_size) {
 			outside_f.bReserved = 1;
 			return &outside_f;
 		}
@@ -559,8 +529,7 @@ public:
 	FIELDDATA* GetFielddataAt(const MapCoords& pos)
 	{
 		auto dwPos = GetMapPos(pos);
-		if (dwPos >= fielddata_size)
-		{
+		if (dwPos >= fielddata_size) {
 			outside_f.bReserved = 1;
 			return &outside_f;
 		}
@@ -617,7 +586,7 @@ public:
 
 	MapCoords ToMapCoords(ProjectedCoords xy) const;
 	MapCoords ToMapCoords3d(ProjectedCoords xy, int mapZ) const;
-	MapCoords ToMapCoords3d(ProjectedCoords xy, bool bAllowAccessBehindCliffs=false, bool ignoreHideFlagsAndOutside=false) const;
+	MapCoords ToMapCoords3d(ProjectedCoords xy, bool bAllowAccessBehindCliffs = false, bool ignoreHideFlagsAndOutside = false) const;
 	ProjectedCoords ProjectCoords(MapCoords xy) const;
 	ProjectedCoords ProjectCoords3d(MapCoords xy) const;
 	ProjectedCoords ProjectCoords3d(MapCoords xy, int z) const;
@@ -708,46 +677,38 @@ protected:
 
 	__forceinline void RemoveOvrlMoney(unsigned char ovrl, unsigned char ovrld)
 	{
-		if (ovrl >= RIPARIUS_BEGIN && ovrl <= RIPARIUS_END)
-		{
+		if (ovrl >= RIPARIUS_BEGIN && ovrl <= RIPARIUS_END) {
 			m_money -= (ovrld + 1) * m_overlayCredits[OverlayCredits_Riparius];
 		}
 
-		if (ovrl >= CRUENTUS_BEGIN && ovrl <= CRUENTUS_END)
-		{
+		if (ovrl >= CRUENTUS_BEGIN && ovrl <= CRUENTUS_END) {
 			m_money -= (ovrld + 1) * m_overlayCredits[OverlayCredits_Cruentus];
 		}
 
-		if (ovrl >= VINIFERA_BEGIN && ovrl <= VINIFERA_END)
-		{
+		if (ovrl >= VINIFERA_BEGIN && ovrl <= VINIFERA_END) {
 			m_money -= (ovrld + 1) * m_overlayCredits[OverlayCredits_Vinifera];
 		}
 
-		if (ovrl >= ABOREUS_BEGIN && ovrl <= ABOREUS_END)
-		{
+		if (ovrl >= ABOREUS_BEGIN && ovrl <= ABOREUS_END) {
 			m_money -= (ovrld + 1) * m_overlayCredits[OverlayCredits_Aboreus];
 		}
 	}
 
 	__forceinline void AddOvrlMoney(unsigned char ovrl, unsigned char ovrld)
 	{
-		if (ovrl >= RIPARIUS_BEGIN && ovrl <= RIPARIUS_END)
-		{
+		if (ovrl >= RIPARIUS_BEGIN && ovrl <= RIPARIUS_END) {
 			m_money += (ovrld + 1) * m_overlayCredits[OverlayCredits_Riparius];
 		}
 
-		if (ovrl >= CRUENTUS_BEGIN && ovrl <= CRUENTUS_END)
-		{
+		if (ovrl >= CRUENTUS_BEGIN && ovrl <= CRUENTUS_END) {
 			m_money += (ovrld + 1) * m_overlayCredits[OverlayCredits_Cruentus];
 		}
 
-		if (ovrl >= VINIFERA_BEGIN && ovrl <= VINIFERA_END)
-		{
+		if (ovrl >= VINIFERA_BEGIN && ovrl <= VINIFERA_END) {
 			m_money += (ovrld + 1) * m_overlayCredits[OverlayCredits_Vinifera];
 		}
 
-		if (ovrl >= ABOREUS_BEGIN && ovrl <= ABOREUS_END)
-		{
+		if (ovrl >= ABOREUS_BEGIN && ovrl <= ABOREUS_END) {
 			m_money += (ovrld + 1) * m_overlayCredits[OverlayCredits_Aboreus];
 		}
 	}
@@ -774,7 +735,7 @@ protected:
 		y += pheight / 2;
 	}
 
-	
+
 	__forceinline void Mini_UpdatePos(const int i, const int e, bool isMultiplayer)
 	{
 		const int pwidth = m_mini_biinfo.bmiHeader.biWidth;
@@ -783,7 +744,7 @@ protected:
 		if (m_mini_colors.empty() || !tiledata)
 			return;
 
-		
+
 		const DWORD dwIsoSize = m_IsoSize;
 		const int pitch = m_mini_pitch;
 
@@ -826,23 +787,18 @@ protected:
 		STDOBJECTDATA sod;
 		sod.house = "";
 		int ic;
-		for (ic = 0;ic < SUBPOS_COUNT;ic++)
-		{
-			if (td.infantry[ic] >= 0)
-			{
+		for (ic = 0; ic < SUBPOS_COUNT; ic++) {
+			if (td.infantry[ic] >= 0) {
 				GetStdInfantryData(td.infantry[ic], &sod);
 			}
 		}
-		if (td.structure >= 0)
-		{
+		if (td.structure >= 0) {
 			GetStdStructureData(td.structure, &sod);
 		}
-		if (td.aircraft >= 0)
-		{
+		if (td.aircraft >= 0) {
 			GetStdAircraftData(td.aircraft, &sod);
 		}
-		if (td.unit >= 0)
-		{
+		if (td.unit >= 0) {
 			GetStdUnitData(td.unit, &sod);
 		}
 
@@ -868,8 +824,7 @@ protected:
 		col_r.rgbtGreen = r.rgbtGreen;
 		col_r.rgbtRed = r.rgbtRed;
 
-		if (isGreenTiberium(td.overlay))
-		{
+		if (isGreenTiberium(td.overlay)) {
 #ifndef RA2_MODE
 			col.rgbtBlue = 0;
 			col.rgbtGreen = 200;
@@ -881,23 +836,17 @@ protected:
 			col.rgbtRed = 250;
 			col_r = col;
 #endif
-		}
-		else if (td.overlay == OVRL_VEINS)
-		{
+		} else if (td.overlay == OVRL_VEINS) {
 			col.rgbtBlue = 120;
 			col.rgbtGreen = 180;
 			col.rgbtRed = 190;
 			col_r = col;
-		}
-		else if (td.overlay == OVRL_VEINHOLE || td.overlay == OVRL_VEINHOLEBORDER)
-		{
+		} else if (td.overlay == OVRL_VEINHOLE || td.overlay == OVRL_VEINHOLEBORDER) {
 			col.rgbtBlue = 120;
 			col.rgbtGreen = 160;
 			col.rgbtRed = 165;
 			col_r = col;
-		}
-		else if (td.overlay != 0xFF)
-		{
+		} else if (td.overlay != 0xFF) {
 			col.rgbtBlue = 20;
 			col.rgbtGreen = 20;
 			col.rgbtRed = 20;
@@ -905,8 +854,7 @@ protected:
 		}
 
 
-		if (sod.house.GetLength() > 0)
-		{
+		if (sod.house.GetLength() > 0) {
 			/*
 			if(strstr(sod.house, houses[1].name))
 			{
@@ -935,25 +883,19 @@ protected:
 		}
 
 		// MW: ADD: make red start pos dots
-		if (isMultiplayer)
-		{
+		if (isMultiplayer) {
 			CString id;
 			DWORD p;
 			int wp = td.waypoint;
 			BOOL startpos = FALSE;
 			int i, e;
-			for (i = -1;i < 2;i++)
-			{
-				for (e = -1;e < 2;e++)
-				{
-					if (dwPos + i + e * m_IsoSize < fielddata_size)
-					{
+			for (i = -1; i < 2; i++) {
+				for (e = -1; e < 2; e++) {
+					if (dwPos + i + e * m_IsoSize < fielddata_size) {
 						int w = GetWaypointAt(dwPos + i + e * m_IsoSize);
-						if (w >= 0)
-						{
+						if (w >= 0) {
 							GetWaypointData(w, &id, &p);
-							if (atoi(id) < 8)
-							{
+							if (atoi(id) < 8) {
 								startpos = TRUE;
 								break;
 							}
@@ -964,8 +906,7 @@ protected:
 				}
 				if (startpos) break;
 			}
-			if (startpos)
-			{
+			if (startpos) {
 				col.rgbtBlue = 0;
 				col.rgbtGreen = 0;
 				col.rgbtRed = 255;
@@ -1047,17 +988,12 @@ public:
 
 		int set = (*tiledata)[m.wGround].wTileSet;
 
-		for (i = 0;i < 3; i++)
-		{
-			for (e = 0;e < 3;e++)
-			{
+		for (i = 0; i < 3; i++) {
+			for (e = 0; e < 3; e++) {
 				int pos = dwPos + (i - 1) + (e - 1) * m_IsoSize;
-				if (pos < 0 || pos >= fielddata_size)
-				{
+				if (pos < 0 || pos >= fielddata_size) {
 					ts[i][e] = 0;
-				}
-				else
-				{
+				} else {
 					FIELDDATA m2 = *GetFielddataAt(pos);
 					if (m2.wGround == 0xFFFF) m2.wGround = 0;
 
@@ -1066,8 +1002,7 @@ public:
 					//if(cur_set==iSmoothSet) bNoLat=FALSE;
 					//
 
-					if (its == iss && cur_set == iSmoothSet)
-					{
+					if (its == iss && cur_set == iSmoothSet) {
 						m2.wGround = iLatGround; cur_set = iLatSet;
 					}
 
@@ -1083,23 +1018,19 @@ public:
 						//if(bIgnoreShore && (*tiledata)[m2.wGround].wTileSet==shoreset)
 						//	ts[i][e]=0;//ts[i][e]+1;
 					}
-					else*/ if (its == iss && cur_set != set)
-					{
+					else*/ if (its == iss && cur_set != set) {
 						if (cur_set == shoreset && !bIgnoreShore)
 							ts[i][e] = its;
 						else if (cur_set != iSmoothSet && cur_set != iTargetSet && cur_set != iLatSet)
 							ts[i][e] = 0;
 						else
 							ts[i][e] = its;
-					}
-					else if (its == iss && cur_set == set)
-	ts[i][e] = ils;
-					else
-					{
+					} else if (its == iss && cur_set == set)
+						ts[i][e] = ils;
+					else {
 						ts[i][e] = (*tiledata)[m2.wGround].tiles[m2.bSubTile].bTerrainType;
 
-						if (cur_set != shoreset && cur_set != iLatSet && cur_set != iSmoothSet)
-						{
+						if (cur_set != shoreset && cur_set != iLatSet && cur_set != iSmoothSet) {
 							ts[i][e] = 0;//ts[i][e]+1; // make sure you don´t smooth at it except it´s shore
 						}
 
@@ -1115,8 +1046,7 @@ public:
 
 		// 1/1 is smoothed tile
 
-		if (ts[1][1] == ils)
-		{
+		if (ts[1][1] == ils) {
 			// single lat
 			if (ts[0][1] != ils && ts[1][0] != ils
 				&& ts[1][2] != ils && ts[2][1] != ils)
@@ -1164,17 +1094,14 @@ public:
 				needed = 4;
 
 
-		}
-		else if (ts[1][1] == its)
-		{
+		} else if (ts[1][1] == its) {
 			// replace target set instead of smooth set
 			//if(st(ts[0][0], && ts[0][1]
 		}
 
 
 		needed -= 1;
-		if (needed >= 0)
-		{
+		if (needed >= 0) {
 			/*for(i=0;i<*tiledata_count;i++)
 			{
 				if((*tiledata)[i].wTileSet==iLatSet)
@@ -1186,15 +1113,12 @@ public:
 
 			// i is first lat tile
 			int e;
-			for (e = 0;e < needed;e++)
-			{
+			for (e = 0; e < needed; e++) {
 				i += (*tiledata)[i].wTileCount;
 			}
 
 			SetTileAt(dwPos, i, 0);
-		}
-		else if (needed == -1)
-		{
+		} else if (needed == -1) {
 			/*for(i=0;i<*tiledata_count;i++)
 			{
 				if((*tiledata)[i].wTileSet==iSmoothSet)
@@ -1222,7 +1146,7 @@ public:
 
 inline bool CMapData::isInside(MapCoords xy) const
 {
-	return xy.x >= 0 && xy.y >= 0 && xy.x < m_IsoSize && xy.y < m_IsoSize;
+	return xy.x >= 0 && xy.y >= 0 && xy.x < m_IsoSize&& xy.y < m_IsoSize;
 }
 
 inline MapCoords CMapData::ToMapCoords(ProjectedCoords xy) const
@@ -1245,20 +1169,16 @@ inline MapCoords CMapData::ToMapCoords3d(const ProjectedCoords xy, bool bAllowAc
 	static const auto fxy = ProjectedVec(f_x, f_y).convertT<float>();
 	auto ret = ignoreHideFlagsAndOutside ? xy2d : MapCoords(-1, -1);
 
-	for (int i = 15; i >= 0; i--)
-	{
-		for (int e = 0; e < 3; e++)
-		{
+	for (int i = 15; i >= 0; i--) {
+		for (int e = 0; e < 3; e++) {
 			const MapVec off(i, i);  // this is a vertical line starting from the bottom
 			const MapVec off2(e == 1 ? -1 : 0, e == 2 ? -1 : 0);  // increase x or y or neither in map coordinates by one so that we have a broader area to check
 			const MapCoords cur = xy2d + off + off2;
 
-			if (isInside(cur))
-			{
+			if (isInside(cur)) {
 				const auto& mfd = *GetFielddataAt(GetMapPos(cur));
 				const int ground = mfd.wGround == 0xFFFF ? 0 : mfd.wGround;
-				if (ignoreHideFlagsAndOutside || (!mfd.bHide && !(tiledata && (*tiledata)[ground].bHide)))
-				{
+				if (ignoreHideFlagsAndOutside || (!mfd.bHide && !(tiledata && (*tiledata)[ground].bHide))) {
 					const auto curProj = ProjectCoords3d(cur);
 
 					// now projCoords hold the logical pixel coordinates for the current field... 

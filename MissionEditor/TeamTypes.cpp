@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // TeamTypes.cpp: Implementierungsdatei
@@ -181,8 +181,7 @@ END_MESSAGE_MAP()
 
 BOOL stob(const char* s)
 {
-	if(_stricmp(s,"no")==NULL)
-	{
+	if (_stricmp(s, "no") == NULL) {
 		return FALSE;
 	}
 	return TRUE;
@@ -190,13 +189,13 @@ BOOL stob(const char* s)
 
 CString btos(BOOL b)
 {
-	CString s="no";
-	if(b==TRUE) s="yes";
+	CString s = "no";
+	if (b == TRUE) s = "yes";
 	return s;
 }
 
-int letter2number(char let){
-	int reply=let-'A';
+int letter2number(char let) {
+	int reply = let - 'A';
 	/*if(let=='A')reply=0;
 	if(let=='B')reply=1;
 	if(let=='C')reply=2;
@@ -227,8 +226,8 @@ int letter2number(char let){
 
 }
 
-char number2letter(int let){
-	int reply=let+'A';
+char number2letter(int let) {
+	int reply = let + 'A';
 	/*if(let==0)reply='A';
 	if(let==1)reply='B';
 	if(let==2)reply='C';
@@ -262,107 +261,100 @@ char number2letter(int let){
 
 int GetWaypoint(const char* c)
 {
-	if(strlen(c)==0) return -1;
-    int i;
-    int res=0;
-    for(i=0;i<strlen(c);i++)
-    {
-        int addval=letter2number(c[i]);
-        res+=addval+(res+1)*(i*25)+i;
-    }
+	if (strlen(c) == 0) return -1;
+	int i;
+	int res = 0;
+	for (i = 0; i < strlen(c); i++) {
+		int addval = letter2number(c[i]);
+		res += addval + (res + 1) * (i * 25) + i;
+	}
 	return res;
 }
 
 CString GetWaypoint(int n)
 {
-	if(n==-1) return (CString)("");
-	int i,e;
-	for(i=-1;i<26;i++)
-	{
-		for(e=0;e<26;e++)
-		{
+	if (n == -1) return (CString)("");
+	int i, e;
+	for (i = -1; i < 26; i++) {
+		for (e = 0; e < 26; e++) {
 			char c[50];
 			CString p;
-			if(i==-1)
-			{
-				c[0]=number2letter(e);
-				c[1]=0;
-				if(GetWaypoint(c)==n) return c;
-			}
-			else
-			{
-				c[0]=number2letter(i);
-				c[1]=number2letter(e);
-				c[2]=0;
-				if(GetWaypoint(c)==n) return c;
+			if (i == -1) {
+				c[0] = number2letter(e);
+				c[1] = 0;
+				if (GetWaypoint(c) == n) return c;
+			} else {
+				c[0] = number2letter(i);
+				c[1] = number2letter(e);
+				c[2] = 0;
+				if (GetWaypoint(c) == n) return c;
 			}
 
 		}
 	}
 	return (CString)("");
 }
-	
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CTeamTypes 
 void CTeamTypes::UpdateDialog()
 {
-	if(!yuri_mode)
-	{
+	if (!yuri_mode) {
 		GetDlgItem(IDC_MINDCONTROLDECISION)->ShowWindow(SW_HIDE);
 		m_MCD_L.ShowWindow(SW_HIDE);
 	}
 
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	CComboBox& taskforces=*(CComboBox*)GetDlgItem(IDC_TASKFORCE);
-	CComboBox& scripts=*(CComboBox*)GetDlgItem(IDC_SCRIPT);
-	CComboBox& houses=*(CComboBox*)GetDlgItem(IDC_HOUSE);
+	CComboBox& taskforces = *(CComboBox*)GetDlgItem(IDC_TASKFORCE);
+	CComboBox& scripts = *(CComboBox*)GetDlgItem(IDC_SCRIPT);
+	CComboBox& houses = *(CComboBox*)GetDlgItem(IDC_HOUSE);
 
-	int sel=m_TeamTypes.GetCurSel();
+	int sel = m_TeamTypes.GetCurSel();
 
-	while(m_TeamTypes.DeleteString(0)!=CB_ERR);
-	while(taskforces.DeleteString(0)!=CB_ERR);
-	while(scripts.DeleteString(0)!=CB_ERR);
+	while (m_TeamTypes.DeleteString(0) != CB_ERR);
+	while (taskforces.DeleteString(0) != CB_ERR);
+	while (scripts.DeleteString(0) != CB_ERR);
 
 	// MW 07/24/01: Clear:
-	m_Aggressive=0;	
-	m_Annoyance=0;
-	m_AreTeamMembersRecruitable=0;	
-	m_Autocreate=0;	
-	m_AvoidThreats=0;	
-	m_Droppod=0;	
-	m_Full=0;	
-	m_Group="";	
-	m_GuardSlower=0;
-	m_House="";	
-	m_IonImmune=0;	
-	m_IsBaseDefense=0;	
-	m_Loadable=0;	
-	m_LooseRecruit=0;	
-	m_Max="";	
-	m_Name="";	
-	m_OnlyTargetHouseEnemy=0;	
-	m_OnTransOnly=0;
-	m_Prebuild=0;	
-	m_Priority="";	
-	m_Recruiter=0;	
-	m_Reinforce=0;	
-	m_Script="";
-	m_Suicide=0;	
-	m_Tag="";
-	m_TaskForce="";
-	m_TechLevel="";
-	m_TransportReturnsOnUnload=0;
-	m_TransportWaypoint="";
-	m_VeteranLevel="";
-	m_MindControlDecision="";
+	m_Aggressive = 0;
+	m_Annoyance = 0;
+	m_AreTeamMembersRecruitable = 0;
+	m_Autocreate = 0;
+	m_AvoidThreats = 0;
+	m_Droppod = 0;
+	m_Full = 0;
+	m_Group = "";
+	m_GuardSlower = 0;
+	m_House = "";
+	m_IonImmune = 0;
+	m_IsBaseDefense = 0;
+	m_Loadable = 0;
+	m_LooseRecruit = 0;
+	m_Max = "";
+	m_Name = "";
+	m_OnlyTargetHouseEnemy = 0;
+	m_OnTransOnly = 0;
+	m_Prebuild = 0;
+	m_Priority = "";
+	m_Recruiter = 0;
+	m_Reinforce = 0;
+	m_Script = "";
+	m_Suicide = 0;
+	m_Tag = "";
+	m_TaskForce = "";
+	m_TechLevel = "";
+	m_TransportReturnsOnUnload = 0;
+	m_TransportWaypoint = "";
+	m_VeteranLevel = "";
+	m_MindControlDecision = "";
 
 	UpdateData(FALSE);
-	
+
 	int i;
 
-	auto updateStringForCBox = [&ini](CComboBox& box , const CString& sec) {
+	auto updateStringForCBox = [&ini](CComboBox& box, const CString& sec) {
 		for (auto const& [seq, id] : ini[sec]) {
 
 			CString str;
@@ -384,9 +376,9 @@ void CTeamTypes::UpdateDialog()
 	ListTags(*(CComboBox*)GetDlgItem(IDC_TAG), FALSE);
 	(*(CComboBox*)GetDlgItem(IDC_TAG)).InsertString(0, GetLanguageStringACP("None"));
 
-	
+
 	CComboBox* house;
-	house=(CComboBox*)GetDlgItem(IDC_HOUSE);
+	house = (CComboBox*)GetDlgItem(IDC_HOUSE);
 
 	/*while(house->DeleteString(0)!=CB_ERR);
 	// houses:  rules.ini + map definitions!
@@ -396,7 +388,7 @@ void CTeamTypes::UpdateDialog()
 		// we use the map definitions!
 		for(i=0;i<ini.sections["Houses"].values.size();i++)
 		{
-			house->AddString(*ini.sections["Houses"].GetValue(i));		
+			house->AddString(*ini.sections["Houses"].GetValue(i));
 		}
 	}
 	else
@@ -404,13 +396,13 @@ void CTeamTypes::UpdateDialog()
 		wasnohouse:
 		for(i=0;i<rules.sections["Houses"].values.size();i++)
 		{
-			house->AddString(*rules.sections["Houses"].GetValue(i));		
-		}				
+			house->AddString(*rules.sections["Houses"].GetValue(i));
+		}
 	}*/
 	ListHouses(*house, FALSE, TRUE, TRUE);
 
 	CComboBox* wayp;
-	wayp=(CComboBox*)GetDlgItem(IDC_WAYPOINT);
+	wayp = (CComboBox*)GetDlgItem(IDC_WAYPOINT);
 
 	while (wayp->DeleteString(0) != CB_ERR);
 	// houses:  rules.ini + map definitions!
@@ -418,16 +410,16 @@ void CTeamTypes::UpdateDialog()
 		wayp->AddString(num);
 	}
 
-	wayp=(CComboBox*)GetDlgItem(IDC_TRANSPORTWAYPOINT);
+	wayp = (CComboBox*)GetDlgItem(IDC_TRANSPORTWAYPOINT);
 
-	while(wayp->DeleteString(0)!=CB_ERR);
+	while (wayp->DeleteString(0) != CB_ERR);
 	// houses:  rules.ini + map definitions!
-	wayp->SetItemData(wayp->InsertString(0,TranslateStringACP("None")),0);
-	
+	wayp->SetItemData(wayp->InsertString(0, TranslateStringACP("None")), 0);
+
 	for (auto const& [num, _] : ini["Waypoints"]) {
 		wayp->SetItemData(wayp->AddString(num), 1);
 	}
-	
+
 #ifdef TS_MODE
 	wayp->ShowWindow(SW_HIDE);
 #endif
@@ -437,25 +429,25 @@ void CTeamTypes::UpdateDialog()
 		m_TeamTypes.SetCurSel(sel);
 	}
 	OnSelchangeTeamtypes();
-	
-	
+
+
 }
 
-void CTeamTypes::OnSelchangeTeamtypes() 
+void CTeamTypes::OnSelchangeTeamtypes()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	if (m_TeamTypes.GetCurSel() < 0) {
 		return;
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	auto const& sec = ini[str];
 
-	m_Aggressive= sec.GetBool("Aggressive");
+	m_Aggressive = sec.GetBool("Aggressive");
 	m_Annoyance = sec.GetBool("Annoyance");
 	m_AreTeamMembersRecruitable = sec.GetBool("AreTeamMembersRecruitable");
 	m_Autocreate = sec.GetBool("Autocreate");
@@ -499,21 +491,21 @@ void CTeamTypes::OnSelchangeTeamtypes()
 		m_TaskForce += " (" + taskForceName + ")";
 	}
 	m_TechLevel = sec.GetString("TechLevel");
-	m_TransportReturnsOnUnload= sec.GetBool("TransportsReturnOnUnload");
+	m_TransportReturnsOnUnload = sec.GetBool("TransportsReturnOnUnload");
 	m_VeteranLevel = sec.GetString("VeteranLevel");
-	
+
 	if (yuri_mode) {
 		m_MindControlDecision = sec.GetString("MindControlDecision");
 	}
-	
+
 
 	int w = GetWaypoint(sec["Waypoint"]);
 	char c[50];
-	itoa(w,c,10);
-	if(w!=-1)
-	m_Waypoint=c;
+	itoa(w, c, 10);
+	if (w != -1)
+		m_Waypoint = c;
 	else
-	m_Waypoint="";
+		m_Waypoint = "";
 
 #ifdef RA2_MODE
 	if (sec.GetBool("UseTransportOrigin")) {
@@ -530,23 +522,23 @@ void CTeamTypes::OnSelchangeTeamtypes()
 	}
 #endif
 
-	m_Whiner= sec.GetBool("Whiner");
+	m_Whiner = sec.GetBool("Whiner");
 
 	UpdateData(FALSE);
 }
 
-void CTeamTypes::OnChangeName() 
+void CTeamTypes::OnChangeName()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
-	if(m_TeamTypes.GetCount()==0) return;
+	if (m_TeamTypes.GetCount() == 0) return;
 
-	CEdit& n=*(CEdit*)GetDlgItem(IDC_NAME);
-	DWORD pos=n.GetSel();
+	CEdit& n = *(CEdit*)GetDlgItem(IDC_NAME);
+	DWORD pos = n.GetSel();
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetString(str, "Name", m_Name);
@@ -556,22 +548,22 @@ void CTeamTypes::OnChangeName()
 	n.SetSel(pos);
 }
 
-void CTeamTypes::OnDeleteteamtype() 
+void CTeamTypes::OnDeleteteamtype()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	if (m_TeamTypes.GetCurSel() != -1) {
-		int res=MessageBox("Are you sure that you want to delete the selected team-type? If you delete it, don´t forget to delete any reference to the team-type.","Delete team-type",MB_YESNO);
+		int res = MessageBox("Are you sure that you want to delete the selected team-type? If you delete it, don´t forget to delete any reference to the team-type.", "Delete team-type", MB_YESNO);
 		if (res == IDNO) {
 			return;
 		}
 
 		CString str;
-		str=GetText(&m_TeamTypes);
+		str = GetText(&m_TeamTypes);
 		TruncSpace(str);
 
-		CIniFile& ini=Map->GetIniFile();
-		
+		CIniFile& ini = Map->GetIniFile();
+
 		if (auto pSec = ini.TryGetSection("TeamTypes")) {
 			pSec->RemoveValue(str);
 		}
@@ -581,9 +573,9 @@ void CTeamTypes::OnDeleteteamtype()
 	//UpdateDialog();
 }
 
-void CTeamTypes::OnEditchangeVeteranlevel() 
+void CTeamTypes::OnEditchangeVeteranlevel()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -591,7 +583,7 @@ void CTeamTypes::OnEditchangeVeteranlevel()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetString(str, "VeteranLevel", m_VeteranLevel);
@@ -599,7 +591,7 @@ void CTeamTypes::OnEditchangeVeteranlevel()
 
 void CTeamTypes::OnEditchangeHouse()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -613,9 +605,9 @@ void CTeamTypes::OnEditchangeHouse()
 	ini.SetString(str, "House", TranslateHouse(m_House));
 }
 
-void CTeamTypes::OnChangePriority() 
+void CTeamTypes::OnChangePriority()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -623,15 +615,15 @@ void CTeamTypes::OnChangePriority()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetString(str, "Priority", m_Priority);
 }
 
-void CTeamTypes::OnChangeMax() 
+void CTeamTypes::OnChangeMax()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -639,15 +631,15 @@ void CTeamTypes::OnChangeMax()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetString(str, "Max", m_Max);
 }
 
-void CTeamTypes::OnEditchangeTechlevel() 
+void CTeamTypes::OnEditchangeTechlevel()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -655,15 +647,15 @@ void CTeamTypes::OnEditchangeTechlevel()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetString(str, "TechLevel", m_TechLevel);
 }
 
-void CTeamTypes::OnEditchangeGroup() 
+void CTeamTypes::OnEditchangeGroup()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -671,15 +663,15 @@ void CTeamTypes::OnEditchangeGroup()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetString(str, "Group", m_Group);
 }
 
-void CTeamTypes::OnEditchangeWaypoint() 
+void CTeamTypes::OnEditchangeWaypoint()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -687,7 +679,7 @@ void CTeamTypes::OnEditchangeWaypoint()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 	auto sec = ini.TryGetSection(str);
 	ASSERT(sec != nullptr);
@@ -699,9 +691,9 @@ void CTeamTypes::OnEditchangeWaypoint()
 	}
 }
 
-void CTeamTypes::OnEditchangeScript() 
+void CTeamTypes::OnEditchangeScript()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -709,17 +701,17 @@ void CTeamTypes::OnEditchangeScript()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
-	CString tmp=m_Script;
+	CString tmp = m_Script;
 	TruncSpace(tmp);
 	ini.SetString(str, "Script", tmp);
 }
 
-void CTeamTypes::OnEditchangeTaskforce() 
+void CTeamTypes::OnEditchangeTaskforce()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -727,57 +719,56 @@ void CTeamTypes::OnEditchangeTaskforce()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
-	CString tmp=m_TaskForce;
+	CString tmp = m_TaskForce;
 	TruncSpace(tmp);
 	ini.SetString(str, "TaskForce", tmp);
 }
 
 
 
-void CTeamTypes::OnKillfocusVeteranlevel() 
+void CTeamTypes::OnKillfocusVeteranlevel()
 {
-	OnEditchangeVeteranlevel();	
+	OnEditchangeVeteranlevel();
 }
 
-void CTeamTypes::OnKillfocusHouse() 
+void CTeamTypes::OnKillfocusHouse()
 {
-	OnEditchangeHouse();	
+	OnEditchangeHouse();
 }
 
-void CTeamTypes::OnKillfocusTechlevel() 
+void CTeamTypes::OnKillfocusTechlevel()
 {
-	OnEditchangeTechlevel();	
+	OnEditchangeTechlevel();
 }
 
-void CTeamTypes::OnKillfocusGroup() 
+void CTeamTypes::OnKillfocusGroup()
 {
-	OnEditchangeGroup();	
+	OnEditchangeGroup();
 }
 
-void CTeamTypes::OnKillfocusWaypoint() 
+void CTeamTypes::OnKillfocusWaypoint()
 {
-	OnEditchangeWaypoint();	
+	OnEditchangeWaypoint();
 }
 
-void CTeamTypes::OnKillfocusScript() 
+void CTeamTypes::OnKillfocusScript()
 {
-	OnEditchangeScript();	
+	OnEditchangeScript();
 }
 
-void CTeamTypes::OnKillfocusTaskforce() 
+void CTeamTypes::OnKillfocusTaskforce()
 {
-	OnEditchangeTaskforce();	
+	OnEditchangeTaskforce();
 }
 
-void CTeamTypes::OnShowWindow(BOOL bShow, UINT nStatus) 
+void CTeamTypes::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CDialog::OnShowWindow(bShow, nStatus);
-	
-	if(!bShow)
-	{
+
+	if (!bShow) {
 		OnKillfocusGroup();
 		OnKillfocusHouse();
 		OnKillfocusScript();
@@ -788,16 +779,16 @@ void CTeamTypes::OnShowWindow(BOOL bShow, UINT nStatus)
 		OnKillfocusTag();
 #ifdef RA2_MODE
 		OnKillfocusTransportwaypoint();
-		if(yuri_mode) OnKillfocusMindcontroldecision();
+		if (yuri_mode) OnKillfocusMindcontroldecision();
 #endif
 	}
 }
 
 
 
-void CTeamTypes::OnLoadable() 
+void CTeamTypes::OnLoadable()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -805,15 +796,15 @@ void CTeamTypes::OnLoadable()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Loadable", m_Loadable);
 }
 
-void CTeamTypes::OnFull() 
+void CTeamTypes::OnFull()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -821,15 +812,15 @@ void CTeamTypes::OnFull()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Loadable", m_Full);
 }
 
-void CTeamTypes::OnAnnoyance() 
+void CTeamTypes::OnAnnoyance()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -837,15 +828,15 @@ void CTeamTypes::OnAnnoyance()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Annoyance", m_Annoyance);
 }
 
-void CTeamTypes::OnGuardslower() 
+void CTeamTypes::OnGuardslower()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -853,15 +844,15 @@ void CTeamTypes::OnGuardslower()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Annoyance", m_GuardSlower);
 }
 
-void CTeamTypes::OnRecruiter() 
+void CTeamTypes::OnRecruiter()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -869,15 +860,15 @@ void CTeamTypes::OnRecruiter()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Annoyance", m_Recruiter);
 }
 
-void CTeamTypes::OnDroppod() 
+void CTeamTypes::OnDroppod()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -885,15 +876,15 @@ void CTeamTypes::OnDroppod()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Annoyance", m_Droppod);
 }
 
-void CTeamTypes::OnWhiner() 
+void CTeamTypes::OnWhiner()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -901,15 +892,15 @@ void CTeamTypes::OnWhiner()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Whiner", m_Whiner);
 }
 
-void CTeamTypes::OnLooserecruit() 
+void CTeamTypes::OnLooserecruit()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -917,15 +908,15 @@ void CTeamTypes::OnLooserecruit()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "LooseRecruit", m_LooseRecruit);
 }
 
-void CTeamTypes::OnAggressive() 
+void CTeamTypes::OnAggressive()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -933,15 +924,15 @@ void CTeamTypes::OnAggressive()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "LooseRecruit", m_Aggressive);
 }
 
-void CTeamTypes::OnSuicide() 
+void CTeamTypes::OnSuicide()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -949,15 +940,15 @@ void CTeamTypes::OnSuicide()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Suicide", m_Suicide);
 }
 
-void CTeamTypes::OnAutocreate() 
+void CTeamTypes::OnAutocreate()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -965,15 +956,15 @@ void CTeamTypes::OnAutocreate()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Autocreate", m_Autocreate);
 }
 
-void CTeamTypes::OnPrebuild() 
+void CTeamTypes::OnPrebuild()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -981,15 +972,15 @@ void CTeamTypes::OnPrebuild()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Prebuild", m_Prebuild);
 }
 
-void CTeamTypes::OnOntransonly() 
+void CTeamTypes::OnOntransonly()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -997,15 +988,15 @@ void CTeamTypes::OnOntransonly()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "OnTransOnly", m_OnTransOnly);
 }
 
-void CTeamTypes::OnReinforce() 
+void CTeamTypes::OnReinforce()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -1013,15 +1004,15 @@ void CTeamTypes::OnReinforce()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Reinforce", m_Reinforce);
 }
 
-void CTeamTypes::OnAvoidthreats() 
+void CTeamTypes::OnAvoidthreats()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -1029,15 +1020,15 @@ void CTeamTypes::OnAvoidthreats()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "Reinforce", m_AvoidThreats);
 }
 
-void CTeamTypes::OnIonimmune() 
+void CTeamTypes::OnIonimmune()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -1045,15 +1036,15 @@ void CTeamTypes::OnIonimmune()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "IonImmune", m_IonImmune);
 }
 
-void CTeamTypes::OnTransportreturnsonunload() 
+void CTeamTypes::OnTransportreturnsonunload()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -1061,15 +1052,15 @@ void CTeamTypes::OnTransportreturnsonunload()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "TransportsReturnOnUnload", m_TransportReturnsOnUnload);
 }
 
-void CTeamTypes::OnAreteammembersrecruitable() 
+void CTeamTypes::OnAreteammembersrecruitable()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -1077,15 +1068,15 @@ void CTeamTypes::OnAreteammembersrecruitable()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "AreTeamMembersRecruitable", m_AreTeamMembersRecruitable);
 }
 
-void CTeamTypes::OnIsbasedefense() 
+void CTeamTypes::OnIsbasedefense()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -1093,15 +1084,15 @@ void CTeamTypes::OnIsbasedefense()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "IsBaseDefense", m_IsBaseDefense);
 }
 
-void CTeamTypes::OnOnlytargethouseenemy() 
+void CTeamTypes::OnOnlytargethouseenemy()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -1109,7 +1100,7 @@ void CTeamTypes::OnOnlytargethouseenemy()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
 	ini.SetBool(str, "IsBaseDefense", m_OnlyTargetHouseEnemy);
@@ -1117,13 +1108,13 @@ void CTeamTypes::OnOnlytargethouseenemy()
 
 CString GetFree(const char* section);
 
-void CTeamTypes::OnNewteamtype() 
+void CTeamTypes::OnNewteamtype()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	CString id=GetFreeID();
+	CString id = GetFreeID();
 	CString p;
-	p=GetFree("TeamTypes");
+	p = GetFree("TeamTypes");
 
 	// TODO: change default value
 	ini.SetString("TeamTypes", p, id);
@@ -1162,32 +1153,30 @@ void CTeamTypes::OnNewteamtype()
 	}
 
 #endif
-		
-	
+
+
 	//UpdateDialog();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 
 	int i;
-	for(i=0;i<m_TeamTypes.GetCount();i++)
-	{
+	for (i = 0; i < m_TeamTypes.GetCount(); i++) {
 		CString k;
 		m_TeamTypes.GetLBText(i, k);
 		TruncSpace(k);
-		if(strcmp(k, id)==NULL)
-		{
+		if (strcmp(k, id) == NULL) {
 			m_TeamTypes.SetCurSel(i);
 			OnSelchangeTeamtypes();
 		}
 	}
 
-	CComboBox& houses=*(CComboBox*)GetDlgItem(IDC_HOUSE);
+	CComboBox& houses = *(CComboBox*)GetDlgItem(IDC_HOUSE);
 	houses.SetCurSel(0);
 	OnEditchangeHouse();
-	CComboBox& waypoints=*(CComboBox*)GetDlgItem(IDC_WAYPOINT);
+	CComboBox& waypoints = *(CComboBox*)GetDlgItem(IDC_WAYPOINT);
 	waypoints.SetCurSel(0);
-	CComboBox& script=*(CComboBox*)GetDlgItem(IDC_SCRIPT);
+	CComboBox& script = *(CComboBox*)GetDlgItem(IDC_SCRIPT);
 	script.SetCurSel(0);
-	CComboBox& taskforce=*(CComboBox*)GetDlgItem(IDC_TASKFORCE);
+	CComboBox& taskforce = *(CComboBox*)GetDlgItem(IDC_TASKFORCE);
 	taskforce.SetCurSel(0);
 	OnKillfocusHouse();
 	OnKillfocusWaypoint();
@@ -1195,9 +1184,9 @@ void CTeamTypes::OnNewteamtype()
 	OnKillfocusTaskforce();
 }
 
-void CTeamTypes::OnEditchangeTag() 
+void CTeamTypes::OnEditchangeTag()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -1205,7 +1194,7 @@ void CTeamTypes::OnEditchangeTag()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 
 	TruncSpace(str);
 	auto sec = ini.TryGetSection(str);
@@ -1219,18 +1208,18 @@ void CTeamTypes::OnEditchangeTag()
 	}
 }
 
-void CTeamTypes::OnKillfocusTag() 
+void CTeamTypes::OnKillfocusTag()
 {
-	OnEditchangeTag();	
+	OnEditchangeTag();
 }
 
-void CTeamTypes::OnEditchangeTransportwaypoint() 
+void CTeamTypes::OnEditchangeTransportwaypoint()
 {
 #ifndef RA2_MODE
 	return;
 #endif
 
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -1238,7 +1227,7 @@ void CTeamTypes::OnEditchangeTransportwaypoint()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 	auto sec = ini.TryGetSection(str);
 	ASSERT(sec != nullptr);
@@ -1248,17 +1237,17 @@ void CTeamTypes::OnEditchangeTransportwaypoint()
 		return;
 	}
 	sec->SetString("TransportWaypoint", GetWaypoint(atoi(m_TransportWaypoint)));
-	sec->SetBool( "UseTransportOrigin", true);
+	sec->SetBool("UseTransportOrigin", true);
 }
 
-void CTeamTypes::OnKillfocusTransportwaypoint() 
+void CTeamTypes::OnKillfocusTransportwaypoint()
 {
-	OnEditchangeTransportwaypoint();	
+	OnEditchangeTransportwaypoint();
 }
 
-void CTeamTypes::OnEditchangeMindcontroldecision() 
+void CTeamTypes::OnEditchangeMindcontroldecision()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	UpdateData(TRUE);
 	if (m_TeamTypes.GetCount() == 0) {
@@ -1266,16 +1255,16 @@ void CTeamTypes::OnEditchangeMindcontroldecision()
 	}
 
 	CString str;
-	str=GetText(&m_TeamTypes);
+	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 	auto sec = ini.TryGetSection(str);
 	ASSERT(sec != nullptr);
-	CString tmp=m_MindControlDecision;
+	CString tmp = m_MindControlDecision;
 	TruncSpace(tmp);
 	sec->SetString("MindControlDecision", std::move(tmp));
 }
 
-void CTeamTypes::OnKillfocusMindcontroldecision() 
+void CTeamTypes::OnKillfocusMindcontroldecision()
 {
-	OnEditchangeMindcontroldecision();	
+	OnEditchangeMindcontroldecision();
 }

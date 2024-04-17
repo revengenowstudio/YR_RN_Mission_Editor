@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "StdAfx.h"
@@ -33,13 +33,13 @@ int sgn(int v)
 	return v > 0 ? 1 : 0;
 }
 
-CTube::CTube(std::uint16_t tubeID, std::uint16_t startX, std::uint16_t startY, ETubeDirection direction, std::uint16_t endX, std::uint16_t endY, const std::vector<ETubeDirection>& tubeParts):
+CTube::CTube(std::uint16_t tubeID, std::uint16_t startX, std::uint16_t startY, ETubeDirection direction, std::uint16_t endX, std::uint16_t endY, const std::vector<ETubeDirection>& tubeParts) :
 	CTube(startX, startY, direction, endX, endY, tubeParts)
 {
 	m_tubeId = tubeID;
 }
 
-CTube::CTube(const std::uint16_t startX, const std::uint16_t startY, const ETubeDirection direction, const std::uint16_t endX, const std::uint16_t endY, const std::vector<ETubeDirection>& tubeParts):
+CTube::CTube(const std::uint16_t startX, const std::uint16_t startY, const ETubeDirection direction, const std::uint16_t endX, const std::uint16_t endY, const std::vector<ETubeDirection>& tubeParts) :
 	CTube()
 {
 	m_startX = startX;
@@ -50,7 +50,7 @@ CTube::CTube(const std::uint16_t startX, const std::uint16_t startY, const ETube
 	m_tubeParts = tubeParts;
 }
 
-CTube::CTube(std::uint16_t tubeId, const std::string& value):
+CTube::CTube(std::uint16_t tubeId, const std::string& value) :
 	m_tubeId(tubeId)
 {
 	m_startY = stoi(GetParam(value, 0));
@@ -60,8 +60,7 @@ CTube::CTube(std::uint16_t tubeId, const std::string& value):
 	m_endX = stoi(GetParam(value, 4));
 
 	std::string readDirS;
-	for (std::size_t e = 5; !(readDirS = GetParam(value, e)).empty(); ++e)
-	{
+	for (std::size_t e = 5; !(readDirS = GetParam(value, e)).empty(); ++e) {
 		const auto readDir = stoi(readDirS);
 		m_tubeParts.push_back(ToTubeDirection(readDir));
 	}
@@ -94,7 +93,7 @@ CTube CTube::reverse(std::uint16_t newTubeID) const
 	// reverse direction tube parts
 	auto reversed = m_tubeParts |
 		std::views::reverse |
-		std::views::transform([](auto dir) {return opposite_dir(dir);}) |
+		std::views::transform([](auto dir) {return opposite_dir(dir); }) |
 		std::views::common;
 
 	// find the first defined direction in the reversed list
@@ -120,17 +119,15 @@ bool CTube::isEqual(const CTube& r, bool ignoreId) const
 
 	const auto& largerTubeParts = r.m_tubeParts.size() >= m_tubeParts.size() ? r.m_tubeParts : m_tubeParts;
 	const auto& smallerTubeParts = r.m_tubeParts.size() < m_tubeParts.size() ? r.m_tubeParts : m_tubeParts;
-	for (auto i = 0; i < smallerTubeParts.size(); ++i)
-	{
+	for (auto i = 0; i < smallerTubeParts.size(); ++i) {
 		if (largerTubeParts[i] != smallerTubeParts[i])
 			return false;
 	}
-	for (auto i = smallerTubeParts.size(); i < largerTubeParts.size(); ++i)
-	{
+	for (auto i = smallerTubeParts.size(); i < largerTubeParts.size(); ++i) {
 		if (largerTubeParts[i] != ETubeDirection::Undefined)
 			return false;
 	}
-	
+
 	return m_direction == r.m_direction && m_startX == r.m_startX && m_startY == r.m_startY && r.m_endX == r.m_endX && r.m_endY == r.m_endY;
 }
 
@@ -154,7 +151,7 @@ CTube CTube::autocreate(std::uint16_t startX, std::uint16_t startY, std::uint16_
 	ti.m_endX = endX;
 	ti.m_endY = endY;
 
-	
+
 
 	int xadd = sgn(endX - curx);
 	int yadd = sgn(endY - cury);
@@ -217,8 +214,7 @@ bool dir_to_xy(ETubeDirection dir, MapVec& vec)
 			   {-1, -1},  // 7
 	};
 	const auto iDir = to_int(dir);
-	if (iDir < 0 || iDir > 7)
-	{
+	if (iDir < 0 || iDir > 7) {
 		vec.x = 0;
 		vec.y = 0;
 		return false;
@@ -240,13 +236,12 @@ bool CTube::touches(const MapCoords& mc) const
 {
 	bool touches = false;
 	walk([this, &mc, &touches](const auto& wi) {
-		if (wi.pos == mc)
-		{
+		if (wi.pos == mc) {
 			touches = true;
 			return false;
 		}
 		return true;
-	});
+		});
 	return touches;
 }
 
@@ -269,7 +264,7 @@ bool CTube::append(std::uint16_t endX, std::uint16_t endY, int forceStraightPart
 {
 	auto newTubeParts = m_tubeParts;
 	MapCoords end(endX, endY);
-	
+
 	// remove delimiters
 	auto oldLast = std::find(newTubeParts.begin(), newTubeParts.end(), ETubeDirection::Undefined);
 	newTubeParts.resize(oldLast - newTubeParts.begin());
@@ -277,66 +272,61 @@ bool CTube::append(std::uint16_t endX, std::uint16_t endY, int forceStraightPart
 	// now find current x/y
 	MapCoords cur = getStartCoords();
 	std::vector<MapCoords> existingPositions;
-	if(!walk([&cur, &existingPositions](const WalkInfo& wi) {
+	if (!walk([&cur, &existingPositions](const WalkInfo& wi) {
 		cur = wi.pos;
 		existingPositions.push_back(wi.pos);
 		return true;
-	}))
+		}))
 		return false;
-	
-	// if no enter direction was given, set it now - this should only be true if there are no existingPositions
-	if (m_direction == ETubeDirection::Undefined)
-	{
-		const bool xMajor = abs(end.x - m_startX) > abs(end.y - m_startY);
-		MapVec add(sgn(end.x - m_startX), sgn(end.y - m_startY));		
-		add.x = xMajor ? add.x : 0;
-		add.y = xMajor ? 0 : add.y;
-		m_direction = kDiffToDir[add.x + 1][add.y + 1];
-	}
 
-	auto endOnExistingIt = std::find(existingPositions.begin(), existingPositions.end(), end);
-	if (endOnExistingIt != existingPositions.end())
-	{
-		if (endOnExistingIt == existingPositions.begin())
-			return false; // zero length remaining
+		// if no enter direction was given, set it now - this should only be true if there are no existingPositions
+		if (m_direction == ETubeDirection::Undefined) {
+			const bool xMajor = abs(end.x - m_startX) > abs(end.y - m_startY);
+			MapVec add(sgn(end.x - m_startX), sgn(end.y - m_startY));
+			add.x = xMajor ? add.x : 0;
+			add.y = xMajor ? 0 : add.y;
+			m_direction = kDiffToDir[add.x + 1][add.y + 1];
+		}
 
-		// shorten
-		auto remaining = endOnExistingIt - existingPositions.begin();
-		newTubeParts.resize(remaining);
+		auto endOnExistingIt = std::find(existingPositions.begin(), existingPositions.end(), end);
+		if (endOnExistingIt != existingPositions.end()) {
+			if (endOnExistingIt == existingPositions.begin())
+				return false; // zero length remaining
+
+			// shorten
+			auto remaining = endOnExistingIt - existingPositions.begin();
+			newTubeParts.resize(remaining);
+			newTubeParts.push_back(ETubeDirection::Undefined);
+			m_endX = end.x;
+			m_endY = end.y;
+			m_tubeParts = std::move(newTubeParts);
+			return true;
+		}
+
+		int n = 0;
+		while (end != cur) {
+			MapVec add(sgn(end.x - cur.x), sgn(end.y - cur.y));
+			if (newTubeParts.size() < 1 && forceStraightParts < 0) {
+				// the first tube part should be in the same direction as the enter direction
+				dir_to_xy(m_direction, add);
+			}
+			if (n++ < forceStraightParts) {
+				const bool xMajorPart = abs(end.x - m_endX) > abs(end.y - m_endY);
+				add.x = xMajorPart ? add.x : 0;
+				add.y = xMajorPart ? 0 : add.y;
+			}
+			cur += add;
+			//if (std::find(existingPositions.begin(), existingPositions.end(), std::make_pair(curX, curY)) != existingPositions.end())
+			//	return false; // intersection - maybe shorten? maybe we can even allow it if TS accepts it?
+			newTubeParts.push_back(kDiffToDir[add.x + 1][add.y + 1]);
+		}
+
 		newTubeParts.push_back(ETubeDirection::Undefined);
-		m_endX = end.x;
-		m_endY = end.y;
+		m_endX = cur.x;
+		m_endY = cur.y;
 		m_tubeParts = std::move(newTubeParts);
-		return true;
-	}
-	
-	int n = 0;
-	while (end != cur)
-	{
-		MapVec add(sgn(end.x - cur.x), sgn(end.y - cur.y));
-		if (newTubeParts.size() < 1 && forceStraightParts < 0)
-		{
-			// the first tube part should be in the same direction as the enter direction
-			dir_to_xy(m_direction, add);
-		}
-		if (n++ < forceStraightParts)
-		{
-			const bool xMajorPart = abs(end.x - m_endX) > abs(end.y - m_endY);
-			add.x = xMajorPart ? add.x : 0;
-			add.y = xMajorPart ? 0 : add.y;
-		}
-		cur += add;
-		//if (std::find(existingPositions.begin(), existingPositions.end(), std::make_pair(curX, curY)) != existingPositions.end())
-		//	return false; // intersection - maybe shorten? maybe we can even allow it if TS accepts it?
-		newTubeParts.push_back(kDiffToDir[add.x + 1][add.y + 1]);
-	}
 
-	newTubeParts.push_back(ETubeDirection::Undefined);
-	m_endX = cur.x;
-	m_endY = cur.y;
-	m_tubeParts = std::move(newTubeParts);
-	
-	return true;
+		return true;
 }
 
 bool CTube::walk(const std::function<bool(const WalkInfo&)>& walker) const
@@ -345,8 +335,7 @@ bool CTube::walk(const std::function<bool(const WalkInfo&)>& walker) const
 	WalkInfo wi;
 	wi.pos = MapCoords(m_startX, m_startY);
 
-	for (auto dir : m_tubeParts)
-	{
+	for (auto dir : m_tubeParts) {
 		wi.direction = dir;
 		dir_to_xy(wi.direction, diff);
 		wi.next_pos = (wi.direction == ETubeDirection::Undefined) ? MapCoords(-1, -1) : wi.pos + diff;
@@ -355,7 +344,7 @@ bool CTube::walk(const std::function<bool(const WalkInfo&)>& walker) const
 		if (wi.direction == ETubeDirection::Undefined)
 			break;
 		wi.pos = wi.next_pos;
-	}	
+	}
 	return true;
 }
 

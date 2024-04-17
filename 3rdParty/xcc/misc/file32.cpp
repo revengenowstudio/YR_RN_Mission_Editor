@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -133,9 +133,9 @@ Cvirtual_binary Cfile32::get_mm()
 {
 	if (!size())
 		return Cvirtual_binary();
-  Cwin_handle mh(CreateFileMapping(h(), NULL, PAGE_READONLY, 0, 0, NULL));
-  void* d = mh ? MapViewOfFile(mh, FILE_MAP_READ, 0, 0, 0) : NULL;
-  return d ? Cvirtual_binary(d, size(), std::shared_ptr<void>(d, UnmapViewOfFile)) : Cvirtual_binary();
+	Cwin_handle mh(CreateFileMapping(h(), NULL, PAGE_READONLY, 0, 0, NULL));
+	void* d = mh ? MapViewOfFile(mh, FILE_MAP_READ, 0, 0, 0) : NULL;
+	return d ? Cvirtual_binary(d, size(), std::shared_ptr<void>(d, UnmapViewOfFile)) : Cvirtual_binary();
 }
 
 Cvirtual_binary file32_read(const string& name)

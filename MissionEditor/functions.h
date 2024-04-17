@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef FUNC_INCLUDED
@@ -36,7 +36,7 @@ void SetMainStatusBarReady();
 CString TranslateStringVariables(int n, const char* originaltext, const char* inserttext);
 
 // Alliance->Korea etc...
-CString TranslateHouse(CString original, BOOL bToUI=FALSE);
+CString TranslateHouse(CString original, BOOL bToUI = FALSE);
 
 // show options dialog
 void ShowOptionsDialog();
@@ -67,7 +67,7 @@ void ClearNode(int n, string owner);
 CString GetFreeID();
 
 
-void HandleParamList(CComboBox &cb, int type);
+void HandleParamList(CComboBox& cb, int type);
 
 // sets 0 if there is a space in the string, so truncates it at the first space occupation
 void TruncSpace(string& str);
@@ -78,12 +78,12 @@ BOOL DoesFileExist(LPCSTR szFile);
 
 
 // Lists some things
-void ListHouses(CComboBox &cb, BOOL bNumbers=FALSE, BOOL bCountries=FALSE, BOOL bPlayers=FALSE);
-void ListTeamTypes(CComboBox &cb, BOOL bListNone=FALSE);
-void ListWaypoints(CComboBox &cb);
+void ListHouses(CComboBox& cb, BOOL bNumbers = FALSE, BOOL bCountries = FALSE, BOOL bPlayers = FALSE);
+void ListTeamTypes(CComboBox& cb, BOOL bListNone = FALSE);
+void ListWaypoints(CComboBox& cb);
 void ListTargets(CComboBox& cb);
 void ListTags(CComboBox& cb, BOOL bListNone);
-void ListMovies(CComboBox& cb, BOOL bListNone, BOOL bListParam=FALSE);
+void ListMovies(CComboBox& cb, BOOL bListNone, BOOL bListParam = FALSE);
 void ListBuildings(CComboBox& cb, bool useIniName = false);
 void ListUnits(CComboBox& cb);
 void ListAircraft(CComboBox& cb);
@@ -115,7 +115,7 @@ CString GetHouseSectionName(CString lpHouse);
 int RepairRulesHouses();
 
 // strcpy_safe allows overlapping of source & destination. strcpy may be faster though!
-char *strcpy_safe( char *strDestination, const char *strSource );
+char* strcpy_safe(char* strDestination, const char* strSource);
 
 /****************************************
  language support functions [12/18/1999]
@@ -137,20 +137,20 @@ CString TranslateStringACP(WCHAR* u16EnglishString);
  sound functions [03/16/2001]
  ****************************************/
 
-// general play sound function. uses parameter in defines.h. Does only play if user has not deactivated sounds
+ // general play sound function. uses parameter in defines.h. Does only play if user has not deactivated sounds
 void Sound(int ID);
 
 
 class BitmapNotFound : std::runtime_error
 {
 public:
-    BitmapNotFound(): std::runtime_error("Bitmap not found") {}
+	BitmapNotFound() : std::runtime_error("Bitmap not found") {}
 };
 
 std::unique_ptr<CBitmap> BitmapFromResource(int resource_id);
 std::unique_ptr<CBitmap> BitmapFromFile(const CString& filepath);
 
-CComPtr<IDirectDrawSurface4> BitmapToSurface(IDirectDraw4 * pDD, const CBitmap& bitmap);
+CComPtr<IDirectDrawSurface4> BitmapToSurface(IDirectDraw4* pDD, const CBitmap& bitmap);
 
 
 #endif

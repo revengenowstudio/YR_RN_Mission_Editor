@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // GlobalsDlg.cpp: Implementierungsdatei
@@ -70,35 +70,34 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CGlobalsDlg 
 
-void CGlobalsDlg::OnOK() 
+void CGlobalsDlg::OnOK()
 {
-	
+
 	// CDialog::OnOK();
 }
 
-void CGlobalsDlg::OnCancel() 
+void CGlobalsDlg::OnCancel()
 {
 	// TODO: Zusätzlichen Bereinigungscode hier einfügen
-	
+
 	CDialog::OnCancel();
 }
 
 void CGlobalsDlg::UpdateDialog()
 {
-	int oldsel=m_Global.GetCurSel();
-	if(oldsel<0) oldsel=0;
+	int oldsel = m_Global.GetCurSel();
+	if (oldsel < 0) oldsel = 0;
 
-	while(m_Global.DeleteString(0)!=CB_ERR);
+	while (m_Global.DeleteString(0) != CB_ERR);
 
 	int i;
-	BOOL bFailFind=FALSE;
-	CIniFile& ini=Map->GetIniFile();
-	for(i=0;i<100;i++)
-	{
+	BOOL bFailFind = FALSE;
+	CIniFile& ini = Map->GetIniFile();
+	for (i = 0; i < 100; i++) {
 		char c[50];
-		itoa(i,c,10);
-		CString added=c;
-		added+=" ";
+		itoa(i, c, 10);
+		CString added = c;
+		added += " ";
 
 		auto const& variableStr = ini.GetString("VariableNames", c);
 		if (!variableStr.IsEmpty()) {
@@ -108,7 +107,7 @@ void CGlobalsDlg::UpdateDialog()
 			added += " No name";
 		}
 
-		m_Global.SetItemData(m_Global.AddString(added),i);
+		m_Global.SetItemData(m_Global.AddString(added), i);
 
 		if (bFailFind) {
 			break;
@@ -119,24 +118,24 @@ void CGlobalsDlg::UpdateDialog()
 	OnSelchangeGlobal();
 }
 
-void CGlobalsDlg::OnChangeDescription() 
+void CGlobalsDlg::OnChangeDescription()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int cursel=m_Global.GetCurSel();
-	if(cursel<0) return;
-	int curglob=m_Global.GetItemData(cursel);
+	int cursel = m_Global.GetCurSel();
+	if (cursel < 0) return;
+	int curglob = m_Global.GetItemData(cursel);
 
-	
+
 
 	char c[50];
 	itoa(curglob, c, 10);
 
 	UpdateData(TRUE);
 
-	if(m_Description.Find(",")>=0) m_Description.SetAt(m_Description.Find(","), 0);
+	if (m_Description.Find(",") >= 0) m_Description.SetAt(m_Description.Find(","), 0);
 
-	if (ini.GetString( "VariableNames",c).IsEmpty()) {
+	if (ini.GetString("VariableNames", c).IsEmpty()) {
 		ini.SetString("VariableNames", c, "text,0");
 	}
 	ini.SetString("VariableNames", c, SetParam(ini.GetString("VariableNames", c), 0, m_Description));
@@ -149,13 +148,13 @@ void CGlobalsDlg::OnChangeDescription()
 
 }
 
-void CGlobalsDlg::OnSelchangeGlobal() 
+void CGlobalsDlg::OnSelchangeGlobal()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	int cursel=m_Global.GetCurSel();
-	if(cursel<0) return;
-	int curglob=m_Global.GetItemData(cursel);
+	int cursel = m_Global.GetCurSel();
+	if (cursel < 0) return;
+	int curglob = m_Global.GetItemData(cursel);
 
 	char c[50];
 	itoa(curglob, c, 10);
@@ -168,34 +167,34 @@ void CGlobalsDlg::OnSelchangeGlobal()
 		m_Description = "";
 	}
 
-	UpdateData(FALSE);	
+	UpdateData(FALSE);
 }
 
-BOOL CGlobalsDlg::OnInitDialog() 
+BOOL CGlobalsDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
 	UpdateDialog();
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }
 
-void CGlobalsDlg::OnSelchangeValue() 
+void CGlobalsDlg::OnSelchangeValue()
 {
-	
+
 }
 
-void CGlobalsDlg::OnEditchangeValue() 
+void CGlobalsDlg::OnEditchangeValue()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	CString str;
 	m_Value.GetWindowText(str);
-	if(str.GetLength()==0) return;
-	int cursel=m_Global.GetCurSel();
-	if(cursel<0) return;
-	int curglob=m_Global.GetItemData(cursel);
-	
+	if (str.GetLength() == 0) return;
+	int cursel = m_Global.GetCurSel();
+	if (cursel < 0) return;
+	int curglob = m_Global.GetItemData(cursel);
+
 	char c[50];
 	itoa(curglob, c, 10);
 
@@ -203,12 +202,12 @@ void CGlobalsDlg::OnEditchangeValue()
 	if (variable.IsEmpty()) {
 		return;
 	}
-	
+
 	UpdateData(TRUE);
-	
-	str=GetParam(str, 0);
+
+	str = GetParam(str, 0);
 	TruncSpace(str);
 	ini.SetString("VariableNames", c, SetParam(variable, 1, str));
 
-	UpdateDialog();	
+	UpdateDialog();
 }

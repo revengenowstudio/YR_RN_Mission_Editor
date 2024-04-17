@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #if !defined(AFX_AITRIGGERTYPES_H__47F0A0E0_A8DC_11D3_B63B_B4F5BEE55940__INCLUDED_)
@@ -36,7 +36,7 @@ class CAITriggerTypes : public CDialog
 {
 	DECLARE_DYNCREATE(CAITriggerTypes)
 
-// construction
+	// construction
 public:
 	char* ConvertToHexFromAITrigInfo(AITrigInfo info, char* buffer);
 	void SetAITriggerParam(const char* value, int param);
@@ -44,8 +44,8 @@ public:
 	CAITriggerTypes();
 	~CAITriggerTypes();
 
-// dialog field data
-	//{{AFX_DATA(CAITriggerTypes)
+	// dialog field data
+		//{{AFX_DATA(CAITriggerTypes)
 	enum { IDD = IDD_AITRIGGERTYPES };
 	CMyComboBox	m_TeamType1;
 	CMyComboBox	m_UnitType;
@@ -81,7 +81,7 @@ public:
 // overwriteables
 	// generated virtual overwriteables
 	//{{AFX_VIRTUAL(CAITriggerTypes)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 

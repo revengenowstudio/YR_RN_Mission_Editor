@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // SaveMapOptionsDlg.cpp: Implementierungsdatei
@@ -54,10 +54,10 @@ CSaveMapOptionsDlg::CSaveMapOptionsDlg(CWnd* pParent /*=NULL*/)
 	m_Standard = FALSE;
 	m_TeamGame = FALSE;
 	//}}AFX_DATA_INIT
-	
-	CIniFile& ini=Map->GetIniFile();
-	if(!Map->IsMultiplayer())
-		m_PreviewMode=1;
+
+	CIniFile& ini = Map->GetIniFile();
+	if (!Map->IsMultiplayer())
+		m_PreviewMode = 1;
 
 	m_MapName = ini.GetString("Basic", "Name");
 }
@@ -70,7 +70,7 @@ void CSaveMapOptionsDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_COMPRESS, m_Compress);
 	DDX_Radio(pDX, IDC_PREVIEWMODE, m_PreviewMode);
 	DDX_Text(pDX, IDC_MAPNAME, m_MapName);
-	#ifdef RA2_MODE
+#ifdef RA2_MODE
 	DDX_Check(pDX, IDC_AIRWAR, m_AirWar);
 	DDX_Check(pDX, IDC_COOPERATIVE, m_Cooperative);
 	DDX_Check(pDX, IDC_DUEL, m_Duel);
@@ -80,7 +80,7 @@ void CSaveMapOptionsDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_NUKEWAR, m_Nukewar);
 	DDX_Check(pDX, IDC_STANDARD, m_Standard);
 	DDX_Check(pDX, IDC_TEAMGAME, m_TeamGame);
-	#endif
+#endif
 	//}}AFX_DATA_MAP
 }
 
@@ -93,13 +93,12 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CSaveMapOptionsDlg 
 
-BOOL CSaveMapOptionsDlg::OnInitDialog() 
+BOOL CSaveMapOptionsDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	CIniFile& ini=Map->GetIniFile();
-	if(!Map->IsMultiplayer())
-	{
+	CIniFile& ini = Map->GetIniFile();
+	if (!Map->IsMultiplayer()) {
 		GetDlgItem(IDC_PREVIEWMODE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_NOPREVIEW)->EnableWindow(FALSE);
 		GetDlgItem(IDC_EXISTINGPREVIEW)->EnableWindow(FALSE);
@@ -116,7 +115,7 @@ BOOL CSaveMapOptionsDlg::OnInitDialog()
 		GetDlgItem(IDC_TEAMGAME)->EnableWindow(FALSE);
 #endif	
 	}
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }

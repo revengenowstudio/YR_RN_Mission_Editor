@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "xcc_dirs.h"
@@ -50,8 +50,7 @@ bool xcc_dirs::enable_log()
 
 string xcc_dirs::get_dir(t_game game)
 {
-	switch (game)
-	{
+	switch (game) {
 	case game_td:
 		return td_primary_dir;
 	case game_ra:
@@ -87,8 +86,7 @@ string xcc_dirs::get_dir(t_game game)
 
 string xcc_dirs::get_exe(t_game game)
 {
-	switch (game)
-	{
+	switch (game) {
 	case game_td:
 		return td_primary_dir + "c&c95.exe";
 	case game_ra:
@@ -116,8 +114,7 @@ string xcc_dirs::get_exe(t_game game)
 
 string xcc_dirs::get_audio_mix(t_game game)
 {
-	switch (game)
-	{
+	switch (game) {
 	case game_ra2:
 		return "audio.mix";
 	case game_ra2_yr:
@@ -129,8 +126,7 @@ string xcc_dirs::get_audio_mix(t_game game)
 
 string xcc_dirs::get_csf_fname(t_game game)
 {
-	switch (game)
-	{
+	switch (game) {
 	case game_ra2:
 		return "ra2.csf";
 	case game_ra2_yr:
@@ -173,8 +169,7 @@ string xcc_dirs::get_expand_mix(t_game game, const string& s)
 
 string xcc_dirs::get_language_mix(t_game game)
 {
-	switch (game)
-	{
+	switch (game) {
 	case game_ra2:
 		return ra2_dir + "language.mix";
 	case game_ra2_yr:
@@ -190,8 +185,7 @@ string xcc_dirs::get_language_mix(t_game game)
 
 string xcc_dirs::get_local_mix(t_game game)
 {
-	switch (game)
-	{
+	switch (game) {
 	case game_ts:
 	case game_ra2:
 		return "local.mix";
@@ -204,8 +198,7 @@ string xcc_dirs::get_local_mix(t_game game)
 
 string xcc_dirs::get_main_mix(t_game game)
 {
-	switch (game)
-	{
+	switch (game) {
 	case game_ra:
 		return ra_dir + "redalert.mix";
 	case game_ts:
@@ -223,14 +216,13 @@ static void set_path(string s, string& path)
 {
 	boost::to_lower(s);
 	if (!s.empty() && s.back() != '\\')
-		s += '\\';	
+		s += '\\';
 	path = s;
 }
 
-void xcc_dirs::set_dir(t_game game, const string &s)
+void xcc_dirs::set_dir(t_game game, const string& s)
 {
-	switch (game)
-	{
+	switch (game) {
 	case game_td:
 		set_path(s, td_primary_dir);
 		break;
@@ -294,10 +286,8 @@ void xcc_dirs::reset_cd_dir()
 {
 	int drive_map = GetLogicalDrives();
 	char drive_root[] = "a:\\";
-	for (int i = 0; i < 26; i++)
-	{		
-		if (drive_map >> i & 1 && GetDriveTypeA(drive_root) == DRIVE_CDROM)
-		{
+	for (int i = 0; i < 26; i++) {
+		if (drive_map >> i & 1 && GetDriveTypeA(drive_root) == DRIVE_CDROM) {
 			set_cd_dir(drive_root);
 			break;
 		}
@@ -314,8 +304,8 @@ static void read_dir(const string& key, const string& value, t_game game)
 {
 	Creg_key h;
 	string s;
-	if (xcc_dirs::get_dir(game).empty() 
-		&& ERROR_SUCCESS == h.open(HKEY_LOCAL_MACHINE, key, KEY_QUERY_VALUE) 
+	if (xcc_dirs::get_dir(game).empty()
+		&& ERROR_SUCCESS == h.open(HKEY_LOCAL_MACHINE, key, KEY_QUERY_VALUE)
 		&& ERROR_SUCCESS == h.query_value(value, s))
 		xcc_dirs::set_dir(game, Cfname(s).get_path());
 }
@@ -323,8 +313,7 @@ static void read_dir(const string& key, const string& value, t_game game)
 void xcc_dirs::load_from_registry()
 {
 	Creg_key kh_base;
-	if (!Cxcc_registry::get_base_key(kh_base))
-	{
+	if (!Cxcc_registry::get_base_key(kh_base)) {
 		string s;
 		if (ERROR_SUCCESS == kh_base.query_value("dune2_dir", s))
 			set_dir(game_dune2, s);

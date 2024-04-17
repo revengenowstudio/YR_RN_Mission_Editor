@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // TriggerEventsDlg.cpp: Implementierungsdatei
@@ -78,66 +78,63 @@ END_MESSAGE_MAP()
 // MW 07/23/01: Added this because startpos=1+curev*3 isn´t anymore valid for calculating the next event
 int GetEventParamStart(const CString& EventData, int param)
 {
-	int count=atoi(GetParam(EventData, 0));
-	if(param>=count) return -1;
+	int count = atoi(GetParam(EventData, 0));
+	if (param >= count) return -1;
 
-	int pos=1;
+	int pos = 1;
 	int i;
-	for(i=0;i<param;i++)
-	{
-		pos+=1; // jump to first eventtype param
-		int needs=atoi(GetParam(EventData, pos));
-		
-		pos+=2; // jump to next usual eventtype
-		if(needs==2) // if needs of last eventtype is 2, we need to add 1
+	for (i = 0; i < param; i++) {
+		pos += 1; // jump to first eventtype param
+		int needs = atoi(GetParam(EventData, pos));
+
+		pos += 2; // jump to next usual eventtype
+		if (needs == 2) // if needs of last eventtype is 2, we need to add 1
 		{
-			pos+=1;
+			pos += 1;
 		}
 	}
 
 	return pos;
 }
 
-void CTriggerEventsDlg::OnNewevent() 
+void CTriggerEventsDlg::OnNewevent()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	if (m_currentTrigger.GetLength() == 0) {
 		return;
 	}
 
 
-	CIniFileSection& sec=ini.AddSection("Events");
+	CIniFileSection& sec = ini.AddSection("Events");
 
 	int cval = atoi(GetParam(sec.GetString(m_currentTrigger), 0));
 	cval++;
 	char c[50];
-	itoa(cval,c,10);
-	
+	itoa(cval, c, 10);
+
 	sec.SetString(m_currentTrigger, SetParam(sec[m_currentTrigger], 0, c));
 	sec.SetString(m_currentTrigger, ",0,0,0");
 
 
 	UpdateDialog();
 
-	m_Event.SetCurSel(cval-1);
-	OnSelchangeEvent();	
+	m_Event.SetCurSel(cval - 1);
+	OnSelchangeEvent();
 }
 
 int FindTokenX(CString data, char token, int n)
 {
-	if(n<=0) return -1;
+	if (n <= 0) return -1;
 
-	int found=0;
-	int pos=0;
-	while(found<n)
-	{
-		if(!pos)
-		pos=data.Find(token, 0);
+	int found = 0;
+	int pos = 0;
+	while (found < n) {
+		if (!pos)
+			pos = data.Find(token, 0);
 		else
-		pos=data.Find(token, pos+1);
-		if(pos<0)
-		{
+			pos = data.Find(token, pos + 1);
+		if (pos < 0) {
 			return -1;
 		}
 
@@ -147,66 +144,66 @@ int FindTokenX(CString data, char token, int n)
 	return pos;
 }
 
-void CTriggerEventsDlg::OnDeleteevent() 
+void CTriggerEventsDlg::OnDeleteevent()
 {
 	char d[50];
 	//itoa(FindTokenX("0,1,2,3,4", ',', 3),d,10);
 	//MessageBox(d);
 
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 	if (m_currentTrigger.GetLength() == 0) {
 		return;
 	}
 
-	int sel2=m_Event.GetCurSel();
+	int sel2 = m_Event.GetCurSel();
 	if (sel2 < 0) {
 		return;
 	}
-	int curev=m_Event.GetItemData(sel2);
+	int curev = m_Event.GetItemData(sel2);
 	if (MessageBox("Do you really want to delete this event?", "Delete event", MB_YESNO) == IDNO) {
 		return;
 	}
 
-	auto  const & orig_data = ini["Events"][m_currentTrigger];
+	auto  const& orig_data = ini["Events"][m_currentTrigger];
 	CString data = orig_data;
 
-	int v=atoi(GetParam(data,0));
+	int v = atoi(GetParam(data, 0));
 	char c[50];
 	v--;
-	itoa(v,c,10);
-	data=SetParam(data,0, c);
+	itoa(v, c, 10);
+	data = SetParam(data, 0, c);
 
-	int pos=GetEventParamStart(orig_data, curev);//1+curev*3;
+	int pos = GetEventParamStart(orig_data, curev);//1+curev*3;
 	//int posc=GetEventParamStart(orig_data, v);//1+v*3;
-	
+
 	// MW 07/23/01:
 	// NEW DELETE EVENT CODE...
 
 	// Now check for those 2 param + code events...
-	BOOL bEvent1Needs4=FALSE;
+	BOOL bEvent1Needs4 = FALSE;
 
-	
+
 	if (GetParam(data, pos + 1) == "2") {
 		bEvent1Needs4 = TRUE;
 	}
-				
-	int count=3;
+
+	int count = 3;
 	if (bEvent1Needs4) {
 		count = 4;
 	}
 
-	int del_start=FindTokenX(data, ',', pos);
-	int del_end=FindTokenX(data, ',', pos+count);
+	int del_start = FindTokenX(data, ',', pos);
+	int del_end = FindTokenX(data, ',', pos + count);
 	if (del_end < 0) {
 		// beyond end, so delete all...
-		del_end=data.GetLength();
+		del_end = data.GetLength();
 
 	}
-	data.Delete(del_start, del_end-del_start);
+	data.Delete(del_start, del_end - del_start);
 
 	/*
 	old delete event code, that used replacement. Not possible anymore because of 4 values/event sometimes now
-	
+
 	int i;
 	for(i=0;i<3;i++)
 		data=SetParam(data,pos+i, GetParam(data,posc+i));
@@ -224,33 +221,33 @@ void CTriggerEventsDlg::OnDeleteevent()
 
 	ini.SetString("Events", m_currentTrigger, data);
 	UpdateDialog();
-		
+
 }
 
-void CTriggerEventsDlg::OnSelchangeEvent() 
+void CTriggerEventsDlg::OnSelchangeEvent()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	if (m_currentTrigger.GetLength() == 0) {
 		return;
 	}
-	int selev=m_Event.GetCurSel();
+	int selev = m_Event.GetCurSel();
 	if (selev < 0) {
 		return;
 	}
-	int curev=m_Event.GetItemData(selev);
+	int curev = m_Event.GetItemData(selev);
 
-	
+
 	int i;
 
 	auto const& EventData = ini["Events"][m_currentTrigger];
-	
-	int startpos=GetEventParamStart(EventData, curev); //1+curev*3;
-	CString EventType=GetParam(EventData,startpos);
+
+	int startpos = GetEventParamStart(EventData, curev); //1+curev*3;
+	CString EventType = GetParam(EventData, startpos);
 	m_EventType.SetWindowText(EventType);
 	for (i = 0; i < m_EventType.GetCount(); i++) {
 		CString tmp;
-		m_EventType.GetLBText(i,tmp);
+		m_EventType.GetLBText(i, tmp);
 		TruncSpace(tmp);
 		if (tmp == EventType) {
 			m_EventType.SetCurSel(i);
@@ -260,24 +257,24 @@ void CTriggerEventsDlg::OnSelchangeEvent()
 	OnEditchangeEventtype();
 }
 
-void CTriggerEventsDlg::OnEditchangeEventtype() 
+void CTriggerEventsDlg::OnEditchangeEventtype()
 {
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
 	if (m_currentTrigger.GetLength() == 0) {
 		return;
 	}
-	int selev=m_Event.GetCurSel();
+	int selev = m_Event.GetCurSel();
 	if (selev < 0) {
 		return;
 	}
-	int curev=m_Event.GetItemData(selev);
+	int curev = m_Event.GetItemData(selev);
 
-	CString e1,e2;
-	while(m_Parameter.DeleteString(0)!=CB_ERR);
+	CString e1, e2;
+	while (m_Parameter.DeleteString(0) != CB_ERR);
 
 
-	CString eventtype,eventdata;
+	CString eventtype, eventdata;
 	m_EventType.GetWindowText(eventtype);
 	TruncSpace(eventtype);
 
@@ -287,18 +284,18 @@ void CTriggerEventsDlg::OnEditchangeEventtype()
 	}
 
 	int pos = GetEventParamStart(ini["Events"][m_currentTrigger], curev); //1+3*curev;
-	
+
 	BOOL bAlready4 = FALSE;
 	if (atoi(GetParam(ini["Events"][m_currentTrigger], pos + 1)) == 2) {
 		bAlready4 = TRUE;
 	}
-	
+
 	ini.SetString("Events", m_currentTrigger, SetParam(ini["Events"][m_currentTrigger], pos, eventtype));
 
 
-	CString evsec="Events";
+	CString evsec = "Events";
 #ifdef RA2_MODE
-	evsec="EventsRA2";
+	evsec = "EventsRA2";
 #endif
 
 
@@ -314,18 +311,18 @@ void CTriggerEventsDlg::OnEditchangeEventtype()
 	}
 #endif
 
-	CString desc=GetParam(eventdata,5);
-	desc.Replace("%1",",");
-	m_EventDescription.SetWindowText(desc); 
-	
+	CString desc = GetParam(eventdata, 5);
+	desc.Replace("%1", ",");
+	m_EventDescription.SetWindowText(desc);
+
 	CString ptype[2];
-	ptype[0]=GetParam(eventdata,1);
-	ptype[1]=GetParam(eventdata,2);
+	ptype[0] = GetParam(eventdata, 1);
+	ptype[1] = GetParam(eventdata, 2);
 
 
 	int pListType[2];
-	pListType[0]=atoi(GetParam(g_data["ParamTypes"][ptype[0]], 1));
-	pListType[1]=atoi(GetParam(g_data["ParamTypes"][ptype[1]], 1));
+	pListType[0] = atoi(GetParam(g_data["ParamTypes"][ptype[0]], 1));
+	pListType[1] = atoi(GetParam(g_data["ParamTypes"][ptype[1]], 1));
 
 	int code = atoi(GetParam(g_data["ParamTypes"][ptype[0]], 2)); // usually 0
 
@@ -372,12 +369,12 @@ void CTriggerEventsDlg::OnEditchangeEventtype()
 	}
 
 	m_ParamValue.SetWindowText("");
-	if(m_Parameter.GetCount()>0) {
+	if (m_Parameter.GetCount() > 0) {
 		m_Parameter.SetCurSel(0);
 		OnSelchangeParameter();
 	}
-	
-	
+
+
 	auto triggerInfoCopy = ini["Triggers"][m_currentTrigger];
 	if (RepairTrigger(triggerInfoCopy)) {
 		ini.SetString("Triggers", m_currentTrigger, triggerInfoCopy);
@@ -438,13 +435,11 @@ void CTriggerEventsDlg::OnSelchangeParameter()
 
 	int i;
 	BOOL bFound = FALSE;
-	for (i = 0; i < m_ParamValue.GetCount(); i++)
-	{
+	for (i = 0; i < m_ParamValue.GetCount(); i++) {
 		CString tmp;
 		m_ParamValue.GetLBText(i, tmp);
 		TruncSpace(tmp);
-		if (tmp == GetParam(EventData, startpos + 1 + original_cuparam))
-		{
+		if (tmp == GetParam(EventData, startpos + 1 + original_cuparam)) {
 			m_ParamValue.SetCurSel(i);
 			bFound = TRUE;
 			break;
@@ -488,8 +483,7 @@ void CTriggerEventsDlg::OnEditchangeParamvalue()
 	int curev = m_Event.GetItemData(selev);
 
 	int curselparam = m_Parameter.GetCurSel();
-	if (curselparam < 0)
-	{
+	if (curselparam < 0) {
 		m_ParamValue.SetWindowText("");
 		return;
 	}
@@ -518,21 +512,20 @@ void CTriggerEventsDlg::UpdateDialog()
 	// MW 07/20/01
 	Clear();
 
-	if(m_currentTrigger.GetLength()==0) 
-	{
-		while(m_Event.DeleteString(0)!=CB_ERR);
+	if (m_currentTrigger.GetLength() == 0) {
+		while (m_Event.DeleteString(0) != CB_ERR);
 		return;
 	}
-	CIniFile& ini=Map->GetIniFile();
+	CIniFile& ini = Map->GetIniFile();
 
-	while(m_EventType.DeleteString(0)!=CB_ERR);
+	while (m_EventType.DeleteString(0) != CB_ERR);
 	int i;
 
 	//9.3.2001: Only use specified section, do not merge
 #ifndef RA2_MODE 
-	CString sec="Events";
+	CString sec = "Events";
 #else
-	CString sec="EventsRA2";
+	CString sec = "EventsRA2";
 #endif
 
 	for (auto const& [eventid, eventdata] : g_data[sec]) {
@@ -551,29 +544,27 @@ void CTriggerEventsDlg::UpdateDialog()
 
 
 #else
-		if (GetParam(eventdata, 6) == "1")
-		{
+		if (GetParam(eventdata, 6) == "1") {
 #endif
 			m_EventType.AddString(text);
 		}
-	}
+		}
 
 
 
-	int cur_sel=m_Event.GetCurSel();
-	while(m_Event.DeleteString(0)!=CB_ERR);
-	
+	int cur_sel = m_Event.GetCurSel();
+	while (m_Event.DeleteString(0) != CB_ERR);
+
 	auto const& data = ini["Events"][m_currentTrigger];
 	int count = atoi(GetParam(data, 0));
 
-	for(i=0;i<count;i++)
-	{
+	for (i = 0; i < count; i++) {
 		char c[50];
-		itoa(i,c,10);
+		itoa(i, c, 10);
 
-		CString s=TranslateStringACP("Event");
-		s+=" ";
-		s+=c;
+		CString s = TranslateStringACP("Event");
+		s += " ";
+		s += c;
 
 		m_Event.SetItemData(m_Event.AddString(s), i);
 	}
@@ -589,13 +580,13 @@ void CTriggerEventsDlg::UpdateDialog()
 
 
 	OnSelchangeEvent();
-}
+	}
 
 // MW 07/20/01
 void CTriggerEventsDlg::Clear()
 {
-	m_EventType.SetWindowText("");	
-	while(m_Parameter.DeleteString(0)!=LB_ERR);
+	m_EventType.SetWindowText("");
+	while (m_Parameter.DeleteString(0) != LB_ERR);
 	m_ParamValue.SetWindowText("");
 	m_EventDescription.SetWindowText("");
 }

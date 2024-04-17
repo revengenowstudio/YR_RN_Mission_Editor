@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // NewMap.cpp: Implementierungsdatei
@@ -99,24 +99,24 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CNewMap 
 
-BOOL CNewMap::OnInitDialog() 
+BOOL CNewMap::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
 	// preset some stuff
-	m_ImportOverlay=TRUE;
-	m_ImportUnits=TRUE;
+	m_ImportOverlay = TRUE;
+	m_ImportUnits = TRUE;
 	m_OK.EnableWindow(FALSE);
-	m_ImportTrees=TRUE;
-	m_PrepareHouses=TRUE;
-	m_AutoProduction=TRUE;
-	m_Theater=0;
-	m_Import=1;
-	m_Width=64;
-	m_Height=64;
-	
+	m_ImportTrees = TRUE;
+	m_PrepareHouses = TRUE;
+	m_AutoProduction = TRUE;
+	m_Theater = 0;
+	m_Import = 1;
+	m_Width = 64;
+	m_Height = 64;
 
-	CComboBox& house=*((CComboBox*)(GetDlgItem(IDC_HOUSE)));
+
+	CComboBox& house = *((CComboBox*)(GetDlgItem(IDC_HOUSE)));
 	int i;
 	for (auto const& [seq, id] : rules[HOUSES]) {
 		house.AddString(id);
@@ -131,30 +131,29 @@ BOOL CNewMap::OnInitDialog()
 	theater.AddString(THEATER2);
 #endif
 
-	m_Theater=0;
+	m_Theater = 0;
 
 	UpdateData(FALSE);
-	
+
 	UpdateStrings();
 
 
-	
+
 
 
 
 	// set cursor to wait
-	SetCursor(LoadCursor(NULL,IDC_WAIT));
+	SetCursor(LoadCursor(NULL, IDC_WAIT));
 
-	CString maps=CString(u8AppDataPath.c_str())+"\\stdmaps\\*.mpr";
+	CString maps = CString(u8AppDataPath.c_str()) + "\\stdmaps\\*.mpr";
 	CFileFind ff;
-	
-	if(ff.FindFile(maps))
-	{
-		BOOL bFileAvailable=TRUE;
-		while(bFileAvailable) {
-			bFileAvailable=ff.FindNextFile();
 
-			CString file=ff.GetFileName();
+	if (ff.FindFile(maps)) {
+		BOOL bFileAvailable = TRUE;
+		while (bFileAvailable) {
+			bFileAvailable = ff.FindNextFile();
+
+			CString file = ff.GetFileName();
 			m_ImportFile.AddString(file);
 		}
 
@@ -166,25 +165,25 @@ BOOL CNewMap::OnInitDialog()
 
 	// set cursor to ready
 	SetCursor(m_hArrowCursor);
-	
-	return TRUE;  
+
+	return TRUE;
 }
 
-void CNewMap::OnBrowse() 
+void CNewMap::OnBrowse()
 {
 	UpdateData();
 
-	CMapOpenDialog dlg(TRUE, NULL, NULL,  OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, "TS maps|*.mpr;*.map|TS multi maps|*.mpr|TS single maps|*.map|");
+	CMapOpenDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, "TS maps|*.mpr;*.map|TS multi maps|*.mpr|TS single maps|*.map|");
 
 	char cuPath[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, cuPath);
-	dlg.m_ofn.lpstrInitialDir=cuPath;
+	dlg.m_ofn.lpstrInitialDir = cuPath;
 
-	if(theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir=(char*)(LPCTSTR)theApp.m_Options.TSExe;
+	if (theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir = (char*)(LPCTSTR)theApp.m_Options.TSExe;
 
 
-	if(dlg.DoModal()==IDCANCEL) return;	
-	
+	if (dlg.DoModal() == IDCANCEL) return;
+
 	m_ImportFile.SetWindowText(dlg.GetPathName());
 
 	UpdateData(FALSE);
@@ -193,36 +192,33 @@ void CNewMap::OnBrowse()
 
 
 
-void CNewMap::OnOK() 
+void CNewMap::OnOK()
 {
-	UpdateData();	
+	UpdateData();
 
 	CDialog::OnOK();
 }
 
-void CNewMap::OnMultiplayer() 
+void CNewMap::OnMultiplayer()
 {
 	UpdateData();
 
-	CButton& ph=*((CButton*)(GetDlgItem(IDC_PREPAREHOUSES)));
-	CButton& autoprod=*((CButton*)(GetDlgItem(IDC_AUTOPROD)));
-	CComboBox& house=*((CComboBox*)(GetDlgItem(IDC_HOUSE)));
-	
-	if(m_Multiplayer)
-	{
+	CButton& ph = *((CButton*)(GetDlgItem(IDC_PREPAREHOUSES)));
+	CButton& autoprod = *((CButton*)(GetDlgItem(IDC_AUTOPROD)));
+	CComboBox& house = *((CComboBox*)(GetDlgItem(IDC_HOUSE)));
+
+	if (m_Multiplayer) {
 		ph.EnableWindow(FALSE);
 		autoprod.EnableWindow(FALSE);
-		m_AutoProduction=FALSE;
+		m_AutoProduction = FALSE;
 		house.EnableWindow(FALSE);
-		m_PrepareHouses=FALSE;
-	}
-	else
-	{
+		m_PrepareHouses = FALSE;
+	} else {
 		autoprod.EnableWindow(TRUE);
-		m_AutoProduction=TRUE;
+		m_AutoProduction = TRUE;
 		ph.EnableWindow(TRUE);
 		house.EnableWindow(TRUE);
-		m_PrepareHouses=TRUE;
+		m_PrepareHouses = TRUE;
 	}
 
 	UpdateData(FALSE);
@@ -246,7 +242,7 @@ void CNewMap::UpdateStrings()
 	SetWindowText(GetLanguageStringACP("NewMapCap"));
 }
 
-void CNewMap::OnEditchangeImportfile() 
+void CNewMap::OnEditchangeImportfile()
 {
 	UpdateData();
 
@@ -254,32 +250,31 @@ void CNewMap::OnEditchangeImportfile()
 	CString file;
 	m_ImportFile.GetWindowText(file);
 
-	m_MapToImport=file;
+	m_MapToImport = file;
 
-	if(file.Find(":")<0)
-	{
-		m_MapToImport=CString(u8AppDataPath.c_str())+"\\stdmaps\\";
-		m_MapToImport+=file;
-	}	
+	if (file.Find(":") < 0) {
+		m_MapToImport = CString(u8AppDataPath.c_str()) + "\\stdmaps\\";
+		m_MapToImport += file;
+	}
 
-	cmap.InsertFile(m_MapToImport,"Map");
-	
+	cmap.InsertFile(m_MapToImport, "Map");
+
 	if (!cmap.TryGetSection("Map")) {
 		m_OK.EnableWindow(FALSE);
 		return;
 	}
 
-	m_OK.EnableWindow(TRUE);	
+	m_OK.EnableWindow(TRUE);
 }
 
 
-void CNewMap::OnImport() 
+void CNewMap::OnImport()
 {
 	m_OK.EnableWindow(FALSE);
-	OnEditchangeImportfile();	
+	OnEditchangeImportfile();
 }
 
-void CNewMap::OnNew() 
+void CNewMap::OnNew()
 {
-	m_OK.EnableWindow(TRUE);	
+	m_OK.EnableWindow(TRUE);
 }

@@ -1,19 +1,19 @@
 /*
-    XCC Utilities and Library
-    Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
+	XCC Utilities and Library
+	Copyright (C) 2000  Olaf van der Spek  <olafvdspek@gmail.com>
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "stdafx.h"
@@ -58,17 +58,14 @@ public:
 		const int cx = m_f.get_cx(m_frame_i);
 		const int cy = m_f.get_cy(m_frame_i);
 		const byte* r;
-		if (m_f.is_compressed(m_frame_i))
-		{
+		if (m_f.is_compressed(m_frame_i)) {
 			decode3(m_f.get_image(m_frame_i), s.write_start(cx * cy), cx, cy);
 			r = s.data();
-		}
-		else
+		} else
 			r = m_f.get_image(m_frame_i);
 		memset(d, 0, cb_image());
 		byte* w = d + m_f.get_x(m_frame_i) + Cshp_ts_decoder::cx() * m_f.get_y(m_frame_i);
-		for (int y = 0; y < cy; y++)
-		{
+		for (int y = 0; y < cy; y++) {
 			memcpy(w, r, cx);
 			r += cx;
 			w += Cshp_ts_decoder::cx();
@@ -109,13 +106,12 @@ bool Cshp_ts_file::is_valid() const
 {
 	const t_shp_ts_header& h = header();
 	int size = get_size();
-	if (sizeof(t_shp_ts_header) > size || 
+	if (sizeof(t_shp_ts_header) > size ||
 		h.zero ||
-		h.c_images < 1 || h.c_images > 10000 || 
+		h.c_images < 1 || h.c_images > 10000 ||
 		sizeof(t_shp_ts_header) + get_cb_index() > size)
 		return false;
-	for (int i = 0; i < min(cf(), 1000); i++)
-	{
+	for (int i = 0; i < min(cf(), 1000); i++) {
 		const t_shp_ts_image_header& image_header = *get_image_header(i);
 		if (!image_header.cx && !image_header.cy && !image_header.offset)
 			continue;
@@ -124,13 +120,10 @@ bool Cshp_ts_file::is_valid() const
 			image_header.zero ||
 			image_header.offset < sizeof(t_shp_ts_header) + get_cb_index())
 			return false;
-		if (is_compressed(i))
-		{
+		if (is_compressed(i)) {
 			if (image_header.offset > size)
 				return false;
-		}
-		else
-		{
+		} else {
 			if (image_header.offset + image_header.cx * image_header.cy > size)
 				return false;
 		}
@@ -152,55 +145,42 @@ int Cshp_ts_file::extract_as_pcx(const Cfname& name, t_file_type ft, const t_pal
 	const int global_cx = cx();
 	const int global_cy = cy();
 	const int c_images = cf();
-	if (combine_shadows && ~c_images & 1)
-	{
+	if (combine_shadows && ~c_images & 1) {
 		bool shadow = false;
 		byte* image = new byte[global_cx * global_cy];
 		byte* d = new byte[global_cx * global_cy * c_images >> 1];
 		byte* w = d;
-		for (int i = 0; i < c_images; i++)
-		{
+		for (int i = 0; i < c_images; i++) {
 			const int cx = get_cx(i);
 			const int cy = get_cy(i);
 			const byte* r;
-			if (is_compressed(i))
-			{
+			if (is_compressed(i)) {
 				decode3(get_image(i), image, cx, cy);
 				r = image;
-			}
-			else
+			} else
 				r = get_image(i);
-			if (!shadow)
-			{
-				if (i == c_images >> 1)
-				{
+			if (!shadow) {
+				if (i == c_images >> 1) {
 					shadow = true;
 					w = d;
-				}
-				else
+				} else
 					memset(w, 0, global_cx * global_cy);
 			}
 			byte* w_start = w;
 			w += get_x(i) + global_cx * get_y(i);
-			for (int y = 0; y < cy; y++)
-			{
-				if (shadow)
-				{
-					for (int x = 0; x < cx; x++)
-					{
+			for (int y = 0; y < cy; y++) {
+				if (shadow) {
+					for (int x = 0; x < cx; x++) {
 						if (*r++)
 							w[x] = 4;
 					}
-				}
-				else
-				{
+				} else {
 					memcpy(w, r, cx);
 					r += cx;
 				}
 				w += global_cx;
 			}
-			if (shadow)
-			{
+			if (shadow) {
 				Cfname t = name;
 				t.set_title(name.get_ftitle() + " " + nwzl(4, i - (c_images >> 1)));
 				error = image_file_write(t, ft, w_start, palet, global_cx, global_cy);
@@ -211,27 +191,21 @@ int Cshp_ts_file::extract_as_pcx(const Cfname& name, t_file_type ft, const t_pal
 		}
 		delete[] d;
 		delete[] image;
-	}
-	else
-	{
+	} else {
 		byte* image = new byte[global_cx * global_cy];
 		byte* s = new byte[global_cx * global_cy];
-		for (int i = 0; i < c_images; i++)
-		{
+		for (int i = 0; i < c_images; i++) {
 			const int cx = get_cx(i);
 			const int cy = get_cy(i);
 			const byte* r;
-			if (is_compressed(i))
-			{
+			if (is_compressed(i)) {
 				decode3(get_image(i), image, cx, cy);
 				r = image;
-			}
-			else
+			} else
 				r = get_image(i);
 			memset(s, 0, global_cx * global_cy);
 			byte* w = s + get_x(i) + global_cx * get_y(i);
-			for (int y = 0; y < cy; y++)
-			{
+			for (int y = 0; y < cy; y++) {
 				memcpy(w, r, cx);
 				r += cx;
 				w += global_cx;
@@ -266,62 +240,47 @@ Cvirtual_image Cshp_ts_file::extract_as_pcx_single(const t_palet _palet, bool co
 	Cvirtual_binary image;
 	Cvirtual_binary s;
 	memset(s.write_start(cx_s * cy_s), 0, cx_s * cy_s);
-	if (combine_shadows)
-	{
+	if (combine_shadows) {
 		c_images <<= 1;
 		bool shadow = false;
-		for (int i = 0; i < c_images; i++)
-		{
+		for (int i = 0; i < c_images; i++) {
 			const int cx = get_cx(i);
 			const int cy = get_cy(i);
 			const byte* r;
-			if (is_compressed(i))
-			{
+			if (is_compressed(i)) {
 				decode3(get_image(i), image.write_start(global_cx * global_cy), cx, cy);
 				r = image.data();
-			}
-			else
+			} else
 				r = get_image(i);
 			if (!shadow && i == c_images >> 1)
 				shadow = true;
 			int j = i % (c_images >> 1);
 			byte* w = s.data_edit() + get_ofs(j % cblocks_x * global_cx + get_x(i), j / cblocks_x * global_cy + get_y(i), cx_s, cy_s);
-			for (int y = 0; y < cy; y++)
-			{
-				if (shadow)
-				{
-					for (int x = 0; x < cx; x++)
-					{
+			for (int y = 0; y < cy; y++) {
+				if (shadow) {
+					for (int x = 0; x < cx; x++) {
 						if (*r++)
 							w[x] = 4;
 					}
-				}
-				else
-				{
+				} else {
 					memcpy(w, r, cx);
 					r += cx;
 				}
 				w += cx_s;
 			}
 		}
-	}
-	else
-	{
-		for (int i = 0; i < c_images; i++)
-		{
+	} else {
+		for (int i = 0; i < c_images; i++) {
 			const int cx = get_cx(i);
 			const int cy = get_cy(i);
 			const byte* r;
-			if (is_compressed(i))
-			{
+			if (is_compressed(i)) {
 				decode3(get_image(i), image.write_start(global_cx * global_cy), cx, cy);
 				r = image.data();
-			}
-			else
+			} else
 				r = get_image(i);
 			byte* w = s.data_edit() + get_ofs(i % cblocks_x * global_cx + get_x(i), i / cblocks_x * global_cy + get_y(i), cx_s, cy_s);
-			for (int y = 0; y < cy; y++)
-			{
+			for (int y = 0; y < cy; y++) {
 				memcpy(w, r, cx);
 				r += cx;
 				w += cx_s;
@@ -340,13 +299,10 @@ void shp_split_frames(Cvirtual_image& image, int cblocks_x, int cblocks_y)
 	byte* d = new byte[cx_d * cy_d];
 	byte* w = d;
 	const byte* r_line = image.image();
-	for (int yb = 0; yb < cblocks_y; yb++)
-	{
-		for (int xb = 0; xb < cblocks_x; xb++)
-		{
+	for (int yb = 0; yb < cblocks_y; yb++) {
+		for (int xb = 0; xb < cblocks_x; xb++) {
 			const byte* r = r_line + cx * xb;
-			for (int y = 0; y < cy; y++)
-			{
+			for (int y = 0; y < cy; y++) {
 				memcpy(w, r, cx);
 				r += image.cx();
 				w += cx_d;
@@ -364,18 +320,15 @@ void shp_split_shadows(Cvirtual_image& image)
 	int cy = image.cy();
 	int count = cx * cy;
 	byte* d = new byte[count << 1];
-	memcpy(d, image.image(), count); 
+	memcpy(d, image.image(), count);
 	byte* r = d;
 	byte* w = d + count;
-	while (count--)
-	{
+	while (count--) {
 		byte& v = *r++;
-		if (v == 4)
-		{
+		if (v == 4) {
 			v = 0;
 			*w++ = 1;
-		}
-		else
+		} else
 			*w++ = 0;
 	}
 	image.load(d, cx, cy << 1, image.cb_pixel(), image.palet());
@@ -432,11 +385,9 @@ static int encode4_line(const byte* r, byte* d, int cx)
 {
 	const byte* s_end = r + cx;
 	byte* w = d;
-	while (r < s_end)
-	{
+	while (r < s_end) {
 		int v = *w++ = *r++;
-		if (!v)
-		{
+		if (!v) {
 			int c = min(get_run_length(r - 1, s_end), 0xff);
 			r += c - 1;
 			*w++ = c;
@@ -448,11 +399,9 @@ static int encode4_line(const byte* r, byte* d, int cx)
 static int decode4_line_size(const byte*& r, int cx)
 {
 	int w = 0;
-	while (cx--)
-	{
+	while (cx--) {
 		w++;
-		if (!*r++)
-		{
+		if (!*r++) {
 			cx -= *r++ - 1;
 			w++;
 		}
@@ -463,8 +412,7 @@ static int decode4_line_size(const byte*& r, int cx)
 static int decode4_line(const byte* s, byte*& w, int cx)
 {
 	const byte* r = s;
-	while (cx--)
-	{
+	while (cx--) {
 		if (!(*w++ = *r++))
 			cx -= (*w++ = *r++) - 1;
 	}
@@ -476,8 +424,7 @@ static int encode4(const byte* s, byte* d, int cx, int cy)
 	const byte* s_end = s + cx * cy;
 	const byte* r = s;
 	byte* w = d;
-	for (int y = 0; y < cy; y++)
-	{
+	for (int y = 0; y < cy; y++) {
 		int lm = min(get_left_margin(r, cx), 0xff);
 		int rm = min(get_right_margin(r + cx, cx - lm), 0xff);
 		*w++ = lm;
@@ -491,8 +438,7 @@ static int encode4(const byte* s, byte* d, int cx, int cy)
 static int decode4_size(const byte*& r, int cx, int cy)
 {
 	int w = 0;
-	for (int y = 0; y < cy; y++)
-	{
+	for (int y = 0; y < cy; y++) {
 		int lm = *r++;
 		int rm = *r++;
 		w += 2;
@@ -508,20 +454,17 @@ static int decode4_size(const byte*& r, int cx, int cy)
 static int decode4(const byte* s, byte*& w, int cx, int cy)
 {
 	const byte* r = s;
-	for (int y = 0; y < cy; y++)
-	{
+	for (int y = 0; y < cy; y++) {
 		int lm = *r++;
 		int rm = *r++;
 		byte* w_line = w;
 		w += 2;
-		if (lm)
-		{
+		if (lm) {
 			*w++ = 0;
 			*w++ = lm;
 		}
 		r += decode4_line(r, w, cx - lm - rm);
-		if (rm)
-		{
+		if (rm) {
 			*w++ = 0;
 			*w++ = rm;
 		}
@@ -558,21 +501,17 @@ int shp_encode4(const Cshp_ts_file& f, byte* d)
 	header.c_frames = c_frames;
 	w += sizeof(t_shp4_header);
 
-	for (int i = 0; i < c_frames; i++)
-	{
+	for (int i = 0; i < c_frames; i++) {
 		const t_shp_ts_image_header& image_header = *f.get_image_header(i);
 
 		const int cx = image_header.cx;
 		const int cy = image_header.cy;
 
 		t_shp4_frame_header& frame_header = *reinterpret_cast<t_shp4_frame_header*>(w);
-		if (image_header.cx && image_header.cy)
-		{
+		if (image_header.cx && image_header.cy) {
 			frame_header.lm = image_header.x;
 			frame_header.tm = image_header.y;
-		}
-		else
-		{
+		} else {
 			frame_header.lm = min(global_cx, 0xff);
 			frame_header.tm = min(global_cy, 0xff);
 		}
@@ -583,13 +522,11 @@ int shp_encode4(const Cshp_ts_file& f, byte* d)
 		frame_header.bm = global_cy - frame_header.tm - cy;
 		w += sizeof(t_shp4_frame_header);
 
-		if (f.is_compressed(i))
-		{
+		if (f.is_compressed(i)) {
 			Cvirtual_binary image;
 			decode3(f.get_image(i), image.write_start(cx * cy), cx, cy);
 			w += encode4(image.data(), w, cx, cy);
-		}
-		else
+		} else
 			w += encode4(f.get_image(i), w, cx, cy);
 	}
 	return w - d;
@@ -605,8 +542,7 @@ int shp_decode4_size(const byte* s)
 	const int c_frames = s_header.c_frames;
 	r += sizeof(t_shp4_header);
 	int w = 0;
-	for (int i = 0; i < c_frames; i++)
-	{
+	for (int i = 0; i < c_frames; i++) {
 		const t_shp4_frame_header& frame_header = *reinterpret_cast<const t_shp4_frame_header*>(r);
 		int x = frame_header.lm;
 		int y = frame_header.tm;
@@ -639,8 +575,7 @@ Cvirtual_binary shp_decode4(const byte* s, int cb_d)
 	header.c_images = c_frames;
 	w += sizeof(t_shp_ts_header);
 	byte* w1 = w + c_frames * sizeof(t_shp_ts_image_header);
-	for (int i = 0; i < c_frames; i++)
-	{
+	for (int i = 0; i < c_frames; i++) {
 		const t_shp4_frame_header& frame_header = *reinterpret_cast<const t_shp4_frame_header*>(r);
 		int x = frame_header.lm;
 		int y = frame_header.tm;

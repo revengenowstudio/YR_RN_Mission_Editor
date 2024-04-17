@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "StdAfx.h"
@@ -44,8 +44,7 @@ std::unique_ptr<CTube> findTubeEndAt(const MapCoords& mapCoords3d, const Project
 std::vector<std::uint16_t> findTubesAt(const ProjectedCoords& projCoords, const CMapData& map)
 {
 	std::vector<std::uint16_t> foundTubes;
-	for (auto& t : map.GetTubes())
-	{
+	for (auto& t : map.GetTubes()) {
 		auto coords = map.ToMapCoords3d(projCoords, map.GetHeightAt(t->getStartCoords()));
 		if (t->touches(coords))
 			foundTubes.push_back(t->getId());
@@ -53,20 +52,18 @@ std::vector<std::uint16_t> findTubesAt(const ProjectedCoords& projCoords, const 
 	return foundTubes;
 }
 
-AddTubeTool::AddTubeTool(CMapData& map, CIsoView& view, bool bidirectional): MapTool(map, view),
-	m_bidirectional(bidirectional)
+AddTubeTool::AddTubeTool(CMapData& map, CIsoView& view, bool bidirectional) : MapTool(map, view),
+m_bidirectional(bidirectional)
 {
-	
+
 }
 
 void AddTubeTool::finish()
 {
 	if (m_tube) {
-		if (m_tube->isValid())
-		{
+		if (m_tube->isValid()) {
 			getMap().SetTube(m_tube.get());
-			if (m_bidirectional)
-			{
+			if (m_bidirectional) {
 				auto t2 = m_tube->reverse();
 				getMap().SetTube(&t2);
 			}
@@ -80,11 +77,9 @@ void AddTubeTool::finish()
 
 bool AddTubeTool::onRButtonUp(const ProjectedCoords& projCoords, const MapCoords& mapCoords3d, MapToolMouseFlags flags)
 {
-	if (!m_modified_tubes.empty())
-	{
+	if (!m_modified_tubes.empty()) {
 		// reset modified tubes to original state
-		for (auto& tube : m_modified_tubes)
-		{
+		for (auto& tube : m_modified_tubes) {
 			getMap().SetTube(tube.get());
 		}
 	}
@@ -109,13 +104,11 @@ void AddTubeTool::onLButtonUp(const ProjectedCoords& projCoords, const MapCoords
 			m_tube = std::move(tube);
 
 			// also find reverse direction
-			if (m_bidirectional)
-			{
+			if (m_bidirectional) {
 				const auto& tubes = getMap().GetTubes();
 				auto reversed = m_tube->reverse();
 				auto reverseIt = std::find_if(tubes.begin(), tubes.end(), [&reversed](const auto& tube) { return tube->isEqual(reversed, true); });
-				if (reverseIt != tubes.end())
-				{
+				if (reverseIt != tubes.end()) {
 					m_modified_tubes.push_back(std::make_unique<CTube>(**reverseIt));
 					getMap().DeleteTube((*reverseIt)->getId());
 				}
@@ -128,20 +121,15 @@ void AddTubeTool::onLButtonUp(const ProjectedCoords& projCoords, const MapCoords
 			// create a new tube, first click
 			m_tube = std::move(createNewTube(mapCoords3d));
 		}
-	}
-	else
-	{
+	} else {
 		int z = getMap().GetHeightAt(m_tube->getStartCoords());
 		auto mc = getMap().ToMapCoords3d(projCoords, z);
-		if (m_tube->getEndCoords() == MapCoords(mc.x, mc.y))
-		{
+		if (m_tube->getEndCoords() == MapCoords(mc.x, mc.y)) {
 			finish();
-		}
-		else
-		{
+		} else {
 			m_tube->append(mc.x, mc.y, m_tube->GetTubeParts().empty() ? 2 : 0);
 		}
-		
+
 	}
 
 	getView().RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
@@ -167,39 +155,30 @@ void AddTubeTool::onMouseMove(const ProjectedCoords& projCoords, const MapCoords
 		auto mc = getMap().ToMapCoords3d(projCoords, z);
 		m_mm_tube->append(mc.x, mc.y, m_tube->GetTubeParts().empty() ? 2 : 0);
 		getView().RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	}
-	else
-	{
+	} else {
 		auto tube = getTubeToModify(mapCoords3d, projCoords, flags);
-		if (tube)
-		{
-			m_hover_tube = std::move(tube);		
+		if (tube) {
+			m_hover_tube = std::move(tube);
 			getView().RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-		}
-		else if (m_hover_tube)
-		{			
+		} else if (m_hover_tube) {
 			m_hover_tube.reset();
 			getView().RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-		}		
+		}
 	}
 }
 
 void AddTubeTool::render()
 {
-	if (m_mm_tube)
-	{
+	if (m_mm_tube) {
 		// mouse-move tube
 		getView().DrawTube(*m_mm_tube);
-	}
-	else if (m_tube) {
+	} else if (m_tube) {
 		getView().DrawTube(*m_tube);
-	}
-	else if (m_hover_tube)
-	{
+	} else if (m_hover_tube) {
 		COLORREF col = RGB(0, 255, 0);
 		getView().DrawTube(*m_hover_tube, nullptr, &col);
 	}
-	
+
 }
 
 RemoveTubeTool::RemoveTubeTool(CMapData& map, CIsoView& view) : MapTool(map, view)
@@ -211,15 +190,11 @@ void RemoveTubeTool::onMouseMove(const ProjectedCoords& projCoords, const MapCoo
 	auto& m = getMap();
 	std::vector<std::uint16_t> tubes = findTubesAt(projCoords, getMap());
 
-	if ((flags & MapToolMouseFlags::LBUTTON) == MapToolMouseFlags::LBUTTON)
-	{
-		for (auto& id : tubes)
-		{
+	if ((flags & MapToolMouseFlags::LBUTTON) == MapToolMouseFlags::LBUTTON) {
+		for (auto& id : tubes) {
 			m.DeleteTube(id);
-		}			
-	}
-	else
-	{
+		}
+	} else {
 		m_hover_tubes.reserve(tubes.size());
 		std::transform(tubes.begin(), tubes.end(), std::back_inserter(m_hover_tubes), [this](std::uint16_t tubeId) { return std::make_unique<CTube>(*getMap().GetTube(tubeId)); });
 	}
@@ -229,14 +204,13 @@ void RemoveTubeTool::onMouseMove(const ProjectedCoords& projCoords, const MapCoo
 
 void RemoveTubeTool::render()
 {
-	for(auto& tube: m_hover_tubes)
-	{
+	for (auto& tube : m_hover_tubes) {
 		COLORREF col = RGB(0, 255, 0);
 		getView().DrawTube(*tube, nullptr, &col);
 	}
 }
 
-ModifyTubeTool::ModifyTubeTool(CMapData& map, CIsoView& view, bool bidirectional): AddTubeTool(map, view, bidirectional)
+ModifyTubeTool::ModifyTubeTool(CMapData& map, CIsoView& view, bool bidirectional) : AddTubeTool(map, view, bidirectional)
 {
 }
 

@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // 
@@ -58,7 +58,7 @@ class CLoading;
 
 class CFinalSunDlg : public CDialog
 {
-// Konstruktion
+	// Konstruktion
 public:
 	void OpenMap(LPCSTR lpFilename);
 	void InsertPrevFile(CString lpFilename);
@@ -69,7 +69,7 @@ public:
 	CToolBar m_clifftoolbar;
 	CToolBar m_terraintoolbar;
 	CToolBar m_maintoolbar;
-	CToolSettingsBar m_settingsbar; 
+	CToolSettingsBar m_settingsbar;
 	CReBarCtrl m_bar;
 	void HideAllDialogs();
 	CSingleplayerSettings m_singleplayersettings;
@@ -92,10 +92,10 @@ public:
 	CMyViewFrame m_view;
 	CSpecialFlags m_specialflags;
 	CLighting m_lighting;
-	void UpdateDialogs(BOOL bOnlyMissionControl=FALSE, BOOL bNoRepos=FALSE);
+	void UpdateDialogs(BOOL bOnlyMissionControl = FALSE, BOOL bNoRepos = FALSE);
 	CAll m_all;
 	CBasic m_basic;
-	CMapD m_map;	
+	CMapD m_map;
 	CIniFile m_PKTHeader;
 	CFinalSunDlg(CWnd* pParent = NULL);	// Standard-Konstruktor
 
@@ -107,10 +107,10 @@ public:
 
 	// Vom Klassenassistenten generierte Überladungen virtueller Funktionen
 	//{{AFX_VIRTUAL(CFinalSunDlg)
-	public:
+public:
 	virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pLResult);
 	virtual INT_PTR DoModal();
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
 	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 	//}}AFX_VIRTUAL
@@ -236,9 +236,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 private:
 	void UnloadAll();
-	
+
 	HCURSOR m_hGameCursor;
-	
+
 public:
 	afx_msg void OnHelpShowlogs();
 	afx_msg void OnOptionsSmoothzoom();

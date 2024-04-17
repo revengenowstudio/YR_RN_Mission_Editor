@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // InputBox.cpp: Implementierungsdatei
@@ -55,7 +55,7 @@ CInputBox::CInputBox(CWnd* pParent /*=NULL*/)
 	: CDialog(CInputBox::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CInputBox)
-		
+
 	//}}AFX_DATA_INIT
 }
 
@@ -64,7 +64,7 @@ void CInputBox::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CInputBox)
-		
+
 	//}}AFX_DATA_MAP
 }
 
@@ -89,25 +89,25 @@ void CInputBox::OnOK()
 	EndDialog(true);
 }
 
-void CInputBox::OnCancel() 
+void CInputBox::OnCancel()
 {
 	EndDialog(false);
 }
 
 void CInputBox::SetCaption(CString Caption)
 {
-	m_Caption=Caption;
+	m_Caption = Caption;
 }
 
 void CInputBox::SetSentence(CString Sentence)
 {
-	m_Text=Sentence;
+	m_Text = Sentence;
 }
 
-BOOL CInputBox::OnInitDialog() 
+BOOL CInputBox::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	SetWindowText(m_Caption);
 	SetDlgItemText(IDC_SENTENCE, m_Text);
 
@@ -115,6 +115,6 @@ BOOL CInputBox::OnInitDialog()
 	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
 
 	GetDlgItem(IDC_VAL)->SetFocus();
-		
-	return FALSE; 
+
+	return FALSE;
 }

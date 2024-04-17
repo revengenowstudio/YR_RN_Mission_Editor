@@ -1,21 +1,21 @@
 ﻿/*
-    FinalSun/FinalAlert 2 Mission Editor
+	FinalSun/FinalAlert 2 Mission Editor
 
-    Copyright (C) 1999-2024 Electronic Arts, Inc.
-    Authored by Matthias Wagner
+	Copyright (C) 1999-2024 Electronic Arts, Inc.
+	Authored by Matthias Wagner
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 // Trees.cpp: Implementierungsdatei
@@ -80,38 +80,37 @@ void CTrees::UpdateDialog()
 	m_TreeList.SetRedraw(FALSE);
 
 	// first clear the list
-	while(m_TreeList.DeleteString(0)!=LB_ERR);
+	while (m_TreeList.DeleteString(0) != LB_ERR);
 
 	// okay add all trees
 
 	int i;
-	CIniFileSection& sec=ini.sections["Terrain"];
-	
-	
-	for(i=0;i<sec.values.size();i++)
-	{
+	CIniFileSection& sec = ini.sections["Terrain"];
+
+
+	for (i = 0; i < sec.values.size(); i++) {
 		CString str;
-		str=sec.GetValueName(i)->data();
+		str = sec.GetValueName(i)->data();
 
-		int pos=atoi(str);
+		int pos = atoi(str);
 
-		str+=(CString)" "+ sec.GetValue(i)->data();
-		int x,y,z;
+		str += (CString)" " + sec.GetValue(i)->data();
+		int x, y, z;
 		GetXYPos((char*)sec.GetValueName(i)->data(), &x, &y);
 		char c[50];
 		itoa(x, c, 10);
-		str+=" (";
-		str+=c;
-		str+="/";
+		str += " (";
+		str += c;
+		str += "/";
 		itoa(y, c, 10);
-		str+=c;
-		
-		z=GetPos(x,y,0);
+		str += c;
+
+		z = GetPos(x, y, 0);
 
 		itoa(z, c, 10);
-		str+="/";
-		str+=c;
-		str+=")";
+		str += "/";
+		str += c;
+		str += ")";
 
 		m_TreeList.InsertString(-1, str);
 
@@ -121,72 +120,72 @@ void CTrees::UpdateDialog()
 	m_TreeList.RedrawWindow();
 }
 
-BOOL CTrees::OnInitDialog() 
+BOOL CTrees::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
-	
+
 	// TODO: Zusätzliche Initialisierung hier einfügen
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }
 
-void CTrees::OnSelchangeTreelist() 
+void CTrees::OnSelchangeTreelist()
 {
-	int i=m_TreeList.GetCurSel();
+	int i = m_TreeList.GetCurSel();
 
 	CString str;
 	m_TreeList.GetText(i, str);
 
-	str.SetAt(str.Find(" ", 0),0);
+	str.SetAt(str.Find(" ", 0), 0);
 
-	m_Type.SetWindowText( ini.sections["Terrain"].values[ (char*)(LPCTSTR)str ].data() );
+	m_Type.SetWindowText(ini.sections["Terrain"].values[(char*)(LPCTSTR)str].data());
 
 	string pos;
-	int x,y,z;
+	int x, y, z;
 	GetXYPos((char*)ini.sections["Terrain"].GetValueName(i)->data(), &x, &y);
 
 	char c[50];
 	itoa(x, c, 10);
-	pos=c;
-	pos+="/";
+	pos = c;
+	pos += "/";
 	itoa(y, c, 10);
-	pos+=c;
-	pos+="/";
+	pos += c;
+	pos += "/";
 	itoa(z, c, 10);
-	pos+=c;
+	pos += c;
 
 	m_Pos.SetWindowText(pos.data());
 
 }
 
-void CTrees::OnEditchangeType() 
+void CTrees::OnEditchangeType()
 {
-	
 
-	
+
+
 }
 
-void CTrees::OnKillfocusType() 
+void CTrees::OnKillfocusType()
 {
-	int i=m_TreeList.GetCurSel();
+	int i = m_TreeList.GetCurSel();
 
-	if(i==-1) return;
+	if (i == -1) return;
 
 	m_TreeList.SetRedraw(FALSE);
 
 	CString str;
 	m_TreeList.GetText(i, str);
 
-	str.SetAt(str.Find(" ", 0),0);
-		
+	str.SetAt(str.Find(" ", 0), 0);
+
 
 	CString type;
 	m_Type.GetWindowText(type);
 
-	if(ini.sections["Terrain"].values[(char*)(LPCTSTR)str]==(char*)(LPCTSTR)type) return;
+	if (ini.sections["Terrain"].values[(char*)(LPCTSTR)str] == (char*)(LPCTSTR)type) return;
 
-	ini.sections["Terrain"].values[(char*)(LPCTSTR)str]=type;
+	ini.sections["Terrain"].values[(char*)(LPCTSTR)str] = type;
 
 	UpdateDialog();
 
@@ -209,67 +208,67 @@ void CTrees::OnKillfocusType()
 		itoa(y, c, 10);
 		str_+=c;
 		str_+=")";
-		
+
 		m_TreeList.DeleteString(i);
 		m_TreeList.InsertString(i, str_);*/
 
-	
+
 
 	m_TreeList.SetRedraw(TRUE);
 	m_TreeList.RedrawWindow();
 	m_TreeList.SetCurSel(i);
 }
 
-void CTrees::OnKillFocus(CWnd* pNewWnd) 
+void CTrees::OnKillFocus(CWnd* pNewWnd)
 {
 	CPropertyPage::OnKillFocus(pNewWnd);
-	
-	
-	
-	
+
+
+
+
 }
 
-void CTrees::OnShowWindow(BOOL bShow, UINT nStatus) 
+void CTrees::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CPropertyPage::OnShowWindow(bShow, nStatus);
-	
-	OnKillfocusType();	
+
+	OnKillfocusType();
 }
 
-void CTrees::OnDelete() 
+void CTrees::OnDelete()
 {
-	int pos=m_TreeList.GetCurSel();
-	if(pos==-1) return;
-	
+	int pos = m_TreeList.GetCurSel();
+	if (pos == -1) return;
+
 	CString cutree;
 	//m_TreeList.GetText(pos, cutree);
-	cutree=ini.sections["Terrain"].GetValueName(pos)->data();
+	cutree = ini.sections["Terrain"].GetValueName(pos)->data();
 
-	ini.sections["Terrain"].values.erase((string)(char*)(LPCTSTR) cutree);
+	ini.sections["Terrain"].values.erase((string)(char*)(LPCTSTR)cutree);
 
 	//m_TreeList.SetRedraw(FALSE);
 	UpdateDialog();
 	m_TreeList.SetCurSel(pos);
 	//m_TreeList.SetRedraw(TRUE);
-	
+
 
 }
 
-void CTrees::OnNew() 
+void CTrees::OnNew()
 {
-	int pos=m_TreeList.GetCurSel(); 
+	int pos = m_TreeList.GetCurSel();
 
 	CPos p;
-	if(p.DoModal()==IDCANCEL) return;
+	if (p.DoModal() == IDCANCEL) return;
 
-	int h=GetPos(atoi(p.m_x), atoi(p.m_y), 0);	
+	int h = GetPos(atoi(p.m_x), atoi(p.m_y), 0);
 
 	char k[50];
 	itoa(h, k, 10);
 
-	ini.sections["Terrain"].values[k]="TREE01";
+	ini.sections["Terrain"].values[k] = "TREE01";
 
 	UpdateDialog();
 	m_TreeList.SetCurSel(pos);
-	
+
 }

@@ -63,13 +63,13 @@ namespace FSunPackLib
 		TS_FS
 	};
 
-	enum class VoxelNormalClass: std::uint8_t
+	enum class VoxelNormalClass : std::uint8_t
 	{
 		Unknown = 0,
 		Gen1 = 1,
 		TS = 2,
 		Gen3 = 3,
-		RA2 = 4,		
+		RA2 = 4,
 	};
 
 	extern "C" extern bool _DEBUG_EnableLogs; // only useable in debug library builds
@@ -95,61 +95,61 @@ namespace FSunPackLib
 		std::shared_ptr<ColorConverterImpl> m_impl;
 	};
 
-// base 64
-/*
-Converts hex data to Base64 data.
-sp - source poINTer
-len - length of hex data
-Returns a poINTer to the base64 data. Caller must free this memory.
-*/
+	// base 64
+	/*
+	Converts hex data to Base64 data.
+	sp - source poINTer
+	len - length of hex data
+	Returns a poINTer to the base64 data. Caller must free this memory.
+	*/
 	BYTE* EncodeBase64(BYTE* sp, UINT len);
-/*
-Converts Base64 data to hex data.
-sp - source poINTer
-dp - dest buffer (should be as large as sp)
-Returns the hex data length
-*/
+	/*
+	Converts Base64 data to hex data.
+	sp - source poINTer
+	dp - dest buffer (should be as large as sp)
+	Returns the hex data length
+	*/
 	size_t DecodeBase64(const char* sp, std::vector<BYTE>& dest);
 
 
-// format 80
-/*
-Pack to a simple format 80 pack like Overlay & OverlayData-Pack
-sp - source poINTer (should be the 262144 bytes for overlay & overlaydata)
-len - length of the source data (should be 262144)
-nSections - section count. should be 32
-dest - poINTer to dest poINTer. Function allocates memory, caller must free this memory.
-Returns the length of the packed data.
-*/
+	// format 80
+	/*
+	Pack to a simple format 80 pack like Overlay & OverlayData-Pack
+	sp - source poINTer (should be the 262144 bytes for overlay & overlaydata)
+	len - length of the source data (should be 262144)
+	nSections - section count. should be 32
+	dest - poINTer to dest poINTer. Function allocates memory, caller must free this memory.
+	Returns the length of the packed data.
+	*/
 	INT EncodeF80(BYTE* sp, UINT len, UINT nSections, BYTE** dest);
 
-/*
-Extracts a simple format 80 pack like the Overlay & OverlayData-Pack
-Note that it extracts a whole pack, not just a simple section.
-In order to simply decode/encode Format80, you should use ConvertFromF80 and ConvertToF80
-	sp - source poINTer
-SourceLength - length of the source
-	dp - dest buffer
-	max_size - maximum allowed destination size
-*/
+	/*
+	Extracts a simple format 80 pack like the Overlay & OverlayData-Pack
+	Note that it extracts a whole pack, not just a simple section.
+	In order to simply decode/encode Format80, you should use ConvertFromF80 and ConvertToF80
+		sp - source poINTer
+	SourceLength - length of the source
+		dp - dest buffer
+		max_size - maximum allowed destination size
+	*/
 	bool DecodeF80(const BYTE* sp, UINT SourceLength, std::vector<BYTE>& dp, std::size_t max_size);
 
-// IsoMapPack5
-/*
-Pack IsoMapPack5.
-sp - source poINTer 
-SourceLength - length of source
-dp - destination buffer
-Returns size of packed data
-*/
+	// IsoMapPack5
+	/*
+	Pack IsoMapPack5.
+	sp - source poINTer
+	SourceLength - length of source
+	dp - destination buffer
+	Returns size of packed data
+	*/
 	UINT EncodeIsoMapPack5(BYTE* sp, UINT SourceLength, BYTE** dp);
 
-/*
-Unpack IsoMapPack5.
-sp - source poINTer 
-SourceLength - length of source
-dp - destination buffer
-*/
+	/*
+	Unpack IsoMapPack5.
+	sp - source poINTer
+	SourceLength - length of source
+	dp - destination buffer
+	*/
 	UINT DecodeIsoMapPack5(BYTE* sp, UINT SourceLength, BYTE* dp, HWND hProgressBar, BOOL bDebugMode);
 
 	BOOL XCC_Initialize(BOOL bUseCache);
@@ -171,9 +171,9 @@ dp - destination buffer
 	BOOL XCC_GetSHPHeader(SHPHEADER* pHeader);
 
 
-/*
-Returns the SHP image header of a image in a SHP file
-*/
+	/*
+	Returns the SHP image header of a image in a SHP file
+	*/
 	BOOL XCC_GetSHPImageHeader(int iImageIndex, SHPIMAGEHEADER* pImageHeader);
 
 
