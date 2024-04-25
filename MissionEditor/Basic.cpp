@@ -163,7 +163,7 @@ void CBasic::OnChangeName()
 void CBasic::UpdateData()
 {
 	// MessageBox("This function ( UpdateData() ) should not be called here... please report to the author.");
-	errstream << "CBasic::UpdateData() called - should not be called" << endl;
+	errstream << "CBasic::UpdateData() called - should not be called" << std::endl;
 	errstream.flush();
 }
 

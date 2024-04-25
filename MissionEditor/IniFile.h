@@ -38,7 +38,8 @@
 #include <ios>
 #include "IniHelper.h"
 
-using namespace std;
+using std::vector;
+using std::map;
 
 class CIniFileSection
 {

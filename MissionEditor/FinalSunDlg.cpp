@@ -69,6 +69,8 @@ static char THIS_FILE[] = __FILE__;
 #include <io.h>
 #include <stdio.h>
 
+using std::endl;
+
 extern ACTIONDATA AD;
 extern BOOL bNoDraw;
 

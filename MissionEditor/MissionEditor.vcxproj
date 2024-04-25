@@ -347,7 +347,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertDebug YR|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\MissionEditorPackLib</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
@@ -419,7 +419,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertRelease YR|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\MissionEditorPackLib</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>

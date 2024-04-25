@@ -358,8 +358,8 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, int
 			short& left = st.vborder[e].left;
 			short& right = st.vborder[e].right;
 
-			auto l = max(left, srcRect.left);
-			auto r = min(right, static_cast<short>(srcRect.right - 1));
+			auto l = std::max(left, srcRect.left);
+			auto r = std::min(right, static_cast<short>(srcRect.right - 1));
 			for (i = l; i <= r; i++) {
 				//if (i < srcRect.left || i >= srcRect.right)
 				{
@@ -640,7 +640,7 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpi
 						int l = pLighting[spos];
 						BYTE* bc = reinterpret_cast<BYTE*>(&c);
 						for (int i = 0; i < 4; ++i)
-							bc[i] = min(255, bc[i] * (200 + l * 300 / 255) / 255);  // game seems to overbrighten and have a lot of ambient - if you change this, also change Loading.cpp shp lighting value so that shp light stays at 1.0
+							bc[i] = std::min(255, bc[i] * (200 + l * 300 / 255) / 255);  // game seems to overbrighten and have a lot of ambient - if you change this, also change Loading.cpp shp lighting value so that shp light stays at 1.0
 							//bc[i] = min(255, bc[i] * (0 + l * (255 - 0) / 255) / 255);
 					}
 					memcpy(dest, &c, bpp);
@@ -3674,7 +3674,7 @@ void CIsoView::DrawTube(const CTube& tube, const DDSURFACEDESC2* lockedDDSD, con
 	const auto col = color ? m_color_converter->GetColor(*color) : (type0 ? m_color_converter->GetColor(255, 0, 0) : m_color_converter->GetColor(0, 0, 255));
 	ProjectedVec lineOffset = type0 ? ProjectedVec() : ProjectedVec(1, 1);
 
-	int lowestHeight = min(Map->GetHeightAt(tube.getStartCoords()), Map->GetHeightAt(tube.getEndCoords()));
+	int lowestHeight = std::min(Map->GetHeightAt(tube.getStartCoords()), Map->GetHeightAt(tube.getEndCoords()));
 	LineDrawer ld(lockedDDSD->lpSurface, bpp, lockedDDSD->dwWidth, lockedDDSD->dwHeight, lockedDDSD->lPitch);
 	auto startDraw = GetRenderTargetCoordinates(tube.getStartCoords(), lowestHeight);
 	ld.MoveTo(startDraw.x + f_x / 2 + lineOffset.x, startDraw.y + f_y / 2 + lineOffset.y);
@@ -4681,7 +4681,7 @@ void CIsoView::OnTimer(UINT_PTR nIDEvent)
 
 		InvalidateRect(NULL, FALSE);
 	} else {
-		errstream << "Timer calls InitTMPs()" << endl;
+		errstream << "Timer calls InitTMPs()" << std::endl;
 		errstream.flush();
 
 		theApp.m_loading->InitTMPs();
@@ -5062,10 +5062,10 @@ void CIsoView::DrawMap()
 		auto topRight = GetMapCoordinatesFromClientCoordinates(CPoint(cr.right, 0), false, true);
 		auto bottomLeft = GetMapCoordinatesFromClientCoordinates(CPoint(0, cr.bottom), false, true);
 		auto bottomRight = GetMapCoordinatesFromClientCoordinates(CPoint(cr.right, cr.bottom), false, true);
-		left = min(topLeft.x, topRight.x);
-		top = min(topLeft.y, topRight.y);
-		right = max(bottomLeft.x, bottomRight.x);
-		bottom = max(bottomLeft.y, bottomRight.y);
+		left = std::min(topLeft.x, topRight.x);
+		top = std::min(topLeft.y, topRight.y);
+		right = std::max(bottomLeft.x, bottomRight.x);
+		bottom = std::max(bottomLeft.y, bottomRight.y);
 	}
 
 	// some large buildings may be out of reach:
@@ -6029,7 +6029,7 @@ void CIsoView::OnKillFocus(CWnd* pNewWnd)
 	CView::OnKillFocus(pNewWnd);
 
 	if (rscroll) {
-		errstream << "Killing scroll" << endl;
+		errstream << "Killing scroll" << std::endl;
 		errstream.flush();
 
 		ReleaseCapture();

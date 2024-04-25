@@ -183,7 +183,7 @@ SMUDGE_INFO smudgeinfo[0x0F00];
 #endif
 
 /* error output */
-ofstream errstream;
+std::ofstream errstream;
 
 /* the finalsun app object */
 CFinalSunApp theApp;

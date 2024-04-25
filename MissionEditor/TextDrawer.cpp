@@ -164,7 +164,7 @@ ProjectedVec TextDrawer::GetExtent(const std::string& text) const
 			cur.set(0, cur.y + ch + lineOffset);
 		} else if (c >= 32 && c <= 126) {
 			cur.x += cw;
-			maxpos.set(max(maxpos.x, cur.x), max(maxpos.y, cur.y + ch));
+			maxpos.set(std::max(maxpos.x, cur.x), std::max(maxpos.y, cur.y + ch));
 		}
 
 	}
