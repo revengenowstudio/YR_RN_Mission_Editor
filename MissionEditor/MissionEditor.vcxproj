@@ -498,6 +498,7 @@
     <ClCompile Include="Infantry.cpp" />
     <ClCompile Include="Info.cpp" />
     <ClCompile Include="IniFile.cpp" />
+    <ClCompile Include="INIMeta.cpp" />
     <ClCompile Include="InputBox.cpp" />
     <ClCompile Include="IsoView.cpp" />
     <ClCompile Include="Lighting.cpp" />
@@ -609,6 +610,7 @@
     <ClInclude Include="ComboUInputDlg.h" />
     <ClInclude Include="defines.h" />
     <ClInclude Include="IniHelper.h" />
+    <ClInclude Include="INIMeta.h" />
     <ClInclude Include="LineDrawer.h" />
     <ClInclude Include="DynamicGraphDlg.h" />
     <ClInclude Include="FinalSun.h" />
@@ -660,6 +662,7 @@
     <ClInclude Include="SingleplayerSettings.h" />
     <ClInclude Include="SpecialFlags.h" />
     <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="StringHelper.h" />
     <ClInclude Include="structs.h" />
     <ClInclude Include="Tags.h" />
     <ClInclude Include="TaskForce.h" />

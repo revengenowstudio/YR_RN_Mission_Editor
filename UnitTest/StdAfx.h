@@ -27,6 +27,9 @@
 #include <iostream>
 #include <afxwin.h> 
 
+using std::cout;
+using std::endl;
+
 #if !defined(ASSERT)
 #define ASSERT(x) if (!(x)) throw("assertion failed");
 #endif
