@@ -42,7 +42,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CViewObjects
 
-const int valadded = 10000;
+const size_t valadded = 10000;
 
 IMPLEMENT_DYNCREATE(CViewObjects, CTreeView)
 

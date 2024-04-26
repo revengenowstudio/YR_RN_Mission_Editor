@@ -78,7 +78,7 @@ inline CString GetUnitPictureFilename(LPCTSTR lpUnitName, DWORD dwPicIndex)
 	}
 
 	char n[50];
-	itoa(dwPicIndex, n, 10);
+	_itoa_s(dwPicIndex, n, 10);
 
 
 	if (pics.find(artname + n) != pics.end()) {
