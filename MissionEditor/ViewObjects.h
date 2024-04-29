@@ -27,8 +27,44 @@
 // ViewObjects.h : Header-Datei
 //
 #include <afxcview.h>
+#include <unordered_set>
 
 #define MAKE_MASK(refVal) 1 << static_cast<int>(refVal) 
+
+class TreeViewBuilder;
+class CViewObjects;
+class IniFileGroup;
+
+using IgnoreSet = std::unordered_set<std::string>;
+
+static const IgnoreSet CollectIgnoreSet();
+
+extern CIniFile rules;
+
+class TreeRoot {
+	friend class TreeViewBuilder;
+	friend class CViewObjects;
+	enum _ : int {
+		Nothing = -1,
+		Infantry,
+		Vehicle,
+		Aircraft,
+		Building,
+		Terrain,
+		Overlay,
+		Waypoint,
+		Celltag,
+		Basenode,
+		Tunnel,
+		Delete,
+		Owner,
+		PlayerLocation,
+		Ground,
+		Smudge,
+		Count,
+		Begin = 0,
+	};
+};
 
 enum class TreeViewTechnoType {
 	Set_None = -1,
@@ -61,6 +97,87 @@ inline bool operator&(TreeViewTechnoType lhs, TechnoTypeMask rhs)
 {
 	return rhs & static_cast<TechnoTypeMask>(MAKE_MASK(lhs));
 }
+
+class TreeViewCategoryHandler {
+	using categoryNodeMap = std::unordered_map<std::string, HTREEITEM>;
+
+public:
+	TreeViewCategoryHandler(CTreeCtrl& tree, HTREEITEM parentNode) :
+		tree(tree),
+		parentNode(parentNode)
+	{}
+
+	HTREEITEM GetOrAdd(const CString& name);
+
+private:
+	CTreeCtrl& tree;
+	HTREEITEM parentNode;
+	categoryNodeMap structhouses;
+};
+
+class GuessSideHelper {
+public:
+	GuessSideHelper(const TreeViewBuilder& builder) : 
+		builder(builder)
+	{}
+
+	const CString& GetSideName(const CString& regName, TreeViewTechnoType technoType, const CIniFile& inWhichIni = rules);
+	int GuessSide(const CString& pRegName, TreeViewTechnoType nType, const CIniFile& inWhichIni);
+	int guessGenericSide(const CString& typeId);
+
+private:
+	int guessBuildingSide(const CString& typeId, const CIniFile& inWhichIni);
+
+	std::unordered_map<std::string, int> KnownItem;
+	const TreeViewBuilder& builder;
+};
+
+class TreeViewBuilder {
+	using houseMap = std::unordered_map<std::string, int>;
+
+	struct CatetoryDefinition {
+		CString CategoryName;// or side name
+		TechnoTypeMask CategoryMask;
+	};
+
+	using mapSideNodeInfo = std::unordered_map<int, CatetoryDefinition>;
+
+public:
+	TreeViewBuilder(CTreeCtrl& tree,
+		const CIniFile& ini,
+		const IgnoreSet& ignoreSet,
+		const CString& theater,
+		const TheaterChar needed_terrain,
+		const HTREEITEM rootitems[]) :
+		tree(tree),
+		ini(ini),
+		theater(theater),
+		needed_terrain(needed_terrain),
+		rootitems(rootitems),
+		m_ignoreSet(ignoreSet),
+		m_owners(collectOwners()),
+		sideInfo(collectCategoryInfo())
+	{
+		updateTechnoItems();
+	}
+
+	const houseMap m_owners;
+	const mapSideNodeInfo sideInfo;
+
+private:
+	static mapSideNodeInfo collectCategoryInfo();
+	static const houseMap collectOwners();
+	void updateTechnoItems();
+	void updateBuildingTypes(HTREEITEM parentNode);
+	void updateUnitTypes(HTREEITEM parentNode, const char* typeListId, TreeViewTechnoType technoType, int multiple);
+
+	const IgnoreSet& m_ignoreSet;
+	CTreeCtrl& tree;
+	const CIniFile& ini;
+	const CString& theater;
+	const TheaterChar needed_terrain;
+	const HTREEITEM* rootitems;
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // Ansicht CViewObjects 
@@ -108,6 +225,20 @@ protected:
 	DECLARE_MESSAGE_MAP()
 private:
 	void HandleBrushSize(int iTile);
+};
+
+class IniMegaFile
+{
+	friend class IniFileGroup;
+public:
+	static IniFileGroup GetRules();
+
+	static bool IsNullOrEmpty(const  CString& value) { return isNullOrEmpty(value); }
+
+private:
+	static bool isNullOrEmpty(const CString& value);
+
+
 };
 
 /////////////////////////////////////////////////////////////////////////////
