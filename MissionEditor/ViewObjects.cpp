@@ -50,8 +50,6 @@ IMPLEMENT_DYNCREATE(CViewObjects, CTreeView)
 
 CViewObjects::CViewObjects()
 {
-	m_ready = FALSE;
-
 }
 
 CViewObjects::~CViewObjects()
@@ -1226,9 +1224,6 @@ int CViewObjects::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CViewObjects::OnInitialUpdate()
 {
 	CTreeView::OnInitialUpdate();
-
-
-	m_ready = TRUE;
 }
 
 void CViewObjects::OnKeydown(NMHDR* pNMHDR, LRESULT* pResult)

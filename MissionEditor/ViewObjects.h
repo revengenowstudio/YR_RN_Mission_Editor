@@ -193,8 +193,6 @@ public:
 
 	// Operationen
 public:
-	CTreeCtrl* tree;
-	BOOL m_ready;
 	void UpdateDialog();
 
 	// Überschreibungen
