@@ -98,23 +98,6 @@ inline bool operator&(TreeViewTechnoType lhs, TechnoTypeMask rhs)
 	return rhs & static_cast<TechnoTypeMask>(MAKE_MASK(lhs));
 }
 
-class TreeViewCategoryHandler {
-	using categoryNodeMap = std::unordered_map<std::string, HTREEITEM>;
-
-public:
-	TreeViewCategoryHandler(CTreeCtrl& tree, HTREEITEM parentNode) :
-		tree(tree),
-		parentNode(parentNode)
-	{}
-
-	HTREEITEM GetOrAdd(const CString& name);
-
-private:
-	CTreeCtrl& tree;
-	HTREEITEM parentNode;
-	categoryNodeMap structhouses;
-};
-
 class GuessSideHelper {
 public:
 	GuessSideHelper(const TreeViewBuilder& builder) : 
@@ -134,15 +117,14 @@ private:
 
 class TreeViewBuilder {
 	using houseMap = std::unordered_map<std::string, int>;
-
+public:
 	struct CatetoryDefinition {
 		CString CategoryName;// or side name
 		TechnoTypeMask CategoryMask;
 	};
 
-	using mapSideNodeInfo = std::unordered_map<int, CatetoryDefinition>;
+	using mapSideNodeInfo = std::map<int, CatetoryDefinition>;
 
-public:
 	TreeViewBuilder(CTreeCtrl& tree,
 		const CIniFile& ini,
 		const IgnoreSet& ignoreSet,
@@ -177,6 +159,24 @@ private:
 	const CString& theater;
 	const TheaterChar needed_terrain;
 	const HTREEITEM* rootitems;
+};
+
+class TreeViewCategoryHandler {
+	using categoryNodeMap = std::unordered_map<std::string, HTREEITEM>;
+
+public:
+	TreeViewCategoryHandler(CTreeCtrl& tree, HTREEITEM parentNode) :
+		tree(tree),
+		parentNode(parentNode)
+	{}
+
+	void Preallocate(const TreeViewBuilder::mapSideNodeInfo& sideInfo, TreeViewTechnoType type);
+	HTREEITEM GetOrAdd(const CString& name);
+
+private:
+	CTreeCtrl& tree;
+	HTREEITEM parentNode;
+	categoryNodeMap structhouses;
 };
 
 /////////////////////////////////////////////////////////////////////////////
