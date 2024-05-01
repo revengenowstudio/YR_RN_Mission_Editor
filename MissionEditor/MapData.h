@@ -34,7 +34,7 @@
 
 extern TILEDATA** tiledata;
 extern DWORD* tiledata_count;
-extern ofstream errstream;
+extern std::ofstream errstream;
 extern map<int, int> tilesets_start;
 extern CIniFile* tiles;
 extern CFinalSunApp theApp;

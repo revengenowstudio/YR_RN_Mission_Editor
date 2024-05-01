@@ -323,10 +323,10 @@ struct XCString
 
 		bUsedDefault = FALSE;
 		wString = new(WCHAR[len + 1]);
-		memset(wString, 0, (len + 1) * 2);
+		memset(wString, 0, (len + 1) * sizeof(WCHAR));
 
-		//MultiByteToWideChar(CP_ACP, WC_COMPOSITECHECK, cString, len, wString, len+1);
-		mbstowcs(wString, cString, len);
+		size_t convertedSize = 0;
+		mbstowcs_s(&convertedSize, wString, len + 1, cString, len);
 
 	}
 	void SetString(const WCHAR* wString, int len)
@@ -358,7 +358,7 @@ struct XCString
 	CString cString;
 	WCHAR* wString;
 	BOOL bUsedDefault;
-	int len;
+	size_t len;
 };
 
 

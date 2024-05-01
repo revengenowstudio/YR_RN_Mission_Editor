@@ -78,7 +78,7 @@ inline CString GetUnitPictureFilename(LPCTSTR lpUnitName, DWORD dwPicIndex)
 	}
 
 	char n[50];
-	itoa(dwPicIndex, n, 10);
+	_itoa_s(dwPicIndex, n, 10);
 
 
 	if (pics.find(artname + n) != pics.end()) {
@@ -195,7 +195,7 @@ inline CString SetParam(const CString& data, const int param, const CString& val
 	if (param < 0)
 		return data;
 	std::vector<CString> params = SplitParams(data);
-	params.resize(max(param + 1, static_cast<int>(params.size())));
+	params.resize(std::max(param + 1, static_cast<int>(params.size())));
 	params[param] = value;
 	return Join(",", params);
 }

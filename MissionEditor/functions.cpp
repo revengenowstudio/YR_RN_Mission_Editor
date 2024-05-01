@@ -1280,10 +1280,10 @@ CString GetFreeID()
 			"Actions",
 			"AITriggerTypes",
 		};
-		if (find(std::begin(typeListSections), std::end(typeListSections), input) != std::end(typeListSections)) {
+		if (std::find(std::begin(typeListSections), std::end(typeListSections), input) != std::end(typeListSections)) {
 			return true;
 		}
-		if (find(std::begin(idListSections), std::end(idListSections), input) != std::end(idListSections)) {
+		if (std::find(std::begin(idListSections), std::end(idListSections), input) != std::end(idListSections)) {
 			return true;
 		}
 		return false;

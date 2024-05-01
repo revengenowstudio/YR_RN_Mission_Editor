@@ -282,6 +282,9 @@
     <ClCompile Include="TextDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="INIMeta.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MissionEditor.rc">
@@ -566,6 +569,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IniHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StringHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INIMeta.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

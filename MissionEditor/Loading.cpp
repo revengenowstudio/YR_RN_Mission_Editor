@@ -4562,7 +4562,7 @@ void CLoading::LoadStrings()
 	BYTE* lpData = NULL;
 	DWORD dwSize;
 	if (DoesFileExist((std::string(TSPath) + "\\" + file).c_str())) {
-		std::ifstream f(std::string(TSPath) + "\\" + file, ios::binary);
+		std::ifstream f(std::string(TSPath) + "\\" + file, std::ios::binary);
 		if (f.good()) {
 			f.seekg(0, std::ios::end);
 			auto size = f.tellg();
@@ -4582,7 +4582,7 @@ void CLoading::LoadStrings()
 		//HMIXFILE hMix=m_hLanguage;
 		if (hMix) {
 			if (FSunPackLib::XCC_ExtractFile(file, u8AppDataPath + "\\RA2Tmp.csf", hMix)) {
-				std::ifstream f(u8AppDataPath + "\\RA2Tmp.csf", ios::binary);
+				std::ifstream f(u8AppDataPath + "\\RA2Tmp.csf", std::ios::binary);
 				if (f.good()) {
 					f.seekg(0, std::ios::end);
 					auto size = f.tellg();

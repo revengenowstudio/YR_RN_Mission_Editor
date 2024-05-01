@@ -112,7 +112,7 @@ CFinalSunApp::CFinalSunApp()
 	log += "finalalert2log.txt";
 #endif
 	m_u8LogFileName = log;
-	errstream.open(m_u8LogFileName, ios_base::trunc);
+	errstream.open(m_u8LogFileName, std::ios_base::trunc);
 	errstream << "\uFEFF"; // BOM
 
 #ifdef TS_MODE

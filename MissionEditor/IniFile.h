@@ -38,12 +38,14 @@
 #include <ios>
 #include "IniHelper.h"
 
-using namespace std;
+using std::vector;
+using std::map;
 
 class CIniFileSection
 {
-	static const CString EmptyValue;
 public:
+	using Container = vector<std::pair<CString, CString>>;
+	static const CString EmptyValue;
 
 	CIniFileSection();
 	virtual ~CIniFileSection();
@@ -197,7 +199,7 @@ public:
 
 private:
 	map<CString, int64_t> value_pos{};
-	vector<std::pair<CString, CString>> value_pairs{};// sequenced
+	Container value_pairs{};// sequenced
 };
 
 class CIniFile

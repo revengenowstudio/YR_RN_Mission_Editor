@@ -97,10 +97,10 @@ void CMiniMap::OnDraw(CDC* pDC)
 	auto topRight = Map->GetMiniMapPos(isoview.GetMapCoordinatesFromClientCoordinates(CPoint(cr.right, 0), false, true));
 	auto bottomLeft = Map->GetMiniMapPos(isoview.GetMapCoordinatesFromClientCoordinates(CPoint(0, cr.bottom), false, true));
 	auto bottomRight = Map->GetMiniMapPos(isoview.GetMapCoordinatesFromClientCoordinates(CPoint(cr.right, cr.bottom), false, true));
-	auto left = min(topLeft.x, topRight.x);
-	auto top = min(topLeft.y, topRight.y);
-	auto right = max(bottomLeft.x, bottomRight.x);
-	auto bottom = max(bottomLeft.y, bottomRight.y);
+	auto left = std::min(topLeft.x, topRight.x);
+	auto top = std::min(topLeft.y, topRight.y);
+	auto right = std::max(bottomLeft.x, bottomRight.x);
+	auto bottom = std::max(bottomLeft.y, bottomRight.y);
 
 	CPoint center(r.right / 2, r.bottom / 2);
 	selRect.left = left * m_scale;

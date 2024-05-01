@@ -24,12 +24,21 @@
     <ClCompile Include="..\MissionEditor\IniFile.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="CIni_Meta_Test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MissionEditor\INIMeta.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StdAfx.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\MissionEditor\IniFile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MissionEditor\INIMeta.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

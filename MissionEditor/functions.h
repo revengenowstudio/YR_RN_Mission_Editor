@@ -25,6 +25,8 @@
 #include <memory>
 #include <array>
 
+using std::string;
+
 bool deleteFile(const std::string& u8FilePath);
 
 // set the status bar text in the main dialog

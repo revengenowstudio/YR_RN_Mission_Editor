@@ -114,7 +114,7 @@ extern SMUDGE_INFO smudgeinfo[0x0F00];
 extern CFinalSunApp theApp;
 
 /* error output */
-extern ofstream errstream;
+extern std::ofstream errstream;
 
 // application path
 extern char AppPath[MAX_PATH + 1];

@@ -32,7 +32,7 @@
 
 #include <vector>
 
-using namespace std;
+using std::vector;
 
 #define COMBOUINPUT_HOUSES 0
 #define COMBOUINPUT_COUNTRIES 1

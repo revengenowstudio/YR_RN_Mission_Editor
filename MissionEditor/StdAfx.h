@@ -28,8 +28,7 @@
 #pragma once
 #endif 
 
-#define VC_EXTRALEAN	
-#define NOMINMAX
+#define VC_EXTRALEAN
 
 #pragma warning(disable: 4503)
 #pragma warning(disable: 4786)
@@ -56,7 +55,7 @@
 #include "resource.h"
 #include "TipDlg.h"
 
-
+using std::endl;
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ inserts additional declarations exactly above this line.
 
