@@ -575,6 +575,9 @@ TreeViewBuilder::mapSideNodeInfo TreeViewBuilder::collectCategoryInfo()
 	mapSideNodeInfo ret;
 
 	auto toType = [](const CString& str) -> TechnoTypeMask {
+		if (str.IsEmpty()) {
+			return TechnoTypeMask(-1);
+		}
 		return TechnoTypeMask(atoi(str));
 	};
 
@@ -584,15 +587,18 @@ TreeViewBuilder::mapSideNodeInfo TreeViewBuilder::collectCategoryInfo()
 	auto const otherCategoryName = GetLanguageStringACP("Other");
 
 	for (auto& [seq, def] : g_data["Sides"]) {
+		auto sideName = def;
 		auto const commaPos = def.Find(',');
 		//now parse real type
 		if (commaPos >= 0) {
+			sideName = def.Mid(0, commaPos);
 			typeStr = def.Mid(commaPos + 1);
 		}
 		if (typeStr == otherCategoryName) {
 			continue;
 		}
-		auto&& info = CatetoryDefinition{ def.Mid(0, commaPos), toType(typeStr) };
+
+		auto&& info = CatetoryDefinition{ TranslateStringACP(sideName), toType(typeStr) };
 		ret.insert({ count++, info });
 	}
 
@@ -640,27 +646,27 @@ const CString& GuessSideHelper::GetSideName(const CString& regName, TreeViewTech
 	return builder.sideInfo.at(-1).CategoryName;
 }
 
-int GuessSideHelper::GuessSide(const CString& pRegName, TreeViewTechnoType nType, const CIniFile& inWhichIni)
+int GuessSideHelper::GuessSide(const CString& regName, TreeViewTechnoType type, const CIniFile& inWhichIni)
 {
-	auto const& knownIterator = KnownItem.find(pRegName.operator LPCSTR());
+	auto const& knownIterator = KnownItem.find(regName.operator LPCSTR());
 	if (knownIterator != KnownItem.end())
 		return knownIterator->second;
 
 	int result = -1;
-	switch (nType) {
+	switch (type) {
 	case TreeViewTechnoType::Set_None:
 	default:
 		break;
 	case TreeViewTechnoType::Building:
-		result = guessBuildingSide(pRegName, inWhichIni);
+		result = guessBuildingSide(regName, inWhichIni);
 		break;
 	case TreeViewTechnoType::Infantry:
 	case TreeViewTechnoType::Vehicle:
 	case TreeViewTechnoType::Aircraft:
-		result = guessGenericSide(pRegName);
+		result = guessGenericSide(regName);
 		break;
 	}
-	KnownItem.insert_or_assign(pRegName.operator LPCSTR(), result);
+	KnownItem.insert_or_assign(std::string(regName), result);
 	return result;
 }
 
@@ -668,10 +674,10 @@ int GuessSideHelper::guessBuildingSide(const CString& typeId, const CIniFile& in
 {
 	int planning;
 	planning = inWhichIni.GetInteger(typeId, "AIBasePlanningSide", -1);
-	if (planning >= rules.GetSection("Sides").Size()) {
-		return -1;
-	}
 	if (planning >= 0) {
+		if (planning >= rules.GetSection("Sides").Size()) {
+			planning = -1;
+		}
 		return planning;
 	}
 	auto const& cons = utilities::split_string(rules.GetString("AI", "BuildConst"));
@@ -687,13 +693,14 @@ int GuessSideHelper::guessBuildingSide(const CString& typeId, const CIniFile& in
 	return guessGenericSide(typeId);
 }
 
-int GuessSideHelper::guessGenericSide(const CString& pRegName)
+int GuessSideHelper::guessGenericSide(const CString& regName)
 {
 	auto const& mmh = IniMegaFile::GetRules();
-	auto const& owners = utilities::split_string(mmh.GetString(pRegName, "Owner"));
+	auto const& owners = utilities::split_string(mmh.GetString(regName, "Owner"));
 	if (owners.size() <= 0) {
 		return -1;
 	}
+
 	auto const& itr = builder.m_owners.find((std::string)owners[0]);
 	if (itr == builder.m_owners.end()) {
 		return -1;
@@ -705,6 +712,8 @@ void TreeViewBuilder::updateBuildingTypes(HTREEITEM parentNode) {
 	TreeViewCategoryHandler structhouses(this->tree, parentNode);
 	GuessSideHelper sideHelper(*this);
 	auto baseOffset = valadded * 2;
+
+	structhouses.Preallocate(sideInfo, TreeViewTechnoType::Building);
 
 	auto const& bldTypeSec = rules["BuildingTypes"];
 	for (auto i = 0; i < bldTypeSec.Size(); i++) {
@@ -770,6 +779,8 @@ void TreeViewBuilder::updateUnitTypes(HTREEITEM parentNode, const char* typeList
 	TreeViewCategoryHandler structhouses(this->tree, parentNode);
 	GuessSideHelper sideHelper(*this);
 	auto baseOffset = valadded * multiple;
+
+	structhouses.Preallocate(sideInfo, technoType);
 
 	for (auto i = 0; i < rules[typeListId].Size(); i++) {
 		auto const& typeId = rules[typeListId].Nth(i).second;
@@ -1256,13 +1267,27 @@ void CViewObjects::HandleBrushSize(int iTile)
 
 }
 
+void TreeViewCategoryHandler::Preallocate(const TreeViewBuilder::mapSideNodeInfo& sideInfo, TreeViewTechnoType type)
+{
+	for (auto const& [idx, def] : sideInfo) {
+		if (idx < 0) {
+			continue;
+		}
+		if (!(def.CategoryMask & type)) {
+			continue;
+		}
+		GetOrAdd(def.CategoryName);
+	}
+}
+
 HTREEITEM TreeViewCategoryHandler::GetOrAdd(const CString& name)
 {
-	auto const it = structhouses.find((std::string)name);
+	auto&& nameStd = std::string(name);
+	auto const it = structhouses.find(nameStd);
 	if (it != structhouses.end()) {
 		return it->second;
 	}
 	auto newItem = tree.InsertItem(TVIF_PARAM | TVIF_TEXT, GetLanguageStringACP(name), 0, 0, 0, 0, -1, parentNode, TVI_LAST);
-	structhouses.insert({ (std::string)name, newItem });
+	structhouses.insert({ std::move(nameStd), newItem });
 	return newItem;
 }
