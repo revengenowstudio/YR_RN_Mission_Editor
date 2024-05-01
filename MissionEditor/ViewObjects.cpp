@@ -1251,7 +1251,7 @@ void CViewObjects::UpdateDialog()
 	}
 
 #ifdef SMUDGE_SUPP
-	auto const& smudgeTypeSec = rules["TerrainTypes"];
+	auto const& smudgeTypeSec = rules["SmudgeTypes"];
 	for (i = 0; i < smudgeTypeSec.Size(); i++) {
 		auto const& unitname = smudgeTypeSec.Nth(i).second;
 		CString addedString = unitname;
