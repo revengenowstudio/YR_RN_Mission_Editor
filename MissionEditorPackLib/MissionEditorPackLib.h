@@ -181,7 +181,7 @@ namespace FSunPackLib
 	BOOL SetCurrentTMP(LPCSTR szTMP, HMIXFILE hOwner);
 
 
-	BOOL SetCurrentSHP(LPCSTR szSHP, HMIXFILE hOwner);
+	bool SetCurrentSHP(LPCSTR szSHP, HMIXFILE hOwner);
 
 
 	BOOL XCC_GetTMPTileInfo(int iTile, POINT* lpPos, int* lpWidth, int* lpHeight, BYTE* lpDirection, BYTE* lpTileHeight, BYTE* lpTileType, RGBTRIPLE* lpRgbLeft, RGBTRIPLE* lpRgbRight);
@@ -195,7 +195,8 @@ namespace FSunPackLib
 	BOOL LoadTMPImage(int iStart, int iCount, BYTE** lpTileArray);
 
 	BOOL LoadSHPImageInSurface(IDirectDraw4* pdd, HTSPALETTE hPalette, int iImageIndex, int iCount, LPDIRECTDRAWSURFACE4* pdds);
-	BOOL LoadSHPImage(int iImageIndex, int iCount, BYTE** lpPics);
+	// load 'wantedNum' frames at 'startIndex'
+	BOOL LoadSHPImage(int startIndex, int wantedNum, BYTE** lpPics);
 	BOOL LoadSHPImage(int iImageIndex, std::vector<BYTE>& pic);
 
 	HTSPALETTE LoadTSPalette(LPCSTR szPalette, HMIXFILE hPaletteOwner);

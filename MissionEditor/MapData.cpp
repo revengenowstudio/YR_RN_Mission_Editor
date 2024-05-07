@@ -3493,6 +3493,10 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 					buildinginfo[n].bUrban = TRUE;
 				}
 
+				if (type == "NALASR") {
+					printf("");
+				}
+
 				buildinginfo[n].pic_count = 8;
 				for (auto k = 0; k < 8; k++) {
 					lpPicFile = GetUnitPictureFilename(type, k);

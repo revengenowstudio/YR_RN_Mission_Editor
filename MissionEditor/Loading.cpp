@@ -1233,12 +1233,12 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 	CString filename; // filename of the image
 	char theat = cur_theat; // standard theater char is t (Temperat). a is snow.
 
-	BOOL bAlwaysSetChar = FALSE; // second char is always theater, even if NewTheater not specified!
+	bool bAlwaysSetChar = FALSE; // second char is always theater, even if NewTheater not specified!
 	WORD wStep = 1; // step is 1 for infantry, buildings, etc, and for shp vehicles it specifies the step rate between every direction
 	WORD wStartWalkFrame = 0; // for examply cyborg reaper has another walk starting frame
 	int iTurretOffset = 0; // used for centering y pos of turret (if existing) (for vehicles)
-	const BOOL bStructure = rules["BuildingTypes"].HasValue(lpUnittype); // is this a structure?
-	const BOOL bVehicle = rules["VehicleTypes"].HasValue(lpUnittype); // is this a structure?
+	const bool bStructure = rules["BuildingTypes"].HasValue(lpUnittype); // is this a structure?
+	const bool bVehicle = rules["VehicleTypes"].HasValue(lpUnittype); // is this a structure?
 
 	auto const bPowerUp = !rules.GetString(lpUnittype, "PowersUpBuilding").IsEmpty();
 
@@ -1314,7 +1314,6 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 			SHPHEADER specialanim3_h;
 			BYTE* specialanim4 = NULL;
 			SHPHEADER specialanim4_h;
-			BYTE** lpT = NULL;
 			SHPHEADER* lpT_h = NULL;
 			std::vector<BYTE> turretColors[8];
 			std::vector<BYTE> turretLighting[8];
@@ -1360,8 +1359,8 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 
 				FSunPackLib::VoxelNormalClass vnc = FSunPackLib::VoxelNormalClass::Unknown;
 
-				if (rules.GetBool(image, "Turret")) {
-					turretanim_name = rules.GetString(image, "TurretAnim");
+				if (rules.GetBool(lpUnittype, "Turret")) {
+					turretanim_name = rules.GetString(lpUnittype, "TurretAnim");
 					auto vxl_turretanim_filename = turretanim_name.IsEmpty() ? image + "tur.vxl" : turretanim_name + ".vxl";
 					auto vxl_barrelanim_filename = image + "barl.vxl";
 					auto const& imageID = art.GetString(turretanim_name, "Image");
@@ -1369,40 +1368,40 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 						vxl_turretanim_filename = imageID + ".vxl";
 					}
 
-					if (bStructure && turretanim_name.GetLength() > 0 && !rules.GetBool(image, "TurretAnimIsVoxel")) {
+					if (bStructure && turretanim_name.GetLength() > 0 && !rules.GetBool(lpUnittype, "TurretAnimIsVoxel")) {
 						turretanim_filename = turretanim_name + ".shp";
 						auto const& imageID = art.GetString(turretanim_name, "Image");
 						if (!imageID.IsEmpty()) {
 							turretanim_filename = imageID + ".shp";
 						}
-
-						if (artSection.GetBool("NewTheater")) {
+						turretanim_filename.SetAt(1, 'G');
+						if (artSection.GetBool("NewTheater", true)) {
 							auto tmp = turretanim_filename;
 							tmp.SetAt(1, theat);
-							if (FSunPackLib::XCC_DoesFileExist(tmp, hShpMix))
+							if (FSunPackLib::XCC_DoesFileExist(tmp, hShpMix)) {
 								turretanim_filename = tmp;
+							}
 						}
 
-
+						turretanim_filename.MakeUpper();
 						FSunPackLib::SetCurrentSHP(turretanim_filename, hShpMix);
 						FSunPackLib::XCC_GetSHPHeader(&head);
 
-						int iStartTurret = 0;
-						const WORD wAnimCount = 4; // anims between each "normal" direction, seems to be hardcoded
+						auto const turretFrameStart = art.GetInteger(turretanim_name, "LoopStart");
+						auto const turretFrameCount = art.GetInteger(turretanim_name, "LoopEnd", 32);
+						const WORD wAnimCount = turretFrameCount / 8; // anims between each "normal" direction
 
-						int i;
-
-						for (i = 0; i < 8; i++) {
-							if (iStartTurret + i * wAnimCount < head.c_images) {
-								FSunPackLib::XCC_GetSHPImageHeader(iStartTurret + i * wAnimCount, &turretinfo[i]);
+						for (auto i = 0; i < 8; i++) {
+							if (turretFrameStart + i * wAnimCount < head.c_images) {
+								FSunPackLib::XCC_GetSHPImageHeader(turretFrameStart + i * wAnimCount, &turretinfo[i]);
 								FSunPackLib::XCC_GetSHPHeader(&turrets_h[i]);
-								FSunPackLib::LoadSHPImage(iStartTurret + i * wAnimCount, turretColors[i]);
+								FSunPackLib::LoadSHPImage(turretFrameStart + i * wAnimCount, turretColors[i]);
 								turretLighting[i].clear();
 							}
 
 						}
 					} else if (
-						(bStructure && turretanim_name.GetLength() > 0 && rules.GetBool(image, "TurretAnimIsVoxel"))
+						(bStructure && !turretanim_name.IsEmpty() && rules.GetBool(lpUnittype, "TurretAnimIsVoxel"))
 						|| (!bStructure && (FindFileInMix(vxl_turretanim_filename) || FindFileInMix(vxl_barrelanim_filename)))
 						) {
 						turretanim_filename = vxl_turretanim_filename;
@@ -1545,16 +1544,15 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 				if (bSuccess) {
 
 					FSunPackLib::XCC_GetSHPHeader(&head);
-					int i;
 					int maxPics = head.c_images;
-					if (maxPics > 8) {
-						maxPics = 8; // we only need 8 pictures for every direction!
-					}
-					if (bStructure && !bPowerUp && !rules.GetBool(image, "Turret")) {
+					if (bStructure && !bPowerUp) {
 						maxPics = 1;
 					}
-					if (bVoxelTurret) {
+					if (rules.GetBool(lpUnittype, "Turret")) {
 						maxPics = 8;
+					}
+					if (maxPics > 8) {
+						maxPics = 8; // we only need 8 pictures for every direction!
 					}
 
 					if (!bStructure && rules.GetBool(image, "Turret")) {
@@ -1572,32 +1570,23 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 
 
 					// create an array of pointers to directdraw surfaces
-					lpT = new(BYTE * [maxPics]);
+					auto lpT = new(BYTE * [maxPics]);
 					::memset(lpT, 0, sizeof(BYTE) * maxPics);
 					std::vector<std::vector<BYTE>> lighting(maxPics);
 					std::vector<SHPIMAGEHEADER> shp_image_headers(maxPics);
 
-					if (bVoxelTurret && bStructure) {
-						for (i = 0; i < maxPics; i++) {
-							FSunPackLib::LoadSHPImage(0, 1, &lpT[i]);
-							FSunPackLib::XCC_GetSHPImageHeader(0, &shp_image_headers[i]);
-						}
-					} else if (wStep == 1 && (rules.GetString(lpUnittype, "PowersUpBuilding").IsEmpty() || !rules.GetBool(lpUnittype, "Turret"))) {
-						// standard case...
-						FSunPackLib::LoadSHPImage(wStartWalkFrame, maxPics, lpT);
-						for (int i = 0; i < maxPics; ++i) {
-							FSunPackLib::XCC_GetSHPImageHeader(wStartWalkFrame + i, &shp_image_headers[i]);
-						}
+					if (lpUnittype == "CAWBNKR1") {
+						printf("");
+					}
 
-					} else if (!rules.GetString(lpUnittype, "PowersUpBuilding").IsEmpty() && rules.GetBool(lpUnittype, "Turret")) {
-						// a "real" turret (vulcan cannon, etc...)
-						for (i = 0; i < maxPics; i++) {
-							FSunPackLib::LoadSHPImage(i * 4, 1, &lpT[i]);
-							FSunPackLib::XCC_GetSHPImageHeader(i * 4, &shp_image_headers[i]);
+					if (bStructure) {
+						for (auto i = 0; i < maxPics; i++) {
+							FSunPackLib::XCC_GetSHPImageHeader(0, &shp_image_headers[i]);
+							FSunPackLib::LoadSHPImage(0, 1, &lpT[i]);
 						}
-					} else {
+					} else {// vehicle, infantry
 						// walk frames used
-						for (i = 0; i < maxPics; i++) {
+						for (auto i = 0; i < maxPics; i++) {
 							const int dir = bVehicle ? ((i + 1) % 8) : i;
 							const int pic_in_file = dir * wStep + wStartWalkFrame;
 							FSunPackLib::LoadSHPImage(pic_in_file, 1, &lpT[i]);
@@ -1605,20 +1594,12 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 						}
 					}
 
-					for (i = 0; i < maxPics; i++) {
-						int pic_in_file = i;
-						if (bStructure && bVoxelTurret) pic_in_file = 0;
-						SHPIMAGEHEADER imghead = shp_image_headers[i];
-						//FSunPackLib::XCC_GetSHPImageHeader(pic_in_file, &imghead);
-
+					// this block handles one-direction only building frame
+					if (bStructure) {
+						SHPIMAGEHEADER imghead = shp_image_headers[0];
+						auto blitDst = lpT[0];
 						if (bib != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, bib, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, 0, head.cx, head.cy, bib, bib_h.cx, bib_h.cy);
+							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, bib, bib_h.cx, bib_h.cy);
 
 							imghead.cx = head.cx - imghead.x; // update size of main graphic
 							imghead.cy = head.cy - imghead.y;
@@ -1626,144 +1607,73 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 						}
 
 						if (activeanim != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, activeanim, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, 0, head.cx, head.cy, activeanim, activeanim_h.cx, activeanim_h.cy);
+							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, activeanim, activeanim_h.cx, activeanim_h.cy);
 
 
 						}
 
 						if (idleanim != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, idleanim, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, 0, head.cx, head.cy, idleanim, idleanim_h.cx, idleanim_h.cy);
+							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, idleanim, idleanim_h.cx, idleanim_h.cy);
 
 
 						}
 
 						if (activeanim2 != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, activeanim2, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, 0, head.cx, head.cy, activeanim2, activeanim2_h.cx, activeanim2_h.cy);
+							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, activeanim2, activeanim2_h.cx, activeanim2_h.cy);
 
 						}
 
 						if (activeanim3 != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, activeanim3, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, 0, head.cx, head.cy, activeanim3, activeanim3_h.cx, activeanim3_h.cy);
+							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, activeanim3, activeanim3_h.cx, activeanim3_h.cy);
 
 						}
 
 						if (superanim1 != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, superanim1, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, superanim_1_zadjust, head.cx, head.cy, superanim1, superanim1_h.cx, superanim1_h.cy);
-
-
+							Blit_Pal(blitDst, 0, superanim_1_zadjust, head.cx, head.cy, superanim1, superanim1_h.cx, superanim1_h.cy);
 						}
 
 						if (superanim2 != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, superanim2, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, superanim_2_zadjust, head.cx, head.cy, superanim2, superanim2_h.cx, superanim2_h.cy);
-
-
+							Blit_Pal(blitDst, 0, superanim_2_zadjust, head.cx, head.cy, superanim2, superanim2_h.cx, superanim2_h.cy);
 						}
 
 						if (superanim3 != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, superanim3, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, superanim_3_zadjust, head.cx, head.cy, superanim3, superanim3_h.cx, superanim3_h.cy);
-
-
+							Blit_Pal(blitDst, 0, superanim_3_zadjust, head.cx, head.cy, superanim3, superanim3_h.cx, superanim3_h.cy);
 						}
-
 						if (superanim4 != NULL && strcmp(lpUnittype, "YAGNTC") != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, superanim4, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, superanim_4_zadjust, head.cx, head.cy, superanim4, superanim4_h.cx, superanim4_h.cy);
+							Blit_Pal(blitDst, 0, superanim_4_zadjust, head.cx, head.cy, superanim4, superanim4_h.cx, superanim4_h.cy);
 
 
 						}
-
 						if (specialanim1 != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, specialanim1, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, 0, head.cx, head.cy, specialanim1, specialanim1_h.cx, specialanim1_h.cy);
-
-
+							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, specialanim1, specialanim1_h.cx, specialanim1_h.cy);
 						}
-
 						if (specialanim2 != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, specialanim2, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, 0, head.cx, head.cy, specialanim2, specialanim2_h.cx, specialanim2_h.cy);
-
+							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, specialanim2, specialanim2_h.cx, specialanim2_h.cy);
 						}
-
 						if (specialanim3 != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, specialanim3, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, 0, head.cx, head.cy, specialanim3, specialanim3_h.cx, specialanim3_h.cy);
-
-
+							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, specialanim3, specialanim3_h.cx, specialanim3_h.cy);
 						}
 
 						if (specialanim4 != NULL) {
-							DDBLTFX fx;
-
-							::memset(&fx, 0, sizeof(DDBLTFX));
-							fx.dwSize = sizeof(DDBLTFX);
-
-							//lpT[i]->Blt(NULL, specialanim4, NULL, DDBLT_KEYSRC | DDBLT_WAIT , &fx);
-							Blit_Pal(lpT[i], 0, 0, head.cx, head.cy, specialanim4, specialanim4_h.cx, specialanim4_h.cy);
+							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, specialanim4, specialanim4_h.cx, specialanim4_h.cy);
 
 						}
+					}
+
+					for (auto i = 0; i < maxPics; i++) {
+						SHPIMAGEHEADER* imghead = &shp_image_headers[i];
+						if (bStructure) {
+							imghead = &shp_image_headers[0];
+							if (!lpT[i]) {
+								auto const dataLen = imghead->cx * imghead->cy;
+								auto data = new(BYTE[dataLen]);
+								memcpy(data, lpT[0], dataLen);
+								lpT[i] = data;
+							}
+						}
+						//FSunPackLib::XCC_GetSHPImageHeader(pic_in_file, &imghead);
+
+
 
 						if (!vxlBarrelLighting[i].empty() || !turretLighting[i].empty())
 							lighting[i].resize(head.cx * head.cy, 46);  // value needs to lead to 1.0 lighting
@@ -1823,24 +1733,26 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 							ddsd.dwWidth = turrets_h[i].cx;
 							ddsd.dwHeight = turrets_h[i].cy;
 
-							int XMover, YMover;
-							char c[50];
-							itoa(i, c, 10);
-#ifdef RA2_MODE
-							XMover = g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "X");
-							YMover = g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "Y");
-							XMover += g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "X" + c);
-							YMover += g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "Y" + c);
-#else
-							XMover = g_data.GetInteger("BuildingVoxelTurrets", lpUnittype + "X");
-							YMover = g_data.GetInteger("BuildingVoxelTurrets", lpUnittype + "Y");
-#endif
+							int XMover = 0;
+							int YMover = 0;
 
 							RECT srcRect, destRect;
 
 							if (bVoxelTurret) {
-								int mx = head.cx / 2 + rules.GetInteger(image, "TurretAnimX") - turretinfo[i].x;
-								int my = head.cy / 2 + rules.GetInteger(image, "TurretAnimY") - turretinfo[i].y;
+								int mx = head.cx / 2 + rules.GetInteger(lpUnittype, "TurretAnimX") - turretinfo[i].x;
+								int my = head.cy / 2 + rules.GetInteger(lpUnittype, "TurretAnimY") - turretinfo[i].y;
+
+								char c[50];
+								itoa(i, c, 10);
+#ifdef RA2_MODE
+								XMover = g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "X");
+								YMover = g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "Y");
+								XMover += g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "X" + c);
+								YMover += g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "Y" + c);
+#else
+								XMover = g_data.GetInteger("BuildingVoxelTurrets", lpUnittype + "X");
+								YMover = g_data.GetInteger("BuildingVoxelTurrets", lpUnittype + "Y");
+#endif
 
 								srcRect.top = 0;
 								srcRect.left = 0;
@@ -1851,13 +1763,9 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 								destRect.right = destRect.left + ddsd.dwWidth;;
 								destRect.bottom = destRect.top + ddsd.dwHeight;
 
-							} else // !bVoxelTurret
-							{
-
-								int mx = rules.GetInteger(image, "TurretAnimX");
-								int my = rules.GetInteger(image, "TurretAnimY");//+rules.GetInteger(image, "barrelAnimZAdjust");
-
-
+							} else {// !bVoxelTurret
+								int mx = rules.GetInteger(lpUnittype, "TurretAnimX");
+								int my = rules.GetInteger(lpUnittype, "TurretAnimY");//+rules.GetInteger(image, "barrelAnimZAdjust");
 
 								srcRect.top = 0;
 								srcRect.left = 0;
@@ -1921,7 +1829,7 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 
 						}
 
-						if (!bPowerUp && i != 0 && (imghead.unknown == 0 && !g_data.GetBool("Debug", "IgnoreSHPImageHeadUnused")) && bStructure) {
+						if (!bPowerUp && i != 0 && (imghead->unknown == 0 && !g_data.GetBool("Debug", "IgnoreSHPImageHeadUnused")) && bStructure) {
 							if (lpT[i]) delete[] lpT[i];
 							lpT[i] = NULL;
 						} else {
@@ -1948,10 +1856,10 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 							if (hPalette == m_hPalUnitTemp || hPalette == m_hPalUnitUrb || hPalette == m_hPalUnitSnow || hPalette == m_hPalUnitDes || hPalette == m_hPalUnitLun || hPalette == m_hPalUnitUbn) p.pal = iPalUnit;
 							if (hPalette == m_hPalLib) p.pal = iPalLib;
 
-							p.x = imghead.x;
-							p.y = imghead.y;
-							p.wHeight = imghead.cy;
-							p.wWidth = imghead.cx;
+							p.x = imghead->x;
+							p.y = imghead->y;
+							p.wHeight = imghead->cy;
+							p.wWidth = imghead->cx;
 							p.wMaxWidth = head.cx;
 							p.wMaxHeight = head.cy;
 							p.bType = PICDATA_TYPE_SHP;
@@ -3643,7 +3551,7 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 
 					FSunPackLib::SetTSPaletteEntry(hPalette, 0x10 + i, &rgbNew, &rgbOld[i]);
 				}
-			}
+		}
 #endif
 
 			FSunPackLib::LoadSHPImage(0, maxPics, lpT);
@@ -3703,9 +3611,9 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 
 
 			delete[] lpT;
-		}
-
 	}
+
+}
 
 	int i;
 	for (i = 0; i < 0xFF; i++) {
@@ -4435,20 +4343,20 @@ void CLoading::FreeAll()
 #endif
 
 			i->second.pic = NULL;
-		} catch (...) {
-			CString err;
-			err = "Access violation while trying to release surface ";
-			char c[6];
-			itoa(e, c, 10);
-			err += c;
+			} catch (...) {
+				CString err;
+				err = "Access violation while trying to release surface ";
+				char c[6];
+				itoa(e, c, 10);
+				err += c;
 
-			err += "\n";
-			OutputDebugString(err);
-			continue;
+				err += "\n";
+				OutputDebugString(err);
+				continue;
+			}
+
+			i++;
 		}
-
-		i++;
-	}
 
 
 
@@ -4469,7 +4377,7 @@ void CLoading::FreeAll()
 	} catch (...) {
 		errstream << "Exception while freeing DirectDraw" << endl;
 	}
-}
+	}
 
 void CLoading::PostNcDestroy()
 {
@@ -4738,7 +4646,7 @@ void CLoading::LoadStrings()
 			//CCStrings[*rules.GetSectionName(i)].SetString=rul
 			CCStrings[*rules.GetSectionName(i)].SetString((LPSTR)(LPCSTR)rules.GetSection(i)->values["Name"]);
 		}
-	}
+}
 #endif
 
 

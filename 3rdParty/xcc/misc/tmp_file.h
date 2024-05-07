@@ -27,7 +27,7 @@ public:
 	bool is_valid() const
 	{
 		const t_tmp_header& h = header();
-		int size = get_size();
+		auto const size = get_size();
 		return !(sizeof(t_tmp_header) > size ||
 			h.cx != 24 ||
 			h.cy != 24 ||

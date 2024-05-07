@@ -558,26 +558,30 @@ namespace FSunPackLib
 		return TRUE;
 	};
 
-	BOOL SetCurrentSHP(LPCSTR szSHP, HMIXFILE hOwner)
+	bool SetCurrentSHP(LPCSTR szSHP, HMIXFILE hOwner)
 	{
-		if (cur_shp.is_open()) cur_shp.close();
+		if (cur_shp.is_open()) {
+			cur_shp.close();
+		}
 
 		if (hOwner == NULL) {
 			if (open_read(cur_shp, szSHP) != 0) {
-				return FALSE;
+				return false;
 			}
 		} else {
-			int id = mixfiles[hOwner - 1].get_id(mixfiles[hOwner - 1].get_game(), szSHP);
-			int size = mixfiles[hOwner - 1].get_size(id);
-			if (size == 0)
+			auto const id = mixfiles[hOwner - 1].get_id(mixfiles[hOwner - 1].get_game(), szSHP);
+			auto const size = mixfiles[hOwner - 1].get_size(id);
+			if (size == 0) {
 				OutputDebugString("NULL size");
+				return false;
+			}
 			BYTE* b = new(BYTE[size]);
 			mixfiles[hOwner - 1].seek(mixfiles[hOwner - 1].get_offset(id));
 			mixfiles[hOwner - 1].read(b, size);
 			cur_shp.load(Cvirtual_binary(b, size));
 		}
 
-		return TRUE;
+		return true;
 	};
 
 	BOOL XCC_GetTMPTileInfo(int iTile, POINT* lpPos, int* lpWidth, int* lpHeight, BYTE* lpDirection, BYTE* lpTileHeight, BYTE* lpTileType, RGBTRIPLE* lpRgbLeft, RGBTRIPLE* lpRgbRight)
@@ -876,7 +880,7 @@ namespace FSunPackLib
 
 	}
 
-	BOOL LoadSHPImage(int iImageIndex, int iCount, BYTE** lpPics)
+	BOOL LoadSHPImage(int startIndex, int wantedNum, BYTE** lpPics)
 	{
 		t_shp_ts_image_header imghead;
 		BYTE* image = NULL;
@@ -889,26 +893,22 @@ namespace FSunPackLib
 			return FALSE;
 		}
 
-
-
-
-		int pic;
 		std::vector<byte> decode_image_buffer;
-		for (pic = 0; pic < iCount; pic++) {
-			if (cur_shp.get_image_header(iImageIndex + pic)) {
-				imghead = *(cur_shp.get_image_header(iImageIndex + pic));
+		for (auto frameIdx = 0; frameIdx < wantedNum; frameIdx++) {
+			if (cur_shp.get_image_header(startIndex + frameIdx)) {
+				imghead = *(cur_shp.get_image_header(startIndex + frameIdx));
 				// if(imghead.offset!=0)
 				{
 
-					if (cur_shp.is_compressed(iImageIndex + pic)) {
+					if (cur_shp.is_compressed(startIndex + frameIdx)) {
 						decode_image_buffer.resize(imghead.cx * imghead.cy);
 						image = decode_image_buffer.data();
-						decode3(cur_shp.get_image(iImageIndex + pic), image, imghead.cx, imghead.cy);
+						decode3(cur_shp.get_image(startIndex + frameIdx), image, imghead.cx, imghead.cy);
 					} else
-						image = (unsigned char*)cur_shp.get_image(iImageIndex + pic);
+						image = (unsigned char*)cur_shp.get_image(startIndex + frameIdx);
 
 
-					lpPics[pic] = new(BYTE[head.cx * head.cy]);
+					lpPics[frameIdx] = new(BYTE[head.cx * head.cy]);
 
 					int i, e;
 					for (i = 0; i < head.cx; i++) {
@@ -920,9 +920,9 @@ namespace FSunPackLib
 								dwRead = (i - imghead.x) + (e - imghead.y) * imghead.cx;
 
 							if (dwRead != 0xFFFFFFFF) {
-								lpPics[pic][dwWrite] = image[dwRead];
+								lpPics[frameIdx][dwWrite] = image[dwRead];
 							} else
-								lpPics[pic][dwWrite] = 0;
+								lpPics[frameIdx][dwWrite] = 0;
 
 						}
 

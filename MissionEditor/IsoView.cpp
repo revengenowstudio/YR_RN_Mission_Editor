@@ -5506,6 +5506,7 @@ void CIsoView::DrawMap()
 							SetError("Loading graphics");
 							theApp.m_loading->LoadUnitGraphic(buildingId);
 							::Map->UpdateBuildingInfo(&buildingId);
+							
 							pic = buildinginfo[id].pic[0];
 						}
 						if (pic.pic == NULL) {

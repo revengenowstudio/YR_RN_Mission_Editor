@@ -52,28 +52,20 @@ inline CString GetUnitPictureFilename(LPCTSTR lpUnitName, DWORD dwPicIndex)
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	CString UnitName = lpUnitName;
+	auto artname = rules.GetStringOr(lpUnitName, "Image", lpUnitName);
+	artname = ini.GetStringOr(lpUnitName, "Image", artname);
 
-	UnitName = ini.GetString(lpUnitName, "Image");
-	if (UnitName.IsEmpty()) {
-		UnitName = rules.GetString(lpUnitName, "Image");
-	}
-
-	CString artname = UnitName;
-	if (UnitName.IsEmpty()) {
-		artname = lpUnitName;
-	}
-	auto const shapeName = art.GetString(UnitName, "Image");
+	auto const& shapeName = art.GetString(artname, "Image");
 
 	if (!shapeName.IsEmpty()) {
-		if (!g_data.GetBool("IgnoreArtImage", UnitName)) {
+		if (!g_data.GetBool("IgnoreArtImage", artname)) {
 			artname = shapeName;
 		}
 	}
 
-	CString filename = UnitName;
+	CString filename = artname;
 
-	if (art.GetBool(UnitName, "NewTheater") && !art.GetBool(UnitName, "DemandLoad")) {
+	if (art.GetBool(artname, "NewTheater") && !art.GetBool(artname, "DemandLoad")) {
 		filename.SetAt(1, 'T');
 	}
 
@@ -81,7 +73,7 @@ inline CString GetUnitPictureFilename(LPCTSTR lpUnitName, DWORD dwPicIndex)
 	_itoa_s(dwPicIndex, n, 10);
 
 
-	if (pics.find(artname + n) != pics.end()) {
+	if (pics.find((artname + n)) != pics.end()) {
 		filename = artname; // yes, found
 		filename += n;
 	} else if (pics.find(artname + ".bmp") != pics.end()) // since June, 15th (Matze): Only use BMP if no SHP/VXL exists
