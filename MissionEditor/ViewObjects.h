@@ -32,14 +32,10 @@
 #define MAKE_MASK(refVal) 1 << static_cast<int>(refVal) 
 
 class TreeViewBuilder;
-class CViewObjects;
-class IniFileGroup;
 
 using IgnoreSet = std::unordered_set<std::string>;
 
 static const IgnoreSet CollectIgnoreSet();
-
-extern CIniFile rules;
 
 class TreeRoot {
 	friend class TreeViewBuilder;
@@ -223,20 +219,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 private:
 	void HandleBrushSize(int iTile);
-};
-
-class IniMegaFile
-{
-	friend class IniFileGroup;
-public:
-	static IniFileGroup GetRules();
-
-	static bool IsNullOrEmpty(const  CString& value) { return isNullOrEmpty(value); }
-
-private:
-	static bool isNullOrEmpty(const CString& value);
-
-
 };
 
 /////////////////////////////////////////////////////////////////////////////
