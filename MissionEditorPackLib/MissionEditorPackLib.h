@@ -35,10 +35,10 @@ typedef DWORD HTSPALETTE;
 
 struct SHPHEADER
 {
-	__int16 zero;
-	__int16 cx;
-	__int16 cy;
-	__int16 c_images;
+	__int16 zero;// type
+	__int16 cx;// width
+	__int16 cy;// height
+	__int16 c_images;// count
 };
 
 struct SHPIMAGEHEADER
@@ -199,9 +199,10 @@ namespace FSunPackLib
 	BOOL LoadSHPImage(int startIndex, int wantedNum, BYTE** lpPics);
 	BOOL LoadSHPImage(int iImageIndex, std::vector<BYTE>& pic);
 
+	bool LoadTSPalette(RGBTRIPLE* ret, const std::string& szPalette, HMIXFILE hPaletteOwner = NULL);
+	bool LoadTSPalette(RGBTRIPLE* ret, LPCSTR szPalette, HMIXFILE hPaletteOwner = NULL);
 	HTSPALETTE LoadTSPalette(LPCSTR szPalette, HMIXFILE hPaletteOwner);
 	HTSPALETTE LoadTSPalette(const std::string& szPalette, HMIXFILE hPaletteOwner);
-
 
 	BOOL SetTSPaletteEntry(HTSPALETTE hPalette, BYTE bIndex, RGBTRIPLE* rgb, RGBTRIPLE* orig);
 

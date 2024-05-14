@@ -25,6 +25,7 @@ struct IUnknown;
 
 #include <map>
 #include <vector>
+#include <optional>
 #include "mix_file.h"
 
 #include "cc_file.h"
@@ -1934,46 +1935,78 @@ namespace FSunPackLib
 		return TRUE;
 	}
 
+	bool loadTSPaletteRaw(Cpal_file& pal, const std::string& szPalette)
+	{
+		return open_read(pal, szPalette) == 0;
+	}
 
+	bool loadTSPaletteFromMix(Cpal_file& pal, const std::string& szPalette, HMIXFILE hPaletteOwner)
+	{
+		if (szPalette[0] == '_' && szPalette[1] == 'I' && szPalette[2] == 'D') {
+			char id[256];
+			strcpy_s(id, &szPalette[3]);
+			int iId = atoi(id);
+			return pal.open(iId, mixfiles[hPaletteOwner - 1]) == 0;
+		}
+		return pal.open(szPalette, mixfiles[hPaletteOwner - 1]) == 0;
+	}
+
+
+	std::optional<Cpal_file> loadTSPalette(const std::string& szPalette, HMIXFILE hPaletteOwner)
+	{
+		Cpal_file pal;
+		if (hPaletteOwner == NULL) {
+			if (!loadTSPaletteRaw(pal, szPalette)) {
+				return std::nullopt;
+			}
+		} else {
+			if (!loadTSPaletteFromMix(pal, szPalette, hPaletteOwner)) {
+				return std::nullopt;
+			}
+		}
+		if (!pal.is_open()) {
+			return std::nullopt;
+		}
+		return pal;
+	}
+
+	bool LoadTSPalette(RGBTRIPLE* ret, const std::string& szPalette, HMIXFILE hPaletteOwner)
+	{
+		if (ret == nullptr) {
+			return false;
+		}
+
+		auto&& palRet = loadTSPalette(szPalette, hPaletteOwner);
+		if (!palRet.has_value()) {
+			return false;
+		}
+		auto&& pal = palRet.value();
+		auto const paldata = reinterpret_cast<const RGBTRIPLE*>(pal.get_data());
+		memcpy(ret, paldata, 768);
+		convert_palet_18_to_24(reinterpret_cast<t_palet_entry*>(ret));
+		pal.close();
+		return true;
+	}
+
+	bool LoadTSPalette(RGBTRIPLE* ret, LPCSTR szPalette, HMIXFILE hPaletteOwner)
+	{
+		return LoadTSPalette(ret, std::string(szPalette), hPaletteOwner);
+	}
 
 	HTSPALETTE LoadTSPalette(const std::string& szPalette, HMIXFILE hPaletteOwner)
 	{
-		Cpal_file pal;
-		RGBTRIPLE* paldata;
-
-		if (dwPalCount > 255)
+		if (dwPalCount > 255) {
 			return NULL;
-		if (hPaletteOwner == NULL) {
-			if (open_read(pal, szPalette))
-				return NULL;
-		} else {
-			if (szPalette[0] == '_' && szPalette[1] == 'I' && szPalette[2] == 'D') {
-				char id[256];
-				strcpy_s(id, &szPalette[3]);
-				int iId = atoi(id);
-				if (pal.open(iId, mixfiles[hPaletteOwner - 1]))
-					return NULL;
-			} else {
-				if (pal.open(szPalette, mixfiles[hPaletteOwner - 1]) != 0)
-					return NULL;
-			}
 		}
 
-		if (!pal.is_open())
+		t_palet buffer;
+		if (!LoadTSPalette(reinterpret_cast<RGBTRIPLE*>(buffer), szPalette, hPaletteOwner)) {
 			return NULL;
-
-		dwPalCount++;
-
-
-		paldata = (RGBTRIPLE*)pal.get_data();
-		//t_palet t_p;
-		memcpy(ts_palettes[dwPalCount - 1], paldata, 768);
-		bFirstConv[dwPalCount - 1] = TRUE;
-		convert_palet_18_to_24(ts_palettes[dwPalCount - 1]);
-
-		pal.close();
+		}
+		memcpy(ts_palettes[dwPalCount], buffer, 768);
+		bFirstConv[dwPalCount] = TRUE;
+		dwPalCount++;// HTSPALETTE is always internal `index+1`
 		return dwPalCount;
-
 	}
 
 	HTSPALETTE LoadTSPalette(LPCSTR szPalette, HMIXFILE hPaletteOwner)

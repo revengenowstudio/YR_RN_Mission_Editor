@@ -23,6 +23,7 @@
 
 #include "FinalSunDlg.h"	
 #include "MissionEditorPackLib.h"
+#include "Palettes.h"
 #include <memory>
 #include <optional>
 
@@ -90,8 +91,6 @@ class CLoading : public CDialog
 {
 	// Construction
 public:
-	void CreateConvTable(RGBTRIPLE* pal, int* iPal);
-	void FetchPalettes();
 	void PrepareUnitGraphic(LPCSTR lpUnittype);
 	void LoadStrings();
 	void FreeAll();
@@ -114,11 +113,17 @@ public:
 	void LoadBuildingSubGraphic(const CString& subkey, const CIniFileSection& artSection, BOOL bAlwaysSetChar, char theat, HMIXFILE hShpMix, SHPHEADER& shp_h, BYTE*& shp);
 	void LoadOverlayGraphic(const CString& lpOvrlName, int iOvrlNum);
 	void InitVoxelNormalTables();
-	HTSPALETTE GetIsoPalette(char theat);
-	HTSPALETTE GetUnitPalette(char theat);
 	std::optional<FindShpResult> FindUnitShp(const CString& image, char preferred_theat, const CIniFileSection& artSection);
 	char cur_theat;
 
+	HMIXFILE FindFileInMix(LPCTSTR lpFilename, TheaterChar* pTheaterChar = NULL);
+
+	const HMIXFILE CacheMix() const {
+		return m_hCache;
+	}
+	const EXPANDMIX* ExpandMixes() const {
+		return m_hExpand;
+	}
 
 	// Dialog data
 		//{{AFX_DATA(CLoading)
@@ -156,29 +161,9 @@ private:
 	int m_pic_count;
 	int m_bmp_count;
 	BOOL LoadTile(LPCSTR lpFilename, HMIXFILE hOwner, HTSPALETTE hPalette, DWORD dwID, BOOL bReplacement);
-	HTSPALETTE m_hPalIsoTemp;
-	HTSPALETTE m_hPalIsoSnow;
-	HTSPALETTE m_hPalIsoUrb;
 
-	HTSPALETTE m_hPalUnitTemp;
-	HTSPALETTE m_hPalUnitSnow;
-	HTSPALETTE m_hPalUnitUrb;
-	HTSPALETTE m_hPalTemp;
-	HTSPALETTE m_hPalSnow;
-	HTSPALETTE m_hPalUrb;
-	HTSPALETTE m_hPalLib;
-	// YR pals:
-	HTSPALETTE m_hPalLun;
-	HTSPALETTE m_hPalDes;
-	HTSPALETTE m_hPalUbn;
-	HTSPALETTE m_hPalIsoLun;
-	HTSPALETTE m_hPalIsoDes;
-	HTSPALETTE m_hPalIsoUbn;
-	HTSPALETTE m_hPalUnitLun;
-	HTSPALETTE m_hPalUnitDes;
-	HTSPALETTE m_hPalUnitUbn;
+	Palettes m_palettes;
 
-	HMIXFILE FindFileInMix(LPCTSTR lpFilename, TheaterChar* pTheaterChar = NULL);
 	HMIXFILE m_hLocal;
 	HMIXFILE m_hSno;
 	HMIXFILE m_hTem;

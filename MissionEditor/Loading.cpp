@@ -1029,60 +1029,6 @@ const Vec3f lightDirection = Vec3f(1.0f, 0.0f, -1.0f).normalize();
 #endif
 
 
-HTSPALETTE CLoading::GetIsoPalette(char theat)
-{
-	HTSPALETTE isoPalette = m_hPalIsoTemp;
-	switch (theat) {
-	case 'T':
-	case 'G':
-		isoPalette = m_hPalIsoTemp;
-		break;
-	case 'A':
-		isoPalette = m_hPalIsoSnow;
-		break;
-	case 'U':
-		isoPalette = m_hPalIsoUrb;
-		break;
-	case 'N':
-		isoPalette = m_hPalIsoUbn;
-		break;
-	case 'D':
-		isoPalette = m_hPalIsoDes;
-		break;
-	case 'L':
-		isoPalette = m_hPalIsoLun;
-		break;
-	}
-	return isoPalette;
-}
-
-HTSPALETTE CLoading::GetUnitPalette(char theat)
-{
-	HTSPALETTE isoPalette = m_hPalUnitTemp;
-	switch (theat) {
-	case 'T':
-	case 'G':
-		isoPalette = m_hPalUnitTemp;
-		break;
-	case 'A':
-		isoPalette = m_hPalUnitSnow;
-		break;
-	case 'U':
-		isoPalette = m_hPalUnitUrb;
-		break;
-	case 'N':
-		isoPalette = m_hPalUnitUbn;
-		break;
-	case 'D':
-		isoPalette = m_hPalUnitDes;
-		break;
-	case 'L':
-		isoPalette = m_hPalUnitLun;
-		break;
-	}
-	return isoPalette;
-}
-
 CString theatToSuffix(char theat)
 {
 	if (theat == 'T') return ".tem";
@@ -1126,20 +1072,20 @@ std::optional<FindShpResult> CLoading::FindUnitShp(const CString& image, char pr
 	const auto& unitPalettePrefixes = g_data["ForceUnitPalettePrefix"];
 	if (unitPalettePrefixes.end() != std::find_if(unitPalettePrefixes.begin(), unitPalettePrefixes.end(),
 		[&image](const auto& pair) {return image.Find(pair.second) == 0; })) {
-		forcedPalette = GetUnitPalette(preferred_theat);
+		forcedPalette = m_palettes.GetUnitPalette(preferred_theat);
 	}
 
 	const auto& isoPalettePrefixes = g_data["ForceIsoPalettePrefix"];
 	if (isoPalettePrefixes.end() != std::find_if(isoPalettePrefixes.begin(), isoPalettePrefixes.end(),
 		[&image](const auto& pair) {return image.Find(pair.second) == 0; })) {
-		forcedPalette = GetIsoPalette(preferred_theat);
+		forcedPalette = m_palettes.GetIsoPalette(preferred_theat);
 	}
 
 	const bool isTheater = artSection.GetBool("Theater");
 	const bool isNewTheater = artSection.GetBool("NewTheater");
 	const bool terrainPalette = artSection.GetBool("TerrainPalette");
 
-	auto unitOrIsoPalette = terrainPalette ? GetIsoPalette(preferred_theat) : GetUnitPalette(preferred_theat);
+	auto unitOrIsoPalette = terrainPalette ? m_palettes.GetIsoPalette(preferred_theat) : m_palettes.GetUnitPalette(preferred_theat);
 
 	HMIXFILE curMixFile = 0;
 	CString curFilename = image + ".shp";
@@ -1154,7 +1100,7 @@ std::optional<FindShpResult> CLoading::FindUnitShp(const CString& image, char pr
 			curFilename.MakeLower();
 			curMixFile = FindFileInMix(curFilename, &curMixTheater);
 			if (curMixFile)
-				return FindShpResult(curMixFile, curMixTheater, curFilename, toTheaterChar(suffixToTheat(curSuffix)), forcedPalette ? forcedPalette : GetIsoPalette(suffixToTheat(curSuffix)));
+				return FindShpResult(curMixFile, curMixTheater, curFilename, toTheaterChar(suffixToTheat(curSuffix)), forcedPalette ? forcedPalette : m_palettes.GetIsoPalette(suffixToTheat(curSuffix)));
 		}
 	}
 	// Phase 1: if NewTheater is enabled and first character indicates support, try with real theater, then in order of kTheatersToTry
@@ -1203,7 +1149,7 @@ std::optional<FindShpResult> CLoading::FindUnitShp(const CString& image, char pr
 		curFilename.MakeLower();
 		curMixFile = FindFileInMix(curFilename, &curMixTheater);
 		if (curMixFile)
-			return FindShpResult(curMixFile, curMixTheater, curFilename, toTheaterChar(suffixToTheat(curSuffix)), forcedPalette ? forcedPalette : GetIsoPalette(suffixToTheat(curSuffix)));
+			return FindShpResult(curMixFile, curMixTheater, curFilename, toTheaterChar(suffixToTheat(curSuffix)), forcedPalette ? forcedPalette : m_palettes.GetIsoPalette(suffixToTheat(curSuffix)));
 	}
 	// Phase 6: try with theater in 2nd char even if first char does not indicate support
 	curFilename = image + ".shp";
@@ -1211,7 +1157,7 @@ std::optional<FindShpResult> CLoading::FindUnitShp(const CString& image, char pr
 		curFilename.SetAt(1, curTheater);
 		curMixFile = FindFileInMix(curFilename, &curMixTheater);
 		if (curMixFile)
-			return FindShpResult(curMixFile, curMixTheater, curFilename, toTheaterChar(curTheater), forcedPalette ? forcedPalette : GetIsoPalette(curTheater));
+			return FindShpResult(curMixFile, curMixTheater, curFilename, toTheaterChar(curTheater), forcedPalette ? forcedPalette : m_palettes.GetIsoPalette(curTheater));
 	}
 
 	return std::nullopt;
@@ -2770,117 +2716,16 @@ HMIXFILE CLoading::FindFileInMix(LPCTSTR lpFilename, TheaterChar* pTheaterChar)
 void CLoading::InitPalettes()
 {
 	errstream << "InitPalettes() called\n";
-	if (!FSunPackLib::XCC_ExtractFile("isotem.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache))
-		errstream << "IsoTem.pal failed\n";
-	m_hPalIsoTemp = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("isosno.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache))
-		errstream << "IsoSno.pal failed\n";
-	m_hPalIsoSnow = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("isourb.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache))
-		errstream << "IsoUrb.pal failed\n";
-	m_hPalIsoUrb = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	HMIXFILE m_hCache2 = m_hExpand[100].hECache;
-	if (!FSunPackLib::XCC_ExtractFile("isolun.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache2))
-		errstream << "IsoLun.pal failed\n";
-	m_hPalIsoLun = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("isodes.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache2))
-		errstream << "IsoDes.pal failed\n";
-	m_hPalIsoDes = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("isoubn.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache2))
-		errstream << "IsoUbn.pal failed\n";
-	m_hPalIsoUbn = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-
-	if (!FSunPackLib::XCC_ExtractFile("unittem.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache))
-		errstream << "UnitTem.pal failed";
-	m_hPalUnitTemp = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("unitsno.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache))
-		errstream << "UnitSno.pal failed\n";
-	m_hPalUnitSnow = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("uniturb.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache))
-		errstream << "UnitUrb.pal failed\n";
-	m_hPalUnitUrb = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-
-	if (!FSunPackLib::XCC_ExtractFile("unitlun.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache2))
-		errstream << "UnitLun.pal failed\n";
-	m_hPalUnitLun = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("unitdes.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache2))
-		errstream << "UnitDes.pal failed\n";
-	m_hPalUnitDes = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("unitubn.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache2))
-		errstream << "UnitUbn.pal failed\n";
-	m_hPalUnitUbn = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-
-	if (!FSunPackLib::XCC_ExtractFile("snow.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache))
-		errstream << "Snow.pal failed\n";
-	m_hPalSnow = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("temperat.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache))
-		errstream << "Temperat.pal failed\n";
-	m_hPalTemp = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("urban.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache))
-		errstream << "Urban.pal failed\n";
-	m_hPalUrb = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-
-	if (!FSunPackLib::XCC_ExtractFile("lunar.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache2))
-		errstream << "lunar.pal failed\n";
-	m_hPalLun = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("desert.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache2))
-		errstream << "desert.pal failed\n";
-	m_hPalDes = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-	if (!FSunPackLib::XCC_ExtractFile("urbann.pal", u8AppDataPath + "\\TmpPalette.pal", m_hCache2))
-		errstream << "urbann.pal failed\n";
-	m_hPalUbn = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
-
-	if (!FSunPackLib::XCC_ExtractFile("_ID2124019542", u8AppDataPath + "\\TmpPalette.pal", m_hCache))
-		errstream << "lib.pal failed\n";
-	m_hPalLib = FSunPackLib::LoadTSPalette(u8AppDataPath + "\\TmpPalette.pal", NULL);
-	deleteFile(u8AppDataPath + "\\TmpPalette.pal");
-
+	
+	m_palettes.Init();
 
 	errstream << "\n";
 	errstream.flush();
-
-
 }
 
 void CLoading::InitTMPs(CProgressCtrl* prog)
 {
-	FetchPalettes();
+	m_palettes.FetchPalettes();
 
 
 	MEMORYSTATUS ms;
@@ -2991,17 +2836,33 @@ void CLoading::InitTMPs(CProgressCtrl* prog)
 			if (tiles == &tiles_d) suffix = ".des";
 
 			filename += suffix;
-			HTSPALETTE hPalette = m_hPalIsoTemp;
-			if (tiles == &tiles_s) hPalette = m_hPalIsoSnow;
-			if (tiles == &tiles_u) hPalette = m_hPalIsoUrb;
-			if (tiles == &tiles_t) hPalette = m_hPalIsoTemp;
-			if (tiles == &tiles_un) hPalette = m_hPalIsoUbn;
-			if (tiles == &tiles_d) hPalette = m_hPalIsoDes;
-			if (tiles == &tiles_l) hPalette = m_hPalIsoLun;
+			HTSPALETTE hPalette = m_palettes.m_hPalIsoTemp;
+			if (tiles == &tiles_s) {
+				hPalette =  m_palettes.m_hPalIsoSnow; }
+			if (tiles == &tiles_u) {
+				hPalette =  m_palettes.m_hPalIsoUrb; }
+			if (tiles == &tiles_t) {
+				hPalette = m_palettes.m_hPalIsoTemp;
+			}
+			if (tiles == &tiles_un) {
+				hPalette = m_palettes.m_hPalIsoUbn;
+			}
+			if (tiles == &tiles_d) {
+				hPalette = m_palettes.m_hPalIsoDes;
+			}
+			if (tiles == &tiles_l) {
+				hPalette = m_palettes.m_hPalIsoLun;
+			}
 
 			// MW add: use other...
-			if (FindFileInMix(filename) == NULL && tiles == &tiles_un) { filename = bas_f + ".urb"; hPalette = m_hPalIsoUrb; }
-			if (FindFileInMix(filename) == NULL) { filename = bas_f + ".tem"; hPalette = m_hPalIsoTemp; }
+			if (FindFileInMix(filename) == NULL && tiles == &tiles_un) { 
+				filename = bas_f + ".urb"; 
+				hPalette = m_palettes.m_hPalIsoUrb;
+			}
+			if (FindFileInMix(filename) == NULL) { 
+				filename = bas_f + ".tem"; 
+				hPalette = m_palettes.m_hPalIsoTemp;
+			}
 
 			(*tiledata)[tilecount].bAllowTiberium = bTib;
 			(*tiledata)[tilecount].bAllowToPlace = bPlace;
@@ -3304,7 +3165,6 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 	last_succeeded_operation = 11;
 
 	CString image; // the image used
-	CString filename; // filename of the image
 	SHPHEADER head;
 	char theat = cur_theat;
 	BYTE** lpT = NULL;
@@ -3312,41 +3172,41 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 	char OvrlID[50];
 	itoa(iOvrlNum, OvrlID, 10);
 
-	HTSPALETTE hPalette = m_hPalIsoTemp;
+	HTSPALETTE hPalette = m_palettes.m_hPalIsoTemp;
 	if (cur_theat == 'T') {
-		hPalette = m_hPalIsoTemp;
+		hPalette = m_palettes.m_hPalIsoTemp;
 #ifdef RA2_MODE
-		hPalette = m_hPalIsoTemp;
+		hPalette = m_palettes.m_hPalIsoTemp;
 #endif
 	}
 	if (cur_theat == 'A') {
-		hPalette = m_hPalIsoSnow;
+		hPalette = m_palettes.m_hPalIsoSnow;
 #ifdef RA2_MODE
-		hPalette = m_hPalIsoSnow;
+		hPalette = m_palettes.m_hPalIsoSnow;
 #endif
 	}
-	if (cur_theat == 'U' && m_hPalIsoUrb) {
-		hPalette = m_hPalIsoUrb;
+	if (cur_theat == 'U' && m_palettes.m_hPalIsoUrb) {
+		hPalette = m_palettes.m_hPalIsoUrb;
 #ifdef RA2_MODE
-		hPalette = m_hPalIsoUrb;
+		hPalette = m_palettes.m_hPalIsoUrb;
 #endif		
 	}
-	if (cur_theat == 'N' && m_hPalIsoUbn) {
-		hPalette = m_hPalIsoUbn;
+	if (cur_theat == 'N' && m_palettes.m_hPalIsoUbn) {
+		hPalette = m_palettes.m_hPalIsoUbn;
 #ifdef RA2_MODE
-		hPalette = m_hPalIsoUbn;
+		hPalette = m_palettes.m_hPalIsoUbn;
 #endif		
 	}
-	if (cur_theat == 'L' && m_hPalIsoLun) {
-		hPalette = m_hPalIsoLun;
+	if (cur_theat == 'L' && m_palettes.m_hPalIsoLun) {
+		hPalette = m_palettes.m_hPalIsoLun;
 #ifdef RA2_MODE
-		hPalette = m_hPalIsoLun;
+		hPalette = m_palettes.m_hPalIsoLun;
 #endif		
 	}
-	if (cur_theat == 'D' && m_hPalIsoDes) {
-		hPalette = m_hPalIsoDes;
+	if (cur_theat == 'D' && m_palettes.m_hPalIsoDes) {
+		hPalette = m_palettes.m_hPalIsoDes;
 #ifdef RA2_MODE
-		hPalette = m_hPalIsoDes;
+		hPalette = m_palettes.m_hPalIsoDes;
 #endif		
 	}
 
@@ -3355,10 +3215,10 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 	const auto& unitPalettePrefixes = g_data["ForceOvrlUnitPalettePrefix"];
 	const CString sOvrlName(lpOvrlName_);
 	if (unitPalettePrefixes.end() != std::find_if(unitPalettePrefixes.begin(), unitPalettePrefixes.end(), [&sOvrlName](const auto& pair) {return sOvrlName.Find(pair.second) == 0; })) {
-		forcedPalette = GetUnitPalette(cur_theat);
+		forcedPalette = m_palettes.GetUnitPalette(cur_theat);
 	}
 	if (isoPalettePrefixes.end() != std::find_if(isoPalettePrefixes.begin(), isoPalettePrefixes.end(), [&sOvrlName](const auto& pair) {return sOvrlName.Find(pair.second) == 0; })) {
-		forcedPalette = GetIsoPalette(cur_theat);
+		forcedPalette = m_palettes.GetIsoPalette(cur_theat);
 	}
 
 	HMIXFILE hMix;
@@ -3386,20 +3246,7 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 
 	TruncSpace(image);
 
-	if (cur_theat == 'T') {
-		filename = image + ".tem";
-	} else if (cur_theat == 'A') {
-		filename = image + ".sno";
-	} else if (cur_theat == 'U') {
-		filename = image + ".urb";
-	} else if (cur_theat == 'N') {
-		filename = image + ".ubn";
-	} else if (cur_theat == 'L') {
-		filename = image + ".lun";
-	} else if (cur_theat == 'D') {
-		filename = image + ".des";
-	}
-
+	CString filename = image + theatToSuffix(cur_theat);
 
 	hMix = FindFileInMix(filename);
 
@@ -3411,12 +3258,24 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 			filename.SetAt(1, theat);
 		}
 
-		if (cur_theat == 'U' && m_hPalUnitUrb) hPalette = m_hPalUnitUrb;
-		if (cur_theat == 'T') hPalette = m_hPalUnitTemp;
-		if (cur_theat == 'A') hPalette = m_hPalUnitSnow;
-		if (cur_theat == 'N') hPalette = m_hPalUnitUbn;
-		if (cur_theat == 'L') hPalette = m_hPalUnitLun;
-		if (cur_theat == 'D') hPalette = m_hPalUnitDes;
+		if (cur_theat == 'U' && m_palettes.m_hPalUnitUrb) {
+			hPalette = m_palettes.m_hPalUnitUrb;
+		}
+		if (cur_theat == 'T') {
+			hPalette = m_palettes.m_hPalUnitTemp;
+		}
+		if (cur_theat == 'A') {
+			hPalette = m_palettes.m_hPalUnitSnow;
+		}
+		if (cur_theat == 'N') {
+			hPalette = m_palettes.m_hPalUnitUbn;
+		}
+		if (cur_theat == 'L') {
+			hPalette = m_palettes.m_hPalUnitLun;
+		}
+		if (cur_theat == 'D') {
+			hPalette = m_palettes.m_hPalUnitDes;
+		}
 
 		hMix = FindFileInMix(filename);
 
@@ -3449,47 +3308,59 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 		}
 
 		if (cur_theat == 'T' || cur_theat == 'U') {
-			hPalette = m_hPalUnitTemp;
+			hPalette = m_palettes.m_hPalUnitTemp;
 		} else
-			hPalette = m_hPalUnitSnow;
+			hPalette = m_palettes.m_hPalUnitSnow;
 
 	}
 
 	if (hMix == NULL) {
 		filename = image + ".tem";
 		hMix = FindFileInMix(filename);
-		if (hMix) hPalette = m_hPalIsoTemp;
+		if (hMix) {
+			hPalette = m_palettes.m_hPalIsoTemp;
+		}
 	}
 	if (hMix == NULL) {
 		filename = image + ".sno";
 		hMix = FindFileInMix(filename);
-		if (hMix) hPalette = m_hPalIsoSnow;
+		if (hMix) {
+			hPalette = m_palettes.m_hPalIsoSnow;
+		}
 	}
 	if (hMix == NULL) {
 		filename = image + ".urb";
 		hMix = FindFileInMix(filename);
-		if (hMix && m_hPalIsoUrb) hPalette = m_hPalIsoUrb;
+		if (hMix && m_palettes.m_hPalIsoUrb) {
+			hPalette = m_palettes.m_hPalIsoUrb;
+		}
 	}
 	if (hMix == NULL) {
 		filename = image + ".ubn";
 		hMix = FindFileInMix(filename);
-		if (hMix && m_hPalIsoUbn) hPalette = m_hPalIsoUbn;
+		if (hMix && m_palettes.m_hPalIsoUbn) {
+			hPalette = m_palettes.m_hPalIsoUbn;
+		}
 	}
 	if (hMix == NULL) {
 		filename = image + ".lun";
 		hMix = FindFileInMix(filename);
-		if (hMix && m_hPalIsoLun) hPalette = m_hPalIsoLun;
+		if (hMix && m_palettes.m_hPalIsoLun) {
+			hPalette = m_palettes.m_hPalIsoLun;
+		}
 	}
 	if (hMix == NULL) {
 		filename = image + ".des";
 		hMix = FindFileInMix(filename);
-		if (hMix && m_hPalIsoDes) hPalette = m_hPalIsoDes;
+		if (hMix && m_palettes.m_hPalIsoDes) {
+			hPalette = m_palettes.m_hPalIsoDes;
+		}
 	}
 
 	if (isveinhole == TRUE || isveins == TRUE || istiberium == TRUE) {
-		hPalette = m_hPalTemp;
+		hPalette = m_palettes.m_hPalTemp;
 #ifndef RA2_MODE
-		hPalette = m_hPalUnitTemp;
+		hPalette = m_palettes.m_hPalUnitTemp;
 #endif
 	}
 
@@ -3582,9 +3453,30 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 					PICDATA p;
 					p.pic = lpT[i];
 
-					if (hPalette == m_hPalIsoTemp || hPalette == m_hPalIsoUrb || hPalette == m_hPalIsoSnow || hPalette == m_hPalIsoDes || hPalette == m_hPalIsoLun || hPalette == m_hPalIsoUbn) p.pal = iPalIso;
-					if (hPalette == m_hPalTemp || hPalette == m_hPalUrb || hPalette == m_hPalSnow || hPalette == m_hPalDes || hPalette == m_hPalLun || hPalette == m_hPalUbn) p.pal = iPalTheater;
-					if (hPalette == m_hPalUnitTemp || hPalette == m_hPalUnitUrb || hPalette == m_hPalUnitSnow || hPalette == m_hPalUnitDes || hPalette == m_hPalUnitLun || hPalette == m_hPalUnitUbn) p.pal = iPalUnit;
+					if (hPalette == m_palettes.m_hPalIsoTemp
+						|| hPalette == m_palettes.m_hPalIsoUrb 
+						|| hPalette == m_palettes.m_hPalIsoSnow 
+						|| hPalette == m_palettes.m_hPalIsoDes 
+						|| hPalette == m_palettes.m_hPalIsoLun 
+						|| hPalette == m_palettes.m_hPalIsoUbn) {
+						p.pal = iPalIso;
+					}
+					if (hPalette == m_palettes.m_hPalTemp
+						|| hPalette == m_palettes.m_hPalUrb
+						|| hPalette == m_palettes.m_hPalSnow
+						|| hPalette == m_palettes.m_hPalDes
+						|| hPalette == m_palettes.m_hPalLun
+						|| hPalette == m_palettes.m_hPalUbn) {
+						p.pal = iPalTheater;
+					}
+					if (hPalette == m_palettes.m_hPalUnitTemp
+						|| hPalette == m_palettes.m_hPalUnitUrb 
+						|| hPalette == m_palettes.m_hPalUnitSnow 
+						|| hPalette == m_palettes.m_hPalUnitDes 
+						|| hPalette == m_palettes.m_hPalUnitLun 
+						|| hPalette == m_palettes.m_hPalUnitUbn) {
+						p.pal = iPalUnit;
+					}
 
 					p.vborder = new(VBORDER[head.cy]);
 					int k;
@@ -3614,257 +3506,6 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 	}
 
 }
-
-	int i;
-	for (i = 0; i < 0xFF; i++) {
-		char ic[50];
-		itoa(i, ic, 10);
-
-		pics[(CString)"OVRL" + OvrlID + "_" + ic].bTried = TRUE;
-	}
-
-
-}
-
-#else // surfaces
-void CLoading::LoadOverlayGraphic(LPCTSTR lpOvrlName_, int iOvrlNum)
-{
-	last_succeeded_operation = 11;
-
-	CString image; // the image used
-	CString filename; // filename of the image
-	SHPHEADER head;
-	char theat = cur_theat;
-	LPDIRECTDRAWSURFACE4* lpT = NULL;
-
-	char OvrlID[50];
-	itoa(iOvrlNum, OvrlID, 10);
-
-	HTSPALETTE hPalette;
-	if (cur_theat == 'T') {
-		hPalette = m_hPalIsoTemp;
-#ifdef RA2_MODE
-		hPalette = m_hPalIsoTemp;
-#endif
-	}
-	if (cur_theat == 'A') {
-		hPalette = m_hPalIsoSnow;
-#ifdef RA2_MODE
-		hPalette = m_hPalIsoSnow;
-#endif
-	}
-	if (cur_theat == 'U' && m_hPalIsoUrb) {
-		hPalette = m_hPalIsoUrb;
-#ifdef RA2_MODE
-		hPalette = m_hPalIsoUrb;
-#endif		
-	}
-
-	HMIXFILE hMix;
-
-	CIsoView& v = *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
-
-	CString lpOvrlName = lpOvrlName_;
-	if (lpOvrlName.Find(' ') >= 0) lpOvrlName = lpOvrlName.Left(lpOvrlName.Find(' '));
-
-	CString isveinhole_t = rules.sections[lpOvrlName].values["IsVeinholeMonster"];
-	CString istiberium_t = rules.sections[lpOvrlName].values["Tiberium"];
-	CString isveins_t = rules.sections[lpOvrlName].values["IsVeins"];
-	isveinhole_t.MakeLower();
-	istiberium_t.MakeLower();
-	isveins_t.MakeLower();
-	BOOL isveinhole = FALSE, istiberium = FALSE, isveins = FALSE;
-	if (isTrue(isveinhole_t)) isveinhole = TRUE;
-	if (isTrue(istiberium_t)) istiberium = TRUE;
-	if (isTrue(isveins_t)) isveins = TRUE;
-
-
-
-
-
-	image = lpOvrlName;
-	if (rules.sections[lpOvrlName].values.find("Image") != rules.sections[lpOvrlName].values.end())
-		image = rules.sections[lpOvrlName].values["Image"];
-
-	TruncSpace(image);
-
-	CString imagerules = image;
-	if (art.sections[image].values.find("Image") != art.sections[image].values.end())
-		image = art.sections[image].values["Image"];
-
-	TruncSpace(image);
-
-	if (cur_theat == 'T') filename = image + ".tem";
-	if (cur_theat == 'A') filename = image + ".sno";
-	if (cur_theat == 'U') filename = image + ".urb";
-
-
-	hMix = FindFileInMix(filename);
-
-
-	if (hMix == NULL) {
-		filename = image + ".shp";
-		if (isTrue(art.sections[image].values["NewTheater"]))
-			filename.SetAt(1, theat);
-
-		if (cur_theat == 'U' && m_hPalUnitUrb) hPalette = m_hPalUnitUrb;
-		if (cur_theat == 'T') hPalette = m_hPalUnitTemp;
-		if (cur_theat == 'A') hPalette = m_hPalUnitSnow;
-
-		hMix = FindFileInMix(filename);
-
-		// errstream << (LPCSTR)filename << " " << hMix;
-
-		if (hMix == NULL) {
-			filename.SetAt(1, 'T');
-			hMix = FindFileInMix(filename);
-		}
-		if (hMix == NULL) {
-			filename.SetAt(1, 'A');
-			hMix = FindFileInMix(filename);
-		}
-		if (hMix == NULL) {
-			filename.SetAt(1, 'U');
-			hMix = FindFileInMix(filename);
-		}
-
-		if (cur_theat == 'T' || cur_theat == 'U') {
-			hPalette = m_hPalUnitTemp;
-		} else
-			hPalette = m_hPalUnitSnow;
-
-	}
-
-	if (hMix == NULL) {
-		filename = image + ".tem";
-		hMix = FindFileInMix(filename);
-		if (hMix) hPalette = m_hPalIsoTemp;
-	}
-	if (hMix == NULL) {
-		filename = image + ".sno";
-		hMix = FindFileInMix(filename);
-		if (hMix) hPalette = m_hPalIsoSnow;
-	}
-	if (hMix == NULL) {
-		filename = image + ".urb";
-		hMix = FindFileInMix(filename);
-		if (hMix && m_hPalIsoUrb) hPalette = m_hPalIsoUrb;
-	}
-
-	if (isveinhole == TRUE || isveins == TRUE || istiberium == TRUE) {
-		hPalette = m_hPalTemp;
-#ifndef RA2_MODE
-		hPalette = m_hPalUnitTemp;
-#endif
-	}
-
-	if (hMix != NULL) {
-
-		FSunPackLib::SetCurrentSHP(filename, hMix);
-		{
-
-			FSunPackLib::XCC_GetSHPHeader(&head);
-
-			int i;
-			int maxPics = head.c_images;
-			if (maxPics > max_ovrl_img) maxPics = max_ovrl_img; // max may_ovrl_img pictures (memory usage!)
-			//errstream << ", loading " << maxPics << " of " << head.c_images << " pictures. ";
-			//errstream.flush();
-
-
-			// create an array of pointers to directdraw surfaces
-			lpT = new(LPDIRECTDRAWSURFACE4[maxPics]);
-			memset(lpT, 0, sizeof(LPDIRECTDRAWSURFACE4) * maxPics);
-
-			// if tiberium, change color
-			BOOL bIsBlueTib = FALSE;
-			BOOL bIsGreenTib = FALSE;
-			RGBTRIPLE rgbOld[16], rgbNew;
-#ifndef RA2_MODE
-			if (istiberium) {
-				if (lpOvrlName[4] == '_') // other than green!
-					bIsBlueTib = TRUE;
-				else
-					bIsGreenTib = TRUE;
-
-
-
-				int i;
-				for (i = 0; i < 16; i++) {
-					if (bIsGreenTib) {
-						rgbNew.rgbtBlue = 0;
-						if (i != 0)
-							rgbNew.rgbtGreen = 255 - i * 16 + 1;
-						else
-							rgbNew.rgbtGreen = 255;
-						rgbNew.rgbtRed = 0;
-					} else if (bIsBlueTib) {
-						if (i != 0)
-							rgbNew.rgbtBlue = 255 - i * 16 + 1;
-						else
-							rgbNew.rgbtBlue = 255;
-						rgbNew.rgbtGreen = 0;
-						rgbNew.rgbtRed = 0;
-					}
-
-					FSunPackLib::SetTSPaletteEntry(hPalette, 0x10 + i, &rgbNew, &rgbOld[i]);
-				}
-			}
-#endif
-
-			FSunPackLib::LoadSHPImageInSurface(v.dd, hPalette, 0, maxPics, lpT);
-
-#ifndef RA2_MODE
-			if (istiberium)
-				for (i = 0; i < 16; i++)
-					FSunPackLib::SetTSPaletteEntry(hPalette, 0x10 + i, &rgbOld[i], NULL);
-#endif
-
-			for (i = 0; i < maxPics; i++) {
-				SHPIMAGEHEADER imghead;
-				FSunPackLib::XCC_GetSHPImageHeader(i, &imghead);
-
-				if (imghead.unknown == 0) // is it a shadow or not used image?
-					if (lpT[i]) lpT[i]->Release();
-
-				if (imghead.unknown && lpT[i]) {
-					char ic[50];
-					itoa(i, ic, 10);
-
-					PICDATA p;
-					p.pic = lpT[i];
-					p.x = imghead.x;
-					p.y = imghead.y;
-
-					p.wHeight = imghead.cy;
-					p.wWidth = imghead.cx;
-					p.wMaxWidth = head.cx;
-					p.wMaxHeight = head.cy;
-					p.bType = PICDATA_TYPE_SHP;
-
-
-
-					pics[(CString)"OVRL" + OvrlID + "_" + ic] = p;
-				}
-			}
-
-
-			delete[] lpT;
-
-			//errstream << " --> Finished" << endl;
-			//errstream.flush();
-		}
-		/*else
-		{
-			errstream << " failed";
-			errstream.flush();
-		}*/
-	}
-
-	else {
-		//errstream << "File not found: " << (LPCTSTR)filename << endl;
-		//errstream.flush();	
-	}
 
 	int i;
 	for (i = 0; i < 0xFF; i++) {
@@ -4727,12 +4368,12 @@ void CLoading::PrepareUnitGraphic(LPCSTR lpUnittype)
 	auto const bPowerUp = !rules.GetString(lpUnittype, "PowersUpBuilding").IsEmpty();
 
 	HTSPALETTE hPalette;
-	if (theat == 'T') hPalette = m_hPalIsoTemp;
-	if (theat == 'A') hPalette = m_hPalIsoSnow;
-	if (theat == 'U') hPalette = m_hPalIsoUrb;
-	if (theat == 'L') hPalette = m_hPalIsoLun;
-	if (theat == 'D') hPalette = m_hPalIsoDes;
-	if (theat == 'N') hPalette = m_hPalIsoUbn;
+	if (theat == 'T') hPalette = m_palettes.m_hPalIsoTemp;
+	if (theat == 'A') hPalette = m_palettes.m_hPalIsoSnow;
+	if (theat == 'U') hPalette = m_palettes.m_hPalIsoUrb;
+	if (theat == 'L') hPalette = m_palettes.m_hPalIsoLun;
+	if (theat == 'D') hPalette = m_palettes.m_hPalIsoDes;
+	if (theat == 'N') hPalette = m_palettes.m_hPalIsoUbn;
 
 	CIsoView& v = *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
 
@@ -4978,7 +4619,7 @@ void CLoading::PrepareUnitGraphic(LPCSTR lpUnittype)
 			auto limited_to_theater = artSection.GetBool("TerrainPalette") ? shp->mixfile_theater : TheaterChar::None;
 
 			if (filename == "tibtre01.tem" || filename == "tibtre02.tem" || filename == "tibtre03.tem" || filename == "veinhole.tem") {
-				hPalette = m_hPalUnitTemp;
+				hPalette = m_palettes.m_hPalUnitTemp;
 			}
 
 			if (shp->mixfile > 0) {
@@ -4986,7 +4627,7 @@ void CLoading::PrepareUnitGraphic(LPCSTR lpUnittype)
 				BOOL bSuccess = FSunPackLib::SetCurrentSHP(filename, shp->mixfile);
 				if (!bSuccess) {
 					filename = image + ".sno";
-					if (cur_theat == 'T' || cur_theat == 'U') hPalette = m_hPalIsoTemp;
+					if (cur_theat == 'T' || cur_theat == 'U') hPalette = m_palettes.m_hPalIsoTemp;
 					HMIXFILE hShpMix = FindFileInMix(filename);
 					bSuccess = FSunPackLib::SetCurrentSHP(filename, hShpMix);
 
@@ -5030,112 +4671,4 @@ void CLoading::PrepareUnitGraphic(LPCSTR lpUnittype)
 
 	}
 
-}
-
-/*
-Helper function that fetches the palette data from FsunPackLib
-FSunPackLib doesn´t provide any special function to retrieve a color table entry,
-so we have to build it ourself
-Also builds color_conv
-*/
-void CLoading::FetchPalettes()
-{
-	// SetTSPaletteEntry(HTSPALETTE hPalette, BYTE bIndex, RGBTRIPLE* rgb, RGBTRIPLE* orig);
-	// SetTSPaletteEntry can retrieve the current color table entry without modifying it!
-
-
-	// iso palette
-	HTSPALETTE hCur = 0;
-	if (Map->GetTheater() == THEATER0) hCur = m_hPalIsoTemp;
-	if (Map->GetTheater() == THEATER1) hCur = m_hPalIsoSnow;
-	if (Map->GetTheater() == THEATER2) hCur = m_hPalIsoUrb;
-	if (Map->GetTheater() == THEATER3) hCur = m_hPalIsoUbn;
-	if (Map->GetTheater() == THEATER4) hCur = m_hPalIsoLun;
-	if (Map->GetTheater() == THEATER5) hCur = m_hPalIsoDes;
-
-	int i;
-
-	for (i = 0; i < 256; i++) {
-		FSunPackLib::SetTSPaletteEntry(hCur, i, NULL /* don´t modify it!*/, &palIso[i] /*but retrieve it!*/);
-	}
-
-
-	// unit palette
-	if (Map->GetTheater() == THEATER0) hCur = m_hPalUnitTemp;
-	if (Map->GetTheater() == THEATER1) hCur = m_hPalUnitSnow;
-	if (Map->GetTheater() == THEATER2) hCur = m_hPalUnitUrb;
-	if (Map->GetTheater() == THEATER3) hCur = m_hPalUnitUbn;
-	if (Map->GetTheater() == THEATER4) hCur = m_hPalUnitLun;
-	if (Map->GetTheater() == THEATER5) hCur = m_hPalUnitDes;
-
-
-	for (i = 0; i < 256; i++) {
-		FSunPackLib::SetTSPaletteEntry(hCur, i, NULL /* don´t modify it!*/, &palUnit[i] /*but retrieve it!*/);
-	}
-
-
-	// theater palette
-	if (Map->GetTheater() == THEATER0) hCur = m_hPalTemp;
-	if (Map->GetTheater() == THEATER1) hCur = m_hPalSnow;
-	if (Map->GetTheater() == THEATER2) hCur = m_hPalUrb;
-	if (Map->GetTheater() == THEATER3) hCur = m_hPalUbn;
-	if (Map->GetTheater() == THEATER4) hCur = m_hPalLun;
-	if (Map->GetTheater() == THEATER5) hCur = m_hPalDes;
-
-
-
-	for (i = 0; i < 256; i++) {
-		FSunPackLib::SetTSPaletteEntry(hCur, i, NULL /* don´t modify it!*/, &palTheater[i] /*but retrieve it!*/);
-	}
-
-
-	// lib palette
-	hCur = m_hPalLib;
-
-
-	for (i = 0; i < 256; i++) {
-		FSunPackLib::SetTSPaletteEntry(hCur, i, NULL /* don´t modify it!*/, &palLib[i] /*but retrieve it!*/);
-	}
-
-	CreateConvTable(palIso, iPalIso);
-	CreateConvTable(palLib, iPalLib);
-	CreateConvTable(palUnit, iPalUnit);
-	CreateConvTable(palTheater, iPalTheater);
-
-	CIsoView& v = *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
-
-	DDPIXELFORMAT pf;
-	memset(&pf, 0, sizeof(DDPIXELFORMAT));
-	pf.dwSize = sizeof(DDPIXELFORMAT);
-
-	v.lpds->GetPixelFormat(&pf);
-	v.pf = pf;
-	v.m_color_converter.reset(new FSunPackLib::ColorConverter(v.pf));
-
-	FSunPackLib::ColorConverter conf(pf);
-
-	for (auto const& [name, col] : rules["Colors"]) {
-		COLORREF cref = v.GetColor("", col);
-
-		color_conv[col] = conf.GetColor(GetRValue(cref), GetGValue(cref), GetBValue(cref));
-		colorref_conv[cref] = color_conv[col];
-	}
-}
-
-void CLoading::CreateConvTable(RGBTRIPLE* pal, int* iPal)
-{
-	CIsoView& v = *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
-
-	DDPIXELFORMAT pf;
-	memset(&pf, 0, sizeof(DDPIXELFORMAT));
-	pf.dwSize = sizeof(DDPIXELFORMAT);
-
-	v.lpds->GetPixelFormat(&pf);
-
-	FSunPackLib::ColorConverter conf(pf);
-
-	int i;
-	for (i = 0; i < 256; i++) {
-		iPal[i] = conf.GetColor(pal[i].rgbtRed, pal[i].rgbtGreen, pal[i].rgbtBlue);
-	}
 }
