@@ -103,9 +103,14 @@ public:
 		const CString& m_section;
 	};
 
-	IniSectionGroup(const IniFileGroup& source, const CString& secName) :
-		m_source(source),
+	IniSectionGroup(IniFileGroup&& source, const CString& secName) : 
+		m_source(std::move(source)),
 		m_section(secName)
+	{
+	}
+
+	IniSectionGroup(const IniFileGroup& source, const CString& secName) :
+		IniSectionGroup(IniFileGroup(source), secName)
 	{
 	}
 
@@ -146,6 +151,6 @@ private:
 		return acquireNextKvGroup(m_section, beg, m_source.end());
 	}
 
-	const IniFileGroup& m_source;
+	const IniFileGroup m_source;
 	CString m_section;
 };
