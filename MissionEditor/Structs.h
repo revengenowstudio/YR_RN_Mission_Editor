@@ -118,7 +118,7 @@ struct PICDATA {
 #else
 	void* pic = nullptr; // BYTE* to image, exception: if bType==PICDATA_TYPE_BMP then this is a LPDIRECTDRAWSURFACE!
 	VBORDER* vborder = nullptr;
-	int* pal = nullptr;
+	const int* pal = nullptr;
 	std::shared_ptr<std::vector<BYTE>> lighting;
 	std::shared_ptr<std::vector<BYTE>> rawPic;
 	std::shared_ptr<std::vector<VBORDER>> _vBorder;

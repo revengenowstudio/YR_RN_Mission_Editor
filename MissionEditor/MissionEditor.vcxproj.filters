@@ -285,6 +285,9 @@
     <ClCompile Include="INIMeta.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Palettes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MissionEditor.rc">
@@ -575,6 +578,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="INIMeta.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IniMega.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Palettes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

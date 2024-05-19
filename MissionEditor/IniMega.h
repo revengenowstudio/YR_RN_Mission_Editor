@@ -19,7 +19,7 @@ private:
 };
 
 
-IniFileGroup IniMegaFile::GetRules()
+inline IniFileGroup IniMegaFile::GetRules()
 {
 	IniFileGroup m_group;
 	m_group.Append(rules);
@@ -27,7 +27,7 @@ IniFileGroup IniMegaFile::GetRules()
 	return m_group;
 }
 
-bool IniMegaFile::isNullOrEmpty(const CString& value)
+inline bool IniMegaFile::isNullOrEmpty(const CString& value)
 {
 	return !value.GetLength() || value == "none" || value == "<none>";
 }

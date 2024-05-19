@@ -47,8 +47,10 @@ inline BOOL isFalse(CString expr)
 	return FALSE;
 }
 
+
+
 // retrieve the picture filename of a unit (as it is saved in the pics map). The returned file may not exist in the pics map (you need to do a check!).
-inline CString GetUnitPictureFilename(LPCTSTR lpUnitName, DWORD dwPicIndex)
+inline CString GetUnitPictureFilename(const CString& lpUnitName, DWORD dwPicIndex)
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -71,17 +73,16 @@ inline CString GetUnitPictureFilename(LPCTSTR lpUnitName, DWORD dwPicIndex)
 
 	char n[50];
 	_itoa_s(dwPicIndex, n, 10);
-
-
-	if (pics.find((artname + n)) != pics.end()) {
-		filename = artname; // yes, found
+	// store differently for each type even they shares same image,
+	// because they can have different components, e.g. turret image
+	if (pics.find((lpUnitName + n)) != pics.end()) {
+		filename = lpUnitName; // yes, found
 		filename += n;
-	} else if (pics.find(artname + ".bmp") != pics.end()) // since June, 15th (Matze): Only use BMP if no SHP/VXL exists
-	{
+	} else if (pics.find(artname + ".bmp") != pics.end()) { // since June, 15th (Matze): Only use BMP if no SHP/VXL exists
 		filename = (CString)artname + ".bmp";
-	} else
+	} else {
 		filename = "";
-
+	}
 	return filename;
 }
 

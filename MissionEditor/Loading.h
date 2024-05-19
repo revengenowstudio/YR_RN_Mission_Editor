@@ -91,7 +91,7 @@ class CLoading : public CDialog
 {
 	// Construction
 public:
-	void PrepareUnitGraphic(LPCSTR lpUnittype);
+	void PrepareUnitGraphic(const CString& lpUnittype);
 	void LoadStrings();
 	void FreeAll();
 	void FreeTileSet();
@@ -109,6 +109,18 @@ public:
 	CLoading(CWnd* pParent = NULL);   // Standardconstructor
 	void InitPics(CProgressCtrl* prog = NULL);
 	void Load();
+	bool LoadSingleFrameShape(const CString& name, int nFrame = 0, int deltaX = 0, int deltaY = 0);
+	void LoadBuilding(const CString& ID);
+	void LoadInfantry(const CString& ID);
+	void LoadTerrainOrSmudge(const CString& ID);
+	void LoadVehicleOrAircraft(const CString& ID);
+
+	void SetImageData(unsigned char* pBuffer, const CString& NameInDict, int FullWidth, int FullHeight, Palette* pPal);
+	void SetImageData(unsigned char* pBuffer, PICDATA& pData, const int FullWidth, const int FullHeight, Palette* pPal);
+	void UnionSHP_Add(unsigned char* pBuffer, int Width, int Height, int DeltaX = 0, int DeltaY = 0, bool UseTemp = false);
+	void UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, int* OutHeight, bool UseTemp = false);
+	void VXL_Add(const unsigned char* pCache, int X, int Y, int Width, int Height);
+	void VXL_GetAndClear(unsigned char*& pBuffer, int* OutWidth, int* OutHeight);
 	BOOL LoadUnitGraphic(const CString& lpUnittype);
 	void LoadBuildingSubGraphic(const CString& subkey, const CIniFileSection& artSection, BOOL bAlwaysSetChar, char theat, HMIXFILE hShpMix, SHPHEADER& shp_h, BYTE*& shp);
 	void LoadOverlayGraphic(const CString& lpOvrlName, int iOvrlNum);
@@ -124,6 +136,24 @@ public:
 	const EXPANDMIX* ExpandMixes() const {
 		return m_hExpand;
 	}
+
+	enum class ObjectType
+	{
+		Unknown = -1,
+		Infantry = 0,
+		Vehicle = 1,
+		Aircraft = 2,
+		Building = 3,
+		Terrain = 4,
+		Smudge = 5
+	};
+
+	ObjectType GetItemType(const CString& ID);
+	CString GetArtID(const CString& ID);
+	CString GetVehicleOrAircraftFileID(const CString& ID);
+	CString GetTerrainOrSmudgeFileID(const CString& ID);
+	CString GetBuildingFileID(const CString& ID);
+	CString GetInfantryFileID(const CString& ID);
 
 	// Dialog data
 		//{{AFX_DATA(CLoading)
@@ -197,7 +227,18 @@ private:
 
 	std::unique_ptr<VoxelNormalTables> m_voxelNormalTables;
 
+	struct SHPUnionData
+	{
+		unsigned char* pBuffer;
+		int Width;
+		int Height;
+		int DeltaX;
+		int DeltaY;
+	};
 
+	std::map<CString, ObjectType> ObjectTypes;
+	std::vector<SHPUnionData> UnionSHP_Data[2];
+	unsigned char VXL_Data[0x10000];
 };
 
 //{{AFX_INSERT_LOCATION}}

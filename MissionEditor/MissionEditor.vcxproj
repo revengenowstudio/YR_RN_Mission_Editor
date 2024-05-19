@@ -522,6 +522,7 @@
     <ClCompile Include="NewMapSpDlg.cpp" />
     <ClCompile Include="NewMapTypeDlg.cpp" />
     <ClCompile Include="NewRA2HouseDlg.cpp" />
+    <ClCompile Include="Palettes.cpp" />
     <ClCompile Include="ProgressDlg.cpp" />
     <ClCompile Include="RightFrame.cpp" />
     <ClCompile Include="RTPDlg.cpp" />
@@ -610,6 +611,7 @@
     <ClInclude Include="ComboUInputDlg.h" />
     <ClInclude Include="defines.h" />
     <ClInclude Include="IniHelper.h" />
+    <ClInclude Include="IniMega.h" />
     <ClInclude Include="INIMeta.h" />
     <ClInclude Include="LineDrawer.h" />
     <ClInclude Include="DynamicGraphDlg.h" />
@@ -650,6 +652,7 @@
     <ClInclude Include="NewMapTypeDlg.h" />
     <ClInclude Include="NewRA2HouseDlg.h" />
     <ClInclude Include="ovrlinline.h" />
+    <ClInclude Include="Palettes.h" />
     <ClInclude Include="ProgressDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RightFrame.h" />

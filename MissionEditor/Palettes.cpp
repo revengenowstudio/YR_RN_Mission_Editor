@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Palettes.h"
 #include "variables.h"
 #include "functions.h"

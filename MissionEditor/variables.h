@@ -104,7 +104,10 @@ extern vector<CString> rndterrainsrc;
 
 // infos for buildings and trees (should be extended to infantry, units, and aircraft)
 // they are initialized in CIsoView, should be changed to CMapData
-extern BUILDING_INFO buildinginfo[0x0F00];
+
+size_t constexpr buildingInfoCapacity = 0x0F000;
+
+extern BUILDING_INFO buildinginfo[buildingInfoCapacity];
 extern TREE_INFO treeinfo[0x0F00];
 #ifdef SMUDGE_SUPP
 extern SMUDGE_INFO smudgeinfo[0x0F00];

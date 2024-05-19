@@ -4,6 +4,8 @@
 #include <map>
 #include "MissionEditorPackLib.h"
 
+class CLoading;
+
 struct BGRStruct
 {
     unsigned char B, G, R, Zero;
@@ -39,6 +41,8 @@ public:
         ret.blue = tmp.B;
         return ret;
     }
+    const BGRStruct* GetData() const { return Data; }
+
 private:
     BGRStruct Data[256];
 };

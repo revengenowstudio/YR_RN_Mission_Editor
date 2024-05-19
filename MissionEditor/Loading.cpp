@@ -39,6 +39,7 @@
 #include <thread>
 #include "VoxelNormals.h"
 #include <format>
+#include "IniMega.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,12 +47,21 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+struct DrawRect
+{
+	int X{};
+	int Y{};
+	int Width{};
+	int Height{};
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CLoading 
 
 
-CLoading::CLoading(CWnd* pParent /*=NULL*/)
-	: CDialog(CLoading::IDD, pParent)
+CLoading::CLoading(CWnd* pParent /*=NULL*/) :
+	CDialog(CLoading::IDD, pParent),
+	m_palettes(*this)
 {
 	//{{AFX_DATA_INIT(CLoading)
 	//}}AFX_DATA_INIT
@@ -476,7 +486,194 @@ void CLoading::Load()
 
 }
 
+void SetTheaterLetter(CString& basename, char TheaterIdentifier)
+{
+	if (TheaterIdentifier != 0 && basename.GetLength() >= 2) {
+		char c0 = basename[0];
+		char c1 = basename[1] & ~0x20; // evil hack to uppercase, copied from Ares
+		if (isalpha(static_cast<unsigned char>(c0))) {
+			if (c1 == 'A' || c1 == 'T') {
+				basename.SetAt(1, TheaterIdentifier);
+			}
+		}
+	}
+}
 
+void SetGenericTheaterLetter(CString& name)
+{
+	name.SetAt(1, 'G');
+}
+
+bool CLoading::LoadSingleFrameShape(const CString& name, int nFrame, int deltaX, int deltaY)
+{
+	CString file = name + ".SHP";
+	SetTheaterLetter(file, this->cur_theat);
+
+
+	auto nMix = FindFileInMix(file);
+	//check whether there can be a valid file
+	do {
+		if (FSunPackLib::XCC_DoesFileExist(file, nMix)) {
+			break;
+		}
+		SetGenericTheaterLetter(file);
+		nMix = FindFileInMix(file);
+		if (FSunPackLib::XCC_DoesFileExist(file, nMix)) {
+			break;
+		}
+		file = name + ".SHP";
+		nMix = FindFileInMix(file);
+		if (FSunPackLib::XCC_DoesFileExist(file, nMix)) {
+			break;
+		}
+		return false;
+	} while (0);
+
+	SHPHEADER header;
+	unsigned char* pBuffer = nullptr;
+
+	if (!FSunPackLib::SetCurrentSHP(file, nMix)) {
+		return false;
+	}
+	if (!FSunPackLib::XCC_GetSHPHeader(&header)) {
+		return false;
+	}
+	if (!FSunPackLib::LoadSHPImage(nFrame, 1, &pBuffer)) {
+		return false;
+	}
+
+	UnionSHP_Add(pBuffer, header.cx, header.cy, deltaX, deltaY);
+
+	return true;
+};
+
+void CLoading::UnionSHP_Add(unsigned char* pBuffer, int Width, int Height, int DeltaX, int DeltaY, bool UseTemp)
+{
+	UnionSHP_Data[UseTemp].push_back(SHPUnionData{ pBuffer,Width,Height,DeltaX,DeltaY });
+}
+
+
+void CLoading::UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, int* OutHeight, bool UseTemp)
+{
+	// never calls it when UnionSHP_Data is empty
+
+	if (UnionSHP_Data[UseTemp].size() == 1) {
+		pOutBuffer = UnionSHP_Data[UseTemp][0].pBuffer;
+		*OutWidth = UnionSHP_Data[UseTemp][0].Width;
+		*OutHeight = UnionSHP_Data[UseTemp][0].Height;
+		UnionSHP_Data[UseTemp].clear();
+		return;
+	}
+
+	// For each shp, we make their center at the same point, this will give us proper result.
+	int W = 0, H = 0;
+
+	for (auto& data : UnionSHP_Data[UseTemp]) {
+		if (W < data.Width + 2 * abs(data.DeltaX)) {
+			W = data.Width + 2 * abs(data.DeltaX);
+		}
+		if (H < data.Height + 2 * abs(data.DeltaY)) {
+			H = data.Height + 2 * abs(data.DeltaY);
+		}
+	}
+
+	// just make it work like unsigned char[W][H];
+	pOutBuffer = new(unsigned char[W * H]);
+	*OutWidth = W;
+	*OutHeight = H;
+
+	int ImageCenterX = W / 2;
+	int ImageCenterY = H / 2;
+
+	// Image[X][Y] <=> pOutBuffer[Y * W + X];
+	for (auto& data : UnionSHP_Data[UseTemp]) {
+		int nStartX = ImageCenterX - data.Width / 2 + data.DeltaX;
+		int nStartY = ImageCenterY - data.Height / 2 + data.DeltaY;
+
+		for (int j = 0; j < data.Height; ++j)
+			for (int i = 0; i < data.Width; ++i)
+				if (auto nPalIdx = data.pBuffer[j * data.Width + i])
+					pOutBuffer[(nStartY + j) * W + nStartX + i] = nPalIdx;
+
+		delete[](data.pBuffer);
+	}
+
+	UnionSHP_Data[UseTemp].clear();
+}
+
+
+void CLoading::VXL_Add(const unsigned char* pCache, int X, int Y, int Width, int Height)
+{
+	for (int j = 0; j < Height; ++j)
+		for (int i = 0; i < Width; ++i)
+			if (auto ch = pCache[j * Width + i])
+				VXL_Data[(j + Y) * 0x100 + X + i] = ch;
+}
+
+void CLoading::VXL_GetAndClear(unsigned char*& pBuffer, int* OutWidth, int* OutHeight)
+{
+	/* TODO : Save memory
+	int validFirstX = 0x100 - 1;
+	int validFirstY = 0x100 - 1;
+	int validLastX = 0;
+	int validLastY = 0;
+
+	for (int j = 0; j < 0x100; ++j)
+	{
+		for (int i = 0; i < 0x100; ++i)
+		{
+			unsigned char ch = VXL_Data[j * 0x100 + i];
+			if (ch != 0)
+			{
+				if (i < validFirstX)
+					validFirstX = i;
+				if (j < validFirstY)
+					validFirstY = j;
+				if (i > validLastX)
+					validLastX = i;
+				if (j > validLastY)
+					validLastY = j;
+			}
+		}
+	}
+	*/
+	pBuffer = new unsigned char[0x10000];
+	memcpy_s(pBuffer, 0x10000, VXL_Data, 0x10000);
+	memset(VXL_Data, 0, 0x10000);
+}
+
+bool IsImageLoaded(const CString& ID) {
+	auto const it = pics.find(ID);
+	if (it == pics.end()) {
+		return false;
+	}
+	return it->second.pic != nullptr;
+}
+
+void GetFullPaletteName(CString& PaletteName, char theater)
+{
+	switch (theater) {
+	case 'A':
+		PaletteName += "sno.pal";
+		return;
+	case 'U':
+		PaletteName += "urb.pal";
+		return;
+	case 'N':
+		PaletteName += "ubn.pal";
+		return;
+	case 'D':
+		PaletteName += "des.pal";
+		return;
+	case 'L':
+		PaletteName += "lun.pal";
+		return;
+	case 'T':
+	default:
+		PaletteName += "tem.pal";
+		return;
+	}
+}
 
 //
 // InitPics loads all graphics except terrain graphics!
@@ -1168,916 +1365,713 @@ int lepton_to_screen_y(int leptons)
 	return leptons * f_y / 256;
 }
 
-BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
+CLoading::ObjectType CLoading::GetItemType(const CString& ID)
 {
-	errstream << "Loading: " << lpUnittype << endl;
+	if (ObjectTypes.size() == 0) {
+		auto load = [this](const CString& typeListName, ObjectType e) {
+			auto const& rules = IniMegaFile::GetRules();
+			auto const& items = rules.GetSection(typeListName);
+			for (auto it = items.begin(); it != items.end(); ++it) {
+				auto const& [_, id] = *it;
+				ObjectTypes.insert({ id, e });
+			}
+		};
+
+		load("InfantryTypes", ObjectType::Infantry);
+		load("VehicleTypes", ObjectType::Vehicle);
+		load("AircraftTypes", ObjectType::Aircraft);
+		load("BuildingTypes", ObjectType::Building);
+		load("SmudgeTypes", ObjectType::Smudge);
+		load("TerrainTypes", ObjectType::Terrain);
+	}
+
+	auto itr = ObjectTypes.find(ID);
+	if (itr != ObjectTypes.end())
+		return itr->second;
+	return ObjectType::Unknown;
+}
+
+BOOL CLoading::LoadUnitGraphic(const CString& ID)
+{
+	errstream << "Loading: " << ID << endl;
 	errstream.flush();
 
 	last_succeeded_operation = 10;
 
-	CString _rules_image; // the image used
-	CString filename; // filename of the image
 	char theat = cur_theat; // standard theater char is t (Temperat). a is snow.
 
-	bool bAlwaysSetChar = FALSE; // second char is always theater, even if NewTheater not specified!
-	WORD wStep = 1; // step is 1 for infantry, buildings, etc, and for shp vehicles it specifies the step rate between every direction
-	WORD wStartWalkFrame = 0; // for examply cyborg reaper has another walk starting frame
-	int iTurretOffset = 0; // used for centering y pos of turret (if existing) (for vehicles)
-	const bool bStructure = rules["BuildingTypes"].HasValue(lpUnittype); // is this a structure?
-	const bool bVehicle = rules["VehicleTypes"].HasValue(lpUnittype); // is this a structure?
 
-	auto const bPowerUp = !rules.GetString(lpUnittype, "PowersUpBuilding").IsEmpty();
-
-
-	CIsoView& v = *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
-
-	_rules_image = lpUnittype;
-	_rules_image = rules.GetStringOr(lpUnittype, "Image", _rules_image);
-
-	CString _art_image = _rules_image;
-	auto const& imageID = art.GetString(_rules_image, "Image");
-	if (!imageID.IsEmpty()) {
-		if (!g_data.GetBool("IgnoreArtImage", _rules_image)) {
-			_art_image = imageID;
-		}
+	auto eItemType = GetItemType(ID);
+	switch (eItemType) {
+	case ObjectType::Infantry:
+		this->LoadInfantry(ID);
+		break;
+	case ObjectType::Terrain:
+	case ObjectType::Smudge:
+		this->LoadTerrainOrSmudge(ID);
+		break;
+	case ObjectType::Vehicle:
+	case ObjectType::Aircraft:
+		this->LoadVehicleOrAircraft(ID);
+		break;
+	case ObjectType::Building:
+		this->LoadBuilding(ID);
+		break;
+	case CLoading::ObjectType::Unknown:
+	default:
+		break;
 	}
-
-	const CString& image = _art_image;
-	const auto& rulesSection = rules[lpUnittype];
-	const auto& artSection = art[image];
-
-	// is it a shp graphic?
-	if (!artSection.GetBool("Voxel")) {
-		try {
-
-			auto shp = FindUnitShp(image, cur_theat, artSection);
-			if (!shp) {
-				errstream << "Building SHP in theater " << cur_theat << " not found: " << image << endl;
-				errstream.flush();
-				missingimages[lpUnittype] = TRUE;
-				return FALSE;
-			}
-
-			filename = shp->filename;
-			HTSPALETTE hPalette = shp->palette;
-			const auto hShpMix = shp->mixfile;
-			theat = static_cast<char>(shp->theat);
-			auto limited_to_theater = artSection.GetBool("TerrainPalette") ? shp->mixfile_theater : TheaterChar::None;
-
-
-			SHPHEADER head;
-			int superanim_1_zadjust = 0;
-			int superanim_2_zadjust = 0;
-			int superanim_3_zadjust = 0;
-			int superanim_4_zadjust = 0;
-
-			CString turretanim_name;
-			CString turretanim_filename;
-			CString barrelanim_filename;
-			BYTE* bib = NULL;
-			SHPHEADER bib_h;
-			BYTE* activeanim = NULL;
-			SHPHEADER activeanim_h;
-			BYTE* idleanim = NULL;
-			SHPHEADER idleanim_h;
-			BYTE* activeanim2 = NULL;
-			SHPHEADER activeanim2_h;
-			BYTE* activeanim3 = NULL;
-			SHPHEADER activeanim3_h;
-			BYTE* superanim1 = NULL;
-			SHPHEADER superanim1_h;
-			BYTE* superanim2 = NULL;
-			SHPHEADER superanim2_h;
-			BYTE* superanim3 = NULL;
-			SHPHEADER superanim3_h;
-			BYTE* superanim4 = NULL;
-			SHPHEADER superanim4_h;
-			BYTE* specialanim1 = NULL;
-			SHPHEADER specialanim1_h;
-			BYTE* specialanim2 = NULL;
-			SHPHEADER specialanim2_h;
-			BYTE* specialanim3 = NULL;
-			SHPHEADER specialanim3_h;
-			BYTE* specialanim4 = NULL;
-			SHPHEADER specialanim4_h;
-			SHPHEADER* lpT_h = NULL;
-			std::vector<BYTE> turretColors[8];
-			std::vector<BYTE> turretLighting[8];
-			std::vector<BYTE> vxlBarrelColors[8];
-			std::vector<BYTE> vxlBarrelLighting[8];
-			SHPHEADER turrets_h[8];
-			SHPIMAGEHEADER turretinfo[8];
-			SHPHEADER barrels_h[8];
-			SHPIMAGEHEADER barrelinfo[8];
-
-
-			if (hShpMix > 0) {
-
-				std::string shp_mixfile;
-				if (FSunPackLib::XCC_GetMixName(hShpMix, shp_mixfile)) {
-					errstream << (LPCTSTR)filename << " found ";
-					errstream << " in " << shp_mixfile << endl;
-					errstream.flush();
-				}
-				//hShpMix=20;
-
-				LoadBuildingSubGraphic("BibShape", artSection, bAlwaysSetChar, theat, hShpMix, bib_h, bib);
-
-				LoadBuildingSubGraphic("ActiveAnim", artSection, bAlwaysSetChar, theat, hShpMix, activeanim_h, activeanim);
-				LoadBuildingSubGraphic("IdleAnim", artSection, bAlwaysSetChar, theat, hShpMix, idleanim_h, idleanim);
-				LoadBuildingSubGraphic("ActiveAnim2", artSection, bAlwaysSetChar, theat, hShpMix, activeanim2_h, activeanim2);
-				LoadBuildingSubGraphic("ActiveAnim3", artSection, bAlwaysSetChar, theat, hShpMix, activeanim3_h, activeanim3);
-				if (!g_data.GetBool("IgnoreSuperAnim1", image))
-					LoadBuildingSubGraphic("SuperAnim", artSection, bAlwaysSetChar, theat, hShpMix, superanim1_h, superanim1);
-				if (!g_data.GetBool("IgnoreSuperAnim2", image))
-					LoadBuildingSubGraphic("SuperAnimTwo", artSection, bAlwaysSetChar, theat, hShpMix, superanim2_h, superanim2);
-				if (!g_data.GetBool("IgnoreSuperAnim3", image))
-					LoadBuildingSubGraphic("SuperAnimThree", artSection, bAlwaysSetChar, theat, hShpMix, superanim3_h, superanim3);
-				if (!g_data.GetBool("IgnoreSuperAnim4", image))
-					LoadBuildingSubGraphic("SuperAnimFour", artSection, bAlwaysSetChar, theat, hShpMix, superanim4_h, superanim4);
-				LoadBuildingSubGraphic("SpecialAnim", artSection, bAlwaysSetChar, theat, hShpMix, specialanim1_h, specialanim1);
-				LoadBuildingSubGraphic("SpecialAnimTwo", artSection, bAlwaysSetChar, theat, hShpMix, specialanim2_h, specialanim2);
-				LoadBuildingSubGraphic("SpecialAnimThree", artSection, bAlwaysSetChar, theat, hShpMix, specialanim3_h, specialanim3);
-				LoadBuildingSubGraphic("SpecialAnimFour", artSection, bAlwaysSetChar, theat, hShpMix, specialanim4_h, specialanim4);
-
-				BOOL bVoxelTurret = FALSE;
-				BOOL bVoxelBarrel = FALSE;
-
-				FSunPackLib::VoxelNormalClass vnc = FSunPackLib::VoxelNormalClass::Unknown;
-
-				if (rules.GetBool(lpUnittype, "Turret")) {
-					turretanim_name = rules.GetString(lpUnittype, "TurretAnim");
-					auto vxl_turretanim_filename = turretanim_name.IsEmpty() ? image + "tur.vxl" : turretanim_name + ".vxl";
-					auto vxl_barrelanim_filename = image + "barl.vxl";
-					auto const& imageID = art.GetString(turretanim_name, "Image");
-					if (!imageID.IsEmpty()) {
-						vxl_turretanim_filename = imageID + ".vxl";
-					}
-
-					if (bStructure && turretanim_name.GetLength() > 0 && !rules.GetBool(lpUnittype, "TurretAnimIsVoxel")) {
-						turretanim_filename = turretanim_name + ".shp";
-						auto const& imageID = art.GetString(turretanim_name, "Image");
-						if (!imageID.IsEmpty()) {
-							turretanim_filename = imageID + ".shp";
-						}
-						turretanim_filename.SetAt(1, 'G');
-						if (artSection.GetBool("NewTheater", true)) {
-							auto tmp = turretanim_filename;
-							tmp.SetAt(1, theat);
-							if (FSunPackLib::XCC_DoesFileExist(tmp, hShpMix)) {
-								turretanim_filename = tmp;
-							}
-						}
-
-						turretanim_filename.MakeUpper();
-						FSunPackLib::SetCurrentSHP(turretanim_filename, hShpMix);
-						FSunPackLib::XCC_GetSHPHeader(&head);
-
-						auto const turretFrameStart = art.GetInteger(turretanim_name, "LoopStart");
-						auto const turretFrameCount = art.GetInteger(turretanim_name, "LoopEnd", 32);
-						const WORD wAnimCount = turretFrameCount / 8; // anims between each "normal" direction
-
-						for (auto i = 0; i < 8; i++) {
-							if (turretFrameStart + i * wAnimCount < head.c_images) {
-								FSunPackLib::XCC_GetSHPImageHeader(turretFrameStart + i * wAnimCount, &turretinfo[i]);
-								FSunPackLib::XCC_GetSHPHeader(&turrets_h[i]);
-								FSunPackLib::LoadSHPImage(turretFrameStart + i * wAnimCount, turretColors[i]);
-								turretLighting[i].clear();
-							}
-
-						}
-					} else if (
-						(bStructure && !turretanim_name.IsEmpty() && rules.GetBool(lpUnittype, "TurretAnimIsVoxel"))
-						|| (!bStructure && (FindFileInMix(vxl_turretanim_filename) || FindFileInMix(vxl_barrelanim_filename)))
-						) {
-						turretanim_filename = vxl_turretanim_filename;
-						barrelanim_filename = vxl_barrelanim_filename;
-
-						HMIXFILE hVXL = FindFileInMix(vxl_turretanim_filename);
-						HMIXFILE hBarl = FindFileInMix(vxl_barrelanim_filename);
-
-						iTurretOffset = artSection.GetInteger("TurretOffset", iTurretOffset);
-						Vec3f turretModelOffset(iTurretOffset / 6.0f, 0.0f, 0.0f);
-
-
-						if (hVXL) {
-							bVoxelTurret = TRUE;
-
-							if (
-								FSunPackLib::SetCurrentVXL(turretanim_filename, hVXL)
-								) {
-								// we assume the voxel normal class is always the same for the combined voxels
-								FSunPackLib::GetVXLSectionInfo(0, vnc);
-
-								int i;
-
-								for (i = 0; i < 8; i++) {
-									float r_x, r_y, r_z;
-
-
-									const int dir = bVehicle ? ((i + 1) % 8) : i;
-									r_x = 300;
-									r_y = 0;
-									r_z = 45 * dir + 90;
-
-									// convert
-									const double pi = 3.141592654;
-									const Vec3f rotation(r_x / 180.0f * pi, r_y / 180.0f * pi, r_z / 180.0f * pi);
-
-
-									RECT r;
-									int center_x, center_y;
-									if (!
-										FSunPackLib::LoadVXLImage(*m_voxelNormalTables, lightDirection, rotation, turretModelOffset, turretColors[i], turretLighting[i], &center_x, &center_y, 0, 0, 0, 0, 0, &r)
-										) {
-
-									} else {
-										turrets_h[i].cx = r.right - r.left;
-										turrets_h[i].cy = r.bottom - r.top;
-
-										turretinfo[i].x = center_x;
-										turretinfo[i].y = center_y;
-										turretinfo[i].cx = r.right - r.left;
-										turretinfo[i].cy = r.bottom - r.top;
-
-									}
-
-								}
-							}
-						}
-						if (hBarl) {
-							bVoxelBarrel = TRUE;
-
-							if (
-								FSunPackLib::SetCurrentVXL(barrelanim_filename, hBarl)
-								) {
-								// we assume the voxel normal class is always the same for the combined voxels
-								FSunPackLib::GetVXLSectionInfo(0, vnc);
-
-								int i;
-
-								for (i = 0; i < 8; i++) {
-									float r_x, r_y, r_z;
-
-
-									const int dir = bVehicle ? ((i + 1) % 8) : i;
-									r_x = 300;
-									r_y = 0;
-									r_z = 45 * dir + 90;
-
-									// convert
-									const double pi = 3.141592654;
-									const Vec3f rotation(r_x / 180.0f * pi, r_y / 180.0f * pi, r_z / 180.0f * pi);
-
-
-									RECT r;
-									int center_x, center_y;
-									if (!
-										FSunPackLib::LoadVXLImage(
-											*m_voxelNormalTables,
-											lightDirection,
-											rotation,
-											turretModelOffset,
-											vxlBarrelColors[i],
-											vxlBarrelLighting[i],
-											&center_x,
-											&center_y,
-											rules.GetInteger(image, "TurretAnimZAdjust"),
-											0, 0, 0, 0, &r)
-										) {
-
-									} else {
-										barrels_h[i].cx = r.right - r.left;
-										barrels_h[i].cy = r.bottom - r.top;
-
-										barrelinfo[i].x = center_x;
-										barrelinfo[i].y = center_y;
-										barrelinfo[i].cx = r.right - r.left;
-										barrelinfo[i].cy = r.bottom - r.top;
-
-									}
-
-								}
-							}
-						}
-					}
-				}
-
-
-				wStep = art.GetInteger(image, "WalkFrames", wStep);
-				wStartWalkFrame = art.GetInteger(image, "StartWalkFrame", wStartWalkFrame);
-
-				if (art.GetString(image, "Palette") == "lib") {
-					hPalette = m_hPalLib;
-				}
-
-				BOOL bSuccess = FSunPackLib::SetCurrentSHP(filename, hShpMix);
-				if (
-					!bSuccess
-					) {
-					filename = image + ".sno";
-					if (cur_theat == 'T' || cur_theat == 'U' /* || cur_theat=='N' ? */) {
-						hPalette = m_hPalIsoTemp;
-					}
-					HMIXFILE hShpMix = FindFileInMix(filename);
-					bSuccess = FSunPackLib::SetCurrentSHP(filename, hShpMix);
-
-					if (!bSuccess) {
-						missingimages[lpUnittype] = TRUE;
-					}
-				}
-
-				if (bSuccess) {
-
-					FSunPackLib::XCC_GetSHPHeader(&head);
-					int maxPics = head.c_images;
-					if (bStructure && !bPowerUp) {
-						maxPics = 1;
-					}
-					if (rules.GetBool(lpUnittype, "Turret")) {
-						maxPics = 8;
-					}
-					if (maxPics > 8) {
-						maxPics = 8; // we only need 8 pictures for every direction!
-					}
-
-					if (!bStructure && rules.GetBool(image, "Turret")) {
-						int iStartTurret = wStartWalkFrame + 8 * wStep;
-						const WORD wAnimCount = 4; // anims between each "normal" direction, seems to be hardcoded
-						for (auto i = 0; i < 8; i++) {
-							if (iStartTurret + i * wAnimCount < head.c_images) {
-								FSunPackLib::XCC_GetSHPImageHeader(iStartTurret + i * wAnimCount, &turretinfo[i]);
-								FSunPackLib::XCC_GetSHPHeader(&turrets_h[i]);
-								FSunPackLib::LoadSHPImage(iStartTurret + i * wAnimCount, turretColors[i]);
-							}
-						}
-					}
-
-
-
-					// create an array of pointers to directdraw surfaces
-					auto lpT = new(BYTE * [maxPics]);
-					::memset(lpT, 0, sizeof(BYTE) * maxPics);
-					std::vector<std::vector<BYTE>> lighting(maxPics);
-					std::vector<SHPIMAGEHEADER> shp_image_headers(maxPics);
-
-					if (lpUnittype == "CAWBNKR1") {
-						printf("");
-					}
-
-					if (bStructure) {
-						for (auto i = 0; i < maxPics; i++) {
-							FSunPackLib::XCC_GetSHPImageHeader(0, &shp_image_headers[i]);
-							FSunPackLib::LoadSHPImage(0, 1, &lpT[i]);
-						}
-					} else {// vehicle, infantry
-						// walk frames used
-						for (auto i = 0; i < maxPics; i++) {
-							const int dir = bVehicle ? ((i + 1) % 8) : i;
-							const int pic_in_file = dir * wStep + wStartWalkFrame;
-							FSunPackLib::LoadSHPImage(pic_in_file, 1, &lpT[i]);
-							FSunPackLib::XCC_GetSHPImageHeader(pic_in_file, &shp_image_headers[i]);
-						}
-					}
-
-					// this block handles one-direction only building frame
-					if (bStructure) {
-						SHPIMAGEHEADER imghead = shp_image_headers[0];
-						auto blitDst = lpT[0];
-						if (bib != NULL) {
-							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, bib, bib_h.cx, bib_h.cy);
-
-							imghead.cx = head.cx - imghead.x; // update size of main graphic
-							imghead.cy = head.cy - imghead.y;
-
-						}
-
-						if (activeanim != NULL) {
-							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, activeanim, activeanim_h.cx, activeanim_h.cy);
-
-
-						}
-
-						if (idleanim != NULL) {
-							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, idleanim, idleanim_h.cx, idleanim_h.cy);
-
-
-						}
-
-						if (activeanim2 != NULL) {
-							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, activeanim2, activeanim2_h.cx, activeanim2_h.cy);
-
-						}
-
-						if (activeanim3 != NULL) {
-							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, activeanim3, activeanim3_h.cx, activeanim3_h.cy);
-
-						}
-
-						if (superanim1 != NULL) {
-							Blit_Pal(blitDst, 0, superanim_1_zadjust, head.cx, head.cy, superanim1, superanim1_h.cx, superanim1_h.cy);
-						}
-
-						if (superanim2 != NULL) {
-							Blit_Pal(blitDst, 0, superanim_2_zadjust, head.cx, head.cy, superanim2, superanim2_h.cx, superanim2_h.cy);
-						}
-
-						if (superanim3 != NULL) {
-							Blit_Pal(blitDst, 0, superanim_3_zadjust, head.cx, head.cy, superanim3, superanim3_h.cx, superanim3_h.cy);
-						}
-						if (superanim4 != NULL && strcmp(lpUnittype, "YAGNTC") != NULL) {
-							Blit_Pal(blitDst, 0, superanim_4_zadjust, head.cx, head.cy, superanim4, superanim4_h.cx, superanim4_h.cy);
-
-
-						}
-						if (specialanim1 != NULL) {
-							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, specialanim1, specialanim1_h.cx, specialanim1_h.cy);
-						}
-						if (specialanim2 != NULL) {
-							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, specialanim2, specialanim2_h.cx, specialanim2_h.cy);
-						}
-						if (specialanim3 != NULL) {
-							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, specialanim3, specialanim3_h.cx, specialanim3_h.cy);
-						}
-
-						if (specialanim4 != NULL) {
-							Blit_Pal(blitDst, 0, 0, head.cx, head.cy, specialanim4, specialanim4_h.cx, specialanim4_h.cy);
-
-						}
-					}
-
-					for (auto i = 0; i < maxPics; i++) {
-						SHPIMAGEHEADER* imghead = &shp_image_headers[i];
-						if (bStructure) {
-							imghead = &shp_image_headers[0];
-							if (!lpT[i]) {
-								auto const dataLen = imghead->cx * imghead->cy;
-								auto data = new(BYTE[dataLen]);
-								memcpy(data, lpT[0], dataLen);
-								lpT[i] = data;
-							}
-						}
-						//FSunPackLib::XCC_GetSHPImageHeader(pic_in_file, &imghead);
-
-
-
-						if (!vxlBarrelLighting[i].empty() || !turretLighting[i].empty())
-							lighting[i].resize(head.cx * head.cy, 46);  // value needs to lead to 1.0 lighting
-
-						// barrels hidden behind turret:
-						if (!vxlBarrelColors[i].empty() && (i == 1 || i == 0 || i == 7)) {
-							DDSURFACEDESC2 ddsd;
-							::memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-							ddsd.dwSize = sizeof(DDSURFACEDESC2);
-							ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-							ddsd.dwWidth = barrels_h[i].cx;
-							ddsd.dwHeight = barrels_h[i].cy;
-
-							int XMover, YMover;
-							char c[50];
-							itoa(i, c, 10);
-#ifdef RA2_MODE
-							XMover = g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "X");
-							YMover = g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "Y");
-							XMover += g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "X" + c);
-							YMover += g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "Y" + c);
-#else
-							XMover = atoi(g_data.GetInteger("BuildingVoxelBarrels"].lpUnittype + "X");
-							YMover = atoi(g_data.GetInteger("BuildingVoxelBarrels"].lpUnittype + "Y");
-#endif
-
-							RECT srcRect, destRect;
-
-							int mx = head.cx / 2 + rules.GetInteger(image, "TurretAnimX") - barrelinfo[i].x;
-							int my = head.cy / 2 + rules.GetInteger(image, "TurretAnimY") - barrelinfo[i].y;
-
-							srcRect.top = 0;
-							srcRect.left = 0;
-							srcRect.right = ddsd.dwWidth;
-							srcRect.bottom = ddsd.dwHeight;
-							destRect.top = YMover + my;
-							destRect.left = XMover + mx;
-							destRect.right = destRect.left + ddsd.dwWidth;
-							destRect.bottom = destRect.top + ddsd.dwHeight;
-
-
-							errstream << "vxl barrel: " << i << " size: " << ddsd.dwWidth << " " << ddsd.dwHeight << " at " << destRect.left << " " << destRect.top << endl;
-							errstream.flush();
-							Blit_PalD(lpT[i], destRect, vxlBarrelColors[i].data(), srcRect, ddsd.dwWidth, head.cx, ddsd.dwHeight, head.cy);
-							Blit_PalD(lighting[i].data(), destRect, vxlBarrelLighting[i].data(), srcRect, ddsd.dwWidth, head.cx, ddsd.dwHeight, head.cy, vxlBarrelColors[i].data());
-
-						}
-
-
-						if (!turretColors[i].empty()) {
-							DDSURFACEDESC2 ddsd;
-							::memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-							ddsd.dwSize = sizeof(DDSURFACEDESC2);
-							ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-							//turrets[i]->GetSurfaceDesc(&ddsd);
-							// replace DX code:
-							ddsd.dwWidth = turrets_h[i].cx;
-							ddsd.dwHeight = turrets_h[i].cy;
-
-							int XMover = 0;
-							int YMover = 0;
-
-							RECT srcRect, destRect;
-
-							if (bVoxelTurret) {
-								int mx = head.cx / 2 + rules.GetInteger(lpUnittype, "TurretAnimX") - turretinfo[i].x;
-								int my = head.cy / 2 + rules.GetInteger(lpUnittype, "TurretAnimY") - turretinfo[i].y;
-
-								char c[50];
-								itoa(i, c, 10);
-#ifdef RA2_MODE
-								XMover = g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "X");
-								YMover = g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "Y");
-								XMover += g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "X" + c);
-								YMover += g_data.GetInteger("BuildingVoxelTurretsRA2", lpUnittype + "Y" + c);
-#else
-								XMover = g_data.GetInteger("BuildingVoxelTurrets", lpUnittype + "X");
-								YMover = g_data.GetInteger("BuildingVoxelTurrets", lpUnittype + "Y");
-#endif
-
-								srcRect.top = 0;
-								srcRect.left = 0;
-								srcRect.right = ddsd.dwWidth;
-								srcRect.bottom = ddsd.dwHeight;
-								destRect.top = YMover + my;
-								destRect.left = XMover + mx;
-								destRect.right = destRect.left + ddsd.dwWidth;;
-								destRect.bottom = destRect.top + ddsd.dwHeight;
-
-							} else {// !bVoxelTurret
-								int mx = rules.GetInteger(lpUnittype, "TurretAnimX");
-								int my = rules.GetInteger(lpUnittype, "TurretAnimY");//+rules.GetInteger(image, "barrelAnimZAdjust");
-
-								srcRect.top = 0;
-								srcRect.left = 0;
-								srcRect.right = turrets_h[i].cx;
-								srcRect.bottom = turrets_h[i].cy;
-								destRect.top = YMover + my;
-								destRect.left = XMover + mx;
-								destRect.right = destRect.left + srcRect.right;
-								destRect.bottom = destRect.top + srcRect.bottom;
-							}
-
-							errstream << "vxl turret: " << i << " size: " << ddsd.dwWidth << " " << ddsd.dwHeight << " at " << destRect.left << " " << destRect.top << endl;
-							errstream.flush();
-							Blit_PalD(lpT[i], destRect, turretColors[i].data(), srcRect, ddsd.dwWidth, head.cx, ddsd.dwHeight, head.cy);
-							Blit_PalD(lighting[i].data(), destRect, turretLighting[i].data(), srcRect, ddsd.dwWidth, head.cx, ddsd.dwHeight, head.cy, turretColors[i].data());
-
-						}
-
-						// barrels in front of turret
-						if (!vxlBarrelColors[i].empty() && i != 1 && i != 0 && i != 7) {
-							DDSURFACEDESC2 ddsd;
-							::memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-							ddsd.dwSize = sizeof(DDSURFACEDESC2);
-							ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-							ddsd.dwWidth = barrels_h[i].cx;
-							ddsd.dwHeight = barrels_h[i].cy;
-
-							int XMover, YMover;
-							char c[50];
-							itoa(i, c, 10);
-#ifdef RA2_MODE
-							XMover = g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "X");
-							YMover = g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + "Y");
-							XMover += g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + (CString)"X" + c);
-							YMover += g_data.GetInteger("BuildingVoxelBarrelsRA2", lpUnittype + (CString)"Y" + c);
-#else
-							XMover = g_data.GetInteger("BuildingVoxelBarrels", lpUnittype + "X");
-							YMover = g_data.GetInteger("BuildingVoxelBarrels", lpUnittype + "Y");
-#endif
-
-							RECT srcRect, destRect;
-
-							int mx = head.cx / 2 + rules.GetInteger(image, "TurretAnimX") - barrelinfo[i].x;
-							int my = head.cy / 2 + rules.GetInteger(image, "TurretAnimY") - barrelinfo[i].y;
-
-							srcRect.top = 0;
-							srcRect.left = 0;
-							srcRect.right = ddsd.dwWidth;
-							srcRect.bottom = ddsd.dwHeight;
-							destRect.top = YMover + my;
-							destRect.left = XMover + mx;
-							destRect.right = destRect.left + ddsd.dwWidth;
-							destRect.bottom = destRect.top + ddsd.dwHeight;
-
-
-							errstream << "vxl barrel: " << i << " size: " << ddsd.dwWidth << " " << ddsd.dwHeight << " at " << destRect.left << " " << destRect.top << endl;
-							errstream.flush();
-							Blit_PalD(lpT[i], destRect, vxlBarrelColors[i].data(), srcRect, ddsd.dwWidth, head.cx, ddsd.dwHeight, head.cy);
-							Blit_PalD(lighting[i].data(), destRect, vxlBarrelLighting[i].data(), srcRect, ddsd.dwWidth, head.cx, ddsd.dwHeight, head.cy, vxlBarrelColors[i].data());
-
-
-						}
-
-						if (!bPowerUp && i != 0 && (imghead->unknown == 0 && !g_data.GetBool("Debug", "IgnoreSHPImageHeadUnused")) && bStructure) {
-							if (lpT[i]) delete[] lpT[i];
-							lpT[i] = NULL;
-						} else {
-							char ic[50];
-							itoa(i, ic, 10);
-
-							PICDATA p;
-							p.pic = lpT[i];
-							if (std::find_if(lighting[i].begin(), lighting[i].end(), [](const BYTE b) { return b != 255; }) != lighting[i].end())
-								p.lighting = std::shared_ptr<std::vector<BYTE>>(new std::vector<BYTE>(std::move(lighting[i])));
-							else
-								lighting[i].clear();
-							p.vborder = new(VBORDER[head.cy]);
-							int k;
-							for (k = 0; k < head.cy; k++) {
-								int l, r;
-								GetDrawBorder(lpT[i], head.cx, k, l, r, 0);
-								p.vborder[k].left = l;
-								p.vborder[k].right = r;
-							}
-
-							if (hPalette == m_hPalIsoTemp || hPalette == m_hPalIsoUrb || hPalette == m_hPalIsoSnow || hPalette == m_hPalIsoUbn || hPalette == m_hPalIsoDes || hPalette == m_hPalIsoLun) p.pal = iPalIso;
-							if (hPalette == m_hPalTemp || hPalette == m_hPalUrb || hPalette == m_hPalSnow || hPalette == m_hPalUbn || hPalette == m_hPalLun || hPalette == m_hPalDes) p.pal = iPalTheater;
-							if (hPalette == m_hPalUnitTemp || hPalette == m_hPalUnitUrb || hPalette == m_hPalUnitSnow || hPalette == m_hPalUnitDes || hPalette == m_hPalUnitLun || hPalette == m_hPalUnitUbn) p.pal = iPalUnit;
-							if (hPalette == m_hPalLib) p.pal = iPalLib;
-
-							p.x = imghead->x;
-							p.y = imghead->y;
-							p.wHeight = imghead->cy;
-							p.wWidth = imghead->cx;
-							p.wMaxWidth = head.cx;
-							p.wMaxHeight = head.cy;
-							p.bType = PICDATA_TYPE_SHP;
-							p.bTerrain = limited_to_theater;
-
-							pics[image + ic] = p;
-
-							//errstream << " --> finished as " << (LPCSTR)(image+ic) << endl;
-							//errstream.flush();
-						}
-
-
-					}
-
-					delete[] lpT;
-
-
-					if (bib) delete[] bib;
-					if (activeanim) delete[] activeanim;
-					if (idleanim) delete[] idleanim;
-					if (activeanim2) delete[] activeanim2;
-					if (activeanim3) delete[] activeanim3;
-					if (superanim1) delete[] superanim1;
-					if (superanim2) delete[] superanim2;
-					if (superanim3) delete[] superanim3;
-					if (superanim4) delete[] superanim4;
-					if (specialanim1) delete[] specialanim1;
-					if (specialanim2) delete[] specialanim2;
-					if (specialanim3) delete[] specialanim3;
-					if (specialanim4) delete[] specialanim4;
-
-					//for(i=0;i<8;i++)
-					//	if(turrets[i]) delete[] turrets[i];
-
-				}
-
-				//errstream << " --> Finished" << endl;
-				//errstream.flush();
-			}
-
-			else {
-				errstream << "File in theater " << cur_theat << " not found: " << (LPCTSTR)filename << endl;
-				errstream.flush();
-
-				missingimages[lpUnittype] = TRUE;
-			}
-
-		} catch (...) {
-			errstream << " exception " << endl;
-			errstream.flush();
-		}
-
-
-	} else {
-		filename = image + ".vxl";
-
-		HMIXFILE hMix = FindFileInMix(filename);
-		if (hMix == FALSE) {
-			missingimages[lpUnittype] = TRUE;
-			return FALSE;
-		}
-
-		int XMover, YMover;
-#ifdef RA2_MODE
-		XMover = g_data.GetInteger("VehicleVoxelTurretsRA2", lpUnittype + "X");
-		YMover = g_data.GetInteger("VehicleVoxelTurretsRA2", lpUnittype + "Y");
-#else
-		XMover = g_data.GetInteger("VehicleVoxelTurrets", lpUnittype + "X");
-		YMover = g_data.GetInteger("VehicleVoxelTurrets", lpUnittype + "Y");
-#endif
-
-		iTurretOffset = art.GetInteger(image, "TurretOffset", iTurretOffset);
-
-		int i;
-
-		for (i = 0; i < 8; i++) {
-			float r_x, r_y, r_z;
-
-
-			r_x = 300;
-			r_y = 0;
-			r_z = 45 * i + 90;
-
-			//r_x = 0;
-			//r_y = 0;
-			//r_z = 0;
-
-			// convert
-			const double pi = 3.141592654;
-			Vec3f rotation(r_x / 180.0f * pi, r_y / 180.0f * pi, r_z / 180.0f * pi);
-			Vec3f turretModelOffset(iTurretOffset / 6.0f, 0.0f, 0.0f);
-
-
-			std::vector<BYTE> colors;
-			std::shared_ptr<std::vector<BYTE>> pLighting(new std::vector<BYTE>);
-			auto& lighting = *pLighting;
-			std::vector<BYTE> turretColors;
-			std::vector<BYTE> turretNormals;
-			std::vector<BYTE> barrelColors;
-			std::vector<BYTE> barrelNormals;
-			RECT lprT;
-			RECT lprB;
-			int turret_x, turret_y, turret_x_zmax, turret_y_zmax, barrel_x, barrel_y;
-
-			if (rules.GetBool(lpUnittype, "Turret")) {
-				if (FSunPackLib::SetCurrentVXL(image + "tur.vxl", hMix)) {
-					FSunPackLib::LoadVXLImage(*m_voxelNormalTables, lightDirection, rotation, turretModelOffset, turretColors, turretNormals, &turret_x, &turret_y, 0, &turret_x_zmax, &turret_y_zmax, -1, -1, &lprT);
-				}
-				if (FSunPackLib::SetCurrentVXL(image + "barl.vxl", hMix)) {
-					FSunPackLib::LoadVXLImage(*m_voxelNormalTables, lightDirection, rotation, turretModelOffset, barrelColors, barrelNormals, &barrel_x, &barrel_y, 0, NULL, NULL, 0, 0, &lprB);
-				}
-			}
-
-
-			if (!FSunPackLib::SetCurrentVXL(filename, hMix)) {
-				return FALSE;
-			}
-
-
-
-			int xcenter, ycenter, xcenter_zmax, ycenter_zmax;
-
-			RECT r;
-
-			if (!
-				FSunPackLib::LoadVXLImage(*m_voxelNormalTables, lightDirection, rotation, Vec3f(), colors, lighting, &xcenter, &ycenter, 0, &xcenter_zmax, &ycenter_zmax, -1, -1, &r)
-				) {
-				return FALSE;
-			}
-
-			FSunPackLib::VoxelNormalClass vnc = FSunPackLib::VoxelNormalClass::Unknown;
-			FSunPackLib::GetVXLSectionInfo(0, vnc);  // we assume the normal class for all voxels sections and turrets or barrels is the same
-
-			DDSURFACEDESC2 ddsd;
-			::memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-			ddsd.dwSize = sizeof(DDSURFACEDESC2);
-			ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-			ddsd.dwWidth = r.right - r.left;
-			ddsd.dwHeight = r.bottom - r.top;
-
-			//lpT->GetSurfaceDesc(&ddsd);
-
-			// turret
-			if (turretColors.size()) {
-				DDSURFACEDESC2 ddsdT;
-				::memset(&ddsdT, 0, sizeof(DDSURFACEDESC2));
-				ddsdT.dwSize = sizeof(DDSURFACEDESC2);
-				ddsdT.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-				ddsdT.dwWidth = lprT.right - lprT.left;
-				ddsdT.dwHeight = lprT.bottom - lprT.top;
-				//lpTurret->GetSurfaceDesc(&ddsdT);
-
-				DDBLTFX fx;
-				::memset(&fx, 0, sizeof(DDBLTFX));
-				fx.dwSize = sizeof(DDBLTFX);
-
-
-				RECT srcRect, destRect;
-				srcRect.left = 0;
-				srcRect.right = ddsdT.dwWidth;
-				destRect.left = xcenter - turret_x + XMover;
-				destRect.right = destRect.left + ddsdT.dwWidth;
-				srcRect.top = 0;
-				srcRect.bottom = ddsdT.dwHeight;
-				destRect.top = ycenter - turret_y + YMover;
-				destRect.bottom = destRect.top + ddsdT.dwHeight;
-
-				errstream << destRect.left << " " << destRect.top << endl;
-				errstream.flush();
-
-				Blit_PalD(colors.data(), destRect, turretColors.data(), srcRect, ddsdT.dwWidth, ddsd.dwWidth, ddsdT.dwHeight, ddsd.dwHeight);
-				Blit_PalD(lighting.data(), destRect, turretNormals.data(), srcRect, ddsdT.dwWidth, ddsd.dwWidth, ddsdT.dwHeight, ddsd.dwHeight, turretColors.data());
-				//AssertNormals(turretColors, turretNormals);
-
-			}
-
-			// barrel
-			if (barrelColors.size()) {
-				DDSURFACEDESC2 ddsdB;
-				::memset(&ddsdB, 0, sizeof(DDSURFACEDESC2));
-				ddsdB.dwSize = sizeof(DDSURFACEDESC2);
-				ddsdB.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-				ddsdB.dwWidth = lprB.right - lprB.left;
-				ddsdB.dwHeight = lprB.bottom - lprB.top;
-				//lpBarrel->GetSurfaceDesc(&ddsdB);
-
-				DDSURFACEDESC2 ddsdT;
-				::memset(&ddsdT, 0, sizeof(DDSURFACEDESC2));
-				ddsdT.dwSize = sizeof(DDSURFACEDESC2);
-				ddsdT.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-
-				if (turretColors.size()) {
-					ddsdT.dwWidth = lprT.right - lprT.left;
-					ddsdT.dwHeight = lprT.bottom - lprT.top;
-					//lpTurret->GetSurfaceDesc(&ddsdT);
-				}
-
-
-				DDBLTFX fx;
-				::memset(&fx, 0, sizeof(DDBLTFX));
-				fx.dwSize = sizeof(DDBLTFX);
-
-				RECT srcRect, destRect;
-				srcRect.left = 0;
-				srcRect.right = ddsdB.dwWidth;
-				destRect.left = xcenter - barrel_x + XMover;
-				destRect.right = destRect.left + ddsdB.dwWidth;
-				srcRect.top = 0;
-				srcRect.bottom = ddsdB.dwHeight;
-				destRect.top = ycenter - barrel_y + YMover;
-				destRect.bottom = destRect.top + ddsdB.dwHeight;
-
-				Blit_PalD(colors.data(), destRect, barrelColors.data(), srcRect, ddsdB.dwWidth, ddsd.dwWidth, ddsdB.dwHeight, ddsd.dwHeight);
-				Blit_PalD(lighting.data(), destRect, barrelNormals.data(), srcRect, ddsdB.dwWidth, ddsd.dwWidth, ddsdB.dwHeight, ddsd.dwHeight, barrelColors.data());
-				//AssertNormals(vxlBarrelColors, barrelNormals);
-
-			}
-
-			// all VXL, so every non-transparent area should have a normal
-			//AssertNormals(colors, lighting);
-
-			char ic[50];
-			itoa(7 - i, ic, 10);
-
-			errstream << ddsd.dwWidth << " " << ddsd.dwHeight << "\n";
-			PICDATA p;
-			p.pic = new(BYTE[colors.size()]);
-			::memcpy(p.pic, colors.data(), colors.size());
-			p.lighting = pLighting;
-			p.normalClass = vnc;
-
-			p.vborder = new(VBORDER[ddsd.dwHeight]);
-			int k;
-			for (k = 0; k < ddsd.dwHeight; k++) {
-				int l, r;
-				GetDrawBorder(colors.data(), ddsd.dwWidth, k, l, r, 0);
-				p.vborder[k].left = l;
-				p.vborder[k].right = r;
-			}
-
-			//if(hPalette==m_hPalIsoTemp || hPalette==m_hPalIsoUrb || hPalette==m_hPalIsoSnow) p.pal=iPalIso;
-			//if(hPalette==m_hPalTemp || hPalette==m_hPalUrb || hPalette==m_hPalSnow) p.pal=iPalTheater;
-			//if(hPalette==m_hPalUnitTemp || hPalette==m_hPalUnitUrb || hPalette==m_hPalUnitSnow) p.pal=iPalUnit;
-			//if(hPalette==m_hPalLib) p.pal=iPalLib;
-			p.pal = iPalUnit;
-
-			p.x = -xcenter;
-			p.y = -ycenter;
-			p.wHeight = ddsd.dwHeight;
-			p.wWidth = ddsd.dwWidth;
-			p.wMaxWidth = ddsd.dwWidth;
-			p.wMaxHeight = ddsd.dwHeight;
-			p.bType = PICDATA_TYPE_VXL;
-			p.bTerrain = TheaterChar::None;
-
-			pics[image + ic] = p;
-
-			errstream << "vxl saved as " << (LPCSTR)image << (LPCSTR)ic << endl;
-			errstream.flush();
-
-			//delete[] lpT;
-
-		}
-
-
-
-	}
-
-
 
 	return FALSE;
 }
+
+
+
+CString CLoading::GetTerrainOrSmudgeFileID(const CString& ID)
+{
+	CString ArtID = GetArtID(ID);
+	CString ImageID = art.GetStringOr(ArtID, "Image", ArtID);
+
+	return ImageID;
+}
+
+CString CLoading::GetBuildingFileID(const CString& ID)
+{
+	CString ArtID = GetArtID(ID);
+	CString ImageID = art.GetStringOr(ArtID, "Image", ArtID);
+
+	CString backupID = ImageID;
+	SetTheaterLetter(ImageID, cur_theat);
+
+	CString validator = ImageID + ".SHP";
+	int nMix = this->FindFileInMix(validator);
+	if (!FSunPackLib::XCC_DoesFileExist(validator, nMix)) {
+		SetGenericTheaterLetter(ImageID);
+		validator = ImageID + ".SHP";
+		nMix = this->FindFileInMix(validator);
+		if (!FSunPackLib::XCC_DoesFileExist(validator, nMix)) {
+			ImageID = backupID;
+		}
+	}
+	return ImageID;
+}
+
+CString CLoading::GetInfantryFileID(const CString& ID)
+{
+	CString ArtID = GetArtID(ID);
+
+	CString ImageID = art.GetStringOr(ArtID, "Image", ArtID);
+	auto const& rules = IniMegaFile::GetRules();
+
+	if (rules.GetBool(ID, "AlternateTheaterArt")) {
+		ImageID += this->cur_theat;
+	} else if (rules.GetBool(ID, "AlternateArcticArt")) {
+		if (this->cur_theat == 'A') {
+			ImageID += 'A';
+		}
+	}
+	if (!art.TryGetSection(ImageID)) {
+		ImageID = ArtID;
+	}
+	return ImageID;
+}
+
+CString CLoading::GetArtID(const CString& ID)
+{
+	auto const& rules = IniMegaFile::GetRules();
+	return rules.GetStringOr(ID, "Image", ID);
+}
+
+CString CLoading::GetVehicleOrAircraftFileID(const CString& ID)
+{
+	CString ArtID = GetArtID(ID);
+
+	CString ImageID = art.GetStringOr(ArtID, "Image", ArtID);
+
+	return ImageID;
+}
+
+void CLoading::LoadBuilding(const CString& ID)
+{
+	CString ArtID = GetArtID(ID);
+	CString ImageID = GetBuildingFileID(ID);
+
+	auto const& rules = IniMegaFile::GetRules();
+	auto const& ppPowerUpBld = rules.GetString(ID, "PowersUpBuilding");
+	// Early load
+	if (!ppPowerUpBld.IsEmpty()) {
+		CString SrcBldName = GetBuildingFileID(*ppPowerUpBld) + "0";
+		if (!IsImageLoaded(SrcBldName))
+			LoadBuilding(*ppPowerUpBld);
+	}
+
+	auto loadAnimFrame = [this, &ArtID, &ID](const CString& key, const CString& controlKey) {
+		auto const imageID = art.GetStringOr(ArtID, key, ArtID);
+		if (!imageID.IsEmpty()) {
+			if (!g_data.GetBool(controlKey, ID)) {
+				int nStartFrame = art.GetInteger(imageID, "LoopStart");
+				LoadSingleFrameShape(art.GetStringOr(imageID, "Image", imageID), nStartFrame);
+			}
+		}
+	};
+
+	int nBldStartFrame = art.GetInteger(ArtID, "LoopStart", 0);
+
+	if (!this->LoadSingleFrameShape(ImageID, nBldStartFrame)) {
+		return;
+	}
+
+	loadAnimFrame("IdleAnim", "IgnoreIdleAnim");
+	loadAnimFrame("ActiveAnim", "IgnoreActiveAnim1");
+	loadAnimFrame("ActiveAnimTwo", "IgnoreActiveAnim2");
+	loadAnimFrame("ActiveAnimThree", "IgnoreActiveAnim3");
+	loadAnimFrame("ActiveAnimFour", "IgnoreActiveAnim4");
+	loadAnimFrame("SuperAnim", "IgnoreSuperAnim1");
+	loadAnimFrame("SuperAnimTwo", "IgnoreSuperAnim2");
+	loadAnimFrame("SuperAnimThree", "IgnoreSuperAnim3");
+	loadAnimFrame("SuperAnimFour", "IgnoreSuperAnim4");
+	auto bibImageName = art.GetString(ArtID, "BibShape");
+	if (bibImageName.GetLength()) {
+		LoadSingleFrameShape(art.GetStringOr(bibImageName, "Image", bibImageName));
+	}
+
+	CString PaletteName = art.GetStringOr(ArtID, "Palette", "unit");
+	if (art.GetBool(ArtID, "TerrainPalette")) {
+		PaletteName = "iso";
+	}
+	GetFullPaletteName(PaletteName, cur_theat);
+
+	CString DictName;
+
+	unsigned char* pBuffer;
+	int width, height;
+	UnionSHP_GetAndClear(pBuffer, &width, &height);
+
+	if (ID == "NAWEAP2") {
+		printf("");
+	}
+
+	// No turret
+	if (!rules.GetBool(ID, "Turret")) {
+		DictName.Format("%s%d", ID, 0);
+		SetImageData(pBuffer, DictName, width, height, m_palettes.LoadPalette(PaletteName));
+		return;
+	}
+	// Has turret
+	if (rules.GetBool(ID, "TurretAnimIsVoxel")) {
+		int turzadjust = rules.GetInteger(ID, "TurretAnimZAdjust"); // no idea why apply it but it worked
+
+		CString TurName = rules.GetStringOr(ID, "TurretAnim", ID + "tur");
+		CString BarlName = ID + "barl";
+
+
+		//if (!DrawStuff::is_vpl_loaded()) {
+		//	DrawStuff::load_vpl("voxels.vpl");
+		//}
+
+		unsigned char* pTurImages[8]{ nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+		unsigned char* pBarlImages[8]{ nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+		DrawRect turrect[8] = { 0 };
+		int barlrect[8][4] = { 0 };
+
+
+		CString VXLName = BarlName + ".vxl";
+		CString HVAName = BarlName + ".hva";
+
+		HMIXFILE hBarl = FindFileInMix(BarlName);
+		if (hBarl && FSunPackLib::SetCurrentVXL(VXLName, hBarl)) {
+			auto vnc = FSunPackLib::VoxelNormalClass::Unknown;
+			std::vector<BYTE> vxlColors[8];
+			std::vector<BYTE> vxlLighting[8];
+			// we assume the voxel normal class is always the same for the combined voxels
+			FSunPackLib::GetVXLSectionInfo(0, vnc);
+			for (int i = 0; i < 8; ++i) {
+				float r_x, r_y, r_z;
+				const int dir = i;
+				r_x = 300;
+				r_y = 0;
+				r_z = 45 * dir + 90;
+
+				// convert
+				const double pi = 3.141592654;
+				const Vec3f rotation(r_x / 180.0f * pi, r_y / 180.0f * pi, r_z / 180.0f * pi);
+				RECT r;
+				int center_x, center_y;
+				if (!FSunPackLib::LoadVXLImage(
+					*m_voxelNormalTables,
+					lightDirection,
+					rotation,
+					0,
+					vxlColors[i],
+					vxlLighting[i],
+					&center_x, &center_y,
+					0, nullptr, nullptr, 0, 0, &r)) {
+					break;
+				}
+
+				auto const x = center_x;
+				auto const y = center_y;
+				auto const width = r.right - r.left;
+				auto const height = r.bottom - r.top;
+
+				VXL_Add(vxlColors[i].data(), x, y, width, height);
+				VXL_Add(vxlLighting[i].data(), x, y, width, height);
+				VXL_GetAndClear(pTurImages[i], nullptr, nullptr);
+				turrect[i] = { x, y, width, height };
+			}
+		}
+
+
+		VXLName = TurName + ".vxl";
+		HVAName = TurName + ".hva";
+
+		HMIXFILE hVXL = FindFileInMix(VXLName);
+
+		//if (DrawStuff::load_vxl(VXLName) && DrawStuff::load_hva(HVAName)) {
+		//	for (int i = 0; i < 8; ++i) {
+		//		// (13 - i) % 8 for facing fix
+		//		bool result = DrawStuff::get_to_image((13 - i) % 8, pTurImages[i],
+		//			turrect[i][0], turrect[i][1], turrect[i][2], turrect[i][3], pBarlImages[i] ? 0 : turzadjust);
+		//		if (!result) {
+		//			break;
+		//		}
+		//	}
+		//}
+
+		for (int i = 0; i < 8; ++i) {
+			auto pTempBuf = new(unsigned char[width * height]);
+			memcpy_s(pTempBuf, width * height, pBuffer, width * height);
+			UnionSHP_Add(pTempBuf, width, height);
+
+			int deltaX = rules.GetInteger(ID, "TurretAnimX", 0);
+			int deltaY = rules.GetInteger(ID, "TurretAnimY", 0);
+
+			auto const& turretRect = turrect[i];
+			auto const& barlRect = barlrect[i];
+
+			if (pTurImages[i]) {
+				CString pKey;
+
+				pKey.Format("%sX%d", ID, (15 - i) % 8);
+				int turdeltaX = g_data.GetInteger("BuildingVoxelTurretsRA2", pKey);
+				pKey.Format("%sY%d", ID, (15 - i) % 8);
+				int turdeltaY = g_data.GetInteger("BuildingVoxelTurretsRA2", pKey);
+
+				VXL_Add(pTurImages[i], turretRect.X + turdeltaX, turretRect.Y + turdeltaY, turretRect.Width, turretRect.Height);
+				delete[] pTurImages[i];
+
+				if (pBarlImages[i]) {
+					pKey.Format("%sX%d", ID, (15 - i) % 8);
+					int barldeltaX = g_data.GetInteger("BuildingVoxelBarrelsRA2", pKey);
+					pKey.Format("%sY%d", ID, (15 - i) % 8);
+					int barldeltaY = g_data.GetInteger("BuildingVoxelBarrelsRA2", pKey);
+
+					VXL_Add(pBarlImages[i], barlRect[2] + barldeltaX, barlRect[3] + barldeltaY, barlRect[0], barlRect[1]);
+					delete[] pBarlImages[i];
+				}
+			}
+
+			int nW = 0x100, nH = 0x100;
+			VXL_GetAndClear(pTurImages[i], &nW, &nH);
+
+			UnionSHP_Add(pTurImages[i], 0x100, 0x100, deltaX, deltaY);
+
+			unsigned char* pImage;
+			int width1, height1;
+
+			UnionSHP_GetAndClear(pImage, &width1, &height1);
+			DictName.Format("%s%d", ID, i);
+			SetImageData(pImage, DictName, width1, height1, m_palettes.LoadPalette(PaletteName));
+		}
+		delete[](pBuffer);
+		return;
+	}
+
+	//SHP anim
+	CString TurName = rules.GetStringOr(ID, "TurretAnim", ID + "tur");
+	int nStartFrame = art.GetInteger(TurName, "LoopStart");
+	int deltaX = rules.GetInteger(ID, "TurretAnimX", 0);
+	int deltaY = rules.GetInteger(ID, "TurretAnimY", 0);
+	auto const turImageName = art.GetStringOr(TurName, "Image", TurName);
+	auto const frameCount = art.GetInteger(TurName, "LoopEnd", 32);
+	auto const frameInterval = frameCount / 8;
+
+	for (int seqIdx = 0; seqIdx < 8; ++seqIdx) {
+		auto pTempBuf = new(unsigned char[width * height]);
+		memcpy_s(pTempBuf, width * height, pBuffer, width * height);
+		UnionSHP_Add(pTempBuf, width, height);
+		LoadSingleFrameShape(turImageName, nStartFrame + seqIdx * frameInterval, deltaX, deltaY);
+
+		unsigned char* pImage;
+		int width1, height1;
+		UnionSHP_GetAndClear(pImage, &width1, &height1);
+
+		DictName.Format("%s%d", ID, seqIdx);
+		SetImageData(pImage, DictName, width1, height1, m_palettes.LoadPalette(PaletteName));
+	}
+	delete(pBuffer);
+}
+
+void CLoading::LoadInfantry(const CString& ID)
+{
+	CString ArtID = GetArtID(ID);
+	CString ImageID = GetInfantryFileID(ID);
+
+	CString sequenceName = art.GetString(ImageID, "Sequence");
+	CString frames = art.GetStringOr(sequenceName, "Guard", "0,1,1");
+	int framesToRead[8];
+	int frameStart, frameStep;
+	sscanf_s(frames, "%d,%d,%d", &frameStart, &framesToRead[0], &frameStep);
+	for (int i = 0; i < 8; ++i) {
+		framesToRead[i] = frameStart + i * frameStep;
+	}
+
+	CString FileName = ImageID + ".shp";
+	int nMix = this->FindFileInMix(FileName);
+	if (FSunPackLib::XCC_DoesFileExist(FileName, nMix)) {
+		SHPHEADER header;
+		unsigned char* FramesBuffers;
+		FSunPackLib::SetCurrentSHP(FileName, nMix);
+		FSunPackLib::XCC_GetSHPHeader(&header);
+		for (int i = 0; i < 8; ++i) {
+			FSunPackLib::LoadSHPImage(framesToRead[i], 1, &FramesBuffers);
+			CString DictName;
+			DictName.Format("%s%d", ImageID, i);
+			CString PaletteName = art.GetStringOr(ArtID, "Palette", "unit");
+			GetFullPaletteName(PaletteName, cur_theat);
+			SetImageData(FramesBuffers, DictName, header.cx, header.cy, m_palettes.LoadPalette(PaletteName));
+		}
+	}
+}
+
+void CLoading::LoadTerrainOrSmudge(const CString& ID)
+{
+	CString ArtID = GetArtID(ID);
+	CString ImageID = GetTerrainOrSmudgeFileID(ID);
+	CString FileName = ImageID + theatToSuffix(this->cur_theat);
+	int nMix = this->FindFileInMix(FileName);
+	if (FSunPackLib::XCC_DoesFileExist(FileName, nMix)) {
+		SHPHEADER header;
+		unsigned char* FramesBuffers[1];
+		FSunPackLib::SetCurrentSHP(FileName, nMix);
+		FSunPackLib::XCC_GetSHPHeader(&header);
+		FSunPackLib::LoadSHPImage(0, 1, &FramesBuffers[0]);
+		CString DictName;
+		DictName.Format("%s%d", ImageID, 0);
+		CString PaletteName;
+
+		if (ID.GetLength() >= 6 && *(DWORD*)ID.operator LPCTSTR() == *(DWORD*)("TIBT")) {
+			PaletteName = "unitsno.pal";
+		} else {
+			PaletteName = art.GetStringOr(ArtID, "Palette", "iso");
+			GetFullPaletteName(PaletteName, cur_theat);
+		}
+		SetImageData(FramesBuffers[0], DictName, header.cx, header.cy, m_palettes.LoadPalette(PaletteName));
+	}
+}
+
+void CLoading::LoadVehicleOrAircraft(const CString& ID)
+{
+	CString ArtID = GetArtID(ID);
+	CString ImageID = GetVehicleOrAircraftFileID(ID);
+	auto const& rules = IniMegaFile::GetRules();
+	bool bHasTurret = rules.GetBool(ID, "Turret");
+
+
+	// As SHP
+	if (!art.GetBool(ArtID, "Voxel")) {
+		int framesToRead[8];
+		int nStandingFrames = art.GetInteger(ArtID, "StandingFrames", 0);
+		if (nStandingFrames) {
+			int nStartStandFrame = art.GetInteger(ArtID, "StartStandFrame", 0);
+			for (int i = 0; i < 8; ++i) {
+				framesToRead[i] = nStartStandFrame + i * nStandingFrames;
+			}
+		} else {
+			int nStartWalkFrame = art.GetInteger(ArtID, "StartWalkFrame", 0);
+			int nWalkFrames = art.GetInteger(ArtID, "WalkFrames", 1);
+			for (int i = 0; i < 8; ++i) {
+				framesToRead[i] = nStartWalkFrame + i * nWalkFrames;
+			}
+		}
+
+		CString FileName = ImageID + ".shp";
+		int nMix = this->FindFileInMix(FileName);
+		if (FSunPackLib::XCC_DoesFileExist(FileName, nMix)) {
+			SHPHEADER header;
+			unsigned char* FramesBuffers[2];
+			FSunPackLib::SetCurrentSHP(FileName, nMix);
+			FSunPackLib::XCC_GetSHPHeader(&header);
+			for (int i = 0; i < 8; ++i) {
+				FSunPackLib::LoadSHPImage(framesToRead[i], 1, &FramesBuffers[0]);
+				CString DictName;
+				DictName.Format("%s%d", ImageID, i);
+				CString PaletteName = art.GetStringOr(ArtID, "Palette", "unit");
+				GetFullPaletteName(PaletteName, cur_theat);
+
+				if (bHasTurret) {
+					int nStartWalkFrame = art.GetInteger(ArtID, "StartWalkFrame", 0);
+					int nWalkFrames = art.GetInteger(ArtID, "WalkFrames", 1);
+					int turretFramesToRead[8];
+
+					// fix from cmcc
+					turretFramesToRead[i] = nStartWalkFrame + 8 * nWalkFrames + 4 * ((i + 1) % 8);
+
+					FSunPackLib::LoadSHPImage(turretFramesToRead[i], 1, &FramesBuffers[1]);
+					UnionSHP_Add(FramesBuffers[0], header.cx, header.cy);
+					UnionSHP_Add(FramesBuffers[1], header.cx, header.cy);
+					unsigned char* outBuffer;
+					int outW, outH;
+					UnionSHP_GetAndClear(outBuffer, &outW, &outH);
+
+					SetImageData(outBuffer, DictName, outW, outH, m_palettes.LoadPalette(PaletteName));
+				} else {
+					SetImageData(FramesBuffers[0], DictName, header.cx, header.cy, m_palettes.LoadPalette(PaletteName));
+				}
+			}
+		}
+		return;
+	}
+
+	// As VXL
+	CString FileName = ImageID + ".vxl";
+	CString HVAName = ImageID + ".hva";
+
+	//if (!DrawStuff::is_vpl_loaded()) {
+	//	DrawStuff::load_vpl("voxels.vpl");
+	//}
+
+	CString PaletteName = art.GetStringOr(ArtID, "Palette", "unit");
+	GetFullPaletteName(PaletteName, cur_theat);
+
+	unsigned char* pImage[8]{ nullptr,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr };
+	unsigned char* pTurretImage[8]{ nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr };
+	unsigned char* pBarrelImage[8]{ nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr };
+	DrawRect rect[8];
+	DrawRect turretrect[8];
+	DrawRect barrelrect[8];
+
+	int nMix = this->FindFileInMix(FileName);
+	if (!nMix || !FSunPackLib::SetCurrentVXL(FileName, nMix)) {
+		return;
+	}
+
+	std::vector<BYTE> vxlColors[8];
+	std::vector<BYTE> vxlLighting[8];
+
+	//if (!DrawStuff::load_vxl(FileName)) {
+	//	return;
+	//}
+	//if (!DrawStuff::load_hva(HVAName)) {
+	//	return;
+	//}
+	for (int i = 0; i < 8; ++i) {
+		// (i+6) % 8 to fix the facing
+		//bool result = DrawStuff::get_to_image((i + 6) % 8, pImage[i],
+		//	rect[i][0], rect[i][1], rect[i][2], rect[i][3]);
+		//if (!result) {
+		//	return;
+		//}
+
+		float r_x, r_y, r_z;
+		const int dir = i;
+		r_x = 300;
+		r_y = 0;
+		r_z = 45 * dir + 90;
+
+		// convert
+		const double pi = 3.141592654;
+		const Vec3f rotation(r_x / 180.0f * pi, r_y / 180.0f * pi, r_z / 180.0f * pi);
+		RECT r;
+		int center_x, center_y;
+		if (!FSunPackLib::LoadVXLImage(
+			*m_voxelNormalTables,
+			lightDirection,
+			rotation,
+			0,
+			vxlColors[i],
+			vxlLighting[i],
+			&center_x, &center_y,
+			0, nullptr, nullptr, 0, 0, &r)) {
+			break;
+		}
+
+		auto const x = center_x;
+		auto const y = center_y;
+		auto const width = r.right - r.left;
+		auto const height = r.bottom - r.top;
+
+		VXL_Add(vxlColors[i].data(), x, y, width, height);
+		VXL_Add(vxlLighting[i].data(), x, y, width, height);
+		VXL_GetAndClear(pImage[i], nullptr, nullptr);
+		rect[i] = { x,y,width,height };
+	}
+
+	if (!bHasTurret) {
+		for (int i = 0; i < 8; ++i) {
+			CString DictName;
+			DictName.Format("%s%d", ImageID, i);
+
+			unsigned char* outBuffer;
+			int outW = 0x100, outH = 0x100;
+
+			VXL_Add(pImage[i], rect[i].X, rect[i].Y, rect[i].Width, rect[i].Height);
+			delete[] pImage[i];
+			VXL_GetAndClear(outBuffer, &outW, &outH);
+
+			SetImageData(outBuffer, DictName, outW, outH, m_palettes.LoadPalette(PaletteName));
+		}
+		return;
+	}
+
+	int F, L, H;
+	int s_count = sscanf_s(art.GetStringOr(ArtID, "TurretOffset", "0,0,0"), "%d,%d,%d", &F, &L, &H);
+	if (s_count == 0) {
+		F = L = H = 0;
+	} else if (s_count == 1) {
+		L = H = 0;
+	} else if (s_count == 2) {
+		H = 0;
+	}
+
+	CString turFileName = ImageID + "tur.vxl";
+	CString turHVAName = ImageID + "tur.hva";
+	//if (DrawStuff::load_vxl(turFileName)) {
+	//	return;
+	//}
+	//if (DrawStuff::load_hva(turHVAName)) {
+	//	return;
+	//}
+	for (int i = 0; i < 8; ++i) {
+		// (i+6) % 8 to fix the facing
+		//bool result = DrawStuff::get_to_image((i + 6) % 8, pTurretImage[i],
+		//	turretrect[i][0], turretrect[i][1], turretrect[i][2], turretrect[i][3], F, L, H);
+
+		//if (!result) {
+		//	break;
+		//}
+	}
+
+	CString barlFileName = ImageID + "barl.vxl";
+	CString barlHVAName = ImageID + "barl.hva";
+	//if (!DrawStuff::load_vxl(barlFileName)) {
+	//	return;
+	//}
+	//if (!DrawStuff::load_hva(barlHVAName)) {
+	//	return;
+	//}
+	for (int i = 0; i < 8; ++i) {
+		// (i+6) % 8 to fix the facing
+		//bool result = DrawStuff::get_to_image((i + 6) % 8, pBarrelImage[i],
+		//	barrelrect[i][0], barrelrect[i][1], barrelrect[i][2], barrelrect[i][3], F, L, H);
+
+		//if (!result) {
+		//	break;
+		//}
+	}
+
+	for (int i = 0; i < 8; ++i) {
+		CString DictName;
+		DictName.Format("%s%d", ImageID, i);
+
+		unsigned char* outBuffer;
+		int outW = 0x100, outH = 0x100;
+
+		if (pImage[i]) {
+			VXL_Add(pImage[i], rect[i].X, rect[i].Y, rect[i].Width, rect[i].Height);
+			delete[] pImage[i];
+		}
+		CString pKey;
+		if (pTurretImage[i]) {
+			pKey.Format("%sX%d", ID, i);
+			int turdeltaX = g_data.GetInteger("VehicleVoxelTurretsRA2", pKey);
+			pKey.Format("%sY%d", ID, i);
+			int turdeltaY = g_data.GetInteger("VehicleVoxelTurretsRA2", pKey);
+			VXL_Add(pTurretImage[i], turretrect[i].X + turdeltaX, turretrect[i].Y + turdeltaY, turretrect[i].Width, turretrect[i].Height);
+			delete[] pTurretImage[i];
+
+			if (pBarrelImage[i]) {
+				pKey.Format("%sX%d", ID, i);
+				int barldeltaX = g_data.GetInteger("VehicleVoxelBarrelsRA2", pKey);
+				pKey.Format("%sY%d", ID, i);
+				int barldeltaY = g_data.GetInteger("VehicleVoxelBarrelsRA2", pKey);
+
+				VXL_Add(pBarrelImage[i], barrelrect[i].X + barldeltaX, barrelrect[i].Y + barldeltaY, barrelrect[i].Width, barrelrect[i].Height);
+				delete[] pBarrelImage[i];
+			}
+		}
+
+		VXL_GetAndClear(outBuffer, &outW, &outH);
+
+		SetImageData(outBuffer, DictName, outW, outH, m_palettes.LoadPalette(PaletteName));
+	}
+
+
+}
+
+void CLoading::SetImageData(unsigned char* pBuffer, const CString& NameInDict, int FullWidth, int FullHeight, Palette* pPal)
+{
+	auto& data = pics[NameInDict];
+	SetImageData(pBuffer, data, FullWidth, FullHeight, pPal);
+}
+
+// TODO: do not do this here, but in the calling position of "LoadUnitGraphic"
+void CLoading::SetImageData(unsigned char* pBuffer, PICDATA& pData, const int FullWidth, const int FullHeight, Palette* pPal)
+{
+	if (pData.pic) {
+		delete[](pData.pic);
+	}
+	if (pData.vborder) {
+		delete[](pData.vborder);
+	}
+
+	// Get available area
+	int counter = 0;
+	int validFirstX = FullWidth - 1;
+	int validFirstY = FullHeight - 1;
+	int validLastX = 0;
+	int validLastY = 0;
+	for (int j = 0; j < FullHeight; ++j) {
+		for (int i = 0; i < FullWidth; ++i) {
+			unsigned char ch = pBuffer[counter++];
+			if (ch != 0) {
+				if (i < validFirstX)
+					validFirstX = i;
+				if (j < validFirstY)
+					validFirstY = j;
+				if (i > validLastX)
+					validLastX = i;
+				if (j > validLastY)
+					validLastY = j;
+			}
+		}
+	}
+
+	pData.x = validFirstX;
+	pData.y = validFirstY;
+	pData.wWidth = validLastX - validFirstX + 1;
+	pData.wHeight = validLastY - validFirstY + 1;
+
+	pData.pic = pBuffer;
+	pData.wMaxHeight = FullHeight;
+	pData.wMaxWidth = FullWidth;
+
+	pData.vborder = new(VBORDER[FullHeight]);
+	for (auto k = 0; k < FullHeight; k++) {
+		int l, r;
+		GetDrawBorder(pBuffer, FullWidth, k, l, r, 0);
+		pData.vborder[k].left = l;
+		pData.vborder[k].right = r;
+	}
+
+	pData.bType = PICDATA_TYPE_SHP;
+	pData.bTried = false;
+	//auto limited_to_theater = artSection.GetBool("TerrainPalette") ? shp->mixfile_theater : TheaterChar::None;
+	auto limited_to_theater = TheaterChar::None;
+	pData.bTerrain = limited_to_theater;
+	pData.pal = pPal ? reinterpret_cast<const int*>(pPal->GetData()) : iPalUnit;
+}
+
 void CLoading::LoadBuildingSubGraphic(const CString& subkey, const CIniFileSection& artSection, BOOL bAlwaysSetChar, char theat, HMIXFILE hShpMix, SHPHEADER& shp_h, BYTE*& shp)
 {
 	CString subname = artSection.GetString(subkey);
@@ -2716,7 +2710,7 @@ HMIXFILE CLoading::FindFileInMix(LPCTSTR lpFilename, TheaterChar* pTheaterChar)
 void CLoading::InitPalettes()
 {
 	errstream << "InitPalettes() called\n";
-	
+
 	m_palettes.Init();
 
 	errstream << "\n";
@@ -2838,9 +2832,11 @@ void CLoading::InitTMPs(CProgressCtrl* prog)
 			filename += suffix;
 			HTSPALETTE hPalette = m_palettes.m_hPalIsoTemp;
 			if (tiles == &tiles_s) {
-				hPalette =  m_palettes.m_hPalIsoSnow; }
+				hPalette = m_palettes.m_hPalIsoSnow;
+			}
 			if (tiles == &tiles_u) {
-				hPalette =  m_palettes.m_hPalIsoUrb; }
+				hPalette = m_palettes.m_hPalIsoUrb;
+			}
 			if (tiles == &tiles_t) {
 				hPalette = m_palettes.m_hPalIsoTemp;
 			}
@@ -2855,12 +2851,12 @@ void CLoading::InitTMPs(CProgressCtrl* prog)
 			}
 
 			// MW add: use other...
-			if (FindFileInMix(filename) == NULL && tiles == &tiles_un) { 
-				filename = bas_f + ".urb"; 
+			if (FindFileInMix(filename) == NULL && tiles == &tiles_un) {
+				filename = bas_f + ".urb";
 				hPalette = m_palettes.m_hPalIsoUrb;
 			}
-			if (FindFileInMix(filename) == NULL) { 
-				filename = bas_f + ".tem"; 
+			if (FindFileInMix(filename) == NULL) {
+				filename = bas_f + ".tem";
 				hPalette = m_palettes.m_hPalIsoTemp;
 			}
 
@@ -3454,10 +3450,10 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 					p.pic = lpT[i];
 
 					if (hPalette == m_palettes.m_hPalIsoTemp
-						|| hPalette == m_palettes.m_hPalIsoUrb 
-						|| hPalette == m_palettes.m_hPalIsoSnow 
-						|| hPalette == m_palettes.m_hPalIsoDes 
-						|| hPalette == m_palettes.m_hPalIsoLun 
+						|| hPalette == m_palettes.m_hPalIsoUrb
+						|| hPalette == m_palettes.m_hPalIsoSnow
+						|| hPalette == m_palettes.m_hPalIsoDes
+						|| hPalette == m_palettes.m_hPalIsoLun
 						|| hPalette == m_palettes.m_hPalIsoUbn) {
 						p.pal = iPalIso;
 					}
@@ -3470,10 +3466,10 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 						p.pal = iPalTheater;
 					}
 					if (hPalette == m_palettes.m_hPalUnitTemp
-						|| hPalette == m_palettes.m_hPalUnitUrb 
-						|| hPalette == m_palettes.m_hPalUnitSnow 
-						|| hPalette == m_palettes.m_hPalUnitDes 
-						|| hPalette == m_palettes.m_hPalUnitLun 
+						|| hPalette == m_palettes.m_hPalUnitUrb
+						|| hPalette == m_palettes.m_hPalUnitSnow
+						|| hPalette == m_palettes.m_hPalUnitDes
+						|| hPalette == m_palettes.m_hPalUnitLun
 						|| hPalette == m_palettes.m_hPalUnitUbn) {
 						p.pal = iPalUnit;
 					}
@@ -3516,7 +3512,7 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 	}
 
 
-}
+	}
 #endif
 
 void CLoading::OnDestroy()
@@ -4349,7 +4345,7 @@ in the specific terrain)
 
 Added: MW March 20th 2001
 */
-void CLoading::PrepareUnitGraphic(LPCSTR lpUnittype)
+void CLoading::PrepareUnitGraphic(const CString& lpUnittype)
 {
 	CString _rules_image; // the image used
 	CString filename; // filename of the image
@@ -4392,222 +4388,6 @@ void CLoading::PrepareUnitGraphic(LPCSTR lpUnittype)
 	// is it a shp graphic?
 	if (!artSection.GetBool("Voxel")) {
 		try {
-
-			/*filename = image + ".shp";
-
-
-			BYTE bTerrain=0;
-
-
-
-			BOOL isNewTerrain=FALSE;
-			if(isTrue(artSection.GetValueByName("NewTheater")))//&& isTrue(artSection.GetValueByName("TerrainPalette")))//(filename.GetAt(0)=='G' || filename.GetAt(0)=='N' || filename.GetAt(0)=='C') && filename.GetAt(1)=='A')
-			{
-				hPalette=m_hPalUnitTemp;
-				if(theat=='A') hPalette=m_hPalUnitSnow;
-				if(theat=='U') hPalette=m_hPalUnitUrb;
-				if(theat=='L') hPalette=m_hPalUnitLun;
-				if(theat=='D') hPalette=m_hPalUnitDes;
-				if(theat=='N') hPalette=m_hPalUnitUbn;
-				filename.SetAt(1, theat);
-				isNewTerrain=TRUE;
-			}
-
-
-			HMIXFILE hShpMix=FindFileInMix(filename, &bTerrain);
-
-			BYTE bIgnoreTerrain=TRUE;
-
-			if(hShpMix==NULL && isNewTerrain)
-			{
-				filename.SetAt(1, 'G');
-				hShpMix=FindFileInMix(filename, &bTerrain);
-				if(hShpMix) theat='G';
-
-			}
-
-
-			if(hShpMix==NULL && isNewTerrain)
-			{
-				filename.SetAt(1, 'N');
-				hShpMix=FindFileInMix(filename, &bTerrain);
-				if(hShpMix) theat='N';
-			}
-
-			if(hShpMix==NULL && isNewTerrain)
-			{
-				filename.SetAt(1, 'D');
-				hShpMix=FindFileInMix(filename, &bTerrain);
-				if(hShpMix) theat='D';
-			}
-
-			if(hShpMix==NULL && isNewTerrain)
-			{
-				filename.SetAt(1, 'L');
-				hShpMix=FindFileInMix(filename, &bTerrain);
-				if(hShpMix) theat='L';
-			}
-
-			if(hShpMix==NULL && isNewTerrain)
-			{
-				filename.SetAt(1, 'A');
-				hShpMix=FindFileInMix(filename, &bTerrain);
-				if(hShpMix) theat='A';
-			}
-
-			if(hShpMix==NULL && isNewTerrain)
-			{
-				filename.SetAt(1, 'T');
-				hShpMix=FindFileInMix(filename, &bTerrain);
-				if(hShpMix){
-					theat='T';
-					hPalette=m_hIsoTemp;
-				}
-			}
-
-
-			if(isTrue(artSection.GetValueByName("TerrainPalette")))
-			{
-				bIgnoreTerrain=FALSE;
-
-				if(cur_theat=='T')
-				hPalette=m_hPalIsoTemp;
-				else if(cur_theat=='A')
-					hPalette=m_hPalIsoSnow;
-				else if (cur_theat=='U')
-					hPalette=m_hPalIsoUrb;
-				else if(cur_theat=='L')
-					hPalette=m_hPalIsoLun;
-				else if(cur_theat=='D')
-					hPalette=m_hPalIsoDes;
-				else if(cur_theat=='N')
-					hPalette=m_hPalIsoUbn;
-
-
-
-			}
-
-
-
-			if(hShpMix==0)
-			{
-				filename=image;
-				filename+=".shp";
-				hShpMix=FindFileInMix(filename, &bTerrain);
-
-
-
-				if(hShpMix==NULL)
-				{
-					filename=image;
-					if(theat=='T') filename+=".tem";
-					if(theat=='A') filename+=".sno";
-					if(theat=='U') filename+=".urb";
-					if(theat=='L') filename+=".lun";
-					if(theat=='D') filename+=".des";
-					if(theat=='N') filename+=".ubn";
-					filename.MakeLower();
-					hShpMix=FindFileInMix(filename, &bTerrain);
-
-					if(hShpMix==NULL)
-					{
-						filename=image;
-						filename+=".tem";
-						hShpMix=FindFileInMix(filename, &bTerrain);
-						if(hShpMix)
-						{
-							hPalette=m_hPalIsoTemp;
-						}
-					}
-
-					if(hShpMix!=NULL)
-					{
-
-
-
-					}
-					else
-					{
-						filename=image+".shp";
-
-						filename.SetAt(1, 'A');
-
-						hShpMix=FindFileInMix(filename);
-
-						if(hShpMix!=NULL)
-						{
-							bAlwaysSetChar=TRUE;
-						}
-						else
-						{
-							filename.SetAt(1, 'A');
-							hShpMix=FindFileInMix(filename);
-
-							if(hShpMix!=NULL)
-							{
-								theat='A';
-								bAlwaysSetChar=TRUE;
-							}
-							else
-							{
-								filename.SetAt(1, 'U');
-								hShpMix=FindFileInMix(filename);
-								if(hShpMix) theat='U';
-								else
-								{
-									filename.SetAt(1, 'L');
-									hShpMix=FindFileInMix(filename);
-									if(hShpMix) theat='L';
-									else
-									{
-										filename.SetAt(1, 'D');
-										hShpMix=FindFileInMix(filename);
-										if(hShpMix) theat='D';
-										else
-										{
-											filename.SetAt(1, 'N');
-											hShpMix=FindFileInMix(filename);
-											if(hShpMix) theat='N';
-											else
-											{
-												filename.SetAt(1, 'T');
-												hShpMix=FindFileInMix(filename);
-												if(hShpMix) theat='T';
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-				else
-				{
-					theat='T';
-				}
-
-			}
-			else
-			{
-
-				// now we need to find out the palette
-
-					if(isTrue(artSection.GetValueByName("TerrainPalette"))) // it´s a file in isotemp.mix/isosno.mix
-					{
-
-					}
-					else // it´s a file in temperat.mix/snow.mix
-					{
-						if(cur_theat=='T') hPalette=m_hPalUnitTemp;
-						if(cur_theat=='A') hPalette=m_hPalUnitSnow;
-						if(cur_theat=='U') hPalette=m_hPalUnitUrb;
-						if(cur_theat=='L') hPalette=m_hPalUnitLun;
-						if(cur_theat=='D') hPalette=m_hPalUnitDes;
-						if(cur_theat=='N') hPalette=m_hPalUnitUbn;
-					}
-
-			}*/
-
 			auto shp = FindUnitShp(image, cur_theat, artSection);
 			if (!shp) {
 				return;

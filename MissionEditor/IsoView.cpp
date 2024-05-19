@@ -547,7 +547,7 @@ inline void CalculateHouseColorPalette(int house_pal[houseColorRelMax + 1], cons
 /*
 There is no need for newpal
 */
-__forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpitch, int dright, int dbottom, PICDATA& pd, int* color = NULL, int* newPal = NULL)//BYTE* src, int swidth, int sheight)
+__forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpitch, int dright, int dbottom, PICDATA& pd, int* color = NULL, const int* newPal = NULL)//BYTE* src, int swidth, int sheight)
 {
 	ASSERT(pd.bType != PICDATA_TYPE_BMP);
 
@@ -650,7 +650,7 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpi
 	}
 }
 
-__forceinline void BlitPicHalfTransp(void* dst, int x, int y, int dleft, int dtop, int dpitch, int dright, int dbottom, PICDATA& pd, int* color = NULL, int* newPal = NULL)//BYTE* src, int swidth, int sheight)
+__forceinline void BlitPicHalfTransp(void* dst, int x, int y, int dleft, int dtop, int dpitch, int dright, int dbottom, PICDATA& pd, int* color = NULL, const int* newPal = NULL)//BYTE* src, int swidth, int sheight)
 {
 	ASSERT(pd.bType != PICDATA_TYPE_BMP);
 
@@ -5372,7 +5372,7 @@ void CIsoView::DrawMap()
 
 					int w = 1, h = 1;
 					PICDATA pic;
-					if (id > -1 && id < 0x0F00) {
+					if (id > -1 && id < buildingInfoCapacity) {
 						w = buildinginfo[id].w;
 						h = buildinginfo[id].h;
 						int dir = objp.direction / 32;
@@ -5402,7 +5402,9 @@ void CIsoView::DrawMap()
 							::Map->UpdateBuildingInfo(&objp.type);
 							int dir = (7 - objp.direction / 32) % 8;
 							pic = buildinginfo[id].pic[dir];
-							if (pic.pic == NULL) pic = buildinginfo[id].pic[0];
+							if (pic.pic == NULL) {
+								pic = buildinginfo[id].pic[0];
+							}
 						}
 						if (pic.pic == NULL) {
 #ifndef NOSURFACES
@@ -5480,7 +5482,7 @@ void CIsoView::DrawMap()
 					int id = m.node.type;
 					int w = 1, h = 1;
 					PICDATA pic;
-					if (id > -1 && id < 0x0F00) {
+					if (id > -1 && id < buildingInfoCapacity) {
 						w = buildinginfo[id].w;
 						h = buildinginfo[id].h;
 						pic = buildinginfo[id].pic[0];
@@ -5694,7 +5696,7 @@ void CIsoView::DrawMap()
 				int id = m.terraintype;
 				int w = 1, h = 1;
 				PICDATA pic;
-				if (id > -1 && id < 0x0F00) {
+				if (id > -1 && id < buildingInfoCapacity) {
 					w = treeinfo[id].w;
 					h = treeinfo[id].h;
 					pic = treeinfo[id].pic;
@@ -5745,7 +5747,7 @@ void CIsoView::DrawMap()
 				int id = m.smudgetype;
 
 				PICDATA pic;
-				if (id > -1 && id < 0x0F00) {
+				if (id > -1 && id < buildingInfoCapacity) {
 					pic = smudgeinfo[id].pic;
 				}
 

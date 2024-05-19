@@ -413,7 +413,7 @@ namespace FSunPackLib
 
 	BOOL XCC_DoesFileExist(LPCSTR szFile, HMIXFILE hOwner)
 	{
-		if (hOwner == 0)
+		if (hOwner == NULL)
 			return FALSE;
 		if (hOwner > dwMixFileCount)
 			return FALSE;
@@ -1819,8 +1819,22 @@ namespace FSunPackLib
 		return TRUE;
 	}
 
-	BOOL LoadVXLImage(const VoxelNormalTables& normalTables, Vec3f lightDirection, const Vec3f rotation, const Vec3f modelOffset, std::vector<BYTE>& image, std::vector<BYTE>& lighting, int* lpXCenter, int* lpYCenter, int ZAdjust, int* lpXCenterZMax, int* lpYCenterZMax, int i3dCenterX, int i3dCenterY, RECT* vxlrect)
-	{
+	BOOL LoadVXLImage(
+		const VoxelNormalTables& normalTables,
+		Vec3f lightDirection, 
+		const Vec3f rotation, 
+		const Vec3f modelOffset, 
+		OUT std::vector<BYTE>& image,
+		OUT std::vector<BYTE>& lighting, 
+		OUT OPTIONAL int* lpXCenter, 
+		OUT OPTIONAL int* lpYCenter, 
+		int ZAdjust, 
+		OUT OPTIONAL int* lpXCenterZMax,
+		OUT OPTIONAL int* lpYCenterZMax, 
+		int i3dCenterX, 
+		int i3dCenterY, 
+		OUT OPTIONAL RECT* vxlrect
+	) {
 		last_succeeded_operation = 1;
 
 		int i;

@@ -37,6 +37,8 @@ using IgnoreSet = std::unordered_set<std::string>;
 
 static const IgnoreSet CollectIgnoreSet();
 
+extern CIniFile rules;
+
 class TreeRoot {
 	friend class TreeViewBuilder;
 	friend class CViewObjects;

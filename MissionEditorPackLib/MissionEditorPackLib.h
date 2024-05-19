@@ -28,6 +28,18 @@
 #include <string>
 #include "Vec3.h"
 
+#ifndef IN
+#define IN
+#endif
+
+#ifndef OUT
+#define OUT
+#endif
+
+#ifndef OPTIONAL
+#define OPTIONAL
+#endif
+
 class VoxelNormalTables;
 
 typedef DWORD HMIXFILE;
@@ -217,7 +229,20 @@ namespace FSunPackLib
 	BOOL LoadVXLImageInSurface(const VoxelNormalTables& normalTables, Vec3f lightDirection, IDirectDraw4* pdd, int iStart, int iCount, Vec3f rotation, Vec3f modelOffset, LPDIRECTDRAWSURFACE4* pdds, HTSPALETTE hPalette, int* lpXCenter = NULL, int* lpYCenter = NULL, int ZAdjust = 0, int* lpXCenterZMax = NULL, int* lpYCenterZMax = NULL, int i3dCenterX = -1, int i3dCenterY = -1);
 
 	// modelOffset is applied before VXL/HVA translates and scales and before model-to-world rotation
-	BOOL LoadVXLImage(const VoxelNormalTables& normalTables, Vec3f lightDirection, Vec3f rotation, Vec3f modelOffset, std::vector<BYTE>& image, std::vector<BYTE>& lighting, int* lpXCenter = NULL, int* lpYCenter = NULL, int ZAdjust = 0, int* lpXCenterZMax = NULL, int* lpYCenterZMax = NULL, int i3dCenterX = -1, int i3dCenterY = -1, RECT* vxlrect = NULL);
+	BOOL LoadVXLImage(const VoxelNormalTables& normalTables, 
+		Vec3f lightDirection, 
+		Vec3f rotation, 
+		Vec3f modelOffset, 
+		OUT std::vector<BYTE>& image, 
+		OUT std::vector<BYTE>& lighting,
+		OUT OPTIONAL int* lpXCenter = NULL, 
+		OUT OPTIONAL int* lpYCenter = NULL,
+		int ZAdjust = 0, 
+		OUT OPTIONAL int* lpXCenterZMax = NULL, 
+		OUT OPTIONAL int* lpYCenterZMax = NULL, 
+		int i3dCenterX = -1, 
+		int i3dCenterY = -1, 
+		OUT OPTIONAL RECT* vxlrect = NULL);
 
 
 	BOOL WriteMixFile(LPCTSTR lpMixFile, LPCSTR* lpFiles, DWORD dwFileCount, Game game);
