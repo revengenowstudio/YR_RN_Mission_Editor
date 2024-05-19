@@ -13,7 +13,7 @@ const CIniFile* IniFileGroup::Nth(int idx) const
 	return m_group.at(idx);
 }
 
-const CString& IniFileGroup::GetString(const CString & section, const CString & key) const
+const CString& IniFileGroup::GetString(const CString& section, const CString & key) const
 {
 	for (auto it = m_group.rbegin(); it != m_group.rend(); ++it) {
 		auto const& got = (*it)->GetString(section, key);

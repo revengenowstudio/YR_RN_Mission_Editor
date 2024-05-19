@@ -547,24 +547,33 @@ inline void CalculateHouseColorPalette(int house_pal[houseColorRelMax + 1], cons
 /*
 There is no need for newpal
 */
-__forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpitch, int dright, int dbottom, PICDATA& pd, int* color = NULL, const int* newPal = NULL)//BYTE* src, int swidth, int sheight)
+__forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpitch, int dright, int dbottom, 
+	PICDATA& pd, int* color = NULL, const int* newPal = NULL)//BYTE* src, int swidth, int sheight)
 {
 	ASSERT(pd.bType != PICDATA_TYPE_BMP);
 
-	if (newPal == NULL) newPal = pd.pal;
+	if (newPal == NULL) {
+		newPal = pd.pal;
+	}
 
 	BYTE* src = (BYTE*)pd.pic;
 	int swidth = pd.wMaxWidth;
 	int sheight = pd.wMaxHeight;
 
-	if (src == NULL || dst == NULL) return;
+	if (src == NULL || dst == NULL) {
+		return;
+	}
 
 	//x += 1;
 	//y += 1;
 	//y -= f_y;
 
-	if (x + swidth < dleft || y + sheight < dtop) return;
-	if (x >= dright || y >= dbottom) return;
+	if (x + swidth < dleft || y + sheight < dtop) {
+		return;
+	}
+	if (x >= dright || y >= dbottom) {
+		return;
+	}
 
 
 	RECT blrect;
