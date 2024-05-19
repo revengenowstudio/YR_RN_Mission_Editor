@@ -1554,7 +1554,7 @@ void CLoading::LoadBuilding(const CString& ID)
 
 	// No turret
 	if (!rules.GetBool(ID, "Turret")) {
-		DictName.Format("%s%d", ID, 0);
+		DictName.Format("%s%d", ID.operator LPCSTR(), 0);
 		SetImageData(pBuffer, DictName, width, height, m_palettes.LoadPalette(PaletteName));
 		return;
 	}
@@ -1911,7 +1911,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 	if (!bHasTurret) {
 		for (int i = 0; i < 8; ++i) {
 			CString DictName;
-			DictName.Format("%s%d", ImageID, i);
+			DictName.Format("%s%d", ImageID.operator LPCSTR(), i);
 
 			unsigned char* outBuffer;
 			int outW = 0x100, outH = 0x100;
@@ -1973,7 +1973,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 
 	for (int i = 0; i < 8; ++i) {
 		CString DictName;
-		DictName.Format("%s%d", ImageID, i);
+		DictName.Format("%s%d", ImageID.operator LPCSTR(), i);
 
 		unsigned char* outBuffer;
 		int outW = 0x100, outH = 0x100;
@@ -1984,17 +1984,17 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 		}
 		CString pKey;
 		if (pTurretImage[i]) {
-			pKey.Format("%sX%d", ID, i);
+			pKey.Format("%sX%d", ID.operator LPCSTR(), i);
 			int turdeltaX = g_data.GetInteger("VehicleVoxelTurretsRA2", pKey);
-			pKey.Format("%sY%d", ID, i);
+			pKey.Format("%sY%d", ID.operator LPCSTR(), i);
 			int turdeltaY = g_data.GetInteger("VehicleVoxelTurretsRA2", pKey);
 			VXL_Add(pTurretImage[i], turretrect[i].X + turdeltaX, turretrect[i].Y + turdeltaY, turretrect[i].Width, turretrect[i].Height);
 			delete[] pTurretImage[i];
 
 			if (pBarrelImage[i]) {
-				pKey.Format("%sX%d", ID, i);
+				pKey.Format("%sX%d", ID.operator LPCSTR(), i);
 				int barldeltaX = g_data.GetInteger("VehicleVoxelBarrelsRA2", pKey);
-				pKey.Format("%sY%d", ID, i);
+				pKey.Format("%sY%d", ID.operator LPCSTR(), i);
 				int barldeltaY = g_data.GetInteger("VehicleVoxelBarrelsRA2", pKey);
 
 				VXL_Add(pBarrelImage[i], barrelrect[i].X + barldeltaX, barrelrect[i].Y + barldeltaY, barrelrect[i].Width, barrelrect[i].Height);
