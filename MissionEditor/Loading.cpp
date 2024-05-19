@@ -558,7 +558,7 @@ void CLoading::UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, i
 	// never calls it when UnionSHP_Data is empty
 
 	if (UnionSHP_Data[UseTemp].size() == 1) {
-		pOutBuffer = UnionSHP_Data[UseTemp][0].pBuffer;
+		pOutBuffer = UnionSHP_Data[UseTemp][0].Buffer;
 		*OutWidth = UnionSHP_Data[UseTemp][0].Width;
 		*OutHeight = UnionSHP_Data[UseTemp][0].Height;
 		UnionSHP_Data[UseTemp].clear();
@@ -593,10 +593,10 @@ void CLoading::UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, i
 
 		for (int j = 0; j < data.Height; ++j)
 			for (int i = 0; i < data.Width; ++i)
-				if (auto nPalIdx = data.pBuffer[j * data.Width + i])
+				if (auto nPalIdx = data.Buffer[j * data.Width + i])
 					pOutBuffer[(nStartY + j) * W + nStartX + i] = nPalIdx;
 
-		delete[](data.pBuffer);
+		delete[](data.Buffer);
 	}
 
 	UnionSHP_Data[UseTemp].clear();

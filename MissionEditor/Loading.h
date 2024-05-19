@@ -229,7 +229,7 @@ private:
 
 	struct SHPUnionData
 	{
-		unsigned char* pBuffer;
+		unsigned char* Buffer;// This buffer allocated from outside
 		int Width;
 		int Height;
 		int DeltaX;
