@@ -1507,7 +1507,7 @@ void CLoading::LoadBuilding(const CString& ID)
 	}
 
 	auto loadAnimFrame = [this, &ArtID, &ID](const CString& key, const CString& controlKey) {
-		auto const imageID = art.GetStringOr(ArtID, key, ArtID);
+		auto const imageID = art.GetString(ArtID, key);
 		if (!imageID.IsEmpty()) {
 			if (!g_data.GetBool(controlKey, ID)) {
 				int nStartFrame = art.GetInteger(imageID, "LoopStart");
