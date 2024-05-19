@@ -579,6 +579,7 @@ void CLoading::UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, i
 
 	// just make it work like unsigned char[W][H];
 	pOutBuffer = new(unsigned char[W * H]);
+	ZeroMemory(pOutBuffer, W * H);
 	*OutWidth = W;
 	*OutHeight = H;
 
