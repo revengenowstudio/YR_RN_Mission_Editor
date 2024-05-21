@@ -330,47 +330,38 @@ static void write_v80(byte v, int count, byte*& d)
 	}
 }
 
-#include <cstdint>
-
-void get_same(const byte* s, const byte* r, const byte* s_end, byte*& p, int& cb_p)
+void get_same(const byte* s, const byte* r, const byte* s_end, const byte*& p, int& cb_p)
 {
-	const byte* s_end_ptr = s_end;
-	const byte* s_ptr = s;
-	int ecx_value = 0;
-	byte* edi_ptr = p;
-	*edi_ptr = static_cast<byte>(ecx_value);
-	s_ptr--;
+	int counted = 0;
+	int maxCount = 0;
+	p = nullptr;
+	s--;
 
-next_s:
-	s_ptr++;
-	int edx_value = 0;
-	const byte* esi_ptr = r;
-	const byte* edi_val = s_ptr;
-	if (edi_val >= esi_ptr)
-		goto end0;
+search_next:
+	s++;
+	counted = 0;
+	if (s >= r) {
+		goto exit;
+	}
 
 next0:
-	edx_value++;
-	if (esi_ptr >= s_end_ptr)
-		goto end_line;
-
-	if (*esi_ptr == *s_ptr)
+	if (r + counted >= s_end) {
+		goto end_search;
+	}
+	if (s[counted] == r[counted]) {
+		counted++;
 		goto next0;
+	}
 
-end_line:
-	edx_value--;
-	if (edx_value < ecx_value)
-		goto next_s;
+end_search:
+	if (counted >= maxCount) {
+		maxCount = counted;
+		p = s;
+	}
+	goto search_next;
 
-	ecx_value = edx_value;
-	edi_ptr = p;
-	*edi_ptr = static_cast<byte>(*s_ptr);
-	goto next_s;
-
-end0:
-	edi_ptr = reinterpret_cast<byte*>(&cb_p);
-	*edi_ptr = ecx_value;
-	// Restore registers
+exit:
+	cb_p = maxCount;
 }
 
 static void write80_c0(byte*& w, int count, int p)
@@ -427,7 +418,7 @@ int encode80(const byte* s, byte* d, int cb_s)
 	byte* w = d;
 	const byte* copy_from = NULL;
 	while (r < s_end) {
-		byte* p;
+		const byte* p;
 		int cb_p;
 		int t = get_run_length(r, s_end);
 		get_same(s, r, s_end, p, cb_p);
