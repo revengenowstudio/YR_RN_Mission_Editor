@@ -121,6 +121,7 @@ public:
 	void UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, int* OutHeight, bool UseTemp = false);
 	void VXL_Add(const unsigned char* pCache, int X, int Y, int Width, int Height);
 	void VXL_GetAndClear(unsigned char*& pBuffer, int* OutWidth, int* OutHeight);
+	void VXL_Reset();
 	BOOL LoadUnitGraphic(const CString& lpUnittype);
 	void LoadBuildingSubGraphic(const CString& subkey, const CIniFileSection& artSection, BOOL bAlwaysSetChar, char theat, HMIXFILE hShpMix, SHPHEADER& shp_h, BYTE*& shp);
 	void LoadOverlayGraphic(const CString& lpOvrlName, int iOvrlNum);
@@ -238,7 +239,8 @@ private:
 
 	std::map<CString, ObjectType> ObjectTypes;
 	std::vector<SHPUnionData> UnionSHP_Data[2];
-	unsigned char VXL_Data[0x10000];
+	static auto constexpr VoxelBlendCacheLength = 0x10000;
+	unsigned char VXL_Data[VoxelBlendCacheLength];
 };
 
 //{{AFX_INSERT_LOCATION}}

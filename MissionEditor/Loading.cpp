@@ -102,6 +102,8 @@ CLoading::CLoading(CWnd* pParent /*=NULL*/) :
 		m_hECache[i] = NULL;
 	}
 
+	VXL_Reset();
+
 	errstream << "CLoading::CLoading() called" << endl;
 	errstream.flush();
 }
@@ -638,9 +640,14 @@ void CLoading::VXL_GetAndClear(unsigned char*& pBuffer, int* OutWidth, int* OutH
 		}
 	}
 	*/
-	pBuffer = new unsigned char[0x10000];
-	memcpy_s(pBuffer, 0x10000, VXL_Data, 0x10000);
-	memset(VXL_Data, 0, 0x10000);
+	pBuffer = new unsigned char[VoxelBlendCacheLength];
+	memcpy_s(pBuffer, VoxelBlendCacheLength, VXL_Data, VoxelBlendCacheLength);
+	VXL_Reset();
+}
+
+void CLoading::VXL_Reset()
+{
+	memset(VXL_Data, 0, VoxelBlendCacheLength);
 }
 
 bool IsImageLoaded(const CString& ID) {
@@ -1548,10 +1555,6 @@ void CLoading::LoadBuilding(const CString& ID)
 	int width, height;
 	UnionSHP_GetAndClear(pBuffer, &width, &height);
 
-	if (ID == "NAWEAP2") {
-		printf("");
-	}
-
 	// No turret
 	if (!rules.GetBool(ID, "Turret")) {
 		DictName.Format("%s%d", ID.operator LPCSTR(), 0);
@@ -1579,6 +1582,7 @@ void CLoading::LoadBuilding(const CString& ID)
 		CString VXLName = BarlName + ".vxl";
 		CString HVAName = BarlName + ".hva";
 
+#if 0
 		HMIXFILE hBarl = FindFileInMix(BarlName);
 		if (hBarl && FSunPackLib::SetCurrentVXL(VXLName, hBarl)) {
 			auto vnc = FSunPackLib::VoxelNormalClass::Unknown;
@@ -1618,15 +1622,60 @@ void CLoading::LoadBuilding(const CString& ID)
 				VXL_Add(vxlColors[i].data(), x, y, width, height);
 				VXL_Add(vxlLighting[i].data(), x, y, width, height);
 				VXL_GetAndClear(pTurImages[i], nullptr, nullptr);
-				turrect[i] = { x, y, width, height };
+				barlrect[i] = { x, y, width, height };
 			}
 		}
+#endif
 
+		if (ID == "NAFLAK") {
+			printf("");
+		}
 
 		VXLName = TurName + ".vxl";
 		HVAName = TurName + ".hva";
 
 		HMIXFILE hVXL = FindFileInMix(VXLName);
+		if (hVXL && FSunPackLib::SetCurrentVXL(VXLName, hVXL)) {
+			auto vnc = FSunPackLib::VoxelNormalClass::Unknown;
+			std::vector<BYTE> vxlColors[8];
+			std::vector<BYTE> vxlLighting[8];
+			// we assume the voxel normal class is always the same for the combined voxels
+			FSunPackLib::GetVXLSectionInfo(0, vnc);
+			for (int i = 0; i < 8; ++i) {
+				float r_x, r_y, r_z;
+				const int dir = i;
+				r_x = 300;
+				r_y = 0;
+				r_z = 45 * dir + 90;
+
+				// convert
+				const double pi = 3.141592654;
+				const Vec3f rotation(r_x / 180.0f * pi, r_y / 180.0f * pi, r_z / 180.0f * pi);
+				RECT r;
+				int center_x, center_y;
+				if (!FSunPackLib::LoadVXLImage(
+					*m_voxelNormalTables,
+					lightDirection,
+					rotation,
+					Vec3f{},
+					vxlColors[i],
+					vxlLighting[i],
+					&center_x, &center_y,
+					0, nullptr, nullptr, 0, 0, &r)) {
+					break;
+				}
+
+				auto const x = center_x;
+				auto const y = center_y;
+				auto const width = r.right - r.left;
+				auto const height = r.bottom - r.top;
+
+				VXL_Add(vxlColors[i].data(), x, y, width, height);
+				VXL_Add(vxlLighting[i].data(), x, y, width, height);
+				VXL_GetAndClear(pTurImages[i], nullptr, nullptr);
+				turrect[i] = { x, y, width, height };
+			}
+		}
 
 		//if (DrawStuff::load_vxl(VXLName) && DrawStuff::load_hva(HVAName)) {
 		//	for (int i = 0; i < 8; ++i) {
@@ -1889,7 +1938,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 			*m_voxelNormalTables,
 			lightDirection,
 			rotation,
-			0,
+			Vec3f{},
 			vxlColors[i],
 			vxlLighting[i],
 			&center_x, &center_y,
@@ -2016,7 +2065,6 @@ void CLoading::SetImageData(unsigned char* pBuffer, const CString& NameInDict, i
 	SetImageData(pBuffer, data, FullWidth, FullHeight, pPal);
 }
 
-// TODO: do not do this here, but in the calling position of "LoadUnitGraphic"
 void CLoading::SetImageData(unsigned char* pBuffer, PICDATA& pData, const int FullWidth, const int FullHeight, Palette* pPal)
 {
 	if (pData.pic) {
