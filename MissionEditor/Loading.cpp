@@ -40,20 +40,13 @@
 #include "VoxelNormals.h"
 #include <format>
 #include "IniMega.h"
+#include "VoxelDrawer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
-struct DrawRect
-{
-	int X{};
-	int Y{};
-	int Width{};
-	int Height{};
-};
 
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CLoading 
@@ -103,6 +96,7 @@ CLoading::CLoading(CWnd* pParent /*=NULL*/) :
 	}
 
 	VXL_Reset();
+	VoxelDrawer::Initalize();
 
 	errstream << "CLoading::CLoading() called" << endl;
 	errstream.flush();
@@ -1578,128 +1572,46 @@ void CLoading::LoadBuilding(const CString& ID)
 		CString TurName = rules.GetStringOr(ID, "TurretAnim", ID + "tur");
 		CString BarlName = ID + "barl";
 
+		auto finder = [this](LPCTSTR lpFilename, char* pTheaterChar) {
+			return this->FindFileInMix(lpFilename, reinterpret_cast<TheaterChar*>(pTheaterChar));
+		};
 
-		//if (!DrawStuff::is_vpl_loaded()) {
-		//	DrawStuff::load_vpl("voxels.vpl");
-		//}
+		if (!VoxelDrawer::IsVPLLoaded()) {
+			VoxelDrawer::LoadVPLFile("voxels.vpl", finder);
+		}
 
 		unsigned char* pTurImages[8]{ nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
 		unsigned char* pBarlImages[8]{ nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
-		DrawRect turrect[8] = { 0 };
-		int barlrect[8][4] = { 0 };
+		VoxelRectangle turrect[8] = { 0 };
+		VoxelRectangle barlrect[8] = { 0 };
 
 
 		CString VXLName = BarlName + ".vxl";
 		CString HVAName = BarlName + ".hva";
 
-		HMIXFILE hBarl = FindFileInMix(BarlName);
-		if (hBarl && FSunPackLib::SetCurrentVXL(VXLName, hBarl)) {
-			auto vnc = FSunPackLib::VoxelNormalClass::Unknown;
-			std::vector<BYTE> vxlColors[8];
-			std::vector<BYTE> vxlLighting[8];
-			// we assume the voxel normal class is always the same for the combined voxels
-			FSunPackLib::GetVXLSectionInfo(0, vnc);
-			for (int i = 0; i < 8; ++i) {
-				float r_x, r_y, r_z;
-				const int dir = i;
-				r_x = 300;
-				r_y = 0;
-				r_z = 45 * dir + 90;
-
-				// convert
-				const double pi = 3.141592654;
-				const Vec3f rotation(r_x / 180.0f * pi, r_y / 180.0f * pi, r_z / 180.0f * pi);
-				RECT r;
-				int center_x, center_y;
-				if (!FSunPackLib::LoadVXLImage(
-					*m_voxelNormalTables,
-					lightDirection,
-					rotation,
-					0,
-					vxlColors[i],
-					vxlLighting[i],
-					&center_x, &center_y,
-					0, nullptr, nullptr, 0, 0, &r)) {
-					break;
+		if (VoxelDrawer::LoadVXLFile(VXLName, finder)) {
+			if (VoxelDrawer::LoadHVAFile(HVAName, finder)) {
+				for (int i = 0; i < 8; ++i) {
+					// (13 - i) % 8 for facing fix
+					bool result = VoxelDrawer::GetImageData((13 - i) % 8, pBarlImages[i], barlrect[i], turzadjust);
+					if (!result)
+						break;
 				}
-
-				auto const x = center_x;
-				auto const y = center_y;
-				auto const width = r.right - r.left;
-				auto const height = r.bottom - r.top;
-
-				VXL_Add(vxlColors[i].data(), x, y, width, height);
-				VXL_Add(vxlLighting[i].data(), x, y, width, height);
-				VXL_GetAndClear(pTurImages[i], nullptr, nullptr);
-				barlrect[i] = { x, y, width, height };
 			}
 		}
-
 
 		VXLName = TurName + ".vxl";
 		HVAName = TurName + ".hva";
 
-		HMIXFILE hVXL = FindFileInMix(VXLName);
-		if (hVXL && FSunPackLib::SetCurrentVXL(VXLName, hVXL)) {
-			auto vnc = FSunPackLib::VoxelNormalClass::Unknown;
-			std::vector<BYTE> vxlColors[8];
-			std::vector<BYTE> vxlLighting[8];
-			// we assume the voxel normal class is always the same for the combined voxels
-			FSunPackLib::GetVXLSectionInfo(0, vnc);
+		if (VoxelDrawer::LoadVXLFile(VXLName, finder) && VoxelDrawer::LoadHVAFile(HVAName, finder)) {
 			for (int i = 0; i < 8; ++i) {
-				float r_x, r_y, r_z;
-				const int dir = i;
-				r_x = 300;
-				r_y = 0;
-				r_z = 45 * dir + 90;
-
-				// convert
-				const double pi = 3.141592654;
-				const Vec3f rotation(r_x / 180.0f * pi, r_y / 180.0f * pi, r_z / 180.0f * pi);
-				RECT r;
-				int center_x, center_y;
-				if (!FSunPackLib::LoadVXLImage(
-					*m_voxelNormalTables,
-					lightDirection,
-					rotation,
-					Vec3f{},
-					vxlColors[i],
-					vxlLighting[i],
-					&center_x, &center_y,
-					0, nullptr, nullptr, 0, 0, &r)) {
+				// (13 - i) % 8 for facing fix
+				bool result = VoxelDrawer::GetImageData((13 - i) % 8, pTurImages[i], turrect[i], pBarlImages[i] ? 0 : turzadjust);
+				if (!result) {
 					break;
 				}
-
-				auto const x = center_x;
-				auto const y = center_y;
-				auto const width = r.right - r.left;
-				auto const height = r.bottom - r.top;
-
-				//Blit_PalD(lpT[i], destRect, turretColors[i].data(), srcRect, ddsd.dwWidth, head.cx, ddsd.dwHeight, head.cy);
-				//Blit_PalD(lighting[i].data(), destRect, turretLighting[i].data(), srcRect, ddsd.dwWidth, head.cx, ddsd.dwHeight, head.cy, turretColors[i].data());
-				//if (std::find_if(lighting[i].begin(), lighting[i].end(), [](const BYTE b) { return b != 255; }) != lighting[i].end())
-				//	p.lighting = std::shared_ptr<std::vector<BYTE>>(new std::vector<BYTE>(std::move(lighting[i])));
-				
-				UnionSHP_Add(vxlColors[i].data(), width, height);
-				UnionSHP_Add(vxlLighting[i].data(), width, height);
-				UnionSHP_GetAndClear(pTurImages[i], nullptr, nullptr, false);
-				//VXL_Add(vxlColors[i].data(), x, y, width, height);
-				//VXL_Add(vxlLighting[i].data(), x, y, width, height);
-				//VXL_GetAndClear(pTurImages[i], nullptr, nullptr);
-				turrect[i] = { x, y, width, height };
 			}
 		}
-
-		//if (DrawStuff::load_vxl(VXLName) && DrawStuff::load_hva(HVAName)) {
-		//	for (int i = 0; i < 8; ++i) {
-		//		// (13 - i) % 8 for facing fix
-		//		bool result = DrawStuff::get_to_image((13 - i) % 8, pTurImages[i],
-		//			turrect[i][0], turrect[i][1], turrect[i][2], turrect[i][3], pBarlImages[i] ? 0 : turzadjust);
-		//		if (!result) {
-		//			break;
-		//		}
-		//	}
-		//}
 
 		for (int i = 0; i < 8; ++i) {
 			auto pTempBuf = new(unsigned char[width * height]);
@@ -1720,9 +1632,8 @@ void CLoading::LoadBuilding(const CString& ID)
 				pKey.Format("%sY%d", ID, (15 - i) % 8);
 				int turdeltaY = g_data.GetInteger("BuildingVoxelTurretsRA2", pKey);
 
-				//VXL_Add(pTurImages[i], turretRect.X + turdeltaX, turretRect.Y + turdeltaY, turretRect.Width, turretRect.Height);
-				UnionSHP_Add(pTurImages[i], turretRect.Width, turretRect.Height, turretRect.X + turdeltaX, turretRect.Y + turdeltaY);
-				//delete[] pTurImages[i];
+				VXL_Add(pTurImages[i], turretRect.X + turdeltaX, turretRect.Y + turdeltaY, turretRect.W, turretRect.H);
+				delete[] pTurImages[i];
 
 				if (pBarlImages[i]) {
 					pKey.Format("%sX%d", ID, (15 - i) % 8);
@@ -1730,15 +1641,15 @@ void CLoading::LoadBuilding(const CString& ID)
 					pKey.Format("%sY%d", ID, (15 - i) % 8);
 					int barldeltaY = g_data.GetInteger("BuildingVoxelBarrelsRA2", pKey);
 
-					VXL_Add(pBarlImages[i], barlRect[2] + barldeltaX, barlRect[3] + barldeltaY, barlRect[0], barlRect[1]);
+					VXL_Add(pBarlImages[i], barlRect.X + barldeltaX, barlRect.Y + barldeltaY, barlRect.W, barlRect.H);
 					delete[] pBarlImages[i];
 				}
 			}
 
-			//int nW = 0x100, nH = 0x100;
-			//VXL_GetAndClear(pTurImages[i], &nW, &nH);
+			int nW = 0x100, nH = 0x100;
+			VXL_GetAndClear(pTurImages[i], &nW, &nH);
 
-			//UnionSHP_Add(pTurImages[i], 0x100, 0x100, deltaX, deltaY);
+			UnionSHP_Add(pTurImages[i], 0x100, 0x100, deltaX, deltaY);
 
 			unsigned char* pImage;
 			int width1, height1;
@@ -1897,13 +1808,17 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 		return;
 	}
 
+	auto finder = [this](LPCTSTR lpFilename, char* pTheaterChar) {
+		return this->FindFileInMix(lpFilename, reinterpret_cast<TheaterChar*>(pTheaterChar));
+	};
+
 	// As VXL
 	CString FileName = ImageID + ".vxl";
 	CString HVAName = ImageID + ".hva";
 
-	//if (!DrawStuff::is_vpl_loaded()) {
-	//	DrawStuff::load_vpl("voxels.vpl");
-	//}
+	if (!VoxelDrawer::IsVPLLoaded()) {
+		VoxelDrawer::LoadVPLFile("voxels.vpl", finder);
+	}
 
 	CString PaletteName = art.GetStringOr(ArtID, "Palette", "unit");
 	GetFullPaletteName(PaletteName, cur_theat);
@@ -1911,9 +1826,9 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 	unsigned char* pImage[8]{ nullptr,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr };
 	unsigned char* pTurretImage[8]{ nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr };
 	unsigned char* pBarrelImage[8]{ nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr ,nullptr };
-	DrawRect rect[8];
-	DrawRect turretrect[8];
-	DrawRect barrelrect[8];
+	VoxelRectangle rect[8];
+	VoxelRectangle turretrect[8];
+	VoxelRectangle barrelrect[8];
 
 	int nMix = this->FindFileInMix(FileName);
 	if (!nMix || !FSunPackLib::SetCurrentVXL(FileName, nMix)) {
@@ -1923,52 +1838,18 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 	std::vector<BYTE> vxlColors[8];
 	std::vector<BYTE> vxlLighting[8];
 
-	//if (!DrawStuff::load_vxl(FileName)) {
-	//	return;
-	//}
-	//if (!DrawStuff::load_hva(HVAName)) {
-	//	return;
-	//}
+	if (!VoxelDrawer::LoadVXLFile(FileName, finder)) {
+		return;
+	}
+	if (!VoxelDrawer::LoadHVAFile(HVAName, finder)) {
+		return;
+	}
 	for (int i = 0; i < 8; ++i) {
 		// (i+6) % 8 to fix the facing
-		//bool result = DrawStuff::get_to_image((i + 6) % 8, pImage[i],
-		//	rect[i][0], rect[i][1], rect[i][2], rect[i][3]);
-		//if (!result) {
-		//	return;
-		//}
-
-		float r_x, r_y, r_z;
-		const int dir = i;
-		r_x = 300;
-		r_y = 0;
-		r_z = 45 * dir + 90;
-
-		// convert
-		const double pi = 3.141592654;
-		const Vec3f rotation(r_x / 180.0f * pi, r_y / 180.0f * pi, r_z / 180.0f * pi);
-		RECT r;
-		int center_x, center_y;
-		if (!FSunPackLib::LoadVXLImage(
-			*m_voxelNormalTables,
-			lightDirection,
-			rotation,
-			Vec3f{},
-			vxlColors[i],
-			vxlLighting[i],
-			&center_x, &center_y,
-			0, nullptr, nullptr, 0, 0, &r)) {
-			break;
+		bool result = VoxelDrawer::GetImageData((i + 6) % 8, pImage[i], rect[i]);
+		if (!result) {
+			return;
 		}
-
-		auto const x = center_x;
-		auto const y = center_y;
-		auto const width = r.right - r.left;
-		auto const height = r.bottom - r.top;
-
-		VXL_Add(vxlColors[i].data(), x, y, width, height);
-		VXL_Add(vxlLighting[i].data(), x, y, width, height);
-		VXL_GetAndClear(pImage[i], nullptr, nullptr);
-		rect[i] = { x,y,width,height };
 	}
 
 	if (!bHasTurret) {
@@ -1979,7 +1860,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 			unsigned char* outBuffer;
 			int outW = 0x100, outH = 0x100;
 
-			VXL_Add(pImage[i], rect[i].X, rect[i].Y, rect[i].Width, rect[i].Height);
+			VXL_Add(pImage[i], rect[i].X, rect[i].Y, rect[i].W, rect[i].H);
 			delete[] pImage[i];
 			VXL_GetAndClear(outBuffer, &outW, &outH);
 
@@ -2000,38 +1881,42 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 
 	CString turFileName = ImageID + "tur.vxl";
 	CString turHVAName = ImageID + "tur.hva";
-	//if (DrawStuff::load_vxl(turFileName)) {
-	//	return;
-	//}
-	//if (DrawStuff::load_hva(turHVAName)) {
-	//	return;
-	//}
+
+	if (VoxelDrawer::LoadVXLFile(turFileName, finder)) {
+		return;
+	}
+	if (VoxelDrawer::LoadHVAFile(turHVAName, finder)) {
+		return;
+	}
+
 	for (int i = 0; i < 8; ++i) {
 		// (i+6) % 8 to fix the facing
-		//bool result = DrawStuff::get_to_image((i + 6) % 8, pTurretImage[i],
-		//	turretrect[i][0], turretrect[i][1], turretrect[i][2], turretrect[i][3], F, L, H);
+		bool result = VoxelDrawer::GetImageData((i + 6) % 8, pTurretImage[i],
+			turretrect[i], F, L, H);
 
-		//if (!result) {
-		//	break;
-		//}
+		if (!result) {
+			break;
+		}
 	}
 
 	CString barlFileName = ImageID + "barl.vxl";
 	CString barlHVAName = ImageID + "barl.hva";
-	//if (!DrawStuff::load_vxl(barlFileName)) {
-	//	return;
-	//}
-	//if (!DrawStuff::load_hva(barlHVAName)) {
-	//	return;
-	//}
+
+	if (!VoxelDrawer::LoadVXLFile(barlFileName, finder)) {
+		return;
+	}
+	if (!VoxelDrawer::LoadHVAFile(barlHVAName, finder)) {
+		return;
+	}
+
 	for (int i = 0; i < 8; ++i) {
 		// (i+6) % 8 to fix the facing
-		//bool result = DrawStuff::get_to_image((i + 6) % 8, pBarrelImage[i],
-		//	barrelrect[i][0], barrelrect[i][1], barrelrect[i][2], barrelrect[i][3], F, L, H);
+		bool result = VoxelDrawer::GetImageData((i + 6) % 8, pBarrelImage[i],
+			barrelrect[i], F, L, H);
 
-		//if (!result) {
-		//	break;
-		//}
+		if (!result) {
+			break;
+		}
 	}
 
 	for (int i = 0; i < 8; ++i) {
@@ -2042,7 +1927,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 		int outW = 0x100, outH = 0x100;
 
 		if (pImage[i]) {
-			VXL_Add(pImage[i], rect[i].X, rect[i].Y, rect[i].Width, rect[i].Height);
+			VXL_Add(pImage[i], rect[i].X, rect[i].Y, rect[i].W, rect[i].H);
 			delete[] pImage[i];
 		}
 		CString pKey;
@@ -2051,7 +1936,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 			int turdeltaX = g_data.GetInteger("VehicleVoxelTurretsRA2", pKey);
 			pKey.Format("%sY%d", ID.operator LPCSTR(), i);
 			int turdeltaY = g_data.GetInteger("VehicleVoxelTurretsRA2", pKey);
-			VXL_Add(pTurretImage[i], turretrect[i].X + turdeltaX, turretrect[i].Y + turdeltaY, turretrect[i].Width, turretrect[i].Height);
+			VXL_Add(pTurretImage[i], turretrect[i].X + turdeltaX, turretrect[i].Y + turdeltaY, turretrect[i].W, turretrect[i].H);
 			delete[] pTurretImage[i];
 
 			if (pBarrelImage[i]) {
@@ -2060,7 +1945,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 				pKey.Format("%sY%d", ID.operator LPCSTR(), i);
 				int barldeltaY = g_data.GetInteger("VehicleVoxelBarrelsRA2", pKey);
 
-				VXL_Add(pBarrelImage[i], barrelrect[i].X + barldeltaX, barrelrect[i].Y + barldeltaY, barrelrect[i].Width, barrelrect[i].Height);
+				VXL_Add(pBarrelImage[i], barrelrect[i].X + barldeltaX, barrelrect[i].Y + barldeltaY, barrelrect[i].W, barrelrect[i].H);
 				delete[] pBarrelImage[i];
 			}
 		}
@@ -2522,6 +2407,7 @@ BOOL CLoading::InitMixFiles()
 CLoading::~CLoading()
 {
 	Unload();
+	VoxelDrawer::Finalize();
 }
 
 void CLoading::Unload()
@@ -3481,7 +3367,7 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 
 					FSunPackLib::SetTSPaletteEntry(hPalette, 0x10 + i, &rgbNew, &rgbOld[i]);
 				}
-		}
+			}
 #endif
 
 			FSunPackLib::LoadSHPImage(0, maxPics, lpT);
@@ -3562,9 +3448,9 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 
 
 			delete[] lpT;
-	}
+		}
 
-}
+	}
 
 	int i;
 	for (i = 0; i < 0xFF; i++) {
@@ -3575,7 +3461,7 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 	}
 
 
-	}
+}
 #endif
 
 void CLoading::OnDestroy()
@@ -4043,20 +3929,20 @@ void CLoading::FreeAll()
 #endif
 
 			i->second.pic = NULL;
-			} catch (...) {
-				CString err;
-				err = "Access violation while trying to release surface ";
-				char c[6];
-				itoa(e, c, 10);
-				err += c;
+		} catch (...) {
+			CString err;
+			err = "Access violation while trying to release surface ";
+			char c[6];
+			itoa(e, c, 10);
+			err += c;
 
-				err += "\n";
-				OutputDebugString(err);
-				continue;
-			}
-
-			i++;
+			err += "\n";
+			OutputDebugString(err);
+			continue;
 		}
+
+		i++;
+	}
 
 
 
@@ -4077,7 +3963,7 @@ void CLoading::FreeAll()
 	} catch (...) {
 		errstream << "Exception while freeing DirectDraw" << endl;
 	}
-	}
+}
 
 void CLoading::PostNcDestroy()
 {
@@ -4346,7 +4232,7 @@ void CLoading::LoadStrings()
 			//CCStrings[*rules.GetSectionName(i)].SetString=rul
 			CCStrings[*rules.GetSectionName(i)].SetString((LPSTR)(LPCSTR)rules.GetSection(i)->values["Name"]);
 		}
-}
+	}
 #endif
 
 

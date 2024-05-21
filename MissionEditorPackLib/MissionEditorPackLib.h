@@ -45,6 +45,8 @@ class VoxelNormalTables;
 typedef DWORD HMIXFILE;
 typedef DWORD HTSPALETTE;
 
+using MemoryBuffer = std::vector<char>;
+
 struct SHPHEADER
 {
 	__int16 zero;// type
@@ -249,6 +251,7 @@ namespace FSunPackLib
 
 	HRESULT SetColorKey(IDirectDrawSurface4* pDDS, COLORREF rgb);
 
+	std::pair<MemoryBuffer, bool> LoadCCFile(LPCTSTR name, HMIXFILE hMix);
 };
 
 #endif

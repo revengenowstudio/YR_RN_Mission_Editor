@@ -349,6 +349,35 @@ namespace FSunPackLib
 		return pDDS->SetColorKey(DDCKEY_SRCBLT, &color_key);
 	}
 
+	std::pair<MemoryBuffer, bool> LoadCCFile(LPCTSTR filepath, HMIXFILE hMix)
+	{
+		MemoryBuffer buffer;
+		Ccc_file file(true);
+
+		if (hMix != NULL) {
+			if (file.open(filepath, mixfiles[hMix - 1])) {
+				return {};
+			}
+		} else {
+			if (file.open(filepath)) {
+				return {};
+			}
+		}
+
+		auto const size = file.get_size();
+
+		if (size < 0) {
+			return {};
+		}
+
+		buffer.resize(size);
+
+		if (file.read(buffer.data(), size)) {
+			return {};
+		}
+		return { std::move(buffer), true };
+	}
+
 	BOOL XCC_Initialize(BOOL bLoadFromRegistry)
 	{
 		if (bLoadFromRegistry)

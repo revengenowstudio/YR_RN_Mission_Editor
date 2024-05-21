@@ -191,5 +191,5 @@ private:
 	bool m_is_open = false;
 	int64_t m_p;
 	const bool m_read_on_open;
-	size_t m_size;
+	int64_t m_size;
 };

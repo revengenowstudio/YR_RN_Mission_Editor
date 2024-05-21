@@ -34,7 +34,10 @@ public:
 	bool is_valid() const
 	{
 		const t_tmp_ts_header& h = header();
-		auto const size = get_size();
+		if (get_size() < 0) {
+			return false;
+		}
+		auto const size = static_cast<size_t>(get_size());
 		if (sizeof(t_tmp_ts_header) > size ||
 			!h.cblocks_x || !h.cblocks_y ||
 			h.cx != 48 && h.cx != 60 ||
