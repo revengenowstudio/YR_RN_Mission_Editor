@@ -332,36 +332,32 @@ static void write_v80(byte v, int count, byte*& d)
 
 void get_same(const byte* s, const byte* r, const byte* s_end, const byte*& p, int& cb_p)
 {
-	int counted = 0;
-	int maxCount = 0;
+	// init
 	p = nullptr;
-	s--;
+	cb_p = 0;
 
-search_next:
-	s++;
-	counted = 0;
-	if (s >= r) {
-		goto exit;
+	while (s++ < s_end) {
+		// reset round
+		int counted = 0;
+		// early safe check
+		if (s >= r) {
+			break;
+		}
+		while (s[counted] == r[counted]) {
+			// match begins, early safe check
+			if (s + counted >= s_end) {
+				break;
+			}
+			if (r + counted >= s_end) {
+				break;
+			}
+			counted++;
+		}
+		if (counted > cb_p) {
+			cb_p = counted;
+			p = s;
+		}
 	}
-
-next0:
-	if (r + counted >= s_end) {
-		goto end_search;
-	}
-	if (s[counted] == r[counted]) {
-		counted++;
-		goto next0;
-	}
-
-end_search:
-	if (counted >= maxCount) {
-		maxCount = counted;
-		p = s;
-	}
-	goto search_next;
-
-exit:
-	cb_p = maxCount;
 }
 
 static void write80_c0(byte*& w, int count, int p)
