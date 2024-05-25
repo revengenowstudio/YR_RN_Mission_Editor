@@ -482,10 +482,10 @@ void CLoading::Load()
 // InitPics loads all graphics except terrain graphics!
 void CLoading::InitPics(CProgressCtrl* prog)
 {
-	MEMORYSTATUS ms;
-	ms.dwLength = sizeof(MEMORYSTATUS);
-	GlobalMemoryStatus(&ms);
-	int cs = ms.dwAvailPhys + ms.dwAvailPageFile;
+	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(MEMORYSTATUSEX);
+	GlobalMemoryStatusEx(&ms);
+	auto cs = ms.ullAvailPhys + ms.ullAvailPageFile;
 
 	errstream << "InitPics() called. Available memory: " << cs << endl;
 	errstream.flush();
@@ -645,8 +645,8 @@ void CLoading::InitPics(CProgressCtrl* prog)
 
 	}
 	ms.dwLength = sizeof(MEMORYSTATUS);
-	GlobalMemoryStatus(&ms);
-	cs = ms.dwAvailPhys + ms.dwAvailPageFile;
+	GlobalMemoryStatusEx(&ms);
+	cs = ms.ullAvailPhys + ms.ullAvailPageFile;
 
 	int piccount = pics.size();
 
