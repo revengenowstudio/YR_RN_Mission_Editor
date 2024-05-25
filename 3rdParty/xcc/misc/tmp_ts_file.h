@@ -39,7 +39,7 @@ public:
 			!h.cblocks_x || !h.cblocks_y ||
 			h.cx != 48 && h.cx != 60 ||
 			2 * h.cy != h.cx ||
-			sizeof(t_tmp_ts_header) + 4 * get_c_tiles() > size)
+			sizeof(t_tmp_ts_header) + static_cast<size_t>(4 * get_c_tiles()) > size)
 			return false;
 		for (int i = 0; i < min(get_c_tiles(), 64); i++) {
 			if (get_index()[i]) {
