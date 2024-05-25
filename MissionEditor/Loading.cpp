@@ -555,14 +555,18 @@ void CLoading::UnionSHP_Add(unsigned char* pBuffer, int Width, int Height, int D
 }
 
 
-void CLoading::UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, int* OutHeight, bool UseTemp)
+void CLoading::UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, int* OutHeight, bool clearBuffer, bool UseTemp)
 {
 	// never calls it when UnionSHP_Data is empty
 
 	if (UnionSHP_Data[UseTemp].size() == 1) {
 		pOutBuffer = UnionSHP_Data[UseTemp][0].Buffer;
-		*OutWidth = UnionSHP_Data[UseTemp][0].Width;
-		*OutHeight = UnionSHP_Data[UseTemp][0].Height;
+		if (OutWidth) {
+			*OutWidth = UnionSHP_Data[UseTemp][0].Width;
+		}
+		if (OutHeight) {
+			*OutHeight = UnionSHP_Data[UseTemp][0].Height;
+		}
 		UnionSHP_Data[UseTemp].clear();
 		return;
 	}
@@ -582,8 +586,12 @@ void CLoading::UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, i
 	// just make it work like unsigned char[W][H];
 	pOutBuffer = new(unsigned char[W * H]);
 	ZeroMemory(pOutBuffer, W * H);
-	*OutWidth = W;
-	*OutHeight = H;
+	if (OutWidth) {
+		*OutWidth = W;
+	}
+	if (OutHeight) {
+		*OutHeight = H;
+	}
 
 	int ImageCenterX = W / 2;
 	int ImageCenterY = H / 2;
@@ -598,7 +606,9 @@ void CLoading::UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, i
 				if (auto nPalIdx = data.Buffer[j * data.Width + i])
 					pOutBuffer[(nStartY + j) * W + nStartX + i] = nPalIdx;
 
-		delete[](data.Buffer);
+		if (clearBuffer) {
+			delete[](data.Buffer);
+		}
 	}
 
 	UnionSHP_Data[UseTemp].clear();
@@ -1582,7 +1592,6 @@ void CLoading::LoadBuilding(const CString& ID)
 		CString VXLName = BarlName + ".vxl";
 		CString HVAName = BarlName + ".hva";
 
-#if 0
 		HMIXFILE hBarl = FindFileInMix(BarlName);
 		if (hBarl && FSunPackLib::SetCurrentVXL(VXLName, hBarl)) {
 			auto vnc = FSunPackLib::VoxelNormalClass::Unknown;
@@ -1625,11 +1634,7 @@ void CLoading::LoadBuilding(const CString& ID)
 				barlrect[i] = { x, y, width, height };
 			}
 		}
-#endif
 
-		if (ID == "NAFLAK") {
-			printf("");
-		}
 
 		VXLName = TurName + ".vxl";
 		HVAName = TurName + ".hva";
@@ -1670,9 +1675,17 @@ void CLoading::LoadBuilding(const CString& ID)
 				auto const width = r.right - r.left;
 				auto const height = r.bottom - r.top;
 
-				VXL_Add(vxlColors[i].data(), x, y, width, height);
-				VXL_Add(vxlLighting[i].data(), x, y, width, height);
-				VXL_GetAndClear(pTurImages[i], nullptr, nullptr);
+				//Blit_PalD(lpT[i], destRect, turretColors[i].data(), srcRect, ddsd.dwWidth, head.cx, ddsd.dwHeight, head.cy);
+				//Blit_PalD(lighting[i].data(), destRect, turretLighting[i].data(), srcRect, ddsd.dwWidth, head.cx, ddsd.dwHeight, head.cy, turretColors[i].data());
+				//if (std::find_if(lighting[i].begin(), lighting[i].end(), [](const BYTE b) { return b != 255; }) != lighting[i].end())
+				//	p.lighting = std::shared_ptr<std::vector<BYTE>>(new std::vector<BYTE>(std::move(lighting[i])));
+				
+				UnionSHP_Add(vxlColors[i].data(), width, height);
+				UnionSHP_Add(vxlLighting[i].data(), width, height);
+				UnionSHP_GetAndClear(pTurImages[i], nullptr, nullptr, false);
+				//VXL_Add(vxlColors[i].data(), x, y, width, height);
+				//VXL_Add(vxlLighting[i].data(), x, y, width, height);
+				//VXL_GetAndClear(pTurImages[i], nullptr, nullptr);
 				turrect[i] = { x, y, width, height };
 			}
 		}
@@ -1707,8 +1720,9 @@ void CLoading::LoadBuilding(const CString& ID)
 				pKey.Format("%sY%d", ID, (15 - i) % 8);
 				int turdeltaY = g_data.GetInteger("BuildingVoxelTurretsRA2", pKey);
 
-				VXL_Add(pTurImages[i], turretRect.X + turdeltaX, turretRect.Y + turdeltaY, turretRect.Width, turretRect.Height);
-				delete[] pTurImages[i];
+				//VXL_Add(pTurImages[i], turretRect.X + turdeltaX, turretRect.Y + turdeltaY, turretRect.Width, turretRect.Height);
+				UnionSHP_Add(pTurImages[i], turretRect.Width, turretRect.Height, turretRect.X + turdeltaX, turretRect.Y + turdeltaY);
+				//delete[] pTurImages[i];
 
 				if (pBarlImages[i]) {
 					pKey.Format("%sX%d", ID, (15 - i) % 8);
@@ -1721,10 +1735,10 @@ void CLoading::LoadBuilding(const CString& ID)
 				}
 			}
 
-			int nW = 0x100, nH = 0x100;
-			VXL_GetAndClear(pTurImages[i], &nW, &nH);
+			//int nW = 0x100, nH = 0x100;
+			//VXL_GetAndClear(pTurImages[i], &nW, &nH);
 
-			UnionSHP_Add(pTurImages[i], 0x100, 0x100, deltaX, deltaY);
+			//UnionSHP_Add(pTurImages[i], 0x100, 0x100, deltaX, deltaY);
 
 			unsigned char* pImage;
 			int width1, height1;
