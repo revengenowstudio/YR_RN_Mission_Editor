@@ -1372,7 +1372,7 @@ BOOL CLoading::LoadUnitGraphic(const CString& lpUnittype)
 					if (bStructure && turretanim_name.GetLength() > 0 && !rules.GetBool(image, "TurretAnimIsVoxel")) {
 						turretanim_filename = turretanim_name + ".shp";
 						auto const& imageID = art.GetString(turretanim_name, "Image");
-						if (imageID.IsEmpty()) {
+						if (!imageID.IsEmpty()) {
 							turretanim_filename = imageID + ".shp";
 						}
 
