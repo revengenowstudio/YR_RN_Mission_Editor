@@ -159,7 +159,7 @@ public:
 		return m_p;
 	}
 
-	long long get_size() const
+	auto get_size() const
 	{
 		return m_size;
 	}
@@ -191,5 +191,5 @@ private:
 	bool m_is_open = false;
 	int m_p;
 	const bool m_read_on_open;
-	long long m_size;
+	size_t m_size;
 };
