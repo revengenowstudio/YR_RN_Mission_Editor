@@ -33,7 +33,7 @@
 #include "rtpdlg.h"
 #include "TubeTool.h"
 #include "StringHelper.h"
-#include "INIMeta.h"
+#include "IniMega.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -512,19 +512,6 @@ __inline HTREEITEM TV_InsertItemW(HWND hWnd, WCHAR* lpString, int len, HTREEITEM
 	}
 
 	return res;
-}
-
-IniFileGroup IniMegaFile::GetRules()
-{
-	IniFileGroup m_group;
-	m_group.Append(rules);
-	m_group.Append(Map->GetIniFile());
-	return m_group;
-}
-
-bool IniMegaFile::isNullOrEmpty(const CString& value)
-{
-	return !value.GetLength() || value == "none" || value == "<none>";
 }
 
 const IgnoreSet CollectIgnoreSet()

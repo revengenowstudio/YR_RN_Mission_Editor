@@ -15,6 +15,7 @@
     <XccVcpkgBin Include="$(XccVcpkgDir)\bin\bz2*.dll" />
     <XccVcpkgBin Include="$(XccVcpkgDir)\bin\lzo2.dll" />
     <XccVcpkgBin Include="$(XccVcpkgDir)\bin\zlib*1.dll" />
+    <VxlLibBin Include="$(VxlLibDir)\*.dll" />
     <InstallData Include="$(MSBuildThisFileDirectory)\..\data\shared\**\*" />
     <InstallData Include="$(MSBuildThisFileDirectory)\..\..\LICENSE.md" />
     <LicDir Include="$(XccDir)\COPYING" DestDir="xcc" />
@@ -28,6 +29,9 @@
   </Target>
   <Target Name="CopyDllFiles" AfterTargets="Build" BeforeTargets="BuildAndZipDistribution">
     <Copy SourceFiles="@(XccVcpkgBin)" DestinationFolder="$(OutDir)" />
+  </Target>
+  <Target Name="CopyDllFiles" AfterTargets="Build" BeforeTargets="BuildAndZipDistribution">
+    <Copy SourceFiles="@(VxlLibBin)" DestinationFolder="$(OutDir)" />
   </Target>
   <Target Name="CopyDataFiles" AfterTargets="Build" BeforeTargets="BuildAndZipDistribution">
     <Copy SourceFiles="@(InstallData)" DestinationFolder="$(OutDir)\%(RecursiveDir)" />

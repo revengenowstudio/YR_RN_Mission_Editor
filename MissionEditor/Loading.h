@@ -23,6 +23,7 @@
 
 #include "FinalSunDlg.h"	
 #include "MissionEditorPackLib.h"
+#include "Palettes.h"
 #include <memory>
 #include <optional>
 
@@ -90,9 +91,7 @@ class CLoading : public CDialog
 {
 	// Construction
 public:
-	void CreateConvTable(RGBTRIPLE* pal, int* iPal);
-	void FetchPalettes();
-	void PrepareUnitGraphic(LPCSTR lpUnittype);
+	void PrepareUnitGraphic(const CString& lpUnittype);
 	void LoadStrings();
 	void FreeAll();
 	void FreeTileSet();
@@ -110,15 +109,52 @@ public:
 	CLoading(CWnd* pParent = NULL);   // Standardconstructor
 	void InitPics(CProgressCtrl* prog = NULL);
 	void Load();
+	bool LoadSingleFrameShape(const CString& name, int nFrame = 0, int deltaX = 0, int deltaY = 0);
+	void LoadBuilding(const CString& ID);
+	void LoadInfantry(const CString& ID);
+	void LoadTerrainOrSmudge(const CString& ID);
+	void LoadVehicleOrAircraft(const CString& ID);
+
+	void SetImageData(unsigned char* pBuffer, const CString& NameInDict, int FullWidth, int FullHeight, Palette* pPal);
+	void SetImageData(unsigned char* pBuffer, PICDATA& pData, const int FullWidth, const int FullHeight, Palette* pPal);
+	void UnionSHP_Add(unsigned char* pBuffer, int Width, int Height, int DeltaX = 0, int DeltaY = 0, bool UseTemp = false);
+	void UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, int* OutHeight, bool clearBuffer = true, bool UseTemp = false);
+	void VXL_Add(const unsigned char* pCache, int X, int Y, int Width, int Height);
+	void VXL_GetAndClear(unsigned char*& pBuffer, int* OutWidth, int* OutHeight);
+	void VXL_Reset();
 	BOOL LoadUnitGraphic(const CString& lpUnittype);
 	void LoadBuildingSubGraphic(const CString& subkey, const CIniFileSection& artSection, BOOL bAlwaysSetChar, char theat, HMIXFILE hShpMix, SHPHEADER& shp_h, BYTE*& shp);
 	void LoadOverlayGraphic(const CString& lpOvrlName, int iOvrlNum);
 	void InitVoxelNormalTables();
-	HTSPALETTE GetIsoPalette(char theat);
-	HTSPALETTE GetUnitPalette(char theat);
 	std::optional<FindShpResult> FindUnitShp(const CString& image, char preferred_theat, const CIniFileSection& artSection);
 	char cur_theat;
 
+	HMIXFILE FindFileInMix(LPCTSTR lpFilename, TheaterChar* pTheaterChar = NULL);
+
+	const HMIXFILE CacheMix() const {
+		return m_hCache;
+	}
+	const EXPANDMIX* ExpandMixes() const {
+		return m_hExpand;
+	}
+
+	enum class ObjectType
+	{
+		Unknown = -1,
+		Infantry = 0,
+		Vehicle = 1,
+		Aircraft = 2,
+		Building = 3,
+		Terrain = 4,
+		Smudge = 5
+	};
+
+	ObjectType GetItemType(const CString& ID);
+	CString GetArtID(const CString& ID);
+	CString GetVehicleOrAircraftFileID(const CString& ID);
+	CString GetTerrainOrSmudgeFileID(const CString& ID);
+	CString GetBuildingFileID(const CString& ID);
+	CString GetInfantryFileID(const CString& ID);
 
 	// Dialog data
 		//{{AFX_DATA(CLoading)
@@ -156,29 +192,9 @@ private:
 	int m_pic_count;
 	int m_bmp_count;
 	BOOL LoadTile(LPCSTR lpFilename, HMIXFILE hOwner, HTSPALETTE hPalette, DWORD dwID, BOOL bReplacement);
-	HTSPALETTE m_hPalIsoTemp;
-	HTSPALETTE m_hPalIsoSnow;
-	HTSPALETTE m_hPalIsoUrb;
 
-	HTSPALETTE m_hPalUnitTemp;
-	HTSPALETTE m_hPalUnitSnow;
-	HTSPALETTE m_hPalUnitUrb;
-	HTSPALETTE m_hPalTemp;
-	HTSPALETTE m_hPalSnow;
-	HTSPALETTE m_hPalUrb;
-	HTSPALETTE m_hPalLib;
-	// YR pals:
-	HTSPALETTE m_hPalLun;
-	HTSPALETTE m_hPalDes;
-	HTSPALETTE m_hPalUbn;
-	HTSPALETTE m_hPalIsoLun;
-	HTSPALETTE m_hPalIsoDes;
-	HTSPALETTE m_hPalIsoUbn;
-	HTSPALETTE m_hPalUnitLun;
-	HTSPALETTE m_hPalUnitDes;
-	HTSPALETTE m_hPalUnitUbn;
+	Palettes m_palettes;
 
-	HMIXFILE FindFileInMix(LPCTSTR lpFilename, TheaterChar* pTheaterChar = NULL);
 	HMIXFILE m_hLocal;
 	HMIXFILE m_hSno;
 	HMIXFILE m_hTem;
@@ -212,7 +228,19 @@ private:
 
 	std::unique_ptr<VoxelNormalTables> m_voxelNormalTables;
 
+	struct SHPUnionData
+	{
+		unsigned char* Buffer;// This buffer allocated from outside
+		int Width;
+		int Height;
+		int DeltaX;
+		int DeltaY;
+	};
 
+	std::map<CString, ObjectType> ObjectTypes;
+	std::vector<SHPUnionData> UnionSHP_Data[2];
+	static auto constexpr VoxelBlendCacheLength = 0x10000;
+	unsigned char VXL_Data[VoxelBlendCacheLength];
 };
 
 //{{AFX_INSERT_LOCATION}}

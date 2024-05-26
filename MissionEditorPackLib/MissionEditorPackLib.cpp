@@ -25,6 +25,7 @@ struct IUnknown;
 
 #include <map>
 #include <vector>
+#include <optional>
 #include "mix_file.h"
 
 #include "cc_file.h"
@@ -348,6 +349,35 @@ namespace FSunPackLib
 		return pDDS->SetColorKey(DDCKEY_SRCBLT, &color_key);
 	}
 
+	std::pair<MemoryBuffer, bool> LoadCCFile(LPCTSTR filepath, HMIXFILE hMix)
+	{
+		MemoryBuffer buffer;
+		Ccc_file file(true);
+
+		if (hMix != NULL) {
+			if (file.open(filepath, mixfiles[hMix - 1])) {
+				return {};
+			}
+		} else {
+			if (file.open(filepath)) {
+				return {};
+			}
+		}
+
+		auto const size = file.get_size();
+
+		if (size < 0) {
+			return {};
+		}
+
+		buffer.resize(size);
+
+		if (file.read(buffer.data(), size)) {
+			return {};
+		}
+		return { std::move(buffer), true };
+	}
+
 	BOOL XCC_Initialize(BOOL bLoadFromRegistry)
 	{
 		if (bLoadFromRegistry)
@@ -412,7 +442,7 @@ namespace FSunPackLib
 
 	BOOL XCC_DoesFileExist(LPCSTR szFile, HMIXFILE hOwner)
 	{
-		if (hOwner == 0)
+		if (hOwner == NULL)
 			return FALSE;
 		if (hOwner > dwMixFileCount)
 			return FALSE;
@@ -558,26 +588,30 @@ namespace FSunPackLib
 		return TRUE;
 	};
 
-	BOOL SetCurrentSHP(LPCSTR szSHP, HMIXFILE hOwner)
+	bool SetCurrentSHP(LPCSTR szSHP, HMIXFILE hOwner)
 	{
-		if (cur_shp.is_open()) cur_shp.close();
+		if (cur_shp.is_open()) {
+			cur_shp.close();
+		}
 
 		if (hOwner == NULL) {
 			if (open_read(cur_shp, szSHP) != 0) {
-				return FALSE;
+				return false;
 			}
 		} else {
-			int id = mixfiles[hOwner - 1].get_id(mixfiles[hOwner - 1].get_game(), szSHP);
-			int size = mixfiles[hOwner - 1].get_size(id);
-			if (size == 0)
+			auto const id = mixfiles[hOwner - 1].get_id(mixfiles[hOwner - 1].get_game(), szSHP);
+			auto const size = mixfiles[hOwner - 1].get_size(id);
+			if (size == 0) {
 				OutputDebugString("NULL size");
+				return false;
+			}
 			BYTE* b = new(BYTE[size]);
 			mixfiles[hOwner - 1].seek(mixfiles[hOwner - 1].get_offset(id));
 			mixfiles[hOwner - 1].read(b, size);
 			cur_shp.load(Cvirtual_binary(b, size));
 		}
 
-		return TRUE;
+		return true;
 	};
 
 	BOOL XCC_GetTMPTileInfo(int iTile, POINT* lpPos, int* lpWidth, int* lpHeight, BYTE* lpDirection, BYTE* lpTileHeight, BYTE* lpTileType, RGBTRIPLE* lpRgbLeft, RGBTRIPLE* lpRgbRight)
@@ -876,7 +910,7 @@ namespace FSunPackLib
 
 	}
 
-	BOOL LoadSHPImage(int iImageIndex, int iCount, BYTE** lpPics)
+	BOOL LoadSHPImage(int startIndex, int wantedNum, BYTE** lpPics)
 	{
 		t_shp_ts_image_header imghead;
 		BYTE* image = NULL;
@@ -889,26 +923,22 @@ namespace FSunPackLib
 			return FALSE;
 		}
 
-
-
-
-		int pic;
 		std::vector<byte> decode_image_buffer;
-		for (pic = 0; pic < iCount; pic++) {
-			if (cur_shp.get_image_header(iImageIndex + pic)) {
-				imghead = *(cur_shp.get_image_header(iImageIndex + pic));
+		for (auto frameIdx = 0; frameIdx < wantedNum; frameIdx++) {
+			if (cur_shp.get_image_header(startIndex + frameIdx)) {
+				imghead = *(cur_shp.get_image_header(startIndex + frameIdx));
 				// if(imghead.offset!=0)
 				{
 
-					if (cur_shp.is_compressed(iImageIndex + pic)) {
+					if (cur_shp.is_compressed(startIndex + frameIdx)) {
 						decode_image_buffer.resize(imghead.cx * imghead.cy);
 						image = decode_image_buffer.data();
-						decode3(cur_shp.get_image(iImageIndex + pic), image, imghead.cx, imghead.cy);
+						decode3(cur_shp.get_image(startIndex + frameIdx), image, imghead.cx, imghead.cy);
 					} else
-						image = (unsigned char*)cur_shp.get_image(iImageIndex + pic);
+						image = (unsigned char*)cur_shp.get_image(startIndex + frameIdx);
 
 
-					lpPics[pic] = new(BYTE[head.cx * head.cy]);
+					lpPics[frameIdx] = new(BYTE[head.cx * head.cy]);
 
 					int i, e;
 					for (i = 0; i < head.cx; i++) {
@@ -920,9 +950,9 @@ namespace FSunPackLib
 								dwRead = (i - imghead.x) + (e - imghead.y) * imghead.cx;
 
 							if (dwRead != 0xFFFFFFFF) {
-								lpPics[pic][dwWrite] = image[dwRead];
+								lpPics[frameIdx][dwWrite] = image[dwRead];
 							} else
-								lpPics[pic][dwWrite] = 0;
+								lpPics[frameIdx][dwWrite] = 0;
 
 						}
 
@@ -1818,8 +1848,22 @@ namespace FSunPackLib
 		return TRUE;
 	}
 
-	BOOL LoadVXLImage(const VoxelNormalTables& normalTables, Vec3f lightDirection, const Vec3f rotation, const Vec3f modelOffset, std::vector<BYTE>& image, std::vector<BYTE>& lighting, int* lpXCenter, int* lpYCenter, int ZAdjust, int* lpXCenterZMax, int* lpYCenterZMax, int i3dCenterX, int i3dCenterY, RECT* vxlrect)
-	{
+	BOOL LoadVXLImage(
+		const VoxelNormalTables& normalTables,
+		Vec3f lightDirection, 
+		const Vec3f rotation, 
+		const Vec3f modelOffset, 
+		OUT std::vector<BYTE>& image,
+		OUT std::vector<BYTE>& lighting, 
+		OUT OPTIONAL int* lpXCenter, 
+		OUT OPTIONAL int* lpYCenter, 
+		int ZAdjust, 
+		OUT OPTIONAL int* lpXCenterZMax,
+		OUT OPTIONAL int* lpYCenterZMax, 
+		int i3dCenterX, 
+		int i3dCenterY, 
+		OUT OPTIONAL RECT* vxlrect
+	) {
 		last_succeeded_operation = 1;
 
 		int i;
@@ -1934,46 +1978,78 @@ namespace FSunPackLib
 		return TRUE;
 	}
 
+	bool loadTSPaletteRaw(Cpal_file& pal, const std::string& szPalette)
+	{
+		return open_read(pal, szPalette) == 0;
+	}
 
+	bool loadTSPaletteFromMix(Cpal_file& pal, const std::string& szPalette, HMIXFILE hPaletteOwner)
+	{
+		if (szPalette[0] == '_' && szPalette[1] == 'I' && szPalette[2] == 'D') {
+			char id[256];
+			strcpy_s(id, &szPalette[3]);
+			int iId = atoi(id);
+			return pal.open(iId, mixfiles[hPaletteOwner - 1]) == 0;
+		}
+		return pal.open(szPalette, mixfiles[hPaletteOwner - 1]) == 0;
+	}
+
+
+	std::optional<Cpal_file> loadTSPalette(const std::string& szPalette, HMIXFILE hPaletteOwner)
+	{
+		Cpal_file pal;
+		if (hPaletteOwner == NULL) {
+			if (!loadTSPaletteRaw(pal, szPalette)) {
+				return std::nullopt;
+			}
+		} else {
+			if (!loadTSPaletteFromMix(pal, szPalette, hPaletteOwner)) {
+				return std::nullopt;
+			}
+		}
+		if (!pal.is_open()) {
+			return std::nullopt;
+		}
+		return pal;
+	}
+
+	bool LoadTSPalette(RGBTRIPLE* ret, const std::string& szPalette, HMIXFILE hPaletteOwner)
+	{
+		if (ret == nullptr) {
+			return false;
+		}
+
+		auto&& palRet = loadTSPalette(szPalette, hPaletteOwner);
+		if (!palRet.has_value()) {
+			return false;
+		}
+		auto&& pal = palRet.value();
+		auto const paldata = reinterpret_cast<const RGBTRIPLE*>(pal.get_data());
+		memcpy(ret, paldata, 768);
+		convert_palet_18_to_24(reinterpret_cast<t_palet_entry*>(ret));
+		pal.close();
+		return true;
+	}
+
+	bool LoadTSPalette(RGBTRIPLE* ret, LPCSTR szPalette, HMIXFILE hPaletteOwner)
+	{
+		return LoadTSPalette(ret, std::string(szPalette), hPaletteOwner);
+	}
 
 	HTSPALETTE LoadTSPalette(const std::string& szPalette, HMIXFILE hPaletteOwner)
 	{
-		Cpal_file pal;
-		RGBTRIPLE* paldata;
-
-		if (dwPalCount > 255)
+		if (dwPalCount > 255) {
 			return NULL;
-		if (hPaletteOwner == NULL) {
-			if (open_read(pal, szPalette))
-				return NULL;
-		} else {
-			if (szPalette[0] == '_' && szPalette[1] == 'I' && szPalette[2] == 'D') {
-				char id[256];
-				strcpy_s(id, &szPalette[3]);
-				int iId = atoi(id);
-				if (pal.open(iId, mixfiles[hPaletteOwner - 1]))
-					return NULL;
-			} else {
-				if (pal.open(szPalette, mixfiles[hPaletteOwner - 1]) != 0)
-					return NULL;
-			}
 		}
 
-		if (!pal.is_open())
+		t_palet buffer;
+		if (!LoadTSPalette(reinterpret_cast<RGBTRIPLE*>(buffer), szPalette, hPaletteOwner)) {
 			return NULL;
-
-		dwPalCount++;
-
-
-		paldata = (RGBTRIPLE*)pal.get_data();
-		//t_palet t_p;
-		memcpy(ts_palettes[dwPalCount - 1], paldata, 768);
-		bFirstConv[dwPalCount - 1] = TRUE;
-		convert_palet_18_to_24(ts_palettes[dwPalCount - 1]);
-
-		pal.close();
+		}
+		memcpy(ts_palettes[dwPalCount], buffer, 768);
+		bFirstConv[dwPalCount] = TRUE;
+		dwPalCount++;// HTSPALETTE is always internal `index+1`
 		return dwPalCount;
-
 	}
 
 	HTSPALETTE LoadTSPalette(LPCSTR szPalette, HMIXFILE hPaletteOwner)

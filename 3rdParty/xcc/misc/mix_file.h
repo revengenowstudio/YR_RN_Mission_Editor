@@ -26,7 +26,7 @@ class Cmix_file : public Ccc_file
 public:
 	int post_open();
 	string get_name(int id);
-	static int get_id(t_game game, string name);
+	static unsigned int get_id(t_game game, string name);
 	int get_index(unsigned int id) const;
 	using Ccc_file::get_size;
 	using Ccc_file::vdata;
@@ -80,10 +80,14 @@ public:
 		return m_index[get_index(id)].offset;
 	}
 
-	int get_size(unsigned int id) const
+	size_t get_size(unsigned int id) const
 	{
-		assert(get_index(id) != -1);
-		return m_index[get_index(id)].size;
+		auto const idx = get_index(id);
+		//assert(idx != -1);
+		if (idx >= 0) {
+			return m_index[idx].size;
+		}
+		return 0;
 	}
 
 	bool has_checksum() const
@@ -101,7 +105,7 @@ public:
 		return &m_index[0];
 	}
 private:
-	using t_id_index = map<int, int>;
+	using t_id_index = map<unsigned int, int>;
 
 	static bool m_ft_support;
 

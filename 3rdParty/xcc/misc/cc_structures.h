@@ -194,7 +194,7 @@ struct t_mix_index_entry
 {
 	t_mix_index_entry() = default;
 
-	t_mix_index_entry(unsigned int id_, int offset_, int size_)
+	t_mix_index_entry(unsigned int id_, int offset_, unsigned __int32 size_)
 	{
 		id = id_;
 		offset = offset_;
@@ -203,7 +203,7 @@ struct t_mix_index_entry
 
 	unsigned __int32 id;
 	__int32 offset;
-	__int32 size;
+	unsigned __int32 size;
 };
 
 struct t_mix_rg_header

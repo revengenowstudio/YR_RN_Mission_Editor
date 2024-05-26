@@ -1,3 +1,6 @@
 [submodule "gtest-lib"]
 	path = googletest
 	url = ../gtest-lib.git
+[submodule "3rdParty/CncVxlRender"]
+	path = 3rdParty/CncVxlRender
+	url = ../CncVxlRenderText.git

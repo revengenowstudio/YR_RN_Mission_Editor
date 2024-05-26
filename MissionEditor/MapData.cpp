@@ -3453,7 +3453,7 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 	CIniFile& ini = GetIniFile();
 
 	if (!lpUnitType) {
-		memset(buildinginfo, 0, 0x0F00 * sizeof(BUILDING_INFO));
+		memset(buildinginfo, 0, buildingInfoCapacity * sizeof(BUILDING_INFO));
 
 		for (auto const& [seq, id] : rules.GetSection("BuildingTypes")) {
 			auto const& type = id;
@@ -3464,7 +3464,7 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 
 			int n = Map->GetUnitTypeID(type);
 
-			if (n >= 0 && n < 0x0F00) {
+			if (n >= 0 && n < buildingInfoCapacity) {
 				buildinginfo[n].w = foundation.Width;
 				buildinginfo[n].h = foundation.Height;
 
@@ -3491,6 +3491,10 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 					buildinginfo[n].bSnow = TRUE;
 					buildinginfo[n].bTemp = TRUE;
 					buildinginfo[n].bUrban = TRUE;
+				}
+
+				if (type == "NALASR") {
+					printf("");
 				}
 
 				buildinginfo[n].pic_count = 8;
@@ -3521,7 +3525,7 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 
 			int n = Map->GetUnitTypeID(type);
 
-			if (n >= 0 && n < 0x0F00) {
+			if (n >= 0 && n < buildingInfoCapacity) {
 				buildinginfo[n].w = foundation.Width;
 				buildinginfo[n].h = foundation.Height;
 				buildinginfo[n].bSnow = TRUE;
@@ -3556,7 +3560,7 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 
 	int n = Map->GetUnitTypeID(type);
 
-	if (n >= 0 && n < 0x0F00) {
+	if (n >= 0 && n < buildingInfoCapacity) {
 		buildinginfo[n].w = foundation.Width;
 		buildinginfo[n].h = foundation.Height;
 		CString lpPicFile = GetUnitPictureFilename(type, 0);

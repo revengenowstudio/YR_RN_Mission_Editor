@@ -257,7 +257,7 @@ int Ccc_file::read()
 	return 0;
 }
 
-int Ccc_file::read(void* data, int size)
+int Ccc_file::read(void* data, int64_t size)
 {
 	if (get_p() < 0 || get_p() + size > get_size())
 		return 1;

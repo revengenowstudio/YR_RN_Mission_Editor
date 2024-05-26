@@ -348,7 +348,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertDebug YR|x64'">
     <ClCompile>
       <PreprocessorDefinitions>NOMINMAX;RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\MissionEditorPackLib;..\3rdParty\CncVxlRender\inc</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -522,6 +522,7 @@
     <ClCompile Include="NewMapSpDlg.cpp" />
     <ClCompile Include="NewMapTypeDlg.cpp" />
     <ClCompile Include="NewRA2HouseDlg.cpp" />
+    <ClCompile Include="Palettes.cpp" />
     <ClCompile Include="ProgressDlg.cpp" />
     <ClCompile Include="RightFrame.cpp" />
     <ClCompile Include="RTPDlg.cpp" />
@@ -588,6 +589,7 @@
     <ClCompile Include="UserScriptsDlg.cpp" />
     <ClCompile Include="variables.cpp" />
     <ClCompile Include="ViewObjects.cpp" />
+    <ClCompile Include="VoxelDrawer.cpp" />
     <ClCompile Include="WaypointID.cpp" />
     <ClCompile Include="MapCode.cpp" />
   </ItemGroup>
@@ -610,6 +612,7 @@
     <ClInclude Include="ComboUInputDlg.h" />
     <ClInclude Include="defines.h" />
     <ClInclude Include="IniHelper.h" />
+    <ClInclude Include="IniMega.h" />
     <ClInclude Include="INIMeta.h" />
     <ClInclude Include="LineDrawer.h" />
     <ClInclude Include="DynamicGraphDlg.h" />
@@ -650,6 +653,7 @@
     <ClInclude Include="NewMapTypeDlg.h" />
     <ClInclude Include="NewRA2HouseDlg.h" />
     <ClInclude Include="ovrlinline.h" />
+    <ClInclude Include="Palettes.h" />
     <ClInclude Include="ProgressDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RightFrame.h" />
@@ -688,6 +692,7 @@
     <ClInclude Include="variables.h" />
     <ClInclude Include="Vec2.h" />
     <ClInclude Include="ViewObjects.h" />
+    <ClInclude Include="VoxelDrawer.h" />
     <ClInclude Include="WaypointID.h" />
     <ClInclude Include="MapCode.h" />
   </ItemGroup>

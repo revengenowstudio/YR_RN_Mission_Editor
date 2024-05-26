@@ -27,6 +27,15 @@ public:
 	CString GetStringOr(const CString& section, const CString& key, const CString& def) const;
 	IniSectionGroup GetSection(const CString& section) const;
 
+	bool GetBool(const CString& pSection, const CString& pKey, bool def = false) const
+	{
+		return INIHelper::StringToBool(GetString(pSection, pKey), def);
+	}
+	int GetInteger(const CString& pSection, const CString& pKey, int def = 0) const
+	{
+		return INIHelper::StringToInteger(GetString(pSection, pKey), def);
+	}
+
 	auto Size() const { return m_group.size(); }
 
 	void Append(const CIniFile& INI);
@@ -94,9 +103,14 @@ public:
 		const CString& m_section;
 	};
 
-	IniSectionGroup(const IniFileGroup& source, const CString& secName) :
-		m_source(source),
+	IniSectionGroup(IniFileGroup&& source, const CString& secName) : 
+		m_source(std::move(source)),
 		m_section(secName)
+	{
+	}
+
+	IniSectionGroup(const IniFileGroup& source, const CString& secName) :
+		IniSectionGroup(IniFileGroup(source), secName)
 	{
 	}
 
@@ -137,6 +151,6 @@ private:
 		return acquireNextKvGroup(m_section, beg, m_source.end());
 	}
 
-	const IniFileGroup& m_source;
+	const IniFileGroup m_source;
 	CString m_section;
 };

@@ -29,9 +29,15 @@ TEST(IniFileGroup, ValidIniWithValidContentTest) {
 
 	auto const bldTypes = group.GetSection("BuildingTypes");
 	auto idx = 0;
-	//for (auto const& [key, val] : bldTypes) {
+
 	for (auto it = bldTypes.begin(); it != bldTypes.end(); ++it) {
 		auto const& [key, val] = *it;
+		EXPECT_EQ(val, referenceList[idx++]);
+	}
+
+	// This is to test RHS issue
+	idx = 0;
+	for (auto const& [key, val] : group.GetSection("BuildingTypes")) {
 		EXPECT_EQ(val, referenceList[idx++]);
 	}
 

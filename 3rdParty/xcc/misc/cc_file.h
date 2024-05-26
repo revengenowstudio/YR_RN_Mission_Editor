@@ -114,7 +114,7 @@ public:
 	void load(const Ccc_file& f);
 	t_file_type get_file_type(bool fast = true);
 	int read();
-	int read(void* data, int size);
+	int read(void* data, int64_t size);
 	int extract(const string& name);
 	virtual void close();
 	Ccc_file(bool read_on_open);
@@ -154,7 +154,7 @@ public:
 		return m_data;
 	}
 
-	int get_p() const
+	int64_t get_p() const
 	{
 		return m_p;
 	}
@@ -174,7 +174,7 @@ public:
 		m_p = p;
 	}
 
-	void skip(int p)
+	void skip(int64_t p)
 	{
 		m_p += p;
 	}
@@ -189,7 +189,7 @@ private:
 	Cvirtual_binary m_data;
 	Cfile32 m_f;
 	bool m_is_open = false;
-	int m_p;
+	int64_t m_p;
 	const bool m_read_on_open;
-	size_t m_size;
+	int64_t m_size;
 };

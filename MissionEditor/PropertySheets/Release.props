@@ -6,6 +6,7 @@
   <PropertyGroup>
   <XccVcpkgDirTriplet>$(XccDir)\vcpkg_installed\$(Platform)-windows\$(Platform)-windows</XccVcpkgDirTriplet>
     <XccVcpkgDir>$(XccVcpkgDirTriplet)</XccVcpkgDir>
+    <VxlLibDir>$(SolutionDir)$(Platform)\Release</VxlLibDir>
   </PropertyGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
@@ -25,7 +26,7 @@
       <PreprocessorDefinitions>NDEBUG;_AFXDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>ddraw.lib;dxguid.lib;winmm.lib;gdiplus.lib;lzo2.lib;bz2.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CncVxlRenderText.lib;ddraw.lib;dxguid.lib;winmm.lib;gdiplus.lib;lzo2.lib;bz2.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib; libcmtd.lib; msvcrtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>

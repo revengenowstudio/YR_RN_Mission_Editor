@@ -30,7 +30,7 @@
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(XccVcpkgDir)\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VxlLibDir);$(XccVcpkgDir)\lib</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <StackReserveSize>11194304</StackReserveSize>
       <StackCommitSize>11194304</StackCommitSize>

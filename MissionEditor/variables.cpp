@@ -176,7 +176,8 @@ bool bAllowAccessBehindCliffs = false;
 
 // infos for buildings and trees (should be extended to infantry, units, and aircraft)
 // they are initialized in CIsoView, should be changed to CMapData
-BUILDING_INFO buildinginfo[0x0F00];
+
+BUILDING_INFO buildinginfo[buildingInfoCapacity];
 TREE_INFO treeinfo[0x0F00];
 #ifdef SMUDGE_SUPP
 SMUDGE_INFO smudgeinfo[0x0F00];
