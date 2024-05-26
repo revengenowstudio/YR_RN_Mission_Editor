@@ -54,6 +54,14 @@ inline CString GetUnitPictureFilename(const CString& lpUnitName, DWORD dwPicInde
 {
 	CIniFile& ini = Map->GetIniFile();
 
+	char n[50];
+	_itoa_s(dwPicIndex, n, 10);
+	// store differently for each type even they shares same image,
+	// because they can have different components, e.g. turret image
+	if (pics.find(lpUnitName + n) != pics.end()) {
+		return lpUnitName + n;
+	}
+	
 	auto artname = rules.GetStringOr(lpUnitName, "Image", lpUnitName);
 	artname = ini.GetStringOr(lpUnitName, "Image", artname);
 
@@ -71,19 +79,15 @@ inline CString GetUnitPictureFilename(const CString& lpUnitName, DWORD dwPicInde
 		filename.SetAt(1, 'T');
 	}
 
-	char n[50];
-	_itoa_s(dwPicIndex, n, 10);
-	// store differently for each type even they shares same image,
-	// because they can have different components, e.g. turret image
-	if (pics.find((lpUnitName + n)) != pics.end()) {
-		filename = lpUnitName; // yes, found
-		filename += n;
-	} else if (pics.find(artname + ".bmp") != pics.end()) { // since June, 15th (Matze): Only use BMP if no SHP/VXL exists
-		filename = (CString)artname + ".bmp";
-	} else {
-		filename = "";
+	if (pics.find(artname + n) != pics.end()) {
+		return artname + n;
 	}
-	return filename;
+
+	if (pics.find(artname + ".bmp") != pics.end()) { // since June, 15th (Matze): Only use BMP if no SHP/VXL exists
+		return artname + ".bmp";
+	}
+
+	return {};
 }
 
 inline CString GetParam(const CString& data, const int param)
