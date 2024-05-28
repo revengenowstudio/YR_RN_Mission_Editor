@@ -1733,7 +1733,7 @@ void CLoading::LoadTerrainOrSmudge(const CString& ID)
 		FSunPackLib::XCC_GetSHPHeader(&header);
 		FSunPackLib::LoadSHPImage(0, 1, &FramesBuffers[0]);
 		CString DictName;
-		DictName.Format("%s%d", ImageID, 0);
+		DictName.Format("%s%d", ImageID.operator LPCSTR(), 0);
 		CString PaletteName;
 
 		if (ID.GetLength() >= 6 && *(DWORD*)ID.operator LPCTSTR() == *(DWORD*)("TIBT")) {
