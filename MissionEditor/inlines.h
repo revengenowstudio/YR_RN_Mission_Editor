@@ -54,8 +54,9 @@ inline CString GetUnitPictureFilename(const CString& lpUnitName, DWORD dwPicInde
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	char n[50];
-	_itoa_s(dwPicIndex, n, 10);
+	CString n;
+	n.Format("%d", dwPicIndex);
+
 	// store differently for each type even they shares same image,
 	// because they can have different components, e.g. turret image
 	if (pics.find(lpUnitName + n) != pics.end()) {
