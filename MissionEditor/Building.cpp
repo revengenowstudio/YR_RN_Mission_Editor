@@ -149,7 +149,9 @@ BOOL CBuilding::OnInitDialog()
 		upgradecount = 1;
 	}
 
-	upgradecount = ini.GetInteger(m_type, "Upgrades");
+
+	upgradecount = rules.GetInteger(m_type, "Upgrades");
+	upgradecount = ini.GetInteger(m_type, "Upgrades", upgradecount);
 
 	GetDlgItem(IDC_P5)->SendMessage(CB_SETCURSEL, atoi(m_spotlight), 0);
 
