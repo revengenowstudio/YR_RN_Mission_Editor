@@ -3326,7 +3326,9 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 
 			int i;
 			int maxPics = head.c_images;
-			if (maxPics > max_ovrl_img) maxPics = max_ovrl_img;
+			if (maxPics > max_ovrl_img) {
+				maxPics = max_ovrl_img;
+			}
 
 
 			// create an array of pointers to directdraw surfaces

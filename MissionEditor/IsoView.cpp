@@ -3244,7 +3244,9 @@ inline PICDATA* GetOverlayPic(BYTE ovrl, BYTE ovrldata)
 
 	// MessageBox(0,fname,"",0);
 
-	if (pics.find(fname) != pics.end()) return &pics[fname];
+	if (pics.find(fname) != pics.end()) {
+		return &pics[fname];
+	}
 
 	//errstream << "pic " << (LPCSTR)fname << " not found" << endl;
 
@@ -5334,9 +5336,12 @@ void CIsoView::DrawMap()
 					} else if (isTrack(m.overlay))
 						offset.y += f_y / 2;
 
-					if (m.overlay >= 0x4a && m.overlay <= 0x65) offset.y += f_y / 2;
-					if (m.overlay >= 0xcd && m.overlay <= 0xec) offset.y += f_y / 2;
-
+					if (m.overlay >= 0x4a && m.overlay <= 0x65) {
+						offset.y += f_y / 2;
+					}
+					if (m.overlay >= 0xcd && m.overlay <= 0xec) {
+						offset.y += f_y / 2;
+					}
 
 					const auto drawCoordsOvrl = drawCoords + offset;
 
