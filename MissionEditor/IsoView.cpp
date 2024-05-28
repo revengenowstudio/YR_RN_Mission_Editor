@@ -5395,8 +5395,9 @@ void CIsoView::DrawMap()
 						dir = (7 - dir) % 8;
 
 						pic = buildinginfo[id].pic[dir];
-						if (pic.pic == NULL) pic = buildinginfo[id].pic[0];
-
+						if (pic.pic == NULL) {
+							pic = buildinginfo[id].pic[0];
+						}
 					}
 
 #ifndef NOSURFACES
@@ -5407,8 +5408,6 @@ void CIsoView::DrawMap()
 						DrawCell(ddsd.lpSurface, ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch, drawCoordsBld.x, drawCoordsBld.y, w, h, colorref_conv[objp.col]);
 					}
 #endif
-
-
 					if (pic.pic == NULL) {
 						if (!missingimages[objp.type]) {
 							SetError("Loading graphics");
