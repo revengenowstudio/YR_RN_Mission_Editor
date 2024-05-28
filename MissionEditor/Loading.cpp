@@ -1959,14 +1959,19 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 
 }
 
-void CLoading::SetImageData(unsigned char* pBuffer, const CString& NameInDict, int FullWidth, int FullHeight, Palette* pPal)
+void CLoading::SetImageData(unsigned char* pBuffer, const CString& NameInDict, int FullWidth, int FullHeight, Palette* pPal, bool forceNoRemap)
 {
 	ASSERT(!NameInDict.IsEmpty());
 	auto& data = pics[NameInDict];
-	SetImageData(pBuffer, data, FullWidth, FullHeight, pPal);
+
+	if (NameInDict.Find("CNST") >= 0) {
+		printf("");
+	}
+
+	SetImageData(pBuffer, data, FullWidth, FullHeight, pPal, forceNoRemap);
 }
 
-void CLoading::SetImageData(unsigned char* pBuffer, PICDATA& pData, const int FullWidth, const int FullHeight, Palette* pPal)
+void CLoading::SetImageData(unsigned char* pBuffer, PICDATA& pData, const int FullWidth, const int FullHeight, Palette* pPal, bool forceNoRemap)
 {
 	if (pData.pic) {
 		delete[](pData.pic);
@@ -2019,7 +2024,13 @@ void CLoading::SetImageData(unsigned char* pBuffer, PICDATA& pData, const int Fu
 	//auto limited_to_theater = artSection.GetBool("TerrainPalette") ? shp->mixfile_theater : TheaterChar::None;
 	auto limited_to_theater = TheaterChar::None;
 	pData.bTerrain = limited_to_theater;
-	pData.pal = pPal ? reinterpret_cast<const int*>(pPal->GetData()) : iPalUnit;
+	if (pPal) {
+		pData.pal  = reinterpret_cast<const int*>(pPal->GetData());
+		pData.bHouseColor = pPal->IsRemappable() && !forceNoRemap;
+		return;
+	}
+	pData.pal = iPalUnit;
+	pData.bHouseColor = true;
 }
 
 void CLoading::LoadBuildingSubGraphic(const CString& subkey, const CIniFileSection& artSection, BOOL bAlwaysSetChar, char theat, HMIXFILE hShpMix, SHPHEADER& shp_h, BYTE*& shp)
@@ -3461,7 +3472,7 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 		char ic[50];
 		itoa(i, ic, 10);
 
-		pics[(CString)"OVRL" + OvrlID + "_" + ic].bTried = TRUE;
+		pics[(CString)"OVRL" + OvrlID + "_" + ic].bTried = true;
 	}
 
 

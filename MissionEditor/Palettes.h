@@ -29,8 +29,8 @@ public:
 class Palette
 {
 public:
-    Palette(const BytePalette& bytes);
-    Palette(HTSPALETTE raw);
+    Palette(const BytePalette& bytes, bool remappable = false);
+    Palette(HTSPALETTE raw, bool remappable = false);
 
     BGRStruct& operator[](int index) { return Data[index]; }
     ColorStruct GetByteColor(int index) {
@@ -42,9 +42,11 @@ public:
         return ret;
     }
     const BGRStruct* GetData() const { return Data; }
+    bool IsRemappable() const { return Remappable; }
 
 private:
-    BGRStruct Data[256];
+    BGRStruct Data[256]{};
+    bool Remappable{};
 };
 
 class Palettes

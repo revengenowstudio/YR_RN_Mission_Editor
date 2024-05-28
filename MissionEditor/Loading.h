@@ -115,8 +115,8 @@ public:
 	void LoadTerrainOrSmudge(const CString& ID);
 	void LoadVehicleOrAircraft(const CString& ID);
 
-	void SetImageData(unsigned char* pBuffer, const CString& NameInDict, int FullWidth, int FullHeight, Palette* pPal);
-	void SetImageData(unsigned char* pBuffer, PICDATA& pData, const int FullWidth, const int FullHeight, Palette* pPal);
+	void SetImageData(unsigned char* pBuffer, const CString& NameInDict, int FullWidth, int FullHeight, Palette* pPal, bool forceNoRemap = false);
+	void SetImageData(unsigned char* pBuffer, PICDATA& pData, const int FullWidth, const int FullHeight, Palette* pPal, bool forceNoRemap);
 	void UnionSHP_Add(unsigned char* pBuffer, int Width, int Height, int DeltaX = 0, int DeltaY = 0, bool UseTemp = false);
 	void UnionSHP_GetAndClear(unsigned char*& pOutBuffer, int* OutWidth, int* OutHeight, bool clearBuffer = true, bool UseTemp = false);
 	void VXL_Add(const unsigned char* pCache, int X, int Y, int Width, int Height);

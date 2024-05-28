@@ -133,7 +133,8 @@ struct PICDATA {
 	WORD wMaxHeight = 0; // for SHPs (size of whole surface)
 	BYTE bType = 0; // is loaded from voxel, shp, bmp, etc... (for drawing logic)
 	TheaterChar bTerrain = TheaterChar::None;
-	BOOL bTried = 0; // already tried to load this? - superseded by global array missingimages
+	bool bTried = false; // already tried to load this? - superseded by global array missingimages
+	bool bHouseColor = false;
 
 	inline ProjectedVec drawOffset() const
 	{

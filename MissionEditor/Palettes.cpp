@@ -113,12 +113,12 @@ void Palettes::Init()
     LoadedPalettes["isolun.pal"] = new Palette(m_hPalIsoLun);
     LoadedPalettes["isodes.pal"] = new Palette(m_hPalIsoDes);
     
-    LoadedPalettes["unittem.pal"] = new Palette(m_hPalUnitTemp);
-    LoadedPalettes["unitsno.pal"] = new Palette(m_hPalUnitSnow);
-    LoadedPalettes["uniturb.pal"] = new Palette(m_hPalUnitUrb);
-    LoadedPalettes["unitubn.pal"] = new Palette(m_hPalUnitUbn);
-    LoadedPalettes["unitlun.pal"] = new Palette(m_hPalUnitLun);
-    LoadedPalettes["unitdes.pal"] = new Palette(m_hPalUnitDes);
+    LoadedPalettes["unittem.pal"] = new Palette(m_hPalUnitTemp, true);
+    LoadedPalettes["unitsno.pal"] = new Palette(m_hPalUnitSnow, true);
+    LoadedPalettes["uniturb.pal"] = new Palette(m_hPalUnitUrb, true);
+    LoadedPalettes["unitubn.pal"] = new Palette(m_hPalUnitUbn, true);
+    LoadedPalettes["unitlun.pal"] = new Palette(m_hPalUnitLun, true);
+    LoadedPalettes["unitdes.pal"] = new Palette(m_hPalUnitDes, true);
 
     LoadedPalettes["temperat.pal"] = new Palette(m_hPalTemp);
     LoadedPalettes["snow.pal"] = new Palette(m_hPalSnow);
@@ -327,7 +327,8 @@ void Palettes::Clear()
     Init();
 }
 
-Palette::Palette(const BytePalette& bytes)
+Palette::Palette(const BytePalette& bytes, bool remappable) :
+    Remappable(remappable)
 {
     for (auto idx = 0; idx < 256; idx++) {
         Data[idx].R = bytes.Data[idx].red;
@@ -337,7 +338,8 @@ Palette::Palette(const BytePalette& bytes)
     }
 }
 
-Palette::Palette(HTSPALETTE indexer)
+Palette::Palette(HTSPALETTE indexer, bool remappable) :
+    Remappable(remappable)
 {
     for (auto idx = 0; idx < 256; idx++) {
         RGBTRIPLE ret;

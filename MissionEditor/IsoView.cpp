@@ -635,7 +635,7 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpi
 
 				if (dest >= dst) {
 					int c;
-					if (!color || newPal != iPalUnit || val < houseColorMin || val > houseColorMax) {
+					if (!color || !pd.bHouseColor || val < houseColorMin || val > houseColorMax) {
 						c = newPal[val];
 					} else {
 						// Replace the original palette color with the house color
