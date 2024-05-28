@@ -5476,7 +5476,7 @@ void CIsoView::DrawMap()
 
 							if (pic.pic != NULL) {
 								static const CString LocLookup[3][2] = { {"PowerUp1LocXX", "PowerUp1LocYY"}, {"PowerUp2LocXX", "PowerUp2LocYY"}, {"PowerUp3LocXX", "PowerUp3LocYY"} };
-								const auto drawCoordsPowerUp = drawCoordsBldShp + ProjectedVec(
+								const auto drawCoordsPowerUp = drawCoordsBld + ProjectedVec(f_x / 2 - pic.wMaxWidth / 2, -pic.wMaxHeight / 2) + ProjectedVec(
 									atoi(art.GetString(objp.type, LocLookup[upgrade][0])),
 									atoi(art.GetString(objp.type, LocLookup[upgrade][1]))
 								);
