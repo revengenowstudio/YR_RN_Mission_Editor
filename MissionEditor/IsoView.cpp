@@ -5438,18 +5438,35 @@ void CIsoView::DrawMap()
 
 						for (int upgrade = 0; upgrade < objp.upradecount; ++upgrade) {
 							const auto& upg = upgrade == 0 ? objp.upgrade1 : (upgrade == 1 ? objp.upgrade2 : objp.upgrade3);
-							if (upg.GetLength() == 0)
+							if (upg.GetLength() == 0) {
 								continue;
+							}
 
 							PICDATA pic;
-							int dir = (7 - objp.direction / 32) % 8;
-							pic = pics[GetUnitPictureFilename(upg, dir)];
-							if (!missingimages[upg] && pic.pic == NULL) {
+							int dir = 0;
+							if (rules.GetBool(upg, "Turret")) {
+								dir = (7 - objp.direction / 32) % 8;
+							}
+							auto const picName = GetUnitPictureFilename(upg, dir);
+
+							if (!picName.IsEmpty()) {
+								pic = pics[picName];
+							}
+
+							if (pic.pic == NULL && !missingimages[upg]) {
 								SetError("Loading graphics");
 								theApp.m_loading->LoadUnitGraphic(upg);
 								::Map->UpdateBuildingInfo(&upg);
-								pic = pics[GetUnitPictureFilename(upg, dir)];
-								if (pic.pic == NULL) missingimages[upg] = TRUE;
+								auto picNameAfterLoad = GetUnitPictureFilename(upg, dir);
+								if (picNameAfterLoad.IsEmpty()) {
+									picNameAfterLoad = GetUnitPictureFilename(upg, 0);
+								}
+								if (!picNameAfterLoad.IsEmpty()) {
+									pic = pics[picNameAfterLoad];
+								}
+								if (pic.pic == NULL) {
+									missingimages[upg] = TRUE;
+								}
 							}
 
 							if (pic.pic != NULL) {
@@ -5549,21 +5566,25 @@ void CIsoView::DrawMap()
 
 				COLORREF c = GetColor(obj.house);
 
-
-				CString lpPicFile = GetUnitPictureFilename(obj.type, atoi(obj.direction) / 32);
+				auto const facing = atoi(obj.direction) / 32;
+				CString lpPicFile = GetUnitPictureFilename(obj.type, facing);
 
 #ifndef NOSURFACES
 				DrawCell(drawCoords.x, drawCoords.y, 1, 1, c);
 #endif
-
-				PICDATA p = pics[lpPicFile];
+				PICDATA p;
+				if (!lpPicFile.IsEmpty()) {
+					p = pics[lpPicFile];
+				}
 
 				if (p.pic == NULL || lpPicFile.GetLength() == 0) {
 					if (!missingimages[obj.type]) {
 						SetError("Loading graphics");
 						theApp.m_loading->LoadUnitGraphic(obj.type);
-						lpPicFile = GetUnitPictureFilename(obj.type, atoi(obj.direction) / 32);
-						p = pics[lpPicFile];
+						lpPicFile = GetUnitPictureFilename(obj.type, facing);
+						if (!lpPicFile.IsEmpty()) {
+							p = pics[lpPicFile];
+						}
 					}
 
 					if (p.pic == NULL) {
@@ -5655,8 +5676,8 @@ void CIsoView::DrawMap()
 
 
 					int dir = (7 - atoi(obj.direction) / 32) % 8;
-					CString lpPicFile = GetUnitPictureFilename(obj.type, dir);
 
+					CString lpPicFile = GetUnitPictureFilename(obj.type, dir);
 #ifndef NOSURFACES
 					DrawCell(drawCoords.x, drawCoords.y, 1, 1, c);
 #endif
@@ -5664,13 +5685,20 @@ void CIsoView::DrawMap()
 					static const ProjectedVec subPosLookup[5] = { ProjectedVec(0, -f_y / 4), ProjectedVec(f_x / 4 , 0), ProjectedVec(-f_x / 4, 0), ProjectedVec(0, f_y / 4), ProjectedVec() };
 					auto drawCoordsInf = drawCoords + subPosLookup[ic > 4 ? 4 : ic];
 
-					PICDATA p = pics[lpPicFile];
+					PICDATA p;
+					
+					if (!lpPicFile.IsEmpty()) {
+						p = pics[lpPicFile];
+					}
 
 					if (p.pic == NULL) {
 						if (!missingimages[obj.type]) {
 							SetError("Loading graphics");
 							theApp.m_loading->LoadUnitGraphic(obj.type);
-							p = pics[lpPicFile];
+							lpPicFile = GetUnitPictureFilename(obj.type, dir);
+							if (!lpPicFile.IsEmpty()) {
+								p = pics[lpPicFile];
+							}
 						}
 
 						if (p.pic == NULL) {

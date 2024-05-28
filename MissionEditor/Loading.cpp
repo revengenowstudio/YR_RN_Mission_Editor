@@ -1509,12 +1509,13 @@ void CLoading::LoadBuilding(const CString& ID)
 	CString ImageID = GetBuildingFileID(ID);
 
 	auto const& rules = IniMegaFile::GetRules();
-	auto const& ppPowerUpBld = rules.GetString(ID, "PowersUpBuilding");
+	auto const& powerUpBldId = rules.GetString(ID, "PowersUpBuilding");
 	// Early load
-	if (!ppPowerUpBld.IsEmpty()) {
-		CString SrcBldName = GetBuildingFileID(*ppPowerUpBld) + "0";
-		if (!IsImageLoaded(SrcBldName))
-			LoadBuilding(*ppPowerUpBld);
+	if (!powerUpBldId.IsEmpty()) {
+		CString SrcBldName = GetBuildingFileID(powerUpBldId) + "0";
+		if (!IsImageLoaded(SrcBldName)) {
+			LoadBuilding(powerUpBldId);
+		}
 	}
 
 	auto loadAnimFrame = [this, &ArtID, &ID](const CString& key, const CString& controlKey) {
@@ -1960,6 +1961,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 
 void CLoading::SetImageData(unsigned char* pBuffer, const CString& NameInDict, int FullWidth, int FullHeight, Palette* pPal)
 {
+	ASSERT(!NameInDict.IsEmpty());
 	auto& data = pics[NameInDict];
 	SetImageData(pBuffer, data, FullWidth, FullHeight, pPal);
 }
