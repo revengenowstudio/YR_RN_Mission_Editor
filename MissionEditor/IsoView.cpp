@@ -5622,20 +5622,25 @@ void CIsoView::DrawMap()
 
 				COLORREF c = GetColor(obj.house);
 
-
-				CString lpPicFile = GetUnitPictureFilename(obj.type, atoi(obj.direction) / 32);
+				auto const facing = atoi(obj.direction) / 32;
+				CString lpPicFile = GetUnitPictureFilename(obj.type, facing);
 
 #ifndef NOSURFACES
 				DrawCell(drawCoords.x, drawCoords.y, 1, 1, c);
 #endif
-
-				PICDATA p = pics[lpPicFile];
+				PICDATA p;
+				if (!lpPicFile.IsEmpty()) {
+					p = pics[lpPicFile];
+				}
 
 				if (p.pic == NULL) {
 					if (!missingimages[obj.type]) {
 						SetError("Loading graphics");
 						theApp.m_loading->LoadUnitGraphic(obj.type);
-						p = pics[lpPicFile];
+						lpPicFile = GetUnitPictureFilename(obj.type, facing);
+						if (!lpPicFile.IsEmpty()) {
+							p = pics[lpPicFile];
+						}
 					}
 
 					if (p.pic == NULL) {
