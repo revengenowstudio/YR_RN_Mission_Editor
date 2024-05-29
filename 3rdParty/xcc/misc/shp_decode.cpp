@@ -185,138 +185,6 @@ static void flush_copy(byte*& w, const byte* r, const byte*& copy_from)
 	}
 }
 
-int encode40(const byte* last_s, const byte* x, byte* d, int cb_s)
-{
-	// full compression
-	byte* s = new byte[cb_s];
-	{
-		byte* a = s;
-		int size = cb_s;
-		while (size--)
-			*a++ = *last_s++ ^ *x++;
-	}
-	const byte* s_end = s + cb_s;
-	const byte* r = s;
-	byte* w = d;
-	const byte* copy_from = NULL;
-	while (r < s_end) {
-		int v = *r;
-		int t = get_run_length(r, s_end);
-		if (!v) {
-			flush_copy(w, r, copy_from);
-			write40_skip(w, t);
-		} else if (t > 2) {
-			flush_copy(w, r, copy_from);
-			write40_fill(w, t, v);
-		} else {
-			if (!copy_from)
-				copy_from = r;
-		}
-		r += t;
-	}
-	flush_copy(w, r, copy_from);
-	write40_c2(w, 0);
-	delete[] s;
-	return w - d;
-}
-
-int encode40_y(const byte* last_r, const byte* r, byte* d, int cb_s)
-{
-	// run length encoding
-	byte* w = d;
-	int count = 0;
-	byte last = ~(*last_r ^ *r);
-
-	while (cb_s--) {
-		byte v = *last_r++ ^ *r++;
-		if (last == v)
-			count++;
-		else {
-			write_v40(last, count, w);
-			count = 1;
-			last = v;
-		}
-	}
-	write_v40(last, count, w);
-	*w++ = 0x80;
-	write_w(0, w);
-	return w - d;
-}
-
-int encode40_z(const byte* last_s, const byte* s, byte* d, int cb_s)
-{
-	// no compression
-	const byte* last_r = last_s;
-	const byte* r = s;
-	byte* w = d;
-	while (cb_s) {
-		int c_write = cb_s > 0x3fff ? 0x3fff : cb_s;
-		cb_s -= c_write;
-		*w++ = 0x80;
-		*w++ = c_write & 0xff;
-		*w++ = 0x80 | c_write >> 8;
-		while (c_write--)
-			*w++ = *last_r++ ^ *r++;
-	}
-	*w++ = 0x80;
-	*w++ = 0x00;
-	*w++ = 0x00;
-	return w - d;
-}
-
-int decode40(const byte* s, byte* d)
-{
-	/*
-	0 fill 00000000 c v
-	1 copy 0ccccccc
-	2 skip 10000000 c 0ccccccc
-	3 copy 10000000 c 10cccccc
-	4 fill 10000000 c 11cccccc v
-	5 skip 1ccccccc
-	*/
-
-	const byte* r = s;
-	byte* w = d;
-	int count;
-	while (1) {
-		int code = *r++;
-		if (code & 0x80) {
-			if (count = code & 0x7f) {
-				w += count;
-			} else {
-				count = *(uint16_t*)r;
-				r += 2;
-				code = count >> 8;
-				if (code & 0x80) {
-					count &= 0x3fff;
-					if (code & 0x40) {
-						code = *r++;
-						while (count--)
-							*w++ ^= code;
-					} else {
-						while (count--)
-							*w++ ^= *r++;
-					}
-				} else {
-					if (!count)
-						break;
-					w += count;
-				}
-			}
-		} else if (code) {
-			count = code;
-			while (count--)
-				*w++ ^= *r++;
-		} else {
-			count = *r++;
-			code = *r++;
-			while (count--)
-				*w++ ^= code;
-		}
-	}
-	return w - d;
-}
-
 static void write_v80(byte v, int count, byte*& d)
 {
 	if (count > 3) {
@@ -443,242 +311,62 @@ int encode80(const byte* s, byte* d, int cb_s)
 	return w - d;
 }
 
-int encode80_y(const byte* s, byte* d, int cb_s)
+int decode80(const byte source[], byte dest[])
 {
-	// run length encoding
-	const byte* r = s;
-	byte* w = d;
-	int count = 0;
-	byte last = ~*r;
+	uint8_t* source_ptr, * dest_ptr, * copy_ptr, op_code, data;
+	uint64_t count, * word_dest_ptr, word_data;
 
-	while (cb_s--) {
-		byte v = *r++;
-		if (last == v)
-			count++;
-		else {
-			write_v80(last, count, w);
-			count = 1;
-			last = v;
-		}
+	source_ptr = (uint8_t*)source;
+	dest_ptr = (uint8_t*)dest;
 
-	}
-	write_v80(last, count, w);
-	*w++ = 0x80;
-	return w - d;
-}
-
-int decode80c(const byte image_in[], byte image_out[], int cb_in)
-{
-	/*
-	0 copy 0cccpppp p
-	1 copy 10cccccc
-	2 copy 11cccccc p p
-	3 fill 11111110 c c v
-	4 copy 11111111 c c p p
-	*/
-
-	const byte* copyp;
-	const byte* r = image_in;
-	byte* w = image_out;
-	int code;
-	int count;
-	while (1) {
-		code = *r++;
-		if (~code & 0x80) {
-			//bit 7 = 0
-			//command 0 (0cccpppp p): copy
-			count = (code >> 4) + 3;
-			copyp = w - (((code & 0xf) << 8) + *r++);
-			while (count--)
-				*w++ = *copyp++;
+	while (true) {
+		op_code = *source_ptr++;
+		if (!(op_code & 0x80)) {
+			count = (op_code >> 4) + 3;
+			copy_ptr = dest_ptr - ((uint64_t)*source_ptr++ + (((uint64_t)op_code & 0x0f) << 8));
+			while (count--) *dest_ptr++ = *copy_ptr++;
 		} else {
-			//bit 7 = 1
-			count = code & 0x3f;
-			if (~code & 0x40) {
-				//bit 6 = 0
-				if (!count)
-					//end of image
-					break;
-				//command 1 (10cccccc): copy
-				while (count--)
-					*w++ = *r++;
+			if (!(op_code & 0x40)) {
+				if (op_code == 0x80)
+					return ((uint64_t)(dest_ptr - (uint8_t*)dest));
+				else {
+					count = op_code & 0x3f;
+					while (count--) *dest_ptr++ = *source_ptr++;
+				}
 			} else {
-				//bit 6 = 1
-				if (count < 0x3e) {
-					//command 2 (11cccccc p p): copy
-					count += 3;
-					copyp = &image_out[*(unsigned __int16*)r];
-					r += 2;
-					while (count--)
-						*w++ = *copyp++;
-				} else
-					if (count == 0x3e) {
-						//command 3 (11111110 c c v): fill
-						count = *(unsigned __int16*)r;
-						r += 2;
-						code = *r++;
-						while (count--)
-							*w++ = byte(code);
-					} else {
-						//command 4 (copy 11111111 c c p p): copy
-						count = *(unsigned __int16*)r;
-						r += 2;
-						copyp = &image_out[*(unsigned __int16*)r];
-						r += 2;
-						while (count--)
-							*w++ = *copyp++;
+				if (op_code == 0xfe) {
+					count = *source_ptr + ((uint64_t) * (source_ptr + 1) << 8);
+					word_data = data = *(source_ptr + 2);
+					word_data = (word_data << 56) + (word_data << 48) + (word_data << 40) + (word_data << 32) + (word_data << 24) + (word_data << 16) + (word_data << 8) + word_data;
+					source_ptr += 3;
+					copy_ptr = dest_ptr + 8 - ((uint64_t)dest_ptr & 0x7);
+					count -= (copy_ptr - dest_ptr);
+					while (dest_ptr < copy_ptr) *dest_ptr++ = data;
+					word_dest_ptr = (uint64_t*)dest_ptr;
+					dest_ptr += (count & 0xfffffffffffffff8);
+					while (word_dest_ptr < (uint64_t*)dest_ptr) {
+						*word_dest_ptr = word_data;
+						*(word_dest_ptr + 1) = word_data;
+						word_dest_ptr += 2;
 					}
-			}
-		}
-	}
-	assert(cb_in == r - image_in);
-	return (w - image_out);
-}
-
-int __fastcall decode80(const byte image_in[], byte image_out[])
-{
-	byte* i; // edi
-	unsigned int v4; // eax
-	const byte* v5; // esi
-	unsigned int v6; // ecx
-	int v7; // eax
-	const byte* v8; // edx
-	byte* v9; // esi
-	unsigned int v10; // ecx
-	unsigned int v11; // eax
-	const byte* v12; // esi
-	unsigned int v13; // ecx
-	char v14; // al
-
-	for (i = image_out; ; i += v10) {
-		while (1) {
-			v4 = (unsigned __int8)*image_in;
-			v5 = image_in + 1;
-			if ((v4 & 0x80) == 0) {
-				v6 = (v4 >> 4) + 3;
-				v7 = (v4 & 0xF) << 8;
-				v7 |= static_cast<unsigned char>(*v5);
-				v8 = v5 + 1;
-				v9 = &i[-v7];
-				goto copy_from_destination;
-			}
-			v10 = v4 & 0x3F;
-			if ((v4 & 0x40) == 0)
-				break;
-			v11 = *(unsigned __int16*)v5;
-			v12 = v5 + 2;
-			if (v10 == 62) {
-				v13 = v11;
-				v14 = *v12;
-				image_in = v12 + 1;
-				memset(i, v14, v13);
-				i += v13;
-			} else {
-				if (v10 > 0x3E) {
-					v6 = v11;
-					v11 = *reinterpret_cast<const int16_t*>(v12);
-					v8 = v12 + 2;
-					v9 = &image_out[v11];
+					copy_ptr = dest_ptr + (count & 0x7);
+					while (dest_ptr < copy_ptr) *dest_ptr++ = data;
 				} else {
-					v8 = v12;
-					v9 = &image_out[v11];
-					v6 = v10 + 3;
+					if (op_code == 0xff) {
+						count = *source_ptr + ((uint64_t) * (source_ptr + 1) << 8);
+						copy_ptr = (uint8_t*)dest + *(source_ptr + 2) + ((uint64_t) * (source_ptr + 3) << 8);
+						source_ptr += 4;
+						while (count--) *dest_ptr++ = *copy_ptr++;
+					} else {
+						count = (op_code & 0x3f) + 3;
+						copy_ptr = (uint8_t*)dest + *source_ptr + ((uint64_t) * (source_ptr + 1) << 8);
+						source_ptr += 2;
+						while (count--) *dest_ptr++ = *copy_ptr++;
+					}
 				}
-			copy_from_destination:
-				memcpy(i, v9, v6);
-				i += v6;
-				image_in = v8;
 			}
 		}
-		if ((v4 & 0x3F) == 0)
-			break;
-		memcpy(i, v5, v10);
-		image_in = &v5[v10];
 	}
-	return i - image_out;
-}
-
-int __fastcall decode80r(const byte image_in[], byte image_out[])
-{
-	byte* i; // edi
-	unsigned int v4; // eax
-	const byte* v5; // esi
-	unsigned int v6; // ecx
-	int v7; // eax
-	const byte* v8; // edx
-	byte* v9; // esi
-	unsigned int v10; // ecx
-	unsigned int v11; // eax
-	const byte* v12; // esi
-	unsigned int v13; // ecx
-	char v14; // al
-
-	for (i = image_out; ; i += v10) {
-		while (1) {
-			v4 = (unsigned __int8)*image_in;
-			v5 = image_in + 1;
-			if ((v4 & 0x80) == 0) {
-				v6 = (v4 >> 4) + 3;
-				v7 = (v4 & 0xF) << 8;
-				v7 |= static_cast<unsigned char>(*v5);
-				v8 = v5 + 1;
-				v9 = &i[-v7];
-				goto copy_from_destination;
-			}
-			v10 = v4 & 0x3F;
-			if ((v4 & 0x40) == 0)
-				break;
-			v11 = *(unsigned __int16*)v5;
-			v12 = v5 + 2;
-			if (v10 == 62) {
-				v13 = v11;
-				v14 = *v12;
-				image_in = v12 + 1;
-				memset(i, v14, v13);
-				i += v13;
-			} else {
-				if (v10 > 0x3E) {
-					v6 = v11;
-					v11 = *reinterpret_cast<const int16_t*>(v12);
-					v8 = v12 + 2;
-					v9 = &i[-v11];
-				} else {
-					v8 = v12;
-					v9 = &i[-v11];
-					v6 = v10 + 3;
-				}
-			copy_from_destination:
-				memcpy(i, v9, v6);
-				i += v6;
-				image_in = v8;
-			}
-		}
-		if ((v4 & 0x3F) == 0)
-			break;
-		memcpy(i, v5, v10);
-		image_in = &v5[v10];
-	}
-	return i - image_out;
-}
-
-int decode2(const byte* s, byte* d, int cb_s, const byte* reference_palet)
-{
-	const byte* r = s;
-	const byte* r_end = s + cb_s;
-	byte* w = d;
-	while (r < r_end) {
-		int v = *r++;
-		if (v)
-			*w++ = v;
-		else {
-			v = *r++;
-			memset(w, 0, v);
-			w += v;
-		}
-	}
-	if (reference_palet)
-		apply_rp(d, w - d, reference_palet);
-	return w - d;
 }
 
 int decode3(const byte* s, byte* d, int cx, int cy)
@@ -704,33 +392,6 @@ int decode3(const byte* s, byte* d, int cx, int cy)
 					*w++ = 0;
 			}
 		}
-	}
-	return w - d;
-}
-
-int encode3(const byte* s, byte* d, int cx, int cy)
-{
-	const byte* r = s;
-	byte* w = d;
-	for (int y = 0; y < cy; y++) {
-		const byte* r_end = r + cx;
-		byte* w_line = w;
-		w += 2;
-		while (r < r_end) {
-
-			int v = *r;
-			*w++ = v;
-			if (v)
-				r++;
-			else {
-				int c = get_run_length(r, r_end);
-				if (c > 0xff)
-					c = 0xff;
-				r += c;
-				*w++ = c;
-			}
-		}
-		*reinterpret_cast<unsigned __int16*>(w_line) = w - w_line;
 	}
 	return w - d;
 }
