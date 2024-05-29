@@ -1512,7 +1512,7 @@ void CLoading::LoadBuilding(const CString& ID)
 	auto const& powerUpBldId = rules.GetString(ID, "PowersUpBuilding");
 	// Early load
 	if (!powerUpBldId.IsEmpty()) {
-		CString SrcBldName = GetBuildingFileID(powerUpBldId) + "0";
+		CString SrcBldName = powerUpBldId + "0";
 		if (!IsImageLoaded(SrcBldName)) {
 			LoadBuilding(powerUpBldId);
 		}
