@@ -1562,6 +1562,7 @@ void CLoading::LoadBuilding(const CString& ID)
 
 	// No turret
 	if (!rules.GetBool(ID, "Turret")) {
+		CString DictName;
 		DictName.Format("%s%d", ID.operator LPCSTR(), 0);
 		SetImageData(pBuffer, DictName, width, height, m_palettes.LoadPalette(PaletteName));
 		return;
@@ -1656,7 +1657,8 @@ void CLoading::LoadBuilding(const CString& ID)
 			int width1, height1;
 
 			UnionSHP_GetAndClear(pImage, &width1, &height1);
-			DictName.Format("%s%d", ID, i);
+			CString DictName;
+			DictName.Format("%s%d", ID.operator LPCSTR(), i);
 			SetImageData(pImage, DictName, width1, height1, m_palettes.LoadPalette(PaletteName));
 		}
 		delete[](pBuffer);
@@ -1681,8 +1683,8 @@ void CLoading::LoadBuilding(const CString& ID)
 		unsigned char* pImage;
 		int width1, height1;
 		UnionSHP_GetAndClear(pImage, &width1, &height1);
-
-		DictName.Format("%s%d", ID, seqIdx);
+		CString DictName;
+		DictName.Format("%s%d", ID.operator LPCSTR(), seqIdx);
 		SetImageData(pImage, DictName, width1, height1, m_palettes.LoadPalette(PaletteName));
 	}
 	delete(pBuffer);
