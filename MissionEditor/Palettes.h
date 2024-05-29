@@ -63,7 +63,7 @@ public:
     void FetchPalettes();
     void CreateConvTable(RGBTRIPLE* pal, int* iPal);
 
-    Palette* LoadPalette(const CString& palName);
+    Palette* LoadPalette(const CString& palName, bool remappable = false);
     void Clear();
 
     HTSPALETTE m_hPalIsoTemp;

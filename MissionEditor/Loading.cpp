@@ -1547,14 +1547,14 @@ void CLoading::LoadBuilding(const CString& ID)
 	if (bibImageName.GetLength()) {
 		LoadSingleFrameShape(art.GetStringOr(bibImageName, "Image", bibImageName));
 	}
-
+	bool paletteRemappable = true;
 	CString PaletteName = art.GetStringOr(ArtID, "Palette", "unit");
 	if (art.GetBool(ArtID, "TerrainPalette")) {
 		PaletteName = "iso";
+		paletteRemappable = false;
 	}
 	GetFullPaletteName(PaletteName, cur_theat);
 
-	CString DictName;
 
 	unsigned char* pBuffer;
 	int width, height;
@@ -1564,7 +1564,7 @@ void CLoading::LoadBuilding(const CString& ID)
 	if (!rules.GetBool(ID, "Turret")) {
 		CString DictName;
 		DictName.Format("%s%d", ID.operator LPCSTR(), 0);
-		SetImageData(pBuffer, DictName, width, height, m_palettes.LoadPalette(PaletteName));
+		SetImageData(pBuffer, DictName, width, height, m_palettes.LoadPalette(PaletteName, paletteRemappable));
 		return;
 	}
 	// Has turret

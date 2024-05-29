@@ -294,7 +294,7 @@ void Palettes::CreateConvTable(RGBTRIPLE* pal, int* iPal)
 }
 
 
-Palette* Palettes::LoadPalette(const CString& palName)
+Palette* Palettes::LoadPalette(const CString& palName, bool remappable)
 {
     if (LoadedPalettes.size() == 0) {
         Palettes::Init();
@@ -309,7 +309,7 @@ Palette* Palettes::LoadPalette(const CString& palName)
     HMIXFILE mixIdx = loading.FindFileInMix(palName);
 
     if (FSunPackLib::LoadTSPalette(reinterpret_cast<RGBTRIPLE*>(buffer.Data), palName, mixIdx)) {
-        auto pal = new Palette(buffer);
+        auto pal = new Palette(buffer, remappable);
         LoadedPalettes[palName] = pal;
         return pal;
     }
