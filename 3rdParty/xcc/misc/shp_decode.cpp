@@ -535,130 +535,62 @@ int decode80c(const byte image_in[], byte image_out[], int cb_in)
 	return (w - image_out);
 }
 
-int __fastcall decode80(const byte image_in[], byte image_out[])
+int decode80(const byte source[], byte dest[])
 {
-	byte* i; // edi
-	unsigned int v4; // eax
-	const byte* v5; // esi
-	unsigned int v6; // ecx
-	int v7; // eax
-	const byte* v8; // edx
-	byte* v9; // esi
-	unsigned int v10; // ecx
-	unsigned int v11; // eax
-	const byte* v12; // esi
-	unsigned int v13; // ecx
-	char v14; // al
+	uint8_t* source_ptr, * dest_ptr, * copy_ptr, op_code, data;
+	uint64_t count, * word_dest_ptr, word_data;
 
-	for (i = image_out; ; i += v10) {
-		while (1) {
-			v4 = (unsigned __int8)*image_in;
-			v5 = image_in + 1;
-			if ((v4 & 0x80) == 0) {
-				v6 = (v4 >> 4) + 3;
-				v7 = (v4 & 0xF) << 8;
-				v7 |= static_cast<unsigned char>(*v5);
-				v8 = v5 + 1;
-				v9 = &i[-v7];
-				goto copy_from_destination;
-			}
-			v10 = v4 & 0x3F;
-			if ((v4 & 0x40) == 0)
-				break;
-			v11 = *(unsigned __int16*)v5;
-			v12 = v5 + 2;
-			if (v10 == 62) {
-				v13 = v11;
-				v14 = *v12;
-				image_in = v12 + 1;
-				memset(i, v14, v13);
-				i += v13;
-			} else {
-				if (v10 > 0x3E) {
-					v6 = v11;
-					v11 = *reinterpret_cast<const int16_t*>(v12);
-					v8 = v12 + 2;
-					v9 = &image_out[v11];
-				} else {
-					v8 = v12;
-					v9 = &image_out[v11];
-					v6 = v10 + 3;
+	source_ptr = (uint8_t*)source;
+	dest_ptr = (uint8_t*)dest;
+
+	while (true) {
+		op_code = *source_ptr++;
+		if (!(op_code & 0x80)) {
+			count = (op_code >> 4) + 3;
+			copy_ptr = dest_ptr - ((uint64_t)*source_ptr++ + (((uint64_t)op_code & 0x0f) << 8));
+			while (count--) *dest_ptr++ = *copy_ptr++;
+		} else {
+			if (!(op_code & 0x40)) {
+				if (op_code == 0x80)
+					return ((uint64_t)(dest_ptr - (uint8_t*)dest));
+				else {
+					count = op_code & 0x3f;
+					while (count--) *dest_ptr++ = *source_ptr++;
 				}
-			copy_from_destination:
-				memcpy(i, v9, v6);
-				i += v6;
-				image_in = v8;
+			} else {
+				if (op_code == 0xfe) {
+					count = *source_ptr + ((uint64_t) * (source_ptr + 1) << 8);
+					word_data = data = *(source_ptr + 2);
+					word_data = (word_data << 56) + (word_data << 48) + (word_data << 40) + (word_data << 32) + (word_data << 24) + (word_data << 16) + (word_data << 8) + word_data;
+					source_ptr += 3;
+					copy_ptr = dest_ptr + 8 - ((uint64_t)dest_ptr & 0x7);
+					count -= (copy_ptr - dest_ptr);
+					while (dest_ptr < copy_ptr) *dest_ptr++ = data;
+					word_dest_ptr = (uint64_t*)dest_ptr;
+					dest_ptr += (count & 0xfffffffffffffff8);
+					while (word_dest_ptr < (uint64_t*)dest_ptr) {
+						*word_dest_ptr = word_data;
+						*(word_dest_ptr + 1) = word_data;
+						word_dest_ptr += 2;
+					}
+					copy_ptr = dest_ptr + (count & 0x7);
+					while (dest_ptr < copy_ptr) *dest_ptr++ = data;
+				} else {
+					if (op_code == 0xff) {
+						count = *source_ptr + ((uint64_t) * (source_ptr + 1) << 8);
+						copy_ptr = (uint8_t*)dest + *(source_ptr + 2) + ((uint64_t) * (source_ptr + 3) << 8);
+						source_ptr += 4;
+						while (count--) *dest_ptr++ = *copy_ptr++;
+					} else {
+						count = (op_code & 0x3f) + 3;
+						copy_ptr = (uint8_t*)dest + *source_ptr + ((uint64_t) * (source_ptr + 1) << 8);
+						source_ptr += 2;
+						while (count--) *dest_ptr++ = *copy_ptr++;
+					}
+				}
 			}
 		}
-		if ((v4 & 0x3F) == 0)
-			break;
-		memcpy(i, v5, v10);
-		image_in = &v5[v10];
 	}
-	return i - image_out;
-}
-
-int __fastcall decode80r(const byte image_in[], byte image_out[])
-{
-	byte* i; // edi
-	unsigned int v4; // eax
-	const byte* v5; // esi
-	unsigned int v6; // ecx
-	int v7; // eax
-	const byte* v8; // edx
-	byte* v9; // esi
-	unsigned int v10; // ecx
-	unsigned int v11; // eax
-	const byte* v12; // esi
-	unsigned int v13; // ecx
-	char v14; // al
-
-	for (i = image_out; ; i += v10) {
-		while (1) {
-			v4 = (unsigned __int8)*image_in;
-			v5 = image_in + 1;
-			if ((v4 & 0x80) == 0) {
-				v6 = (v4 >> 4) + 3;
-				v7 = (v4 & 0xF) << 8;
-				v7 |= static_cast<unsigned char>(*v5);
-				v8 = v5 + 1;
-				v9 = &i[-v7];
-				goto copy_from_destination;
-			}
-			v10 = v4 & 0x3F;
-			if ((v4 & 0x40) == 0)
-				break;
-			v11 = *(unsigned __int16*)v5;
-			v12 = v5 + 2;
-			if (v10 == 62) {
-				v13 = v11;
-				v14 = *v12;
-				image_in = v12 + 1;
-				memset(i, v14, v13);
-				i += v13;
-			} else {
-				if (v10 > 0x3E) {
-					v6 = v11;
-					v11 = *reinterpret_cast<const int16_t*>(v12);
-					v8 = v12 + 2;
-					v9 = &i[-v11];
-				} else {
-					v8 = v12;
-					v9 = &i[-v11];
-					v6 = v10 + 3;
-				}
-			copy_from_destination:
-				memcpy(i, v9, v6);
-				i += v6;
-				image_in = v8;
-			}
-		}
-		if ((v4 & 0x3F) == 0)
-			break;
-		memcpy(i, v5, v10);
-		image_in = &v5[v10];
-	}
-	return i - image_out;
 }
 
 int decode2(const byte* s, byte* d, int cb_s, const byte* reference_palet)
