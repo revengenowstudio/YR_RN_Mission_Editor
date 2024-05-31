@@ -226,10 +226,7 @@ protected:
 	afx_msg void OnUpdateOptionsSounds(CCmdUI* pCmdUI);
 	afx_msg void OnOptionsDisableslopecorrection();
 	afx_msg void OnOptionsShowbuildingoutline();
-	afx_msg void OnFileFile1();
-	afx_msg void OnFileFile2();
-	afx_msg void OnFileFile3();
-	afx_msg void OnFileFile4();
+	afx_msg BOOL OnRecentFileClicked(UINT nID);
 	afx_msg void OnMaptoolsSearchwaypoint();
 	afx_msg void OnMaptoolsToolscripts();
 	//}}AFX_MSG

@@ -583,17 +583,24 @@
 #define ID_ONLINE_UNOFFICIALSUPPORTFORUM 40119
 #define ID_OPTIONS_DISABLESLOPECORRECTION 40120
 #define ID_OPTIONS_SHOWBUILDINGOUTLINE  40123
-#define ID_FILE_FILE1                   40129
-#define ID_FILE_FILE2                   40130
-#define ID_FILE_FILE3                   40131
-#define ID_FILE_FILE4                   40132
-#define ID_MAPTOOLS_SEARCHWAYPOINT      40133
-#define ID_MAPTOOLS_TOOLSCRIPTS         40135
-#define ID_HELP_SHOWLOGS                40138
-#define ID_HELP_                        40139
-#define ID_HELP_SHOWLOGS40140           40140
-#define ID_OPTIONS_SMOOTHZOOM           40141
-#define ID_OPTIONS_USEDEFAULTMOUSECURSOR 40142
+#define ID_MAPTOOLS_SEARCHWAYPOINT      40124
+#define ID_MAPTOOLS_TOOLSCRIPTS         40125
+#define ID_HELP_SHOWLOGS                40128
+#define ID_HELP_                        40129
+#define ID_HELP_SHOWLOGS40140           40130
+#define ID_OPTIONS_SMOOTHZOOM           40131
+#define ID_OPTIONS_USEDEFAULTMOUSECURSOR 40132
+
+#define ID_FILE_FILE1                   40139
+#define ID_FILE_FILE2                   40140
+#define ID_FILE_FILE3                   40141
+#define ID_FILE_FILE4                   40142
+#define ID_FILE_FILE5					40143
+#define ID_FILE_FILE6					40144
+#define ID_FILE_FILE7					40145
+#define ID_FILE_FILE8					40146
+#define ID_FILE_FILE9					40147
+#define ID_FILE_FILE10					40148
 
 #define IDS_LINEARVERSION               57604
 #define IDC_TOOLTIPCENTER               65535

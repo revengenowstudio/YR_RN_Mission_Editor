@@ -324,7 +324,7 @@ BOOL CFinalSunApp::InitInstance()
 
 	// MW 07/20/01: Load file list
 	int i;
-	for (i = 0; i < 4; i++) {
+	for (i = 0; i < RecentFilesSlots; i++) {
 		char c[50];
 		itoa(i, c, 10);
 		opts.prev_maps[i] = optini.GetString("Files", c);

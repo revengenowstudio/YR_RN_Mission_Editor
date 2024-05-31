@@ -37,10 +37,12 @@
 #include "ddeml.h"
 #include "loading.h"
 
+static auto constexpr RecentFilesSlots = 10;
+
 struct OPTIONS {
 	CString TSExe;
 	CString LanguageName;
-	CString prev_maps[4];
+	CString prev_maps[RecentFilesSlots];
 	bool bPreferLocalTheaterFiles = true;
 	BOOL bFlat;
 	BOOL bEasy;

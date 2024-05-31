@@ -220,10 +220,16 @@ BEGIN_MESSAGE_MAP(CFinalSunDlg, CDialog)
 	ON_UPDATE_COMMAND_UI(ID_OPTIONS_SOUNDS, OnUpdateOptionsSounds)
 	ON_COMMAND(ID_OPTIONS_DISABLESLOPECORRECTION, OnOptionsDisableslopecorrection)
 	ON_COMMAND(ID_OPTIONS_SHOWBUILDINGOUTLINE, OnOptionsShowbuildingoutline)
-	ON_COMMAND(ID_FILE_FILE1, OnFileFile1)
-	ON_COMMAND(ID_FILE_FILE2, OnFileFile2)
-	ON_COMMAND(ID_FILE_FILE3, OnFileFile3)
-	ON_COMMAND(ID_FILE_FILE4, OnFileFile4)
+	ON_COMMAND_EX(ID_FILE_FILE1, OnRecentFileClicked)
+	ON_COMMAND_EX(ID_FILE_FILE2, OnRecentFileClicked)
+	ON_COMMAND_EX(ID_FILE_FILE3, OnRecentFileClicked)
+	ON_COMMAND_EX(ID_FILE_FILE4, OnRecentFileClicked)
+	ON_COMMAND_EX(ID_FILE_FILE5, OnRecentFileClicked)
+	ON_COMMAND_EX(ID_FILE_FILE6, OnRecentFileClicked)
+	ON_COMMAND_EX(ID_FILE_FILE7, OnRecentFileClicked)
+	ON_COMMAND_EX(ID_FILE_FILE8, OnRecentFileClicked)
+	ON_COMMAND_EX(ID_FILE_FILE9, OnRecentFileClicked)
+	ON_COMMAND_EX(ID_FILE_FILE10, OnRecentFileClicked)
 	ON_COMMAND(ID_MAPTOOLS_SEARCHWAYPOINT, OnMaptoolsSearchwaypoint)
 	ON_COMMAND(ID_MAPTOOLS_TOOLSCRIPTS, OnMaptoolsToolscripts)
 	//}}AFX_MSG_MAP
@@ -2070,18 +2076,13 @@ void CFinalSunDlg::UpdateStrings()
 
 	// MW 07/20/01: Show prev. opened files
 	int prev_maps_count = 0;
-	for (idx = 0; idx < 4; idx++) {
+	for (idx = 0; idx < RecentFilesSlots; idx++) {
 		if (theApp.m_Options.prev_maps[idx].GetLength() > 0) {
 			prev_maps_count++;
 
-			int id = 0;
 			CString str = "bla";
 			str = theApp.m_Options.prev_maps[idx];
-
-			if (idx == 0) id = ID_FILE_FILE1;
-			else if (idx == 1) id = ID_FILE_FILE2;
-			else if (idx == 2) id = ID_FILE_FILE3;
-			else if (idx == 3) id = ID_FILE_FILE4;
+			auto const id = idx + ID_FILE_FILE1;
 
 			my_menu->GetSubMenu(0)->InsertMenu(10 + prev_maps_count, MF_BYPOSITION | MF_STRING, id, str);
 		}
@@ -3644,46 +3645,27 @@ void CFinalSunDlg::OnOptionsShowbuildingoutline()
 }
 
 
-void CFinalSunDlg::OnFileFile1()
+BOOL CFinalSunDlg::OnRecentFileClicked(UINT nID)
 {
-	if (DoesFileExist(theApp.m_Options.prev_maps[0])) OpenMap(theApp.m_Options.prev_maps[0]);
-
-}
-
-void CFinalSunDlg::OnFileFile2()
-{
-	if (DoesFileExist(theApp.m_Options.prev_maps[1])) OpenMap(theApp.m_Options.prev_maps[1]);
-
-}
-
-void CFinalSunDlg::OnFileFile3()
-{
-	if (DoesFileExist(theApp.m_Options.prev_maps[2])) OpenMap(theApp.m_Options.prev_maps[2]);
-
-}
-
-void CFinalSunDlg::OnFileFile4()
-{
-	if (DoesFileExist(theApp.m_Options.prev_maps[3])) OpenMap(theApp.m_Options.prev_maps[3]);
-
+	auto const idx = nID - ID_FILE_FILE1;
+	if (nID < 0 || nID >= ID_FILE_FILE1 + RecentFilesSlots) {
+		return FALSE;
+	}
+	auto const& path = theApp.m_Options.prev_maps[idx];
+	if (DoesFileExist(path)) {
+		OpenMap(path);
+	}
+	return TRUE;
 }
 
 // MW 07/20/01: Checks if file already exists in prev. files list. If not, adds it (may delete old ones)
 void CFinalSunDlg::InsertPrevFile(CString lpFilename)
 {
-	int idx;
-
 	//int free_at=-1;
-	for (idx = 0; idx < 4; idx++) {
-		CString f = theApp.m_Options.prev_maps[idx];
-		CString f2 = lpFilename;
-		f2.MakeLower();
-		f.MakeLower();
-
-		if (f == f2) {
+	for (auto idx = 0; idx < RecentFilesSlots; idx++) {
+		if (!lpFilename.CompareNoCase(theApp.m_Options.prev_maps[idx])) {
 			return;
 		}
-
 		/*if(free_at<0)
 		{
 			if(theApp.m_Options.prev_maps[i].GetLength()==0)
@@ -3698,23 +3680,17 @@ void CFinalSunDlg::InsertPrevFile(CString lpFilename)
 #ifdef RA2_MODE
 	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
 #endif
-
-
-
-
-
-
-	for (idx = 3; idx > 0; idx--) {
+	for (auto idx = RecentFilesSlots - 1; idx > 0; idx--) {
 		theApp.m_Options.prev_maps[idx] = theApp.m_Options.prev_maps[idx - 1];
-		char e[10];
-		itoa(idx, e, 10);
+	}
+	theApp.m_Options.prev_maps[0] = lpFilename;
 
+	CString e;
+	Options.SetString("Files", "0", theApp.m_Options.prev_maps[0]);
+	for (auto idx = 1; idx < RecentFilesSlots; idx++) {
+		e.Format("%d", idx);
 		Options.SetString("Files", e, theApp.m_Options.prev_maps[idx]);
 	}
-
-	theApp.m_Options.prev_maps[0] = lpFilename;
-	Options.SetString("Files", "0", theApp.m_Options.prev_maps[0]);
-
 
 
 #ifndef RA2_MODE
