@@ -734,7 +734,7 @@ __forceinline void BlitPicHalfTransp(void* dst, int x, int y, int dleft, int dto
 				void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * dpitch);
 				//*dest=newPal[val];
 				if (dest >= dst) {
-					if (!color || newPal != iPalUnit || val < 0x10 || val>0x1f) {
+					if (!color || !pd.bHouseColor || val < 0x10 || val>0x1f) {
 						memcpy(dest, &newPal[val], bpp);
 					} else {
 						//int col=0;
