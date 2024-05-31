@@ -1859,7 +1859,7 @@ void CFinalSunDlg::OnFileNew()
 			for (auto idx = 0; idx < rulesHouseSec.Size(); idx++) {
 #ifdef RA2_MODE
 				auto const& country = rulesHouseSec.Nth(idx).second;
-				if (!country.CompareNoCase("nod") || country.CompareNoCase("gdi")) {
+				if (!country.CompareNoCase("nod") || !country.CompareNoCase("gdi")) {
 					continue;
 				}
 #endif
