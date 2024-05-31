@@ -534,6 +534,9 @@ bool CLoading::LoadSingleFrameShape(const CString& name, int nFrame, int deltaX,
 	if (!FSunPackLib::XCC_GetSHPHeader(&header)) {
 		return false;
 	}
+	if (nFrame >= header.c_images) {
+		nFrame = 0;
+	}
 	if (!FSunPackLib::LoadSHPImage(nFrame, 1, &pBuffer)) {
 		return false;
 	}

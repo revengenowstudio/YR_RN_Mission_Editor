@@ -922,6 +922,9 @@ namespace FSunPackLib
 		if (head.cx == 0 || head.cy == 0) {
 			return FALSE;
 		}
+		if (startIndex >= head.c_images) {
+			return FALSE;
+		}
 
 		std::vector<byte> decode_image_buffer;
 		for (auto frameIdx = 0; frameIdx < wantedNum; frameIdx++) {
