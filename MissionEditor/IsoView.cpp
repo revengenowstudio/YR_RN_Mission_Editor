@@ -614,6 +614,16 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpi
 	CalculateHouseColorPalette(houseColors, newPal, color);
 	const BYTE* const pLighting = (bpp == 4 && pd.lighting && !pd.lighting->empty()) ? pd.lighting->data() : nullptr;
 
+	auto getHouseColor = std::function([](BYTE idx, BYTE houseColorMinIdx) -> int {
+			return idx - houseColorMinIdx;
+		});
+
+	if (g_data["Debug"].GetBool("RenderPlainHouseColor")) {
+		getHouseColor = [](BYTE idx, BYTE houseColorMinIdx) -> int {
+			return 0;
+		};
+	}
+
 	for (e = srcRect.top; e < srcRect.bottom; e++) {
 		int left = pd.vborder[e].left;
 		int right = pd.vborder[e].right;
@@ -640,7 +650,7 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, int dpi
 					} else {
 						// Replace the original palette color with the house color
 						ASSERT(val >= houseColorMin && val <= houseColorMax);
-						const int v = (val - houseColorMin);
+						const int v = getHouseColor(val, houseColorMin);
 						c = houseColors[v];
 					}
 					if (pLighting) {
