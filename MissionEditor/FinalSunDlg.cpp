@@ -1878,7 +1878,7 @@ void CFinalSunDlg::OnFileNew()
 #endif
 
 				// is it a player house or a ai house?
-				if (house != (LPCTSTR)plhouse) {
+				if (house != plhouse) {
 					ini.SetInteger(house, "IQ", 5);
 
 					ini.SetBool(house, "PlayerControl", false);
