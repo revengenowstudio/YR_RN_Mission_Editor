@@ -1268,24 +1268,40 @@ CString GetFreeID()
 	int n = 1000000;
 
 	auto isIDInUse = [&ini](const CString& input) {
-		static const CString typeListSections[] = {
+		// [TypeList] 
+		// 0=TYPE1
+		// 1=TYPE2
+		static const CString typeLists[] = {
 			"ScriptTypes",
 			"TaskForces",
 			"TeamTypes",
 		};
-		static const CString idListSections[] = {
+		// [ItemList]
+		// ID1=SOME_DEFINITION1
+		// ID2=SOME_DEFINITION2
+		static const CString itemLists[] = {
 			"Triggers",
 			"Events",
 			"Tags",
 			"Actions",
 			"AITriggerTypes",
 		};
-		if (std::find(std::begin(typeListSections), std::end(typeListSections), input) != std::end(typeListSections)) {
-			return true;
+
+		for (auto const& id : typeLists) {
+			for (auto const& [_, id] : ini[id]) {
+				if (id == input) {
+					return true;
+				}
+			}
 		}
-		if (std::find(std::begin(idListSections), std::end(idListSections), input) != std::end(idListSections)) {
-			return true;
+		for (auto const& id : itemLists) {
+			for (auto const& [id, _] : ini[id]) {
+				if (id == input) {
+					return true;
+				}
+			}
 		}
+
 		return false;
 	};
 
