@@ -323,7 +323,7 @@ int decode80(const byte source[], byte dest[])
 		op_code = *source_ptr++;
 		if (!(op_code & 0x80)) {
 			count = (op_code >> 4) + 3;
-			copy_ptr = dest_ptr - ((uint64_t)*source_ptr++ + (((uint64_t)op_code & 0x0f) << 8));
+			copy_ptr = dest_ptr - ((uint64_t)*source_ptr++ + ((uint64_t)(op_code & 0x0f) << 8));
 			while (count--) *dest_ptr++ = *copy_ptr++;
 		} else {
 			if (!(op_code & 0x40)) {
@@ -339,17 +339,17 @@ int decode80(const byte source[], byte dest[])
 					word_data = data = *(source_ptr + 2);
 					word_data = (word_data << 56) + (word_data << 48) + (word_data << 40) + (word_data << 32) + (word_data << 24) + (word_data << 16) + (word_data << 8) + word_data;
 					source_ptr += 3;
-					copy_ptr = dest_ptr + 8 - ((uint64_t)dest_ptr & 0x7);
+					copy_ptr = dest_ptr + 4 - ((uint64_t)dest_ptr & 0x3);
 					count -= (copy_ptr - dest_ptr);
 					while (dest_ptr < copy_ptr) *dest_ptr++ = data;
 					word_dest_ptr = (uint64_t*)dest_ptr;
-					dest_ptr += (count & 0xfffffffffffffff8);
+					dest_ptr += (count & 0xfffffffffffffffc);
 					while (word_dest_ptr < (uint64_t*)dest_ptr) {
 						*word_dest_ptr = word_data;
 						*(word_dest_ptr + 1) = word_data;
 						word_dest_ptr += 2;
 					}
-					copy_ptr = dest_ptr + (count & 0x7);
+					copy_ptr = dest_ptr + (count & 0x3);
 					while (dest_ptr < copy_ptr) *dest_ptr++ = data;
 				} else {
 					if (op_code == 0xff) {
