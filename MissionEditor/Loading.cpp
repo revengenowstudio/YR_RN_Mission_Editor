@@ -153,10 +153,10 @@ void CLoading::Load()
 
 	errstream << "Initializing mix files" << std::endl;
 	errstream.flush();
-	MEMORYSTATUS ms;
-	ms.dwLength = sizeof(MEMORYSTATUS);
-	GlobalMemoryStatus(&ms);
-	int cs = ms.dwAvailPhys + ms.dwAvailPageFile;
+	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(ms);
+	GlobalMemoryStatusEx(&ms);
+	int cs = ms.ullAvailPhys + ms.ullAvailPageFile;
 
 	m_progress.SetPos(10);
 	UpdateWindow();
