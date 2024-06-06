@@ -324,6 +324,12 @@ public:
 		this->SetString(section, key, INIHelper::ToString(value));
 	}
 
+	void RemoveValue(const CString& section, const CString& value) {
+		if (auto pSec = this->TryGetSection(section)) {
+			pSec->RemoveValue(value);
+		}
+	}
+
 	void RemoveValueByKey(const CString& section, const CString& key) {
 		if (auto pSec = this->TryGetSection(section)) {
 			pSec->RemoveByKey(key);

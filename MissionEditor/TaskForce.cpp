@@ -181,22 +181,26 @@ void CTaskForce::OnSelchangeTaskforces()
 
 	int i;
 	while (m_Units.DeleteString(0) != LB_ERR);
-	for (i = 0; i < sec.Size() - 2; i++) {
-		char p[50];
-		itoa(i, p, 10);
-		auto const& data = sec.GetString(p);
-		CString type = GetParam(data, 1);
-		CString s = GetParam(data, 0);
-		s += " ";
-		/*if(ini.sections.find((char*)(LPCTSTR)type)!=ini.sections.end() && ini.sections[(char*)(LPCTSTR)type].values.find("Name")!=ini.sections[(char*)(LPCTSTR)type].values.end())
-			s+=ini.sections[(char*)(LPCTSTR)type].values["Name"];
-		else
-			s+=rules.sections[(char*)(LPCTSTR)type].values["Name"];*/
-		s += Map->GetUnitName(type);
-		//s+=")";
 
-		m_Units.SetItemData(m_Units.AddString(s), i);
+	if (sec.Size()) {
+		for (i = 0; i < sec.Size() - 2; i++) {
+			char p[50];
+			itoa(i, p, 10);
+			auto const& data = sec.GetString(p);
+			CString type = GetParam(data, 1);
+			CString s = GetParam(data, 0);
+			s += " ";
+			/*if(ini.sections.find((char*)(LPCTSTR)type)!=ini.sections.end() && ini.sections[(char*)(LPCTSTR)type].values.find("Name")!=ini.sections[(char*)(LPCTSTR)type].values.end())
+				s+=ini.sections[(char*)(LPCTSTR)type].values["Name"];
+			else
+				s+=rules.sections[(char*)(LPCTSTR)type].values["Name"];*/
+			s += Map->GetUnitName(type);
+			//s+=")";
+
+			m_Units.SetItemData(m_Units.AddString(s), i);
+		}
 	}
+
 	UpdateData(FALSE);
 
 	if (m_Units.SetCurSel(0) != LB_ERR) {
@@ -426,7 +430,7 @@ void CTaskForce::OnDeletetaskforce()
 		return;
 	}
 
-	ini.RemoveValueByKey("TaskForces", tf);
+	ini.RemoveValue("TaskForces", tf);
 	ini.DeleteSection(tf);
 	while (m_Units.DeleteString(0) != LB_ERR);
 	//UpdateDialog();
