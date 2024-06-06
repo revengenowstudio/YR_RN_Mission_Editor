@@ -250,11 +250,15 @@ void CTaskForce::OnDeleteunit()
 	TruncSpace(tf);
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
-	char k[50];
-	itoa(u, k, 10);
+	CString numberStrToDelete;
+	numberStrToDelete.Format("%d", u);
+
+	if (!sec) {
+		return;
+	}
 
 	if (sec->Size() < 4) {
-		sec->RemoveByKey(k);
+		sec->RemoveByKey(numberStrToDelete);
 		m_Units.DeleteString(sel);
 		m_UnitType.SetWindowText("");
 		m_NumberOfUnits = atoi("0");
@@ -265,14 +269,12 @@ void CTaskForce::OnDeleteunit()
 	int lastpos = sec->Size() - 3;
 	char l[50];
 	itoa(lastpos, l, 10);
-	sec->SetString(k, sec->GetString(l));
-	sec->RemoveByKey(l);
+	sec->SetString(numberStrToDelete, sec->GetString(l));
 	sec->RemoveAt(lastpos);
 	m_Units.DeleteString(sel);
 
 
 	UpdateDialog();
-	return;
 }
 
 void CTaskForce::OnChangeNumberunits()
