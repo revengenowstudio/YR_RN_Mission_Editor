@@ -330,7 +330,7 @@ void CTriggerEditorDlg::OnClone()
 	}
 	int curtrig = m_Trigger.GetItemData(sel);
 
-	auto const& triggerId = ini["Triggers"].Nth(curtrig).first;
+	auto const triggerId = ini["Triggers"].Nth(curtrig).first;
 
 	CString newId = GetFreeID();
 	ini.SetString("Triggers", newId, ini["Triggers"][triggerId]);
