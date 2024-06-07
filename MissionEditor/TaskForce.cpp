@@ -267,10 +267,12 @@ void CTaskForce::OnDeleteunit()
 	}
 
 	int lastpos = sec->Size() - 3;
-	char l[50];
-	itoa(lastpos, l, 10);
-	sec->SetString(numberStrToDelete, sec->GetString(l));
-	sec->RemoveAt(lastpos);
+
+	CString lastPosStr;
+	lastPosStr.Format("%d", lastpos);
+
+	sec->SetString(numberStrToDelete, sec->GetString(lastPosStr));
+	sec->RemoveByKey(lastPosStr);
 	m_Units.DeleteString(sel);
 
 
