@@ -481,7 +481,9 @@ void TruncSpace(CString& str)
 {
 	str.TrimLeft();
 	str.TrimRight();
-	if (str.Find(" ") >= 0) str.Delete(str.Find(" "), str.GetLength() - str.Find(" "));
+	if (str.Find(" ") >= 0) {
+		str.Delete(str.Find(" "), str.GetLength() - str.Find(" "));
+	}
 }
 
 CString GetText(CWnd* wnd) {
