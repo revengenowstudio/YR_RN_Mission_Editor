@@ -729,12 +729,17 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	DDSURFACEDESC2 desc;
 
 	try {
-		pics["SCROLLCURSOR"].pic = BitmapToSurface(((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd, *BitmapFromResource(IDB_SCROLLCURSOR)).Detach();
-		FSunPackLib::SetColorKey((LPDIRECTDRAWSURFACE4)pics["SCROLLCURSOR"].pic, -1);
+		auto pPic = BitmapToSurface(((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd, *BitmapFromResource(IDB_SCROLLCURSOR)).Detach();
+		// This is really dangerous to store a dangling ComPtr
+		pics["SCROLLCURSOR"].pic = pPic;
+		if (!pPic) {
+			throw new BitmapNotFound();
+		}
+		FSunPackLib::SetColorKey((LPDIRECTDRAWSURFACE4)pPic, -1);
 		::memset(&desc, 0, sizeof(DDSURFACEDESC2));
 		desc.dwSize = sizeof(DDSURFACEDESC2);
 		desc.dwFlags = DDSD_HEIGHT | DDSD_WIDTH;
-		((LPDIRECTDRAWSURFACE4)pics["SCROLLCURSOR"].pic)->GetSurfaceDesc(&desc);
+		((LPDIRECTDRAWSURFACE4)pPic)->GetSurfaceDesc(&desc);
 		pics["SCROLLCURSOR"].wHeight = desc.dwHeight;
 		pics["SCROLLCURSOR"].wWidth = desc.dwWidth;
 		pics["SCROLLCURSOR"].bType = PICDATA_TYPE_BMP;
