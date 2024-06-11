@@ -330,9 +330,11 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, con
 	short i, e;
 
 
-#ifdef NOSURFACES_EXTRACT
-	int pos = 0;
+	auto const surfaceEnd = (BYTE*)dst + boundary.dpitch * boundary.dwHeight;
+
 	if (!st.bNotExtracted) {
+#ifdef NOSURFACES_EXTRACT
+		int pos = 0;
 		for (e = srcRect.top; e < srcRect.bottom; e++) {
 			short left = st.vborder[e].left;
 			short right = st.vborder[e].right;
@@ -361,7 +363,6 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, con
 				}
 
 
-				auto const surfaceEnd = (BYTE*)dst + boundary.dpitch * boundary.dwHeight;
 				auto dest = ((BYTE*)dst + (blrect.left + left) * bpp + (blrect.top + e) * boundary.dpitch);
 				if (dest + bpp * (right - left + 1) < surfaceEnd) {
 					memcpy(dest, &st.pic[pos], bpp * (right - left + 1));
@@ -369,9 +370,8 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, con
 				pos += (realright - left + 1) * bpp;
 			}
 		}
-	} else
-
 #endif
+	} else {
 		for (e = srcRect.top; e < srcRect.bottom; e++) {
 			short& left = st.vborder[e].left;
 			short& right = st.vborder[e].right;
@@ -379,24 +379,16 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, con
 			auto l = std::max(left, srcRect.left);
 			auto r = std::min(right, static_cast<short>(srcRect.right - 1));
 			for (i = l; i <= r; i++) {
-				//if (i < srcRect.left || i >= srcRect.right)
-				{
-					//dest+=bpp;
-				}
-				//else
-				{
-
-					BYTE& val = src[i + e * swidth];
-					if (val) {
-						void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * boundary.dpitch);
-
+				BYTE& val = src[i + e * swidth];
+				if (val) {
+					auto dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * boundary.dpitch);
+					if (dest < surfaceEnd) {
 						memcpy(dest, &iPalIso[val], bpp);
 					}
 				}
 			}
-
 		}
-
+	}
 }
 
 
