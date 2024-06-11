@@ -392,21 +392,27 @@ __forceinline void BlitTerrain(void* dst, int x, int y, int dleft, int dtop, con
 }
 
 
-__forceinline void BlitTerrainHalfTransp(void* dst, int x, int y, int dleft, int dtop, int dpitch, int dright, int dbottom, const SUBTILE& st)//BYTE* src, int swidth, int sheight)
+__forceinline void BlitTerrainHalfTransp(void* dst, int x, int y, int dleft, int dtop, const DDBoundary& boundary, int dright, int dbottom, const SUBTILE& st)//BYTE* src, int swidth, int sheight)
 {
 	BYTE* src = st.pic;
 	const unsigned short swidth = st.wWidth;
 	const unsigned short sheight = st.wHeight;
 
 
-	if (src == NULL || dst == NULL) return;
+	if (src == NULL || dst == NULL) {
+		return;
+	}
 
 	//x += 1;
 	//y += 1;
 	//y -= f_y;
 
-	if (x + swidth < dleft || y + sheight < dtop) return;
-	if (x >= dright || y >= dbottom) return;
+	if (x + swidth < dleft || y + sheight < dtop) {
+		return;
+	}
+	if (x >= dright || y >= dbottom) {
+		return;
+	}
 
 
 	BlitRect blrect;
@@ -442,9 +448,10 @@ __forceinline void BlitTerrainHalfTransp(void* dst, int x, int y, int dleft, int
 	short i, e;
 
 
-#ifdef NOSURFACES_EXTRACT
-	int pos = 0;
+	auto const surfaceEnd = (BYTE*)dst + boundary.dpitch * boundary.dwHeight;
 	if (!st.bNotExtracted) {
+#ifdef NOSURFACES_EXTRACT
+		int pos = 0;
 		int a = 0;
 		for (e = srcRect.top; e < srcRect.bottom; e += 1) {
 			short left = st.vborder[e].left;
@@ -467,7 +474,7 @@ __forceinline void BlitTerrainHalfTransp(void* dst, int x, int y, int dleft, int
 				}
 
 
-				void* dest = ((BYTE*)dst + (blrect.left + left) * bpp + (blrect.top + e) * dpitch);
+				auto dest = ((BYTE*)dst + (blrect.left + left) * bpp + (blrect.top + e) * boundary.dpitch);
 
 				//memcpy(dest, &st.pic[pos], bpp*(right-left+1));
 				//pos+=(right-left+1)*bpp;
@@ -481,8 +488,9 @@ __forceinline void BlitTerrainHalfTransp(void* dst, int x, int y, int dleft, int
 						//if(val)
 						{
 							void* dest2 = (BYTE*)dest + (i - left) * bpp; //((BYTE*)dst+(blrect.left+i)*bpp+(blrect.top+e)*dpitch);
-
-							memcpy(dest2, &st.pic[pos + (i - left) * bpp], bpp);
+							if (dest2 < surfaceEnd) {
+								memcpy(dest2, &st.pic[pos + (i - left) * bpp], bpp);
+							}
 						}
 					}
 				}
@@ -490,10 +498,8 @@ __forceinline void BlitTerrainHalfTransp(void* dst, int x, int y, int dleft, int
 				pos += (realright - left + 1) * bpp;
 			}
 		}
-	} else
-
 #endif
-	{
+	} else {
 		int a = 0;
 		for (e = srcRect.top; e < srcRect.bottom; e++) {
 			short& left = st.vborder[e].left;
@@ -509,17 +515,15 @@ __forceinline void BlitTerrainHalfTransp(void* dst, int x, int y, int dleft, int
 
 					BYTE& val = src[i + e * swidth];
 					if (val) {
-						void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * dpitch);
-
-						memcpy(dest, &iPalIso[val], bpp);
+						void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * boundary.dpitch);
+						if (dest < surfaceEnd) {
+							memcpy(dest, &iPalIso[val], bpp);
+						}
 					}
 				}
 			}
-
-
 		}
 	}
-
 }
 
 
@@ -634,6 +638,8 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, const D
 		};
 	}
 
+	auto const surfaceEnd = (BYTE*)dst + boundary.dpitch * boundary.dwHeight;
+
 	for (e = srcRect.top; e < srcRect.bottom; e++) {
 		int left = pd.vborder[e].left;
 		int right = pd.vborder[e].right;
@@ -675,7 +681,6 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, const D
 							bc[i] = std::min(255, bc[i] * (200 + l * 300 / 255) / 255);  // game seems to overbrighten and have a lot of ambient - if you change this, also change Loading.cpp shp lighting value so that shp light stays at 1.0
 							//bc[i] = min(255, bc[i] * (0 + l * (255 - 0) / 255) / 255);
 					}
-					auto const surfaceEnd = (BYTE*)dst + boundary.dpitch * boundary.dwHeight;
 					if (dest + bpp < surfaceEnd) {
 						memcpy(dest, &c, bpp);
 					}
@@ -685,7 +690,7 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, const D
 	}
 }
 
-__forceinline void BlitPicHalfTransp(void* dst, int x, int y, int dleft, int dtop, int dpitch, int dright, int dbottom, PICDATA& pd, int* color = NULL, const int* newPal = NULL)//BYTE* src, int swidth, int sheight)
+__forceinline void BlitPicHalfTransp(void* dst, int x, int y, int dleft, int dtop, const DDBoundary& boundary, int dright, int dbottom, PICDATA& pd, int* color = NULL, const int* newPal = NULL)//BYTE* src, int swidth, int sheight)
 {
 	ASSERT(pd.bType != PICDATA_TYPE_BMP);
 
@@ -742,9 +747,7 @@ __forceinline void BlitPicHalfTransp(void* dst, int x, int y, int dleft, int dto
 
 
 	int i, e;
-
-
-
+	auto const surfaceEnd = (BYTE*)dst + boundary.dpitch * boundary.dwHeight;
 
 	for (e = srcRect.top; e < srcRect.bottom; e++) {
 
@@ -767,14 +770,16 @@ __forceinline void BlitPicHalfTransp(void* dst, int x, int y, int dleft, int dto
 			BYTE& val = src[i + e * swidth];
 			//0x10-0x1f,
 			if (val) {
-				void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * dpitch);
-				//*dest=newPal[val];
-				if (dest >= dst) {
-					if (!color || !pd.bHouseColor || val < 0x10 || val>0x1f) {
-						memcpy(dest, &newPal[val], bpp);
-					} else {
-						//int col=0;
-						memcpy(dest, color, bpp);
+				void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * boundary.dpitch);
+				if (dest < surfaceEnd) {
+					//*dest=newPal[val];
+					if (dest >= dst) {
+						if (!color || !pd.bHouseColor || val < 0x10 || val>0x1f) {
+							memcpy(dest, &newPal[val], bpp);
+						} else {
+							//int col=0;
+							memcpy(dest, color, bpp);
+						}
 					}
 				}
 			}
@@ -5215,14 +5220,16 @@ void CIsoView::DrawMap()
 							r.right, r.bottom,
 							st);
 #endif
-					} else // draw soemthing representing the tile
-					{
+					} else {// draw soemthing representing the tile
 #ifndef NOSURFACES
 						DrawCell(stDrawCoords.x, stDrawCoords.y, 1, 1, RGB(0, 140, 0), FALSE, FALSE);
 #else
-						BlitTerrainHalfTransp(ddsd.lpSurface, stDrawCoords.x, stDrawCoords.y, r.left, r.top, ddsd.lPitch, r.right, r.bottom, st);
-#endif							
-
+						BlitTerrainHalfTransp(ddsd.lpSurface, stDrawCoords.x, stDrawCoords.y, 
+							r.left, r.top,
+							DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch },
+							r.right, r.bottom,
+							st);
+#endif
 					}
 				}
 
@@ -5239,8 +5246,9 @@ void CIsoView::DrawMap()
 				bCancelDraw = FALSE;
 			}
 
-			if (u < 1 || v < 1 || u + v<mapwidth + 1 || u + v>mapwidth + mapheight * 2 || (v + 1 > mapwidth && u - 1 < v - mapwidth) || (u + 1 > mapwidth && v + mapwidth - 1 < u))
+			if (u < 1 || v < 1 || u + v<mapwidth + 1 || u + v>mapwidth + mapheight * 2 || (v + 1 > mapwidth && u - 1 < v - mapwidth) || (u + 1 > mapwidth && v + mapwidth - 1 < u)) {
 				continue;
+			}
 
 			FIELDDATA m = *Map->GetFielddataAt(mapCoords);  // copy
 			const auto drawCoords = GetRenderTargetCoordinates(mapCoords);
@@ -5296,7 +5304,7 @@ void CIsoView::DrawMap()
 #ifndef NOSURFACES			// draw soemthing representing the tile
 							DrawCell(stDrawCoords.x, stDrawCoords.y, 1, 1, RGB(0, 140, 0), FALSE, FALSE);
 #else
-							BlitTerrainHalfTransp(ddsd.lpSurface, stDrawCoords.x, stDrawCoords.y, r.left, r.top, ddsd.lPitch, r.right, r.bottom, st);
+							BlitTerrainHalfTransp(ddsd.lpSurface, stDrawCoords.x, stDrawCoords.y, r.left, r.top, DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch }, r.right, r.bottom, st);
 #endif							
 
 						}
@@ -5601,11 +5609,13 @@ void CIsoView::DrawMap()
 #ifndef NOSURFACES					
 						Blit(pic.pic, drawCoordsBldShp.x, drawCoordsBldShp.y);
 #else
-						BlitPicHalfTransp(ddsd.lpSurface, drawCoordsBldShp.x, drawCoordsBldShp.y, r.left, r.top, ddsd.lPitch, r.right, r.bottom, pic, &colorref_conv[c]);
+						BlitPicHalfTransp(ddsd.lpSurface, drawCoordsBldShp.x, drawCoordsBldShp.y, 
+							r.left, r.top, 
+							DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch },
+							r.right, r.bottom, pic, &colorref_conv[c]);
 #endif
 					}
 				}
-
 			}
 			if (m.unit != -1) {
 
