@@ -105,7 +105,7 @@ void CTaskForce::UpdateDialog()
 	m_NumberOfUnits = 0;
 	UpdateData(FALSE);
 
-	int i;
+
 	auto const& sec = ini["TaskForces"];
 	for (auto const& [seq, id] : sec) {
 		CString s;
@@ -183,20 +183,14 @@ void CTaskForce::OnSelchangeTaskforces()
 	while (m_Units.DeleteString(0) != LB_ERR);
 
 	if (sec.Size()) {
+		CString p;
 		for (i = 0; i < sec.Size() - 2; i++) {
-			char p[50];
-			itoa(i, p, 10);
+			p.Format("%d", i);
 			auto const& data = sec.GetString(p);
 			CString type = GetParam(data, 1);
 			CString s = GetParam(data, 0);
 			s += " ";
-			/*if(ini.sections.find((char*)(LPCTSTR)type)!=ini.sections.end() && ini.sections[(char*)(LPCTSTR)type].values.find("Name")!=ini.sections[(char*)(LPCTSTR)type].values.end())
-				s+=ini.sections[(char*)(LPCTSTR)type].values["Name"];
-			else
-				s+=rules.sections[(char*)(LPCTSTR)type].values["Name"];*/
 			s += Map->GetUnitName(type);
-			//s+=")";
-
 			m_Units.SetItemData(m_Units.AddString(s), i);
 		}
 	}
@@ -217,20 +211,19 @@ void CTaskForce::OnSelchangeUnits()
 	CString tf;
 	tf = GetText(&m_TaskForces);
 	TruncSpace(tf);
+
+	CString indexStr;
+	indexStr.Format("%d", u);
+
 	auto const& sec = ini[tf];
-	auto const& data = sec.Nth(u).second;
-	CString c = GetParam(data, 0);
+	auto const& data = sec.GetString(indexStr);
+	CString countStr = GetParam(data, 0);
 
-	CString s;
 	CString type = GetParam(data, 1);
-	/*if(ini.sections.find((char*)(LPCTSTR)type)!=ini.sections.end() && ini.sections[(char*)(LPCTSTR)type].values.find("Name")!=ini.sections[(char*)(LPCTSTR)type].values.end())
-		s=ini.sections[(char*)(LPCTSTR)type].values["Name"];
-	else
-		s=rules.sections[(char*)(LPCTSTR)type].values["Name"];*/
-	s = Map->GetUnitName(type);
+	CString unitID = Map->GetUnitName(type);
 
-	m_UnitType.SetWindowText(((CString)(LPCTSTR)type + (CString)" (" + s + (CString)")"));
-	m_NumberOfUnits = atoi(c);
+	m_UnitType.SetWindowText((type + (CString)" (" + unitID + (CString)")"));
+	m_NumberOfUnits = atoi(countStr);
 
 	UpdateData(FALSE);
 }
@@ -296,9 +289,10 @@ void CTaskForce::OnChangeNumberunits()
 	TruncSpace(tf);
 	auto sec = ini.TryGetSection(tf);
 
-	char k[50], n[50];
-	itoa(u, k, 10);
-	itoa(m_NumberOfUnits, n, 10);
+	CString k, n;
+	k.Format("%d", u);
+	n.Format("%d", m_NumberOfUnits);
+
 	auto const& data = sec->GetString(k);
 	CString c = GetParam(data, 1);
 	sec->SetString(k, n + (CString)"," + c);
@@ -332,6 +326,11 @@ void CTaskForce::OnEditchangeUnittype()
 {
 	CIniFile& ini = Map->GetIniFile();
 
+	CString type = GetText(&m_UnitType);
+	if (type.IsEmpty()) {
+		return;
+	}
+
 	int sel = m_Units.GetCurSel();
 	if (sel < 0) {
 		return;
@@ -343,14 +342,18 @@ void CTaskForce::OnEditchangeUnittype()
 	TruncSpace(tf);
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
-	char k[50];
-	itoa(u, k, 10);
+
+	if (sec == nullptr) {
+		return;
+	}
+
+	CString k;
+	k.Format("%d", u);
 
 	CString count = GetParam(sec->GetString(k), 0);
-	CString type = GetText(&m_UnitType);
 	TruncSpace(type);
 
-	sec->SetString(k, count + "," + (char*)(LPCTSTR)type);
+	sec->SetString(k, count + "," + type);
 
 	CString ut;
 	m_UnitType.GetWindowText(ut);
@@ -376,8 +379,12 @@ void CTaskForce::OnSelchangeUnittype()
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
 
-	char k[50];
-	itoa(u, k, 10);
+	if (sec == nullptr) {
+		return;
+	}
+
+	CString k;
+	k.Format("%d", u);
 
 	CString count = GetParam(sec->GetString(k), 0);
 	CString type = GetText(&m_UnitType);
