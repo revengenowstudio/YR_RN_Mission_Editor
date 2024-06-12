@@ -61,6 +61,9 @@ protected:
 
 // Implementierung
 protected:
+
+	BOOL PreTranslateMessage(MSG* pMsg) override;
+
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CTaskForce)
 	afx_msg void OnEditchangeTaskforces();

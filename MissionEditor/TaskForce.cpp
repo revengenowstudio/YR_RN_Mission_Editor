@@ -500,3 +500,38 @@ void CTaskForce::OnChangeGroup()
 	UpdateDialog();
 
 }
+
+BOOL CTaskForce::PreTranslateMessage(MSG* pMsg)
+{
+	if (pMsg->message == WM_KEYDOWN) {
+		switch (pMsg->wParam) {
+		case VK_RETURN:
+		{
+			auto pEdit = this->m_UnitType.GetWindow(GW_CHILD);
+			if (pMsg->hwnd == pEdit->m_hWnd) {
+				this->OnEditchangeUnittype();
+			}
+
+			switch (::GetDlgCtrlID(pMsg->hwnd)) {
+			case IDC_NAME: 
+				this->OnChangeName();
+				break;
+			case IDC_NUMBERUNITS: 
+				this->OnChangeNumberunits();
+				break;
+			case IDC_GROUP:
+				this->OnChangeGroup();
+				break;
+			default:
+				break;
+			}
+		}
+		//do not exit dialog when enter key pressed
+		return TRUE;
+		default:
+			break;
+		}
+	}
+
+	return this->CDialog::PreTranslateMessage(pMsg);
+}
