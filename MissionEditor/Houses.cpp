@@ -753,7 +753,9 @@ void CHouses::UpdateStrings()
 	SetDlgItemText(IDC_LCOLOR, GetLanguageStringACP("HousesColor"));
 	SetDlgItemText(IDC_LALLIES, GetLanguageStringACP("HousesAllies"));
 	SetDlgItemText(IDC_LCREDITS, GetLanguageStringACP("HousesCredits"));
+#ifndef RA2_MODE
 	SetDlgItemText(IDC_LACTSLIKE, GetLanguageStringACP("HousesActsLike"));
+#endif
 	SetDlgItemText(IDC_LNODECOUNT, GetLanguageStringACP("HousesNodeCount"));
 	SetDlgItemText(IDC_LTECHLEVEL, GetLanguageStringACP("HousesTechlevel"));
 	SetDlgItemText(IDC_LBUILDACTIVITY, GetLanguageStringACP("HousesBuildActivity"));
