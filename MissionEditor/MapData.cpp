@@ -1712,11 +1712,14 @@ void CMapData::UpdateWaypoints(BOOL bSave)
 
 	for (i = 0; i < sec.Size(); i++) {
 		int x, y;
-		PosToXY(sec.Nth(i).second, &x, &y);
+		auto const& [id, coord] = sec.Nth(i);
+		PosToXY(coord, &x, &y);
 
 		int pos = x + y * GetIsoSize();
-		if (pos < 0 || pos >= fielddata_size) continue;
-		fielddata[pos].waypoint = i;
+		if (pos < 0 || pos >= fielddata_size) {
+			continue;
+		}
+		fielddata[pos].waypoint = atoi(id);
 
 		int k, l;
 		for (k = -1; k < 2; k++)
@@ -1871,7 +1874,9 @@ void CMapData::DeleteInfantry(DWORD dwIndex)
 
 void CMapData::DeleteWaypoint(DWORD dwIndex)
 {
-	if (dwIndex >= GetWaypointCount()) return;
+	if (dwIndex >= GetWaypointCount()) {
+		return;
+	}
 
 	CString id;
 	DWORD pos;
@@ -1883,7 +1888,7 @@ void CMapData::DeleteWaypoint(DWORD dwIndex)
 	auto const pSec = m_mapfile.TryGetSection("Waypoints");
 	ASSERT(pSec != nullptr);
 
-	pSec->RemoveAt(dwIndex);
+	pSec->RemoveByKey(id);
 
 	if (!m_noAutoObjectUpdate) {
 		UpdateWaypoints(FALSE);
@@ -2026,19 +2031,17 @@ void CMapData::DeleteNode(LPCTSTR lpHouse, DWORD dwIndex)
 	UpdateNodes(FALSE);
 }
 
-BOOL CMapData::AddWaypoint(CString lpID, DWORD dwPos)
+BOOL CMapData::AddWaypoint(CString id, DWORD dwPos)
 {
 	// create waypoint, auto number
-	CString id = lpID;
-
-
-	if (lpID.GetLength() == 0) id = GetFree("Waypoints");
-
+	if (id.IsEmpty()) {
+		id = GetFree("Waypoints");
+	}
 
 	char j[15];
 	char k[15];
-	memset(j, 0, 15);
-	memset(k, 0, 15);
+	memset(j, 0, sizeof(j));
+	memset(k, 0, sizeof(k));
 	itoa(dwPos / GetIsoSize(), j, 10);
 	if (strlen(j) < 3) {
 		strcpy_safe(j + 1, j);
@@ -2053,8 +2056,13 @@ BOOL CMapData::AddWaypoint(CString lpID, DWORD dwPos)
 
 	//MessageBox(0,k,"",0);
 
+	auto pSec = m_mapfile.TryGetSection("Waypoints");
+	if (!pSec) {
+		pSec = &m_mapfile.AddSection("Waypoints");
+	}
 
-	m_mapfile.SetString("Waypoints", id, k);
+	pSec->Insert(std::move(id), k);
+
 	if (!m_noAutoObjectUpdate) {
 		UpdateWaypoints(FALSE);
 	}
@@ -2773,11 +2781,14 @@ void CMapData::GetWaypointData(DWORD dwIndex, CString* lpID, DWORD* lpdwPos) con
 	}
 
 	auto const& section = m_mapfile.GetSection("Waypoints");
-	if (dwIndex >= section.Size()) {
+	CString id;
+	id.Format("%d", dwIndex);
+
+	auto const& data = section.GetString(id);
+
+	if (data.IsEmpty()) {
 		return;
 	}
-
-	auto const& [id, data] = section.Nth(dwIndex);
 
 	int x, y;
 	PosToXY(data, &x, &y);
@@ -2788,7 +2799,6 @@ void CMapData::GetWaypointData(DWORD dwIndex, CString* lpID, DWORD* lpdwPos) con
 	if (lpdwPos) {
 		*lpdwPos = x + y * GetIsoSize();
 	}
-
 }
 
 void CMapData::GetStdAircraftData(DWORD dwIndex, STDOBJECTDATA* lpStdAircraft) const

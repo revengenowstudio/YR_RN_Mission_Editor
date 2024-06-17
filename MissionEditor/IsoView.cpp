@@ -1521,8 +1521,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 		OnLButtonDown(nFlags, point);
 	} else if ((nFlags & MK_LBUTTON) && (nFlags & MK_SHIFT) && AD.mode == ACTIONMODE_LOWERTILE) {
 		OnLButtonDown(nFlags, point);
-	} else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_WAYPOINT) // waypoints
-	{
+	} else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_WAYPOINT) { // waypoints
 		if (AD.type == 1) {
 			//delete waypoint
 			int w = Map->GetWaypointAt(x + y * Map->GetIsoSize());
