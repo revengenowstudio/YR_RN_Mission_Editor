@@ -4216,7 +4216,7 @@ void CLoading::HackRules()
 			auto const pSec = rules.TryGetSection("BuildingTypes");
 			ASSERT(pSec != nullptr);
 			if (!pSec->HasValue(gateOne)) {
-				pSec->Insert(gateOne, gateOne);
+				pSec->Append(gateOne, gateOne);
 			}
 		}
 

@@ -137,6 +137,15 @@ public:
 		return this->FindValue(val) >= 0;
 	}
 
+	size_t LowerBound(const CString& key) const {
+		auto const it = value_pos.lower_bound(key);
+		if (it != value_pos.end()) {
+			return it->second;
+		}
+		return value_pairs.size();
+	}
+
+	// ==================== Modify
 	void SetString(const CString& key, const CString& value) {
 		return this->SetString(key, CString(value));
 	}
@@ -145,7 +154,7 @@ public:
 		auto const it = value_pos.find(key);
 		// new, never had one
 		if (it == value_pos.end()) {
-			this->Insert(key, std::move(value));
+			this->Append(key, std::move(value));
 			return;
 		}
 		value_pairs[it->second].second = std::move(value);
@@ -159,13 +168,29 @@ public:
 		this->SetString(key, INIHelper::ToString(val));
 	}
 
-	void Insert(const CString& key, const CString& value) {
-		this->Insert(key, CString(value));
+	void Append(const CString& key, const CString& value) {
+		this->Append(key, CString(value));
 	}
 
-	void Insert(const CString& key, CString&& value) {
+	void Append(const CString& key, CString&& value) {
 		value_pairs.push_back({ key, value });
 		value_pos.insert_or_assign(key, value_pairs.size() - 1);
+	}
+
+	void InsertAt(size_t idx, CString&& key, CString&& value) {
+		if (idx > value_pairs.size()) {
+			idx = value_pairs.size() - 1;
+		}
+		value_pairs.insert(value_pairs.begin() + idx, { key, value });
+		value_pos.insert_or_assign(key, idx);
+		// fix all indexes
+		for (auto it = value_pos.upper_bound(key); it != value_pos.end(); ++it) {
+			it->second++;
+		}
+	}
+	void Insert(CString&& key, CString&& value) {
+		auto const pos = LowerBound(key);
+		InsertAt(pos, std::move(key), std::move(value));
 	}
 
 	// ==================== Delete
@@ -309,7 +334,7 @@ public:
 
 	// ============== Writer and Helper converter ============================
 	CIniFileSection& AddSection(CString&& sectionName) {
-		auto const ret = this->sections.insert({ std::move(sectionName), {} });
+		auto const ret = this->sections.try_emplace(std::move(sectionName), CIniFileSection{});
 		return ret.first->second;
 	}
 	CIniFileSection& AddSection(const CString& sectionName) {

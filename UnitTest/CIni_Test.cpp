@@ -238,3 +238,37 @@ CliffsWater2=112
 	EXPECT_EQ(false, file["NewUrbanInfo"].Exists("Morphable2"));
 
 }
+
+TEST(CIniFileClass, IniLowerBoundInsertTest) {
+	auto const fileName = "test.ini";
+	IniTestHelper helper(fileName, R"(
+[Waypoints]
+0=123456
+1=456123
+2=123654
+5=789654
+6=654789
+10=159357
+
+)");
+
+	CIniFile file;
+	ASSERT_EQ(file.LoadFile(std::string(fileName)), 0);
+
+	EXPECT_EQ(123654, file.GetInteger("Waypoints", "2"));
+
+	auto const pSec = file.TryGetSection("Waypoints");
+	EXPECT_NE(pSec, nullptr);
+	auto const pos = pSec->LowerBound("4");
+	EXPECT_LE(pos, pSec->Size());
+	pSec->InsertAt(pos, "4", "432156");
+	EXPECT_EQ(432156, file.GetInteger("Waypoints", "4"));
+	EXPECT_EQ("432156", file["Waypoints"].Nth(3).second);
+	EXPECT_EQ("789654", file["Waypoints"].Nth(4).second);
+	pSec->Insert("9", "149367");
+	pSec->Insert("11", "987654");
+	EXPECT_EQ(149367, file.GetInteger("Waypoints", "9"));
+	EXPECT_EQ(987654, file.GetInteger("Waypoints", "11"));
+	EXPECT_EQ("987654", file["Waypoints"].Nth(pSec->Size() - 1).second);
+	EXPECT_EQ("159357", file["Waypoints"].Nth(pSec->Size() - 2).second);
+}
