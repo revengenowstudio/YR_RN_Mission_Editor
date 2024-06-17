@@ -1872,15 +1872,11 @@ void CMapData::DeleteInfantry(DWORD dwIndex)
 
 }
 
-void CMapData::DeleteWaypoint(DWORD dwIndex)
+void CMapData::DeleteWaypoint(DWORD dwId)
 {
-	if (dwIndex >= GetWaypointCount()) {
-		return;
-	}
-
 	CString id;
 	DWORD pos;
-	Map->GetWaypointData(dwIndex, &id, &pos);
+	Map->GetWaypointData(dwId, &id, &pos);
 
 	int x = pos % m_IsoSize;
 	int y = pos / m_IsoSize;
@@ -1895,9 +1891,11 @@ void CMapData::DeleteWaypoint(DWORD dwIndex)
 	}
 
 	int k, l;
-	for (k = -1; k < 2; k++)
-		for (l = -1; l < 2; l++)
+	for (k = -1; k < 2; k++) {
+		for (l = -1; l < 2; l++) {
 			Mini_UpdatePos(x + k, y + l, IsMultiplayer());
+		}
+	}
 }
 
 void CMapData::DeleteCelltag(DWORD dwIndex)
@@ -2771,7 +2769,7 @@ BOOL CMapData::IsGroundObjectAt(DWORD dwPos) const
 
 }
 
-void CMapData::GetWaypointData(DWORD dwIndex, CString* lpID, DWORD* lpdwPos) const
+void CMapData::GetNthWaypointData(DWORD dwIdx, CString* lpID, DWORD* lpdwPos) const
 {
 	if (lpID) {
 		*lpID = "";
@@ -2780,11 +2778,7 @@ void CMapData::GetWaypointData(DWORD dwIndex, CString* lpID, DWORD* lpdwPos) con
 		*lpdwPos = 0;
 	}
 
-	auto const& section = m_mapfile.GetSection("Waypoints");
-	CString id;
-	id.Format("%d", dwIndex);
-
-	auto const& data = section.GetString(id);
+	auto const& [id, data] = m_mapfile.GetSection("Waypoints").Nth(dwIdx);
 
 	if (data.IsEmpty()) {
 		return;
@@ -2798,6 +2792,26 @@ void CMapData::GetWaypointData(DWORD dwIndex, CString* lpID, DWORD* lpdwPos) con
 	}
 	if (lpdwPos) {
 		*lpdwPos = x + y * GetIsoSize();
+	}
+}
+
+void CMapData::GetWaypointData(DWORD dwId, CString* lpID, DWORD* lpdwPos) const
+{
+	if (lpID) {
+		*lpID = "";
+	}
+	if (lpdwPos) {
+		*lpdwPos = 0;
+	}
+
+	CString id;
+	id.Format("%d", dwId);
+	auto const& section = m_mapfile.GetSection("Waypoints");
+
+	auto const idx = section.FindIndex(id);
+
+	if (idx >= 0 && idx < section.Size()) {
+		GetNthWaypointData(idx, lpID, lpdwPos);
 	}
 }
 
@@ -6094,7 +6108,7 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 		DWORD pos;
 		CString id;
 
-		GetWaypointData(i, &id, &pos);
+		GetNthWaypointData(i, &id, &pos);
 
 		wp_id[i] = id;
 		wp_pos[i] = pos;

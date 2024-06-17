@@ -577,7 +577,7 @@ int get_player_count()
 	for (i = 0; i < Map->GetWaypointCount(); i++) {
 		CString id;
 		DWORD pos;
-		Map->GetWaypointData(i, &id, &pos);
+		Map->GetNthWaypointData(i, &id, &pos);
 		int idi;
 		idi = atoi(id);
 		if (idi != i) break;
@@ -1983,7 +1983,7 @@ void CUserScriptsDlg::OnOK()
 			int k;
 			for (k = 0; k < Map->GetWaypointCount(); k++) {
 				CString id;
-				Map->GetWaypointData(k, &id, &pos);
+				Map->GetNthWaypointData(k, &id, &pos);
 
 				if (id == params[0]) {
 					bFound = TRUE;

@@ -76,7 +76,7 @@ BOOL CSearchWaypointDlg::OnInitDialog()
 	for (i = 0; i < count; i++) {
 		CString id;
 		DWORD pos;
-		Map->GetWaypointData(i, &id, &pos);
+		Map->GetNthWaypointData(i, &id, &pos);
 
 		ctrl.SetItemData(ctrl.InsertString(i, id), i);
 	}

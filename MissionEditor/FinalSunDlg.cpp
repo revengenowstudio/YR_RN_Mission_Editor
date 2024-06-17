@@ -893,7 +893,7 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 		for (i = 0; i < Map->GetWaypointCount(); i++) {
 			CString id;
 			DWORD pos;
-			Map->GetWaypointData(i, &id, &pos);
+			Map->GetNthWaypointData(i, &id, &pos);
 			int idi;
 			idi = atoi(id);
 			if (idi != i) break;
@@ -1055,7 +1055,7 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 		for (i = 0; i < Map->GetWaypointCount(); i++) {
 			CString id;
 			DWORD pos;
-			Map->GetWaypointData(i, &id, &pos);
+			Map->GetNthWaypointData(i, &id, &pos);
 			int idi;
 			idi = atoi(id);
 			if (idi != i) {
@@ -1822,8 +1822,8 @@ void CFinalSunDlg::OnFileNew()
 			last_succeeded_operation = 11003;
 
 			// create map function was created for SP. Fix it here;
-			Map->DeleteWaypoint(0);
-			Map->DeleteWaypoint(0);
+			Map->DeleteWaypoint(98);
+			Map->DeleteWaypoint(99);
 			int midx = Map->GetIsoSize() / 2;
 			int midy = Map->GetIsoSize() / 2;
 			Map->AddWaypoint("0", midx + midy * Map->GetIsoSize());

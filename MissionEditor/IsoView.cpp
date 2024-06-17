@@ -1567,7 +1567,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 				for (i = 0; i < Map->GetWaypointCount(); i++) {
 					CString id;
 					DWORD pos;
-					Map->GetWaypointData(i, &id, &pos);
+					Map->GetNthWaypointData(i, &id, &pos);
 					if (atoi(id) == e) bFound = TRUE;
 					if (bFound) break;
 				}
@@ -6151,7 +6151,7 @@ void CIsoView::FocusWaypoint(int index)
 
 	DWORD dwPos;
 
-	Map->GetWaypointData(index, NULL, &dwPos);
+	Map->GetNthWaypointData(index, NULL, &dwPos);
 
 	x = dwPos % Map->GetIsoSize();
 	y = dwPos / Map->GetIsoSize();

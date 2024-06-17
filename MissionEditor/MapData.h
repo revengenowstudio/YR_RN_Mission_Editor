@@ -387,7 +387,8 @@ public:
 	DWORD GetInfantryCount() const;
 	void GetStdUnitData(DWORD dwIndex, STDOBJECTDATA* lpStdUnit) const;
 	void GetStdAircraftData(DWORD dwIndex, STDOBJECTDATA* lpStdAircraft) const;
-	void GetWaypointData(DWORD dwIndex, CString* lpID, DWORD* lpdwPos) const;
+	void GetNthWaypointData(DWORD dwIdx, CString* lpID, DWORD* lpdwPos) const;
+	void GetWaypointData(DWORD dwId, CString* lpID, DWORD* lpdwPos) const;
 	BOOL IsGroundObjectAt(DWORD dwPos) const;
 	BOOL AddTerrain(LPCTSTR lpType, DWORD dwPos, int suggestedIndex = -1);
 	void GetTerrainData(DWORD dwIndex, CString* lpType) const;
@@ -415,7 +416,7 @@ public:
 	void DeleteStructure(DWORD dwIndex);
 	void DeleteUnit(DWORD dwIndex);
 	void DeleteCelltag(DWORD dwIndex);
-	void DeleteWaypoint(DWORD dwIndex);
+	void DeleteWaypoint(DWORD id);
 	void DeleteInfantry(DWORD dwIndex);
 
 	INT GetCelltagAt(DWORD dwPos) const

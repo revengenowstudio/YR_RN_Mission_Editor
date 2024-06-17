@@ -159,7 +159,7 @@ BOOL CMapValidator::CheckMap()
 			for (i = 0; i < d; i++) {
 				DWORD pos;
 				CString id;
-				Map->GetWaypointData(i, &id, &pos);
+				Map->GetNthWaypointData(i, &id, &pos);
 				if (atoi(id) < 8) {
 					below8found++;
 				}
@@ -328,9 +328,11 @@ BOOL CMapValidator::CheckMap()
 		DWORD pos;
 		CString id;
 
-		Map->GetWaypointData(i, &id, &pos);
+		Map->GetNthWaypointData(i, &id, &pos);
 
-		if (atoi(id) > 99) bWaypBig = TRUE;
+		if (atoi(id) > 99) {
+			bWaypBig = TRUE;
+		}
 	}
 
 	if (bWaypBig)
