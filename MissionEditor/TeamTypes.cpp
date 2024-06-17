@@ -808,7 +808,7 @@ void CTeamTypes::OnFull()
 	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
-	ini.SetBool(str, "Loadable", m_Full);
+	ini.SetBool(str, "Full", m_Full);
 }
 
 void CTeamTypes::OnAnnoyance()
@@ -840,7 +840,7 @@ void CTeamTypes::OnGuardslower()
 	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
-	ini.SetBool(str, "Annoyance", m_GuardSlower);
+	ini.SetBool(str, "GuardSlower", m_GuardSlower);
 }
 
 void CTeamTypes::OnRecruiter()
@@ -856,7 +856,7 @@ void CTeamTypes::OnRecruiter()
 	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
-	ini.SetBool(str, "Annoyance", m_Recruiter);
+	ini.SetBool(str, "Recruiter", m_Recruiter);
 }
 
 void CTeamTypes::OnDroppod()
@@ -872,7 +872,7 @@ void CTeamTypes::OnDroppod()
 	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
-	ini.SetBool(str, "Annoyance", m_Droppod);
+	ini.SetBool(str, "Droppod", m_Droppod);
 }
 
 void CTeamTypes::OnWhiner()
@@ -920,7 +920,7 @@ void CTeamTypes::OnAggressive()
 	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
-	ini.SetBool(str, "LooseRecruit", m_Aggressive);
+	ini.SetBool(str, "Aggressive", m_Aggressive);
 }
 
 void CTeamTypes::OnSuicide()
@@ -1016,7 +1016,7 @@ void CTeamTypes::OnAvoidthreats()
 	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
-	ini.SetBool(str, "Reinforce", m_AvoidThreats);
+	ini.SetBool(str, "AvoidThreats", m_AvoidThreats);
 }
 
 void CTeamTypes::OnIonimmune()
@@ -1096,7 +1096,7 @@ void CTeamTypes::OnOnlytargethouseenemy()
 	str = GetText(&m_TeamTypes);
 	TruncSpace(str);
 
-	ini.SetBool(str, "IsBaseDefense", m_OnlyTargetHouseEnemy);
+	ini.SetBool(str, "OnlyTargetHouseEnemy", m_OnlyTargetHouseEnemy);
 }
 
 CString GetFree(const char* section);
