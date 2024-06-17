@@ -41,6 +41,24 @@
 using std::vector;
 using std::map;
 
+class SortDummy
+{
+public:
+	bool operator()(const CString& x, const CString& y) const
+	{
+		// the length is more important than spelling (numbers!!!)...
+		if (x.GetLength() < y.GetLength()) {
+			return true;
+		}
+		if (x.GetLength() == y.GetLength()) {
+			if (x < y) {
+				return true;
+			}
+		}
+		return false;
+	}
+};
+
 class CIniFileSection
 {
 public:
@@ -198,7 +216,7 @@ public:
 	}
 
 private:
-	map<CString, int64_t> value_pos{};
+	map<CString, int64_t, SortDummy> value_pos{};
 	Container value_pairs{};// sequenced
 };
 
