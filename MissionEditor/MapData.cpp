@@ -458,12 +458,13 @@ void CMapData::UpdateIniFile(DWORD dwFlags)
 		InitMinimap();
 
 		slopesetpiecesset = tiles->GetInteger("General", "SlopeSetPieces");
+		rampset = tiles->GetInteger("General", "RampBase");
 		rampsmoothset = tiles->GetInteger("General", "RampSmooth");
 		cliffset = tiles->GetInteger("General", "CliffSet");
 		cliffset_start = GetTileID(cliffset, 0);
 		waterset = tiles->GetInteger("General", "WaterSet");
 		shoreset = tiles->GetInteger("General", "ShorePieces");
-		rampset_start = GetTileID(tiles->GetInteger("General", "RampBase"), 0);
+		rampset_start = GetTileID(rampset, 0);
 		ramp2set = g_data.GetInteger("NewUrbanInfo", "Ramps2");
 		ramp2set_start = GetTileID(ramp2set, 0);
 		pave2set = g_data.GetInteger("NewUrbanInfo", "Morphable2");
