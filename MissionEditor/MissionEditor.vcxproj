@@ -509,6 +509,9 @@
     <ClCompile Include="MapLoadingDlg.cpp" />
     <ClCompile Include="MapModifier.cpp" />
     <ClCompile Include="MapOpenDialog.cpp" />
+    <ClCompile Include="MapOperationMiniMap.cpp" />
+    <ClCompile Include="MapOperationSlopes.cpp" />
+    <ClCompile Include="MapOperationSmooth.cpp" />
     <ClCompile Include="MapValidator.cpp" />
     <ClCompile Include="MiniMap.cpp" />
     <ClCompile Include="MMXSavingOptionsDlg.cpp" />

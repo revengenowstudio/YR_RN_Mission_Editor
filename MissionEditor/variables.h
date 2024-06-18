@@ -29,6 +29,7 @@
 #include "FinalSun.h"
 #include "MapData.h"
 
+class CMapData;
 using TranslationMap = map<CString, XCString>;
 
 // the map

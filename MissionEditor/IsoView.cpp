@@ -1416,7 +1416,9 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 		// if(abs(m_FlattenLastX-x)<2 && abs(m_FlattenLastY-y)<2) //ReachableFrom(x+y*Map->GetIsoSize(), m_mapx+m_mapy*Map->GetIsoSize()))
 		int ground = Map->GetFielddataAt(x + (y)*Map->GetIsoSize())->wGround;
-		if (ground == 0xFFFF) ground = 0;
+		if (ground == 0xFFFF) {
+			ground = 0;
+		}
 
 		//if((*tiledata)[ground].bMorphable)
 		{
@@ -1433,25 +1435,30 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			for (m = left; m < right; m++) {
 				for (n = top; n < bottom; n++) {
 					int pos = x + m + (y + n) * isosize;
-
 					int ground = Map->GetFielddataAt(pos)->wGround;
-					if (ground == 0xFFFF) ground = 0;
+					if (ground == 0xFFFF) {
+						ground = 0;
+					}
 					/*int ground1=Map->GetFielddataAt(pos-m)->wGround;
 					if(ground1==0xFFFF) ground=0;
 					int ground2=Map->GetFielddataAt(pos-n*isosize)->wGround;
 					if(ground2==0xFFFF) ground=0;*/
-
-
-
 					if (!(*tiledata)[ground].bMorphable) {
 
 						{
-							if (n <= 0 /*&& !(*tiledata)[ground1].bMorphable*/) top = n + 1;
-							if (m <= 0 /*&& !(*tiledata)[ground2].bMorphable*/) left = m + 1;
-							if (n > 0 /*&& !(*tiledata)[ground1].bMorphable*/) bottom = n;
-							if (m > 0 /*&& !(*tiledata)[ground2].bMorphable*/) right = m;
+							if (n <= 0 /*&& !(*tiledata)[ground1].bMorphable*/) {
+								top = n + 1;
+							}
+							if (m <= 0 /*&& !(*tiledata)[ground2].bMorphable*/) {
+								left = m + 1;
+							}
+							if (n > 0 /*&& !(*tiledata)[ground1].bMorphable*/) {
+								bottom = n;
+							}
+							if (m > 0 /*&& !(*tiledata)[ground2].bMorphable*/) {
+								right = m;
+							}
 						}
-
 					}
 
 					if (n < top) {
@@ -1473,32 +1480,25 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			for (m = left; m < right; m++) {
 				for (n = top; n < bottom; n++) {
 					int ground = Map->GetFielddataAt(x + m + (y + n) * Map->GetIsoSize())->wGround;
-					if (ground == 0xFFFF) ground = 0;
-
-
+					if (ground == 0xFFFF) {
+						ground = 0;
+					}
 
 					if ((*tiledata)[ground].bMorphable) {
 						int i;
 						int max = isosize * isosize;
-						for (i = 0; i < max; i++)
+						for (i = 0; i < max; i++) {
 							Map->SetReserved(i, 0);
-
-
+						}
 						// do not make any slopes yet, we do this once we´re finished with the whole area!
 						// helps to speed up performance!
 						ChangeTileHeight(x + m + (y + n) * isosize, m_FlattenHeight, FALSE, FALSE, TRUE);
-
-
-
 					} else {
-						if (n == 0 && m == 0)
+						if (n == 0 && m == 0) {
 							doNotSave = TRUE;
-
-
+						}
 					}
-
 				}
-
 			}
 
 			/*
@@ -1507,9 +1507,11 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			*/
 			ASSERT(m_funcRect.left <= m_funcRect.right);
 			ASSERT(m_funcRect.top <= m_funcRect.bottom);
-			for (m = m_funcRect.left - 1; m <= m_funcRect.right + 1; m++)
-				for (n = m_funcRect.top - 1; n <= m_funcRect.bottom + 1; n++)
+			for (m = m_funcRect.left - 1; m <= m_funcRect.right + 1; m++) {
+				for (n = m_funcRect.top - 1; n <= m_funcRect.bottom + 1; n++) {
 					Map->CreateSlopesAt(m + n * isosize);
+				}
+			}
 
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 			if (!doNotSave) {
@@ -4060,23 +4062,37 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 
 	//if(dwX==0 || dwY==0 || dwX+dwY<mapwidth || dwX+dwY>mapwidth+mapheight*2 || (dwY>mapwidth && dwX<dwY-mapwidth) || (dwX>mapwidth && dwY+mapwidth<dwX)) return;
 	//if( dwX<2|| dwY<2 || dwX+dwY<mapwidth+2 || dwX+dwY+2>mapwidth+mapheight*2 || (dwY+2>mapwidth && dwX-2<dwY-mapwidth) || (dwX+2>mapwidth && dwY+mapwidth-2<dwX)) return;
-	if (dwX < 1 || dwY < 1 || dwX + dwY<mapwidth + 1 || dwX + dwY>mapwidth + mapheight * 2 || (dwY + 1 > mapwidth && dwX - 1 < dwY - mapwidth) || (dwX + 1 > mapwidth && dwY + mapwidth - 1 < dwX)) return;
-
-
+	if (dwX < 1 || dwY < 1 || dwX + dwY<mapwidth + 1 || dwX + dwY>mapwidth + mapheight * 2 
+		|| (dwY + 1 > mapwidth && dwX - 1 < dwY - mapwidth) 
+		|| (dwX + 1 > mapwidth && dwY + mapwidth - 1 < dwX)) {
+		return;
+	}
 
 	FIELDDATA orig_fd = *Map->GetFielddataAt(dwPos);
 
 	//if(bOnlyHeighten && dwNewHeight<orig_fd.bHeight) return;
 
-	if (orig_fd.wGround == 0xFFFF) orig_fd.wGround = 0;
+	if (orig_fd.wGround == 0xFFFF) {
+		orig_fd.wGround = 0;
+	}
 	int orig_ground = orig_fd.wGround;
 
-	if (orig_fd.bReserved) return;
+	if (orig_fd.bReserved) {
+		return;
+	}
 
-	if (dwX < m_funcRect.left) m_funcRect.left = dwX;
-	if (dwY < m_funcRect.top) m_funcRect.top = dwY;
-	if (dwX > m_funcRect.right) m_funcRect.right = dwX;
-	if (dwY > m_funcRect.bottom) m_funcRect.bottom = dwY;
+	if (dwX < m_funcRect.left) {
+		m_funcRect.left = dwX;
+	}
+	if (dwY < m_funcRect.top) {
+		m_funcRect.top = dwY;
+	}
+	if (dwX > m_funcRect.right) {
+		m_funcRect.right = dwX;
+	}
+	if (dwY > m_funcRect.bottom) {
+		m_funcRect.bottom = dwY;
+	}
 
 	BOOL bCliffNext = FALSE;
 	/*if(bOnlyHeighten)
@@ -4107,10 +4123,10 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 	Map->SetReserved(dwPos, 1);
 
 
-	if (!(*tiledata)[orig_ground].bMorphable) bNonMorpheableMove = TRUE;
-
+	if (!(*tiledata)[orig_ground].bMorphable) {
+		bNonMorpheableMove = TRUE;
+	}
 	Map->SetHeightAt(dwPos, dwNewHeight);
-
 
 	int i, e;
 	for (i = -1; i < 2; i++) {
@@ -4119,20 +4135,25 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 			int pos = dwPos + i + (e)*isosize;
 
 			FIELDDATA fd = *Map->GetFielddataAt(pos);
-			if (fd.wGround == 0xFFFF) fd.wGround = 0;
+			if (fd.wGround == 0xFFFF) {
+				fd.wGround = 0;
+			}
 
 			BOOL bAllowed = TRUE;
 
-			if (dwX == 0 && i == -1) bAllowed = FALSE;
-			else if (dwY == 0 && e == -1) bAllowed = FALSE;
-			else if (dwX == isosize - 1 && i == 1) bAllowed = FALSE;
-			else if (dwY == isosize - 1 && e == 1) bAllowed = FALSE;
-
-
+			if (dwX == 0 && i == -1) {
+				bAllowed = FALSE;
+			} else if (dwY == 0 && e == -1) {
+				bAllowed = FALSE;
+			} else if (dwX == isosize - 1 && i == 1) {
+				bAllowed = FALSE;
+			} else if (dwY == isosize - 1 && e == 1) {
+				bAllowed = FALSE;
+			}
 			if (bOnlyThisTile) {
-				if (fd.wGround != orig_fd.wGround) bAllowed = FALSE; // was another tile
-
-				else {
+				if (fd.wGround != orig_fd.wGround) {
+					bAllowed = FALSE; // was another tile
+				} else {
 					// we now need to check if it is really the same tile or just the same tile type (!)
 					int of = orig_fd.bSubTile;
 					int f = fd.bSubTile;
@@ -4142,20 +4163,15 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 					int oy = of % width;
 					int x = f / width;
 					int y = f % width;
-
-					if (x - ox != i || y - oy != e) bAllowed = FALSE;
+					if (x - ox != i || y - oy != e) {
+						bAllowed = FALSE;
+					}
 				}
 			}
 
-
 			int ground = fd.wGround;
 
-
 			if (bAllowed && !fd.bReserved && pos > 0 && pos < mapsize) {
-
-
-
-
 				BOOL bDestMorphable = (*tiledata)[fd.wGround].bMorphable;
 				TILEDATA destTile = (*tiledata)[fd.wGround];
 				TILEDATA sourceTile = (*tiledata)[orig_fd.wGround];
@@ -4164,50 +4180,62 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 					if (e == 1 && i == 1) {
 						int leftGround = Map->GetFielddataAt(dwPos + 1)->wGround;
 						int rightGround = Map->GetFielddataAt(dwPos + isosize)->wGround;
-						if (leftGround == 0xFFFF) leftGround = 0;
-						if (rightGround == 0xFFFF) rightGround = 0;
-						if (!(*tiledata)[leftGround].bMorphable && !(*tiledata)[rightGround].bMorphable)
+						if (leftGround == 0xFFFF) {
+							leftGround = 0;
+						}
+						if (rightGround == 0xFFFF) {
+							rightGround = 0;
+						}
+						if (!(*tiledata)[leftGround].bMorphable && !(*tiledata)[rightGround].bMorphable) {
 							bAllowed = FALSE;
+						}
 					}
 					if (e == -1 && i == -1) {
 						int leftGround = Map->GetFielddataAt(dwPos - 1)->wGround;
 						int rightGround = Map->GetFielddataAt(dwPos - isosize)->wGround;
-						if (leftGround == 0xFFFF) leftGround = 0;
-						if (rightGround == 0xFFFF) rightGround = 0;
-						if (!(*tiledata)[leftGround].bMorphable && !(*tiledata)[rightGround].bMorphable)
+						if (leftGround == 0xFFFF) {
+							leftGround = 0;
+						}
+						if (rightGround == 0xFFFF) {
+							rightGround = 0;
+						}
+						if (!(*tiledata)[leftGround].bMorphable && !(*tiledata)[rightGround].bMorphable) {
 							bAllowed = FALSE;
+						}
 					}
 					if (e == -1 && i == 1) {
 						int leftGround = Map->GetFielddataAt(dwPos - 1)->wGround;
 						int rightGround = Map->GetFielddataAt(dwPos + isosize)->wGround;
-						if (leftGround == 0xFFFF) leftGround = 0;
-						if (rightGround == 0xFFFF) rightGround = 0;
-						if (!(*tiledata)[leftGround].bMorphable && !(*tiledata)[rightGround].bMorphable)
+						if (leftGround == 0xFFFF) {
+							leftGround = 0;
+						}
+						if (rightGround == 0xFFFF) {
+							rightGround = 0;
+						}
+						if (!(*tiledata)[leftGround].bMorphable && !(*tiledata)[rightGround].bMorphable) {
 							bAllowed = FALSE;
+						}
 					}
 					if (e == 1 && i == -1) {
 						int leftGround = Map->GetFielddataAt(dwPos + 1)->wGround;
 						int rightGround = Map->GetFielddataAt(dwPos - isosize)->wGround;
-						if (leftGround == 0xFFFF) leftGround = 0;
-						if (rightGround == 0xFFFF) rightGround = 0;
-						if (!(*tiledata)[leftGround].bMorphable && !(*tiledata)[rightGround].bMorphable)
+						if (leftGround == 0xFFFF) {
+							leftGround = 0;
+						}
+						if (rightGround == 0xFFFF) {
+							rightGround = 0;
+						}
+						if (!(*tiledata)[leftGround].bMorphable && !(*tiledata)[rightGround].bMorphable) {
 							bAllowed = FALSE;
+						}
 					}
 				}
 
-
-
-
-
-
 				if (/*(*tiledata)[ground].bMorphable &&*/ bAllowed) {
 					int need_diff = (*tiledata)[ground].tiles[fd.bSubTile].bZHeight - (*tiledata)[orig_ground].tiles[orig_fd.bSubTile].bZHeight;
-
-
 					//if(Map->GetHeightAt(pos)-dwNewHeight!=need_diff || !bNonMorpheableMove)
 					{
 						int diff = fd.bHeight - dwNewHeight;
-
 						/*
 						Activate this code to use the huge slopes
 						Removed because it did look worse than the normal slopes
@@ -4218,15 +4246,15 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 							if(diff<-1) diff++;
 							if(diff>1) diff--;
 						}*/
-
-
 						if (!bNonMorpheableMove && bDestMorphable) {
 							//if(!bOnlyHeighten)//!bCliffNext)
 							{
-								if (diff < -1)
+								if (diff < -1) {
 									ChangeTileHeight(pos, dwNewHeight - 1, bNonMorpheableMove, bOnlyThisTile, bNoSlopes);
-								if (diff > 1)
+								}
+								if (diff > 1) {
 									ChangeTileHeight(pos, dwNewHeight + 1, bNonMorpheableMove, bOnlyThisTile, bNoSlopes);
+								}
 							}
 							/*else
 							{

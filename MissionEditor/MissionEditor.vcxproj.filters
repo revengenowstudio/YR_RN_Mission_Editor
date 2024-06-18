@@ -291,6 +291,15 @@
     <ClCompile Include="VoxelDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MapOperationSlopes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MapOperationSmooth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MapOperationMiniMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MissionEditor.rc">
