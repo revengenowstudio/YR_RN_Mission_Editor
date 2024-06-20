@@ -1053,22 +1053,22 @@ STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Scripts"
 FONT 8, "Tahoma"
 BEGIN
-LTEXT           "Scripttypes let you, for example, define that a team moves from one point to another. A scripttype is attached to a TeamType (not a TaskForce!)", IDC_STATIC, 7, 7, 288, 20
-LTEXT           "Scripttype", IDC_STATIC, 7, 31, 65, 12
+LTEXT           "Scripttypes let you, for example, define that a team moves from one point to another. A scripttype is attached to a TeamType (not a TaskForce!)", IDC_SCTIPTTYPE_INRO, 7, 7, 288, 20
+LTEXT           "Scripttype", IDC_SCRIPTTYPE_TYPE, 7, 31, 65, 12
 COMBOBOX        IDC_SCRIPTTYPE, 72, 32, 223, 196, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 PUSHBUTTON      "Add", IDC_ADD, 169, 49, 59, 14
 PUSHBUTTON      "Delete", IDC_DELETE, 236, 49, 59, 14
-LTEXT           "Name:", IDC_STATIC, 7, 74, 65, 12
+LTEXT           "Name:", IDC_SCRIPTTYPE_NAME, 7, 74, 65, 12
 EDITTEXT        IDC_NAME, 72, 74, 223, 13, ES_AUTOHSCROLL
-LTEXT           "Actions:", IDC_STATIC, 7, 92, 65, 11
+LTEXT           "Actions:", IDC_SCRIPTTYPE_ACTIONS, 7, 92, 65, 11
 LISTBOX         IDC_ACTION, 72, 92, 223, 45, LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-LTEXT           "Type of action:", IDC_STATIC, 7, 160, 65, 12
+LTEXT           "Type of action:", IDC_SCRIPTTYPE_ACTIONTYPE, 7, 160, 65, 12
 LTEXT           "Parameter of action:", IDC_PDESC, 7, 180, 65, 17
 COMBOBOX        IDC_TYPE, 72, 161, 223, 192, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 COMBOBOX        IDC_PARAM, 72, 180, 223, 111, CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
 PUSHBUTTON      "Delete", IDC_DELETEACTION, 235, 140, 60, 14
 PUSHBUTTON      "Add", IDC_ADDACTION, 168, 140, 60, 14
-LTEXT           "Description:", IDC_STATIC, 7, 201, 62, 13
+LTEXT           "Description:", IDC_SCRIPTTYPE_DESC, 7, 201, 62, 13
 EDITTEXT        IDC_DESCRIPTION, 72, 201, 221, 24, ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
 END
 

@@ -51,14 +51,13 @@ public:
 	CListBox	m_Action;
 	CString	m_Name;
 	//}}AFX_DATA
-
-
 // Überschreibungen
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
 	//{{AFX_VIRTUAL(CScriptTypes)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
 	//}}AFX_VIRTUAL
+	void UpdateStrings();
 
 // Implementierung
 protected:

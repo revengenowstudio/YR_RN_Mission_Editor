@@ -262,6 +262,24 @@ CScriptTypes::~CScriptTypes()
 {
 }
 
+void CScriptTypes::UpdateStrings()
+{
+	this->SetDlgItemText(IDC_ADD, GetLanguageStringACP("ScriptTypesAddScript"));
+	this->SetDlgItemText(IDC_DELETE, GetLanguageStringACP("ScriptTypesDelScript"));
+
+	this->SetDlgItemText(IDC_SCTIPTTYPE_INRO, GetLanguageStringACP("ScriptTypesDesc"));
+	this->SetDlgItemText(IDC_SCRIPTTYPE_TYPE, GetLanguageStringACP("ScriptTypesSelectedScript"));
+	this->SetDlgItemText(IDC_SCRIPTTYPE_NAME, GetLanguageStringACP("ScriptTypesName"));
+	this->SetDlgItemText(IDC_SCRIPTTYPE_ACTIONS, GetLanguageStringACP("ScriptTypesActions"));
+	this->SetDlgItemText(IDC_SCRIPTTYPE_ACTIONTYPE, GetLanguageStringACP("ScriptTypesActionType"));
+	this->SetDlgItemText(IDC_PDESC, GetLanguageStringACP("ScriptTypesActionParam"));
+	this->SetDlgItemText(IDC_SCRIPTTYPE_DESC, GetLanguageStringACP("ScriptTypesActionDesc"));
+	this->SetDlgItemText(IDC_ADDACTION, GetLanguageStringACP("ScriptTypesAddAction"));
+	this->SetDlgItemText(IDC_DELETEACTION, GetLanguageStringACP("ScriptTypesDelAction"));
+
+	this->SetWindowText(TranslateStringACP("ScriptsCaption"));
+}
+
 void CScriptTypes::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
@@ -714,6 +732,8 @@ void CScriptTypes::ListBehaviours(CComboBox& cb)
 BOOL CScriptTypes::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+
+	UpdateStrings();
 
 	while (m_Type.DeleteString(0) != CB_ERR);
 
