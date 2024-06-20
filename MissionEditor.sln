@@ -148,8 +148,8 @@ Global
 		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertDebug|x64.Build.0 = Debug|x64
 		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertRelease YR|Win32.ActiveCfg = ReleaseMinimal|Win32
 		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertRelease YR|Win32.Build.0 = ReleaseMinimal|Win32
-		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertRelease YR|x64.ActiveCfg = Release|x64
-		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertRelease YR|x64.Build.0 = Release|x64
+		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertRelease YR|x64.ActiveCfg = ReleaseMinimal|x64
+		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertRelease YR|x64.Build.0 = ReleaseMinimal|x64
 		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertRelease|Win32.ActiveCfg = ReleaseMinimal|Win32
 		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertRelease|Win32.Build.0 = ReleaseMinimal|Win32
 		{5E445578-CB45-4D82-9A1C-FC7D3E8D866A}.FinalAlertRelease|x64.ActiveCfg = Release|x64
