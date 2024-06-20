@@ -2152,10 +2152,18 @@ void CFinalSunDlg::UpdateStrings()
 	// now the child windows and the iso view
 	m_view.m_objectview->UpdateDialog();
 	m_view.m_browser->m_bar.Update();
-	if (m_basic.m_hWnd) m_basic.UpdateStrings();
-	if (m_houses.m_hWnd) m_houses.UpdateStrings();
-	if (m_map.m_hWnd) m_map.UpdateStrings();
-	if (m_singleplayersettings.m_hWnd) m_singleplayersettings.UpdateStrings();
+	if (m_basic.m_hWnd) {
+		m_basic.UpdateStrings();
+	}
+	if (m_houses.m_hWnd) {
+		m_houses.UpdateStrings();
+	}
+	if (m_map.m_hWnd) {
+		m_map.UpdateStrings();
+	}
+	if (m_singleplayersettings.m_hWnd) {
+		m_singleplayersettings.UpdateStrings();
+	}
 
 	// we need to check SimpleView if using easy view
 	if (theApp.m_Options.bEasy) GetMenu()->CheckMenuItem(ID_OPTIONS_SIMPLEVIEW, MF_BYCOMMAND | MF_CHECKED);
