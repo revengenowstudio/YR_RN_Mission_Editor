@@ -3,6 +3,7 @@
 #pragma code_page(65001)
 
 #include "resource.h"
+#include "Version.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -3087,13 +3088,13 @@ BEGIN
 VALUE "Comments", "FinalAlert 2: Yuri's Revenge Mission Editor"
 VALUE "CompanyName", "Electronic Arts, Inc."
 VALUE "FileDescription", "FinalAlert 2: Yuri's Revenge"
-VALUE "FileVersion", "2.00"
+VALUE "FileVersion", PRODUCT_VERSION_STRING
 VALUE "InternalName", "FinalAlert 2: Yuri's Revenge Mission Editor"
 VALUE "LegalCopyright", "Copyright (C) 1999-2024 Electronic Arts, Inc."
 VALUE "LegalTrademarks", "FinalAlert 2: Yuri's Revenge"
 VALUE "OriginalFilename", "FinalAlert2YR.EXE"
 VALUE "ProductName", "FinalAlert 2: Yuri's Revenge"
-VALUE "ProductVersion", "2.00"
+VALUE "ProductVersion", PRODUCT_VERSION_STRING
 END
 END
 BLOCK "VarFileInfo"
@@ -3128,13 +3129,13 @@ BEGIN
 VALUE "Comments", "FinalSun Mission Editor"
 VALUE "CompanyName", "Electronic Arts, Inc."
 VALUE "FileDescription", "FinalSun"
-VALUE "FileVersion", "2.00"
+VALUE "FileVersion", PRODUCT_VERSION_STRING
 VALUE "InternalName", "FinalSun Mission Editor"
 VALUE "LegalCopyright", "Copyright (C) 1999-2024 Electronic Arts, Inc."
 VALUE "LegalTrademarks", "FinalSun"
 VALUE "OriginalFilename", "FinalSun.EXE"
 VALUE "ProductName", "FinalSun"
-VALUE "ProductVersion", "2.00"
+VALUE "ProductVersion", PRODUCT_VERSION_STRING
 END
 END
 BLOCK "VarFileInfo"
@@ -3537,9 +3538,9 @@ END
 STRINGTABLE
 BEGIN
 IDS_BUILTBY             "Matthias Wagner"
-IDS_VERSIONTEXT         "Version 2.00"
-IDS_VERSION             "2.00"
-IDS_VERSIONTEXTTS       "Version 2.00"
+IDS_VERSIONTEXT         "Version " PRODUCT_VERSION_STRING
+IDS_VERSION             PRODUCT_VERSION_STRING
+IDS_VERSIONTEXTTS       "Version " PRODUCT_VERSION_STRING
 END
 
 STRINGTABLE

@@ -694,6 +694,7 @@
     <ClInclude Include="UserScriptsDlg.h" />
     <ClInclude Include="variables.h" />
     <ClInclude Include="Vec2.h" />
+    <ClInclude Include="Version.h" />
     <ClInclude Include="ViewObjects.h" />
     <ClInclude Include="VoxelDrawer.h" />
     <ClInclude Include="WaypointID.h" />
