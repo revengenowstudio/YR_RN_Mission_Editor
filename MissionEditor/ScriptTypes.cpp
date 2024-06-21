@@ -264,20 +264,20 @@ CScriptTypes::~CScriptTypes()
 
 void CScriptTypes::UpdateStrings()
 {
-	this->SetDlgItemText(IDC_ADD, GetLanguageStringACP("ScriptTypesAddScript"));
-	this->SetDlgItemText(IDC_DELETE, GetLanguageStringACP("ScriptTypesDelScript"));
+	TranslateDlgItem(*this, IDC_ADD, "ScriptTypesAddScript");
+	TranslateDlgItem(*this, IDC_DELETE, "ScriptTypesDelScript");
 
-	this->SetDlgItemText(IDC_SCTIPTTYPE_INRO, GetLanguageStringACP("ScriptTypesDesc"));
-	this->SetDlgItemText(IDC_SCRIPTTYPE_TYPE, GetLanguageStringACP("ScriptTypesSelectedScript"));
-	this->SetDlgItemText(IDC_SCRIPTTYPE_NAME, GetLanguageStringACP("ScriptTypesName"));
-	this->SetDlgItemText(IDC_SCRIPTTYPE_ACTIONS, GetLanguageStringACP("ScriptTypesActions"));
-	this->SetDlgItemText(IDC_SCRIPTTYPE_ACTIONTYPE, GetLanguageStringACP("ScriptTypesActionType"));
-	this->SetDlgItemText(IDC_PDESC, GetLanguageStringACP("ScriptTypesActionParam"));
-	this->SetDlgItemText(IDC_SCRIPTTYPE_DESC, GetLanguageStringACP("ScriptTypesActionDesc"));
-	this->SetDlgItemText(IDC_ADDACTION, GetLanguageStringACP("ScriptTypesAddAction"));
-	this->SetDlgItemText(IDC_DELETEACTION, GetLanguageStringACP("ScriptTypesDelAction"));
+	TranslateDlgItem(*this, IDC_SCTIPTTYPE_INRO, "ScriptTypesDesc");
+	TranslateDlgItem(*this, IDC_SCRIPTTYPE_TYPE, "ScriptTypesSelectedScript");
+	TranslateDlgItem(*this, IDC_SCRIPTTYPE_NAME, "ScriptTypesName");
+	TranslateDlgItem(*this, IDC_SCRIPTTYPE_ACTIONS, "ScriptTypesActions");
+	TranslateDlgItem(*this, IDC_SCRIPTTYPE_ACTIONTYPE, "ScriptTypesActionType");
+	TranslateDlgItem(*this, IDC_PDESC, "ScriptTypesActionParam");
+	TranslateDlgItem(*this, IDC_SCRIPTTYPE_DESC, "ScriptTypesActionDesc");
+	TranslateDlgItem(*this, IDC_ADDACTION, "ScriptTypesAddAction");
+	TranslateDlgItem(*this, IDC_DELETEACTION, "ScriptTypesDelAction");
 
-	this->SetWindowText(TranslateStringACP("ScriptsCaption"));
+	TranslateWindowCaption(*this, "ScriptsCaption");
 }
 
 void CScriptTypes::DoDataExchange(CDataExchange* pDX)
