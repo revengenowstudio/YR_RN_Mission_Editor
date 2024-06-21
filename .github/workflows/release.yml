@@ -15,7 +15,7 @@ env:
   IS_PRERELEASE: false
 
 jobs:
-  compile-check:
+  build-and-release:
     runs-on: windows-2022
     env:
       CONFIGURATION: FinalAlertRelease YR
@@ -37,7 +37,7 @@ jobs:
       run: |
         versionNum=${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.${{ github.run_number }}
         pkgName=RN-Mission-Editor-v$versionNum.zip
-        .\scripts\update_product_version.ps1 -major ${{ env.VERSION_MAJOR }} -minor ${{ env.VERSION_MINOR }} -revision ${{ github.run_number }}
+        ./scripts/update_product_version.ps1 -major ${{ env.VERSION_MAJOR }} -minor ${{ env.VERSION_MINOR }} -revision ${{ github.run_number }}
         echo "RELEASE_VER=$versionNum" >> $GITHUB_ENV
         echo "PACKAGE_NAME=$pkgName" >> $GITHUB_ENV
     - name: build-msvc
