@@ -1,0 +1,58 @@
+name: Release Product
+
+on:
+  push:
+    branches:
+      - "main"
+      - "RN"
+  workflow_dispatch:
+
+env:
+  VERSION_MAJOR: 2
+  VERSION_MINOR: 1
+  RELEASE_VER:
+  PACKAGE_NAME:
+  IS_PRERELEASE: false
+
+jobs:
+  compile-check:
+    runs-on: windows-2022
+    env:
+      CONFIGURATION: FinalAlertRelease YR
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+        submodules: recursive
+        lfs: true
+    - name: setup-msvc
+      uses: egor-tensin/vs-shell@v2
+      with:
+        # Target architecture
+        arch: x64
+    - name: Handle version
+      shell: bash
+      run: |
+        versionNum=${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.${{ github.run_number }}
+        pkgName=RN-Mission-Editor-v$versionNum.zip
+        .\scripts\update_product_version.ps1 -major ${{ env.VERSION_MAJOR }} -minor ${{ env.VERSION_MINOR }} -revision ${{ github.run_number }}
+        echo "RELEASE_VER=$versionNum" >> $GITHUB_ENV
+        echo "PACKAGE_NAME=$pkgName" >> $GITHUB_ENV
+    - name: build-msvc
+      run: |
+        devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
+    - name: Pack up
+      shell: pwsh
+      run: |
+        cd dist/FinalAlert2YR
+        Compress-Archive -Path ./* -DestinationPath ../${{ env.PACKAGE_NAME }}
+    - name: Release - ${{ env.RELEASE_VER }}
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ env.RELEASE_VER }}
+        name: ${{ env.RELEASE_VER }}
+        files: dist/${{ env.PACKAGE_NAME }}
+        target_commitish: ${{ github.ref }}
+        prerelease: ${{ env.IS_PRERELEASE }}
