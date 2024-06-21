@@ -125,7 +125,7 @@ char* strcpy_safe(char* strDestination, const char* strSource);
 
 // retrieve the string name in the correct language (name is an ID).
 // the returned string is in the active codepage (UTF-8 on Windows 10 1909+)
-CString GetLanguageStringACP(CString name);
+CString GetLanguageStringACP(const CString name);
 
 // tranlate a string/word by using the table from english to the current language
 // the returned string is in the active codepage (UTF-8 on Windows 10 1909+)
@@ -134,6 +134,9 @@ CString TranslateStringACP(CString u8EnglishString);
 // tranlate a string/word by using the table from english to the current language
 // the returned string is in the active codepage (UTF-8 on Windows 10 1909+)
 CString TranslateStringACP(WCHAR* u16EnglishString);
+
+void TranslateDlgItem(CWnd& cwnd, int controlID, const CString& label);
+void TranslateWindowCaption(CWnd& cwnd, const CString& label);
 
 /****************************************
  sound functions [03/16/2001]
