@@ -27,6 +27,7 @@
 #include "FinalSunDlg.h"
 #include "mapdata.h"
 #include "variables.h"
+#include "functions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -67,6 +68,11 @@ END_MESSAGE_MAP()
 // Behandlungsroutinen für Nachrichten CToolSettingsBar 
 
 
+
+void CToolSettingsBar::TranslateUI()
+{
+	TranslateDlgItem(*this, IDC_STATIC, "ToolSettingsBarBrushSize");
+}
 
 void CToolSettingsBar::OnSelchangeBrushsize()
 {
@@ -122,19 +128,23 @@ void CToolSettingsBar::OnSelchangeBrushsize()
 	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = by;
 }
 
-BOOL CToolSettingsBar::OnInitDialog()
+// never called
+#if 0
+void CToolSettingsBar::OnInitialUpdate()
 {
+	CDialogBar::OnInitialUpdate();
+
 	m_BrushSize = 0;
 	UpdateData(FALSE);
 
 	((CComboBox*)GetDlgItem(IDC_BRUSHSIZE))->SetCurSel(0);
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }
+#endif
 
 void CToolSettingsBar::OnShowWindow(BOOL bShow, UINT nStatus)
 {
+	TranslateUI();
+
 	CDialogBar::OnShowWindow(bShow, nStatus);
 
 	UpdateData(FALSE);

@@ -52,11 +52,14 @@ protected:
 
 // Implementierung
 protected:
+	void TranslateUI();
 
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CToolSettingsBar)
 	afx_msg void OnSelchangeBrushsize();
-	virtual BOOL OnInitDialog();
+#if 0
+	afx_msg void OnInitialUpdate();
+#endif
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
