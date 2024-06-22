@@ -431,6 +431,15 @@ const CString* getLanguageString(const CString& key)
 	return language.GetSection("English-Strings").TryGetString(key);
 }
 
+CString escapeString(const CString& input)
+{
+	auto updated = input;
+	if (updated.Find("\\n")) {
+		updated.Replace("\\n", "\n");
+	}
+	return updated;
+}
+
 // retrieve the string name in the correct language (name is an ID).
 CString GetLanguageStringACP(const CString name)
 {
@@ -477,7 +486,7 @@ void TranslateDlgItem(CWnd& cwnd, int controlID, const CString& label)
 {
 	auto const translated = getLanguageString(label);
 	if (translated) {
-		cwnd.SetDlgItemText(controlID, *translated);
+		cwnd.SetDlgItemText(controlID, escapeString(*translated));
 	}
 }
 
@@ -485,7 +494,7 @@ void TranslateWindowCaption(CWnd& cwnd, const CString& label)
 {
 	auto const translated = getLanguageString(label);
 	if (translated) {
-		cwnd.SetWindowText(*translated);
+		cwnd.SetWindowText(escapeString(*translated));
 	}
 }
 
