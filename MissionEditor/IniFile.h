@@ -199,7 +199,8 @@ public:
 		ASSERT(idx < value_pairs.size());
 		// delete from record first;
 		auto const& pair = value_pairs.at(idx);
-		ASSERT(value_pos.erase(pair.first) == 1);
+		auto const eraseCount = value_pos.erase(pair.first);
+		ASSERT(eraseCount == 1);
 		value_pairs.erase(value_pairs.begin() + idx);
 		// now update all key-pos indexing, dec 1
 		for (auto affectedIdx = idx; affectedIdx < value_pairs.size(); ++affectedIdx) {
@@ -348,12 +349,13 @@ public:
 	void SetString(const CString& section, const CString& key, CString&& value) {
 		auto const it = sections.find(section);
 		if (it != sections.end()) {
-			it->second.SetString(key, value);
+			it->second.SetString(key, std::move(value));
 			return;
 		}
 		auto&& newSec = CIniFileSection{};
-		newSec.SetString(key, value);
-		ASSERT(sections.insert({ section, std::move(newSec) }).second == true);
+		newSec.SetString(key, std::move(value));
+		auto const success = sections.insert({ section, std::move(newSec) }).second;
+		ASSERT(success == true);
 	}
 
 	void SetString(const CString& section, const CString& key, const CString& value) {
