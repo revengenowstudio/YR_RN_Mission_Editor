@@ -1,12 +1,11 @@
 ﻿//{{NO_DEPENDENCIES}}
-// Von Microsoft Visual C++ generierte Includedatei.
-// Verwendet durch MissionEditor.rc
+// Microsoft Visual C++ generated include file.
+// Used by MissionEditor.rc
 //
 #define IDD_TIBERIANSUNMISSIONEDITOR_DIALOG 102
 #define IDD_FINALSUN_DIALOG             102
 #define IDB_LIGHTBULB                   103
 #define IDD_TIP                         104
-
 #define IDR_MAINFRAME                   128
 #define IDR_MAIN                        129
 #define IDD_BASIC                       135
@@ -172,6 +171,7 @@
 #define IDC_LEVEL2                      1067
 #define IDC_INITIALVETERAN              1067
 #define IDC_POS                         1067
+#define IDC_SCRIPT_COPY                 1067
 #define IDC_FIXEDALLIANCE               1068
 #define IDC_HARVESTERIMMUNE             1069
 #define IDC_FOGOFWAR                    1070
@@ -299,9 +299,12 @@
 #define IDC_LABEL_A6                    1191
 #define IDC_TRIGGER2                    1192
 #define IDC_SCRIPTTYPE                  1193
+#define IDC_SCRIPT_TEMPLATE             1194
 #define IDC_PARAM                       1196
+#define IDC_SCRIPT_EXTRA                1197
 #define IDC_PDESC                       1198
 #define IDC_AITRIGGERTYPE               1199
+#define IDC_SCRIPT_EXDESC               1199
 #define IDC_ENABLEALL                   1200
 #define IDC_TEAMTYPE1                   1204
 #define IDC_OWNER                       1205
@@ -514,20 +517,20 @@
 #define IDC_PREFER_LOCAL_THEATER_INI_FILES 1462
 #define IDC_PREFER_LOCAL_THEATER_FILES  1463
 #define IDC_TRIGGER_OPTION_TYPE_STR     1464
-#define IDC_TRIGGER_OPTION_NAME			1465
-#define IDC_TRIGGER_OPTION_HOUSE		1466
-#define IDC_TRIGGER_OPTION_ATTACHED_TRIGGER		1467
-#define IDC_TRIGGER_OPTION_TRIGGER_DIS_TIP		1468
-#define IDC_MAP_D_WIDTH					1469
-#define IDC_MAP_D_HEIGHT				1470
-#define IDC_SCTIPTTYPE_INRO				1471
-#define IDC_SCRIPTTYPE_TYPE				1472
-#define IDC_SCRIPTTYPE_NAME				1473
-#define IDC_SCRIPTTYPE_ACTIONS			1474
-#define IDC_SCRIPTTYPE_ACTIONTYPE		1475
-#define IDC_SCRIPTTYPE_DESC				1476
-#define IDD_TERRAINBAR_TG				1477
-#define IDD_TERRAINBAR_OS				1478
+#define IDC_TRIGGER_OPTION_NAME         1465
+#define IDC_TRIGGER_OPTION_HOUSE        1466
+#define IDC_TRIGGER_OPTION_ATTACHED_TRIGGER 1467
+#define IDC_TRIGGER_OPTION_TRIGGER_DIS_TIP 1468
+#define IDC_MAP_D_WIDTH                 1469
+#define IDC_MAP_D_HEIGHT                1470
+#define IDC_SCTIPTTYPE_INRO             1471
+#define IDC_SCRIPTTYPE_TYPE             1472
+#define IDC_SCRIPTTYPE_NAME             1473
+#define IDC_SCRIPTTYPE_ACTIONS          1474
+#define IDC_SCRIPTTYPE_ACTIONTYPE       1475
+#define IDC_SCRIPTTYPE_DESC             1476
+#define IDD_TERRAINBAR_TG               1477
+#define IDD_TERRAINBAR_OS               1478
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -605,18 +608,16 @@
 #define ID_HELP_SHOWLOGS40140           40130
 #define ID_OPTIONS_SMOOTHZOOM           40131
 #define ID_OPTIONS_USEDEFAULTMOUSECURSOR 40132
-
 #define ID_FILE_FILE1                   40139
 #define ID_FILE_FILE2                   40140
 #define ID_FILE_FILE3                   40141
 #define ID_FILE_FILE4                   40142
-#define ID_FILE_FILE5					40143
-#define ID_FILE_FILE6					40144
-#define ID_FILE_FILE7					40145
-#define ID_FILE_FILE8					40146
-#define ID_FILE_FILE9					40147
-#define ID_FILE_FILE10					40148
-
+#define ID_FILE_FILE5                   40143
+#define ID_FILE_FILE6                   40144
+#define ID_FILE_FILE7                   40145
+#define ID_FILE_FILE8                   40146
+#define ID_FILE_FILE9                   40147
+#define ID_FILE_FILE10                  40148
 #define IDS_LINEARVERSION               57604
 #define IDC_TOOLTIPCENTER               65535
 

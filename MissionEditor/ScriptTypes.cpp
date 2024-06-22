@@ -251,6 +251,19 @@ char const* UnloadTypeNames[UNLOAD_COUNT] = {
 
 IMPLEMENT_DYNCREATE(CScriptTypes, CDialog)
 
+int scriptTypeIndexToComboBoxIndex(CComboBox& comboBox, int scriptTypeIndex)
+{
+	auto const totalCount = comboBox.GetCount();
+	for (auto idx = 0; idx < totalCount; ++idx) {
+		const int MData = comboBox.GetItemData(idx);
+		if (MData == scriptTypeIndex) {
+			return idx;
+		}
+	}
+
+	return 0;
+}
+
 CScriptTypes::CScriptTypes() : CDialog(CScriptTypes::IDD)
 {
 	//{{AFX_DATA_INIT(CScriptTypes)
@@ -286,30 +299,31 @@ void CScriptTypes::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CScriptTypes)
 	DDX_Control(pDX, IDC_DESCRIPTION, m_DescriptionEx);
 	DDX_Control(pDX, IDC_PDESC, m_Desc);
-	DDX_Control(pDX, IDC_TYPE, m_Type);
+	DDX_Control(pDX, IDC_TYPE, m_ActionType);
 	DDX_Control(pDX, IDC_SCRIPTTYPE, m_ScriptType);
 	DDX_Control(pDX, IDC_PARAM, m_Param);
-	DDX_Control(pDX, IDC_ACTION, m_Action);
+	DDX_Control(pDX, IDC_ACTION, m_Actions);
 	DDX_Text(pDX, IDC_NAME, m_Name);
 	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CScriptTypes, CDialog)
-	//{{AFX_MSG_MAP(CScriptTypes)
 	ON_CBN_KILLFOCUS(IDC_SCRIPTTYPE, OnEditchangeScripttype)
 	ON_CBN_SELCHANGE(IDC_SCRIPTTYPE, OnSelchangeScripttype)
-	ON_LBN_SELCHANGE(IDC_ACTION, OnSelchangeAction)
+	ON_LBN_SELCHANGE(IDC_ACTION, OnSelchangeActionList)
 	ON_EN_KILLFOCUS(IDC_NAME, OnChangeName)
-	ON_CBN_KILLFOCUS(IDC_TYPE, OnEditchangeType)
-	ON_CBN_SELCHANGE(IDC_TYPE, OnSelchangeType)
+	ON_CBN_KILLFOCUS(IDC_TYPE, OnEditchangeActionType)
+	ON_CBN_SELCHANGE(IDC_TYPE, OnSelchangeActionType)
 	ON_CBN_KILLFOCUS(IDC_PARAM, OnEditchangeParam)
 	ON_CBN_SELCHANGE(IDC_PARAM, OnSelchangeParam)
 	ON_BN_CLICKED(IDC_ADDACTION, OnAddaction)
 	ON_BN_CLICKED(IDC_DELETEACTION, OnDeleteaction)
 	ON_BN_CLICKED(IDC_ADD, OnAdd)
 	ON_BN_CLICKED(IDC_DELETE, OnDelete)
-	//}}AFX_MSG_MAP
+	ON_CBN_SELCHANGE(IDC_SCRIPT_EXTRA, &CScriptTypes::OnCbnSelchangeScriptExtra)
+	ON_CBN_SELCHANGE(IDC_SCRIPT_TEMPLATE, &CScriptTypes::OnCbnSelchangeScriptTemplate)
+	ON_BN_CLICKED(IDC_SCRIPT_COPY, &CScriptTypes::OnBnClickedScriptCopy)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -329,8 +343,10 @@ void CScriptTypes::UpdateDialog()
 	m_DescriptionEx.SetWindowText("");
 	m_Name = "";
 	m_Param.SetWindowText("");
-	m_Action.SetWindowText("");
-	m_Type.SetCurSel(-1);
+	m_ParamExt.SetWindowText("");
+	m_Actions.SetWindowText("");
+	m_ActionType.SetCurSel(-1);
+	m_Template.SetCurSel(-1);
 
 	UpdateData(FALSE);
 
@@ -360,8 +376,8 @@ void CScriptTypes::OnSelchangeScripttype()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	int sel = m_Action.GetCurSel();
-	while (m_Action.DeleteString(0) != CB_ERR);
+	int sel = m_Actions.GetCurSel();
+	while (m_Actions.DeleteString(0) != CB_ERR);
 
 	CString Scripttype;
 	if (m_ScriptType.GetCurSel() < 0) return;
@@ -375,41 +391,47 @@ void CScriptTypes::OnSelchangeScripttype()
 	for (i = 0; i < count; i++) {
 		char c[50];
 		itoa(i, c, 10);
-		m_Action.AddString(c);
+		m_Actions.AddString(c);
 	}
 
 
-	m_Action.SetCurSel(0);
-	if (sel >= 0) m_Action.SetCurSel(sel);
-	OnSelchangeAction();
+	m_Actions.SetCurSel(0);
+	if (sel >= 0) m_Actions.SetCurSel(sel);
+	OnSelchangeActionList();
 
 	UpdateData(FALSE);
 }
 
-void CScriptTypes::OnSelchangeAction()
+void CScriptTypes::OnSelchangeActionList()
 {
-	CIniFile& ini = Map->GetIniFile();
+	auto& doc = Map->GetIniFile();
+	CString scriptId, buffer, paramNumStr;
+	int listIndex, actionIndex, selectIndex;
 
-	CString Scripttype;
-	char action[50];
-	if (m_ScriptType.GetCurSel() < 0) {
-		return;
+	auto const scriptIndex = this->m_ScriptType.GetCurSel();
+	listIndex = this->m_Actions.GetCurSel();
+	if (scriptIndex >= 0 && listIndex >= 0) {
+		this->m_ScriptType.GetLBText(scriptIndex, scriptId);
+		TruncSpace(scriptId);
+		auto const idxs = std::to_string(listIndex);
+		buffer.Format("%d", listIndex);
+		buffer = doc.GetStringOr(scriptId, buffer, "0,0");
+		actionIndex = buffer.Find(',');
+		if (actionIndex < 0) {
+			buffer += ",0";
+			actionIndex = buffer.GetLength() - 2;
+		}
+		paramNumStr = buffer.Mid(actionIndex + 1);
+		TruncSpace(paramNumStr);
+
+		actionIndex = atoi(buffer.Mid(0, actionIndex));
+
+		selectIndex = scriptTypeIndexToComboBoxIndex(this->m_ActionType, actionIndex);
+
+		this->m_ActionType.SetCurSel(selectIndex);
+		this->UpdateParams(actionIndex, paramNumStr);
+		this->m_Param.SetWindowText(paramNumStr);
 	}
-	if (m_Action.GetCurSel() < 0) {
-		return;
-	}
-	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
-	TruncSpace(Scripttype);
-
-	itoa(m_Action.GetCurSel(), action, 10);
-	//m_Type.SetWindowText(GetParam(ini.sections[(LPCTSTR)Scripttype].values[action],0));
-	m_Type.SetCurSel(atoi(GetParam(ini.GetString(Scripttype, action), 0)));
-
-	OnSelchangeType();
-
-	m_Param.SetWindowText(GetParam(ini.GetString(Scripttype, action), 1));
-
-
 }
 
 void CScriptTypes::OnChangeName()
@@ -436,23 +458,23 @@ void CScriptTypes::OnChangeName()
 	n->SetSel(pos);
 }
 
-void CScriptTypes::OnEditchangeType()
+void CScriptTypes::OnEditchangeActionType()
 {
 	CIniFile& ini = Map->GetIniFile();
 
 	while (m_Param.DeleteString(0) != CB_ERR);
 	CString Scripttype;
 	char action[50];
-	if (m_Action.GetCurSel() < 0) return;
+	if (m_Actions.GetCurSel() < 0) return;
 	if (m_ScriptType.GetCurSel() < 0) return;
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 
 	//CString type;
-	//m_Type.GetWindowText(type);
+	//m_ActionType.GetWindowText(type);
 	//TruncSpace(type);
 	//MessageBox("beep");
-	int type = m_Type.GetCurSel();
+	int type = m_ActionType.GetCurSel();
 
 	int i;
 	char tmp[50];
@@ -464,7 +486,7 @@ void CScriptTypes::OnEditchangeType()
 		break;
 	case 39:
 	case 40:
-		ListGlobals(m_Param);
+		ListMapVariables(m_Param);
 		break;
 
 	case 11:
@@ -538,26 +560,26 @@ void CScriptTypes::OnEditchangeType()
 		m_Desc.SetWindowText("Parameter of action:");
 	}
 
-	itoa(m_Action.GetCurSel(), action, 10);
+	itoa(m_Actions.GetCurSel(), action, 10);
 
 	char types[50];
 	itoa(type, types, 10);
 	ini.SetString(Scripttype, action, SetParam(ini.GetString(Scripttype, action), 0, types));
 }
 
-void CScriptTypes::OnSelchangeType()
+void CScriptTypes::OnSelchangeActionType()
 {
 	CString str;
-	if (m_Type.GetCurSel() > -1) {
-		//m_Type.GetLBText(m_Type.GetCurSel(), str);
-		//m_Type.SetWindowText(str);
+	if (m_ActionType.GetCurSel() > -1) {
+		//m_ActionType.GetLBText(m_ActionType.GetCurSel(), str);
+		//m_ActionType.SetWindowText(str);
 
-		m_DescriptionEx.SetWindowText(TMissionsHelp[m_Type.GetCurSel()]);
+		m_DescriptionEx.SetWindowText(TMissionsHelp[m_ActionType.GetCurSel()]);
 	}
 
 
 
-	OnEditchangeType();
+	OnEditchangeActionType();
 }
 
 void CScriptTypes::OnEditchangeParam()
@@ -566,7 +588,7 @@ void CScriptTypes::OnEditchangeParam()
 
 	CString Scripttype;
 	char action[50];
-	if (m_Action.GetCurSel() < 0) return;
+	if (m_Actions.GetCurSel() < 0) return;
 	if (m_ScriptType.GetCurSel() < 0) return;
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
@@ -577,7 +599,7 @@ void CScriptTypes::OnEditchangeParam()
 
 	param = TranslateHouse(param);
 
-	itoa(m_Action.GetCurSel(), action, 10);
+	itoa(m_Actions.GetCurSel(), action, 10);
 	ini.SetString(Scripttype, action, SetParam(ini.GetString(Scripttype, action), 1, param));
 }
 
@@ -610,7 +632,7 @@ void CScriptTypes::OnDeleteaction()
 	CIniFile& ini = Map->GetIniFile();
 
 	CString Scripttype;
-	if (m_Action.GetCurSel() < 0) return;
+	if (m_Actions.GetCurSel() < 0) return;
 	if (m_ScriptType.GetCurSel() < 0) return;
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
@@ -618,7 +640,7 @@ void CScriptTypes::OnDeleteaction()
 
 	// okay, action is now the deleted one...
 	int i;
-	for (i = m_Action.GetCurSel(); i < m_Action.GetCount() - 1; i++) {
+	for (i = m_Actions.GetCurSel(); i < m_Actions.GetCount() - 1; i++) {
 		// okay, now move every action one number up.
 		char current[50];
 		char next[50];
@@ -629,7 +651,7 @@ void CScriptTypes::OnDeleteaction()
 		ini.SetString(Scripttype, current, ini.GetString(Scripttype, next));
 	}
 	char last[50];
-	itoa(m_Action.GetCount() - 1, last, 10);
+	itoa(m_Actions.GetCount() - 1, last, 10);
 	ini.RemoveValueByKey(Scripttype, last);
 
 	UpdateDialog();
@@ -693,39 +715,39 @@ void CScriptTypes::ListBehaviours(CComboBox& cb)
 {
 	while (cb.DeleteString(0) != CB_ERR);
 
-	cb.AddString("0 - Sleep");
-	cb.AddString("1 - Attack nearest enemy");
-	cb.AddString("2 - Move");
-	cb.AddString("3 - QMove");
-	cb.AddString("4 - Retreat home for R&R");
-	cb.AddString("5 - Guard");
-	cb.AddString("6 - Sticky (never recruit)");
-	cb.AddString("7 - Enter object");
-	cb.AddString("8 - Capture object");
-	cb.AddString("9 - Move into & get eaten");
-	cb.AddString("10 - Harvest");
-	cb.AddString("11 - Area Guard");
-	cb.AddString("12 - Return (to refinery)");
-	cb.AddString("13 - Stop");
-	cb.AddString("14 - Ambush (wait until discovered)");
-	cb.AddString("15 - Hunt");
-	cb.AddString("16 - Unload");
-	cb.AddString("17 - Sabotage (move in & destroy)");
-	cb.AddString("18 - Construction");
-	cb.AddString("19 - Deconstruction");
-	cb.AddString("20 - Repair");
-	cb.AddString("21 - Rescue");
-	cb.AddString("22 - Missile");
-	cb.AddString("23 - Harmless");
-	cb.AddString("24 - Open");
-	cb.AddString("25 - Patrol");
-	cb.AddString("26 - Paradrop approach drop zone");
-	cb.AddString("27 - Paradrop overlay drop zone");
-	cb.AddString("28 - Wait");
-	cb.AddString("29 - Attack move");
+	cb.AddString(TranslateStringACP("0 - Sleep"));
+	cb.AddString(TranslateStringACP("1 - Attack nearest enemy"));
+	cb.AddString(TranslateStringACP("2 - Move"));
+	cb.AddString(TranslateStringACP("3 - QMove"));
+	cb.AddString(TranslateStringACP("4 - Retreat home for R&R"));
+	cb.AddString(TranslateStringACP("5 - Guard"));
+	cb.AddString(TranslateStringACP("6 - Sticky (never recruit)"));
+	cb.AddString(TranslateStringACP("7 - Enter object"));
+	cb.AddString(TranslateStringACP("8 - Capture object"));
+	cb.AddString(TranslateStringACP("9 - Move into & get eaten"));
+	cb.AddString(TranslateStringACP("10 - Harvest"));
+	cb.AddString(TranslateStringACP("11 - Area Guard"));
+	cb.AddString(TranslateStringACP("12 - Return (to refinery)"));
+	cb.AddString(TranslateStringACP("13 - Stop"));
+	cb.AddString(TranslateStringACP("14 - Ambush (wait until discovered)"));
+	cb.AddString(TranslateStringACP("15 - Hunt"));
+	cb.AddString(TranslateStringACP("16 - Unload"));
+	cb.AddString(TranslateStringACP("17 - Sabotage (move in & destroy)"));
+	cb.AddString(TranslateStringACP("18 - Construction"));
+	cb.AddString(TranslateStringACP("19 - Deconstruction"));
+	cb.AddString(TranslateStringACP("20 - Repair"));
+	cb.AddString(TranslateStringACP("21 - Rescue"));
+	cb.AddString(TranslateStringACP("22 - Missile"));
+	cb.AddString(TranslateStringACP("23 - Harmless"));
+	cb.AddString(TranslateStringACP("24 - Open"));
+	cb.AddString(TranslateStringACP("25 - Patrol"));
+	cb.AddString(TranslateStringACP("26 - Paradrop approach drop zone"));
+	cb.AddString(TranslateStringACP("27 - Paradrop overlay drop zone"));
+	cb.AddString(TranslateStringACP("28 - Wait"));
+	cb.AddString(TranslateStringACP("29 - Attack again"));
 	if (yuri_mode) {
-		//	cb.AddString("30 - Spyplane approach");
-		//	cb.AddString("31 - Spyplane retreat");
+		cb.AddString(TranslateStringACP("30 - Spyplane approach"));
+		cb.AddString(TranslateStringACP("31 - Spyplane retreat"));
 	}
 }
 
@@ -735,7 +757,7 @@ BOOL CScriptTypes::OnInitDialog()
 
 	UpdateStrings();
 
-	while (m_Type.DeleteString(0) != CB_ERR);
+	while (m_ActionType.DeleteString(0) != CB_ERR);
 
 
 	int i;
@@ -751,11 +773,292 @@ BOOL CScriptTypes::OnInitDialog()
 		p += TMissions[i];
 
 		if (strlen(TMissions[i]) > 0) {
-			m_Type.AddString(p);
+			m_ActionType.AddString(p);
 		}
 	}
 
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+}
+
+void CScriptTypes::OnCbnSelchangeScriptExtra()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
+void CScriptTypes::OnCbnSelchangeScriptTemplate()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
+void CScriptTypes::OnBnClickedScriptCopy()
+{
+	// TODO: Add your control notification handler code here
+}
+
+
+void CScriptTypes::updateExtraParamComboBox(ExtraParameterType type, int value)
+{
+	//LogDebug(" type = %d", type);
+	HWND text = ::GetDlgItem(this->m_hWnd, IDC_SCRIPT_EXDESC);
+	switch (type) {
+	default:
+	case ExtraParameterType::None:
+		::EnableWindow(text, FALSE);
+		m_ParamExt.Clear();
+		m_ParamExt.EnableWindow(false);
+		m_ParamExt.SetWindowText("");
+		break;
+	case ExtraParameterType::ScanType:
+	{
+		::EnableWindow(text, TRUE);
+		m_ParamExt.Clear();
+		m_ParamExt.EnableWindow(true);
+		m_ParamExt.AddString(TranslateStringACP("0 - Least threat"));
+		m_ParamExt.AddString(TranslateStringACP("1 - Most threat"));
+		m_ParamExt.AddString(TranslateStringACP("2 - Least distant"));
+		m_ParamExt.AddString(TranslateStringACP("3 - Most distant"));
+		m_ParamExt.SetCurSel(value);
+		char buffer[0x20];
+		_itoa_s(value, buffer, 10);
+		m_ParamExt.SetWindowTextA(buffer);
+		//LogDebug(" [%X] window enabled", m_ParamExt.GetHWND());
+	}
+	break;
+	case ExtraParameterType::Counter:
+	{
+		::EnableWindow(text, TRUE);
+		m_ParamExt.Clear();
+		m_ParamExt.EnableWindow(true);
+		char buffer[0x20];
+		_itoa_s(value, buffer, 10);
+		m_ParamExt.SetWindowTextA(buffer);
+		break;
+	}
+	}
+}
+
+const CScriptTypes::CScriptTypeAction& CScriptTypes::getActionData(int actionCbIndex) const
+{
+	return m_actionDefinitions.at(actionCbIndex);
+}
+
+const CScriptTypes::CScriptTypeParam& CScriptTypes::getParamData(int paramIndex) const
+{
+	return m_paramDefinitions.at(paramIndex);
+}
+ParameterType CScriptTypes::getParameterType(int actionCbIndex) const
+{
+	return getParamData(getActionData(actionCbIndex).ParamTypeIndex_).Type_;
+}
+
+ExtraParameterType getExtraParamType(ParameterType paramType)
+{
+	switch (paramType) {
+	default:
+		return ExtraParameterType::None;
+	case PRM_BuildingType:
+		return ExtraParameterType::ScanType;
+	}
+}
+
+void CScriptTypes::updateExtraValue(ParameterType paramType, CString& paramNumStr)
+{
+	int extraValue = 0;
+	if (paramType == PRM_BuildingType) {
+		DWORD rawNum = atoi(paramNumStr);
+		paramNumStr.Format("%d", LOWORD(rawNum));
+		extraValue = HIWORD(rawNum);
+	}
+	errstream << "paramType " << paramType << std::endl;
+	updateExtraParamComboBox(getExtraParamType(paramType), extraValue);
+}
+
+static void ListSplitGroup(CComboBox& comboBox)
+{
+	while (comboBox.DeleteString(0) != -1);
+
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("0 - Keep Transports, Keep Units")), 0);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("1 - Keep Transports, Lose Units")), 1);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("2 - Lose Transports, Keep Units")), 2);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("3 - Lose Transports, Lose Units")), 3);
+}
+
+static void ListScriptLine(const CScriptTypes::ActionDefinitionMap& actionDef, CComboBox& comboBox, CComboBox& currentScript, CListBox& listBox)
+{
+	int itemNum = listBox.GetCount();
+	// up to 50
+	if (itemNum > 50) {
+		itemNum = 50;
+	}
+
+	while (comboBox.DeleteString(0) != -1);
+
+	auto const& doc = Map->GetIniFile();
+
+	CString buffer, scriptName, parambuf;
+	currentScript.GetLBText(currentScript.GetCurSel(), scriptName);
+	TruncSpace(scriptName);
+
+	for (int i = 0; i < itemNum; ++i) {
+		buffer.Format("%d", i);
+		buffer = doc.GetStringOr(scriptName, buffer, "0,0");
+		int actionIndex = buffer.Find(',');
+		if (actionIndex == CB_ERR) {
+			actionIndex = -1;
+		} else {
+			actionIndex = atoi(buffer.Mid(0, actionIndex));
+		}
+		buffer.Format("%d - %s", i + 1, actionDef.at(actionIndex).Name_);
+		int idx = comboBox.AddString(buffer);
+		comboBox.SetItemData(idx, i);
+	}
+}
+
+static void ListTypeList(CComboBox& comboBox, const CString& listID)
+{
+	while (comboBox.DeleteString(0) != -1);
+
+	auto const& doc = Map->GetIniFile();
+
+	for (auto const& [idxStr, id] : doc[listID]) {
+		CString text;
+		if (doc.TryGetSection(id)) {
+			int idx = atoi(idxStr);
+			text = doc.GetString(id, "Name");
+			text.Format("%d - %s - %s", idx, id, text);
+			comboBox.SetItemData(comboBox.AddString(text), idx);
+		}
+	}
+}
+
+static void listScriptTypes(CComboBox& comboBox)
+{
+	ListTypeList(comboBox, "ScriptTypes");
+}
+
+static void listTeamTypes(CComboBox& comboBox)
+{
+	ListTypeList(comboBox, "TeamTypes");
+}
+
+static void listFacing(CComboBox& comboBox)
+{
+	while (comboBox.DeleteString(0) != -1);
+
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("0 - NE")), 0);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("1 - E")), 1);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("2 - SE")), 2);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("3 - S")), 3);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("4 - SW")), 4);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("5 - W")), 5);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("6 - NW")), 6);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("7 - N")), 7);
+}
+
+static void listTalkBubble(CComboBox& comboBox)
+{
+	while (comboBox.DeleteString(0) != -1);
+
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("0 - None")), 0);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("1 - Asterisk(*)")), 1);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("2 - Question mark(?)")), 2);
+	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("3 - Exclamation mark(!)")), 3);
+}
+
+void CScriptTypes::UpdateParams(int actionIndex, CString& paramNumStr)
+{
+	static int LastActionID = -1;
+	auto const& actionDefinition = getActionData(actionIndex);
+	auto const& paramDefinition = getParamData(actionDefinition.ParamTypeIndex_);
+	auto const paramType = paramDefinition.Type_;
+	auto const lastActionID = std::exchange(LastActionID, actionIndex);
+
+	//LogDebug(
+	//	" LastActionID = " + std::to_string(lastActionID) +
+	//	" actionIndex = " + std::to_string(actionIndex) +
+	//	" paramType = " + std::to_string(paramType)
+	//);
+	updateExtraValue(paramType, paramNumStr);
+	if (lastActionID == actionIndex) {
+		return;
+	}
+	switch (paramType) {
+	default:
+	case PRM_None:
+		while (this->m_Param.DeleteString(0) != -1);
+		break;
+	case 1:
+		ListTargets(this->m_Param);
+		break;
+	case 2:
+		ListWaypoints(this->m_Param);
+		break;
+	case 3:
+		ListScriptLine(
+			m_actionDefinitions,
+			this->m_Param,
+			this->m_ScriptType,
+			this->m_Actions
+		);
+		break;
+	case 4:
+		ListSplitGroup(this->m_Param);
+		break;
+	case 5:
+		ListRulesGlobals(this->m_Param);
+		break;
+	case 6:
+		listScriptTypes(this->m_Param);
+		break;
+	case 7:
+		listTeamTypes(this->m_Param);
+		break;
+	case 8:
+		ListHouses(this->m_Param);
+		break;
+	case 9:
+		ListSpeeches(this->m_Param);
+		break;
+	case 10:
+		ListSounds(this->m_Param);
+		break;
+	case 11:
+		ListMovies(this->m_Param, true);
+		break;
+	case 12:
+		ListThemes(this->m_Param);
+		break;
+	case 13:
+		ComboBoxHelper::ListCountries(this->m_Param);
+		break;
+	case 14:
+		ListMapVariables(this->m_Param);
+		break;
+	case 15:
+		listFacing(this->m_Param);
+		break;
+	case PRM_BuildingType:
+		ListBuildings(this->m_Param);
+		break;
+	case 17:
+		ListAnimations(this->m_Param);
+		break;
+	case 18:
+		listTalkBubble(this->m_Param);
+		break;
+	case 19:
+		ListBehaviours(this->m_Param);
+		break;
+	case 20:
+		ComboBoxHelper::ListBoolean(this->m_Param);
+		break;
+	}
+	this->m_Desc.SetWindowText(paramDefinition.Label_);
+	this->m_Desc.EnableWindow(actionDefinition.Editable_);
+	this->m_Param.EnableWindow(actionDefinition.Editable_);
+	this->m_DescriptionEx.SetWindowText(actionDefinition.Description_);
 }

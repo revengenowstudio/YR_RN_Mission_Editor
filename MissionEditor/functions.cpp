@@ -27,6 +27,7 @@
 #include "functions.h"
 #include "inlines.h"
 #include "mmsystem.h"
+#include "IniMega.h"
 
 #include <algorithm>
 
@@ -296,7 +297,7 @@ void HandleParamList(CComboBox& cb, int type)
 		ListSpeechBubbleTypes(cb);
 		break;
 	case PARAMTYPE_GLOBALS:
-		ListGlobals(cb);
+		ListMapVariables(cb);
 		break;
 	case PARAMTYPE_RULESGLOBALS:
 		ListRulesGlobals(cb);
@@ -804,7 +805,7 @@ void listLocalVariables(CComboBox& cb, const CIniFile& ini)
 }
 
 // should be ListLocals()
-void ListGlobals(CComboBox& cb)
+void ListMapVariables(CComboBox& cb)
 {
 	listLocalVariables(cb, Map->GetIniFile());
 }
@@ -1279,6 +1280,41 @@ void ListTargets(CComboBox& cb)
 
 }
 
+void ComboBoxHelper::Clear(CComboBox& combobox)
+{
+	while (combobox.DeleteString(0) != -1);
+}
+
+void ComboBoxHelper::ListCountries(CComboBox& combobox, bool bShowIndex)
+{
+	ComboBoxHelper::Clear(combobox);
+	auto& doc = Map->GetIniFile();
+	bool bMultiOnly = doc.GetBool("Basic", "MultiplayerOnly");
+	if (bMultiOnly) {
+		ListHouses(combobox, bShowIndex);
+		return;
+	}
+	auto const& rules = IniMegaFile::GetRules();
+	auto const& items = rules.GetSection("Countries");
+	CString buffer;
+	for (auto it = items.begin(); it != items.end(); ++it) {
+		auto const& [idxStr, id] = *it;
+		auto const idx = atoi(idxStr);
+		if (bShowIndex) {
+			buffer.Format("%u - %s", idx, id.operator LPCSTR());
+		} else {
+			buffer = id;
+		}
+		combobox.SetItemData(combobox.AddString(buffer), idx);
+	}
+}
+
+void ComboBoxHelper::ListBoolean(CComboBox& combobox)
+{
+	ComboBoxHelper::Clear(combobox);
+	combobox.SetItemData(combobox.AddString(TranslateStringACP("0 - FALSE")), 0);
+	combobox.SetItemData(combobox.AddString(TranslateStringACP("1 - TRUE")), 1);
+}
 
 CString GetHouseSectionName(CString lpHouse)
 {

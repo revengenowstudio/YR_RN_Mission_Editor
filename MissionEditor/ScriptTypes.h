@@ -30,12 +30,47 @@
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CScriptTypes 
 
+enum /*class*/ ActionType
+{
+	ACT_None = 0,
+	ACT_DoMission = 11,
+};
+
+enum /*class*/ ParameterType
+{
+	PRM_None = 0,
+	PRM_BuildingType = 16,
+};
+
+enum class ExtraParameterType
+{
+	None = 0,
+	ScanType,
+	Counter,
+};
+
 class CScriptTypes : public CDialog
 {
-	DECLARE_DYNCREATE(CScriptTypes)
 
+	struct CScriptTypeAction {
+		const char* Name_{};
+		int ParamTypeIndex_{};//!< index linked to specific CScriptTypeParam, can be user defined
+		const char* Description_{};
+		bool Hide_{};
+		bool Editable_{};
+	};
+
+	struct CScriptTypeParam {
+		const char* Label_{};//!< the string displayed for such parameter type
+		ParameterType Type_{};//!< internal predefined paramter type
+	};
+
+
+	DECLARE_DYNCREATE(CScriptTypes)
 	// Konstruktion
 public:
+	using ActionDefinitionMap = std::map<int, CScriptTypeAction>;
+
 	void UpdateDialog();
 	CScriptTypes();
 	~CScriptTypes();
@@ -43,13 +78,6 @@ public:
 	// Dialogfelddaten
 		//{{AFX_DATA(CScriptTypes)
 	enum { IDD = IDD_SCRIPTTYPES };
-	CEdit	m_DescriptionEx;
-	CStatic	m_Desc;
-	CComboBox	m_Type;
-	CComboBox	m_ScriptType;
-	CComboBox	m_Param;
-	CListBox	m_Action;
-	CString	m_Name;
 	//}}AFX_DATA
 // Überschreibungen
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
@@ -58,6 +86,13 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
 	//}}AFX_VIRTUAL
 	void UpdateStrings();
+
+	void updateExtraParamComboBox(ExtraParameterType type, int value);
+	const CScriptTypeAction& getActionData(int actionCbIndex) const;
+	const CScriptTypeParam& getParamData(int paramIndex) const;
+	ParameterType getParameterType(int actionCbIndex) const;
+	void updateExtraValue(ParameterType paramType, CString& paramNumStr);
+	void UpdateParams(int actionIndex, CString& paramNumStr);
 
 // Implementierung
 protected:
@@ -80,6 +115,23 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
+	afx_msg void OnCbnSelchangeScriptExtra();
+	afx_msg void OnCbnSelchangeScriptTemplate();
+	afx_msg void OnBnClickedScriptCopy();
+
+
+	CEdit	m_DescriptionEx;
+	CStatic	m_Desc;
+	CComboBox	m_Template;
+	CComboBox	m_Type;
+	CComboBox	m_ScriptType;
+	CComboBox	m_Param;
+	CComboBox	m_ParamExt;
+	CListBox	m_Action;
+	CString	m_Name;
+
+	ActionDefinitionMap m_actionDefinitions;
+	std::map<int, CScriptTypeParam> m_paramDefinitions;
 };
 
 //{{AFX_INSERT_LOCATION}}
