@@ -526,6 +526,8 @@
 #define IDC_SCRIPTTYPE_ACTIONS			1474
 #define IDC_SCRIPTTYPE_ACTIONTYPE		1475
 #define IDC_SCRIPTTYPE_DESC				1476
+#define IDD_TERRAINBAR_TG				1477
+#define IDD_TERRAINBAR_OS				1478
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003

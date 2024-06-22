@@ -42,7 +42,7 @@ public:
 	//{{AFX_DATA(CTerrainDlg)
 	enum { IDD = IDD_TERRAINBAR };
 	//}}AFX_DATA
-
+	void TranslateUI();
 
 // Überschreibungen
 	// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
@@ -59,9 +59,6 @@ protected:
 
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CTerrainDlg)
-	virtual void OnOK();
-	virtual void OnCancel();
-	virtual BOOL OnInitDialog();
 	afx_msg void OnSelchangeTileset();
 	afx_msg void OnSelchangeOverlay();
 	//}}AFX_MSG

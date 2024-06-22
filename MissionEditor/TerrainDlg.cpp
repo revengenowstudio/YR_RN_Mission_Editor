@@ -69,27 +69,16 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CTerrainDlg 
 
-void CTerrainDlg::OnOK()
-{
-	// stub
-}
-
-void CTerrainDlg::OnCancel()
-{
-	DestroyWindow();
-}
-
-BOOL CTerrainDlg::OnInitDialog()
-{
-	//CDialogBar::OnInitDialog();
-
-	return FALSE;
-}
-
 void CTerrainDlg::PostNcDestroy()
 {
 	//delete this;
 	//CDialog::PostNcDestroy();
+}
+
+void CTerrainDlg::TranslateUI()
+{
+	TranslateDlgItem(*this, IDD_TERRAINBAR_TG, "TerrainDlgTerrainGround");
+	TranslateDlgItem(*this, IDD_TERRAINBAR_OS, "TerrainDlgOverlaySpecial");
 }
 
 void CTerrainDlg::OnSelchangeTileset()
