@@ -280,6 +280,12 @@ BOOL CTriggerOptionsDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	{
+		SetDlgItemText(IDC_TRIGGER_OPTION_TYPE_STR, GetLanguageStringACP("TriggerOptionType"));
+		SetDlgItemText(IDC_TRIGGER_OPTION_NAME, GetLanguageStringACP("TriggerOptionName"));
+		SetDlgItemText(IDC_TRIGGER_OPTION_HOUSE, GetLanguageStringACP("TriggerOptionHouse"));
+		SetDlgItemText(IDC_TRIGGER_OPTION_ATTACHED_TRIGGER, GetLanguageStringACP("TriggerOptionAttachedTrigger"));
+		SetDlgItemText(IDC_TRIGGER_OPTION_TRIGGER_DIS_TIP, GetLanguageStringACP("TriggerOptionDisableTip"));
+
 		m_tooltip.Create(this);
 		m_tooltip.Activate(TRUE);
 		m_tooltip.AddTool(GetDlgItem(IDC_HOUSE), GetLanguageStringACP("TT_TriggerHouse"));

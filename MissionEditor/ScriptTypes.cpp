@@ -262,6 +262,24 @@ CScriptTypes::~CScriptTypes()
 {
 }
 
+void CScriptTypes::UpdateStrings()
+{
+	TranslateDlgItem(*this, IDC_ADD, "ScriptTypesAddScript");
+	TranslateDlgItem(*this, IDC_DELETE, "ScriptTypesDelScript");
+
+	TranslateDlgItem(*this, IDC_SCTIPTTYPE_INRO, "ScriptTypesDesc");
+	TranslateDlgItem(*this, IDC_SCRIPTTYPE_TYPE, "ScriptTypesSelectedScript");
+	TranslateDlgItem(*this, IDC_SCRIPTTYPE_NAME, "ScriptTypesName");
+	TranslateDlgItem(*this, IDC_SCRIPTTYPE_ACTIONS, "ScriptTypesActions");
+	TranslateDlgItem(*this, IDC_SCRIPTTYPE_ACTIONTYPE, "ScriptTypesActionType");
+	TranslateDlgItem(*this, IDC_PDESC, "ScriptTypesActionParam");
+	TranslateDlgItem(*this, IDC_SCRIPTTYPE_DESC, "ScriptTypesActionDesc");
+	TranslateDlgItem(*this, IDC_ADDACTION, "ScriptTypesAddAction");
+	TranslateDlgItem(*this, IDC_DELETEACTION, "ScriptTypesDelAction");
+
+	TranslateWindowCaption(*this, "ScriptsCaption");
+}
+
 void CScriptTypes::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
@@ -714,6 +732,8 @@ void CScriptTypes::ListBehaviours(CComboBox& cb)
 BOOL CScriptTypes::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+
+	UpdateStrings();
 
 	while (m_Type.DeleteString(0) != CB_ERR);
 

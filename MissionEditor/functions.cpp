@@ -401,57 +401,70 @@ CString TranslateStringVariables(int n, const char* originaltext, const char* in
 	strcat(seekedstring, c);
 
 	CString orig = originaltext;
-	if (orig.Find(seekedstring) < 0) return orig;
+	if (orig.Find(seekedstring) < 0) {
+		return orig;
+	}
 
 	orig.Replace(seekedstring, inserttext);
 
 	return orig;
 }
 
-// retrieve the string name in the correct language (name is an ID).
-CString GetLanguageStringACP(CString name)
+const CString* getLanguageString(const CString& key)
 {
 #ifdef RA2_MODE
 	auto const strRA2Sec = theApp.m_Options.LanguageName + "-StringsRA2";
-	if (auto const& translated = language.GetSection(strRA2Sec).TryGetString(name)) {
-		return ToACP(*translated);
+	if (auto const& translated = language.GetSection(strRA2Sec).TryGetString(key)) {
+		return translated;
 	}
-	if (auto const& def = language.GetSection("English-StringsRA2").TryGetString(name)) {
-		return ToACP(*def);
+	// fallback to english
+	if (auto const& def = language.GetSection("English-StringsRA2").TryGetString(key)) {
+		return def;
 	}
 #endif
+	// last try
 	auto const defSec = theApp.m_Options.LanguageName + "-Strings";
-	auto const translated = language.GetSection(defSec).TryGetString(name);
-	if (!translated) {
-		CString s = language.GetSection("English-Strings").GetStringOr(name, name);
+	if (auto const& def = language.GetSection(defSec).TryGetString(key)) {
+		return def;
+	}
+	// last try
+	return language.GetSection("English-Strings").TryGetString(key);
+}
+
+CString escapeString(const CString& input)
+{
+	auto updated = input;
+	if (updated.Find("\\n")) {
+		updated.Replace("\\n", "\n");
+	}
+	return updated;
+}
+
+// retrieve the string name in the correct language (name is an ID).
+CString GetLanguageStringACP(const CString name)
+{
 #ifndef RA2_MODE
-		s = TranslateStringVariables(9, s, "FinalSun");
+	auto const pStrToInsert = "FinalSun";
+#elif YR_MODE
+	auto const pStrToInsert = "FinalAlert 2: Yuri's Revenge";
 #else
-#ifdef YR_MODE
-		s = TranslateStringVariables(9, s, "FinalAlert 2: Yuri's Revenge");
-#else
-		s = TranslateStringVariables(9, s, "FinalAlert 2");
+	auto const pStrToInsert = "FinalAlert 2";
 #endif
-#endif
-		return ToACP(s);
+
+	auto translated = getLanguageString(name);
+	if (!translated) {
+		CString encoded = name;
+		encoded = TranslateStringVariables(9, encoded, pStrToInsert);
+		return ToACP(encoded);
 	}
 
-	CString s;
-	s = *translated;
+	CString encoded;
+	encoded = *translated;
 
-#ifndef RA2_MODE
-	if (s.Find("%9") >= 0) s = TranslateStringVariables(9, s, "FinalSun");
-#else
-#ifdef YR_MODE
-	if (s.Find("%9") >= 0) s = TranslateStringVariables(9, s, "FinalAlert 2: Yuri's Revenge");
-#else
-	if (s.Find("%9") >= 0) s = TranslateStringVariables(9, s, "FinalAlert 2");
-#endif
-#endif
-
-
-
-	return ToACP(s);
+	if (encoded.Find("%9") >= 0) {
+		encoded = TranslateStringVariables(9, encoded, pStrToInsert);
+	}
+	return ToACP(encoded);
 }
 
 CString TranslateStringACP(WCHAR* u16EnglishString)
@@ -469,7 +482,21 @@ CString TranslateStringACP(CString u8EnglishString)
 	return GetLanguageStringACP(u8EnglishString);
 }
 
+void TranslateDlgItem(CWnd& cwnd, int controlID, const CString& label)
+{
+	auto const translated = getLanguageString(label);
+	if (translated) {
+		cwnd.SetDlgItemText(controlID, escapeString(*translated));
+	}
+}
 
+void TranslateWindowCaption(CWnd& cwnd, const CString& label)
+{
+	auto const translated = getLanguageString(label);
+	if (translated) {
+		cwnd.SetWindowText(escapeString(*translated));
+	}
+}
 
 void TruncSpace(string& str)
 {

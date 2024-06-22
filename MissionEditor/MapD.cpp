@@ -113,13 +113,19 @@ void CMapD::OnEditchangeTheater()
 
 void CMapD::UpdateStrings()
 {
-
+	CString curCaption;
+	GetWindowText(curCaption);
+	SetWindowText(TranslateStringACP(curCaption));
 	GetDlgItem(IDC_DESC)->SetWindowText(GetLanguageStringACP("MapDesc"));
 	GetDlgItem(IDC_SIZEFRAME)->SetWindowText(GetLanguageStringACP("MapSizeFrame"));
 	GetDlgItem(IDC_LSIZE)->SetWindowText(GetLanguageStringACP("MapSize"));
 	GetDlgItem(IDC_USEABLEFRAME)->SetWindowText(GetLanguageStringACP("MapVisibleSizeFrame"));
 	GetDlgItem(IDC_LUSEABLE)->SetWindowText(GetLanguageStringACP("MapVisibleSize"));
 	GetDlgItem(IDC_LTHEATER)->SetWindowText(GetLanguageStringACP("MapTheater"));
+	GetDlgItem(IDC_MAP_D_WIDTH)->SetWindowText(GetLanguageStringACP("MapWidth"));
+	GetDlgItem(IDC_MAP_D_HEIGHT)->SetWindowText(GetLanguageStringACP("MapHeight"));
+	GetDlgItem(IDC_CHANGELOCAL)->SetWindowText(GetLanguageStringACP("MapChange"));
+	GetDlgItem(IDC_CHANGE)->SetWindowText(GetLanguageStringACP("MapChange"));
 }
 
 void CMapD::OnChangelocal()
