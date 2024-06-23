@@ -629,7 +629,7 @@ __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, const D
 	const BYTE* const pLighting = (bpp == 4 && pd.lighting && !pd.lighting->empty()) ? pd.lighting->data() : nullptr;
 
 	auto getHouseColor = std::function([](BYTE idx, BYTE houseColorMinIdx) -> int {
-			return idx - houseColorMinIdx;
+		return idx - houseColorMinIdx;
 		});
 
 	if (g_data["Debug"].GetBool("RenderPlainHouseColor")) {
@@ -861,41 +861,41 @@ inline int GetScrPos(CWnd* pOwner, UINT nSB, UINT nSBCode, UINT& nPos)
 	pOwner->GetScrollInfo(nSB, &scr);
 
 	switch (nSBCode) {
-	case SB_LEFT:
-	{
-		nPos = scr.nMin;
-		break;
-	}
-	case SB_RIGHT:
-	{
-		nPos = scr.nMax;
-		break;
-	}
-	case SB_THUMBTRACK:
-	case SB_THUMBPOSITION:
-	{
-		break;
-	}
-	case SB_LINELEFT:
-	{
-		nPos = scr.nPos - 1;
-		break;
-	}
-	case SB_LINERIGHT:
-	{
-		nPos = scr.nPos + 1;
-		break;
-	}
-	case SB_PAGELEFT:
-	{
-		nPos = scr.nPos - 5;
-		break;
-	}
-	case SB_PAGERIGHT:
-	{
-		nPos = scr.nPos + 5;
-		break;
-	}
+		case SB_LEFT:
+		{
+			nPos = scr.nMin;
+			break;
+		}
+		case SB_RIGHT:
+		{
+			nPos = scr.nMax;
+			break;
+		}
+		case SB_THUMBTRACK:
+		case SB_THUMBPOSITION:
+		{
+			break;
+		}
+		case SB_LINELEFT:
+		{
+			nPos = scr.nPos - 1;
+			break;
+		}
+		case SB_LINERIGHT:
+		{
+			nPos = scr.nPos + 1;
+			break;
+		}
+		case SB_PAGELEFT:
+		{
+			nPos = scr.nPos - 5;
+			break;
+		}
+		case SB_PAGERIGHT:
+		{
+			nPos = scr.nPos + 5;
+			break;
+		}
 	}
 
 	return nPos;
@@ -1958,26 +1958,26 @@ BOOL CIsoView::OnCommand(WPARAM wParam, LPARAM lParam)
 		// a standard menu, no popup!
 
 		switch (wID) {
-		case 4:
-		{
-			last_succeeded_operation = 54310;
-			//get the number
-			if (Map->GetAirAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
-				HandleProperties(Map->GetAirAt(m_mapx + m_mapy * Map->GetIsoSize()), 2);
-			} else if (Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
-				last_succeeded_operation = 54311;
-				int z;
-				for (z = 0; z < SUBPOS_COUNT; z++)
-					if (Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize(), z) != -1) HandleProperties(Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize(), z), 0);
-			} else if (Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
-				HandleProperties(Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()), 3);
-			} else if (Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
-				HandleProperties(Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize()), 1);
+			case 4:
+			{
+				last_succeeded_operation = 54310;
+				//get the number
+				if (Map->GetAirAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
+					HandleProperties(Map->GetAirAt(m_mapx + m_mapy * Map->GetIsoSize()), 2);
+				} else if (Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
+					last_succeeded_operation = 54311;
+					int z;
+					for (z = 0; z < SUBPOS_COUNT; z++)
+						if (Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize(), z) != -1) HandleProperties(Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize(), z), 0);
+				} else if (Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
+					HandleProperties(Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()), 3);
+				} else if (Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
+					HandleProperties(Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize()), 1);
+				}
+
+
+				break;
 			}
-
-
-			break;
-		}
 
 		}
 
@@ -1997,158 +1997,158 @@ void CIsoView::HandleProperties(int n, int type)
 
 	if (n < 0) return;
 	switch (type) {
-	case 0:
-	{
-		last_succeeded_operation = 54312;
+		case 0:
+		{
+			last_succeeded_operation = 54312;
 
-		// infantry
+			// infantry
 
-		INFANTRY data;
+			INFANTRY data;
 
-		Map->GetInfantryData(n, &data);
+			Map->GetInfantryData(n, &data);
 
-		last_succeeded_operation = 54313;
-
-
-		CInfantrie dlg(this);
-		char tmp[255];
-		dlg.Init((LPCTSTR)data.house, (LPCTSTR)data.strength, (LPCTSTR)data.action,
-			(LPCTSTR)data.direction, (LPCTSTR)data.tag, (LPCTSTR)data.flag1,
-			(LPCTSTR)data.flag2, (LPCTSTR)data.flag3, (LPCTSTR)data.flag4, (LPCTSTR)data.flag5);
-
-		int res = dlg.DoModal();
-		if (res == IDCANCEL) return;
-
-		data.action = dlg.m_action;
-		data.strength = dlg.m_strength;
-		data.tag = dlg.m_tag;
-		data.direction = dlg.m_direction;
-		data.house = dlg.m_house;
-		data.flag1 = dlg.m_flag1;
-		data.flag2 = dlg.m_flag2;
-		data.flag3 = dlg.m_flag3;
-		data.flag4 = dlg.m_flag4;
-		data.flag5 = dlg.m_flag5;
+			last_succeeded_operation = 54313;
 
 
-		Map->DeleteInfantry(n);
-		Map->AddInfantry(&data);
+			CInfantrie dlg(this);
+			char tmp[255];
+			dlg.Init((LPCTSTR)data.house, (LPCTSTR)data.strength, (LPCTSTR)data.action,
+				(LPCTSTR)data.direction, (LPCTSTR)data.tag, (LPCTSTR)data.flag1,
+				(LPCTSTR)data.flag2, (LPCTSTR)data.flag3, (LPCTSTR)data.flag4, (LPCTSTR)data.flag5);
 
-		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-		break;
-	}
-	case 1:
-	{
-		// building
+			int res = dlg.DoModal();
+			if (res == IDCANCEL) return;
 
-		STRUCTURE data;
-		Map->GetStructureData(n, &data);
-
-
-		CBuilding dlg(this);
-		char tmp[255];
-		dlg.Init((LPCTSTR)data.house, (LPCTSTR)data.strength, (LPCTSTR)data.direction, (LPCTSTR)data.tag,
-			(LPCTSTR)data.flag1, (LPCTSTR)data.flag2, (LPCTSTR)data.energy,
-			(LPCTSTR)data.upgradecount, (LPCTSTR)data.spotlight, (LPCTSTR)data.upgrade1, (LPCTSTR)data.upgrade2,
-			(LPCTSTR)data.upgrade3, (LPCTSTR)data.flag3, (LPCTSTR)data.flag4);
-		dlg.m_type = data.type;
-
-		int res = dlg.DoModal();
-		if (res == IDCANCEL) return;
-
-		data.strength = dlg.m_strength;
-		data.tag = dlg.m_tag;
-		data.direction = dlg.m_direction;
-		data.house = dlg.m_house;
-		data.spotlight = dlg.m_spotlight;
-		data.flag1 = dlg.m_flag1;
-		data.flag2 = dlg.m_flag2;
-		data.flag3 = dlg.m_flag3;
-		data.flag4 = dlg.m_flag4;
-		data.energy = dlg.m_energy;
-		data.upgradecount = dlg.m_upgradecount;
-		data.upgrade1 = dlg.m_upgrade1;
-		data.upgrade2 = dlg.m_upgrade2;
-		data.upgrade3 = dlg.m_upgrade3;
+			data.action = dlg.m_action;
+			data.strength = dlg.m_strength;
+			data.tag = dlg.m_tag;
+			data.direction = dlg.m_direction;
+			data.house = dlg.m_house;
+			data.flag1 = dlg.m_flag1;
+			data.flag2 = dlg.m_flag2;
+			data.flag3 = dlg.m_flag3;
+			data.flag4 = dlg.m_flag4;
+			data.flag5 = dlg.m_flag5;
 
 
+			Map->DeleteInfantry(n);
+			Map->AddInfantry(&data);
 
-		Map->DeleteStructure(n);
-		Map->AddStructure(&data);
+			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+			break;
+		}
+		case 1:
+		{
+			// building
 
-		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-		break;
-
-	}
-	case 2:
-	{
-		// aircraft
-
-		AIRCRAFT data;
-		Map->GetAircraftData(n, &data);
+			STRUCTURE data;
+			Map->GetStructureData(n, &data);
 
 
-		CAircraft dlg(this);
-		char tmp[255];
-		dlg.Init(data.house, data.strength, data.direction, data.action,
-			data.tag, data.flag1, data.flag2, data.flag3, data.flag4);
+			CBuilding dlg(this);
+			char tmp[255];
+			dlg.Init((LPCTSTR)data.house, (LPCTSTR)data.strength, (LPCTSTR)data.direction, (LPCTSTR)data.tag,
+				(LPCTSTR)data.flag1, (LPCTSTR)data.flag2, (LPCTSTR)data.energy,
+				(LPCTSTR)data.upgradecount, (LPCTSTR)data.spotlight, (LPCTSTR)data.upgrade1, (LPCTSTR)data.upgrade2,
+				(LPCTSTR)data.upgrade3, (LPCTSTR)data.flag3, (LPCTSTR)data.flag4);
+			dlg.m_type = data.type;
 
-		int res = dlg.DoModal();
-		if (res == IDCANCEL) return;
+			int res = dlg.DoModal();
+			if (res == IDCANCEL) return;
 
-		data.action = dlg.m_action;
-		data.strength = dlg.m_strength;
-		data.tag = dlg.m_tag;
-		data.direction = dlg.m_direction;
-		data.house = dlg.m_house;
-		data.flag1 = dlg.m_flag1;
-		data.flag2 = dlg.m_flag2;
-		data.flag3 = dlg.m_flag3;
-		data.flag4 = dlg.m_flag4;
-
-
-		Map->DeleteAircraft(n);
-		Map->AddAircraft(&data);
-
-		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-		break;
-	}
-	case 3:
-	{
-		// vehicle
-
-		UNIT data;
-		Map->GetUnitData(n, &data);
+			data.strength = dlg.m_strength;
+			data.tag = dlg.m_tag;
+			data.direction = dlg.m_direction;
+			data.house = dlg.m_house;
+			data.spotlight = dlg.m_spotlight;
+			data.flag1 = dlg.m_flag1;
+			data.flag2 = dlg.m_flag2;
+			data.flag3 = dlg.m_flag3;
+			data.flag4 = dlg.m_flag4;
+			data.energy = dlg.m_energy;
+			data.upgradecount = dlg.m_upgradecount;
+			data.upgrade1 = dlg.m_upgrade1;
+			data.upgrade2 = dlg.m_upgrade2;
+			data.upgrade3 = dlg.m_upgrade3;
 
 
-		CUnit dlg(this);
-		char tmp[255];
-		dlg.Init(data.house, data.strength, data.direction, data.action,
-			data.tag, data.flag1, data.flag2, data.flag3, data.flag4, data.flag5, data.flag6);
 
-		int res = dlg.DoModal();
-		if (res == IDCANCEL) return;
+			Map->DeleteStructure(n);
+			Map->AddStructure(&data);
 
-		data.action = dlg.m_action;
-		data.strength = dlg.m_strength;
-		data.tag = dlg.m_tag;
-		data.direction = dlg.m_direction;
-		data.house = dlg.m_house;
-		data.flag1 = dlg.m_flag1;
-		data.flag2 = dlg.m_flag2;
-		data.flag3 = dlg.m_flag3;
-		data.flag4 = dlg.m_flag4;
-		data.flag5 = dlg.m_flag5;
-		data.flag6 = dlg.m_flag6;
+			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+			break;
 
-		Map->DeleteUnit(n);
-		Map->AddUnit(&data);
+		}
+		case 2:
+		{
+			// aircraft
 
-		RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-		break;
+			AIRCRAFT data;
+			Map->GetAircraftData(n, &data);
 
 
-	}
+			CAircraft dlg(this);
+			char tmp[255];
+			dlg.Init(data.house, data.strength, data.direction, data.action,
+				data.tag, data.flag1, data.flag2, data.flag3, data.flag4);
+
+			int res = dlg.DoModal();
+			if (res == IDCANCEL) return;
+
+			data.action = dlg.m_action;
+			data.strength = dlg.m_strength;
+			data.tag = dlg.m_tag;
+			data.direction = dlg.m_direction;
+			data.house = dlg.m_house;
+			data.flag1 = dlg.m_flag1;
+			data.flag2 = dlg.m_flag2;
+			data.flag3 = dlg.m_flag3;
+			data.flag4 = dlg.m_flag4;
+
+
+			Map->DeleteAircraft(n);
+			Map->AddAircraft(&data);
+
+			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+			break;
+		}
+		case 3:
+		{
+			// vehicle
+
+			UNIT data;
+			Map->GetUnitData(n, &data);
+
+
+			CUnit dlg(this);
+			char tmp[255];
+			dlg.Init(data.house, data.strength, data.direction, data.action,
+				data.tag, data.flag1, data.flag2, data.flag3, data.flag4, data.flag5, data.flag6);
+
+			int res = dlg.DoModal();
+			if (res == IDCANCEL) return;
+
+			data.action = dlg.m_action;
+			data.strength = dlg.m_strength;
+			data.tag = dlg.m_tag;
+			data.direction = dlg.m_direction;
+			data.house = dlg.m_house;
+			data.flag1 = dlg.m_flag1;
+			data.flag2 = dlg.m_flag2;
+			data.flag3 = dlg.m_flag3;
+			data.flag4 = dlg.m_flag4;
+			data.flag5 = dlg.m_flag5;
+			data.flag6 = dlg.m_flag6;
+
+			Map->DeleteUnit(n);
+			Map->AddUnit(&data);
+
+			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+			break;
+
+
+		}
 	}
 }
 
@@ -2776,110 +2776,109 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 		itoa(x, strX, 10);
 		itoa(y, strY, 10);
 		switch (m_type) {
-		case 0: // drag infantry
-		{
-			INFANTRY infantry;
-			Map->GetInfantryData(m_id, &infantry);
-			infantry.x = strX;
-			infantry.y = strY;
-			infantry.pos = "-1";
+			case 0: // drag infantry
+			{
+				INFANTRY infantry;
+				Map->GetInfantryData(m_id, &infantry);
+				infantry.x = strX;
+				infantry.y = strY;
+				infantry.pos = "-1";
 
-			if ((nFlags != MK_SHIFT)) {
-				Map->DeleteInfantry(m_id);
+				if ((nFlags != MK_SHIFT)) {
+					Map->DeleteInfantry(m_id);
+				}
+
+				Map->AddInfantry(&infantry);
+
+				break;
+			}
+			case 1: // drag structure
+			{
+				STRUCTURE structure;
+				Map->GetStructureData(m_id, &structure);
+				structure.x = strX;
+				structure.y = strY;
+
+				if ((nFlags != MK_SHIFT)) {
+					Map->DeleteStructure(m_id);
+				}
+
+				Map->AddStructure(&structure);
+
+				break;
+			}
+			case 2: // drag aircraft
+			{
+				AIRCRAFT aircraft;
+				Map->GetAircraftData(m_id, &aircraft);
+				aircraft.x = strX;
+				aircraft.y = strY;
+
+
+				if ((nFlags != MK_SHIFT)) {
+					Map->DeleteAircraft(m_id);
+				}
+
+				Map->AddAircraft(&aircraft);
+
+				break;
+			}
+			case 3: // drag vehicles
+			{
+				UNIT unit;
+				Map->GetUnitData(m_id, &unit);
+				unit.x = strX;
+				unit.y = strY;
+
+				if (!(nFlags == MK_SHIFT)) {
+					Map->DeleteUnit(m_id);
+				}
+
+				Map->AddUnit(&unit);
+
+				break;
+			}
+			case 4: // drag terrain
+			{
+				CString type;
+
+				Map->GetTerrainData(m_id, &type);
+
+				if ((nFlags != MK_SHIFT)) {
+					Map->DeleteTerrain(m_id);
+				}
+
+				Map->AddTerrain(type, x + y * Map->GetIsoSize());
+				break;
 			}
 
-			Map->AddInfantry(&infantry);
+			case 5: // drag celltag
+			{
+				CString tag;
+				DWORD dwPos;
+				Map->GetCelltagData(m_id, &tag, &dwPos);
 
-			break;
-		}
-		case 1: // drag structure
-		{
-			STRUCTURE structure;
-			Map->GetStructureData(m_id, &structure);
-			structure.x = strX;
-			structure.y = strY;
+				if ((nFlags != MK_SHIFT)) {
+					Map->DeleteCelltag(m_id);
+				}
 
-			if ((nFlags != MK_SHIFT)) {
-				Map->DeleteStructure(m_id);
+				Map->AddCelltag(tag, x + y * Map->GetIsoSize());
+				break;
 			}
+			case 6: // drag waypoint
+			{
+				CString ID;
+				DWORD dwPos;
 
-			Map->AddStructure(&structure);
+				Map->GetWaypointData(m_id, &ID, &dwPos);
 
-			break;
-		}
-		case 2: // drag aircraft
-		{
-			AIRCRAFT aircraft;
-			Map->GetAircraftData(m_id, &aircraft);
-			aircraft.x = strX;
-			aircraft.y = strY;
+				if (!(nFlags == MK_SHIFT)) {
+					Map->DeleteWaypoint(m_id);
+				}
 
-
-			if ((nFlags != MK_SHIFT)) {
-				Map->DeleteAircraft(m_id);
+				Map->AddWaypoint(ID, x + y * Map->GetIsoSize());
+				break;
 			}
-
-			Map->AddAircraft(&aircraft);
-
-			break;
-		}
-		case 3: // drag vehicles
-		{
-			UNIT unit;
-			Map->GetUnitData(m_id, &unit);
-			unit.x = strX;
-			unit.y = strY;
-
-			if (!(nFlags == MK_SHIFT)) {
-				Map->DeleteUnit(m_id);
-			}
-
-			Map->AddUnit(&unit);
-
-			break;
-		}
-		case 4: // drag terrain
-		{
-			CString type;
-
-			Map->GetTerrainData(m_id, &type);
-
-			if ((nFlags != MK_SHIFT)) {
-				Map->DeleteTerrain(m_id);
-			}
-
-			Map->AddTerrain(type, x + y * Map->GetIsoSize());
-			break;
-		}
-
-		case 5: // drag celltag
-		{
-			CString tag;
-			DWORD dwPos;
-			Map->GetCelltagData(m_id, &tag, &dwPos);
-
-			if ((nFlags != MK_SHIFT)) {
-				Map->DeleteCelltag(m_id);
-			}
-
-			Map->AddCelltag(tag, x + y * Map->GetIsoSize());
-			break;
-		}
-		case 6: // drag waypoint
-		{
-			CString ID;
-			DWORD dwPos;
-
-			Map->GetWaypointData(m_id, &ID, &dwPos);
-
-			if (!(nFlags == MK_SHIFT)) {
-				Map->DeleteWaypoint(m_id);
-			}
-
-			Map->AddWaypoint(ID, x + y * Map->GetIsoSize());
-			break;
-		}
-
 		}
 
 
@@ -4062,8 +4061,8 @@ void __fastcall CIsoView::ChangeTileHeight(DWORD dwPos, DWORD dwNewHeight, BOOL 
 
 	//if(dwX==0 || dwY==0 || dwX+dwY<mapwidth || dwX+dwY>mapwidth+mapheight*2 || (dwY>mapwidth && dwX<dwY-mapwidth) || (dwX>mapwidth && dwY+mapwidth<dwX)) return;
 	//if( dwX<2|| dwY<2 || dwX+dwY<mapwidth+2 || dwX+dwY+2>mapwidth+mapheight*2 || (dwY+2>mapwidth && dwX-2<dwY-mapwidth) || (dwX+2>mapwidth && dwY+mapwidth-2<dwX)) return;
-	if (dwX < 1 || dwY < 1 || dwX + dwY<mapwidth + 1 || dwX + dwY>mapwidth + mapheight * 2 
-		|| (dwY + 1 > mapwidth && dwX - 1 < dwY - mapwidth) 
+	if (dwX < 1 || dwY < 1 || dwX + dwY<mapwidth + 1 || dwX + dwY>mapwidth + mapheight * 2
+		|| (dwY + 1 > mapwidth && dwX - 1 < dwY - mapwidth)
 		|| (dwX + 1 > mapwidth && dwY + mapwidth - 1 < dwX)) {
 		return;
 	}
@@ -5251,7 +5250,7 @@ void CIsoView::DrawMap()
 #ifndef NOSURFACES
 						DrawCell(stDrawCoords.x, stDrawCoords.y, 1, 1, RGB(0, 140, 0), FALSE, FALSE);
 #else
-						BlitTerrainHalfTransp(ddsd.lpSurface, stDrawCoords.x, stDrawCoords.y, 
+						BlitTerrainHalfTransp(ddsd.lpSurface, stDrawCoords.x, stDrawCoords.y,
 							r.left, r.top,
 							DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch },
 							r.right, r.bottom,
@@ -5636,8 +5635,8 @@ void CIsoView::DrawMap()
 #ifndef NOSURFACES					
 						Blit(pic.pic, drawCoordsBldShp.x, drawCoordsBldShp.y);
 #else
-						BlitPicHalfTransp(ddsd.lpSurface, drawCoordsBldShp.x, drawCoordsBldShp.y, 
-							r.left, r.top, 
+						BlitPicHalfTransp(ddsd.lpSurface, drawCoordsBldShp.x, drawCoordsBldShp.y,
+							r.left, r.top,
 							DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch },
 							r.right, r.bottom, pic, &colorref_conv[c]);
 #endif
