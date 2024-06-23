@@ -910,8 +910,8 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 		}
 		char c[50];
 		CIniFile& ini = Map->GetIniFile();
-		auto const sec = ini.TryGetSection("Header");
-		sec->SetInteger("NumberStartingPoints", wp_count);
+		auto& sec = ini.AddSection("Header");
+		sec.SetInteger("NumberStartingPoints", wp_count);
 		for (i = 0; i < 8; i++) {
 			CString key = "Waypoint";
 			itoa(i + 1, c, 10);
@@ -921,14 +921,14 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 			val += ",";
 			itoa(yw[i], c, 10);
 			val += c;
-			sec->SetString(key, val);
+			sec.SetString(key, val);
 		}
 
 		int startx, starty, width, height;
 		MC_GetHeaderRect(startx, starty, width, height);
 
-		sec->SetInteger("Height", height);
-		sec->SetInteger("Width", width);
+		sec.SetInteger("Height", height);
+		sec.SetInteger("Width", width);
 
 		//CIniFile& ini=Map->GetIniFile();
 		auto const& localSizeStr = ini.GetString("Map", "LocalSize");
@@ -938,8 +938,8 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 		//startx=1;//Map->GetHeight()/2;//atoi(left);//Map->GetIsoSize()/2-Map->GetWidth()/2;//198/2-50;//Map->GetIsoSize()/2-Map->GetHeight()/2;//Map->GetWidth()/2-50;
 		//starty=Map->GetWidth();//Map->GetIsoSize()/2-Map->GetWidth()/2;//198/2-50;//Map->GetIsoSize()/2-Map->GetWidth()/2;//Map->GetHeight()/2-50;
 		itoa(startx, c, 10);
-		sec->SetInteger("StartX", startx);
-		sec->SetInteger("StartY", starty);
+		sec.SetInteger("StartX", startx);
+		sec.SetInteger("StartY", starty);
 
 		/*CMultiSaveOptionsDlg mso;
 
