@@ -531,6 +531,7 @@
 #define IDC_SCRIPTTYPE_DESC             1476
 #define IDD_TERRAINBAR_TG               1477
 #define IDD_TERRAINBAR_OS               1478
+#define IDC_SCRIPT_TEMPLATE_DSC			1479
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003

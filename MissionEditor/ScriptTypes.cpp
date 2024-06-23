@@ -29,7 +29,7 @@
 #include "variables.h"
 #include "functions.h"
 #include "inlines.h"
-
+#include <set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -264,6 +264,41 @@ int scriptTypeIndexToComboBoxIndex(CComboBox& comboBox, int scriptTypeIndex)
 	return 0;
 }
 
+#pragma region ScriptTemplate
+//Class ScriptTemplate
+ScriptTemplate::ScriptTemplate() {
+	Data.clear();
+}
+
+ScriptTemplate::ScriptTemplate(std::vector<std::string> init) {
+	int count = atoi(init[2].c_str());
+	Data.resize(count + 1);
+	Data[0].first = init[0];//UIName
+	Data[0].second = init[1];//Name
+	for (int i = 1; i <= count; ++i) {
+		Data[i].first = init[2 * i + 1];
+		Data[i].second = init[2 * i + 2];
+	}
+}
+
+int ScriptTemplate::Count() {
+	return Data.size() - 1;
+}
+
+void ScriptTemplate::Resize(int size) {
+	Data.resize(size);
+	return;
+}
+
+std::pair<std::string, std::string>& ScriptTemplate::operator[] (int index) {
+	return Data[index];
+}
+const std::pair<std::string, std::string>& ScriptTemplate::operator[] (int index) const {
+	auto non_const_ptr = const_cast<std::remove_const_t<std::remove_pointer_t<decltype(this)>>*>(this);
+	return non_const_ptr->operator[](index);
+}
+#pragma endregion
+
 CScriptTypes::CScriptTypes() : CDialog(CScriptTypes::IDD)
 {
 	//{{AFX_DATA_INIT(CScriptTypes)
@@ -281,6 +316,7 @@ void CScriptTypes::UpdateStrings()
 	TranslateDlgItem(*this, IDC_DELETE, "ScriptTypesDelScript");
 
 	TranslateDlgItem(*this, IDC_SCTIPTTYPE_INRO, "ScriptTypesDesc");
+	TranslateDlgItem(*this, IDC_SCRIPT_TEMPLATE_DSC, "ScriptTypesSelectedTemplate");
 	TranslateDlgItem(*this, IDC_SCRIPTTYPE_TYPE, "ScriptTypesSelectedScript");
 	TranslateDlgItem(*this, IDC_SCRIPTTYPE_NAME, "ScriptTypesName");
 	TranslateDlgItem(*this, IDC_SCRIPTTYPE_ACTIONS, "ScriptTypesActions");
@@ -297,11 +333,13 @@ void CScriptTypes::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CScriptTypes)
-	DDX_Control(pDX, IDC_DESCRIPTION, m_DescriptionEx);
-	DDX_Control(pDX, IDC_PDESC, m_Desc);
+	DDX_Control(pDX, IDC_DESCRIPTION, m_Description);
+	DDX_Control(pDX, IDC_PDESC, m_ParamDesc);
 	DDX_Control(pDX, IDC_TYPE, m_ActionType);
 	DDX_Control(pDX, IDC_SCRIPTTYPE, m_ScriptType);
+	DDX_Control(pDX, IDC_SCRIPT_TEMPLATE, m_Template);
 	DDX_Control(pDX, IDC_PARAM, m_Param);
+	DDX_Control(pDX, IDC_SCRIPT_EXTRA, m_ParamExt);
 	DDX_Control(pDX, IDC_ACTION, m_Actions);
 	DDX_Text(pDX, IDC_NAME, m_Name);
 	//}}AFX_DATA_MAP
@@ -340,7 +378,7 @@ void CScriptTypes::UpdateDialog()
 
 
 	// MW 07/24/01: clear dialog
-	m_DescriptionEx.SetWindowText("");
+	m_Description.SetWindowText("");
 	m_Name = "";
 	m_Param.SetWindowText("");
 	m_ParamExt.SetWindowText("");
@@ -482,7 +520,7 @@ void CScriptTypes::OnEditchangeActionType()
 	switch (type) {
 	case 0:
 		ListTargets(m_Param);
-		m_Desc.SetWindowText("Target:");
+		m_ParamDesc.SetWindowText("Target:");
 		break;
 	case 39:
 	case 40:
@@ -496,23 +534,23 @@ void CScriptTypes::OnEditchangeActionType()
 	case 3:
 	case 16:
 		ListWaypoints(m_Param);
-		m_Desc.SetWindowText("Waypoint:");
+		m_ParamDesc.SetWindowText("Waypoint:");
 		break;
 	case 4:
-		m_Desc.SetWindowText("Cell:");
+		m_ParamDesc.SetWindowText("Cell:");
 		break;
 	case 5:
-		m_Desc.SetWindowText("Time units to guard:");
+		m_ParamDesc.SetWindowText("Time units to guard:");
 		break;
 	case 6:
-		m_Desc.SetWindowText("Script action #:");
+		m_ParamDesc.SetWindowText("Script action #:");
 		while (m_Param.DeleteString(0) != CB_ERR);
 		for (i = 1; i <= ini[Scripttype].Size() - 1; i++) {
 			m_Param.AddString(itoa(i, tmp, 10));
 		}
 		break;
 	case 8:
-		m_Desc.SetWindowText("Split groups:");
+		m_ParamDesc.SetWindowText("Split groups:");
 		while (m_Param.DeleteString(0) != CB_ERR);
 		int i;
 		for (i = 0; i < UNLOAD_COUNT; i++) {
@@ -529,19 +567,19 @@ void CScriptTypes::OnEditchangeActionType()
 	case 9:
 	case 14:
 	case 37:
-		m_Desc.SetWindowText("Use 0:");
+		m_ParamDesc.SetWindowText("Use 0:");
 		break;
 	case 12:
-		m_Desc.SetWindowText("Global:");
+		m_ParamDesc.SetWindowText("Global:");
 		break;
 	case 20:
 		ListHouses(m_Param, TRUE);
-		m_Desc.SetWindowText("House:");
+		m_ParamDesc.SetWindowText("House:");
 		break;
 	case 46:
 	case 47:
 	{
-		m_Desc.SetWindowText("Type to move/attack:");
+		m_ParamDesc.SetWindowText("Type to move/attack:");
 		auto const& bldTypeSec = rules["BuildingTypes"];
 		for (i = 0; i < bldTypeSec.Size(); i++) {
 			char c[50];
@@ -557,7 +595,7 @@ void CScriptTypes::OnEditchangeActionType()
 	}
 
 	default:
-		m_Desc.SetWindowText("Parameter of action:");
+		m_ParamDesc.SetWindowText("Parameter of action:");
 	}
 
 	itoa(m_Actions.GetCurSel(), action, 10);
@@ -574,7 +612,7 @@ void CScriptTypes::OnSelchangeActionType()
 		//m_ActionType.GetLBText(m_ActionType.GetCurSel(), str);
 		//m_ActionType.SetWindowText(str);
 
-		m_DescriptionEx.SetWindowText(TMissionsHelp[m_ActionType.GetCurSel()]);
+		m_Description.SetWindowText(TMissionsHelp[m_ActionType.GetCurSel()]);
 	}
 
 
@@ -612,19 +650,16 @@ void CScriptTypes::OnSelchangeParam()
 void CScriptTypes::OnAddaction()
 {
 	CIniFile& ini = Map->GetIniFile();
-
 	CString Scripttype;
-	if (m_ScriptType.GetCurSel() < 0) return;
-	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
-	TruncSpace(Scripttype);
-
-
-	char action[20];
-	int count = ini[Scripttype].Size() - 1;
-	itoa(count, action, 10);
-	ini.SetString(Scripttype, action, "0,0");
-
-	UpdateDialog();
+	if (m_ScriptType.GetCurSel() >= 0) {
+		m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
+		TruncSpace(Scripttype);
+		int count = ini[Scripttype].Size() - 1;
+		CString action;
+		action.Format("%d", count);
+		ini.SetString(Scripttype, action, "0,0");
+		UpdateDialog();
+	}
 }
 
 void CScriptTypes::OnDeleteaction()
@@ -661,6 +696,36 @@ CString GetFree(const char* section);
 
 void CScriptTypes::OnAdd()
 {
+	errstream << "Add Script" << std::endl;
+	HWND ScriptWnd = this->m_hWnd;
+
+	//HWND EditName = ::GetDlgItem(ScriptWnd, WND_Script::EditScriptName);
+	//HWND ListBox = ::GetDlgItem(ScriptWnd, WND_Script::ListBoxActions);
+	//HWND ComboType = ::GetDlgItem(ScriptWnd, WND_Script::m_ActionType);
+	//HWND ComboPara = ::GetDlgItem(ScriptWnd, WND_Script::ComboBoxParameter);
+	int curTemplateComboCount = m_Template.GetCount();
+	if (curTemplateComboCount <= 0) {
+		// TODO: load when dialog init
+		//HWND BtnLoad = ::GetDlgItem(ScriptWnd, WND_Script::ButtonReload);
+		//::SendMessageA(BtnLoad, WM_LBUTTONDOWN, WND_Script::ButtonReload, NULL);
+		//::SendMessageA(BtnLoad, WM_LBUTTONUP, WND_Script::ButtonReload, NULL);
+	}
+	int curTemplateIndex = m_Template.GetCurSel();
+	ScriptTemplate& curTemplate = m_scriptTemplates[curTemplateIndex];
+	errstream << "Now using Script Template %s" << curTemplate[0].first.c_str() << std::endl;
+
+	int ScriptCount = m_ScriptType.GetCount();
+	std::set<CString> ScriptDictionary;
+
+	for (int i = 0; i < ScriptCount; ++i) {
+		int strLen = m_ScriptType.GetLBTextLen(i);
+		CString scriptID;
+		m_ScriptType.GetLBText(i, scriptID);
+		ScriptDictionary.emplace(std::move(scriptID));
+	}
+
+	//this->OnScriptTypeAdd();
+#if 1
 	CIniFile& ini = Map->GetIniFile();
 
 	CString ID = GetFreeID();
@@ -685,7 +750,46 @@ void CScriptTypes::OnAdd()
 	}
 
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
-	//UpdateDialog();
+#endif
+
+	int newIdx = 0;
+	for (; newIdx < ScriptCount; ++newIdx) {
+		CString str;
+		m_ScriptType.GetLBText(newIdx, str);
+		if (ScriptDictionary.find(str) == ScriptDictionary.end()) {
+			break;
+		}
+	}
+
+	//::SendMessageA(m_ScriptType, CB_SETCURSEL, i, NULL);
+	this->m_ScriptType.SetCurSel(newIdx);//select the end
+	this->SetDlgItemTextA(IDC_NAME, curTemplate[0].second.c_str());
+	this->OnChangeName();
+
+	//::SendMessageA(ScriptWnd, WM_COMMAND, MAKEWPARAM(WND_Script::m_ScriptType, CBN_SELCHANGE), (LPARAM)m_ScriptType);
+	this->OnSelchangeScripttype();
+
+	for (int idx = 0; idx < curTemplate.Count(); ++idx) {
+		this->OnAddaction();
+		auto const& templateItem = curTemplate[idx + 1];//first one is reserved for name
+		//::SendMessageA(ListBox, LB_SETCURSEL, idx, NULL);
+		this->m_Actions.SetCurSel(idx);
+		//::SendMessageA(ScriptWnd, WM_COMMAND, MAKEWPARAM(WND_Script::ListBoxActions, LBN_SELCHANGE), (LPARAM)ListBox);
+		this->OnSelchangeActionList();
+		//::SendMessageA(ComboType, CB_SETCURSEL, atoi(templateItem->first.c_str()), NULL);
+		auto const scripIndex = atoi(templateItem.first.c_str());
+		errstream << " m_ActionType cur idx %d: " << atoi(templateItem.first.c_str()) << std::endl;
+		this->m_ActionType.SetCurSel(scriptTypeIndexToComboBoxIndex(this->m_ActionType, scripIndex));
+		//::SendMessageA(ScriptWnd, WM_COMMAND, MAKEWPARAM(WND_Script::m_ActionType, CBN_SELCHANGE), (LPARAM)ComboType);
+		this->OnSelchangeActionType();
+		if (templateItem.second == "EMPTY") {
+			continue;
+		}
+		//::SetWindowTextA(ComboPara, templateItem->second.c_str());
+		this->m_Param.SetWindowTextA(templateItem.second.c_str());
+		this->OnEditchangeParam();
+		//::SendMessageA(ScriptWnd, WM_COMMAND, MAKEWPARAM(WND_Script::ComboBoxParameter, CBN_SELCHANGE), (LPARAM)ComboPara);
+	}
 }
 
 void CScriptTypes::OnDelete()
@@ -1057,8 +1161,8 @@ void CScriptTypes::UpdateParams(int actionIndex, CString& paramNumStr)
 		ComboBoxHelper::ListBoolean(this->m_Param);
 		break;
 	}
-	this->m_Desc.SetWindowText(paramDefinition.Label_);
-	this->m_Desc.EnableWindow(actionDefinition.Editable_);
+	this->m_ParamDesc.SetWindowText(paramDefinition.Label_);
+	this->m_ParamDesc.EnableWindow(actionDefinition.Editable_);
 	this->m_Param.EnableWindow(actionDefinition.Editable_);
-	this->m_DescriptionEx.SetWindowText(actionDefinition.Description_);
+	this->m_Description.SetWindowText(actionDefinition.Description_);
 }

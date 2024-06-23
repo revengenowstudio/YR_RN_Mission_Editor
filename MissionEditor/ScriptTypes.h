@@ -49,6 +49,18 @@ enum class ExtraParameterType
 	Counter,
 };
 
+class ScriptTemplate {
+private:
+	std::vector<std::pair<std::string, std::string>> Data;
+public:
+	ScriptTemplate();
+	ScriptTemplate(std::vector<std::string> init);
+	std::pair<std::string, std::string>& operator[](int index);
+	const std::pair<std::string, std::string>& operator[](int index) const;
+	int Count();
+	void Resize(int size);
+};
+
 class CScriptTypes : public CDialog
 {
 
@@ -101,10 +113,10 @@ protected:
 	//{{AFX_MSG(CScriptTypes)
 	afx_msg void OnEditchangeScripttype();
 	afx_msg void OnSelchangeScripttype();
-	afx_msg void OnSelchangeAction();
+	afx_msg void OnSelchangeActionList();
 	afx_msg void OnChangeName();
-	afx_msg void OnEditchangeType();
-	afx_msg void OnSelchangeType();
+	afx_msg void OnEditchangeActionType();
+	afx_msg void OnSelchangeActionType();
 	afx_msg void OnEditchangeParam();
 	afx_msg void OnSelchangeParam();
 	afx_msg void OnAddaction();
@@ -120,18 +132,19 @@ protected:
 	afx_msg void OnBnClickedScriptCopy();
 
 
-	CEdit	m_DescriptionEx;
-	CStatic	m_Desc;
+	CEdit	m_Description;
+	CStatic	m_ParamDesc;
 	CComboBox	m_Template;
-	CComboBox	m_Type;
+	CComboBox	m_ActionType;
 	CComboBox	m_ScriptType;
 	CComboBox	m_Param;
 	CComboBox	m_ParamExt;
-	CListBox	m_Action;
+	CListBox	m_Actions;
 	CString	m_Name;
 
 	ActionDefinitionMap m_actionDefinitions;
 	std::map<int, CScriptTypeParam> m_paramDefinitions;
+	std::vector<ScriptTemplate> m_scriptTemplates;
 };
 
 //{{AFX_INSERT_LOCATION}}
