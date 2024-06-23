@@ -260,15 +260,19 @@ TEST(CIniFileClass, IniLowerBoundInsertTest) {
 	auto const pSec = file.TryGetSection("Waypoints");
 	EXPECT_NE(pSec, nullptr);
 	auto const pos = pSec->LowerBound("4");
-	EXPECT_LE(pos, pSec->Size());
-	pSec->InsertAt(pos, "4", "432156");
+	EXPECT_LE(pos.first, pSec->Size());
+	// not existed
+	EXPECT_EQ(pos.second, false);
+	pSec->InsertAt(pos.first, "4", "432156");
 	EXPECT_EQ(432156, file.GetInteger("Waypoints", "4"));
 	EXPECT_EQ("432156", file["Waypoints"].Nth(3).second);
 	EXPECT_EQ("789654", file["Waypoints"].Nth(4).second);
-	pSec->Insert("9", "149367");
-	pSec->Insert("11", "987654");
+	pSec->InsertOrAssign("9", "149367");
+	pSec->InsertOrAssign("11", "987654");
+	pSec->InsertOrAssign("10", "159356"); // existed replace
 	EXPECT_EQ(149367, file.GetInteger("Waypoints", "9"));
+	EXPECT_EQ(159356, file.GetInteger("Waypoints", "10"));
 	EXPECT_EQ(987654, file.GetInteger("Waypoints", "11"));
 	EXPECT_EQ("987654", file["Waypoints"].Nth(pSec->Size() - 1).second);
-	EXPECT_EQ("159357", file["Waypoints"].Nth(pSec->Size() - 2).second);
+	EXPECT_EQ("159356", file["Waypoints"].Nth(pSec->Size() - 2).second);
 }

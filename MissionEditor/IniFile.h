@@ -137,12 +137,13 @@ public:
 		return this->FindValue(val) >= 0;
 	}
 
-	size_t LowerBound(const CString& key) const {
+	// <pos, existed?>
+	std::pair<size_t, bool> LowerBound(const CString& key) const {
 		auto const it = value_pos.lower_bound(key);
 		if (it != value_pos.end()) {
-			return it->second;
+			return { it->second, it->first == key };
 		}
-		return value_pairs.size();
+		return { value_pairs.size(), false };
 	}
 
 	// ==================== Modify
@@ -176,7 +177,7 @@ public:
 		value_pairs.push_back({ key, value });
 		value_pos.insert_or_assign(key, value_pairs.size() - 1);
 	}
-
+	// not recommended to call it directly
 	void InsertAt(size_t idx, CString&& key, CString&& value) {
 		if (idx > value_pairs.size()) {
 			idx = value_pairs.size() - 1;
@@ -188,9 +189,13 @@ public:
 			it->second++;
 		}
 	}
-	void Insert(CString&& key, CString&& value) {
-		auto const pos = LowerBound(key);
-		InsertAt(pos, std::move(key), std::move(value));
+	void InsertOrAssign(CString&& key, CString&& value) {
+		auto const [pos, found] = LowerBound(key);
+		if (!found) {
+			InsertAt(pos, std::move(key), std::move(value));
+		}
+		// existed, assign
+		value_pairs[pos].second = std::move(value);
 	}
 
 	// ==================== Delete

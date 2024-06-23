@@ -2060,7 +2060,7 @@ BOOL CMapData::AddWaypoint(CString id, DWORD dwPos)
 		pSec = &m_mapfile.AddSection("Waypoints");
 	}
 
-	pSec->Insert(std::move(id), k);
+	pSec->InsertOrAssign(std::move(id), k);
 
 	if (!m_noAutoObjectUpdate) {
 		UpdateWaypoints(FALSE);
