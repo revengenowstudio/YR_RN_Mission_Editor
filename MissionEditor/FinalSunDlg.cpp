@@ -879,7 +879,6 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 #ifdef RA2_MODE
 	if (Map->IsMultiplayer()) {
 		if (FileName_.Find(".mmx") >= 0) bSaveAsMMX = TRUE; else bSaveAsMMX = FALSE;
-		if (FileName_.Find(".map") >= 0) FileName_.Replace(".map", ".mpr");
 
 		// MW 07/27/01: Check for YRM
 		if (FileName_.Find(".mpr") >= 0 && Map->IsYRMap()) FileName_.Replace(".mpr", ".yrm");
