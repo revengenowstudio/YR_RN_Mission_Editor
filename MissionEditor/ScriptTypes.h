@@ -141,6 +141,7 @@ protected:
 
 	void reloadTemplates();
 	void insertScriptType(const CString& name, const std::vector<CString>& items);
+	int getExtraValue();
 
 	CEdit	m_Description;
 	CStatic	m_ParamDesc;

@@ -54,6 +54,15 @@ int scriptTypeIndexToComboBoxIndex(CComboBox& comboBox, int scriptTypeIndex)
 
 	return 0;
 }
+ExtraParameterType getExtraParamType(ParameterType paramType)
+{
+	switch (paramType) {
+		default:
+			return ExtraParameterType::None;
+		case PRM_BuildingType:
+			return ExtraParameterType::ScanType;
+	}
+}
 
 std::vector<CString> ScriptTemplate::parse(const CString& content)
 {
@@ -373,25 +382,51 @@ void CScriptTypes::OnSelchangeActionType()
 	}
 }
 
+int CScriptTypes::getExtraValue()
+{
+	auto const curActionSel = this->m_ActionType.GetCurSel();
+	const int actionData = this->m_ActionType.GetItemData(curActionSel);
+	auto const paramType = getParameterType(actionData);
+	auto const extParamType = getExtraParamType(paramType);
+	CString curExtParamContent;
+	m_ParamExt.GetWindowText(curExtParamContent);
+	//errstream << " curExtParamContent = " << curExtParamContent;
+	return atoi(curExtParamContent);
+}
+
 void CScriptTypes::OnEditchangeParam()
 {
-	CIniFile& ini = Map->GetIniFile();
+	auto& doc = Map->GetIniFile();
+	CString scriptId, buffer, listStr, paramStr, tmp;
+	int scriptIndex, listIndex, actionIndex;
 
-	CString Scripttype;
-	char action[50];
-	if (m_Actions.GetCurSel() < 0) return;
-	if (m_ScriptType.GetCurSel() < 0) return;
-	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
-	TruncSpace(Scripttype);
-
-	CString param;
-	m_Param.GetWindowText(param);
-	TruncSpace(param);
-
-	param = TranslateHouse(param);
-
-	itoa(m_Actions.GetCurSel(), action, 10);
-	ini.SetString(Scripttype, action, SetParam(ini.GetString(Scripttype, action), 1, param));
+	scriptIndex = this->m_ScriptType.GetCurSel();
+	listIndex = this->m_Actions.GetCurSel();
+	if (scriptIndex >= 0 && listIndex >= 0) {
+		this->m_ScriptType.GetLBText(scriptIndex, scriptId);
+		TruncSpace(scriptId);
+		buffer.Format("%d", listIndex);
+		buffer = doc.GetStringOr(scriptId, buffer, "0,0");
+		actionIndex = buffer.Find(',');
+		if (actionIndex == CB_ERR) {
+			actionIndex = buffer.GetLength();
+		}
+		buffer = buffer.Mid(0, actionIndex);
+		this->m_Param.GetWindowText(paramStr);
+		//paramStr = this->m_Param.GetText();
+		TruncSpace(paramStr);
+		//
+		//LogDebug(" actionData = %d, paramType = %d, extParamType = %d", actionData, paramType, extParamType);
+		if (auto const extValue = getExtraValue()) {
+			auto const paramInt = MAKEWPARAM(atoi(paramStr), extValue);
+			paramStr.Format("%d", paramInt);
+		}
+		//
+		tmp.Format("%s,%s", buffer, paramStr);
+		listStr.Format("%d", listIndex);
+		doc.SetString(scriptId, listStr, tmp);
+		//_showCStr(tmp);
+	}
 }
 
 void CScriptTypes::OnSelchangeParam()
@@ -717,16 +752,6 @@ const CScriptTypes::CScriptTypeParam& CScriptTypes::getParamData(int paramIndex)
 ParameterType CScriptTypes::getParameterType(int actionCbIndex) const
 {
 	return getParamData(getActionData(actionCbIndex).ParamTypeIndex_).Type_;
-}
-
-ExtraParameterType getExtraParamType(ParameterType paramType)
-{
-	switch (paramType) {
-		default:
-			return ExtraParameterType::None;
-		case PRM_BuildingType:
-			return ExtraParameterType::ScanType;
-	}
 }
 
 void CScriptTypes::updateExtraValue(ParameterType paramType, CString& paramNumStr)
