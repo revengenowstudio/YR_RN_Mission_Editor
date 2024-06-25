@@ -130,9 +130,12 @@ protected:
 
 	// Implementierung
 protected:
+	DECLARE_MESSAGE_MAP()
+
+	virtual BOOL OnInitDialog() override;
+
 	void ListBehaviours(CComboBox& cb);
 	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CScriptTypes)
 	afx_msg void OnSelchangeScripttype();
 	afx_msg void OnSelchangeActionList();
 	afx_msg void OnChangeName();
@@ -144,10 +147,6 @@ protected:
 	afx_msg void OnDeleteaction();
 	afx_msg void OnAdd();
 	afx_msg void OnDelete();
-	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-
 	afx_msg void OnCbnSelchangeScriptExtra();
 	afx_msg void OnCbnSelchangeScriptTemplate();
 	afx_msg void OnBnClickedScriptCopy();
