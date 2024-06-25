@@ -702,8 +702,10 @@ void CScriptTypes::OnBnClickedScriptCopy()
 	CString idxStr;
 	for (auto idx = 0; idx < std::numeric_limits<short>::max(); ++idx) {
 		idxStr.Format("%d", idx);
-		if (auto const& item = sec.GetString(idxStr)) {
+		auto const& item = sec.GetString(idxStr);
+		if (!item.IsEmpty()) {
 			contents.emplace_back(item);
+			continue;
 		}
 		break;
 	}
