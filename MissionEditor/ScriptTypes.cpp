@@ -253,7 +253,9 @@ void CScriptTypes::OnSelchangeScripttype()
 	while (m_Actions.DeleteString(0) != CB_ERR);
 
 	CString Scripttype;
-	if (m_ScriptType.GetCurSel() < 0) return;
+	if (m_ScriptType.GetCurSel() < 0) {
+		return;
+	}
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 
