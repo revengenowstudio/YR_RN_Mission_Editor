@@ -607,13 +607,13 @@ BOOL CScriptTypes::OnInitDialog()
 		if (id < 0) {
 			continue;
 		}
-		auto const param1 = GetParam(content, 1);
+		auto const param1 = GetParam(content, 0);
 		// no valid value at all
 		if (param1.IsEmpty()) {
 			continue;
 		}
 		m_paramDefinitions[id].Label_ = param1;
-		auto const param2 = GetParam(content, 2);
+		auto const param2 = GetParam(content, 1);
 		if (!param2.IsEmpty()) {
 			m_paramDefinitions[id].Type_ = ParameterType(atoi(param2));
 		}
@@ -632,13 +632,13 @@ BOOL CScriptTypes::OnInitDialog()
 				m_actionDefinitions[id].Description_ = strings[4];
 				//LogDebug(" Description_ = %s", m_actionDefinitions[id].Description_);
 			case 4:
-				m_actionDefinitions[id].Editable_ = strings[3];
+				m_actionDefinitions[id].Editable_ = INIHelper::StringToBool(strings[3], false);
 			case 3:
-				m_actionDefinitions[id].Hide_ = strings[2];
+				m_actionDefinitions[id].Hide_ = INIHelper::StringToBool(strings[2], false);
 			case 2:
 				m_actionDefinitions[id].ParamTypeIndex_ = atoi(strings[1]);
 			case 1:
-				m_actionDefinitions[id].Name_ = _strdup(strings[0]);
+				m_actionDefinitions[id].Name_ = strings[0];
 			case 0:
 			default:
 				continue;
