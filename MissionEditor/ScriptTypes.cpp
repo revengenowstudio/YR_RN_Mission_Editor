@@ -66,15 +66,19 @@ ExtraParameterType getExtraParamType(ParameterType paramType)
 
 std::vector<CString> ScriptTemplate::parse(const CString& content)
 {
-	std::vector<CString> ret;
 	auto const init = INIHelper::Split(content);
-	const size_t count = atoi(init[0]);
-	ret.reserve(count);
+	auto const count = std::min<size_t>(atoi(init[0]), init.size() / 2);
+	return parse(init, count, 1);
+}
 
+std::vector<CString> ScriptTemplate::parse(const std::vector<CString>& content, size_t count, size_t offset)
+{
+	std::vector<CString> ret;
+	ret.reserve(count);
 	for (auto i = 0; i < count; i++) {
-		ret.emplace_back(init[static_cast<size_t>(2 * i) + 1]
+		ret.emplace_back(content[static_cast<size_t>(2 * i) + offset]
 			+ ','
-			+ init[static_cast<size_t>(2 * i) + 2]);
+			+ content[static_cast<size_t>(2 * i) + 1 + offset]);
 	}
 	return ret;
 }
@@ -150,10 +154,10 @@ END_MESSAGE_MAP()
 void CScriptTypes::reloadTemplates()
 {
 	auto const& sec = g_data["ScriptTemplates"];
-	auto const count = sec.GetInteger("Count");
+	auto const count = sec.GetInteger("Counts");
 	auto const defName = sec.GetStringOr("DefaultName", "Default");
 	m_scriptTemplates.push_back(
-		ScriptTemplate{ defName, "New Script", { "1,0,0" } }
+		ScriptTemplate{ defName, "New Script", "1,0,0" }
 	);
 
 	auto offset = 0;
@@ -167,7 +171,13 @@ void CScriptTypes::reloadTemplates()
 		if (parts.size() <= 3) {
 			return false;
 		}
-		this->m_scriptTemplates.emplace_back(ScriptTemplate{ parts[0], parts[1], parts[2] });
+		auto const contentCount = atoi(parts[2]);
+		if (contentCount * 2 != parts.size() - 3) {
+			errstream << "record count mismatches content size" << std::endl;
+			return false;
+		}
+		std::vector<CString> remaining(parts.begin() + 3, parts.end());
+		this->m_scriptTemplates.emplace_back(ScriptTemplate{ parts[0], parts[1], remaining });
 		return true;
 	};
 
@@ -501,7 +511,7 @@ void CScriptTypes::insertScriptType(const CString& name, const std::vector<CStri
 	auto idx = 0;
 	CString idStr;
 	for (auto const& line : items) {
-		idStr.Format("%d", idx);
+		idStr.Format("%d", idx++);
 		sec.SetString(idStr, line);
 	}
 

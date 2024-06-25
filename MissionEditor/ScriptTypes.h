@@ -51,10 +51,12 @@ enum class ExtraParameterType
 
 class ScriptTemplate {
 public:
+	ScriptTemplate(const CString& desc, const CString& name, const std::vector<CString>& content) :
+		ScriptTemplate(desc, name, parse(content))
+	{
+	}
 	ScriptTemplate(const CString& desc, const CString& name, const CString& content) :
-		m_desc(desc),
-		m_name(name),
-		m_content(parse(content))
+		ScriptTemplate(desc, name, parse(content))
 	{
 	}
 
@@ -63,7 +65,18 @@ public:
 	auto const& Content() const { return m_content; }
 
 private:
+	ScriptTemplate(const CString& desc, const CString& name, std::vector<CString>&& content) :
+		m_desc(desc),
+		m_name(name),
+		m_content(std::move(content))
+	{
+	}
+
 	static std::vector<CString> parse(const CString& content);
+	static std::vector<CString> parse(const std::vector<CString>& content, size_t count, size_t offset = 0);
+	static inline std::vector<CString> parse(const std::vector<CString>& content) {
+		return parse(content, content.size() / 2);
+	}
 
 	CString m_desc;
 	CString m_name;
@@ -115,7 +128,7 @@ protected:
 	void updateExtraValue(ParameterType paramType, CString& paramNumStr);
 	void UpdateParams(int actionIndex, CString paramNumStr = {});
 
-// Implementierung
+	// Implementierung
 protected:
 	void ListBehaviours(CComboBox& cb);
 	// Generierte Nachrichtenzuordnungsfunktionen
