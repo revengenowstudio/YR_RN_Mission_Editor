@@ -50,24 +50,33 @@ enum class ExtraParameterType
 };
 
 class ScriptTemplate {
-private:
-	std::vector<std::pair<std::string, std::string>> Data;
 public:
-	ScriptTemplate();
-	ScriptTemplate(std::vector<std::string> init);
-	std::pair<std::string, std::string>& operator[](int index);
-	const std::pair<std::string, std::string>& operator[](int index) const;
-	int Count();
-	void Resize(int size);
+	ScriptTemplate(const CString& desc, const CString& name, const CString& content) :
+		m_desc(desc),
+		m_name(name),
+		m_content(parse(content))
+	{
+	}
+
+	auto const& Desc() const { return m_desc; }
+	auto const& Name() const { return m_name; }
+	auto const& Content() const { return m_content; }
+
+private:
+	static std::vector<CString> parse(const CString& content);
+
+	CString m_desc;
+	CString m_name;
+	std::vector<CString> m_content;
 };
 
 class CScriptTypes : public CDialog
 {
 
 	struct CScriptTypeAction {
-		const char* Name_{};
+		CString Name_{};
 		int ParamTypeIndex_{};//!< index linked to specific CScriptTypeParam, can be user defined
-		const char* Description_{};
+		CString Description_{};
 		bool Hide_{};
 		bool Editable_{};
 	};
@@ -131,6 +140,8 @@ protected:
 	afx_msg void OnCbnSelchangeScriptTemplate();
 	afx_msg void OnBnClickedScriptCopy();
 
+	void reloadTemplates();
+	void insertScriptType(const CString& name, const std::vector<CString>& items);
 
 	CEdit	m_Description;
 	CStatic	m_ParamDesc;

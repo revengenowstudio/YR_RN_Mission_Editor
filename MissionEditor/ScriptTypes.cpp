@@ -264,40 +264,20 @@ int scriptTypeIndexToComboBoxIndex(CComboBox& comboBox, int scriptTypeIndex)
 	return 0;
 }
 
-#pragma region ScriptTemplate
-//Class ScriptTemplate
-ScriptTemplate::ScriptTemplate() {
-	Data.clear();
-}
+std::vector<CString> ScriptTemplate::parse(const CString& content)
+{
+	std::vector<CString> ret;
+	auto const init = INIHelper::Split(content);
+	const size_t count = atoi(init[0]);
+	ret.reserve(count);
 
-ScriptTemplate::ScriptTemplate(std::vector<std::string> init) {
-	int count = atoi(init[2].c_str());
-	Data.resize(count + 1);
-	Data[0].first = init[0];//UIName
-	Data[0].second = init[1];//Name
-	for (int i = 1; i <= count; ++i) {
-		Data[i].first = init[2 * i + 1];
-		Data[i].second = init[2 * i + 2];
+	for (auto i = 0; i < count; i++) {
+		ret.emplace_back(init[static_cast<size_t>(2 * i) + 1]
+			+ ','
+			+ init[static_cast<size_t>(2 * i) + 2]);
 	}
+	return ret;
 }
-
-int ScriptTemplate::Count() {
-	return Data.size() - 1;
-}
-
-void ScriptTemplate::Resize(int size) {
-	Data.resize(size);
-	return;
-}
-
-std::pair<std::string, std::string>& ScriptTemplate::operator[] (int index) {
-	return Data[index];
-}
-const std::pair<std::string, std::string>& ScriptTemplate::operator[] (int index) const {
-	auto non_const_ptr = const_cast<std::remove_const_t<std::remove_pointer_t<decltype(this)>>*>(this);
-	return non_const_ptr->operator[](index);
-}
-#pragma endregion
 
 CScriptTypes::CScriptTypes() : CDialog(CScriptTypes::IDD)
 {
@@ -367,11 +347,61 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CScriptTypes 
 
+void CScriptTypes::reloadTemplates()
+{
+	auto const& sec = g_data["ScriptTemplates"];
+	auto const count = sec.GetInteger("Count");
+	auto const defName = sec.GetStringOr("DefaultName", "Default");
+	m_scriptTemplates.push_back(
+		ScriptTemplate{ defName, "New Script", { "1,0,0" } }
+	);
+
+	auto offset = 0;
+
+	auto parseTemplate = [this, &sec](const CString& id) -> bool {
+		auto const& record = sec.GetString(id);
+		if (record.IsEmpty()) {
+			return false;
+		}
+		auto&& parts = INIHelper::Split(record, ',');
+		if (parts.size() <= 3) {
+			return false;
+		}
+		this->m_scriptTemplates.emplace_back(ScriptTemplate{ parts[0], parts[1], parts[2] });
+		return true;
+	};
+
+	// try from 0. If no 0, try from 1
+	if (!parseTemplate("0")) {
+		errstream << "[script template] could not parse content from index 0" << std::endl;
+		offset = 1;
+	}
+
+	CString idStr;
+	for (auto idx = 0; idx < count; ++idx) {
+		idStr.Format("%d", idx + offset);
+		if (!parseTemplate(idStr)) {
+			errstream << "[script template] could not parse content from index " << idStr << std::endl;
+		}
+	}
+
+	// load template into list
+	ASSERT(m_scriptTemplates.size() > 0);
+	for (auto const& templ : m_scriptTemplates) {
+		m_Template.AddString(templ.Desc());
+	}
+	m_Template.SetCurSel(0);
+}
+
 void CScriptTypes::UpdateDialog()
 {
+	if (!m_scriptTemplates.size()) {
+		reloadTemplates();
+	}
+
 	CIniFile& ini = Map->GetIniFile();
 
-	int sel = m_ScriptType.GetCurSel();
+	int lastScriptSel = m_ScriptType.GetCurSel();
 
 
 	while (m_ScriptType.DeleteString(0) != CB_ERR);
@@ -384,10 +414,10 @@ void CScriptTypes::UpdateDialog()
 	m_ParamExt.SetWindowText("");
 	m_Actions.SetWindowText("");
 	m_ActionType.SetCurSel(-1);
-	m_Template.SetCurSel(-1);
 
 	UpdateData(FALSE);
 
+	// load script type into list
 	for (auto const& [seq, type] : ini["ScriptTypes"]) {
 		CString desc = type;
 		desc += " (";
@@ -397,8 +427,8 @@ void CScriptTypes::UpdateDialog()
 	}
 
 	m_ScriptType.SetCurSel(0);
-	if (sel >= 0) {
-		m_ScriptType.SetCurSel(sel);
+	if (lastScriptSel >= 0) {
+		m_ScriptType.SetCurSel(lastScriptSel);
 	}
 	OnSelchangeScripttype();
 
@@ -518,84 +548,84 @@ void CScriptTypes::OnEditchangeActionType()
 	char tmp[50];
 
 	switch (type) {
-	case 0:
-		ListTargets(m_Param);
-		m_ParamDesc.SetWindowText("Target:");
-		break;
-	case 39:
-	case 40:
-		ListMapVariables(m_Param);
-		break;
+		case 0:
+			ListTargets(m_Param);
+			m_ParamDesc.SetWindowText("Target:");
+			break;
+		case 39:
+		case 40:
+			ListMapVariables(m_Param);
+			break;
 
-	case 11:
-		ListBehaviours(m_Param);
-		break;
-	case 1:
-	case 3:
-	case 16:
-		ListWaypoints(m_Param);
-		m_ParamDesc.SetWindowText("Waypoint:");
-		break;
-	case 4:
-		m_ParamDesc.SetWindowText("Cell:");
-		break;
-	case 5:
-		m_ParamDesc.SetWindowText("Time units to guard:");
-		break;
-	case 6:
-		m_ParamDesc.SetWindowText("Script action #:");
-		while (m_Param.DeleteString(0) != CB_ERR);
-		for (i = 1; i <= ini[Scripttype].Size() - 1; i++) {
-			m_Param.AddString(itoa(i, tmp, 10));
+		case 11:
+			ListBehaviours(m_Param);
+			break;
+		case 1:
+		case 3:
+		case 16:
+			ListWaypoints(m_Param);
+			m_ParamDesc.SetWindowText("Waypoint:");
+			break;
+		case 4:
+			m_ParamDesc.SetWindowText("Cell:");
+			break;
+		case 5:
+			m_ParamDesc.SetWindowText("Time units to guard:");
+			break;
+		case 6:
+			m_ParamDesc.SetWindowText("Script action #:");
+			while (m_Param.DeleteString(0) != CB_ERR);
+			for (i = 1; i <= ini[Scripttype].Size() - 1; i++) {
+				m_Param.AddString(itoa(i, tmp, 10));
+			}
+			break;
+		case 8:
+			m_ParamDesc.SetWindowText("Split groups:");
+			while (m_Param.DeleteString(0) != CB_ERR);
+			int i;
+			for (i = 0; i < UNLOAD_COUNT; i++) {
+				CString p;
+				char c[50];
+				itoa(i, c, 10);
+				p = c;
+				p += " - ";
+				p += UnloadTypeNames[i];
+
+				m_Param.AddString(p);
+			}
+			break;
+		case 9:
+		case 14:
+		case 37:
+			m_ParamDesc.SetWindowText("Use 0:");
+			break;
+		case 12:
+			m_ParamDesc.SetWindowText("Global:");
+			break;
+		case 20:
+			ListHouses(m_Param, TRUE);
+			m_ParamDesc.SetWindowText("House:");
+			break;
+		case 46:
+		case 47:
+		{
+			m_ParamDesc.SetWindowText("Type to move/attack:");
+			auto const& bldTypeSec = rules["BuildingTypes"];
+			for (i = 0; i < bldTypeSec.Size(); i++) {
+				char c[50];
+				itoa(i, c, 10);
+				CString s = c;
+
+				s += " ";
+				//s+=rules.sections[*rules.sections["BuildingTypes"].GetValue(i)].values["Name"];
+				s += Map->GetUnitName(bldTypeSec.Nth(i).second);
+				m_Param.AddString(s);
+			}
+			break;
 		}
-		break;
-	case 8:
-		m_ParamDesc.SetWindowText("Split groups:");
-		while (m_Param.DeleteString(0) != CB_ERR);
-		int i;
-		for (i = 0; i < UNLOAD_COUNT; i++) {
-			CString p;
-			char c[50];
-			itoa(i, c, 10);
-			p = c;
-			p += " - ";
-			p += UnloadTypeNames[i];
 
-			m_Param.AddString(p);
-		}
-		break;
-	case 9:
-	case 14:
-	case 37:
-		m_ParamDesc.SetWindowText("Use 0:");
-		break;
-	case 12:
-		m_ParamDesc.SetWindowText("Global:");
-		break;
-	case 20:
-		ListHouses(m_Param, TRUE);
-		m_ParamDesc.SetWindowText("House:");
-		break;
-	case 46:
-	case 47:
-	{
-		m_ParamDesc.SetWindowText("Type to move/attack:");
-		auto const& bldTypeSec = rules["BuildingTypes"];
-		for (i = 0; i < bldTypeSec.Size(); i++) {
-			char c[50];
-			itoa(i, c, 10);
-			CString s = c;
-
-			s += " ";
-			//s+=rules.sections[*rules.sections["BuildingTypes"].GetValue(i)].values["Name"];
-			s += Map->GetUnitName(bldTypeSec.Nth(i).second);
-			m_Param.AddString(s);
-		}
-		break;
-	}
-
-	default:
-		m_ParamDesc.SetWindowText("Parameter of action:");
+		default:
+			m_ParamDesc.SetWindowText("Parameter of action:");
 	}
 
 	itoa(m_Actions.GetCurSel(), action, 10);
@@ -667,8 +697,12 @@ void CScriptTypes::OnDeleteaction()
 	CIniFile& ini = Map->GetIniFile();
 
 	CString Scripttype;
-	if (m_Actions.GetCurSel() < 0) return;
-	if (m_ScriptType.GetCurSel() < 0) return;
+	if (m_Actions.GetCurSel() < 0) {
+		return;
+	}
+	if (m_ScriptType.GetCurSel() < 0) {
+		return;
+	}
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 
@@ -694,50 +728,25 @@ void CScriptTypes::OnDeleteaction()
 
 CString GetFree(const char* section);
 
-void CScriptTypes::OnAdd()
+void CScriptTypes::insertScriptType(const CString& name, const std::vector<CString>& items)
 {
-	errstream << "Add Script" << std::endl;
-	HWND ScriptWnd = this->m_hWnd;
-
-	//HWND EditName = ::GetDlgItem(ScriptWnd, WND_Script::EditScriptName);
-	//HWND ListBox = ::GetDlgItem(ScriptWnd, WND_Script::ListBoxActions);
-	//HWND ComboType = ::GetDlgItem(ScriptWnd, WND_Script::m_ActionType);
-	//HWND ComboPara = ::GetDlgItem(ScriptWnd, WND_Script::ComboBoxParameter);
-	int curTemplateComboCount = m_Template.GetCount();
-	if (curTemplateComboCount <= 0) {
-		// TODO: load when dialog init
-		//HWND BtnLoad = ::GetDlgItem(ScriptWnd, WND_Script::ButtonReload);
-		//::SendMessageA(BtnLoad, WM_LBUTTONDOWN, WND_Script::ButtonReload, NULL);
-		//::SendMessageA(BtnLoad, WM_LBUTTONUP, WND_Script::ButtonReload, NULL);
-	}
-	int curTemplateIndex = m_Template.GetCurSel();
-	ScriptTemplate& curTemplate = m_scriptTemplates[curTemplateIndex];
-	errstream << "Now using Script Template %s" << curTemplate[0].first.c_str() << std::endl;
-
-	int ScriptCount = m_ScriptType.GetCount();
-	std::set<CString> ScriptDictionary;
-
-	for (int i = 0; i < ScriptCount; ++i) {
-		int strLen = m_ScriptType.GetLBTextLen(i);
-		CString scriptID;
-		m_ScriptType.GetLBText(i, scriptID);
-		ScriptDictionary.emplace(std::move(scriptID));
-	}
-
-	//this->OnScriptTypeAdd();
-#if 1
-	CIniFile& ini = Map->GetIniFile();
-
 	CString ID = GetFreeID();
-
 	CString p = GetFree("ScriptTypes");
+
+	CIniFile& ini = Map->GetIniFile();
+	auto& sec = ini.AddSection(ID);
 	ini.SetString("ScriptTypes", p, ID);
-	ini.SetString(ID, "Name", "New script");
+	sec.SetString("Name", name);
 
+	// template value copy
+	auto idx = 0;
+	CString idStr;
+	for (auto const& line : items) {
+		idStr.Format("%d", idx);
+		sec.SetString(idStr, line);
+	}
 
-
-	int i;
-	for (i = 0; i < m_ScriptType.GetCount(); i++) {
+	for (auto i = 0; i < m_ScriptType.GetCount(); i++) {
 		CString data;
 		m_ScriptType.GetLBText(i, data);
 		TruncSpace(data);
@@ -748,48 +757,16 @@ void CScriptTypes::OnAdd()
 			break;
 		}
 	}
-
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
-#endif
+}
 
-	int newIdx = 0;
-	for (; newIdx < ScriptCount; ++newIdx) {
-		CString str;
-		m_ScriptType.GetLBText(newIdx, str);
-		if (ScriptDictionary.find(str) == ScriptDictionary.end()) {
-			break;
-		}
-	}
-
-	//::SendMessageA(m_ScriptType, CB_SETCURSEL, i, NULL);
-	this->m_ScriptType.SetCurSel(newIdx);//select the end
-	this->SetDlgItemTextA(IDC_NAME, curTemplate[0].second.c_str());
-	this->OnChangeName();
-
-	//::SendMessageA(ScriptWnd, WM_COMMAND, MAKEWPARAM(WND_Script::m_ScriptType, CBN_SELCHANGE), (LPARAM)m_ScriptType);
-	this->OnSelchangeScripttype();
-
-	for (int idx = 0; idx < curTemplate.Count(); ++idx) {
-		this->OnAddaction();
-		auto const& templateItem = curTemplate[idx + 1];//first one is reserved for name
-		//::SendMessageA(ListBox, LB_SETCURSEL, idx, NULL);
-		this->m_Actions.SetCurSel(idx);
-		//::SendMessageA(ScriptWnd, WM_COMMAND, MAKEWPARAM(WND_Script::ListBoxActions, LBN_SELCHANGE), (LPARAM)ListBox);
-		this->OnSelchangeActionList();
-		//::SendMessageA(ComboType, CB_SETCURSEL, atoi(templateItem->first.c_str()), NULL);
-		auto const scripIndex = atoi(templateItem.first.c_str());
-		errstream << " m_ActionType cur idx %d: " << atoi(templateItem.first.c_str()) << std::endl;
-		this->m_ActionType.SetCurSel(scriptTypeIndexToComboBoxIndex(this->m_ActionType, scripIndex));
-		//::SendMessageA(ScriptWnd, WM_COMMAND, MAKEWPARAM(WND_Script::m_ActionType, CBN_SELCHANGE), (LPARAM)ComboType);
-		this->OnSelchangeActionType();
-		if (templateItem.second == "EMPTY") {
-			continue;
-		}
-		//::SetWindowTextA(ComboPara, templateItem->second.c_str());
-		this->m_Param.SetWindowTextA(templateItem.second.c_str());
-		this->OnEditchangeParam();
-		//::SendMessageA(ScriptWnd, WM_COMMAND, MAKEWPARAM(WND_Script::ComboBoxParameter, CBN_SELCHANGE), (LPARAM)ComboPara);
-	}
+void CScriptTypes::OnAdd()
+{
+	errstream << "Add Script" << std::endl;
+	int curTemplateIndex = m_Template.GetCurSel();
+	auto const& curTemplate = m_scriptTemplates[curTemplateIndex];
+	errstream << "Now using Script Template: " << curTemplate.Name() << std::endl;
+	insertScriptType(curTemplate.Name(), curTemplate.Content());
 }
 
 void CScriptTypes::OnDelete()
@@ -797,7 +774,9 @@ void CScriptTypes::OnDelete()
 	CIniFile& ini = Map->GetIniFile();
 
 	CString Scripttype;
-	if (m_ScriptType.GetCurSel() < 0) return;
+	if (m_ScriptType.GetCurSel() < 0) {
+		return;
+	}
 	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
 	TruncSpace(Scripttype);
 
@@ -864,23 +843,58 @@ BOOL CScriptTypes::OnInitDialog()
 	while (m_ActionType.DeleteString(0) != CB_ERR);
 
 
-	int i;
-	for (i = 0; i < TMISSION_COUNT; i++) {
-		CString p;
-		char c[50];
-		itoa(i, c, 10);
-
-		//p=c;
-
-
-		//p+=" - ";
-		p += TMissions[i];
-
-		if (strlen(TMissions[i]) > 0) {
-			m_ActionType.AddString(p);
+	char* pParseBuffer[2];
+	for (auto& [idStr, content] : g_data["ScriptParams"]) {
+		int id = atoi(idStr);
+		if (id < 0) {
+			continue;
+		}
+		auto const param1 = GetParam(content, 1);
+		// no valid value at all
+		if (param1.IsEmpty()) {
+			continue;
+		}
+		m_paramDefinitions[id].Label_ = param1;
+		auto const param2 = GetParam(content, 2);
+		if (!param2.IsEmpty()) {
+			m_paramDefinitions[id].Type_ = ParameterType(atoi(param2));
 		}
 	}
 
+	for (auto& pair : g_data["ScriptsRA2"]) {
+		int id = atoi(pair.first);
+		//LogDebug(" id = %d", id);
+		if (id < 0) {
+			continue;
+		}
+		auto const& strings = INIHelper::Split(pair.second);
+		//LogDebug("pair.second = %s, count = %d", pair.second, strings.size());
+		switch (strings.size()) {
+			case 5:
+				m_actionDefinitions[id].Description_ = strings[4];
+				//LogDebug(" Description_ = %s", m_actionDefinitions[id].Description_);
+			case 4:
+				m_actionDefinitions[id].Editable_ = strings[3];
+			case 3:
+				m_actionDefinitions[id].Hide_ = strings[2];
+			case 2:
+				m_actionDefinitions[id].ParamTypeIndex_ = atoi(strings[1]);
+			case 1:
+				m_actionDefinitions[id].Name_ = _strdup(strings[0]);
+			case 0:
+			default:
+				continue;
+		}
+	}
+
+	int counter = 0;
+	for (auto& ent : m_actionDefinitions) {
+		if (!ent.second.Hide_) {
+			int data = m_ActionType.AddString(ent.second.Name_);
+			m_ActionType.SetItemData(data, counter);
+		}
+		++counter;
+	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
@@ -894,13 +908,36 @@ void CScriptTypes::OnCbnSelchangeScriptExtra()
 
 void CScriptTypes::OnCbnSelchangeScriptTemplate()
 {
-	// TODO: Add your control notification handler code here
+
 }
 
 
 void CScriptTypes::OnBnClickedScriptCopy()
 {
-	// TODO: Add your control notification handler code here
+	auto& doc = Map->GetIniFile();
+
+	int nCurSel = this->m_ScriptType.GetCurSel();
+	if (nCurSel < 0) {
+		return;
+	}
+	CString label;
+	this->m_ScriptType.GetLBText(nCurSel, label);
+	TruncSpace(label);
+
+	auto const& sec = doc[label];
+	auto const name = sec.GetString("Name") + " Clone";
+	std::vector<CString> contents;
+
+	// don't try infinitely
+	CString idxStr;
+	for (auto idx = 0; idx < std::numeric_limits<short>::max(); ++idx) {
+		idxStr.Format("%d", idx);
+		if (auto const& item = sec.GetString(idxStr)) {
+			contents.emplace_back(item);
+		}
+		break;
+	}
+	this->insertScriptType(name, contents);
 }
 
 
@@ -909,39 +946,39 @@ void CScriptTypes::updateExtraParamComboBox(ExtraParameterType type, int value)
 	//LogDebug(" type = %d", type);
 	HWND text = ::GetDlgItem(this->m_hWnd, IDC_SCRIPT_EXDESC);
 	switch (type) {
-	default:
-	case ExtraParameterType::None:
-		::EnableWindow(text, FALSE);
-		m_ParamExt.Clear();
-		m_ParamExt.EnableWindow(false);
-		m_ParamExt.SetWindowText("");
+		default:
+		case ExtraParameterType::None:
+			::EnableWindow(text, FALSE);
+			m_ParamExt.Clear();
+			m_ParamExt.EnableWindow(false);
+			m_ParamExt.SetWindowText("");
+			break;
+		case ExtraParameterType::ScanType:
+		{
+			::EnableWindow(text, TRUE);
+			m_ParamExt.Clear();
+			m_ParamExt.EnableWindow(true);
+			m_ParamExt.AddString(TranslateStringACP("0 - Least threat"));
+			m_ParamExt.AddString(TranslateStringACP("1 - Most threat"));
+			m_ParamExt.AddString(TranslateStringACP("2 - Least distant"));
+			m_ParamExt.AddString(TranslateStringACP("3 - Most distant"));
+			m_ParamExt.SetCurSel(value);
+			char buffer[0x20];
+			_itoa_s(value, buffer, 10);
+			m_ParamExt.SetWindowTextA(buffer);
+			//LogDebug(" [%X] window enabled", m_ParamExt.GetHWND());
+		}
 		break;
-	case ExtraParameterType::ScanType:
-	{
-		::EnableWindow(text, TRUE);
-		m_ParamExt.Clear();
-		m_ParamExt.EnableWindow(true);
-		m_ParamExt.AddString(TranslateStringACP("0 - Least threat"));
-		m_ParamExt.AddString(TranslateStringACP("1 - Most threat"));
-		m_ParamExt.AddString(TranslateStringACP("2 - Least distant"));
-		m_ParamExt.AddString(TranslateStringACP("3 - Most distant"));
-		m_ParamExt.SetCurSel(value);
-		char buffer[0x20];
-		_itoa_s(value, buffer, 10);
-		m_ParamExt.SetWindowTextA(buffer);
-		//LogDebug(" [%X] window enabled", m_ParamExt.GetHWND());
-	}
-	break;
-	case ExtraParameterType::Counter:
-	{
-		::EnableWindow(text, TRUE);
-		m_ParamExt.Clear();
-		m_ParamExt.EnableWindow(true);
-		char buffer[0x20];
-		_itoa_s(value, buffer, 10);
-		m_ParamExt.SetWindowTextA(buffer);
-		break;
-	}
+		case ExtraParameterType::Counter:
+		{
+			::EnableWindow(text, TRUE);
+			m_ParamExt.Clear();
+			m_ParamExt.EnableWindow(true);
+			char buffer[0x20];
+			_itoa_s(value, buffer, 10);
+			m_ParamExt.SetWindowTextA(buffer);
+			break;
+		}
 	}
 }
 
@@ -962,10 +999,10 @@ ParameterType CScriptTypes::getParameterType(int actionCbIndex) const
 ExtraParameterType getExtraParamType(ParameterType paramType)
 {
 	switch (paramType) {
-	default:
-		return ExtraParameterType::None;
-	case PRM_BuildingType:
-		return ExtraParameterType::ScanType;
+		default:
+			return ExtraParameterType::None;
+		case PRM_BuildingType:
+			return ExtraParameterType::ScanType;
 	}
 }
 
@@ -1091,75 +1128,75 @@ void CScriptTypes::UpdateParams(int actionIndex, CString& paramNumStr)
 		return;
 	}
 	switch (paramType) {
-	default:
-	case PRM_None:
-		while (this->m_Param.DeleteString(0) != -1);
-		break;
-	case 1:
-		ListTargets(this->m_Param);
-		break;
-	case 2:
-		ListWaypoints(this->m_Param);
-		break;
-	case 3:
-		ListScriptLine(
-			m_actionDefinitions,
-			this->m_Param,
-			this->m_ScriptType,
-			this->m_Actions
-		);
-		break;
-	case 4:
-		ListSplitGroup(this->m_Param);
-		break;
-	case 5:
-		ListRulesGlobals(this->m_Param);
-		break;
-	case 6:
-		listScriptTypes(this->m_Param);
-		break;
-	case 7:
-		listTeamTypes(this->m_Param);
-		break;
-	case 8:
-		ListHouses(this->m_Param);
-		break;
-	case 9:
-		ListSpeeches(this->m_Param);
-		break;
-	case 10:
-		ListSounds(this->m_Param);
-		break;
-	case 11:
-		ListMovies(this->m_Param, true);
-		break;
-	case 12:
-		ListThemes(this->m_Param);
-		break;
-	case 13:
-		ComboBoxHelper::ListCountries(this->m_Param);
-		break;
-	case 14:
-		ListMapVariables(this->m_Param);
-		break;
-	case 15:
-		listFacing(this->m_Param);
-		break;
-	case PRM_BuildingType:
-		ListBuildings(this->m_Param);
-		break;
-	case 17:
-		ListAnimations(this->m_Param);
-		break;
-	case 18:
-		listTalkBubble(this->m_Param);
-		break;
-	case 19:
-		ListBehaviours(this->m_Param);
-		break;
-	case 20:
-		ComboBoxHelper::ListBoolean(this->m_Param);
-		break;
+		default:
+		case PRM_None:
+			while (this->m_Param.DeleteString(0) != -1);
+			break;
+		case 1:
+			ListTargets(this->m_Param);
+			break;
+		case 2:
+			ListWaypoints(this->m_Param);
+			break;
+		case 3:
+			ListScriptLine(
+				m_actionDefinitions,
+				this->m_Param,
+				this->m_ScriptType,
+				this->m_Actions
+			);
+			break;
+		case 4:
+			ListSplitGroup(this->m_Param);
+			break;
+		case 5:
+			ListRulesGlobals(this->m_Param);
+			break;
+		case 6:
+			listScriptTypes(this->m_Param);
+			break;
+		case 7:
+			listTeamTypes(this->m_Param);
+			break;
+		case 8:
+			ListHouses(this->m_Param);
+			break;
+		case 9:
+			ListSpeeches(this->m_Param);
+			break;
+		case 10:
+			ListSounds(this->m_Param);
+			break;
+		case 11:
+			ListMovies(this->m_Param, true);
+			break;
+		case 12:
+			ListThemes(this->m_Param);
+			break;
+		case 13:
+			ComboBoxHelper::ListCountries(this->m_Param);
+			break;
+		case 14:
+			ListMapVariables(this->m_Param);
+			break;
+		case 15:
+			listFacing(this->m_Param);
+			break;
+		case PRM_BuildingType:
+			ListBuildings(this->m_Param);
+			break;
+		case 17:
+			ListAnimations(this->m_Param);
+			break;
+		case 18:
+			listTalkBubble(this->m_Param);
+			break;
+		case 19:
+			ListBehaviours(this->m_Param);
+			break;
+		case 20:
+			ComboBoxHelper::ListBoolean(this->m_Param);
+			break;
 	}
 	this->m_ParamDesc.SetWindowText(paramDefinition.Label_);
 	this->m_ParamDesc.EnableWindow(actionDefinition.Editable_);

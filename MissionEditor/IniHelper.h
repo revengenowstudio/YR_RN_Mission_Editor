@@ -62,4 +62,22 @@ public:
 		buffer[sizeof buffer - 1] = '\0';
 		return buffer;
 	}
+
+	static inline std::vector<CString> Split(CString str, char ch = ',') {
+		std::vector<CString> ret;
+		int start = 0;
+		int end = 0;
+
+		while (end != -1) {
+			end = str.Find(ch, start);
+			if (end == -1) {
+				ret.push_back(str.Mid(start));
+			} else {
+				ret.push_back(str.Mid(start, end - start));
+				start = end + 1;
+			}
+		}
+
+		return ret;
+	}
 };
