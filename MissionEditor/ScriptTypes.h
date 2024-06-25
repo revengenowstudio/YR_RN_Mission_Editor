@@ -82,7 +82,7 @@ class CScriptTypes : public CDialog
 	};
 
 	struct CScriptTypeParam {
-		const char* Label_{};//!< the string displayed for such parameter type
+		CString Label_{};//!< the string displayed for such parameter type
 		ParameterType Type_{};//!< internal predefined paramter type
 	};
 
@@ -113,14 +113,13 @@ protected:
 	const CScriptTypeParam& getParamData(int paramIndex) const;
 	ParameterType getParameterType(int actionCbIndex) const;
 	void updateExtraValue(ParameterType paramType, CString& paramNumStr);
-	void UpdateParams(int actionIndex, CString& paramNumStr);
+	void UpdateParams(int actionIndex, CString paramNumStr = {});
 
 // Implementierung
 protected:
 	void ListBehaviours(CComboBox& cb);
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CScriptTypes)
-	afx_msg void OnEditchangeScripttype();
 	afx_msg void OnSelchangeScripttype();
 	afx_msg void OnSelchangeActionList();
 	afx_msg void OnChangeName();

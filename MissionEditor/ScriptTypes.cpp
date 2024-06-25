@@ -37,215 +37,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-#define TMISSION_COUNT 59
-#define TPROPERTY_COUNT 4
-#define UNLOAD_COUNT 4
-
-
-// The various missions that a team can have.
-enum TeamMissionType {
-	TMISSION_ATTACK,
-	TMISSION_ATT_WAYPT,
-	TMISSION_BERZERK,
-	TMISSION_MOVE,
-	TMISSION_MOVECELL,
-	TMISSION_GUARD,
-	TMISSION_LOOP,
-	TMISSION_WIN,
-	TMISSION_UNLOAD,
-	TMISSION_DEPLOY,
-	TMISSION_HOUND_DOG,
-	TMISSION_DO,
-	TMISSION_SET_GLOBAL,
-	TMISSION_IDLE_ANIM,
-	TMISSION_LOAD,
-	TMISSION_SPY,
-	TMISSION_PATROL,
-	TMISSION_SCRIPT,
-	TMISSION_TEAMCHANGE,
-	TMISSION_PANIC,
-	TMISSION_CHANGE_HOUSE,
-	TMISSION_SCATTER,
-	TMISSION_GOTO_SHROUD,
-	TMISSION_LOSE,
-	TMISSION_PLAY_SPEECH,
-	TMISSION_PLAY_SOUND,
-	TMISSION_PLAY_MOVIE,
-	TMISSION_PLAY_MUSIC,
-	TMISSION_REDUCE_TIBERIUM,
-	TMISSION_BEGIN_PRODUCTION,
-	TMISSION_FIRE_SALE,
-	TMISSION_SELF_DESTRUCT,
-	TMISSION_ION_STORM_START,
-	TMISSION_ION_STORM_END,
-	TMISSION_CENTER_VIEWPOINT,
-	TMISSION_RESHROUD,
-	TMISSION_REVEAL,
-	TMISSION_DESTROY_MEMBERS,
-	TMISSION_CLEAR_GLOBAL,
-	TMISSION_SET_LOCAL,
-	TMISSION_CLEAR_LOCAL,
-	TMISSION_UNPANIC,
-	TMISSION_FORCE_FACING,
-	TMISSION_FULLY_LOADED,
-	TMISSION_UNLOAD_TRUCK,
-	TMISSION_LOAD_TRUCK,
-	TMISSION_ATTACK_BUILDING_WITH_PROPERTY,
-	TMISSION_MOVETO_BUILDING_WITH_PROPERTY,
-	TMISSION_SCOUT,
-	TMISSION_SUCCESS,
-	TMISSION_FLASH,
-	TMISSION_PLAY_ANIM,
-	TMISSION_TALK_BUBBLE,
-	TMISSION_GATHER_FAR,
-	TMISSION_GATHER_NEAR,
-	TMISSION_ACTIVATE_CURTAIN,
-	TMISSION_CHRONO_ATTACK_BUILDING_WITH_PROPERTY,
-	TMISSION_CHRONO_ATTACK,
-	TMISSION_MOVETO_OWN_BUILDING_WITH_PROPERTY,
-};
-
-char const* TMissions[TMISSION_COUNT] = {
-	"Attack...",
-	"Attack Waypoint...",
-	"Go Berzerk",
-	"Move to waypoint...",
-	"Move to Cell...",
-	"Guard area (timer ticks)...",
-	"Jump to line #...",
-	"Player wins",
-	"Unload...",
-	"Deploy",
-	"Follow friendlies",
-	"Do this...",
-	"Set global...",
-	"Idle Anim...",
-	"Load onto Transport",
-	"Spy on bldg @ waypt...",
-	"Patrol to waypoint...",
-	"Change script...",
-	"Change team...",
-	"Panic",
-	"Change house...",
-	"Scatter",
-	"Goto nearby shroud",
-	"Player loses",
-	"Play speech...",
-	"Play sound...",
-	"Play movie...",
-	"Play music...",
-	"Reduce tiberium",
-	"Begin production",
-	"Fire sale",
-	"Self destruct",
-	"Ion storm start in...",
-	"Ion storn end",
-	"Center view on team (speed)...",
-	"Reshroud map",
-	"Reveal map",
-	"Delete team members",
-	"Clear global...",
-	"Set local...",
-	"Clear local...",
-	"Unpanic",
-	"Force facing...",
-	"Wait till fully loaded",
-	"Truck unload",
-	"Truck load",
-	"Attack enemy building",
-	"Moveto enemy building",
-	"Scout",
-	"Success",
-	"Flash",
-	"Play Anim",
-	"Talk Bubble",
-	"Gather at Enemy",
-	"Gather at Base",
-	"Iron Curtain Me",
-	"Chrono Prep for ABwP",
-	"Chrono Prep for AQ",
-	"Move to own building",
-};
-
-char const* TMissionsHelp[TMISSION_COUNT] = {
-	"Attack some general target",
-	"Attack anything nearby the specified waypoint",
-	"Cyborg members of the team will go berzerk.",
-	"Orders the team to move to a waypoint on the map",
-	"Orders the team to move to a specific cell on the map",
-	"Guard an area for a specified amount of time",
-	"Move to a new line number in the script.  Used for loops.",
-	"Duh",
-	"Unloads all loaded units.  The command parameter specifies which units should stay a part of the team, and which should be severed from the team.",
-	"Causes all deployable units in the team to deploy",
-	"Causes the team to follow the nearest friendly unit",
-	"Give all team members the specified mission",
-	"Sets a global variable",
-	"Causes team members to enter their idle animation",
-	"Causes all units to load into transports, if able",
-	"**OBSOLETE**",
-	"Move to a waypoint while scanning for enemies",
-	"Causes the team to start using a new script",
-	"Causes the team to switch team types",
-	"Causes all units in the team to panic",
-	"All units in the team switch houses",
-	"Tells all units to scatter",
-	"Causes units to flee to a shrouded cell",
-	"Causes the player to lose",
-	"Plays the specified voice file",
-	"Plays the specified sound file",
-	"Plays the specified movie file",
-	"Plays the specified theme",
-	"Reduces the amount of tiberium around team members",
-	"Signals the owning house to begin production",
-	"Causes an AI house to sell all of its buildings and do a Braveheart",
-	"Causes all team members to self destruct",
-	"Causes an ion storm to begin at the specified time",
-	"Causes an ion storm to end",
-	"Center view on team (speed)...",
-	"Reshrouds the map",
-	"Reveals the map",
-	"Delete all members from the team",
-	"Clears the specified global variable",
-	"Sets the specified local variable",
-	"Clears the specified local variable",
-	"Causes all team members to stop panicking",
-	"Forces team members to face a certain direction",
-	"Waits until all transports are full",
-	"Causes all trucks to unload their crates (ie, change imagery)",
-	"Causes all trucks to load crates (ie, change imagery)",
-	"Attack a specific type of building with the specified property",
-	"Move to a specific type of building with the specified property",
-	"The team will scout the bases of the players that have not been scouted",
-	"Record a team as having successfully accomplished its mission.  Used for AI trigger weighting.  Put this at the end of every AITrigger script.",
-	"Flashes a team for a period of team.",
-	"Plays an anim over every unit in the team.",
-	"Displays talk bubble over first unit in the team.",
-	"Uses AISafeDistance to find a spot close to enemy's base to gather close.",
-	"Gathers outside own base perimeter.",
-	"Calls (and waits if nearly ready) for House to deliver Iron Curtain to Team.",
-	"Teleports team to Building With Property, but needs similar attack order as next mission.",
-	"Teleports team to Attack Quarry, but needs similar attack order as next mission.",
-	"A BwP move that will only search through buildings owned by this house.",
-};
-
-
-char const* TargetProperties[TPROPERTY_COUNT] = {
-	"Least Threat",
-	"Greatest Threat",
-	"Nearest",
-	"Farthest",
-};
-
-char const* UnloadTypeNames[UNLOAD_COUNT] = {
-	"Keep Transports, Keep Units",
-	"Keep Transports, Lose Units",
-	"Lose Transports, Keep Units",
-	"Lose Transports, Lose Units",
-};
-
-
 /////////////////////////////////////////////////////////////////////////////
 // Eigenschaftenseite CScriptTypes 
 
@@ -327,7 +118,6 @@ void CScriptTypes::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CScriptTypes, CDialog)
-	ON_CBN_KILLFOCUS(IDC_SCRIPTTYPE, OnEditchangeScripttype)
 	ON_CBN_SELCHANGE(IDC_SCRIPTTYPE, OnSelchangeScripttype)
 	ON_LBN_SELCHANGE(IDC_ACTION, OnSelchangeActionList)
 	ON_EN_KILLFOCUS(IDC_NAME, OnChangeName)
@@ -435,11 +225,6 @@ void CScriptTypes::UpdateDialog()
 
 }
 
-void CScriptTypes::OnEditchangeScripttype()
-{
-
-}
-
 void CScriptTypes::OnSelchangeScripttype()
 {
 	CIniFile& ini = Map->GetIniFile();
@@ -464,7 +249,9 @@ void CScriptTypes::OnSelchangeScripttype()
 
 
 	m_Actions.SetCurSel(0);
-	if (sel >= 0) m_Actions.SetCurSel(sel);
+	if (sel >= 0) {
+		m_Actions.SetCurSel(sel);
+	}
 	OnSelchangeActionList();
 
 	UpdateData(FALSE);
@@ -528,126 +315,62 @@ void CScriptTypes::OnChangeName()
 
 void CScriptTypes::OnEditchangeActionType()
 {
-	CIniFile& ini = Map->GetIniFile();
+	CIniFile& doc = Map->GetIniFile();
 
-	while (m_Param.DeleteString(0) != CB_ERR);
-	CString Scripttype;
-	char action[50];
-	if (m_Actions.GetCurSel() < 0) return;
-	if (m_ScriptType.GetCurSel() < 0) return;
-	m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
-	TruncSpace(Scripttype);
-
-	//CString type;
-	//m_ActionType.GetWindowText(type);
-	//TruncSpace(type);
-	//MessageBox("beep");
-	int type = m_ActionType.GetCurSel();
-
-	int i;
-	char tmp[50];
-
-	switch (type) {
-		case 0:
-			ListTargets(m_Param);
-			m_ParamDesc.SetWindowText("Target:");
-			break;
-		case 39:
-		case 40:
-			ListMapVariables(m_Param);
-			break;
-
-		case 11:
-			ListBehaviours(m_Param);
-			break;
-		case 1:
-		case 3:
-		case 16:
-			ListWaypoints(m_Param);
-			m_ParamDesc.SetWindowText("Waypoint:");
-			break;
-		case 4:
-			m_ParamDesc.SetWindowText("Cell:");
-			break;
-		case 5:
-			m_ParamDesc.SetWindowText("Time units to guard:");
-			break;
-		case 6:
-			m_ParamDesc.SetWindowText("Script action #:");
-			while (m_Param.DeleteString(0) != CB_ERR);
-			for (i = 1; i <= ini[Scripttype].Size() - 1; i++) {
-				m_Param.AddString(itoa(i, tmp, 10));
-			}
-			break;
-		case 8:
-			m_ParamDesc.SetWindowText("Split groups:");
-			while (m_Param.DeleteString(0) != CB_ERR);
-			int i;
-			for (i = 0; i < UNLOAD_COUNT; i++) {
-				CString p;
-				char c[50];
-				itoa(i, c, 10);
-				p = c;
-				p += " - ";
-				p += UnloadTypeNames[i];
-
-				m_Param.AddString(p);
-			}
-			break;
-		case 9:
-		case 14:
-		case 37:
-			m_ParamDesc.SetWindowText("Use 0:");
-			break;
-		case 12:
-			m_ParamDesc.SetWindowText("Global:");
-			break;
-		case 20:
-			ListHouses(m_Param, TRUE);
-			m_ParamDesc.SetWindowText("House:");
-			break;
-		case 46:
-		case 47:
-		{
-			m_ParamDesc.SetWindowText("Type to move/attack:");
-			auto const& bldTypeSec = rules["BuildingTypes"];
-			for (i = 0; i < bldTypeSec.Size(); i++) {
-				char c[50];
-				itoa(i, c, 10);
-				CString s = c;
-
-				s += " ";
-				//s+=rules.sections[*rules.sections["BuildingTypes"].GetValue(i)].values["Name"];
-				s += Map->GetUnitName(bldTypeSec.Nth(i).second);
-				m_Param.AddString(s);
-			}
-			break;
+	const int scriptIndex = this->m_ScriptType.GetCurSel();
+	const int listIndex = this->m_Actions.GetCurSel();
+	if (scriptIndex >= 0 && listIndex >= 0) {
+		CString scriptId;
+		CString buffer;
+		//_showCStr(scriptId);
+		//_showCStr(buffer);
+		this->m_ScriptType.GetLBText(scriptIndex, scriptId);
+		TruncSpace(scriptId);
+		//_showCStr(scriptId);
+		buffer.Format("%d", listIndex);
+		// _showCStr(buffer);
+		buffer = doc.GetStringOr(scriptId, buffer, "0,0");
+		// _showCStr(buffer);
+		int commaPos = buffer.Find(',');
+		if (commaPos < 0) {
+			buffer = "0";
+		} else {
+			buffer = buffer.Mid(commaPos + 1);
 		}
 
-		default:
-			m_ParamDesc.SetWindowText("Parameter of action:");
+		int actionIndex = this->m_ActionType.GetCurSel();
+		if (actionIndex >= 0) {
+			const int actionData = this->m_ActionType.GetItemData(actionIndex);
+			this->UpdateParams(actionData);
+			actionIndex = this->m_Param.FindString(0, buffer);
+			if (actionIndex != CB_ERR) {
+				this->m_Param.SetCurSel(actionIndex);
+			}
+			CString listStr;
+			CString tmp;
+			tmp.Format("%d,%s", actionData, buffer.operator LPCSTR());
+			listStr.Format("%d", listIndex);
+			doc.SetString(scriptId, listStr, tmp);
+			// _showCStr(tmp);
+		}
 	}
-
-	itoa(m_Actions.GetCurSel(), action, 10);
-
-	char types[50];
-	itoa(type, types, 10);
-	ini.SetString(Scripttype, action, SetParam(ini.GetString(Scripttype, action), 0, types));
 }
 
 void CScriptTypes::OnSelchangeActionType()
 {
-	CString str;
-	if (m_ActionType.GetCurSel() > -1) {
-		//m_ActionType.GetLBText(m_ActionType.GetCurSel(), str);
-		//m_ActionType.SetWindowText(str);
+	int curActionIdx = this->m_ActionType.GetCurSel();
+	if (curActionIdx >= 0) {
+		int curActionData = this->m_ActionType.GetItemData(curActionIdx);
+		auto const& dict = m_actionDefinitions;
+		auto itr = dict.find(curActionData);
+		if (itr != dict.end()) {
+			this->OnEditchangeActionType();
 
-		m_Description.SetWindowText(TMissionsHelp[m_ActionType.GetCurSel()]);
+			this->m_Description.SetWindowTextA(itr->second.Description_);
+			this->m_Description.EnableWindow(itr->second.Editable_);
+			this->m_Param.EnableWindow(itr->second.Editable_);
+		}
 	}
-
-
-
-	OnEditchangeActionType();
 }
 
 void CScriptTypes::OnEditchangeParam()
@@ -1110,7 +833,7 @@ static void listTalkBubble(CComboBox& comboBox)
 	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("3 - Exclamation mark(!)")), 3);
 }
 
-void CScriptTypes::UpdateParams(int actionIndex, CString& paramNumStr)
+void CScriptTypes::UpdateParams(int actionIndex, CString paramNumStr)
 {
 	static int LastActionID = -1;
 	auto const& actionDefinition = getActionData(actionIndex);
