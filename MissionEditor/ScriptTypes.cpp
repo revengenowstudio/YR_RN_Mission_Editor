@@ -102,6 +102,7 @@ void CScriptTypes::UpdateStrings()
 	TranslateDlgItem(*this, IDC_SCRIPTTYPE_ACTIONS, "ScriptTypesActions");
 	TranslateDlgItem(*this, IDC_SCRIPTTYPE_ACTIONTYPE, "ScriptTypesActionType");
 	TranslateDlgItem(*this, IDC_PDESC, "ScriptTypesActionParam");
+	TranslateDlgItem(*this, IDC_SCRIPT_EXDESC, "ScriptTypesParamExtDesc");
 	TranslateDlgItem(*this, IDC_SCRIPTTYPE_DESC, "ScriptTypesActionDesc");
 	TranslateDlgItem(*this, IDC_ADDACTION, "ScriptTypesAddAction");
 	TranslateDlgItem(*this, IDC_DELETEACTION, "ScriptTypesDelAction");
