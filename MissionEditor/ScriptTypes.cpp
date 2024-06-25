@@ -514,7 +514,7 @@ void CScriptTypes::insertScriptType(const CString& name, const std::vector<CStri
 		idStr.Format("%d", idx++);
 		sec.SetString(idStr, line);
 	}
-
+	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 	for (auto i = 0; i < m_ScriptType.GetCount(); i++) {
 		CString data;
 		m_ScriptType.GetLBText(i, data);
@@ -526,7 +526,6 @@ void CScriptTypes::insertScriptType(const CString& name, const std::vector<CStri
 			break;
 		}
 	}
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 }
 
 void CScriptTypes::OnAdd()
