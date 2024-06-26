@@ -128,7 +128,6 @@ void CScriptTypes::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PARAM, m_Param);
 	DDX_Control(pDX, IDC_SCRIPT_EXTRA, m_ParamExt);
 	DDX_Control(pDX, IDC_ACTION, m_Actions);
-	DDX_Control(pDX, IDC_SCRIPT_CK_INSERT, m_insertMode);
 	DDX_Text(pDX, IDC_NAME, m_Name);
 	//}}AFX_DATA_MAP
 }
@@ -484,7 +483,9 @@ void CScriptTypes::insertAction(int curSel, const CString& scriptTypeId, const C
 
 void CScriptTypes::OnAddaction()
 {
-	bool isInsert = m_insertMode.GetCheck() == BST_CHECKED;
+	HWND ScriptWnd = this->GetSafeHwnd();
+	HWND CheckBox = ::GetDlgItem(ScriptWnd, IDC_SCRIPT_CK_INSERT);
+	bool isInsert = ::SendMessageA(CheckBox, BM_GETCHECK, NULL, NULL) == BST_CHECKED;
 	auto const curSel = this->m_Actions.GetCurSel();
 	if (curSel < 0) {
 		isInsert = false;
@@ -496,7 +497,9 @@ void CScriptTypes::OnAddaction()
 
 void CScriptTypes::OnBnClickedCopyaction()
 {
-	bool isInsert = m_insertMode.GetCheck() == BST_CHECKED;
+	HWND ScriptWnd = this->GetSafeHwnd();
+	HWND CheckBox = ::GetDlgItem(ScriptWnd, IDC_SCRIPT_CK_INSERT);
+	bool isInsert = ::SendMessageA(CheckBox, BM_GETCHECK, NULL, NULL) == BST_CHECKED;
 	auto const curSel = this->m_Actions.GetCurSel();
 	if (curSel < 0) {
 		return;

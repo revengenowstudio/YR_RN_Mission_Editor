@@ -165,7 +165,6 @@ protected:
 	CComboBox	m_Param;
 	CComboBox	m_ParamExt;
 	CListBox	m_Actions;
-	CButton m_insertMode;
 	CString	m_Name;
 
 	ActionDefinitionMap m_actionDefinitions;
