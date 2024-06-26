@@ -387,9 +387,9 @@ void CScriptTypes::OnSelchangeActionType()
 		if (itr != dict.end()) {
 			this->OnEditchangeActionType();
 
-			this->m_Description.SetWindowTextA(itr->second.Description_);
-			this->m_Description.EnableWindow(itr->second.Editable_);
-			this->m_Param.EnableWindow(itr->second.Editable_);
+			this->m_Description.SetWindowTextA(itr->second.Description);
+			this->m_Description.EnableWindow(itr->second.Editable);
+			this->m_Param.EnableWindow(itr->second.Editable);
 		}
 	}
 }
@@ -623,10 +623,10 @@ BOOL CScriptTypes::OnInitDialog()
 		if (param1.IsEmpty()) {
 			continue;
 		}
-		m_paramDefinitions[id].Label_ = param1;
+		m_paramDefinitions[id].Label = param1;
 		auto const param2 = GetParam(content, 1);
 		if (!param2.IsEmpty()) {
-			m_paramDefinitions[id].Type_ = ParameterType(atoi(param2));
+			m_paramDefinitions[id].Type = ParameterType(atoi(param2));
 		}
 	}
 
@@ -640,16 +640,16 @@ BOOL CScriptTypes::OnInitDialog()
 		//LogDebug("pair.second = %s, count = %d", pair.second, strings.size());
 		switch (strings.size()) {
 			case 5:
-				m_actionDefinitions[id].Description_ = strings[4];
-				//LogDebug(" Description_ = %s", m_actionDefinitions[id].Description_);
+				m_actionDefinitions[id].Description = strings[4];
+				//LogDebug(" Description = %s", m_actionDefinitions[id].Description);
 			case 4:
-				m_actionDefinitions[id].Editable_ = INIHelper::StringToBool(strings[3], false);
+				m_actionDefinitions[id].Editable = INIHelper::StringToBool(strings[3], false);
 			case 3:
-				m_actionDefinitions[id].Hide_ = INIHelper::StringToBool(strings[2], false);
+				m_actionDefinitions[id].Hide = INIHelper::StringToBool(strings[2], false);
 			case 2:
-				m_actionDefinitions[id].ParamTypeIndex_ = atoi(strings[1]);
+				m_actionDefinitions[id].ParamTypeIndex = atoi(strings[1]);
 			case 1:
-				m_actionDefinitions[id].Name_ = strings[0];
+				m_actionDefinitions[id].Name = strings[0];
 			case 0:
 			default:
 				continue;
@@ -658,8 +658,8 @@ BOOL CScriptTypes::OnInitDialog()
 
 	int counter = 0;
 	for (auto& ent : m_actionDefinitions) {
-		if (!ent.second.Hide_) {
-			int data = m_ActionType.AddString(ent.second.Name_);
+		if (!ent.second.Hide) {
+			int data = m_ActionType.AddString(ent.second.Name);
 			m_ActionType.SetItemData(data, counter);
 		}
 		++counter;
@@ -764,7 +764,7 @@ const CScriptTypes::CScriptTypeParam& CScriptTypes::getParamData(int paramIndex)
 }
 ParameterType CScriptTypes::getParameterType(int actionCbIndex) const
 {
-	return getParamData(getActionData(actionCbIndex).ParamTypeIndex_).Type_;
+	return getParamData(getActionData(actionCbIndex).ParamTypeIndex).Type;
 }
 
 void CScriptTypes::updateExtraValue(ParameterType paramType, CString* paramNumStr)
@@ -816,7 +816,7 @@ static void ListScriptLine(const CScriptTypes::ActionDefinitionMap& actionDef, C
 		} else {
 			actionIndex = atoi(buffer.Mid(0, actionIndex));
 		}
-		buffer.Format("%d - %s", i + 1, actionDef.at(actionIndex).Name_);
+		buffer.Format("%d - %s", i + 1, actionDef.at(actionIndex).Name);
 		int idx = comboBox.AddString(buffer);
 		comboBox.SetItemData(idx, i);
 	}
@@ -877,8 +877,8 @@ void CScriptTypes::UpdateParams(int actionIndex, CString* paramNumStr)
 {
 	static int LastActionID = -1;
 	auto const& actionDefinition = getActionData(actionIndex);
-	auto const& paramDefinition = getParamData(actionDefinition.ParamTypeIndex_);
-	auto const paramType = paramDefinition.Type_;
+	auto const& paramDefinition = getParamData(actionDefinition.ParamTypeIndex);
+	auto const paramType = paramDefinition.Type;
 	auto const lastActionID = std::exchange(LastActionID, actionIndex);
 
 	//LogDebug(

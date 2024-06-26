@@ -87,16 +87,16 @@ class CScriptTypes : public CDialog
 {
 
 	struct CScriptTypeAction {
-		CString Name_{};
-		int ParamTypeIndex_{};//!< index linked to specific CScriptTypeParam, can be user defined
-		CString Description_{};
-		bool Hide_{};
-		bool Editable_{};
+		CString Name{};
+		CString Description{};
+		int ParamTypeIndex{};//!< index linked to specific CScriptTypeParam, can be user defined
+		bool Hide{};
+		bool Editable{};
 	};
 
 	struct CScriptTypeParam {
-		CString Label_{};//!< the string displayed for such parameter type
-		ParameterType Type_{};//!< internal predefined paramter type
+		ParameterType Type{};//!< internal predefined paramter type
+		CString Label{};//!< the string displayed for such parameter type
 	};
 
 
