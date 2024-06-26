@@ -110,6 +110,8 @@ void CScriptTypes::UpdateStrings()
 	TranslateDlgItem(*this, IDC_SCRIPT_EXDESC, "ScriptTypesParamExtDesc");
 	TranslateDlgItem(*this, IDC_SCRIPTTYPE_DESC, "ScriptTypesActionDesc");
 	TranslateDlgItem(*this, IDC_ADDACTION, "ScriptTypesAddAction");
+	TranslateDlgItem(*this, IDC_COPYACTION, "ScriptTypesCopyAction");
+	TranslateDlgItem(*this, IDC_SCRIPT_CK_INSERT, "ScriptTypesInsertMode");
 	TranslateDlgItem(*this, IDC_DELETEACTION, "ScriptTypesDelAction");
 
 	TranslateWindowCaption(*this, "ScriptsCaption");
@@ -126,6 +128,7 @@ void CScriptTypes::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PARAM, m_Param);
 	DDX_Control(pDX, IDC_SCRIPT_EXTRA, m_ParamExt);
 	DDX_Control(pDX, IDC_ACTION, m_Actions);
+	DDX_Control(pDX, IDC_SCRIPT_CK_INSERT, m_insertMode);
 	DDX_Text(pDX, IDC_NAME, m_Name);
 	//}}AFX_DATA_MAP
 }
@@ -144,8 +147,8 @@ BEGIN_MESSAGE_MAP(CScriptTypes, CDialog)
 	ON_BN_CLICKED(IDC_ADD, OnAdd)
 	ON_BN_CLICKED(IDC_DELETE, OnDelete)
 	ON_CBN_SELCHANGE(IDC_SCRIPT_EXTRA, &CScriptTypes::OnCbnSelchangeScriptExtra)
-	ON_CBN_SELCHANGE(IDC_SCRIPT_TEMPLATE, &CScriptTypes::OnCbnSelchangeScriptTemplate)
 	ON_BN_CLICKED(IDC_SCRIPT_COPY, &CScriptTypes::OnBnClickedScriptCopy)
+	ON_BN_CLICKED(IDC_COPYACTION, &CScriptTypes::OnBnClickedCopyaction)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -447,19 +450,64 @@ void CScriptTypes::OnSelchangeParam()
 	OnEditchangeParam();
 }
 
+CString CScriptTypes::getCurrentTypeID()
+{
+	CString scriptTypeId;
+	this->m_ScriptType.GetLBText(this->m_ScriptType.GetCurSel(), scriptTypeId);
+	TruncSpace(scriptTypeId);
+	return scriptTypeId;
+}
+
+
+void CScriptTypes::insertAction(int curSel, const CString& scriptTypeId, const CString& value)
+{
+	CString idxStr;
+	std::vector<CString> oldItems;
+	auto& doc = Map->GetIniFile();
+	//record old values from next line
+	for (auto idx = curSel + 1; idx < this->m_Actions.GetCount(); ++idx) {
+		idxStr.Format("%d", idx);
+		oldItems.push_back(doc.GetStringOr(scriptTypeId, idxStr, "0,0"));
+	}
+	idxStr.Format("%d", curSel + 1);
+	doc.SetString(scriptTypeId, idxStr, value);
+	auto newIdx = curSel + 2;
+	for (auto& val : oldItems) {
+		idxStr.Format("%d", newIdx);
+		doc.SetString(scriptTypeId, idxStr, val);
+		newIdx++;
+	}
+	this->m_Actions.InsertString(this->m_Actions.GetCount(), idxStr);
+	this->m_Actions.SetCurSel(curSel + 1);
+	this->OnSelchangeActionList();
+}
+
 void CScriptTypes::OnAddaction()
 {
-	CIniFile& ini = Map->GetIniFile();
-	CString Scripttype;
-	if (m_ScriptType.GetCurSel() >= 0) {
-		m_ScriptType.GetLBText(m_ScriptType.GetCurSel(), Scripttype);
-		TruncSpace(Scripttype);
-		int count = ini[Scripttype].Size() - 1;
-		CString action;
-		action.Format("%d", count);
-		ini.SetString(Scripttype, action, "0,0");
-		UpdateDialog();
+	bool isInsert = m_insertMode.GetCheck() == BST_CHECKED;
+	auto const curSel = this->m_Actions.GetCurSel();
+	if (curSel < 0) {
+		isInsert = false;
 	}
+	//get selected value :
+	auto const insertIdx = (isInsert ? curSel : this->m_Actions.GetCount()) - 1;
+	insertAction(insertIdx, getCurrentTypeID(), "0,0");
+}
+
+void CScriptTypes::OnBnClickedCopyaction()
+{
+	bool isInsert = m_insertMode.GetCheck() == BST_CHECKED;
+	auto const curSel = this->m_Actions.GetCurSel();
+	if (curSel < 0) {
+		return;
+	}
+	//get selected value :
+	CString idxStr;
+	auto& doc = Map->GetIniFile();
+	CString scriptTypeId = getCurrentTypeID();
+	idxStr.Format("%d", curSel);
+	auto value = doc.GetStringOr(scriptTypeId, idxStr, "0,0");
+	insertAction(isInsert ? curSel : this->m_Actions.GetCount() - 1, scriptTypeId, value);
 }
 
 void CScriptTypes::OnDeleteaction()
@@ -675,12 +723,6 @@ void CScriptTypes::OnCbnSelchangeScriptExtra()
 }
 
 
-void CScriptTypes::OnCbnSelchangeScriptTemplate()
-{
-
-}
-
-
 void CScriptTypes::OnBnClickedScriptCopy()
 {
 	auto& doc = Map->GetIniFile();
@@ -710,7 +752,6 @@ void CScriptTypes::OnBnClickedScriptCopy()
 	}
 	this->insertScriptType(name, contents);
 }
-
 
 void CScriptTypes::updateExtraParamComboBox(ExtraParameterType type, int value)
 {

@@ -281,6 +281,7 @@
 #define IDC_ADDACTION                   1173
 #define IDC_DELETEACTION                1174
 #define IDC_EVENTTYPE                   1175
+#define IDC_COPYACTION                  1175
 #define IDC_ACTIONPARAM1                1176
 #define IDC_ACTIONWAYPOINT              1177
 #define IDC_ACTIONTYPE                  1178
@@ -517,6 +518,7 @@
 #define IDC_PREFER_LOCAL_THEATER_INI_FILES 1462
 #define IDC_PREFER_LOCAL_THEATER_FILES  1463
 #define IDC_TRIGGER_OPTION_TYPE_STR     1464
+#define IDC_SCRIPT_CK_INSERT            1464
 #define IDC_TRIGGER_OPTION_NAME         1465
 #define IDC_TRIGGER_OPTION_HOUSE        1466
 #define IDC_TRIGGER_OPTION_ATTACHED_TRIGGER 1467
@@ -531,7 +533,7 @@
 #define IDC_SCRIPTTYPE_DESC             1476
 #define IDD_TERRAINBAR_TG               1477
 #define IDD_TERRAINBAR_OS               1478
-#define IDC_SCRIPT_TEMPLATE_DSC			1479
+#define IDC_SCRIPT_TEMPLATE_DSC         1479
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -628,7 +630,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        300
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1464
+#define _APS_NEXT_CONTROL_VALUE         1465
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

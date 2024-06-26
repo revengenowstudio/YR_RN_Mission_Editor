@@ -148,12 +148,15 @@ protected:
 	afx_msg void OnAdd();
 	afx_msg void OnDelete();
 	afx_msg void OnCbnSelchangeScriptExtra();
-	afx_msg void OnCbnSelchangeScriptTemplate();
 	afx_msg void OnBnClickedScriptCopy();
+	afx_msg void OnBnClickedCopyaction();
+
 
 	void reloadTemplates();
 	void insertScriptType(const CString& name, const std::vector<CString>& items);
 	int getExtraValue();
+	CString getCurrentTypeID();
+	void insertAction(int curSel, const CString& scriptTypeId, const CString& value);
 
 	CEdit	m_Description;
 	CComboBox	m_Template;
@@ -162,11 +165,14 @@ protected:
 	CComboBox	m_Param;
 	CComboBox	m_ParamExt;
 	CListBox	m_Actions;
+	CButton m_insertMode;
 	CString	m_Name;
 
 	ActionDefinitionMap m_actionDefinitions;
 	std::map<int, CScriptTypeParam> m_paramDefinitions;
 	std::vector<ScriptTemplate> m_scriptTemplates;
+
+
 };
 
 //{{AFX_INSERT_LOCATION}}
