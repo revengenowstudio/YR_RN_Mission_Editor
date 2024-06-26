@@ -291,7 +291,6 @@ void CScriptTypes::OnSelchangeActionList()
 	if (scriptIndex >= 0 && listIndex >= 0) {
 		this->m_ScriptType.GetLBText(scriptIndex, scriptId);
 		TruncSpace(scriptId);
-		auto const idxs = std::to_string(listIndex);
 		buffer.Format("%d", listIndex);
 		buffer = doc.GetStringOr(scriptId, buffer, "0,0");
 		actionIndex = buffer.Find(',');
@@ -307,7 +306,7 @@ void CScriptTypes::OnSelchangeActionList()
 		selectIndex = scriptTypeIndexToComboBoxIndex(this->m_ActionType, actionIndex);
 
 		this->m_ActionType.SetCurSel(selectIndex);
-		this->UpdateParams(actionIndex, paramNumStr);
+		this->UpdateParams(actionIndex, &paramNumStr);
 		this->m_Param.SetWindowText(paramNumStr);
 	}
 }
@@ -722,14 +721,14 @@ void CScriptTypes::updateExtraParamComboBox(ExtraParameterType type, int value)
 		default:
 		case ExtraParameterType::None:
 			::EnableWindow(text, FALSE);
-			m_ParamExt.Clear();
+			ComboBoxHelper::Clear(m_ParamExt);
 			m_ParamExt.EnableWindow(false);
 			m_ParamExt.SetWindowText("");
 			break;
 		case ExtraParameterType::ScanType:
 		{
 			::EnableWindow(text, TRUE);
-			m_ParamExt.Clear();
+			ComboBoxHelper::Clear(m_ParamExt);
 			m_ParamExt.EnableWindow(true);
 			m_ParamExt.AddString(TranslateStringACP("0 - Least threat"));
 			m_ParamExt.AddString(TranslateStringACP("1 - Most threat"));
@@ -745,7 +744,7 @@ void CScriptTypes::updateExtraParamComboBox(ExtraParameterType type, int value)
 		case ExtraParameterType::Counter:
 		{
 			::EnableWindow(text, TRUE);
-			m_ParamExt.Clear();
+			ComboBoxHelper::Clear(m_ParamExt);
 			m_ParamExt.EnableWindow(true);
 			char buffer[0x20];
 			_itoa_s(value, buffer, 10);
@@ -769,13 +768,15 @@ ParameterType CScriptTypes::getParameterType(int actionCbIndex) const
 	return getParamData(getActionData(actionCbIndex).ParamTypeIndex_).Type_;
 }
 
-void CScriptTypes::updateExtraValue(ParameterType paramType, CString& paramNumStr)
+void CScriptTypes::updateExtraValue(ParameterType paramType, CString* paramNumStr)
 {
 	int extraValue = 0;
 	if (paramType == PRM_BuildingType) {
-		DWORD rawNum = atoi(paramNumStr);
-		paramNumStr.Format("%d", LOWORD(rawNum));
-		extraValue = HIWORD(rawNum);
+		if (paramNumStr) {
+			DWORD rawNum = atoi(*paramNumStr);
+			paramNumStr->Format("%d", LOWORD(rawNum));
+			extraValue = HIWORD(rawNum);
+		}
 	}
 	errstream << "paramType " << paramType << std::endl;
 	updateExtraParamComboBox(getExtraParamType(paramType), extraValue);
@@ -873,7 +874,7 @@ static void listTalkBubble(CComboBox& comboBox)
 	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("3 - Exclamation mark(!)")), 3);
 }
 
-void CScriptTypes::UpdateParams(int actionIndex, CString paramNumStr)
+void CScriptTypes::UpdateParams(int actionIndex, CString* paramNumStr)
 {
 	static int LastActionID = -1;
 	auto const& actionDefinition = getActionData(actionIndex);
@@ -886,10 +887,10 @@ void CScriptTypes::UpdateParams(int actionIndex, CString paramNumStr)
 	//	" actionIndex = " + std::to_string(actionIndex) +
 	//	" paramType = " + std::to_string(paramType)
 	//);
-	updateExtraValue(paramType, paramNumStr);
 	if (lastActionID == actionIndex) {
 		return;
 	}
+	updateExtraValue(paramType, paramNumStr);
 	switch (paramType) {
 		default:
 		case PRM_None:

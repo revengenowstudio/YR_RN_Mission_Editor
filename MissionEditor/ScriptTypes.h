@@ -125,8 +125,8 @@ protected:
 	const CScriptTypeAction& getActionData(int actionCbIndex) const;
 	const CScriptTypeParam& getParamData(int paramIndex) const;
 	ParameterType getParameterType(int actionCbIndex) const;
-	void updateExtraValue(ParameterType paramType, CString& paramNumStr);
-	void UpdateParams(int actionIndex, CString paramNumStr = {});
+	void updateExtraValue(ParameterType paramType, CString* paramNumStr);
+	void UpdateParams(int actionIndex, CString* paramNumStr = nullptr);
 
 	// Implementierung
 protected:
