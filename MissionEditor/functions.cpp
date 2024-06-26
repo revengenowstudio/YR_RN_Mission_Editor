@@ -1267,17 +1267,18 @@ void ListTargets(CComboBox& cb)
 
 	while (cb.DeleteString(0) != CB_ERR);
 
-	cb.AddString("1 - Not specified");
-	cb.AddString("2 - Buildings");
-	cb.AddString("3 - Harvesters");
-	cb.AddString("4 - Infantry");
-	cb.AddString("5 - Vehicles");
-	cb.AddString("6 - Factories");
-	cb.AddString("7 - Base defenses");
-	cb.AddString("9 - Power plants");
+	cb.AddString(TranslateStringACP("1 - Not specified"));
+	cb.AddString(TranslateStringACP("2 - Buildings"));
+	cb.AddString(TranslateStringACP("3 - Harvesters"));
+	cb.AddString(TranslateStringACP("4 - Infantry"));
+	cb.AddString(TranslateStringACP("5 - Vehicles"));
+	cb.AddString(TranslateStringACP("6 - Factories"));
+	cb.AddString(TranslateStringACP("7 - Base defenses"));
+	cb.AddString(TranslateStringACP("9 - Power plants"));
 
-	if (sel >= 0) cb.SetCurSel(sel);
-
+	if (sel >= 0) {
+		cb.SetCurSel(sel);
+	}
 }
 
 void ComboBoxHelper::Clear(CComboBox& combobox)
