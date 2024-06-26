@@ -230,84 +230,84 @@ void HandleParamList(CComboBox& cb, int type)
 	cb.GetWindowText(oldText);
 
 	switch (type) {
-	case PARAMTYPE_NOTHING:
-	{
-		while (cb.DeleteString(0) != CB_ERR);
-		cb.SetWindowText(oldText);
+		case PARAMTYPE_NOTHING:
+		{
+			while (cb.DeleteString(0) != CB_ERR);
+			cb.SetWindowText(oldText);
 
 
-		//cb.AddString("0");
-	}
-	break;
-	case PARAMTYPE_HOUSES:
-		ListHouses(cb, TRUE, TRUE, TRUE);
+			//cb.AddString("0");
+		}
 		break;
-	case PARAMTYPE_WAYPOINTS:
-		ListWaypoints(cb);
-		break;
-	case PARAMTYPE_TEAMTYPES:
-		ListTeamTypes(cb, FALSE);
-		break;
-	case PARAMTYPE_UNITTYPES:
-		ListUnits(cb);
-		break;
-	case PARAMTYPE_INFANTRYTYPES:
-		ListInfantry(cb);
-		break;
-	case PARAMTYPE_AIRCRAFTTYPES:
-		ListAircraft(cb);
-		break;
-	case PARAMTYPE_BUILDINGTYPES:
-		ListBuildings(cb);
-		break;
-	case PARAMTYPE_VIDEOS:
-		ListMovies(cb, FALSE, TRUE);
-		break;
-	case PARAMTYPE_TUTORIALTEXTS:
-		ListTutorial(cb);
-		break;
-	case PARAMTYPE_TRIGGERS:
-		ListTriggers(cb);
-		break;
-	case PARAMTYPE_YESNO:
-		ListYesNo(cb);
-		break;
-	case PARAMTYPE_SOUNDS:
-		ListSounds(cb);
-		break;
-	case PARAMTYPE_THEMES:
-		ListThemes(cb);
-		break;
-	case PARAMTYPE_SPEECHES:
-		ListSpeeches(cb);
-		break;
-	case PARAMTYPE_SPECIALWEAPONS:
-		ListSpecialWeapons(cb);
-		break;
-	case PARAMTYPE_ANIMATIONS:
-		ListAnimations(cb);
-		break;
-	case PARAMTYPE_PARTICLES:
-		ListParticles(cb);
-		break;
-	case PARAMTYPE_CRATETYPES:
-		ListCrateTypes(cb);
-		break;
-	case PARAMTYPE_SPEECHBUBBLETYPES:
-		ListSpeechBubbleTypes(cb);
-		break;
-	case PARAMTYPE_GLOBALS:
-		ListMapVariables(cb);
-		break;
-	case PARAMTYPE_RULESGLOBALS:
-		ListRulesGlobals(cb);
-		break;
-	case PARAMTYPE_BUILDINGTYPESINI:
-		ListBuildings(cb, true);
-		break;
-	case PARAMTYPE_TECHTYPES:
-		ListTechtypes(cb);
-		break;
+		case PARAMTYPE_HOUSES:
+			ListHouses(cb, TRUE, TRUE, TRUE);
+			break;
+		case PARAMTYPE_WAYPOINTS:
+			ListWaypoints(cb);
+			break;
+		case PARAMTYPE_TEAMTYPES:
+			ListTeamTypes(cb, FALSE);
+			break;
+		case PARAMTYPE_UNITTYPES:
+			ListUnits(cb);
+			break;
+		case PARAMTYPE_INFANTRYTYPES:
+			ListInfantry(cb);
+			break;
+		case PARAMTYPE_AIRCRAFTTYPES:
+			ListAircraft(cb);
+			break;
+		case PARAMTYPE_BUILDINGTYPES:
+			ListBuildings(cb);
+			break;
+		case PARAMTYPE_VIDEOS:
+			ListMovies(cb, FALSE, TRUE);
+			break;
+		case PARAMTYPE_TUTORIALTEXTS:
+			ListTutorial(cb);
+			break;
+		case PARAMTYPE_TRIGGERS:
+			ListTriggers(cb);
+			break;
+		case PARAMTYPE_YESNO:
+			ListYesNo(cb);
+			break;
+		case PARAMTYPE_SOUNDS:
+			ListSounds(cb);
+			break;
+		case PARAMTYPE_THEMES:
+			ListThemes(cb);
+			break;
+		case PARAMTYPE_SPEECHES:
+			ListSpeeches(cb);
+			break;
+		case PARAMTYPE_SPECIALWEAPONS:
+			ListSpecialWeapons(cb);
+			break;
+		case PARAMTYPE_ANIMATIONS:
+			ListAnimations(cb);
+			break;
+		case PARAMTYPE_PARTICLES:
+			ListParticles(cb);
+			break;
+		case PARAMTYPE_CRATETYPES:
+			ListCrateTypes(cb);
+			break;
+		case PARAMTYPE_SPEECHBUBBLETYPES:
+			ListSpeechBubbleTypes(cb);
+			break;
+		case PARAMTYPE_GLOBALS:
+			ListMapVariables(cb);
+			break;
+		case PARAMTYPE_RULESGLOBALS:
+			ListRulesGlobals(cb);
+			break;
+		case PARAMTYPE_BUILDINGTYPESINI:
+			ListBuildings(cb, true);
+			break;
+		case PARAMTYPE_TECHTYPES:
+			ListTechtypes(cb);
+			break;
 	}
 }
 
@@ -672,24 +672,24 @@ bool HSVToRGB(const float h, const float s, const float v, float& r, float& g, f
 	const float x = c * (1 - fabs(fmod(h / 60.0, 2.0) - 1));
 	const float m = v - c;
 	switch (h_) {
-	case 0:
-		r = c, g = x, b = 0.0;
-		break;
-	case 1:
-		r = x, g = c, b = 0.0;
-		break;
-	case 2:
-		r = 0.0, g = c, b = x;
-		break;
-	case 3:
-		r = 0.0, g = x, b = c;
-		break;
-	case 4:
-		r = x, g = 0.0, b = c;
-		break;
-	case 5:
-		r = c, g = 0.0, b = x;
-		break;
+		case 0:
+			r = c, g = x, b = 0.0;
+			break;
+		case 1:
+			r = x, g = c, b = 0.0;
+			break;
+		case 2:
+			r = 0.0, g = c, b = x;
+			break;
+		case 3:
+			r = 0.0, g = x, b = c;
+			break;
+		case 4:
+			r = x, g = 0.0, b = c;
+			break;
+		case 5:
+			r = c, g = 0.0, b = x;
+			break;
 	}
 	r += m;
 	g += m;
