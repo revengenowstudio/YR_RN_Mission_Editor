@@ -76,9 +76,14 @@ std::vector<CString> ScriptTemplate::parse(const std::vector<CString>& content, 
 	std::vector<CString> ret;
 	ret.reserve(count);
 	for (auto i = 0; i < count; i++) {
-		ret.emplace_back(content[static_cast<size_t>(2 * i) + offset]
+		auto const& action = content[static_cast<size_t>(2 * i) + offset];
+		auto param = content[static_cast<size_t>(2 * i) + 1 + offset];
+		if (param == "EMPTY") {
+			param = "0";
+		}
+		ret.emplace_back(action
 			+ ','
-			+ content[static_cast<size_t>(2 * i) + 1 + offset]);
+			+ param);
 	}
 	return ret;
 }
