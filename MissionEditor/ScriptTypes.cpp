@@ -120,7 +120,6 @@ void CScriptTypes::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CScriptTypes)
 	DDX_Control(pDX, IDC_DESCRIPTION, m_Description);
-	DDX_Control(pDX, IDC_PDESC, m_ParamDesc);
 	DDX_Control(pDX, IDC_TYPE, m_ActionType);
 	DDX_Control(pDX, IDC_SCRIPTTYPE, m_ScriptType);
 	DDX_Control(pDX, IDC_SCRIPT_TEMPLATE, m_Template);
@@ -962,8 +961,9 @@ void CScriptTypes::UpdateParams(int actionIndex, CString* paramNumStr)
 			ComboBoxHelper::ListBoolean(this->m_Param);
 			break;
 	}
-	this->m_ParamDesc.SetWindowText(paramDefinition.Label_);
-	this->m_ParamDesc.EnableWindow(actionDefinition.Editable_);
-	this->m_Param.EnableWindow(actionDefinition.Editable_);
-	this->m_Description.SetWindowText(actionDefinition.Description_);
+	HWND paramDesc = ::GetDlgItem(this->m_hWnd, IDC_PDESC);
+	::SetWindowText(paramDesc, paramDefinition.Label);
+	::EnableWindow(paramDesc, actionDefinition.Editable);
+	this->m_Param.EnableWindow(actionDefinition.Editable);
+	this->m_Description.SetWindowText(actionDefinition.Description);
 }

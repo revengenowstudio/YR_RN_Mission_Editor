@@ -156,7 +156,6 @@ protected:
 	int getExtraValue();
 
 	CEdit	m_Description;
-	CStatic	m_ParamDesc;
 	CComboBox	m_Template;
 	CComboBox	m_ActionType;
 	CComboBox	m_ScriptType;
