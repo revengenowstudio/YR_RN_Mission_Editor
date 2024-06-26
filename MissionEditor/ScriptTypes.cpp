@@ -922,7 +922,7 @@ void CScriptTypes::UpdateParams(int actionIndex, CString* paramNumStr)
 			listTeamTypes(this->m_Param);
 			break;
 		case 8:
-			ListHouses(this->m_Param);
+			ListHouses(this->m_Param, true, true, true);
 			break;
 		case 9:
 			ListSpeeches(this->m_Param);
@@ -937,7 +937,7 @@ void CScriptTypes::UpdateParams(int actionIndex, CString* paramNumStr)
 			ListThemes(this->m_Param);
 			break;
 		case 13:
-			ComboBoxHelper::ListCountries(this->m_Param);
+			ListHouses(this->m_Param, true, true, false);
 			break;
 		case 14:
 			ListMapVariables(this->m_Param);
