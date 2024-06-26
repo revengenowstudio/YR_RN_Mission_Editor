@@ -97,6 +97,7 @@ CScriptTypes::~CScriptTypes()
 void CScriptTypes::UpdateStrings()
 {
 	TranslateDlgItem(*this, IDC_ADD, "ScriptTypesAddScript");
+	TranslateDlgItem(*this, IDC_SCRIPT_COPY, "ScriptTypesCopyScript");
 	TranslateDlgItem(*this, IDC_DELETE, "ScriptTypesDelScript");
 
 	TranslateDlgItem(*this, IDC_SCTIPTTYPE_INRO, "ScriptTypesDesc");
