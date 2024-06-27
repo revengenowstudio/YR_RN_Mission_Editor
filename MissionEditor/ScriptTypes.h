@@ -30,12 +30,81 @@
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CScriptTypes 
 
+enum /*class*/ ActionType
+{
+	ACT_None = 0,
+	ACT_DoMission = 11,
+};
+
+enum /*class*/ ParameterType
+{
+	PRM_None = 0,
+	PRM_BuildingType = 16,
+};
+
+enum class ExtraParameterType
+{
+	None = 0,
+	ScanType,
+	Counter,
+};
+
+class ScriptTemplate {
+public:
+	ScriptTemplate(const CString& desc, const CString& name, const std::vector<CString>& content) :
+		ScriptTemplate(desc, name, parse(content))
+	{
+	}
+	ScriptTemplate(const CString& desc, const CString& name, const CString& content) :
+		ScriptTemplate(desc, name, parse(content))
+	{
+	}
+
+	auto const& Desc() const { return m_desc; }
+	auto const& Name() const { return m_name; }
+	auto const& Content() const { return m_content; }
+
+private:
+	ScriptTemplate(const CString& desc, const CString& name, std::vector<CString>&& content) :
+		m_desc(desc),
+		m_name(name),
+		m_content(std::move(content))
+	{
+	}
+
+	static std::vector<CString> parse(const CString& content);
+	static std::vector<CString> parse(const std::vector<CString>& content, size_t count, size_t offset = 0);
+	static inline std::vector<CString> parse(const std::vector<CString>& content) {
+		return parse(content, content.size() / 2);
+	}
+
+	CString m_desc;
+	CString m_name;
+	std::vector<CString> m_content;
+};
+
 class CScriptTypes : public CDialog
 {
-	DECLARE_DYNCREATE(CScriptTypes)
 
+	struct CScriptTypeAction {
+		CString Name{};
+		CString Description{};
+		int ParamTypeIndex{};//!< index linked to specific CScriptTypeParam, can be user defined
+		bool Hide{};
+		bool Editable{};
+	};
+
+	struct CScriptTypeParam {
+		ParameterType Type{};//!< internal predefined paramter type
+		CString Label{};//!< the string displayed for such parameter type
+	};
+
+
+	DECLARE_DYNCREATE(CScriptTypes)
 	// Konstruktion
 public:
+	using ActionDefinitionMap = std::map<int, CScriptTypeAction>;
+
 	void UpdateDialog();
 	CScriptTypes();
 	~CScriptTypes();
@@ -43,13 +112,6 @@ public:
 	// Dialogfelddaten
 		//{{AFX_DATA(CScriptTypes)
 	enum { IDD = IDD_SCRIPTTYPES };
-	CEdit	m_DescriptionEx;
-	CStatic	m_Desc;
-	CComboBox	m_Type;
-	CComboBox	m_ScriptType;
-	CComboBox	m_Param;
-	CListBox	m_Action;
-	CString	m_Name;
 	//}}AFX_DATA
 // Überschreibungen
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
@@ -59,26 +121,56 @@ protected:
 	//}}AFX_VIRTUAL
 	void UpdateStrings();
 
-// Implementierung
+	void updateExtraParamComboBox(ExtraParameterType type, int value);
+	const CScriptTypeAction& getActionData(int actionCbIndex) const;
+	const CScriptTypeParam& getParamData(int paramIndex) const;
+	ParameterType getParameterType(int actionCbIndex) const;
+	void updateExtraValue(ParameterType paramType, CString* paramNumStr);
+	void UpdateParams(int actionIndex, CString* paramNumStr = nullptr);
+
+	// Implementierung
 protected:
+	DECLARE_MESSAGE_MAP()
+
+	virtual BOOL OnInitDialog() override;
+
 	void ListBehaviours(CComboBox& cb);
 	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CScriptTypes)
-	afx_msg void OnEditchangeScripttype();
 	afx_msg void OnSelchangeScripttype();
-	afx_msg void OnSelchangeAction();
+	afx_msg void OnSelchangeActionList();
 	afx_msg void OnChangeName();
-	afx_msg void OnEditchangeType();
-	afx_msg void OnSelchangeType();
+	afx_msg void OnEditchangeActionType();
+	afx_msg void OnSelchangeActionType();
 	afx_msg void OnEditchangeParam();
 	afx_msg void OnSelchangeParam();
 	afx_msg void OnAddaction();
 	afx_msg void OnDeleteaction();
 	afx_msg void OnAdd();
 	afx_msg void OnDelete();
-	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+	afx_msg void OnCbnSelchangeScriptExtra();
+	afx_msg void OnBnClickedScriptCopy();
+	afx_msg void OnBnClickedCopyaction();
+
+
+	void reloadTemplates();
+	void insertScriptType(const CString& name, const std::vector<CString>& items);
+	int getExtraValue();
+	CString getCurrentTypeID();
+	void insertAction(int curSel, const CString& scriptTypeId, const CString& value);
+
+	CEdit	m_Description;
+	CComboBox	m_Template;
+	CComboBox	m_ActionType;
+	CComboBox	m_ScriptType;
+	CComboBox	m_Param;
+	CComboBox	m_ParamExt;
+	CListBox	m_Actions;
+	CString	m_Name;
+
+	ActionDefinitionMap m_actionDefinitions;
+	std::map<int, CScriptTypeParam> m_paramDefinitions;
+	std::vector<ScriptTemplate> m_scriptTemplates;
+
 
 };
 
