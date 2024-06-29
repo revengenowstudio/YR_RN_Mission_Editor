@@ -33,6 +33,47 @@
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CTeamTypes 
 
+struct TeamTypeParams
+{
+	CString Name;
+	CString House;
+	CString TaskForce;
+	CString Script;
+	CString Tag;
+	int VeteranLevel{ 1 };
+	int Group{ -1 };
+	int Priority{ 5 };
+	int TechLevel{};
+	int Max{1};
+	int Waypoint{};
+	int TransportWaypoint{};
+#ifdef RA2_MODE
+	int MindControlDecision{};
+#endif
+	bool Aggressive{};
+	bool Annoyance{};
+	bool AreTeamMembersRecruitable{};
+	bool Autocreate{};
+	bool AvoidThreats{};
+	bool Droppod{};
+	bool Full{};
+	bool GuardSlower{};
+	bool IonImmune{};
+	bool IsBaseDefense{};
+	bool Loadable{};
+	bool LooseRecruit{};
+	bool OnlyTargetHouseEnemy{};
+	bool OnTransOnly{};
+	bool Prebuild{};
+	bool Recruiter{};
+	bool Reinforce{};
+	bool Suicide{};
+	bool TransportsReturnOnUnload{};
+	bool Whiner{};
+#ifdef RA2_MODE
+	bool UseTransportOrigin{};
+#endif
+};
 
 class CTeamTypes : public CDialog
 {
@@ -47,7 +88,6 @@ public:
 	// Dialogfelddaten
 		//{{AFX_DATA(CTeamTypes)
 	enum { IDD = IDD_TEAMTYPES };
-	CStatic	m_MCD_L;
 	CComboBox	m_TeamTypes;
 	BOOL	m_Aggressive;
 	BOOL	m_Annoyance;
@@ -81,7 +121,7 @@ public:
 	CString	m_VeteranLevel;
 	CString	m_Tag;
 	CString	m_TransportWaypoint;
-	CString	m_MindControlDecision;
+	CComboBox	m_MindControlDecision;
 	//}}AFX_DATA
 
 
@@ -89,8 +129,14 @@ public:
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
 	//{{AFX_VIRTUAL(CTeamTypes)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
+	virtual BOOL OnInitDialog() override;
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
 	//}}AFX_VIRTUAL
+	void addTeamtype(TeamTypeParams&& params);
+	void translateUI();
+	void initMCDecisionComboBox();
+	void setMCDection(const int decision);
+	int getMCDecision();
 
 // Implementierung
 protected:
@@ -143,8 +189,10 @@ protected:
 	afx_msg void OnKillfocusTransportwaypoint();
 	afx_msg void OnEditchangeMindcontroldecision();
 	afx_msg void OnKillfocusMindcontroldecision();
+	afx_msg void OnBnClickedTeamtypeCopy();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
 
 };
 
