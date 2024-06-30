@@ -125,8 +125,6 @@ void CTaskForce::translateUI()
 	TranslateDlgItem(*this, IDC_DELETEUNIT, "TaskforcesDeleteUnit");
 	TranslateDlgItem(*this, IDC_TASKFORCE_T_U_NUM, "TaskforcesUnitNumber");
 	TranslateDlgItem(*this, IDC_TASKFORCE_T_U_TYPE, "TaskforcesUnitType");
-	
-	
 }
 
 void CTaskForce::UpdateDialog()
