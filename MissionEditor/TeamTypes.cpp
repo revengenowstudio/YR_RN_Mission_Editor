@@ -129,6 +129,95 @@ void CTeamTypes::translateUI()
 	TranslateDlgItem(*this, IDC_ONLYTARGETHOUSEENEMY, "TeamTypesOnlyTargetHouseEnemy");
 }
 
+inline void TeamTemplate::assignInteger(int& val, const CString& str)
+{
+	val = INIHelper::StringToInteger(str, val);
+}
+inline void TeamTemplate::assignBool(bool& val, const CString& str)
+{
+	val = INIHelper::StringToBool(str, val);
+}
+
+TeamTemplate::TeamTemplate(std::vector<CString>&& input) noexcept :
+	m_displayName(std::move(input[0]))
+{
+	m_params.Name = std::move(input[1]);
+	assignInteger(m_params.VeteranLevel, input[2]);
+	assignInteger(m_params.Group, input[5]);
+	assignInteger(m_params.Priority,input[3]);
+	assignInteger(m_params.TechLevel ,input[6]);
+	assignInteger(m_params.Max, input[4]);
+#ifdef RA2_MODE
+	assignInteger(m_params.MindControlDecision, input[7]);
+#endif
+	assignBool(m_params.Loadable, input[8]);
+	assignBool(m_params.Full, input[9]);
+	assignBool(m_params.Annoyance, input[10]);
+	assignBool(m_params.GuardSlower, input[11]);
+	assignBool(m_params.Recruiter, input[12]);
+	assignBool(m_params.Droppod, input[13]);
+	assignBool(m_params.Whiner, input[14]);
+	assignBool(m_params.LooseRecruit, input[15]);
+	assignBool(m_params.Aggressive, input[16]);
+	assignBool(m_params.Suicide, input[17]);
+	assignBool(m_params.Autocreate, input[18]);
+	assignBool(m_params.Prebuild, input[19]);
+	assignBool(m_params.Reinforce, input[20]);
+	assignBool(m_params.OnTransOnly, input[21]);
+	assignBool(m_params.AvoidThreats, input[22]);
+	assignBool(m_params.AreTeamMembersRecruitable, input[23]);
+	assignBool(m_params.TransportsReturnOnUnload, input[24]);
+	assignBool(m_params.IsBaseDefense, input[25]);
+
+	assignBool(m_params.OnlyTargetHouseEnemy, input[26]);
+#if defined(RA2_MODE) && 0
+	assignBool(m_params.UseTransportOrigin, input[27]);
+#endif
+	
+}
+
+void CTeamTypes::reloadTemplates()
+{
+	auto const& sec = g_data["TeamTemplates"];
+	auto const count = sec.GetInteger("Counts");
+	auto&& defName = sec.GetStringOr("DefaultName", "Default");
+
+	m_templates.push_back({ std::move(defName), { .Name = "New teamtype" } });
+
+	auto parseTemplate = [this, &sec](const CString& id) -> bool {
+		auto&& elements = INIHelper::Split(sec.GetString(id));
+		if (elements.size() != 27) {
+			errstream << "[team type template] content fragments less than 27" << std::endl;
+			return false;
+		}
+		m_templates.push_back(std::move(elements));
+		return true;
+	};
+
+	auto offset = 0;
+	// try from 0. If no 0, try from 1
+	if (!parseTemplate("0")) {
+		errstream << "[team type template] could not parse content from index 0" << std::endl;
+		offset = 1;
+	}
+
+	CString idStr;
+	for (auto idx = 0; idx < count; ++idx) {
+		idStr.Format("%d", idx + offset);
+		if (!parseTemplate(idStr)) {
+			errstream << "[team type template] could not parse content from index " << idStr << std::endl;
+		}
+	}
+
+	// load template into list
+	ASSERT(m_templates.size() > 0);
+	auto idx = 0;
+	for (auto const& templ : m_templates) {
+		m_Template.InsertString(idx++, templ.Desc());
+	}
+	m_Template.SetCurSel(0);
+}
+
 BOOL CTeamTypes::OnInitDialog()
 {
 	auto const ret = CDialog::OnInitDialog();
@@ -141,6 +230,7 @@ void CTeamTypes::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTeamTypes)
+	DDX_Control(pDX, IDC_TEAMTYPE_TEMPLATE, m_Template);
 	DDX_Control(pDX, IDC_TEAMTYPES, m_TeamTypes);
 	DDX_Check(pDX, IDC_AGGRESSIVE, m_Aggressive);
 	DDX_Check(pDX, IDC_ANNOYANCE, m_Annoyance);
@@ -303,6 +393,10 @@ CString GetWaypoint(int n)
 // Behandlungsroutinen für Nachrichten CTeamTypes 
 void CTeamTypes::UpdateDialog()
 {
+	if (m_templates.empty()) {
+		reloadTemplates();
+	}
+
 	if (!yuri_mode) {
 		GetDlgItem(IDC_MINDCONTROLDECISION)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_MCD_L)->ShowWindow(SW_HIDE);
@@ -1133,7 +1227,7 @@ void CTeamTypes::OnOnlytargethouseenemy()
 
 CString GetFree(const char* section);
 
-void CTeamTypes::addTeamtype(TeamTypeParams&& params)
+void CTeamTypes::addTeamtype(const TeamTypeParams& params)
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -1145,7 +1239,7 @@ void CTeamTypes::addTeamtype(TeamTypeParams&& params)
 	ini.SetString("TeamTypes", p, id);
 	CIniFileSection& s = ini.AddSection(id);
 
-	s.SetString("Name", std::move(params.Name));
+	s.SetString("Name", params.Name);
 	s.SetInteger("VeteranLevel", params.VeteranLevel);
 	s.SetBool("Loadable", params.Loadable);
 	s.SetBool("Full", params.Full);
@@ -1225,9 +1319,12 @@ void CTeamTypes::addTeamtype(TeamTypeParams&& params)
 
 void CTeamTypes::OnNewteamtype()
 {
-	addTeamtype({
-		.Name = "New teamtype",
-		});
+	//errstream << "Add Script" << std::endl;
+	int curTemplateIndex = m_Template.GetCurSel();
+	ASSERT(curTemplateIndex >= 0);
+	auto const& curTemplate = m_templates[curTemplateIndex];
+	//errstream << "Now using Script Template: " << curTemplate.Name() << std::endl;
+	addTeamtype(curTemplate.Params());
 }
 
 void CTeamTypes::OnBnClickedTeamtypeCopy()
