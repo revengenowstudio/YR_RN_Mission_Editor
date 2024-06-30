@@ -204,15 +204,16 @@ void CScriptTypes::reloadTemplates()
 
 	// load template into list
 	ASSERT(m_scriptTemplates.size() > 0);
+	auto idx = 0;
 	for (auto const& templ : m_scriptTemplates) {
-		m_Template.AddString(templ.Desc());
+		m_Template.InsertString(idx++, templ.Desc());
 	}
 	m_Template.SetCurSel(0);
 }
 
 void CScriptTypes::UpdateDialog()
 {
-	if (!m_scriptTemplates.size()) {
+	if (m_scriptTemplates.empty()) {
 		reloadTemplates();
 	}
 
