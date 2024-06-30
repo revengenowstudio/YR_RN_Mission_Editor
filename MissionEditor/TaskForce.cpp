@@ -109,8 +109,24 @@ CString CTaskForce::getCurrrentID()
 
 void CTaskForce::translateUI()
 {
-	TranslateDlgItem(*this, IDC_COPYTASKFORCE, "TaskforcesCopy");
+	TranslateWindowCaption(*this, "TaskforcesCaption");
 
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_TYPE, "TaskforcesType");
+	TranslateDlgItem(*this, IDC_ADDTASKFORCE, "TaskforcesAdd");
+	TranslateDlgItem(*this, IDC_COPYTASKFORCE, "TaskforcesCopy");
+	TranslateDlgItem(*this, IDC_DELETETASKFORCE, "TaskforcesDelete");
+	TranslateDlgItem(*this, IDC_TASKFORCE_G_SELECTED, "TaskforcesSelected");
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_NAME, "TaskforcesName");
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_GROUP, "TaskforcesGroup");
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_MEMBERS, "TaskforcesMembers");
+	
+	TranslateDlgItem(*this, IDC_ADDUNIT, "TaskforcesAddUnit");
+	TranslateDlgItem(*this, IDC_COPYUNIT, "TaskforcesCopyUnit");
+	TranslateDlgItem(*this, IDC_DELETEUNIT, "TaskforcesDeleteUnit");
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_U_NUM, "TaskforcesUnitNumber");
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_U_TYPE, "TaskforcesUnitType");
+	
+	
 }
 
 void CTaskForce::UpdateDialog()

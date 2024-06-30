@@ -553,6 +553,13 @@
 #define IDC_TEAMTYPE_P_TAG              1479
 #define IDC_TEAMTYPE_P_SCRIPT           1480
 #define IDC_TEAMTYPE_P_TASKFORCE        1481
+#define IDC_TASKFORCE_T_TYPE            1482
+#define IDC_TASKFORCE_G_SELECTED        1483
+#define IDC_TASKFORCE_T_NAME            1484
+#define IDC_TASKFORCE_T_GROUP           1485
+#define IDC_TASKFORCE_T_MEMBERS         1486
+#define IDC_TASKFORCE_T_U_NUM           1487
+#define IDC_TASKFORCE_T_U_TYPE          1488
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -649,7 +656,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        302
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1482
+#define _APS_NEXT_CONTROL_VALUE         1489
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif
