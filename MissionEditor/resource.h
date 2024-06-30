@@ -257,6 +257,7 @@
 #define IDC_DELETETASKFORCE             1150
 #define IDC_ADDTASKFORCE                1151
 #define IDC_COPYTASKFORCE               1152
+#define IDC_COPYUNIT                    1153
 #define IDC_ADD                         1154
 #define IDC_REPEAT                      1156
 #define IDC_TRIGGER                     1157

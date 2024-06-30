@@ -62,9 +62,11 @@ protected:
 	//}}AFX_VIRTUAL
 
 // Implementierung
-protected:
+	CString getCurrrentID();
 	void translateUI();
 	void addTaskforce(CString&& name, int group, std::vector<CString>&& members);
+
+	DECLARE_MESSAGE_MAP()
 
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CTaskForce)
@@ -77,13 +79,12 @@ protected:
 	afx_msg void OnEditchangeUnittype();
 	afx_msg void OnSelchangeUnittype();
 	afx_msg void OnAddunit();
+	afx_msg void OnBnClickedCopyunit();
 	afx_msg void OnDeletetaskforce();
 	afx_msg void OnAddtaskforce();
 	afx_msg void OnBnClickedCopytaskforce();
 	afx_msg void OnChangeGroup();
 	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-
 };
 
 //{{AFX_INSERT_LOCATION}}

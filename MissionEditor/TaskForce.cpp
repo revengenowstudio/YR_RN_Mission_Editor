@@ -93,10 +93,19 @@ BEGIN_MESSAGE_MAP(CTaskForce, CDialog)
 	ON_EN_KILLFOCUS(IDC_GROUP, OnChangeGroup)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_COPYTASKFORCE, &CTaskForce::OnBnClickedCopytaskforce)
+	ON_BN_CLICKED(IDC_COPYUNIT, &CTaskForce::OnBnClickedCopyunit)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CTaskForce 
+
+CString CTaskForce::getCurrrentID()
+{
+	CString tf;
+	tf = GetText(&m_TaskForces);
+	TruncSpace(tf);
+	return tf;
+}
 
 void CTaskForce::translateUI()
 {
@@ -187,10 +196,7 @@ void CTaskForce::OnSelchangeTaskforces()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	CString tf;
-	tf = GetText(&m_TaskForces);
-	TruncSpace(tf);
-
+	auto const tf = getCurrrentID();
 	auto const& sec = ini[tf];
 	m_Name = sec.GetString("Name");
 	m_Group = sec.GetString("Group");
@@ -224,10 +230,7 @@ void CTaskForce::OnSelchangeUnits()
 
 	int sel = m_Units.GetCurSel();
 	int u = m_Units.GetItemData(sel);
-	CString tf;
-	tf = GetText(&m_TaskForces);
-	TruncSpace(tf);
-
+	auto const tf = getCurrrentID();
 	CString indexStr;
 	indexStr.Format("%d", u);
 
@@ -253,10 +256,8 @@ void CTaskForce::OnDeleteunit()
 		return;
 	}
 	int u = m_Units.GetItemData(sel);
-	CString tf;
-	tf = GetText(&m_TaskForces);
+	auto const tf = getCurrrentID();
 
-	TruncSpace(tf);
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
 	CString numberStrToDelete;
@@ -299,10 +300,7 @@ void CTaskForce::OnChangeNumberunits()
 		return;
 	}
 	int u = m_Units.GetItemData(sel);
-	CString tf;
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
+	auto const tf = getCurrrentID();
 	auto sec = ini.TryGetSection(tf);
 
 	CString k, n;
@@ -327,11 +325,7 @@ void CTaskForce::OnChangeName()
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
-	CString tf;
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
-
+	auto const tf = getCurrrentID();
 	ini.SetString(tf, "Name", m_Name);
 
 	UpdateDialog();
@@ -343,6 +337,8 @@ void CTaskForce::OnEditchangeUnittype()
 	CIniFile& ini = Map->GetIniFile();
 
 	CString type = GetText(&m_UnitType);
+	TruncSpace(type);
+
 	if (type.IsEmpty()) {
 		return;
 	}
@@ -352,10 +348,7 @@ void CTaskForce::OnEditchangeUnittype()
 		return;
 	}
 	int u = m_Units.GetItemData(sel);
-	CString tf;
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
+	auto const tf = getCurrrentID();
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
 
@@ -367,7 +360,7 @@ void CTaskForce::OnEditchangeUnittype()
 	k.Format("%d", u);
 
 	CString count = GetParam(sec->GetString(k), 0);
-	TruncSpace(type);
+
 
 	sec->SetString(k, count + "," + type);
 
@@ -388,10 +381,7 @@ void CTaskForce::OnSelchangeUnittype()
 		return;
 	}
 	int u = m_Units.GetItemData(sel);
-	CString tf;
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
+	auto const tf = getCurrrentID();
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
 
@@ -417,13 +407,10 @@ void CTaskForce::OnAddunit()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	CString tf;
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
+	auto const tf = getCurrrentID();
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
 
@@ -439,18 +426,33 @@ void CTaskForce::OnAddunit()
 	UpdateDialog();
 }
 
+void CTaskForce::OnBnClickedCopyunit()
+{
+	auto& ini = Map->GetIniFile();
+
+	auto const tf = getCurrrentID();
+	if (tf.IsEmpty()) {
+		return;
+	}
+	auto const selected = m_Units.GetCurSel();
+
+	if (selected < 0) {
+		return;
+	}
+	auto const curCount = m_Units.GetCount();
+	auto const& content = ini.GetString(tf, INIHelper::ToString(selected));
+	ini.SetString(tf, INIHelper::ToString(curCount), content);
+	UpdateDialog();
+	m_Units.SetCurSel(curCount);
+}
+
 void CTaskForce::OnDeletetaskforce()
 {
 	CIniFile& ini = Map->GetIniFile();
-
-	CString tf;
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
-
+	auto const tf = getCurrrentID();
 	int res;
 	res = MessageBox("Are you sure to delete the selected task force? If you delete it, make sure to eliminate ANY references to this task force in team-types.", "Delete task force", MB_YESNO);
 	if (res == IDNO) {
@@ -505,8 +507,7 @@ void CTaskForce::OnAddtaskforce()
 
 void CTaskForce::OnBnClickedCopytaskforce()
 {
-	auto id = GetText(&m_TaskForces);
-	TruncSpace(id);
+	auto const id = getCurrrentID();
 	if (id.IsEmpty()) {
 		return;
 	}
@@ -532,14 +533,10 @@ void CTaskForce::OnChangeGroup()
 
 	UpdateData();
 
-	CString tf;
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
-
+	auto const tf = getCurrrentID();
 	ini.SetString(tf, "Group", m_Group);
 
 	UpdateDialog();
