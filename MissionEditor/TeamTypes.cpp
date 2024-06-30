@@ -76,7 +76,6 @@ CTeamTypes::CTeamTypes() : CDialog(CTeamTypes::IDD)
 	m_VeteranLevel = _T("");
 	m_Tag = _T("");
 	m_TransportWaypoint = _T("");
-	m_MindControlDecision = _T("");
 	//}}AFX_DATA_INIT
 }
 
@@ -84,11 +83,154 @@ CTeamTypes::~CTeamTypes()
 {
 }
 
+void CTeamTypes::translateUI()
+{
+	TranslateWindowCaption(*this, "TeamTypesCaption");
+
+	TranslateDlgItem(*this, IDC_TEAMTYPE_COPY, "TeamTypesCopy");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_DESC, "TeamTypesDesc");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_T_TXT, "TeamTypesTemplate");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_TYPE, "TeamTypesType");
+	TranslateDlgItem(*this, IDC_NEWTEAMTYPE, "TeamTypesNew");
+	TranslateDlgItem(*this, IDC_DELETETEAMTYPE, "TeamTypesDelete");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_GBOX, "TeamTypesSelected");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_P_NAME, "TeamTypesName");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_P_GROUP, "TeamTypesGroup");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_P_VLEVEL, "TeamTypesVeteranLevel");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_P_WAYP, "TeamTypesWaypoint");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_P_HOUSE, "TeamTypesHouse");
+	TranslateDlgItem(*this, IDC_LTRANSPORTWAYPOINT, "TeamTypesTransWaypoint");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_P_PRIORITY, "TeamTypesPriority");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_P_TECHLEVEL, "TeamTypesTechLevel");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_P_MAX, "TeamTypesMax");
+	TranslateDlgItem(*this, IDC_MCD_L, "TeamTypesMCDecision");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_P_TAG, "TeamTypesTag");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_P_SCRIPT, "TeamTypesScript");
+	TranslateDlgItem(*this, IDC_TEAMTYPE_P_TASKFORCE, "TeamTypesTaskforce");
+	TranslateDlgItem(*this, IDC_LOADABLE, "TeamTypesLoadable");
+	TranslateDlgItem(*this, IDC_FULL, "TeamTypesFull");
+	TranslateDlgItem(*this, IDC_ANNOYANCE, "TeamTypesAnnoyance");
+	TranslateDlgItem(*this, IDC_GUARDSLOWER, "TeamTypesGuardSlower");
+	TranslateDlgItem(*this, IDC_RECRUITER, "TeamTypesRecruiter");
+	TranslateDlgItem(*this, IDC_AUTOCREATE, "TeamTypesAutocreate");
+	TranslateDlgItem(*this, IDC_PREBUILD, "TeamTypesPrebuild");
+	TranslateDlgItem(*this, IDC_REINFORCE, "TeamTypesReinforce");
+	TranslateDlgItem(*this, IDC_DROPPOD, "TeamTypesDropped");
+	TranslateDlgItem(*this, IDC_WHINER, "TeamTypesWhiner");
+	TranslateDlgItem(*this, IDC_LOOSERECRUIT, "TeamTypesLooseRecruit");
+	TranslateDlgItem(*this, IDC_AGGRESSIVE, "TeamTypesAggressive");
+	TranslateDlgItem(*this, IDC_SUICIDE, "TeamTypesSuicide");
+	TranslateDlgItem(*this, IDC_ONTRANSONLY, "TeamTypesOnTransOnly");
+	TranslateDlgItem(*this, IDC_AVOIDTHREATS, "TeamTypesAvoidThreats");
+	TranslateDlgItem(*this, IDC_IONIMMUNE, "TeamTypesIonImmune");
+	TranslateDlgItem(*this, IDC_TRANSPORTRETURNSONUNLOAD, "TeamTypesTransportsReturnOnUnload");
+	TranslateDlgItem(*this, IDC_ARETEAMMEMBERSRECRUITABLE, "TeamTypesAreTeamMembersRecruitable");
+	TranslateDlgItem(*this, IDC_ISBASEDEFENSE, "TeamTypesIsBaseDefense");
+	TranslateDlgItem(*this, IDC_ONLYTARGETHOUSEENEMY, "TeamTypesOnlyTargetHouseEnemy");
+}
+
+inline void TeamTemplate::assignInteger(int& val, const CString& str)
+{
+	val = INIHelper::StringToInteger(str, val);
+}
+inline void TeamTemplate::assignBool(bool& val, const CString& str)
+{
+	val = INIHelper::StringToBool(str, val);
+}
+
+TeamTemplate::TeamTemplate(std::vector<CString>&& input) noexcept :
+	m_displayName(std::move(input[0]))
+{
+	m_params.Name = std::move(input[1]);
+	assignInteger(m_params.VeteranLevel, input[2]);
+	assignInteger(m_params.Group, input[5]);
+	assignInteger(m_params.Priority,input[3]);
+	assignInteger(m_params.TechLevel ,input[6]);
+	assignInteger(m_params.Max, input[4]);
+#ifdef RA2_MODE
+	assignInteger(m_params.MindControlDecision, input[7]);
+#endif
+	assignBool(m_params.Loadable, input[8]);
+	assignBool(m_params.Full, input[9]);
+	assignBool(m_params.Annoyance, input[10]);
+	assignBool(m_params.GuardSlower, input[11]);
+	assignBool(m_params.Recruiter, input[12]);
+	assignBool(m_params.Droppod, input[13]);
+	assignBool(m_params.Whiner, input[14]);
+	assignBool(m_params.LooseRecruit, input[15]);
+	assignBool(m_params.Aggressive, input[16]);
+	assignBool(m_params.Suicide, input[17]);
+	assignBool(m_params.Autocreate, input[18]);
+	assignBool(m_params.Prebuild, input[19]);
+	assignBool(m_params.Reinforce, input[20]);
+	assignBool(m_params.OnTransOnly, input[21]);
+	assignBool(m_params.AvoidThreats, input[22]);
+	assignBool(m_params.AreTeamMembersRecruitable, input[23]);
+	assignBool(m_params.TransportsReturnOnUnload, input[24]);
+	assignBool(m_params.IsBaseDefense, input[25]);
+
+	assignBool(m_params.OnlyTargetHouseEnemy, input[26]);
+#if defined(RA2_MODE) && 0
+	assignBool(m_params.UseTransportOrigin, input[27]);
+#endif
+	
+}
+
+void CTeamTypes::reloadTemplates()
+{
+	auto const& sec = g_data["TeamTemplates"];
+	auto const count = sec.GetInteger("Counts");
+	auto&& defName = sec.GetStringOr("DefaultName", "Default");
+
+	m_templates.push_back({ std::move(defName), { .Name = "New teamtype" } });
+
+	auto parseTemplate = [this, &sec](const CString& id) -> bool {
+		auto&& elements = INIHelper::Split(sec.GetString(id));
+		if (elements.size() != 27) {
+			errstream << "[team type template] content fragments less than 27" << std::endl;
+			return false;
+		}
+		m_templates.push_back(std::move(elements));
+		return true;
+	};
+
+	auto offset = 0;
+	// try from 0. If no 0, try from 1
+	if (!parseTemplate("0")) {
+		errstream << "[team type template] could not parse content from index 0" << std::endl;
+		offset = 1;
+	}
+
+	CString idStr;
+	for (auto idx = 0; idx < count; ++idx) {
+		idStr.Format("%d", idx + offset);
+		if (!parseTemplate(idStr)) {
+			errstream << "[team type template] could not parse content from index " << idStr << std::endl;
+		}
+	}
+
+	// load template into list
+	ASSERT(m_templates.size() > 0);
+	auto idx = 0;
+	for (auto const& templ : m_templates) {
+		m_Template.InsertString(idx++, templ.Desc());
+	}
+	m_Template.SetCurSel(0);
+}
+
+BOOL CTeamTypes::OnInitDialog()
+{
+	auto const ret = CDialog::OnInitDialog();
+	initMCDecisionComboBox();
+	translateUI();
+	return ret;
+}
+
 void CTeamTypes::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTeamTypes)
-	DDX_Control(pDX, IDC_MCD_L, m_MCD_L);
+	DDX_Control(pDX, IDC_TEAMTYPE_TEMPLATE, m_Template);
 	DDX_Control(pDX, IDC_TEAMTYPES, m_TeamTypes);
 	DDX_Check(pDX, IDC_AGGRESSIVE, m_Aggressive);
 	DDX_Check(pDX, IDC_ANNOYANCE, m_Annoyance);
@@ -122,7 +264,7 @@ void CTeamTypes::DoDataExchange(CDataExchange* pDX)
 	DDX_CBString(pDX, IDC_VETERANLEVEL, m_VeteranLevel);
 	DDX_CBString(pDX, IDC_TAG, m_Tag);
 	DDX_CBString(pDX, IDC_TRANSPORTWAYPOINT, m_TransportWaypoint);
-	DDX_CBString(pDX, IDC_MINDCONTROLDECISION, m_MindControlDecision);
+	DDX_Control(pDX, IDC_MINDCONTROLDECISION, m_MindControlDecision);
 	//}}AFX_DATA_MAP
 }
 
@@ -170,6 +312,7 @@ BEGIN_MESSAGE_MAP(CTeamTypes, CDialog)
 	ON_CBN_EDITCHANGE(IDC_MINDCONTROLDECISION, OnEditchangeMindcontroldecision)
 	ON_CBN_KILLFOCUS(IDC_MINDCONTROLDECISION, OnKillfocusMindcontroldecision)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_TEAMTYPE_COPY, &CTeamTypes::OnBnClickedTeamtypeCopy)
 END_MESSAGE_MAP()
 
 BOOL stob(const char* s)
@@ -183,78 +326,29 @@ BOOL stob(const char* s)
 CString btos(BOOL b)
 {
 	CString s = "no";
-	if (b == TRUE) s = "yes";
+	if (b == TRUE) {
+		s = "yes";
+	}
 	return s;
 }
 
 int letter2number(char let) {
 	int reply = let - 'A';
-	/*if(let=='A')reply=0;
-	if(let=='B')reply=1;
-	if(let=='C')reply=2;
-	if(let=='D')reply=3;
-	if(let=='E')reply=4;
-	if(let=='F')reply=5;
-	if(let=='G')reply=6;
-	if(let=='H')reply=7;
-	if(let=='I')reply=8;
-	if(let=='J')reply=9;
-	if(let=='K')reply=10;
-	if(let=='L')reply=11;
-	if(let=='M')reply=12;
-	if(let=='N')reply=13;
-	if(let=='O')reply=14;
-	if(let=='P')reply=15;
-	if(let=='Q')reply=16;
-	if(let=='R')reply=17;
-	if(let=='S')reply=18;
-	if(let=='T')reply=19;
-	if(let=='U')reply=20;
-	if(let=='V')reply=21;
-	if(let=='W')reply=22;
-	if(let=='X')reply=23;
-	if(let=='Y')reply=24;
-	if(let=='Z')reply=25;*/
 	return reply;
 
 }
 
 char number2letter(int let) {
 	int reply = let + 'A';
-	/*if(let==0)reply='A';
-	if(let==1)reply='B';
-	if(let==2)reply='C';
-	if(let==3)reply='D';
-	if(let==4)reply='E';
-	if(let==5)reply='F';
-	if(let==6)reply='G';
-	if(let==7)reply='H';
-	if(let==8)reply='I';
-	if(let==9)reply='J';
-	if(let==10)reply='K';
-	if(let==11)reply='L';
-	if(let==12)reply='M';
-	if(let==13)reply='N';
-	if(let==14)reply='O';
-	if(let==15)reply='P';
-	if(let==16)reply='Q';
-	if(let==17)reply='R';
-	if(let==18)reply='S';
-	if(let==19)reply='T';
-	if(let==20)reply='U';
-	if(let==21)reply='V';
-	if(let==22)reply='W';
-	if(let==23)reply='X';
-	if(let==24)reply='Y';
-	if(let==25)reply='Z';*/
-
 	return reply;
 
 }
 
 int GetWaypoint(const char* c)
 {
-	if (strlen(c) == 0) return -1;
+	if (strlen(c) == 0) {
+		return -1;
+	}
 	int i;
 	int res = 0;
 	for (i = 0; i < strlen(c); i++) {
@@ -266,7 +360,9 @@ int GetWaypoint(const char* c)
 
 CString GetWaypoint(int n)
 {
-	if (n == -1) return (CString)("");
+	if (n == -1) {
+		return (CString)("");
+	}
 	int i, e;
 	for (i = -1; i < 26; i++) {
 		for (e = 0; e < 26; e++) {
@@ -275,12 +371,16 @@ CString GetWaypoint(int n)
 			if (i == -1) {
 				c[0] = number2letter(e);
 				c[1] = 0;
-				if (GetWaypoint(c) == n) return c;
+				if (GetWaypoint(c) == n) {
+					return c;
+				}
 			} else {
 				c[0] = number2letter(i);
 				c[1] = number2letter(e);
 				c[2] = 0;
-				if (GetWaypoint(c) == n) return c;
+				if (GetWaypoint(c) == n) {
+					return c;
+				}
 			}
 
 		}
@@ -293,9 +393,13 @@ CString GetWaypoint(int n)
 // Behandlungsroutinen für Nachrichten CTeamTypes 
 void CTeamTypes::UpdateDialog()
 {
+	if (m_templates.empty()) {
+		reloadTemplates();
+	}
+
 	if (!yuri_mode) {
 		GetDlgItem(IDC_MINDCONTROLDECISION)->ShowWindow(SW_HIDE);
-		m_MCD_L.ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_MCD_L)->ShowWindow(SW_HIDE);
 	}
 
 	CIniFile& ini = Map->GetIniFile();
@@ -341,7 +445,6 @@ void CTeamTypes::UpdateDialog()
 	m_TransportReturnsOnUnload = 0;
 	m_TransportWaypoint = "";
 	m_VeteranLevel = "";
-	m_MindControlDecision = "";
 
 	UpdateData(FALSE);
 
@@ -426,6 +529,27 @@ void CTeamTypes::UpdateDialog()
 
 }
 
+void CTeamTypes::initMCDecisionComboBox()
+{
+	ComboBoxHelper::Clear(m_MindControlDecision);
+	m_MindControlDecision.AddString(TranslateStringACP("0 - <Don't care>"));
+	m_MindControlDecision.AddString(TranslateStringACP("1 - Add To Team"));
+	m_MindControlDecision.AddString(TranslateStringACP("2 - Put in Grinder"));
+	m_MindControlDecision.AddString(TranslateStringACP("3 - Put in Bio Reactor"));
+	m_MindControlDecision.AddString(TranslateStringACP("4 - Go to Hunt"));
+	m_MindControlDecision.AddString(TranslateStringACP("5 - Do Nothing"));
+}
+
+int CTeamTypes::getMCDecision()
+{
+	return std::max(m_MindControlDecision.GetCurSel(), 0);
+}
+
+void CTeamTypes::setMCDection(const int decision)
+{
+	m_MindControlDecision.SetCurSel(decision);
+}
+
 void CTeamTypes::OnSelchangeTeamtypes()
 {
 	CIniFile& ini = Map->GetIniFile();
@@ -488,7 +612,7 @@ void CTeamTypes::OnSelchangeTeamtypes()
 	m_VeteranLevel = sec.GetString("VeteranLevel");
 
 	if (yuri_mode) {
-		m_MindControlDecision = sec.GetString("MindControlDecision");
+		setMCDection(sec.GetInteger("MindControlDecision"));
 	}
 
 
@@ -772,7 +896,9 @@ void CTeamTypes::OnShowWindow(BOOL bShow, UINT nStatus)
 		OnKillfocusTag();
 #ifdef RA2_MODE
 		OnKillfocusTransportwaypoint();
-		if (yuri_mode) OnKillfocusMindcontroldecision();
+		if (yuri_mode) {
+			OnKillfocusMindcontroldecision();
+		}
 #endif
 	}
 }
@@ -1101,7 +1227,7 @@ void CTeamTypes::OnOnlytargethouseenemy()
 
 CString GetFree(const char* section);
 
-void CTeamTypes::OnNewteamtype()
+void CTeamTypes::addTeamtype(const TeamTypeParams& params)
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -1112,41 +1238,55 @@ void CTeamTypes::OnNewteamtype()
 	// TODO: change default value
 	ini.SetString("TeamTypes", p, id);
 	CIniFileSection& s = ini.AddSection(id);
-	s.SetString("Name", "New teamtype");
-	s.SetInteger("VeteranLevel", 1);
-	s.SetBool("Loadable", false);
-	s.SetBool("Full", true);
-	s.SetBool("Annoyance", false);
-	s.SetBool("GuardSlower", false);
-	s.SetBool("Recruiter", false);
-	s.SetBool("Autocreate", true);
-	s.SetBool("Prebuild", false);
-	s.SetBool("Reinforce", false);
-	s.SetBool("Droppod", false);
-	s.SetBool("Whiner", false);
-	s.SetBool("LooseRecruit", false);
-	s.SetBool("Aggressive", false);
-	s.SetBool("Suicide", false);
-	s.SetInteger("Priority", 5);
-	s.SetInteger("Max", 5);
-	s.SetInteger("TechLevel", 0);
-	s.SetInteger("Group", -1);
-	s.SetBool("OnTransOnly", false);
-	s.SetBool("AvoidThreats", false);
-	s.SetBool("IonImmune", false);
-	s.SetBool("TransportsReturnOnUnload", false);
-	s.SetBool("AreTeamMembersRecruitable", false);
-	s.SetBool("IsBaseDefense", false);
-	s.SetBool("OnlyTargetHouseEnemy", false);
 
-#ifdef RA2_MODE
-	s.SetBool("UseTransportOrigin", false);
-	if (yuri_mode) {
-		s.SetInteger("MindControlDecision", 0);
+	s.SetString("Name", params.Name);
+	s.SetInteger("VeteranLevel", params.VeteranLevel);
+	s.SetBool("Loadable", params.Loadable);
+	s.SetBool("Full", params.Full);
+	s.SetBool("Annoyance", params.Annoyance);
+	s.SetBool("GuardSlower", params.GuardSlower);
+	s.SetBool("Recruiter", params.Recruiter);
+	s.SetBool("Autocreate", params.Autocreate);
+	s.SetBool("Prebuild", params.Prebuild);
+	s.SetBool("Reinforce", params.Reinforce);
+	s.SetBool("Droppod", params.Droppod);
+	s.SetBool("Whiner", params.Whiner);
+	s.SetBool("LooseRecruit", params.LooseRecruit);
+	s.SetBool("Aggressive", params.Aggressive);
+	s.SetBool("Suicide", params.Suicide);
+	s.SetInteger("Priority", params.Priority);
+	s.SetInteger("Max", params.Max);
+	s.SetInteger("TechLevel", params.TechLevel);
+	s.SetInteger("Group", params.Group);
+	s.SetInteger("Waypoint", params.Waypoint);
+	s.SetInteger("TransportWaypoint", params.TransportWaypoint);
+	s.SetBool("OnTransOnly", params.OnTransOnly);
+	s.SetBool("AvoidThreats", params.AvoidThreats);
+	s.SetBool("IonImmune", params.IonImmune);
+	s.SetBool("TransportsReturnOnUnload", params.TransportsReturnOnUnload);
+	s.SetBool("AreTeamMembersRecruitable", params.AreTeamMembersRecruitable);
+	s.SetBool("IsBaseDefense", params.IsBaseDefense);
+	s.SetBool("OnlyTargetHouseEnemy", params.OnlyTargetHouseEnemy);
+
+	if (!params.House.IsEmpty()) {
+		s.SetString("House", params.House);
+	}
+	if (!params.TaskForce.IsEmpty()) {
+		s.SetString("TaskForce", params.TaskForce);
+	}
+	if (!params.Script.IsEmpty()) {
+		s.SetString("Script", params.Script);
+	}
+	if (!params.Tag.IsEmpty()) {
+		s.SetString("Tag", params.Tag);
 	}
 
+#ifdef RA2_MODE
+	s.SetBool("UseTransportOrigin", params.UseTransportOrigin);
+	if (yuri_mode) {
+		s.SetInteger("MindControlDecision", params.MindControlDecision);
+	}
 #endif
-
 
 	//UpdateDialog();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
@@ -1175,6 +1315,69 @@ void CTeamTypes::OnNewteamtype()
 	OnKillfocusWaypoint();
 	OnKillfocusScript();
 	OnKillfocusTaskforce();
+}
+
+void CTeamTypes::OnNewteamtype()
+{
+	//errstream << "Add Script" << std::endl;
+	int curTemplateIndex = m_Template.GetCurSel();
+	ASSERT(curTemplateIndex >= 0);
+	auto const& curTemplate = m_templates[curTemplateIndex];
+	//errstream << "Now using Script Template: " << curTemplate.Name() << std::endl;
+	addTeamtype(curTemplate.Params());
+}
+
+void CTeamTypes::OnBnClickedTeamtypeCopy()
+{
+	auto const& ini = Map->GetIniFile();
+	auto curTeamType = GetText(&m_TeamTypes);
+	TruncSpace(curTeamType);
+
+	if (curTeamType.IsEmpty()) {
+		return;
+	}
+
+	auto const& sec = ini.GetSection(curTeamType);
+	addTeamtype({
+	.Name = sec.GetString("Name") + " Clone",
+	.House = sec.GetString("House"),
+	.TaskForce = sec.GetString("TaskForce"),
+	.Script = sec.GetString("Script"),
+	.Tag = sec.GetString("Tag"),
+	.VeteranLevel = sec.GetInteger("VeteranLevel"),
+	.Group = sec.GetInteger("Group"),
+	.Priority = sec.GetInteger("Priority"),
+	.TechLevel = sec.GetInteger("TechLevel"),
+	.Max = sec.GetInteger("Max"),
+	.Waypoint = sec.GetInteger("Waypoint"),
+	.TransportWaypoint = sec.GetInteger("TransportWaypoint"),
+#ifdef RA2_MODE
+	.MindControlDecision = sec.GetInteger("MindControlDecision"),
+#endif
+	.Aggressive = sec.GetBool("Aggressive"),
+	.Annoyance = sec.GetBool("Annoyance"),
+	.AreTeamMembersRecruitable = sec.GetBool("AreTeamMembersRecruitable"),
+	.Autocreate = sec.GetBool("Autocreate"),
+	.AvoidThreats = sec.GetBool("AvoidThreats"),
+	.Droppod = sec.GetBool("Droppod"),
+	.Full = sec.GetBool("Full"),
+	.GuardSlower = sec.GetBool("GuardSlower"),
+	.IonImmune = sec.GetBool("IonImmune"),
+	.IsBaseDefense = sec.GetBool("IsBaseDefense"),
+	.Loadable = sec.GetBool("Loadable"),
+	.LooseRecruit = sec.GetBool("LooseRecruit"),
+	.OnlyTargetHouseEnemy = sec.GetBool("OnlyTargetHouseEnemy"),
+	.OnTransOnly = sec.GetBool("OnTransOnly"),
+	.Prebuild = sec.GetBool("Prebuild"),
+	.Recruiter = sec.GetBool("Recruiter"),
+	.Reinforce = sec.GetBool("Reinforce"),
+	.Suicide = sec.GetBool("Suicide"),
+	.TransportsReturnOnUnload = sec.GetBool("TransportsReturnOnUnload"),
+	.Whiner = sec.GetBool("Whiner"),
+#ifdef RA2_MODE
+	.UseTransportOrigin = sec.GetBool("UseTransportOrigin"),
+#endif
+		});
 }
 
 void CTeamTypes::OnEditchangeTag()
@@ -1252,12 +1455,11 @@ void CTeamTypes::OnEditchangeMindcontroldecision()
 	TruncSpace(str);
 	auto sec = ini.TryGetSection(str);
 	ASSERT(sec != nullptr);
-	CString tmp = m_MindControlDecision;
-	TruncSpace(tmp);
-	sec->SetString("MindControlDecision", std::move(tmp));
+	sec->SetInteger("MindControlDecision", getMCDecision());
 }
 
 void CTeamTypes::OnKillfocusMindcontroldecision()
 {
 	OnEditchangeMindcontroldecision();
 }
+
