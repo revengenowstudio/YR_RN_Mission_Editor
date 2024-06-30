@@ -127,9 +127,7 @@ void CTags::OnSelchangeTag()
 	}
 	CString type;
 	m_Tag.GetLBText(index, type);
-	if (type.Find(" ") >= 0) {
-		type.SetAt(type.Find(" "), 0);
-	}
+	TruncSpace(type);
 
 	auto const& data = ini.GetString("Tags", type);
 	m_Name = GetParam(data, 1);
@@ -163,10 +161,12 @@ void CTags::OnChangeName()
 	int sel2 = name.GetSel();
 
 	int index = m_Tag.GetCurSel();
-	if (index < 0) return;
+	if (index < 0) {
+		return;
+	}
 	CString type;
 	m_Tag.GetLBText(index, type);
-	if (type.Find(" ") >= 0) type.SetAt(type.Find(" "), 0);
+	TruncSpace(type);
 
 	auto const& data = ini.GetString("Tags", type);
 
@@ -194,9 +194,7 @@ void CTags::OnEditchangeRepeat()
 
 	CString type;
 	m_Tag.GetLBText(index, type);
-	if (type.Find(" ") >= 0) {
-		type.SetAt(type.Find(" "), 0);
-	}
+	TruncSpace(type);
 
 	auto const data = ini.GetString("Tags", type);
 
@@ -252,11 +250,11 @@ void CTags::OnEditchangeTrigger()
 
 	CString str;
 	m_Trigger.GetWindowText(str);
-	if (str.Find(" ") >= 0) str.SetAt(str.Find(" "), 0);
+	TruncSpace(str);
 
 	CString type;
 	m_Tag.GetLBText(index, type);
-	if (type.Find(" ") >= 0) type.SetAt(type.Find(" "), 0);
+	TruncSpace(type);
 
 	auto const data = ini.GetString("Tags", type);
 
@@ -285,16 +283,11 @@ void CTags::OnSelchangeTrigger()
 
 
 	m_Trigger.GetLBText(v, str);
-
-	if (str.Find(" ") >= 0) {
-		str.SetAt(str.Find(" "), 0);
-	}
+	TruncSpace(str);
 
 	CString type;
 	m_Tag.GetLBText(index, type);
-	if (type.Find(" ") >= 0) {
-		type.SetAt(type.Find(" "), 0);
-	}
+	TruncSpace(type);
 
 	auto const data = ini.GetString("Tags", type);
 
@@ -318,9 +311,7 @@ void CTags::OnDelete()
 
 	CString type;
 	m_Tag.GetLBText(index, type);
-	if (type.Find(" ") >= 0) {
-		type.SetAt(type.Find(" "), 0);
-	}
+	TruncSpace(type);
 
 	int res = MessageBox("Are you sure to delete the selected tag? This may cause the attached trigger to don´t work anymore, if no other tag has the trigger attached.", "Delete tag", MB_YESNO);
 	if (res == IDNO) {
@@ -335,7 +326,7 @@ void CTags::OnAdd()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	CString ID = GetFreeID();
+	CString newTagID = GetFreeID();
 
 	if (ini["Triggers"].Size() < 1) {
 		MessageBox("Before creating tags, you need at least one trigger.", "Error");
@@ -345,18 +336,18 @@ void CTags::OnAdd()
 	CString data;
 	data = "0,New Tag,";
 	data += ini["Triggers"].Nth(0).first;
-	ini.SetString("Tags", ID, data);
+	ini.SetString("Tags", newTagID, data);
 
 
 	UpdateDialog();
 
 	int i;
 	for (i = 0; i < m_Tag.GetCount(); i++) {
-		CString j;
-		m_Tag.GetLBText(i, j);
-		if (j.Find(" ") >= 0) j.SetAt(j.Find(" "), 0);
+		CString tagID;
+		m_Tag.GetLBText(i, tagID);
+		TruncSpace(tagID);
 
-		if (j == ID) {
+		if (tagID == newTagID) {
 			m_Tag.SetCurSel(i);
 			break;
 		}

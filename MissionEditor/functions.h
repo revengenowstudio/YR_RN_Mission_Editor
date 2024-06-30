@@ -101,7 +101,7 @@ void ListAnimations(CComboBox& cb);
 void ListParticles(CComboBox& cb);
 void ListCrateTypes(CComboBox& cb);
 void ListSpeechBubbleTypes(CComboBox& cb);
-void ListGlobals(CComboBox& cb);
+void ListMapVariables(CComboBox& cb);
 void ListRulesGlobals(CComboBox& cb);
 void ListTechtypes(CComboBox& cb);
 
@@ -157,5 +157,12 @@ std::unique_ptr<CBitmap> BitmapFromFile(const CString& filepath);
 
 CComPtr<IDirectDrawSurface4> BitmapToSurface(IDirectDraw4* pDD, const CBitmap& bitmap);
 
+class ComboBoxHelper
+{
+public:
+	static void Clear(CComboBox& combobox);
+	static void ListCountries(CComboBox& combobox, bool bShowIndex = false);
+	static void ListBoolean(CComboBox& combobox);
+};
 
 #endif

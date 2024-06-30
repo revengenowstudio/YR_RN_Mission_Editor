@@ -27,6 +27,7 @@
 #include "functions.h"
 #include "inlines.h"
 #include "mmsystem.h"
+#include "IniMega.h"
 
 #include <algorithm>
 
@@ -229,84 +230,84 @@ void HandleParamList(CComboBox& cb, int type)
 	cb.GetWindowText(oldText);
 
 	switch (type) {
-	case PARAMTYPE_NOTHING:
-	{
-		while (cb.DeleteString(0) != CB_ERR);
-		cb.SetWindowText(oldText);
+		case PARAMTYPE_NOTHING:
+		{
+			while (cb.DeleteString(0) != CB_ERR);
+			cb.SetWindowText(oldText);
 
 
-		//cb.AddString("0");
-	}
-	break;
-	case PARAMTYPE_HOUSES:
-		ListHouses(cb, TRUE, TRUE, TRUE);
+			//cb.AddString("0");
+		}
 		break;
-	case PARAMTYPE_WAYPOINTS:
-		ListWaypoints(cb);
-		break;
-	case PARAMTYPE_TEAMTYPES:
-		ListTeamTypes(cb, FALSE);
-		break;
-	case PARAMTYPE_UNITTYPES:
-		ListUnits(cb);
-		break;
-	case PARAMTYPE_INFANTRYTYPES:
-		ListInfantry(cb);
-		break;
-	case PARAMTYPE_AIRCRAFTTYPES:
-		ListAircraft(cb);
-		break;
-	case PARAMTYPE_BUILDINGTYPES:
-		ListBuildings(cb);
-		break;
-	case PARAMTYPE_VIDEOS:
-		ListMovies(cb, FALSE, TRUE);
-		break;
-	case PARAMTYPE_TUTORIALTEXTS:
-		ListTutorial(cb);
-		break;
-	case PARAMTYPE_TRIGGERS:
-		ListTriggers(cb);
-		break;
-	case PARAMTYPE_YESNO:
-		ListYesNo(cb);
-		break;
-	case PARAMTYPE_SOUNDS:
-		ListSounds(cb);
-		break;
-	case PARAMTYPE_THEMES:
-		ListThemes(cb);
-		break;
-	case PARAMTYPE_SPEECHES:
-		ListSpeeches(cb);
-		break;
-	case PARAMTYPE_SPECIALWEAPONS:
-		ListSpecialWeapons(cb);
-		break;
-	case PARAMTYPE_ANIMATIONS:
-		ListAnimations(cb);
-		break;
-	case PARAMTYPE_PARTICLES:
-		ListParticles(cb);
-		break;
-	case PARAMTYPE_CRATETYPES:
-		ListCrateTypes(cb);
-		break;
-	case PARAMTYPE_SPEECHBUBBLETYPES:
-		ListSpeechBubbleTypes(cb);
-		break;
-	case PARAMTYPE_GLOBALS:
-		ListGlobals(cb);
-		break;
-	case PARAMTYPE_RULESGLOBALS:
-		ListRulesGlobals(cb);
-		break;
-	case PARAMTYPE_BUILDINGTYPESINI:
-		ListBuildings(cb, true);
-		break;
-	case PARAMTYPE_TECHTYPES:
-		ListTechtypes(cb);
-		break;
+		case PARAMTYPE_HOUSES:
+			ListHouses(cb, TRUE, TRUE, TRUE);
+			break;
+		case PARAMTYPE_WAYPOINTS:
+			ListWaypoints(cb);
+			break;
+		case PARAMTYPE_TEAMTYPES:
+			ListTeamTypes(cb, FALSE);
+			break;
+		case PARAMTYPE_UNITTYPES:
+			ListUnits(cb);
+			break;
+		case PARAMTYPE_INFANTRYTYPES:
+			ListInfantry(cb);
+			break;
+		case PARAMTYPE_AIRCRAFTTYPES:
+			ListAircraft(cb);
+			break;
+		case PARAMTYPE_BUILDINGTYPES:
+			ListBuildings(cb);
+			break;
+		case PARAMTYPE_VIDEOS:
+			ListMovies(cb, FALSE, TRUE);
+			break;
+		case PARAMTYPE_TUTORIALTEXTS:
+			ListTutorial(cb);
+			break;
+		case PARAMTYPE_TRIGGERS:
+			ListTriggers(cb);
+			break;
+		case PARAMTYPE_YESNO:
+			ListYesNo(cb);
+			break;
+		case PARAMTYPE_SOUNDS:
+			ListSounds(cb);
+			break;
+		case PARAMTYPE_THEMES:
+			ListThemes(cb);
+			break;
+		case PARAMTYPE_SPEECHES:
+			ListSpeeches(cb);
+			break;
+		case PARAMTYPE_SPECIALWEAPONS:
+			ListSpecialWeapons(cb);
+			break;
+		case PARAMTYPE_ANIMATIONS:
+			ListAnimations(cb);
+			break;
+		case PARAMTYPE_PARTICLES:
+			ListParticles(cb);
+			break;
+		case PARAMTYPE_CRATETYPES:
+			ListCrateTypes(cb);
+			break;
+		case PARAMTYPE_SPEECHBUBBLETYPES:
+			ListSpeechBubbleTypes(cb);
+			break;
+		case PARAMTYPE_GLOBALS:
+			ListMapVariables(cb);
+			break;
+		case PARAMTYPE_RULESGLOBALS:
+			ListRulesGlobals(cb);
+			break;
+		case PARAMTYPE_BUILDINGTYPESINI:
+			ListBuildings(cb, true);
+			break;
+		case PARAMTYPE_TECHTYPES:
+			ListTechtypes(cb);
+			break;
 	}
 }
 
@@ -508,8 +509,9 @@ void TruncSpace(CString& str)
 {
 	str.TrimLeft();
 	str.TrimRight();
-	if (str.Find(" ") >= 0) {
-		str.Delete(str.Find(" "), str.GetLength() - str.Find(" "));
+	auto const spacePos = str.Find(" ");
+	if (spacePos >= 0) {
+		str.Delete(spacePos, str.GetLength() - spacePos);
 	}
 }
 
@@ -670,24 +672,24 @@ bool HSVToRGB(const float h, const float s, const float v, float& r, float& g, f
 	const float x = c * (1 - fabs(fmod(h / 60.0, 2.0) - 1));
 	const float m = v - c;
 	switch (h_) {
-	case 0:
-		r = c, g = x, b = 0.0;
-		break;
-	case 1:
-		r = x, g = c, b = 0.0;
-		break;
-	case 2:
-		r = 0.0, g = c, b = x;
-		break;
-	case 3:
-		r = 0.0, g = x, b = c;
-		break;
-	case 4:
-		r = x, g = 0.0, b = c;
-		break;
-	case 5:
-		r = c, g = 0.0, b = x;
-		break;
+		case 0:
+			r = c, g = x, b = 0.0;
+			break;
+		case 1:
+			r = x, g = c, b = 0.0;
+			break;
+		case 2:
+			r = 0.0, g = c, b = x;
+			break;
+		case 3:
+			r = 0.0, g = x, b = c;
+			break;
+		case 4:
+			r = x, g = 0.0, b = c;
+			break;
+		case 5:
+			r = c, g = 0.0, b = x;
+			break;
 	}
 	r += m;
 	g += m;
@@ -803,7 +805,7 @@ void listLocalVariables(CComboBox& cb, const CIniFile& ini)
 }
 
 // should be ListLocals()
-void ListGlobals(CComboBox& cb)
+void ListMapVariables(CComboBox& cb)
 {
 	listLocalVariables(cb, Map->GetIniFile());
 }
@@ -1265,19 +1267,55 @@ void ListTargets(CComboBox& cb)
 
 	while (cb.DeleteString(0) != CB_ERR);
 
-	cb.AddString("1 - Not specified");
-	cb.AddString("2 - Buildings");
-	cb.AddString("3 - Harvesters");
-	cb.AddString("4 - Infantry");
-	cb.AddString("5 - Vehicles");
-	cb.AddString("6 - Factories");
-	cb.AddString("7 - Base defenses");
-	cb.AddString("9 - Power plants");
+	cb.AddString(TranslateStringACP("1 - Not specified"));
+	cb.AddString(TranslateStringACP("2 - Buildings"));
+	cb.AddString(TranslateStringACP("3 - Harvesters"));
+	cb.AddString(TranslateStringACP("4 - Infantry"));
+	cb.AddString(TranslateStringACP("5 - Vehicles"));
+	cb.AddString(TranslateStringACP("6 - Factories"));
+	cb.AddString(TranslateStringACP("7 - Base defenses"));
+	cb.AddString(TranslateStringACP("9 - Power plants"));
 
-	if (sel >= 0) cb.SetCurSel(sel);
-
+	if (sel >= 0) {
+		cb.SetCurSel(sel);
+	}
 }
 
+void ComboBoxHelper::Clear(CComboBox& combobox)
+{
+	while (combobox.DeleteString(0) != -1);
+}
+
+void ComboBoxHelper::ListCountries(CComboBox& combobox, bool bShowIndex)
+{
+	ComboBoxHelper::Clear(combobox);
+	auto& doc = Map->GetIniFile();
+	bool bMultiOnly = doc.GetBool("Basic", "MultiplayerOnly");
+	if (bMultiOnly) {
+		ListHouses(combobox, bShowIndex);
+		return;
+	}
+	auto const& rules = IniMegaFile::GetRules();
+	auto const& items = rules.GetSection("Countries");
+	CString buffer;
+	for (auto it = items.begin(); it != items.end(); ++it) {
+		auto const& [idxStr, id] = *it;
+		auto const idx = atoi(idxStr);
+		if (bShowIndex) {
+			buffer.Format("%u - %s", idx, id.operator LPCSTR());
+		} else {
+			buffer = id;
+		}
+		combobox.SetItemData(combobox.AddString(buffer), idx);
+	}
+}
+
+void ComboBoxHelper::ListBoolean(CComboBox& combobox)
+{
+	ComboBoxHelper::Clear(combobox);
+	combobox.SetItemData(combobox.AddString(TranslateStringACP("0 - FALSE")), 0);
+	combobox.SetItemData(combobox.AddString(TranslateStringACP("1 - TRUE")), 1);
+}
 
 CString GetHouseSectionName(CString lpHouse)
 {

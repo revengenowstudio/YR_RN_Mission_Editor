@@ -142,9 +142,7 @@ void CAiTriggerTypesEnable::OnDelete()
 	}
 	CString aitrigger;
 	m_AITriggerType.GetLBText(sel, aitrigger);
-	if (aitrigger.Find(" ") >= 0) {
-		aitrigger.SetAt(aitrigger.Find(" "), 0);
-	}
+	TruncSpace(aitrigger);
 
 	CIniFile& ini = Map->GetIniFile();
 
