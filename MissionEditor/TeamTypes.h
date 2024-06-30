@@ -33,6 +33,68 @@
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CTeamTypes 
 
+struct TeamTypeParams
+{
+	CString Name;
+	CString House;
+	CString TaskForce;
+	CString Script;
+	CString Tag;
+	int VeteranLevel{ 1 };
+	int Group{ -1 };
+	int Priority{ 5 };
+	int TechLevel{};
+	int Max{ 1 };
+	int Waypoint{};
+	int TransportWaypoint{};
+#ifdef RA2_MODE
+	int MindControlDecision{};
+#endif
+	bool Aggressive{};
+	bool Annoyance{};
+	bool AreTeamMembersRecruitable{};
+	bool Autocreate{};
+	bool AvoidThreats{};
+	bool Droppod{};
+	bool Full{};
+	bool GuardSlower{};
+	bool IonImmune{};
+	bool IsBaseDefense{};
+	bool Loadable{};
+	bool LooseRecruit{};
+	bool OnlyTargetHouseEnemy{};
+	bool OnTransOnly{};
+	bool Prebuild{};
+	bool Recruiter{};
+	bool Reinforce{};
+	bool Suicide{};
+	bool TransportsReturnOnUnload{};
+	bool Whiner{};
+#ifdef RA2_MODE
+	bool UseTransportOrigin{};
+#endif
+};
+
+class TeamTemplate
+{
+public:
+	TeamTemplate(std::vector<CString>&& input) noexcept;
+	// used for default template
+	TeamTemplate(CString&& name, TeamTypeParams&& params) noexcept : 
+		m_displayName(std::move(name)),
+		m_params(std::move(params))
+	{}
+
+	const CString& Desc() const { return m_displayName; }
+	const TeamTypeParams& Params() const { return m_params; }
+
+private:
+	static void assignInteger(int& val, const CString& str);
+	static void assignBool(bool& val, const CString& str);
+
+	CString m_displayName;
+	TeamTypeParams m_params;
+};
 
 class CTeamTypes : public CDialog
 {
@@ -45,54 +107,23 @@ public:
 	~CTeamTypes();
 
 	// Dialogfelddaten
-		//{{AFX_DATA(CTeamTypes)
 	enum { IDD = IDD_TEAMTYPES };
-	CStatic	m_MCD_L;
-	CComboBox	m_TeamTypes;
-	BOOL	m_Aggressive;
-	BOOL	m_Annoyance;
-	BOOL	m_AreTeamMembersRecruitable;
-	BOOL	m_Autocreate;
-	BOOL	m_AvoidThreats;
-	BOOL	m_Droppod;
-	BOOL	m_Full;
-	CString	m_Group;
-	BOOL	m_GuardSlower;
-	CString	m_House;
-	BOOL	m_IonImmune;
-	BOOL	m_IsBaseDefense;
-	BOOL	m_Loadable;
-	BOOL	m_LooseRecruit;
-	CString	m_Max;
-	CString	m_Name;
-	BOOL	m_OnlyTargetHouseEnemy;
-	BOOL	m_OnTransOnly;
-	BOOL	m_Prebuild;
-	CString	m_Priority;
-	BOOL	m_Recruiter;
-	BOOL	m_Reinforce;
-	CString	m_Script;
-	BOOL	m_Suicide;
-	CString	m_TaskForce;
-	CString	m_TechLevel;
-	BOOL	m_TransportReturnsOnUnload;
-	CString	m_Waypoint;
-	BOOL	m_Whiner;
-	CString	m_VeteranLevel;
-	CString	m_Tag;
-	CString	m_TransportWaypoint;
-	CString	m_MindControlDecision;
-	//}}AFX_DATA
-
 
 // Überschreibungen
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
 	//{{AFX_VIRTUAL(CTeamTypes)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
+	virtual BOOL OnInitDialog() override;
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
 	//}}AFX_VIRTUAL
+	void addTeamtype(const TeamTypeParams& params);
+	void translateUI();
+	void initMCDecisionComboBox();
+	void reloadTemplates();
+	void setMCDection(const int decision);
+	int getMCDecision();
 
-// Implementierung
+	// Implementierung
 protected:
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CTeamTypes)
@@ -143,9 +174,48 @@ protected:
 	afx_msg void OnKillfocusTransportwaypoint();
 	afx_msg void OnEditchangeMindcontroldecision();
 	afx_msg void OnKillfocusMindcontroldecision();
+	afx_msg void OnBnClickedTeamtypeCopy();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
+private:
+	CComboBox	m_Template;
+	CComboBox	m_TeamTypes;
+	BOOL	m_Aggressive;
+	BOOL	m_Annoyance;
+	BOOL	m_AreTeamMembersRecruitable;
+	BOOL	m_Autocreate;
+	BOOL	m_AvoidThreats;
+	BOOL	m_Droppod;
+	BOOL	m_Full;
+	CString	m_Group;
+	BOOL	m_GuardSlower;
+	CString	m_House;
+	BOOL	m_IonImmune;
+	BOOL	m_IsBaseDefense;
+	BOOL	m_Loadable;
+	BOOL	m_LooseRecruit;
+	CString	m_Max;
+	CString	m_Name;
+	BOOL	m_OnlyTargetHouseEnemy;
+	BOOL	m_OnTransOnly;
+	BOOL	m_Prebuild;
+	CString	m_Priority;
+	BOOL	m_Recruiter;
+	BOOL	m_Reinforce;
+	CString	m_Script;
+	BOOL	m_Suicide;
+	CString	m_TaskForce;
+	CString	m_TechLevel;
+	BOOL	m_TransportReturnsOnUnload;
+	CString	m_Waypoint;
+	BOOL	m_Whiner;
+	CString	m_VeteranLevel;
+	CString	m_Tag;
+	CString	m_TransportWaypoint;
+	CComboBox	m_MindControlDecision;
+
+	std::vector<TeamTemplate> m_templates;
 };
 
 //{{AFX_INSERT_LOCATION}}

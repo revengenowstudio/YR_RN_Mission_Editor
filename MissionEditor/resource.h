@@ -520,20 +520,37 @@
 #define IDC_TRIGGER_OPTION_TYPE_STR     1464
 #define IDC_SCRIPT_CK_INSERT            1464
 #define IDC_TRIGGER_OPTION_NAME         1465
+#define IDC_TEAMTYPE_TEMPLATE           1465
 #define IDC_TRIGGER_OPTION_HOUSE        1466
+#define IDC_TEAMTYPE_T_TXT              1466
 #define IDC_TRIGGER_OPTION_ATTACHED_TRIGGER 1467
+#define IDC_TEAMTYPE_COPY               1467
 #define IDC_TRIGGER_OPTION_TRIGGER_DIS_TIP 1468
+#define IDC_TEAMTYPE_DESC               1468
 #define IDC_MAP_D_WIDTH                 1469
+#define IDC_TEAMTYPE_TYPE               1469
 #define IDC_MAP_D_HEIGHT                1470
+#define IDC_TEAMTYPE_GBOX               1470
 #define IDC_SCTIPTTYPE_INRO             1471
+#define IDC_TEAMTYPE_P_NAME             1471
 #define IDC_SCRIPTTYPE_TYPE             1472
+#define IDC_TEAMTYPE_P_GROUP            1472
 #define IDC_SCRIPTTYPE_NAME             1473
+#define IDC_TEAMTYPE_P_VLEVEL           1473
 #define IDC_SCRIPTTYPE_ACTIONS          1474
+#define IDC_TEAMTYPE_P_WAYP             1474
 #define IDC_SCRIPTTYPE_ACTIONTYPE       1475
+#define IDC_TEAMTYPE_P_HOUSE            1475
 #define IDC_SCRIPTTYPE_DESC             1476
+#define IDC_TEAMTYPE_P_PRIORITY         1476
 #define IDD_TERRAINBAR_TG               1477
+#define IDC_TEAMTYPE_P_TECHLEVEL        1477
 #define IDD_TERRAINBAR_OS               1478
+#define IDC_TEAMTYPE_P_MAX              1478
 #define IDC_SCRIPT_TEMPLATE_DSC         1479
+#define IDC_TEAMTYPE_P_TAG              1479
+#define IDC_TEAMTYPE_P_SCRIPT           1480
+#define IDC_TEAMTYPE_P_TASKFORCE        1481
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -628,9 +645,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        300
+#define _APS_NEXT_RESOURCE_VALUE        301
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1465
+#define _APS_NEXT_CONTROL_VALUE         1482
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif
