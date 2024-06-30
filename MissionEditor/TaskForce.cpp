@@ -36,6 +36,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+CString GetFree(const char* section);
+
 /////////////////////////////////////////////////////////////////////////////
 // Eigenschaftenseite CTaskForce 
 
@@ -52,6 +54,13 @@ CTaskForce::CTaskForce() : CDialog(CTaskForce::IDD)
 
 CTaskForce::~CTaskForce()
 {
+}
+
+BOOL CTaskForce::OnInitDialog()
+{
+	auto const ret = CDialog::OnInitDialog();
+	translateUI();
+	return ret;
 }
 
 void CTaskForce::DoDataExchange(CDataExchange* pDX)
@@ -83,10 +92,17 @@ BEGIN_MESSAGE_MAP(CTaskForce, CDialog)
 	ON_BN_CLICKED(IDC_ADDTASKFORCE, OnAddtaskforce)
 	ON_EN_KILLFOCUS(IDC_GROUP, OnChangeGroup)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_COPYTASKFORCE, &CTaskForce::OnBnClickedCopytaskforce)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CTaskForce 
+
+void CTaskForce::translateUI()
+{
+	TranslateDlgItem(*this, IDC_COPYTASKFORCE, "TaskforcesCopy");
+
+}
 
 void CTaskForce::UpdateDialog()
 {
@@ -173,8 +189,8 @@ void CTaskForce::OnSelchangeTaskforces()
 
 	CString tf;
 	tf = GetText(&m_TaskForces);
-
 	TruncSpace(tf);
+
 	auto const& sec = ini[tf];
 	m_Name = sec.GetString("Name");
 	m_Group = sec.GetString("Group");
@@ -448,8 +464,7 @@ void CTaskForce::OnDeletetaskforce()
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 }
 
-CString GetFree(const char* section);
-void CTaskForce::OnAddtaskforce()
+void CTaskForce::addTaskforce(CString&& name, int group, std::vector<CString>&& members)
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -457,29 +472,59 @@ void CTaskForce::OnAddtaskforce()
 	CString tf = GetFree("TaskForces");
 	ini.SetString("TaskForces", tf, ID);
 
-	ini.SetString(ID, "Name", "New task force");
-	ini.SetString(ID, "Group", "-1");
+	auto& sec = ini.AddSection(ID);
+	sec.SetString("Name", std::move(name));
+	sec.SetInteger("Group", group);
 
-	//UpdateDialog();
+	int idx = 0;
+	CString idxStr;
+	for (auto&& member : members) {
+		idxStr.Format("%d", idx++);
+		sec.SetString(idxStr, std::move(member));
+	}
 
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 
-	int i;
-	for (i = 0; i < m_TaskForces.GetCount(); i++) {
-		CString tf2;
+	CString tf2;
+	for (auto i = 0; i < m_TaskForces.GetCount(); i++) {
 		m_TaskForces.GetLBText(i, tf2);
-
 		TruncSpace(tf2);
-
 		if (strcmp(ID, tf2) == NULL) {
 			m_TaskForces.SetCurSel(i);
 			OnSelchangeTaskforces(); // MW bugfix
 			break;
 		}
 	}
-
-
 }
+
+
+void CTaskForce::OnAddtaskforce()
+{
+	addTaskforce("New task force", -1, {});
+}
+
+void CTaskForce::OnBnClickedCopytaskforce()
+{
+	auto id = GetText(&m_TaskForces);
+	TruncSpace(id);
+	if (id.IsEmpty()) {
+		return;
+	}
+	std::vector<CString> content;
+	auto const& ini = Map->GetIniFile();
+	auto const& sec = ini[id];
+	for (auto const& [key, val] : sec) {
+		if (IsNumeric(key)) {
+			content.push_back(val);
+		}
+	}
+	addTaskforce(
+		sec.GetString("Name") + " Clone",
+		sec.GetInteger("Group"),
+		std::move(content)
+	);
+}
+
 
 void CTaskForce::OnChangeGroup()
 {
@@ -505,31 +550,31 @@ BOOL CTaskForce::PreTranslateMessage(MSG* pMsg)
 {
 	if (pMsg->message == WM_KEYDOWN) {
 		switch (pMsg->wParam) {
-		case VK_RETURN:
-		{
-			auto pEdit = this->m_UnitType.GetWindow(GW_CHILD);
-			if (pMsg->hwnd == pEdit->m_hWnd) {
-				this->OnEditchangeUnittype();
-			}
+			case VK_RETURN:
+			{
+				auto pEdit = this->m_UnitType.GetWindow(GW_CHILD);
+				if (pMsg->hwnd == pEdit->m_hWnd) {
+					this->OnEditchangeUnittype();
+				}
 
-			switch (::GetDlgCtrlID(pMsg->hwnd)) {
-			case IDC_NAME: 
-				this->OnChangeName();
-				break;
-			case IDC_NUMBERUNITS: 
-				this->OnChangeNumberunits();
-				break;
-			case IDC_GROUP:
-				this->OnChangeGroup();
-				break;
+				switch (::GetDlgCtrlID(pMsg->hwnd)) {
+					case IDC_NAME:
+						this->OnChangeName();
+						break;
+					case IDC_NUMBERUNITS:
+						this->OnChangeNumberunits();
+						break;
+					case IDC_GROUP:
+						this->OnChangeGroup();
+						break;
+					default:
+						break;
+				}
+			}
+			//do not exit dialog when enter key pressed
+			return TRUE;
 			default:
 				break;
-			}
-		}
-		//do not exit dialog when enter key pressed
-		return TRUE;
-		default:
-			break;
 		}
 	}
 

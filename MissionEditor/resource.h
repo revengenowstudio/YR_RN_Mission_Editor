@@ -256,6 +256,7 @@
 #define IDC_UNITTYPE                    1149
 #define IDC_DELETETASKFORCE             1150
 #define IDC_ADDTASKFORCE                1151
+#define IDC_COPYTASKFORCE               1152
 #define IDC_ADD                         1154
 #define IDC_REPEAT                      1156
 #define IDC_TRIGGER                     1157
@@ -645,7 +646,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        301
+#define _APS_NEXT_RESOURCE_VALUE        302
 #define _APS_NEXT_COMMAND_VALUE         40144
 #define _APS_NEXT_CONTROL_VALUE         1482
 #define _APS_NEXT_SYMED_VALUE           111
