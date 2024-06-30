@@ -1252,10 +1252,10 @@ void CTeamTypes::OnBnClickedTeamtypeCopy()
 	.Priority = sec.GetInteger("Priority"),
 	.TechLevel = sec.GetInteger("TechLevel"),
 	.Max = sec.GetInteger("Max"),
-	.Waypoint = sec.GetBool("Waypoint"),
-	.TransportWaypoint = sec.GetBool("TransportWaypoint"),
+	.Waypoint = sec.GetInteger("Waypoint"),
+	.TransportWaypoint = sec.GetInteger("TransportWaypoint"),
 #ifdef RA2_MODE
-	.MindControlDecision = sec.GetBool("MindControlDecision"),
+	.MindControlDecision = sec.GetInteger("MindControlDecision"),
 #endif
 	.Aggressive = sec.GetBool("Aggressive"),
 	.Annoyance = sec.GetBool("Annoyance"),
