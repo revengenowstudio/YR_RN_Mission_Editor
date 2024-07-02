@@ -190,6 +190,7 @@ BOOL CHouses::OnInitDialog()
 	UpdateDialog();
 
 #ifdef RA2_MODE
+	::ShowWindow(GetDlgItem(IDC_LACTSLIKE)->m_hWnd, SW_HIDE);
 	m_ActsLike.ShowWindow(SW_HIDE);
 	//m_Edge.ShowWindow(SW_HIDE);
 #endif
@@ -846,6 +847,13 @@ END_MESSAGE_MAP()
 
 void CHouseAllies::translateUI()
 {
+	TranslateWindowCaption(*this, "HouseAlliesCaption");
+
+	TranslateDlgItem(*this, IDC_HOUSE_ALLIES_T_ENEMIES, "HouseAlliesEnemies");
+	TranslateDlgItem(*this, IDC_HOUSE_ALLIES_T_ALLIES, "HouseAlliesAllies");
+
+	SetDlgItemText(IDOK, GetLanguageStringACP("OK"));
+	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
 }
 
 void CHouseAllies::updateAllyTexts()
