@@ -825,6 +825,7 @@ BOOL CHouseAllies::OnInitDialog()
 			m_enemyList.AddString(house);
 		}
 	}
+	updateAllyTexts();
 	return ret;
 }
 
@@ -834,6 +835,7 @@ void CHouseAllies::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Control(pDX, IDC_HOUSE_LIST_ALLIES, m_allyList);
 	DDX_Control(pDX, IDC_HOUSE_LIST_ENEMIES, m_enemyList);
+	DDX_Control(pDX, IDC_HOUSE_ALLIES_VALUES, m_allianceText);
 }
 
 BEGIN_MESSAGE_MAP(CHouseAllies, CDialog)
@@ -844,6 +846,11 @@ END_MESSAGE_MAP()
 
 void CHouseAllies::translateUI()
 {
+}
+
+void CHouseAllies::updateAllyTexts()
+{
+	m_allianceText.SetWindowText(INIHelper::Join(m_allies));
 }
 
 void CHouseAllies::OnBnClickedHouseAlliesAdd()
@@ -857,6 +864,7 @@ void CHouseAllies::OnBnClickedHouseAlliesAdd()
 	m_enemyList.DeleteString(selected);
 	m_allies.insert(house);
 	m_allyList.AddString(house);
+	updateAllyTexts();
 }
 
 
@@ -871,4 +879,5 @@ void CHouseAllies::OnBnClickedHouseAlliesRemove()
 	m_allyList.DeleteString(selected);
 	m_allies.erase(house);
 	m_enemyList.AddString(house);
+	updateAllyTexts();
 }

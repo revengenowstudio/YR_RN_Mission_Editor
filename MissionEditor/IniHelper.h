@@ -81,7 +81,8 @@ public:
 		return ret;
 	}
 
-	static inline CString Join(const std::vector<CString>& strings, char ch = ',') {
+	template<typename TContainer>
+	static inline CString Join(const TContainer& strings, char ch = ',') {
 		CString ret;
 		for (auto const& item : strings) {
 			ret += item;

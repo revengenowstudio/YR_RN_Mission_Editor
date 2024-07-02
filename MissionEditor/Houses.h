@@ -45,12 +45,14 @@ private:
 	DECLARE_MESSAGE_MAP()
 
 	void translateUI();
+	void updateAllyTexts();
 
 	afx_msg void OnBnClickedHouseAlliesAdd();
 	afx_msg void OnBnClickedHouseAlliesRemove();
 
 	CListBox m_enemyList;
 	CListBox m_allyList;
+	CEdit m_allianceText;
 
 	std::vector<CString> m_allHouses;
 	std::set<CString> m_allies;
