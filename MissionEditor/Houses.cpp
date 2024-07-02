@@ -85,7 +85,6 @@ BEGIN_MESSAGE_MAP(CHouses, CDialog)
 	ON_CBN_KILLFOCUS(IDC_EDGE, OnKillfocusEdge)
 	ON_CBN_KILLFOCUS(IDC_SIDE, OnKillfocusSide)
 	ON_CBN_KILLFOCUS(IDC_COLOR, OnKillfocusColor)
-	ON_EN_KILLFOCUS(IDC_ALLIES, OnKillfocusAllies)
 	ON_EN_KILLFOCUS(IDC_CREDITS, OnKillfocusCredits)
 	ON_CBN_EDITCHANGE(IDC_ACTSLIKE, OnEditchangeActslike)
 	ON_CBN_KILLFOCUS(IDC_NODECOUNT, OnKillfocusNodecount)
@@ -94,8 +93,8 @@ BEGIN_MESSAGE_MAP(CHouses, CDialog)
 	ON_CBN_KILLFOCUS(IDC_PLAYERCONTROL, OnKillfocusPlayercontrol)
 	ON_CBN_SELCHANGE(IDC_HUMANPLAYER, OnSelchangeHumanplayer)
 	ON_CBN_SELCHANGE(IDC_ACTSLIKE, OnSelchangeActslike)
-	ON_EN_SETFOCUS(IDC_ALLIES, OnSetfocusAllies)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_HOUSES_CHANGE_ALLIES, &CHouses::OnBnClickedHousesChangeAllies)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -424,7 +423,6 @@ void CHouses::OnShowWindow(BOOL bShow, UINT nStatus)
 		// call all KillFocus !
 		OnKillfocusIq();
 		OnEditchangeActslike();
-		OnKillfocusAllies();
 		OnKillfocusColor();
 		OnKillfocusCredits();
 		OnKillfocusEdge();
@@ -569,26 +567,6 @@ void CHouses::OnKillfocusColor()
 	Map->RedrawMinimap();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_minimap.RedrawWindow();
-}
-
-void CHouses::OnKillfocusAllies()
-{
-	CIniFile& ini = Map->GetIniFile();
-
-	SetMainStatusBarReady();
-
-	int cusel;
-	cusel = m_houses.GetCurSel();
-	if (cusel == -1) return;
-
-	CString name;
-	m_houses.GetLBText(cusel, name);
-	name = TranslateHouse(name);
-
-	CString t;
-	m_Allies.GetWindowText(t);
-	t = TranslateHouse(t);
-	ini.SetString(name, "Allies", t);
 }
 
 void CHouses::OnKillfocusCredits()
@@ -742,6 +720,41 @@ void CHouses::OnSelchangeActslike()
 	ini.SetString(name, "ActsLike", t);
 }
 
+void CHouses::OnBnClickedHousesChangeAllies()
+{
+	auto const curSel = m_houses.GetCurSel();
+	if (curSel == -1) {
+		return;
+	}
+
+	CString name;
+	m_houses.GetLBText(curSel, name);
+	name = TranslateHouse(name);
+
+	CIniFile& ini = Map->GetIniFile();
+
+	std::vector<CString> allHouses;
+	for (auto idx = 0; idx < m_houses.GetCount(); ++idx) {
+		CString item;
+		m_houses.GetLBText(idx, item);
+		allHouses.emplace_back(std::move(item));
+	}
+
+	CHouseAllies dlg(std::move(allHouses), ini.GetString(name, "Allies"));
+
+	if (dlg.DoModal() == IDCANCEL) {
+		return;
+	}
+	auto&& allies = dlg.GetAllies();
+	ini.SetString(name, "Allies", INIHelper::Join(allies));
+
+	for (auto& house : allies) {
+		house = TranslateHouse(house, true);
+	}
+	m_Allies.SetWindowText(INIHelper::Join(allies));
+	SetMainStatusBarReady();
+}
+
 void CHouses::UpdateStrings()
 {
 	SetDlgItemText(IDC_DESC, GetLanguageStringACP("HousesDesc"));
@@ -768,12 +781,94 @@ void CHouses::UpdateStrings()
 	SetWindowText(TranslateStringACP(HOUSES));
 }
 
-void CHouses::OnSetfocusAllies()
-{
-	SetMainStatusBar(GetLanguageStringACP("HousesAlliesHelp"));
-}
-
 void CHouses::PostNcDestroy()
 {
 	CDialog::PostNcDestroy();
+}
+
+// CHouseAllies
+
+CHouseAllies::CHouseAllies(std::vector<CString>&& houses, const CString& allies, CWnd* pParent) :
+	CDialog(CHouseAllies::IDD, pParent),
+	m_allHouses(std::move(houses))
+{
+	auto const allyStrings = INIHelper::Split(allies);
+	for (auto& str : allyStrings) {
+		m_allies.insert(TranslateHouse(str, true));
+	}
+
+}
+
+CHouseAllies::~CHouseAllies()
+{
+}
+
+std::vector<CString> CHouseAllies::GetAllies() const
+{
+	std::vector<CString> ret;
+	for (auto const& str : m_allies) {
+		ret.emplace_back(TranslateHouse(str));
+	}
+	return ret;
+}
+
+BOOL CHouseAllies::OnInitDialog()
+{
+	auto const ret = CDialog::OnInitDialog();
+	translateUI();
+
+	for (auto const& str : m_allies) {
+		m_allyList.AddString(str);
+	}
+	for (auto const& house : m_allHouses) {
+		if (m_allies.find(house) == m_allies.end()) {
+			m_enemyList.AddString(house);
+		}
+	}
+	return ret;
+}
+
+void CHouseAllies::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+
+	DDX_Control(pDX, IDC_HOUSE_LIST_ALLIES, m_allyList);
+	DDX_Control(pDX, IDC_HOUSE_LIST_ENEMIES, m_enemyList);
+}
+
+BEGIN_MESSAGE_MAP(CHouseAllies, CDialog)
+	ON_BN_CLICKED(IDC_HOUSE_ALLIES_ADD, &CHouseAllies::OnBnClickedHouseAlliesAdd)
+	ON_BN_CLICKED(IDC_HOUSE_ALLIES_REMOVE, &CHouseAllies::OnBnClickedHouseAlliesRemove)
+END_MESSAGE_MAP()
+
+
+void CHouseAllies::translateUI()
+{
+}
+
+void CHouseAllies::OnBnClickedHouseAlliesAdd()
+{
+	auto const selected = m_enemyList.GetCurSel();
+	if (selected < 0) {
+		return;
+	}
+	CString house;
+	m_enemyList.GetText(selected, house);
+	m_enemyList.DeleteString(selected);
+	m_allies.insert(house);
+	m_allyList.AddString(house);
+}
+
+
+void CHouseAllies::OnBnClickedHouseAlliesRemove()
+{
+	auto const selected = m_allyList.GetCurSel();
+	if (selected < 0) {
+		return;
+	}
+	CString house;
+	m_allyList.GetText(selected, house);
+	m_allyList.DeleteString(selected);
+	m_allies.erase(house);
+	m_enemyList.AddString(house);
 }
