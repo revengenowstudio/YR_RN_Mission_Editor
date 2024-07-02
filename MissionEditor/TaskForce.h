@@ -56,13 +56,17 @@ public:
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
 	//{{AFX_VIRTUAL(CTaskForce)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
+	virtual BOOL OnInitDialog() override;
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 	//}}AFX_VIRTUAL
 
 // Implementierung
-protected:
+	CString getCurrrentID();
+	void translateUI();
+	void addTaskforce(CString&& name, int group, std::vector<CString>&& members);
 
-	BOOL PreTranslateMessage(MSG* pMsg) override;
+	DECLARE_MESSAGE_MAP()
 
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CTaskForce)
@@ -75,12 +79,12 @@ protected:
 	afx_msg void OnEditchangeUnittype();
 	afx_msg void OnSelchangeUnittype();
 	afx_msg void OnAddunit();
+	afx_msg void OnBnClickedCopyunit();
 	afx_msg void OnDeletetaskforce();
 	afx_msg void OnAddtaskforce();
+	afx_msg void OnBnClickedCopytaskforce();
 	afx_msg void OnChangeGroup();
 	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-
 };
 
 //{{AFX_INSERT_LOCATION}}

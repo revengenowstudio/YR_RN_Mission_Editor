@@ -36,6 +36,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+CString GetFree(const char* section);
+
 /////////////////////////////////////////////////////////////////////////////
 // Eigenschaftenseite CTaskForce 
 
@@ -52,6 +54,13 @@ CTaskForce::CTaskForce() : CDialog(CTaskForce::IDD)
 
 CTaskForce::~CTaskForce()
 {
+}
+
+BOOL CTaskForce::OnInitDialog()
+{
+	auto const ret = CDialog::OnInitDialog();
+	translateUI();
+	return ret;
 }
 
 void CTaskForce::DoDataExchange(CDataExchange* pDX)
@@ -83,10 +92,40 @@ BEGIN_MESSAGE_MAP(CTaskForce, CDialog)
 	ON_BN_CLICKED(IDC_ADDTASKFORCE, OnAddtaskforce)
 	ON_EN_KILLFOCUS(IDC_GROUP, OnChangeGroup)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_COPYTASKFORCE, &CTaskForce::OnBnClickedCopytaskforce)
+	ON_BN_CLICKED(IDC_COPYUNIT, &CTaskForce::OnBnClickedCopyunit)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CTaskForce 
+
+CString CTaskForce::getCurrrentID()
+{
+	CString tf;
+	tf = GetText(&m_TaskForces);
+	TruncSpace(tf);
+	return tf;
+}
+
+void CTaskForce::translateUI()
+{
+	TranslateWindowCaption(*this, "TaskforcesCaption");
+
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_TYPE, "TaskforcesType");
+	TranslateDlgItem(*this, IDC_ADDTASKFORCE, "TaskforcesAdd");
+	TranslateDlgItem(*this, IDC_COPYTASKFORCE, "TaskforcesCopy");
+	TranslateDlgItem(*this, IDC_DELETETASKFORCE, "TaskforcesDelete");
+	TranslateDlgItem(*this, IDC_TASKFORCE_G_SELECTED, "TaskforcesSelected");
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_NAME, "TaskforcesName");
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_GROUP, "TaskforcesGroup");
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_MEMBERS, "TaskforcesMembers");
+	
+	TranslateDlgItem(*this, IDC_ADDUNIT, "TaskforcesAddUnit");
+	TranslateDlgItem(*this, IDC_COPYUNIT, "TaskforcesCopyUnit");
+	TranslateDlgItem(*this, IDC_DELETEUNIT, "TaskforcesDeleteUnit");
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_U_NUM, "TaskforcesUnitNumber");
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_U_TYPE, "TaskforcesUnitType");
+}
 
 void CTaskForce::UpdateDialog()
 {
@@ -171,10 +210,7 @@ void CTaskForce::OnSelchangeTaskforces()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	CString tf;
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
+	auto const tf = getCurrrentID();
 	auto const& sec = ini[tf];
 	m_Name = sec.GetString("Name");
 	m_Group = sec.GetString("Group");
@@ -208,10 +244,7 @@ void CTaskForce::OnSelchangeUnits()
 
 	int sel = m_Units.GetCurSel();
 	int u = m_Units.GetItemData(sel);
-	CString tf;
-	tf = GetText(&m_TaskForces);
-	TruncSpace(tf);
-
+	auto const tf = getCurrrentID();
 	CString indexStr;
 	indexStr.Format("%d", u);
 
@@ -237,10 +270,8 @@ void CTaskForce::OnDeleteunit()
 		return;
 	}
 	int u = m_Units.GetItemData(sel);
-	CString tf;
-	tf = GetText(&m_TaskForces);
+	auto const tf = getCurrrentID();
 
-	TruncSpace(tf);
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
 	CString numberStrToDelete;
@@ -283,10 +314,7 @@ void CTaskForce::OnChangeNumberunits()
 		return;
 	}
 	int u = m_Units.GetItemData(sel);
-	CString tf;
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
+	auto const tf = getCurrrentID();
 	auto sec = ini.TryGetSection(tf);
 
 	CString k, n;
@@ -311,11 +339,7 @@ void CTaskForce::OnChangeName()
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
-	CString tf;
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
-
+	auto const tf = getCurrrentID();
 	ini.SetString(tf, "Name", m_Name);
 
 	UpdateDialog();
@@ -327,6 +351,8 @@ void CTaskForce::OnEditchangeUnittype()
 	CIniFile& ini = Map->GetIniFile();
 
 	CString type = GetText(&m_UnitType);
+	TruncSpace(type);
+
 	if (type.IsEmpty()) {
 		return;
 	}
@@ -336,10 +362,7 @@ void CTaskForce::OnEditchangeUnittype()
 		return;
 	}
 	int u = m_Units.GetItemData(sel);
-	CString tf;
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
+	auto const tf = getCurrrentID();
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
 
@@ -351,7 +374,7 @@ void CTaskForce::OnEditchangeUnittype()
 	k.Format("%d", u);
 
 	CString count = GetParam(sec->GetString(k), 0);
-	TruncSpace(type);
+
 
 	sec->SetString(k, count + "," + type);
 
@@ -372,10 +395,7 @@ void CTaskForce::OnSelchangeUnittype()
 		return;
 	}
 	int u = m_Units.GetItemData(sel);
-	CString tf;
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
+	auto const tf = getCurrrentID();
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
 
@@ -401,13 +421,10 @@ void CTaskForce::OnAddunit()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	CString tf;
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
+	auto const tf = getCurrrentID();
 	auto sec = ini.TryGetSection(tf);
 	ASSERT(sec != nullptr);
 
@@ -423,18 +440,33 @@ void CTaskForce::OnAddunit()
 	UpdateDialog();
 }
 
+void CTaskForce::OnBnClickedCopyunit()
+{
+	auto& ini = Map->GetIniFile();
+
+	auto const tf = getCurrrentID();
+	if (tf.IsEmpty()) {
+		return;
+	}
+	auto const selected = m_Units.GetCurSel();
+
+	if (selected < 0) {
+		return;
+	}
+	auto const curCount = m_Units.GetCount();
+	auto const& content = ini.GetString(tf, INIHelper::ToString(selected));
+	ini.SetString(tf, INIHelper::ToString(curCount), content);
+	UpdateDialog();
+	m_Units.SetCurSel(curCount);
+}
+
 void CTaskForce::OnDeletetaskforce()
 {
 	CIniFile& ini = Map->GetIniFile();
-
-	CString tf;
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
-
+	auto const tf = getCurrrentID();
 	int res;
 	res = MessageBox("Are you sure to delete the selected task force? If you delete it, make sure to eliminate ANY references to this task force in team-types.", "Delete task force", MB_YESNO);
 	if (res == IDNO) {
@@ -448,8 +480,7 @@ void CTaskForce::OnDeletetaskforce()
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 }
 
-CString GetFree(const char* section);
-void CTaskForce::OnAddtaskforce()
+void CTaskForce::addTaskforce(CString&& name, int group, std::vector<CString>&& members)
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -457,29 +488,58 @@ void CTaskForce::OnAddtaskforce()
 	CString tf = GetFree("TaskForces");
 	ini.SetString("TaskForces", tf, ID);
 
-	ini.SetString(ID, "Name", "New task force");
-	ini.SetString(ID, "Group", "-1");
+	auto& sec = ini.AddSection(ID);
+	sec.SetString("Name", std::move(name));
+	sec.SetInteger("Group", group);
 
-	//UpdateDialog();
+	int idx = 0;
+	CString idxStr;
+	for (auto&& member : members) {
+		idxStr.Format("%d", idx++);
+		sec.SetString(idxStr, std::move(member));
+	}
 
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 
-	int i;
-	for (i = 0; i < m_TaskForces.GetCount(); i++) {
-		CString tf2;
+	CString tf2;
+	for (auto i = 0; i < m_TaskForces.GetCount(); i++) {
 		m_TaskForces.GetLBText(i, tf2);
-
 		TruncSpace(tf2);
-
 		if (strcmp(ID, tf2) == NULL) {
 			m_TaskForces.SetCurSel(i);
 			OnSelchangeTaskforces(); // MW bugfix
 			break;
 		}
 	}
-
-
 }
+
+
+void CTaskForce::OnAddtaskforce()
+{
+	addTaskforce("New task force", -1, {});
+}
+
+void CTaskForce::OnBnClickedCopytaskforce()
+{
+	auto const id = getCurrrentID();
+	if (id.IsEmpty()) {
+		return;
+	}
+	std::vector<CString> content;
+	auto const& ini = Map->GetIniFile();
+	auto const& sec = ini[id];
+	for (auto const& [key, val] : sec) {
+		if (IsNumeric(key)) {
+			content.push_back(val);
+		}
+	}
+	addTaskforce(
+		sec.GetString("Name") + " Clone",
+		sec.GetInteger("Group"),
+		std::move(content)
+	);
+}
+
 
 void CTaskForce::OnChangeGroup()
 {
@@ -487,14 +547,10 @@ void CTaskForce::OnChangeGroup()
 
 	UpdateData();
 
-	CString tf;
 	if (m_TaskForces.GetCurSel() < 0) {
 		return;
 	}
-	tf = GetText(&m_TaskForces);
-
-	TruncSpace(tf);
-
+	auto const tf = getCurrrentID();
 	ini.SetString(tf, "Group", m_Group);
 
 	UpdateDialog();
@@ -505,31 +561,31 @@ BOOL CTaskForce::PreTranslateMessage(MSG* pMsg)
 {
 	if (pMsg->message == WM_KEYDOWN) {
 		switch (pMsg->wParam) {
-		case VK_RETURN:
-		{
-			auto pEdit = this->m_UnitType.GetWindow(GW_CHILD);
-			if (pMsg->hwnd == pEdit->m_hWnd) {
-				this->OnEditchangeUnittype();
-			}
+			case VK_RETURN:
+			{
+				auto pEdit = this->m_UnitType.GetWindow(GW_CHILD);
+				if (pMsg->hwnd == pEdit->m_hWnd) {
+					this->OnEditchangeUnittype();
+				}
 
-			switch (::GetDlgCtrlID(pMsg->hwnd)) {
-			case IDC_NAME: 
-				this->OnChangeName();
-				break;
-			case IDC_NUMBERUNITS: 
-				this->OnChangeNumberunits();
-				break;
-			case IDC_GROUP:
-				this->OnChangeGroup();
-				break;
+				switch (::GetDlgCtrlID(pMsg->hwnd)) {
+					case IDC_NAME:
+						this->OnChangeName();
+						break;
+					case IDC_NUMBERUNITS:
+						this->OnChangeNumberunits();
+						break;
+					case IDC_GROUP:
+						this->OnChangeGroup();
+						break;
+					default:
+						break;
+				}
+			}
+			//do not exit dialog when enter key pressed
+			return TRUE;
 			default:
 				break;
-			}
-		}
-		//do not exit dialog when enter key pressed
-		return TRUE;
-		default:
-			break;
 		}
 	}
 

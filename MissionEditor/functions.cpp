@@ -663,6 +663,12 @@ void PosToXY(const char* pos, int* X, int* Y)
 
 }
 
+bool IsNumeric(const CString& str) {
+	return std::all_of(str.operator LPCSTR(), str.operator LPCSTR() + str.GetLength(), [](char c) {
+		return std::isdigit(c);
+		});
+}
+
 bool HSVToRGB(const float h, const float s, const float v, float& r, float& g, float& b)
 {
 	if (h < 0.0 || h >= 360.0 || s < 0.0 || s > 1.0 || v < 0.0 || v > 1.0)
