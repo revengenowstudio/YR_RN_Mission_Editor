@@ -133,6 +133,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	virtual BOOL OnInitDialog() override;
+	BOOL PreTranslateMessage(MSG* pMsg) override;
 
 	void ListBehaviours(CComboBox& cb);
 	// Generierte Nachrichtenzuordnungsfunktionen
@@ -157,6 +158,7 @@ protected:
 	int getExtraValue();
 	CString getCurrentTypeID();
 	void insertAction(int curSel, const CString& scriptTypeId, const CString& value);
+	BOOL onMessageKeyDown(MSG* pMsg);
 
 	CEdit	m_Description;
 	CComboBox	m_Template;
