@@ -144,6 +144,7 @@ BEGIN_MESSAGE_MAP(CAITriggerTypes, CDialog)
 	ON_CBN_EDITCHANGE(IDC_MULTISIDE, OnEditchangeMultiside)
 	ON_CBN_SELCHANGE(IDC_MULTISIDE, OnSelchangeMultiside)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_AITRIGGER_COPY, &CAITriggerTypes::OnBnClickedAitriggerCopy)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -171,6 +172,19 @@ void ListObjects(CComboBox& cb)
 	addToUnitType("VehicleTypes");
 	addToUnitType("AircraftTypes");
 	addToUnitType("BuildingTypes");
+}
+
+
+CString CAITriggerTypes::getCurrentID()
+{
+	int sel = m_AITriggerType.GetCurSel();
+	if (sel < 0) {
+		return {};
+	}
+	CString aitrigger;
+	m_AITriggerType.GetLBText(sel, aitrigger);
+	TruncSpace(aitrigger);
+	return aitrigger;
 }
 
 void CAITriggerTypes::UpdateDialog()
@@ -214,13 +228,10 @@ void CAITriggerTypes::UpdateDialog()
 
 void CAITriggerTypes::OnSelchangeAitriggertype()
 {
-	int sel = m_AITriggerType.GetCurSel();
-	if (sel < 0) return;
-
-	CString aitrigger;
-	m_AITriggerType.GetLBText(sel, aitrigger);
-	TruncSpace(aitrigger);
-
+	auto const aitrigger = getCurrentID();
+	if (aitrigger.IsEmpty()) {
+		return;
+	}
 
 	AITRIGGERTYPE aitt;
 	Map->GetAITriggerType(Map->GetAITriggerTypeIndex(aitrigger), &aitt);
@@ -440,16 +451,12 @@ void CAITriggerTypes::OnChangeFlag9()
 void CAITriggerTypes::OnEnabled()
 {
 	// enable or disable trigger
-
 	UpdateData();
 
-	int sel = m_AITriggerType.GetCurSel();
-	if (sel < 0) {
+	auto const aitrigger = getCurrentID();
+	if (aitrigger.IsEmpty()) {
 		return;
 	}
-	CString aitrigger;
-	m_AITriggerType.GetLBText(sel, aitrigger);
-	TruncSpace(aitrigger);
 
 	CIniFile& ini = Map->GetIniFile();
 
@@ -465,14 +472,10 @@ void CAITriggerTypes::OnEnabled()
 
 void CAITriggerTypes::SetAITriggerParam(const char* value, int param)
 {
-	int sel = m_AITriggerType.GetCurSel();
-	if (sel < 0) {
+	auto const aitrigger = getCurrentID();
+	if (aitrigger.IsEmpty()) {
 		return;
 	}
-
-	CString aitrigger;
-	m_AITriggerType.GetLBText(sel, aitrigger);
-	TruncSpace(aitrigger);
 
 	CIniFile& ini = Map->GetIniFile();
 
@@ -481,13 +484,35 @@ void CAITriggerTypes::SetAITriggerParam(const char* value, int param)
 	}
 }
 
-void CAITriggerTypes::OnAdd()
+void CAITriggerTypes::addTrigger(CString&& content)
 {
 	CString ID = GetFreeID();
 	CIniFile& ini = Map->GetIniFile();
+
+	ini.SetString("AITriggerTypes", ID, std::move(content));
+
+	UpdateDialog();
+
+	// now make current id visible
+	int i;
+	for (i = 0; i < m_AITriggerType.GetCount(); i++) {
+		CString cuString;
+		m_AITriggerType.GetLBText(i, cuString);
+		TruncSpace(cuString);
+
+		if (cuString == ID) {
+			m_AITriggerType.SetCurSel(i);
+			OnSelchangeAitriggertype();
+		}
+	}
+}
+
+void CAITriggerTypes::OnAdd()
+{
+	// now try to set a teamtype
+	auto const& ini = Map->GetIniFile();
 	CString data = "New AI Trigger,";
 
-	// now try to set a teamtype
 	if (ini["TeamTypes"].Size() > 0) {
 		data += *ini["TeamTypes"].Nth(0).second;
 	} else {
@@ -517,32 +542,39 @@ void CAITriggerTypes::OnAdd()
 
 	data += ",1,1,1";
 
-	ini.SetString("AITriggerTypes", ID, data);
-
-	UpdateDialog();
-
-	// now make current id visible
-	int i;
-	for (i = 0; i < m_AITriggerType.GetCount(); i++) {
-		CString cuString;
-		m_AITriggerType.GetLBText(i, cuString);
-		TruncSpace(cuString);
-
-		if (cuString == ID) {
-			m_AITriggerType.SetCurSel(i);
-			OnSelchangeAitriggertype();
-		}
-	}
+	addTrigger(std::move(data));
 }
+
+
+void CAITriggerTypes::OnBnClickedAitriggerCopy()
+{
+	auto const aitrigger = getCurrentID();
+	if (aitrigger.IsEmpty()) {
+		return;
+	}
+
+	auto const& ini = Map->GetIniFile();
+	auto const& toCopy = ini.GetString("AITriggerTypes",aitrigger);
+	ASSERT(!toCopy.IsEmpty());
+	auto const nameSplitter = toCopy.Find(',');
+	ASSERT(nameSplitter > 0);
+	auto const name = toCopy.Mid(0, nameSplitter);
+	auto const restExceptName = toCopy.Mid(nameSplitter + 1);
+
+	CString newContent = name;
+	newContent += " Clone,";
+	newContent += restExceptName;
+
+	addTrigger(std::move(newContent));
+}
+
 
 void CAITriggerTypes::OnDelete()
 {
-	int sel = m_AITriggerType.GetCurSel();
-	if (sel < 0) return;
-
-	CString aitrigger;
-	m_AITriggerType.GetLBText(sel, aitrigger);
-	TruncSpace(aitrigger);
+	auto const aitrigger = getCurrentID();
+	if (aitrigger.IsEmpty()) {
+		return;
+	}
 
 	CIniFile& ini = Map->GetIniFile();
 
