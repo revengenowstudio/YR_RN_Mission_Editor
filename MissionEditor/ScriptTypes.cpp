@@ -151,6 +151,7 @@ BEGIN_MESSAGE_MAP(CScriptTypes, CDialog)
 	ON_BN_CLICKED(IDC_ADD, OnAdd)
 	ON_BN_CLICKED(IDC_DELETE, OnDelete)
 	ON_CBN_SELCHANGE(IDC_SCRIPT_EXTRA, &CScriptTypes::OnCbnSelchangeScriptExtra)
+	ON_CBN_KILLFOCUS(IDC_SCRIPT_EXTRA, &CScriptTypes::OnCbnSelchangeScriptExtra)
 	ON_BN_CLICKED(IDC_SCRIPT_COPY, &CScriptTypes::OnBnClickedScriptCopy)
 	ON_BN_CLICKED(IDC_COPYACTION, &CScriptTypes::OnBnClickedCopyaction)
 END_MESSAGE_MAP()
@@ -728,9 +729,8 @@ BOOL CScriptTypes::OnInitDialog()
 
 void CScriptTypes::OnCbnSelchangeScriptExtra()
 {
-	// TODO: Add your control notification handler code here
+	OnEditchangeParam();
 }
-
 
 void CScriptTypes::OnBnClickedScriptCopy()
 {
@@ -1016,4 +1016,52 @@ void CScriptTypes::UpdateParams(int actionIndex, CString* paramNumStr)
 	::EnableWindow(paramDesc, actionDefinition.Editable);
 	this->m_Param.EnableWindow(actionDefinition.Editable);
 	this->m_Description.SetWindowText(actionDefinition.Description);
+}
+
+
+BOOL CScriptTypes::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	} else if (pMsg->message == WM_LBUTTONUP) {
+		ret = onMessageKeyUp(pMsg);
+	}
+
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
+
+BOOL CScriptTypes::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+		default:
+			return -1;
+		case VK_RETURN:
+		{
+			switch (::GetDlgCtrlID(pMsg->hwnd)) {
+				default:
+					break;// never exist window (default -1) even nothing did
+				case IDC_NAME: this->OnChangeName();
+					break;
+				case IDC_PARAM: this->OnEditchangeParam();
+					break;
+				case IDC_SCRIPT_EXTRA: this->OnCbnSelchangeScriptExtra();
+					break;
+			}
+		}
+	}
+	return TRUE;
+}
+BOOL CScriptTypes::onMessageKeyUp(MSG* pMsg)
+{
+	if (pMsg->hwnd == this->GetDlgItem(IDC_SCRIPT_COPY)->GetSafeHwnd()) {
+		this->OnBnClickedScriptCopy();
+	} else if (pMsg->hwnd == this->GetDlgItem(IDC_COPYACTION)->GetSafeHwnd()) {
+		this->OnBnClickedCopyaction();
+	} else if (pMsg->hwnd == this->GetDlgItem(IDC_ADDACTION)->GetSafeHwnd()) {
+		this->OnAddaction();
+	} else if (pMsg->hwnd == this->GetDlgItem(IDC_ADD)->GetSafeHwnd()) {
+		this->OnAdd();
+	}
+	return -1;
 }
