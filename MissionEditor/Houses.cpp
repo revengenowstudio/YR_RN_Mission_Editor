@@ -129,7 +129,7 @@ void CHouses::UpdateDialog()
 
 	CIniFile& ini = Map->GetIniFile();
 
-	if (!ini.TryGetSection(MAPHOUSES) && ini.Size() > 0) {
+	if (ini[MAPHOUSES].Size() <= 0) {
 		// MessageBox("No houses do exist, if you want to use houses, you should use ""Prepare houses"" before doing anything else.");
 	} else {
 		m_HumanPlayer.AddString("None");
@@ -471,7 +471,7 @@ void CHouses::OnDeletehouse()
 
 	ini.DeleteSection(name);
 
-	ini.RemoveValueByKey(MAPHOUSES, name);
+	ini.RemoveValue(MAPHOUSES, name);
 
 	if (ini[MAPHOUSES].Size() == 0) {
 		ini.DeleteSection(MAPHOUSES);
