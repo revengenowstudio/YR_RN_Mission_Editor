@@ -27,6 +27,37 @@
 // Houses.h : Header-Datei
 //
 
+#include <set>
+
+class CHouseAllies : public CDialog
+{
+public:
+	enum { IDD = IDD_HOUSES_ALLIES };
+
+	CHouseAllies(std::vector<CString>&& houses, const CString& allies, CWnd* pParent = NULL);
+	~CHouseAllies();
+	std::vector<CString> GetAllies() const;
+
+private:
+	virtual BOOL OnInitDialog() override;
+	virtual void DoDataExchange(CDataExchange* pDX) override;
+
+	DECLARE_MESSAGE_MAP()
+
+	void translateUI();
+	void updateAllyTexts();
+
+	afx_msg void OnBnClickedHouseAlliesAdd();
+	afx_msg void OnBnClickedHouseAlliesRemove();
+
+	CListBox m_enemyList;
+	CListBox m_allyList;
+	CEdit m_allianceText;
+
+	std::vector<CString> m_allHouses;
+	std::set<CString> m_allies;
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CHouses 
 
@@ -65,12 +96,12 @@ public:
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
 	//{{AFX_VIRTUAL(CHouses)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
-	virtual void PostNcDestroy();
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
+	virtual void PostNcDestroy() override;
 	//}}AFX_VIRTUAL
 
 // Implementierung
-protected:
+	DECLARE_MESSAGE_MAP()
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CHouses)
 	virtual BOOL OnInitDialog();
@@ -83,7 +114,6 @@ protected:
 	afx_msg void OnKillfocusEdge();
 	afx_msg void OnKillfocusSide();
 	afx_msg void OnKillfocusColor();
-	afx_msg void OnKillfocusAllies();
 	afx_msg void OnKillfocusCredits();
 	afx_msg void OnEditchangeActslike();
 	afx_msg void OnKillfocusNodecount();
@@ -92,11 +122,11 @@ protected:
 	afx_msg void OnKillfocusPlayercontrol();
 	afx_msg void OnSelchangeHumanplayer();
 	afx_msg void OnSelchangeActslike();
-	afx_msg void OnSetfocusAllies();
+	afx_msg void OnBnClickedHousesChangeAllies();
 	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
 
 };
+
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ fügt unmittelbar vor der vorhergehenden Zeile zusätzliche Deklarationen ein.

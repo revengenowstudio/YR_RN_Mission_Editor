@@ -80,4 +80,15 @@ public:
 
 		return ret;
 	}
+
+	template<typename TContainer>
+	static inline CString Join(const TContainer& strings, char ch = ',') {
+		CString ret;
+		for (auto const& item : strings) {
+			ret += item;
+			ret += ch;
+		}
+		ret.Delete(ret.GetLength() - 1, 1);
+		return ret;
+	}
 };

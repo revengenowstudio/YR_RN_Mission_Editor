@@ -37,6 +37,7 @@
 #define IDD_BUILDING                    175
 #define IDD_UNIT                        176
 #define IDD_HOUSES                      177
+#define IDD_HOUSES_ALLIES               178
 #define IDD_AIRCRAFT                    179
 #define IDI_AIR                         180
 #define IDD_LOADING                     181
@@ -560,6 +561,16 @@
 #define IDC_TASKFORCE_T_MEMBERS         1486
 #define IDC_TASKFORCE_T_U_NUM           1487
 #define IDC_TASKFORCE_T_U_TYPE          1488
+#define IDC_HOUSES_CHANGE_ALLIES        1489
+#define IDC_HOUSE_LIST_ENEMIES          1490
+#define IDC_HOUSE_LIST_ALLIES           1491
+#define IDC_HOUSE_ALLIES_ADD            1492
+#define IDC_HOUSE_ALLIES_REMOVE         1493
+#define IDC_EDIT2                       1494
+#define IDC_HOUSE_ALLIES_VALUES         1494
+#define IDC_EDIT3                       1495
+#define IDC_HOUSE_ALLIES_T_ENEMIES      1496
+#define IDC_HOUSE_ALLIES_T_ALLIES       1497
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -654,9 +665,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        302
+#define _APS_NEXT_RESOURCE_VALUE        312
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1489
+#define _APS_NEXT_CONTROL_VALUE         1498
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif
