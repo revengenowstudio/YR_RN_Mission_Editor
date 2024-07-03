@@ -1024,8 +1024,6 @@ BOOL CScriptTypes::PreTranslateMessage(MSG* pMsg)
 	int ret = -1;
 	if (pMsg->message == WM_KEYDOWN) {
 		ret = onMessageKeyDown(pMsg);
-	} else if (pMsg->message == WM_LBUTTONUP) {
-		ret = onMessageKeyUp(pMsg);
 	}
 
 	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
@@ -1051,17 +1049,4 @@ BOOL CScriptTypes::onMessageKeyDown(MSG* pMsg)
 		}
 	}
 	return TRUE;
-}
-BOOL CScriptTypes::onMessageKeyUp(MSG* pMsg)
-{
-	if (pMsg->hwnd == this->GetDlgItem(IDC_SCRIPT_COPY)->GetSafeHwnd()) {
-		this->OnBnClickedScriptCopy();
-	} else if (pMsg->hwnd == this->GetDlgItem(IDC_COPYACTION)->GetSafeHwnd()) {
-		this->OnBnClickedCopyaction();
-	} else if (pMsg->hwnd == this->GetDlgItem(IDC_ADDACTION)->GetSafeHwnd()) {
-		this->OnAddaction();
-	} else if (pMsg->hwnd == this->GetDlgItem(IDC_ADD)->GetSafeHwnd()) {
-		this->OnAdd();
-	}
-	return -1;
 }

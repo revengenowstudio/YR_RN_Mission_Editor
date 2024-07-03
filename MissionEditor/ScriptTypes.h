@@ -159,7 +159,6 @@ protected:
 	CString getCurrentTypeID();
 	void insertAction(int curSel, const CString& scriptTypeId, const CString& value);
 	BOOL onMessageKeyDown(MSG* pMsg);
-	BOOL onMessageKeyUp(MSG* pMsg);
 
 	CEdit	m_Description;
 	CComboBox	m_Template;
