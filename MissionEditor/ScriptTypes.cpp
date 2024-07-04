@@ -935,10 +935,13 @@ void CScriptTypes::UpdateParams(int actionIndex, CString* paramNumStr)
 	//	" actionIndex = " + std::to_string(actionIndex) +
 	//	" paramType = " + std::to_string(paramType)
 	//);
+	// This should be done always
+	updateExtraValue(paramType, paramNumStr);
+
+	// only update dialog when action changes
 	if (lastActionID == actionIndex) {
 		return;
 	}
-	updateExtraValue(paramType, paramNumStr);
 	switch (paramType) {
 		default:
 		case PRM_None:
