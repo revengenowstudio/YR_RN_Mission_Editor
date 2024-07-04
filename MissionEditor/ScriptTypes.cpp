@@ -717,7 +717,8 @@ BOOL CScriptTypes::OnInitDialog()
 	int counter = 0;
 	for (auto& ent : m_actionDefinitions) {
 		if (!ent.second.Hide) {
-			m_ActionType.InsertString(counter, ent.second.Name);
+			int data = m_ActionType.AddString(ent.second.Name);
+			m_ActionType.SetItemData(data, counter);
 		}
 		++counter;
 	}
