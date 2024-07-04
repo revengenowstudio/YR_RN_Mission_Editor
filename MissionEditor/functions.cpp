@@ -1312,15 +1312,15 @@ void ComboBoxHelper::ListCountries(CComboBox& combobox, bool bShowIndex)
 		} else {
 			buffer = id;
 		}
-		combobox.SetItemData(combobox.AddString(buffer), idx);
+		combobox.InsertString(idx, buffer);
 	}
 }
 
 void ComboBoxHelper::ListBoolean(CComboBox& combobox)
 {
 	ComboBoxHelper::Clear(combobox);
-	combobox.SetItemData(combobox.AddString(TranslateStringACP("0 - FALSE")), 0);
-	combobox.SetItemData(combobox.AddString(TranslateStringACP("1 - TRUE")), 1);
+	combobox.InsertString(0, "0 - FALSE");
+	combobox.InsertString(1, "1 - TRUE");
 }
 
 CString GetHouseSectionName(CString lpHouse)

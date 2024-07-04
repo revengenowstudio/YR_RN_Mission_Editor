@@ -717,8 +717,7 @@ BOOL CScriptTypes::OnInitDialog()
 	int counter = 0;
 	for (auto& ent : m_actionDefinitions) {
 		if (!ent.second.Hide) {
-			int data = m_ActionType.AddString(ent.second.Name);
-			m_ActionType.SetItemData(data, counter);
+			m_ActionType.InsertString(counter, ent.second.Name);
 		}
 		++counter;
 	}
@@ -835,10 +834,10 @@ static void ListSplitGroup(CComboBox& comboBox)
 {
 	while (comboBox.DeleteString(0) != -1);
 
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("0 - Keep Transports, Keep Units")), 0);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("1 - Keep Transports, Lose Units")), 1);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("2 - Lose Transports, Keep Units")), 2);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("3 - Lose Transports, Lose Units")), 3);
+	comboBox.InsertString(0, TranslateStringACP("0 - Keep Transports, Keep Units"));
+	comboBox.InsertString(1, TranslateStringACP("1 - Keep Transports, Lose Units"));
+	comboBox.InsertString(2, TranslateStringACP("2 - Lose Transports, Keep Units"));
+	comboBox.InsertString(3, TranslateStringACP("3 - Lose Transports, Lose Units"));
 }
 
 static void ListScriptLine(const CScriptTypes::ActionDefinitionMap& actionDef, CComboBox& comboBox, CComboBox& currentScript, CListBox& listBox)
@@ -866,9 +865,8 @@ static void ListScriptLine(const CScriptTypes::ActionDefinitionMap& actionDef, C
 		} else {
 			actionIndex = atoi(buffer.Mid(0, actionIndex));
 		}
-		buffer.Format("%d - %s", i + 1, actionDef.at(actionIndex).Name);
-		int idx = comboBox.AddString(buffer);
-		comboBox.SetItemData(idx, i);
+		buffer.Format("%d - %s", i + 1, actionDef.at(actionIndex).Name.operator LPCSTR());
+		comboBox.InsertString(i, buffer);
 	}
 }
 
@@ -883,8 +881,8 @@ static void ListTypeList(CComboBox& comboBox, const CString& listID)
 		if (doc.TryGetSection(id)) {
 			int idx = atoi(idxStr);
 			text = doc.GetString(id, "Name");
-			text.Format("%d - %s - %s", idx, id, text);
-			comboBox.SetItemData(comboBox.AddString(text), idx);
+			text.Format("%d - %s - %s", idx, id, text.operator LPCSTR());
+			comboBox.InsertString(idx, text);
 		}
 	}
 }
@@ -903,24 +901,24 @@ static void listFacing(CComboBox& comboBox)
 {
 	while (comboBox.DeleteString(0) != -1);
 
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("0 - NE")), 0);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("1 - E")), 1);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("2 - SE")), 2);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("3 - S")), 3);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("4 - SW")), 4);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("5 - W")), 5);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("6 - NW")), 6);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("7 - N")), 7);
+	comboBox.InsertString(0, TranslateStringACP("0 - NE"));
+	comboBox.InsertString(1, TranslateStringACP("1 - E"));
+	comboBox.InsertString(2, TranslateStringACP("2 - SE"));
+	comboBox.InsertString(3, TranslateStringACP("3 - S"));
+	comboBox.InsertString(4, TranslateStringACP("4 - SW"));
+	comboBox.InsertString(5, TranslateStringACP("5 - W"));
+	comboBox.InsertString(6, TranslateStringACP("6 - NW"));
+	comboBox.InsertString(7, TranslateStringACP("7 - N"));
 }
 
 static void listTalkBubble(CComboBox& comboBox)
 {
 	while (comboBox.DeleteString(0) != -1);
 
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("0 - None")), 0);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("1 - Asterisk(*)")), 1);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("2 - Question mark(?)")), 2);
-	comboBox.SetItemData(comboBox.AddString(TranslateStringACP("3 - Exclamation mark(!)")), 3);
+	comboBox.InsertString(0, TranslateStringACP("0 - None"));
+	comboBox.InsertString(1, TranslateStringACP("1 - Asterisk(*)"));
+	comboBox.InsertString(2, TranslateStringACP("2 - Question mark(?)"));
+	comboBox.InsertString(3, TranslateStringACP("3 - Exclamation mark(!)"));
 }
 
 void CScriptTypes::UpdateParams(int actionIndex, CString* paramNumStr)

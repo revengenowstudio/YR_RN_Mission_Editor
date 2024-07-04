@@ -107,7 +107,7 @@ void CGlobalsDlg::UpdateDialog()
 			added += " No name";
 		}
 
-		m_Global.SetItemData(m_Global.AddString(added), i);
+		m_Global.InsertString(i, added);
 
 		if (bFailFind) {
 			break;
