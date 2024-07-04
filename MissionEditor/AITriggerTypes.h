@@ -66,7 +66,7 @@ public:
 	CString	m_Flag8;
 	CString	m_Flag9;
 	BOOL	m_Enabled;
-	int		m_Condition;
+	CComboBox		m_Condition;
 	int		m_Number;
 	BOOL	m_Easy;
 	BOOL	m_Medium;
@@ -74,7 +74,7 @@ public:
 	BOOL	m_BaseDefense;
 	BOOL	m_Skirmish;
 	CString	m_Flag5;
-	CString	m_MultiSide;
+	CComboBox	m_MultiSide;
 	//}}AFX_DATA
 
 
@@ -88,6 +88,8 @@ protected:
 
 // implementation
 	void translateUI();
+	void initMultisideComboBox();
+	void initConditionOpComboBox();
 	void addTrigger(CString&& content);
 	CString getCurrentID();
 	AITrigInfo ConvertToAITrigInfoFromHex(char* aitinfo);

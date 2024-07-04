@@ -29,6 +29,7 @@
 #include "variables.h"
 #include "functions.h"
 #include "inlines.h"
+#include "IniMega.h"
 
 
 // AI trigger type enumeration
@@ -67,7 +68,6 @@ CAITriggerTypes::CAITriggerTypes() : CDialog(CAITriggerTypes::IDD)
 	m_Flag8 = _T("");
 	m_Flag9 = _T("");
 	m_Enabled = FALSE;
-	m_Condition = -1;
 	m_Number = 0;
 	m_Easy = FALSE;
 	m_Medium = FALSE;
@@ -75,7 +75,6 @@ CAITriggerTypes::CAITriggerTypes() : CDialog(CAITriggerTypes::IDD)
 	m_BaseDefense = FALSE;
 	m_Skirmish = FALSE;
 	m_Flag5 = _T("");
-	m_MultiSide = _T("");
 	//}}AFX_DATA_INIT
 }
 
@@ -101,7 +100,7 @@ void CAITriggerTypes::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_FLAG4, m_Flag4);
 	DDX_Text(pDX, IDC_NAME, m_Name);
 	DDX_Check(pDX, IDC_ENABLED, m_Enabled);
-	DDX_CBIndex(pDX, IDC_CONDITION, m_Condition);
+	DDX_Control(pDX, IDC_CONDITION, m_Condition);
 	DDX_Text(pDX, IDC_NUMBER, m_Number);
 	DDV_MinMaxInt(pDX, m_Number, 0, 256);
 	DDX_Check(pDX, IDC_EASY, m_Easy);
@@ -109,7 +108,7 @@ void CAITriggerTypes::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_HARD, m_Hard);
 	DDX_Check(pDX, IDC_BASEDEFENSE, m_BaseDefense);
 	DDX_Check(pDX, IDC_SKIRMISH, m_Skirmish);
-	DDX_CBString(pDX, IDC_MULTISIDE, m_MultiSide);
+	DDX_Control(pDX, IDC_MULTISIDE, m_MultiSide);
 	//}}AFX_DATA_MAP
 }
 
@@ -117,8 +116,39 @@ BOOL CAITriggerTypes::OnInitDialog()
 {
 	auto const ret = CDialog::OnInitDialog();
 	translateUI();
+	initMultisideComboBox();
+	initConditionOpComboBox();
 
 	return ret;
+}
+
+void CAITriggerTypes::initMultisideComboBox()
+{
+	m_MultiSide.InsertString(0, TranslateStringACP("0 None"));
+	auto const& rules = IniMegaFile::GetRules();
+	auto const& items = rules.GetSection("Sides");
+	CString buffer;
+	auto idx = 1;
+	for (auto& [_, sideName] : g_data["Sides"]) {
+		// skip speical category
+		if (sideName.Find(',') >= 0) {
+			continue;
+		}
+		auto const name = TranslateStringACP(sideName);
+		buffer.Format("%d %s", idx, name.operator LPCSTR());
+		m_MultiSide.InsertString(idx, buffer);
+		idx++;
+	}
+}
+
+void CAITriggerTypes::initConditionOpComboBox()
+{
+	m_Condition.InsertString(COND_LT, TranslateStringACP("less than"));
+	m_Condition.InsertString(COND_LE, TranslateStringACP("less than or equal to"));
+	m_Condition.InsertString(COND_EQ, TranslateStringACP("equal to"));
+	m_Condition.InsertString(COND_GE, TranslateStringACP("greater than or equal to"));
+	m_Condition.InsertString(COND_GT, TranslateStringACP("greater than"));
+	m_Condition.InsertString(COND_NE, TranslateStringACP("not equal to"));
 }
 
 void CAITriggerTypes::translateUI()
@@ -290,22 +320,20 @@ void CAITriggerTypes::OnSelchangeAitriggertype()
 	m_Skirmish = isTrue(aitt.skirmish);
 	m_Flag4 = aitt.flag4;
 	//m_Flag5=aitt.multihouse;
-	m_MultiSide = aitt.multihouse;
+	m_MultiSide.SetCurSel(INIHelper::StringToInteger(aitt.multihouse, 0));
 	m_BaseDefense = isTrue(aitt.basedefense);
 	m_TeamType2.SetWindowText(aitt.teamtype2);
 	m_Easy = isTrue(aitt.easy);
 	m_Medium = isTrue(aitt.medium);
 	m_Hard = isTrue(aitt.hard);
 
-	m_Enabled = FALSE;
-	CIniFile& ini = Map->GetIniFile();
-	if (ini.GetBool("AITriggerTypesEnable", aitrigger)) {
-		m_Enabled = TRUE;
-	}
+	auto const& ini = Map->GetIniFile();
+	m_Enabled = ini.GetBool("AITriggerTypesEnable", aitrigger);
+
 
 	AITrigInfo info;
 	info = ConvertToAITrigInfoFromHex((char*)(LPCSTR)aitt.data);
-	m_Condition = info.Condition;
+	m_Condition.SetCurSel(info.Condition);
 	m_Number = info.Number;
 
 	ListObjects(m_UnitType);
@@ -592,7 +620,7 @@ void CAITriggerTypes::OnBnClickedAitriggerCopy()
 	}
 
 	auto const& ini = Map->GetIniFile();
-	auto const& toCopy = ini.GetString("AITriggerTypes",aitrigger);
+	auto const& toCopy = ini.GetString("AITriggerTypes", aitrigger);
 	ASSERT(!toCopy.IsEmpty());
 	auto const nameSplitter = toCopy.Find(',');
 	ASSERT(nameSplitter > 0);
@@ -686,7 +714,7 @@ void CAITriggerTypes::OnSelchangeCondition()
 	UpdateData(TRUE);
 
 	AITrigInfo info;
-	info.Condition = (ConditionEnum)m_Condition;
+	info.Condition = ConditionEnum(m_Condition.GetCurSel());
 	info.Number = m_Number;
 
 	char buffer[65];
@@ -707,7 +735,7 @@ void CAITriggerTypes::OnChangeNumber()
 
 	AITrigInfo info;
 	memset(&info, 0, sizeof(AITrigInfo));
-	info.Condition = (ConditionEnum)m_Condition;
+	info.Condition = ConditionEnum(m_Condition.GetCurSel());
 	info.Number = m_Number;
 
 	char buffer[65];
@@ -783,7 +811,7 @@ void CAITriggerTypes::OnEditchangeMultiside()
 	UpdateData();
 
 	CString value;
-	value = m_MultiSide;
+	m_MultiSide.GetLBText(m_MultiSide.GetCurSel(), value);
 
 	TruncSpace(value);
 
