@@ -83,9 +83,11 @@ public:
 	//{{AFX_VIRTUAL(CAITriggerTypes)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
+	virtual BOOL OnInitDialog() override;
 	//}}AFX_VIRTUAL
 
 // implementation
+	void translateUI();
 	void addTrigger(CString&& content);
 	CString getCurrentID();
 	AITrigInfo ConvertToAITrigInfoFromHex(char* aitinfo);

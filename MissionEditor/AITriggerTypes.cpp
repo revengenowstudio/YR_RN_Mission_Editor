@@ -113,6 +113,44 @@ void CAITriggerTypes::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
+BOOL CAITriggerTypes::OnInitDialog()
+{
+	auto const ret = CDialog::OnInitDialog();
+	translateUI();
+
+	return ret;
+}
+
+void CAITriggerTypes::translateUI()
+{
+	TranslateWindowCaption(*this, "AITriggerCaption");
+	TranslateDlgItem(*this, IDC_ADD, "AITriggerAdd");
+	TranslateDlgItem(*this, IDC_AITRIGGER_COPY, "AITriggerCopy");
+	TranslateDlgItem(*this, IDC_DELETE, "AITriggerDelete");
+
+	TranslateDlgItem(*this, IDC_ENABLED, "AITriggerEnabled");
+
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_TYPE, "AITriggerType");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_TTYPE, "AITriggerCategory");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_NAME, "AITriggerName");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_HOUSE, "AITriggerHouse");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_TEAM1, "AITriggerTeamType1");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_TEAM2, "AITriggerTeamType2");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_SIDE, "AITriggerSide");
+	TranslateDlgItem(*this, IDC_BASEDEFENSE, "AITriggerBaseDefense");
+	TranslateDlgItem(*this, IDC_SKIRMISH, "AITriggerSkirmishAvailable");
+	TranslateDlgItem(*this, IDC_EASY, "AITriggerEasyEnable");
+	TranslateDlgItem(*this, IDC_MEDIUM, "AITriggerMediumEnable");
+	TranslateDlgItem(*this, IDC_HARD, "AITriggerHardEnable");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_WEIGHT, "AITriggerWeightInitial");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_WEIGHT_MIN, "AITriggerWeightMin");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_WEIGHT_MAX, "AITriggerWeightMax");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_ADDITIONAL, "AITriggerAdditional");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_CONDITION, "AITriggerCondition");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_NUM, "AITriggerNumber");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_UNITTYPE, "AITriggerUnitType");
+}
+
 
 BEGIN_MESSAGE_MAP(CAITriggerTypes, CDialog)
 	//{{AFX_MSG_MAP(CAITriggerTypes)
