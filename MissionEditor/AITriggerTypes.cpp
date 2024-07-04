@@ -580,7 +580,7 @@ void CAITriggerTypes::OnAdd()
 	CString data = "New AI Trigger,";
 
 	if (ini["TeamTypes"].Size() > 0) {
-		data += *ini["TeamTypes"].Nth(0).second;
+		data += ini["TeamTypes"].Nth(0).second;
 	} else {
 		data += "<none>";
 	}
