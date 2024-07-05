@@ -71,7 +71,9 @@ BOOL CNewRA2HouseDlg::OnInitDialog()
 	CComboBox* country = (CComboBox*)GetDlgItem(IDC_COUNTRY);
 
 	for (auto const& [seq, id] : rules[HOUSES]) {
-		country->AddString(TranslateHouse(id, TRUE));
+		if (id != "GDI" && id != "Nod") {
+			country->AddString(TranslateHouse(id, TRUE));
+		}
 	}
 
 	country->SetCurSel(0);
