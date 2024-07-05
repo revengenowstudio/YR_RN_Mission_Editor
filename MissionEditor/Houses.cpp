@@ -356,22 +356,21 @@ void CHouses::AddHouse(const CString& name)
 	side = rules.GetString(TranslateHouse(dlg.m_Country), "Side");
 #endif
 
-	if (strstr(name, "Nod") != NULL) {
+	if (name.Find("Nod") >= 0) {
 #ifndef RA2_MODE
 		ini.sections[translatedHouseName].values["Side"] = "Nod";
-#endif
-		ini.SetString(translatedHouseName, "Color", "DarkRed");
 		if (name != "Nod") {
 			ini.SetString(name, "Allies", ini.GetString(name, "Allies") + ",Nod");
 		}
+#endif
+		ini.SetString(translatedHouseName, "Color", "DarkRed");
 	} else {
 #ifndef RA2_MODE
-		ini.sections[translatedHouseName].values["Side"] = "GDI";
-#endif
-		ini.SetString(translatedHouseName, "Color", "Gold");
 		if (name != "GDI") {
 			ini.SetString(translatedHouseName, "Allies", ini.GetString(translatedHouseName, "Allies") + ",GDI");
-		}
+	}
+#endif
+		ini.SetString(translatedHouseName, "Color", "Gold");
 	}
 	ini.SetInteger(translatedHouseName, "Credits", 0);
 #ifndef RA2_MODE
