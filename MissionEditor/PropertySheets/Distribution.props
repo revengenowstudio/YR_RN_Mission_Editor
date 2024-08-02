@@ -30,7 +30,7 @@
   <Target Name="CopyDllFiles" AfterTargets="Build" BeforeTargets="BuildAndZipDistribution">
     <Copy SourceFiles="@(XccVcpkgBin)" DestinationFolder="$(OutDir)" />
   </Target>
-  <Target Name="CopyDllFiles" AfterTargets="Build" BeforeTargets="BuildAndZipDistribution">
+  <Target Name="CopyVxlLibDll" AfterTargets="Build" BeforeTargets="BuildAndZipDistribution">
     <Copy SourceFiles="@(VxlLibBin)" DestinationFolder="$(OutDir)" />
   </Target>
   <Target Name="CopyDataFiles" AfterTargets="Build" BeforeTargets="BuildAndZipDistribution">
