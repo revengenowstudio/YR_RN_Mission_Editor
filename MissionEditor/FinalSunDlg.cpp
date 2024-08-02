@@ -485,9 +485,8 @@ void CFinalSunDlg::OnCancel()
 
 void CFinalSunDlg::OnOptionsTiberiansunoptions()
 {
-
-	ShowOptionsDialog();
-
+	CIniFile optini;
+	ShowOptionsDialog(optini);
 }
 
 void CFinalSunDlg::OnFileOpenmap()

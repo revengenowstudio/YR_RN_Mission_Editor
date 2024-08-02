@@ -311,7 +311,7 @@ void HandleParamList(CComboBox& cb, int type)
 	}
 }
 
-void ShowOptionsDialog()
+void ShowOptionsDialog(CIniFile& optIni)
 {
 	// show the options dialog, and save the options.
 
@@ -324,49 +324,51 @@ void ShowOptionsDialog()
 #endif
 
 	std::string iniFile = "";
-	CIniFile optini;
 	iniFile = u8AppDataPath;
 #ifndef RA2_MODE
 	iniFile += "\\FinalSun.ini";
 #else
 	iniFile += "\\FinalAlert.ini";
 #endif
-	optini.LoadFile(iniFile);
+	optIni.LoadFile(iniFile);
 	CTSOptions opt;
 	opt.m_TSEXE = theApp.m_Options.TSExe;
-	if (opt.DoModal() == IDCANCEL) return;
+	if (opt.DoModal() == IDCANCEL) {
+		return;
+	}
 	theApp.m_Options.TSExe = opt.m_TSEXE;
-	optini.SetString(game, "Exe", theApp.m_Options.TSExe);
-	optini.SetString(app, "Language", opt.m_LanguageName);
+	optIni.SetString(game, "Exe", theApp.m_Options.TSExe);
+	optIni.SetString(app, "Language", opt.m_LanguageName);
 
 	BOOL bOldSearch = theApp.m_Options.bSearchLikeTS;
 	if (!(opt.m_LikeTS == 1)) {
-		optini.SetString(app, "FileSearchLikeGame", "yes");
+		optIni.SetString(app, "FileSearchLikeGame", "yes");
 		theApp.m_Options.bSearchLikeTS = TRUE;
 	} else {
 		theApp.m_Options.bSearchLikeTS = FALSE;
-		optini.SetString(app, "FileSearchLikeGame", "no");
+		optIni.SetString(app, "FileSearchLikeGame", "no");
 	}
 
 	auto bOldPreferLocalTheaterFiles = theApp.m_Options.bPreferLocalTheaterFiles;
 	theApp.m_Options.bPreferLocalTheaterFiles = opt.m_PreferLocalTheaterFiles ? true : false;
-	optini.SetString(app, "PreferLocalTheaterFiles", theApp.m_Options.bPreferLocalTheaterFiles ? "1" : "0");
+	optIni.SetString(app, "PreferLocalTheaterFiles", theApp.m_Options.bPreferLocalTheaterFiles ? "1" : "0");
 
 
 	if (
 		(
 			(bOldPreferLocalTheaterFiles != theApp.m_Options.bPreferLocalTheaterFiles) ||
 			(bOldSearch != theApp.m_Options.bSearchLikeTS)
-			) && bOptionsStartup == FALSE)
+			) && bOptionsStartup == FALSE) {
 		MessageBox(0, GetLanguageStringACP("RestartNeeded"), "Restart", 0);
+	}
 
 
 	CString oldLang = theApp.m_Options.LanguageName;
 	theApp.m_Options.LanguageName = opt.m_LanguageName;
-	if (oldLang != theApp.m_Options.LanguageName && theApp.m_pMainWnd != NULL && theApp.m_pMainWnd->m_hWnd != NULL)
+	if (oldLang != theApp.m_Options.LanguageName && theApp.m_pMainWnd != NULL && theApp.m_pMainWnd->m_hWnd != NULL) {
 		((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateStrings();
-
-	optini.SaveFile(iniFile);
+	}
+	optIni.SaveFile(iniFile);
 }
 
 

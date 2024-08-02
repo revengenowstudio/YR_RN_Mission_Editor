@@ -74,12 +74,17 @@ END_MESSAGE_MAP()
 
 void CTSOptions::OnChoose()
 {
-#ifndef RA2_MODE
-	CFileDialog fd(TRUE, NULL, "Sun.exe", OFN_FILEMUSTEXIST, "Tiberian Sun EXE|Sun.exe|");
+	const char* pFileName = "game.exe";
+	const char* pFileSearchPattern = "C&C EXE|game.exe|";
+#if defined(RA2_MODE)
+	pFileName = yuri_mode?  "ra2md.exe":"ra2.exe";
+	pFileSearchPattern = yuri_mode ? "Yuri's Revenge EXE|ra2md.exe|": "Red Alert 2 EXE|ra2.exe|";
 #else
-	CFileDialog fd(TRUE, NULL, "ra2.exe", OFN_FILEMUSTEXIST, "Red Alert 2 EXE|ra2.exe|");
+	pFileName = "Sun.exe";
+	pFileSearchPattern = "Tiberian Sun EXE|Sun.exe|";
 #endif
 
+	CFileDialog fd(TRUE, NULL, pFileName, OFN_FILEMUSTEXIST, pFileSearchPattern);
 	fd.DoModal();
 
 	this->GetDlgItem(IDC_EDIT1)->SetWindowText((LPCTSTR)fd.GetPathName());
