@@ -47,6 +47,14 @@ CTriggerEventsDlg::CTriggerEventsDlg(CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 }
 
+BOOL CTriggerEventsDlg::OnInitDialog()
+{
+	auto const ret = CDialog::OnInitDialog();
+
+	TranslateUI();
+
+	return ret;
+}
 
 void CTriggerEventsDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -71,6 +79,18 @@ BEGIN_MESSAGE_MAP(CTriggerEventsDlg, CDialog)
 	ON_CBN_EDITCHANGE(IDC_PARAMVALUE, OnEditchangeParamvalue)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
+
+void CTriggerEventsDlg::TranslateUI()
+{
+	TranslateDlgItem(*this, IDC_EVENT_CUR_TXT, "TriggerEventCurrent");
+	TranslateDlgItem(*this, IDC_NEWEVENT, "TriggerEventNew");
+	TranslateDlgItem(*this, IDC_DELETEEVENT, "TriggerEventDelete");
+	TranslateDlgItem(*this, IDC_EVENT_OPT_TXT, "TriggerEventOptions");
+	TranslateDlgItem(*this, IDC_EVENT_TYPE_TXT, "TriggerEventType");
+	TranslateDlgItem(*this, IDC_EVENT_PARAM_TXT, "TriggerEventParams");
+	TranslateDlgItem(*this, IDC_EVENT_VAL_TXT, "TriggerEventParamValue");
+	TranslateDlgItem(*this, IDC_EVENT_DESC, "TriggerEventDesc");
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CTriggerEventsDlg 
