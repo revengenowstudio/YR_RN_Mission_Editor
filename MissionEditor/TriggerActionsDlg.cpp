@@ -63,6 +63,27 @@ CTriggerActionsDlg::CTriggerActionsDlg(CWnd* pParent /*=NULL*/)
 }
 
 
+BOOL CTriggerActionsDlg::OnInitDialog()
+{
+	auto const ret = CDialog::OnInitDialog();
+
+	TranslateUI();
+
+	return ret;
+}
+
+void CTriggerActionsDlg::TranslateUI()
+{
+	TranslateDlgItem(*this, IDC_ACTION_CUR_TXT, "TriggerActionCurrent");
+	TranslateDlgItem(*this, IDC_NEWACTION, "TriggerActionNew");
+	TranslateDlgItem(*this, IDC_DELETEACTION, "TriggerActionDelete");
+	TranslateDlgItem(*this, IDC_ACTION_OPT_TXT, "TriggerActionOptions");
+	TranslateDlgItem(*this, IDC_ACTION_TYPE_TXT, "TriggerActionType");
+	TranslateDlgItem(*this, IDC_ACTION_PARAM_TXT, "TriggerActionParams");
+	TranslateDlgItem(*this, IDC_ACTION_VAL_TXT, "TriggerActionValue");
+	TranslateDlgItem(*this, IDC_ACTION_DESC, "TriggerActionDesc");
+}
+
 void CTriggerActionsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
