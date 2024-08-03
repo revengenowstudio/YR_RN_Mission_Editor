@@ -66,7 +66,7 @@ public:
 	CString	m_Flag8;
 	CString	m_Flag9;
 	BOOL	m_Enabled;
-	int		m_Condition;
+	CComboBox		m_Condition;
 	int		m_Number;
 	BOOL	m_Easy;
 	BOOL	m_Medium;
@@ -74,7 +74,7 @@ public:
 	BOOL	m_BaseDefense;
 	BOOL	m_Skirmish;
 	CString	m_Flag5;
-	CString	m_MultiSide;
+	CComboBox	m_MultiSide;
 	//}}AFX_DATA
 
 
@@ -82,13 +82,20 @@ public:
 	// generated virtual overwriteables
 	//{{AFX_VIRTUAL(CAITriggerTypes)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
+	virtual BOOL OnInitDialog() override;
 	//}}AFX_VIRTUAL
 
 // implementation
-protected:
+	void translateUI();
+	void initMultisideComboBox();
+	void initConditionOpComboBox();
+	void addTrigger(CString&& content);
+	CString getCurrentID();
 	AITrigInfo ConvertToAITrigInfoFromHex(char* aitinfo);
+
 	// generated message maps
+	DECLARE_MESSAGE_MAP()
 	//{{AFX_MSG(CAITriggerTypes)
 	afx_msg void OnSelchangeAitriggertype();
 	afx_msg void OnChangeName();
@@ -111,6 +118,7 @@ protected:
 	afx_msg void OnChangeFlag9();
 	afx_msg void OnEnabled();
 	afx_msg void OnAdd();
+	afx_msg void OnBnClickedAitriggerCopy();
 	afx_msg void OnDelete();
 	afx_msg void OnEditchangeAitriggertype();
 	afx_msg void OnSelchangeCondition();
@@ -123,7 +131,6 @@ protected:
 	afx_msg void OnEditchangeMultiside();
 	afx_msg void OnSelchangeMultiside();
 	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
 
 };
 

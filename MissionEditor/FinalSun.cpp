@@ -265,27 +265,24 @@ BOOL CFinalSunApp::InitInstance()
 		opts.TSExe = optini.GetString(game, "Exe");
 	}
 
-	auto const& appSec = optini[app];
+	// settings incomplete
 	if (copiedDefaultFile ||
 		optini.Size() == 0 ||
 		opts.TSExe.IsEmpty() ||
-		appSec.GetString("Language").IsEmpty() ||
-		!appSec.GetBool("FileSearchLikeGame") ||
-		!appSec.GetBool("PreferLocalTheaterFiles")) {
+		optini[app].GetString("Language").IsEmpty() ||
+		!optini[app].GetBool("FileSearchLikeGame") ||
+		!optini[app].GetBool("PreferLocalTheaterFiles")) {
 		opts.bSearchLikeTS = TRUE;
-
 		bOptionsStartup = TRUE;
-		ShowOptionsDialog();
+		ShowOptionsDialog(optini);
 		bOptionsStartup = FALSE;
 
 	} else {
-		opts.LanguageName = appSec.GetString("Language");
-		if (appSec.GetBool("FileSearchLikeGame")) {
-			opts.bSearchLikeTS = TRUE;
-		} else {
-			opts.bSearchLikeTS = FALSE;
-		}
+		opts.LanguageName = optini[app].GetString("Language");
+		opts.bSearchLikeTS = optini[app].GetBool("FileSearchLikeGame");
 	}
+
+	auto const& appSec = optini[app];
 	opts.bPreferLocalTheaterFiles = appSec.GetBool("PreferLocalTheaterFiles", opts.bPreferLocalTheaterFiles);
 	auto const& graphSec = optini["Graphics"];
 	opts.bDoNotLoadAircraftGraphics = graphSec.GetBool("NoAircraftGraphics");

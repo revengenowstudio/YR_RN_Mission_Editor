@@ -29,6 +29,7 @@
 #include "variables.h"
 #include "functions.h"
 #include "inlines.h"
+#include "IniMega.h"
 
 
 // AI trigger type enumeration
@@ -67,7 +68,6 @@ CAITriggerTypes::CAITriggerTypes() : CDialog(CAITriggerTypes::IDD)
 	m_Flag8 = _T("");
 	m_Flag9 = _T("");
 	m_Enabled = FALSE;
-	m_Condition = -1;
 	m_Number = 0;
 	m_Easy = FALSE;
 	m_Medium = FALSE;
@@ -75,7 +75,6 @@ CAITriggerTypes::CAITriggerTypes() : CDialog(CAITriggerTypes::IDD)
 	m_BaseDefense = FALSE;
 	m_Skirmish = FALSE;
 	m_Flag5 = _T("");
-	m_MultiSide = _T("");
 	//}}AFX_DATA_INIT
 }
 
@@ -101,7 +100,7 @@ void CAITriggerTypes::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_FLAG4, m_Flag4);
 	DDX_Text(pDX, IDC_NAME, m_Name);
 	DDX_Check(pDX, IDC_ENABLED, m_Enabled);
-	DDX_CBIndex(pDX, IDC_CONDITION, m_Condition);
+	DDX_Control(pDX, IDC_CONDITION, m_Condition);
 	DDX_Text(pDX, IDC_NUMBER, m_Number);
 	DDV_MinMaxInt(pDX, m_Number, 0, 256);
 	DDX_Check(pDX, IDC_EASY, m_Easy);
@@ -109,8 +108,77 @@ void CAITriggerTypes::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_HARD, m_Hard);
 	DDX_Check(pDX, IDC_BASEDEFENSE, m_BaseDefense);
 	DDX_Check(pDX, IDC_SKIRMISH, m_Skirmish);
-	DDX_CBString(pDX, IDC_MULTISIDE, m_MultiSide);
+	DDX_Control(pDX, IDC_MULTISIDE, m_MultiSide);
 	//}}AFX_DATA_MAP
+}
+
+BOOL CAITriggerTypes::OnInitDialog()
+{
+	auto const ret = CDialog::OnInitDialog();
+	translateUI();
+	initMultisideComboBox();
+	initConditionOpComboBox();
+
+	return ret;
+}
+
+void CAITriggerTypes::initMultisideComboBox()
+{
+	m_MultiSide.InsertString(0, TranslateStringACP("0 None"));
+	auto const& rules = IniMegaFile::GetRules();
+	auto const& items = rules.GetSection("Sides");
+	CString buffer;
+	auto idx = 1;
+	for (auto& [_, sideName] : g_data["Sides"]) {
+		// skip speical category
+		if (sideName.Find(',') >= 0) {
+			continue;
+		}
+		auto const name = TranslateStringACP(sideName);
+		buffer.Format("%d %s", idx, name.operator LPCSTR());
+		m_MultiSide.InsertString(idx, buffer);
+		idx++;
+	}
+}
+
+void CAITriggerTypes::initConditionOpComboBox()
+{
+	m_Condition.InsertString(COND_LT, TranslateStringACP("less than"));
+	m_Condition.InsertString(COND_LE, TranslateStringACP("less than or equal to"));
+	m_Condition.InsertString(COND_EQ, TranslateStringACP("equal to"));
+	m_Condition.InsertString(COND_GE, TranslateStringACP("greater than or equal to"));
+	m_Condition.InsertString(COND_GT, TranslateStringACP("greater than"));
+	m_Condition.InsertString(COND_NE, TranslateStringACP("not equal to"));
+}
+
+void CAITriggerTypes::translateUI()
+{
+	TranslateWindowCaption(*this, "AITriggerCaption");
+	TranslateDlgItem(*this, IDC_ADD, "AITriggerAdd");
+	TranslateDlgItem(*this, IDC_AITRIGGER_COPY, "AITriggerCopy");
+	TranslateDlgItem(*this, IDC_DELETE, "AITriggerDelete");
+
+	TranslateDlgItem(*this, IDC_ENABLED, "AITriggerEnabled");
+
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_TYPE, "AITriggerType");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_TTYPE, "AITriggerCategory");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_NAME, "AITriggerName");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_HOUSE, "AITriggerHouse");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_TEAM1, "AITriggerTeamType1");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_TEAM2, "AITriggerTeamType2");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_SIDE, "AITriggerSide");
+	TranslateDlgItem(*this, IDC_BASEDEFENSE, "AITriggerBaseDefense");
+	TranslateDlgItem(*this, IDC_SKIRMISH, "AITriggerSkirmishAvailable");
+	TranslateDlgItem(*this, IDC_EASY, "AITriggerEasyEnable");
+	TranslateDlgItem(*this, IDC_MEDIUM, "AITriggerMediumEnable");
+	TranslateDlgItem(*this, IDC_HARD, "AITriggerHardEnable");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_WEIGHT, "AITriggerWeightInitial");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_WEIGHT_MIN, "AITriggerWeightMin");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_WEIGHT_MAX, "AITriggerWeightMax");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_ADDITIONAL, "AITriggerAdditional");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_CONDITION, "AITriggerCondition");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_NUM, "AITriggerNumber");
+	TranslateDlgItem(*this, IDC_AITRIGGER_T_UNITTYPE, "AITriggerUnitType");
 }
 
 
@@ -144,6 +212,7 @@ BEGIN_MESSAGE_MAP(CAITriggerTypes, CDialog)
 	ON_CBN_EDITCHANGE(IDC_MULTISIDE, OnEditchangeMultiside)
 	ON_CBN_SELCHANGE(IDC_MULTISIDE, OnSelchangeMultiside)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_AITRIGGER_COPY, &CAITriggerTypes::OnBnClickedAitriggerCopy)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -171,6 +240,19 @@ void ListObjects(CComboBox& cb)
 	addToUnitType("VehicleTypes");
 	addToUnitType("AircraftTypes");
 	addToUnitType("BuildingTypes");
+}
+
+
+CString CAITriggerTypes::getCurrentID()
+{
+	int sel = m_AITriggerType.GetCurSel();
+	if (sel < 0) {
+		return {};
+	}
+	CString aitrigger;
+	m_AITriggerType.GetLBText(sel, aitrigger);
+	TruncSpace(aitrigger);
+	return aitrigger;
 }
 
 void CAITriggerTypes::UpdateDialog()
@@ -214,13 +296,10 @@ void CAITriggerTypes::UpdateDialog()
 
 void CAITriggerTypes::OnSelchangeAitriggertype()
 {
-	int sel = m_AITriggerType.GetCurSel();
-	if (sel < 0) return;
-
-	CString aitrigger;
-	m_AITriggerType.GetLBText(sel, aitrigger);
-	TruncSpace(aitrigger);
-
+	auto const aitrigger = getCurrentID();
+	if (aitrigger.IsEmpty()) {
+		return;
+	}
 
 	AITRIGGERTYPE aitt;
 	Map->GetAITriggerType(Map->GetAITriggerTypeIndex(aitrigger), &aitt);
@@ -241,22 +320,20 @@ void CAITriggerTypes::OnSelchangeAitriggertype()
 	m_Skirmish = isTrue(aitt.skirmish);
 	m_Flag4 = aitt.flag4;
 	//m_Flag5=aitt.multihouse;
-	m_MultiSide = aitt.multihouse;
+	m_MultiSide.SetCurSel(INIHelper::StringToInteger(aitt.multihouse, 0));
 	m_BaseDefense = isTrue(aitt.basedefense);
 	m_TeamType2.SetWindowText(aitt.teamtype2);
 	m_Easy = isTrue(aitt.easy);
 	m_Medium = isTrue(aitt.medium);
 	m_Hard = isTrue(aitt.hard);
 
-	m_Enabled = FALSE;
-	CIniFile& ini = Map->GetIniFile();
-	if (ini.GetBool("AITriggerTypesEnable", aitrigger)) {
-		m_Enabled = TRUE;
-	}
+	auto const& ini = Map->GetIniFile();
+	m_Enabled = ini.GetBool("AITriggerTypesEnable", aitrigger);
+
 
 	AITrigInfo info;
 	info = ConvertToAITrigInfoFromHex((char*)(LPCSTR)aitt.data);
-	m_Condition = info.Condition;
+	m_Condition.SetCurSel(info.Condition);
 	m_Number = info.Number;
 
 	ListObjects(m_UnitType);
@@ -440,16 +517,12 @@ void CAITriggerTypes::OnChangeFlag9()
 void CAITriggerTypes::OnEnabled()
 {
 	// enable or disable trigger
-
 	UpdateData();
 
-	int sel = m_AITriggerType.GetCurSel();
-	if (sel < 0) {
+	auto const aitrigger = getCurrentID();
+	if (aitrigger.IsEmpty()) {
 		return;
 	}
-	CString aitrigger;
-	m_AITriggerType.GetLBText(sel, aitrigger);
-	TruncSpace(aitrigger);
 
 	CIniFile& ini = Map->GetIniFile();
 
@@ -465,14 +538,10 @@ void CAITriggerTypes::OnEnabled()
 
 void CAITriggerTypes::SetAITriggerParam(const char* value, int param)
 {
-	int sel = m_AITriggerType.GetCurSel();
-	if (sel < 0) {
+	auto const aitrigger = getCurrentID();
+	if (aitrigger.IsEmpty()) {
 		return;
 	}
-
-	CString aitrigger;
-	m_AITriggerType.GetLBText(sel, aitrigger);
-	TruncSpace(aitrigger);
 
 	CIniFile& ini = Map->GetIniFile();
 
@@ -481,15 +550,37 @@ void CAITriggerTypes::SetAITriggerParam(const char* value, int param)
 	}
 }
 
-void CAITriggerTypes::OnAdd()
+void CAITriggerTypes::addTrigger(CString&& content)
 {
 	CString ID = GetFreeID();
 	CIniFile& ini = Map->GetIniFile();
+
+	ini.SetString("AITriggerTypes", ID, std::move(content));
+
+	UpdateDialog();
+
+	// now make current id visible
+	int i;
+	for (i = 0; i < m_AITriggerType.GetCount(); i++) {
+		CString cuString;
+		m_AITriggerType.GetLBText(i, cuString);
+		TruncSpace(cuString);
+
+		if (cuString == ID) {
+			m_AITriggerType.SetCurSel(i);
+			OnSelchangeAitriggertype();
+		}
+	}
+}
+
+void CAITriggerTypes::OnAdd()
+{
+	// now try to set a teamtype
+	auto const& ini = Map->GetIniFile();
 	CString data = "New AI Trigger,";
 
-	// now try to set a teamtype
 	if (ini["TeamTypes"].Size() > 0) {
-		data += *ini["TeamTypes"].Nth(0).second;
+		data += ini["TeamTypes"].Nth(0).second;
 	} else {
 		data += "<none>";
 	}
@@ -517,32 +608,39 @@ void CAITriggerTypes::OnAdd()
 
 	data += ",1,1,1";
 
-	ini.SetString("AITriggerTypes", ID, data);
-
-	UpdateDialog();
-
-	// now make current id visible
-	int i;
-	for (i = 0; i < m_AITriggerType.GetCount(); i++) {
-		CString cuString;
-		m_AITriggerType.GetLBText(i, cuString);
-		TruncSpace(cuString);
-
-		if (cuString == ID) {
-			m_AITriggerType.SetCurSel(i);
-			OnSelchangeAitriggertype();
-		}
-	}
+	addTrigger(std::move(data));
 }
+
+
+void CAITriggerTypes::OnBnClickedAitriggerCopy()
+{
+	auto const aitrigger = getCurrentID();
+	if (aitrigger.IsEmpty()) {
+		return;
+	}
+
+	auto const& ini = Map->GetIniFile();
+	auto const& toCopy = ini.GetString("AITriggerTypes", aitrigger);
+	ASSERT(!toCopy.IsEmpty());
+	auto const nameSplitter = toCopy.Find(',');
+	ASSERT(nameSplitter > 0);
+	auto const name = toCopy.Mid(0, nameSplitter);
+	auto const restExceptName = toCopy.Mid(nameSplitter + 1);
+
+	CString newContent = name;
+	newContent += " Clone,";
+	newContent += restExceptName;
+
+	addTrigger(std::move(newContent));
+}
+
 
 void CAITriggerTypes::OnDelete()
 {
-	int sel = m_AITriggerType.GetCurSel();
-	if (sel < 0) return;
-
-	CString aitrigger;
-	m_AITriggerType.GetLBText(sel, aitrigger);
-	TruncSpace(aitrigger);
+	auto const aitrigger = getCurrentID();
+	if (aitrigger.IsEmpty()) {
+		return;
+	}
 
 	CIniFile& ini = Map->GetIniFile();
 
@@ -616,7 +714,7 @@ void CAITriggerTypes::OnSelchangeCondition()
 	UpdateData(TRUE);
 
 	AITrigInfo info;
-	info.Condition = (ConditionEnum)m_Condition;
+	info.Condition = ConditionEnum(m_Condition.GetCurSel());
 	info.Number = m_Number;
 
 	char buffer[65];
@@ -637,7 +735,7 @@ void CAITriggerTypes::OnChangeNumber()
 
 	AITrigInfo info;
 	memset(&info, 0, sizeof(AITrigInfo));
-	info.Condition = (ConditionEnum)m_Condition;
+	info.Condition = ConditionEnum(m_Condition.GetCurSel());
 	info.Number = m_Number;
 
 	char buffer[65];
@@ -713,7 +811,7 @@ void CAITriggerTypes::OnEditchangeMultiside()
 	UpdateData();
 
 	CString value;
-	value = m_MultiSide;
+	m_MultiSide.GetLBText(m_MultiSide.GetCurSel(), value);
 
 	TruncSpace(value);
 

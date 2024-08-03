@@ -67,7 +67,9 @@ WORD CIniFile::LoadFile(const std::string& filename, BOOL bNoSpaces)
 {
 	Clear();
 
-	if (filename.size() == NULL) return 1;
+	if (filename.size() == NULL) {
+		return 1;
+	}
 	m_filename = filename;
 
 	return(InsertFile(filename, NULL, bNoSpaces));
@@ -77,7 +79,6 @@ WORD CIniFile::LoadFile(const std::string& filename, BOOL bNoSpaces)
 
 void CIniFile::Clear()
 {
-
 	sections.clear();
 }
 

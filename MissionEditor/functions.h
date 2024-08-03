@@ -41,7 +41,7 @@ CString TranslateStringVariables(int n, const char* originaltext, const char* in
 CString TranslateHouse(CString original, BOOL bToUI = FALSE);
 
 // show options dialog
-void ShowOptionsDialog();
+void ShowOptionsDialog(CIniFile& optIni);
 
 // repairs a trigger (sets flags correctly)
 bool RepairTrigger(CString& triggerdata);

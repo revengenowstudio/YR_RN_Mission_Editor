@@ -123,17 +123,19 @@ void CGlobalsDlg::OnChangeDescription()
 	CIniFile& ini = Map->GetIniFile();
 
 	int cursel = m_Global.GetCurSel();
-	if (cursel < 0) return;
+	if (cursel < 0) {
+		return;
+	}
 	int curglob = m_Global.GetItemData(cursel);
-
-
 
 	char c[50];
 	itoa(curglob, c, 10);
 
 	UpdateData(TRUE);
 
-	if (m_Description.Find(",") >= 0) m_Description.SetAt(m_Description.Find(","), 0);
+	if (m_Description.Find(",") >= 0) {
+		m_Description.SetAt(m_Description.Find(","), 0);
+	}
 
 	if (ini.GetString("VariableNames", c).IsEmpty()) {
 		ini.SetString("VariableNames", c, "text,0");
@@ -153,7 +155,9 @@ void CGlobalsDlg::OnSelchangeGlobal()
 	CIniFile& ini = Map->GetIniFile();
 
 	int cursel = m_Global.GetCurSel();
-	if (cursel < 0) return;
+	if (cursel < 0) {
+		return;
+	}
 	int curglob = m_Global.GetItemData(cursel);
 
 	char c[50];

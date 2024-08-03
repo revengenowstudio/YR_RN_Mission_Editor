@@ -571,6 +571,21 @@
 #define IDC_EDIT3                       1495
 #define IDC_HOUSE_ALLIES_T_ENEMIES      1496
 #define IDC_HOUSE_ALLIES_T_ALLIES       1497
+#define IDC_AITRIGGER_COPY              1498
+#define IDC_AITRIGGER_T_TYPE            1499
+#define IDC_AITRIGGER_T_TTYPE           1500
+#define IDC_AITRIGGER_T_NAME            1501
+#define IDC_AITRIGGER_T_HOUSE           1502
+#define IDC_AITRIGGER_T_TEAM1           1503
+#define IDC_AITRIGGER_T_TEAM2           1504
+#define IDC_AITRIGGER_T_SIDE            1505
+#define IDC_AITRIGGER_T_WEIGHT          1506
+#define IDC_AITRIGGER_T_WEIGHT_MIN      1507
+#define IDC_AITRIGGER_T_WEIGHT_MAX      1508
+#define IDC_AITRIGGER_T_ADDITIONAL      1509
+#define IDC_AITRIGGER_T_CONDITION       1510
+#define IDC_AITRIGGER_T_NUM             1511
+#define IDC_AITRIGGER_T_UNITTYPE        1512
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -667,7 +682,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        312
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1498
+#define _APS_NEXT_CONTROL_VALUE         1513
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

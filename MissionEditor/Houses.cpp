@@ -332,8 +332,8 @@ void CHouses::AddHouse(const CString& name)
 	char k[50];
 	itoa(pos, k, 10);
 
-	auto const translatedHouseName = TranslateHouse(name);
-	ini.SetString(MAPHOUSES, k, translatedHouseName);
+	auto const realHouseID = TranslateHouse(name);
+	ini.SetString(MAPHOUSES, k, realHouseID);
 
 	CString country;
 	country = name;
@@ -347,53 +347,54 @@ void CHouses::AddHouse(const CString& name)
 	_itoa(pos2, k, 10);
 	ini.SetString(HOUSES, k, country);
 #endif
-	ini.SetInteger(translatedHouseName, "IQ", 0);
-	ini.SetString(translatedHouseName, "Edge", "West");
-	ini.SetString(translatedHouseName, "Allies", translatedHouseName);
+	ini.SetInteger(realHouseID, "IQ", 0);
+	ini.SetString(realHouseID, "Edge", "West");
+	ini.SetString(realHouseID, "Allies", realHouseID);
 
 	CString side = name;
+	auto const parentCountryID = TranslateHouse(dlg.m_Country);
 #ifdef RA2_MODE
-	side = rules.GetString(TranslateHouse(dlg.m_Country), "Side");
+	side = rules.GetString(parentCountryID, "Side");
 #endif
 
-	if (strstr(name, "Nod") != NULL) {
+	if (side.Find("Nod") >= 0) {
 #ifndef RA2_MODE
-		ini.sections[translatedHouseName].values["Side"] = "Nod";
-#endif
-		ini.SetString(translatedHouseName, "Color", "DarkRed");
+		ini.sections[realHouseID].values["Side"] = "Nod";
 		if (name != "Nod") {
 			ini.SetString(name, "Allies", ini.GetString(name, "Allies") + ",Nod");
 		}
-	} else {
-#ifndef RA2_MODE
-		ini.sections[translatedHouseName].values["Side"] = "GDI";
 #endif
-		ini.SetString(translatedHouseName, "Color", "Gold");
-		if (name != "GDI") {
-			ini.SetString(translatedHouseName, "Allies", ini.GetString(translatedHouseName, "Allies") + ",GDI");
-		}
-	}
-	ini.SetInteger(translatedHouseName, "Credits", 0);
-#ifndef RA2_MODE
-	ini.SetInteger(translatedHouseName, "ActsLike", 0);
+		ini.SetString(realHouseID, "Color", "DarkRed");
+	} else if (side.Find("GDI") >= 0) {
+#if defined(RA2_MODE)
+		ini.SetString(realHouseID, "Color", "DarkBlue");
 #else
-	ini.SetString(translatedHouseName, "Country", TranslateHouse(country));
+		if (name != "GDI") {
+			ini.SetString(realHouseID, "Allies", ini.GetString(realHouseID, "Allies") + ",GDI");
+			ini.SetString(realHouseID, "Color", "Gold");
+		}
 #endif
-	ini.SetInteger(translatedHouseName, "NodeCount", 0);
-	ini.SetInteger(translatedHouseName, "TechLevel", 10);
-	ini.SetInteger(translatedHouseName, "PercentBuilt", 100);
-	ini.SetBool(translatedHouseName, "PlayerControl", false);
+	}
+	ini.SetInteger(realHouseID, "Credits", 0);
+#ifndef RA2_MODE
+	ini.SetInteger(realHouseID, "ActsLike", 0);
+#else
+	ini.SetString(realHouseID, "Country", TranslateHouse(country));
+#endif
+	ini.SetInteger(realHouseID, "NodeCount", 0);
+	ini.SetInteger(realHouseID, "TechLevel", 10);
+	ini.SetInteger(realHouseID, "PercentBuilt", 100);
+	ini.SetBool(realHouseID, "PlayerControl", false);
 
 #ifdef RA2_MODE
-	dlg.m_Country = TranslateHouse(dlg.m_Country); // just to make sure...
 	country = TranslateHouse(country);
-	ini.SetString(country, "ParentCountry", dlg.m_Country);
+	ini.SetString(country, "ParentCountry", parentCountryID);
 	ini.SetString(country, "Name", country);
-	ini.SetString(country, "Suffix", rules.GetString(dlg.m_Country, "Suffix"));
-	ini.SetString(country, "Prefix", rules.GetString(dlg.m_Country, "Prefix"));
-	ini.SetString(country, "Color", rules.GetString(dlg.m_Country, "Color"));
-	ini.SetString(country, "Side", rules.GetString(dlg.m_Country, "Side"));
-	ini.SetString(country, "SmartAI", rules.GetString(dlg.m_Country, "SmartAI"));
+	ini.SetString(country, "Suffix", rules.GetString(parentCountryID, "Suffix"));
+	ini.SetString(country, "Prefix", rules.GetString(parentCountryID, "Prefix"));
+	ini.SetString(country, "Color", rules.GetString(parentCountryID, "Color"));
+	ini.SetString(country, "Side", rules.GetString(parentCountryID, "Side"));
+	ini.SetString(country, "SmartAI", rules.GetString(parentCountryID, "SmartAI"));
 	ini.SetInteger(country, "CostUnitsMult", 1);
 #endif
 
