@@ -264,10 +264,11 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 
 
 	if (atoi(GetParam(eventdata, 7)) == 1) {
-		if (bNoWP)
+		if (bNoWP) {
 			m_Parameter.SetItemData(m_Parameter.AddString(TranslateStringACP("Number")), -1);
-		else
+		} else {
 			m_Parameter.SetItemData(m_Parameter.AddString(TranslateStringACP("Waypoint")), -1);
+		}
 	}
 
 	m_ParamValue.SetWindowText("");
@@ -381,9 +382,13 @@ void CTriggerActionsDlg::OnEditchangeParamvalue()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	if (m_currentTrigger.GetLength() == 0) return;
+	if (m_currentTrigger.GetLength() == 0) {
+		return;
+	}
 	int selev = m_Action.GetCurSel();
-	if (selev < 0) return;
+	if (selev < 0) {
+		return;
+	}
 	int curev = m_Action.GetItemData(selev);
 
 	int curselparam = m_Parameter.GetCurSel();
@@ -458,13 +463,23 @@ void CTriggerActionsDlg::OnNewaction()
 void CTriggerActionsDlg::OnDeleteaction()
 {
 	CIniFile& ini = Map->GetIniFile();
-	if (m_currentTrigger.GetLength() == 0) return;
+	if (m_currentTrigger.GetLength() == 0) {
+		return;
+	}
 
 	int sel2 = m_Action.GetCurSel();
-	if (sel2 < 0) return;
-	int curev = m_Action.GetItemData(sel2);
-	if (MessageBox("Do you really want to delete this action?", "Delete action", MB_YESNO) == IDNO) return;
+	if (sel2 < 0) {
+		return;
+	}
 
+
+	int curev = m_Action.GetItemData(sel2);
+	auto const title = TranslateStringACP("Delete action");
+	auto const content = TranslateStringACP("Do you really want to delete this action?");
+
+	if (MessageBox(content, title, MB_YESNO) == IDNO) {
+		return;
+	}
 
 	auto sec = ini.TryGetSection("Actions");
 	ASSERT(sec != nullptr);

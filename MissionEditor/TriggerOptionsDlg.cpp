@@ -278,7 +278,7 @@ BOOL CTriggerOptionsDlg::PreTranslateMessage(MSG* pMsg)
 
 BOOL CTriggerOptionsDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	auto const ret = CDialog::OnInitDialog();
 	{
 		TranslateDlgItem(*this, IDC_TRIGGER_OPTION_TYPE_STR, "TriggerOptionType");
 		TranslateDlgItem(*this, IDC_TRIGGER_OPTION_NAME, "TriggerOptionName");
@@ -298,7 +298,7 @@ BOOL CTriggerOptionsDlg::OnInitDialog()
 		m_tooltip.Activate(TRUE);
 		m_tooltip.AddTool(GetDlgItem(IDC_HOUSE), GetLanguageStringACP("TT_TriggerHouse"));
 	}
-	return TRUE;
+	return ret;
 }
 
 void CTriggerOptionsDlg::OnDisabled()

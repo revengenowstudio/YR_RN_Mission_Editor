@@ -180,7 +180,9 @@ void CTriggerEventsDlg::OnDeleteevent()
 		return;
 	}
 	int curev = m_Event.GetItemData(sel2);
-	if (MessageBox("Do you really want to delete this event?", "Delete event", MB_YESNO) == IDNO) {
+	auto const title = TranslateStringACP("Delete event");
+	auto const content = TranslateStringACP("Do you really want to delete this event?");
+	if (MessageBox(content, title, MB_YESNO) == IDNO) {
 		return;
 	}
 
