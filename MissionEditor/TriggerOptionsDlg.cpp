@@ -290,6 +290,10 @@ BOOL CTriggerOptionsDlg::OnInitDialog()
 		TranslateDlgItem(*this, IDC_MEDIUM, "TriggerOptionMedium");
 		TranslateDlgItem(*this, IDC_HARD, "TriggerOptionHard");
 
+		m_TriggerType.InsertString(0, TranslateStringACP("0 - Standard"));
+		m_TriggerType.InsertString(1, TranslateStringACP("1 - All Attached"));
+		m_TriggerType.InsertString(2, TranslateStringACP("2 - Repeating"));
+
 		m_tooltip.Create(this);
 		m_tooltip.Activate(TRUE);
 		m_tooltip.AddTool(GetDlgItem(IDC_HOUSE), GetLanguageStringACP("TT_TriggerHouse"));
