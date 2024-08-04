@@ -69,6 +69,7 @@ protected:
 protected:
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CLighting)
+	void translateUI();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnChangeAmbient();
 	afx_msg void OnChangeLevel();

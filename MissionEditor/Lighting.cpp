@@ -26,6 +26,7 @@
 #include "Lighting.h"
 #include "mapdata.h"
 #include "variables.h"
+#include "functions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -102,21 +103,67 @@ void CLighting::UpdateDialog()
 	//MessageBox(ini.GetString("Lightning", "Ambient"));
 }
 
-BOOL CLighting::OnInitDialog()
+void CLighting::translateUI()
 {
-	CDialog::OnInitDialog();
+	TranslateWindowCaption(*this, "TaskforcesCaption");
+
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_TYPE, "TaskforcesType");
+
+	TranslateWindowCaption(*this, "Lighting");
+
+	TranslateDlgItem(*this, IDD_LIGHTING, "Lighting");
+	//TranslateStringACP();
+	TranslateDlgItem(*this, IDC_DESC, "LightingDesc");
+
+	TranslateDlgItem(*this, IDC_LNORMAL, "LightingNormal");
+	TranslateDlgItem(*this, IDC_LAMBIENT1, "LightingNormalAmbient");
+	TranslateDlgItem(*this, IDC_LLEVEL1, "LightingNormalLevel");
+	TranslateDlgItem(*this, IDC_LRED1, "LightingNormalRed");
+	TranslateDlgItem(*this, IDC_LGREEN1, "LightingNormalGreen");
+	TranslateDlgItem(*this, IDC_LBLUE1, "LightingNormalBlue");
+
+	TranslateDlgItem(*this, IDC_LIONSTORM, "LightingIonStorm");
+	TranslateDlgItem(*this, IDC_LAMBIENT2, "LightingWeatherStormAmbient");
+	TranslateDlgItem(*this, IDC_LLEVEL2, "LightingWeatherStormLevel");
+	TranslateDlgItem(*this, IDC_LRED2, "LightingWeatherStormRed");
+	TranslateDlgItem(*this, IDC_LGREEN2, "LightingWeatherStormGreen");
+	TranslateDlgItem(*this, IDC_LBLUE2, "LightingWeatherStormBlue");
 
 #ifdef RA2_MODE
-	SetDlgItemText(IDC_LIONSTORM, "Weather Storm Settings");
+	TranslateDlgItem(*this, IDC_LIONSTORM,"LightingWeatherStorm");
+	/*SetDlgItemText(IDC_LIONSTORM, GetLanguageStringACP("LightingWeatherStorm"));*/
 #endif
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+//	SetWindowText("Lighting");
+//	SetDlgItemText(IDD_LIGHTING, "Lighting");
+//	//TranslateStringACP();
+//	SetDlgItemText(IDC_DESC, "LightingDesc");
+//
+//	SetDlgItemText(IDC_LNORMAL, "LightingNormal");
+//	SetDlgItemText(IDC_LAMBIENT1, "LightingNormalAmbient");
+//	SetDlgItemText(IDC_LLEVEL1, "LightingNormalLevel");
+//	SetDlgItemText(IDC_LRED1, "LightingNormalRed");
+//	SetDlgItemText(IDC_LGREEN1, "LightingNormalGreen");
+//	SetDlgItemText(IDC_LBLUE1, "LightingNormalBlue");
+//
+//	SetDlgItemText(IDC_LIONSTORM, "LightingIonStorm");
+//	SetDlgItemText(IDC_LAMBIENT2, "LightingWeatherStormAmbient");
+//	SetDlgItemText(IDC_LLEVEL2, "LightingWeatherStormLevel");
+//	SetDlgItemText(IDC_LRED2, "LightingWeatherStormRed");
+//	SetDlgItemText(IDC_LGREEN2, "LightingWeatherStormGreen");
+//	SetDlgItemText(IDC_LBLUE2, "LightingWeatherStormBlue");
+
 }
 
+BOOL CLighting::OnInitDialog()
+{
+	auto const ret = CDialog::OnInitDialog();
+	translateUI();
+	return ret;
 
-
-
+	//return TRUE;  // return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+}
 
 void CLighting::OnChangeAmbient()
 {
