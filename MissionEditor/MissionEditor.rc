@@ -1136,12 +1136,12 @@ BEGIN
     LTEXT           "Shutting down, please wait a few seconds",IDC_STATIC,7,14,172,13
 END
 
-IDD_DYNAMICLOAD DIALOG 0, 0, 220, 44
+IDD_DYNAMICLOAD DIALOGEX 0, 0, 220, 44
 STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_CENTER | WS_POPUP | WS_CAPTION
 CAPTION "Loading"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    LTEXT           "Loading graphics, please wait a few seconds.",IDC_STATIC,7,7,206,15
+    LTEXT           "Loading graphics, please wait a few seconds.",IDC_LOADING_GRAPH_TXT,7,7,206,15
     CONTROL         "Progress4",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,7,22,206,15
 END
 
@@ -3626,6 +3626,11 @@ BEGIN
     0
 END
 #endif
+
+IDD_DYNAMICLOAD AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
 
 
 /////////////////////////////////////////////////////////////////////////////
