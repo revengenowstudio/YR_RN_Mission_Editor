@@ -273,7 +273,9 @@ void CHouses::OnPreparehouses()
 
 	// import the rules.ini houses
 	if (ini[MAPHOUSES].Size() > 0) {
-		MessageBox("There are already houses in your map. You need to delete these first.");
+		auto const title = TranslateStringACP("HouseDuplicatedCreatingCaption");
+		auto const content = TranslateStringACP("HouseDuplicatedCreatingTip");
+		MessageBox(content, title);
 		return;
 	}
 
