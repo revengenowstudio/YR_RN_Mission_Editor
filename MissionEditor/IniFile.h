@@ -193,9 +193,13 @@ public:
 		auto const [pos, found] = LowerBound(key);
 		if (!found) {
 			InsertAt(pos, std::move(key), std::move(value));
+			return;
 		}
 		// existed, assign
 		value_pairs[pos].second = std::move(value);
+	}
+	void InsertOrAssign(const CString& key, const CString& value) {
+		this->InsertOrAssign(CString(key), CString(value));
 	}
 
 	// ==================== Delete
