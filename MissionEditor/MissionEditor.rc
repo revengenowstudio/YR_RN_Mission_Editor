@@ -811,23 +811,23 @@ BEGIN
     PUSHBUTTON      "Clone",IDC_COPYUNIT,17,118,61,15
 END
 
-IDD_TAGS DIALOG 0, 0, 303, 204
+IDD_TAGS DIALOGEX 0, 0, 303, 204
 STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "Tags"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
-    LTEXT           "Tags make Triggers work. Without a tag, a trigger is usually useless, because it won't be executed (except if another triggers fires it directly).",IDC_STATIC,7,7,290,20
-    LTEXT           "Tag:",IDC_STATIC,7,36,54,12
+    LTEXT           "Tags make Triggers work. Without a tag, a trigger is usually useless, because it won't be executed (except if another triggers fires it directly).",IDC_DESC,7,7,290,20
+    LTEXT           "Tag:",IDC_TAGS_CUR_TXT,7,36,54,12
     COMBOBOX        IDC_TAG,61,37,236,196,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Add",IDC_ADD,169,53,59,14
     PUSHBUTTON      "Delete",IDC_DELETE,238,53,59,14
-    LTEXT           "Name:",IDC_STATIC,7,90,54,12
+    LTEXT           "Name:",IDC_TAGS_NAME,7,90,54,12
     EDITTEXT        IDC_NAME,61,89,236,13,ES_AUTOHSCROLL
-    LTEXT           "Repeat:",IDC_STATIC,7,110,54,13
+    LTEXT           "Repeat:",IDC_TAGS_REPEAT,7,110,54,13
     COMBOBOX        IDC_REPEAT,61,110,236,59,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Trigger:",IDC_STATIC,7,131,54,13
+    LTEXT           "Trigger:",IDC_TAGS_TRIGGER,7,131,54,13
     COMBOBOX        IDC_TRIGGER,61,131,236,135,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "For every trigger you create, you should create a tag to make the trigger work. A trigger consists of some general properties, an event and an action, which can all be defined in the ""trigger"" section.",IDC_STATIC,7,167,290,30
+    LTEXT           "For every trigger you create, you should create a tag to make the trigger work. A trigger consists of some general properties, an event and an action, which can all be defined in the ""trigger"" section.",IDC_TAGS_DESC_2,7,167,290,30
 END
 
 IDD_TRIGGERS DIALOG 0, 0, 303, 204
@@ -2554,20 +2554,6 @@ BEGIN
 END
 #endif
 
-IDD_TAGS DLGINIT
-BEGIN
-    IDC_REPEAT, 0x403, 36, 0
-0x2030, 0x202d, 0x614d, 0x656b, 0x7420, 0x6568, 0x7420, 0x6972, 0x6767, 
-0x7265, 0x7720, 0x726f, 0x206b, 0x6e6f, 0x796c, 0x6f20, 0x636e, 0x0065, 
-
-    IDC_REPEAT, 0x403, 12, 0
-0x2031, 0x202d, 0x6e55, 0x6e6b, 0x776f, 0x006e, 
-    IDC_REPEAT, 0x403, 32, 0
-0x2032, 0x202d, 0x614d, 0x656b, 0x7420, 0x6568, 0x7420, 0x6972, 0x6767, 
-0x7265, 0x7220, 0x7065, 0x6165, 0x6974, 0x676e, 0x0020, 
-    0
-END
-
 IDD_TRIGGERS DLGINIT
 BEGIN
     IDC_TRIGGER2, 0x403, 7, 0
@@ -3624,6 +3610,11 @@ BEGIN
 END
 
 IDD_GLOBALS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TAGS AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
