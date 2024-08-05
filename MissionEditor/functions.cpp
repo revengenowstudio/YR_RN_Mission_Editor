@@ -296,6 +296,9 @@ void HandleParamList(CComboBox& cb, int type)
 		case PARAMTYPE_SPEECHBUBBLETYPES:
 			ListSpeechBubbleTypes(cb);
 			break;
+		case PARAMTYPE_TAGS:
+			ListTags(cb, false);
+			break;
 		case PARAMTYPE_GLOBALS:
 			ListMapVariables(cb);
 			break;
