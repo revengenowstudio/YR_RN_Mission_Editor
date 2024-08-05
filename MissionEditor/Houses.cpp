@@ -455,7 +455,9 @@ void CHouses::OnShowWindow(BOOL bShow, UINT nStatus)
 void CHouses::OnAddhouse()
 {
 	CString name = InputBox(GetLanguageStringACP("AddHouse"), GetLanguageStringACP("AddHouseCap"));
-	if (name.GetLength() == 0) return;
+	if (name.GetLength() == 0) {
+		return;
+	}
 
 	name = GetHouseSectionName(name);
 	//name=TranslateHouse(name);
@@ -472,6 +474,8 @@ void CHouses::OnDeletehouse()
 		return;
 	}
 
+
+
 	CString name;
 	CString uiname;
 	m_houses.GetLBText(cusel, name);
@@ -479,9 +483,19 @@ void CHouses::OnDeletehouse()
 	uiname = name;
 	name = TranslateHouse(name);
 
-	CString str = GetLanguageStringACP("DeleteHouse");
-	str = TranslateStringVariables(1, str, uiname);
-	if (MessageBox(str, GetLanguageStringACP("DeleteHouseCap"), MB_YESNO) == IDNO) {
+	CString title, content;
+	auto const houseIdx = rules[HOUSES].FindIndex(name);
+
+	if (houseIdx >= rules[HOUSES].Size()) {
+		title = TranslateStringACP("HouseDeleteWarnCaption");
+		content = TranslateStringACP("HouseDeleteWarnTip");
+	} else {
+		CString str = GetLanguageStringACP("DeleteHouse");
+		content = TranslateStringVariables(1, str, uiname);
+		title = GetLanguageStringACP("DeleteHouseCap");
+	}
+
+	if (MessageBox(content, title, MB_YESNO) == IDNO) {
 		return;
 	}
 
