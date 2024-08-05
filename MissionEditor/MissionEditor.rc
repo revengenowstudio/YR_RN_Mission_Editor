@@ -356,12 +356,12 @@ FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,140,159,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,85,159,50,14
-    LTEXT           "Red Alert 2 EXE (make sure its in the correct path)",IDC_STATIC,5,5,130,20
+    LTEXT           "Red Alert 2 EXE (make sure its in the correct path)",IDC_DESC,5,5,184,20
     EDITTEXT        IDC_EDIT1,5,25,130,15,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse",IDC_CHOOSE,140,25,50,15
-    LTEXT           "Language / Sprache:",IDC_STATIC,7,51,128,11
+    LTEXT           "Language / Sprache:",IDC_OPTIONS_LAN_TXT,7,51,128,11
     COMBOBOX        IDC_LANGUAGE,7,63,183,94,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Support settings",IDC_STATIC,7,81,183,71
+    GROUPBOX        "Support settings",IDC_OPTIONS_SUPPORT_TXT,7,81,183,71
     CONTROL         "Support mission disks and mods (recommended)",IDC_RULESLIKETS,
                     "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP,14,92,170,16
     CONTROL         "Only support original Red Alert 2",IDC_ONLYORIGINAL,
