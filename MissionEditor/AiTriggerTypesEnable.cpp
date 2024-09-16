@@ -72,6 +72,23 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CAiTriggerTypesEnable 
+BOOL CAiTriggerTypesEnable::OnInitDialog()
+{
+	auto const ret = CDialog::OnInitDialog();
+	translateUI();
+	return ret;
+}
+
+void CAiTriggerTypesEnable::translateUI()
+{
+	TranslateWindowCaption(*this, "AITriggerEnableCaption");
+
+	TranslateDlgItem(*this, IDC_AI_TRG_ENB_DESC, "AITriggerEnableDesc");
+	TranslateDlgItem(*this, IDC_ENABLEALL, "AITriggerEnableAll");
+	TranslateDlgItem(*this, IDC_AI_TRG_ENB_TYPE, "AITriggerEnableType");
+	TranslateDlgItem(*this, IDC_ADD, "AITriggerEnableAdd");
+	TranslateDlgItem(*this, IDC_DELETE, "AITriggerEnableDelete");
+}
 
 void CAiTriggerTypesEnable::UpdateDialog()
 {

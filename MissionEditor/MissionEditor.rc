@@ -1096,13 +1096,13 @@ BEGIN
     PUSHBUTTON      "Copy",IDC_COPYACTION,165,201,60,14
 END
 
-IDD_AITRIGGERTYPESENABLE DIALOG 0, 0, 303, 204
+IDD_AITRIGGERTYPESENABLE DIALOGEX 0, 0, 303, 204
 STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "AI Trigger Types Enable"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
-    LTEXT           "This allows the AI for example to create teams automatically. You simply specify which AITriggerTypes are enabled.",IDC_STATIC,7,7,287,23
-    LTEXT           "AITriggerType:",IDC_STATIC,7,62,60,13
+    LTEXT           "This allows the AI for example to create teams automatically. You simply specify which AITriggerTypes are enabled.",IDC_AI_TRG_ENB_DESC,7,7,287,23
+    LTEXT           "AITriggerType:",IDC_AI_TRG_ENB_TYPE,7,62,60,13
     COMBOBOX        IDC_AITRIGGERTYPE,71,62,223,281,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Enable all standard AI triggers (recommended)",IDC_ENABLEALL,7,30,160,14
     PUSHBUTTON      "Delete = Disable AITrigger",IDC_DELETE,192,81,102,15
@@ -1903,6 +1903,10 @@ BEGIN
         HORZGUIDE, 240
         HORZGUIDE, 257
         HORZGUIDE, 280
+    END
+
+    IDD_AITRIGGERTYPESENABLE, DIALOG
+    BEGIN
     END
 
     IDD_TERRAINBAR, DIALOG
@@ -3586,6 +3590,11 @@ BEGIN
 END
 
 IDD_TAGS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_AITRIGGERTYPESENABLE AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
