@@ -610,6 +610,7 @@
 #define IDC_OPTIONS_SUPPORT_TXT         1534
 #define IDC_AI_TRG_ENB_DESC             1535
 #define IDC_AI_TRG_ENB_TYPE             1536
+#define IDC_SEARCH_WP_WP                1537
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -704,9 +705,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        316
+#define _APS_NEXT_RESOURCE_VALUE        318
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1537
+#define _APS_NEXT_CONTROL_VALUE         1538
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif
