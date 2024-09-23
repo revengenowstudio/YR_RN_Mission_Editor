@@ -26,6 +26,7 @@
 #include "All.h"
 #include "mapdata.h"
 #include "variables.h"
+#include "functions.h"
 
 
 #ifdef _DEBUG
@@ -65,6 +66,33 @@ void CAll::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
+BOOL CAll::OnInitDialog()
+{
+	auto const ret = CDialog::OnInitDialog();
+
+	translateUI();
+
+	return ret;
+}
+
+void CAll::translateUI()
+{
+	TranslateWindowCaption(*this, "IniEditorCaption");
+
+	TranslateDlgItem(*this, IDC_INI_EDITOR_DESC, "IniEditorDesc");
+	TranslateDlgItem(*this, IDC_INI_EDITOR_SECTIONS, "IniEditorSections");
+	TranslateDlgItem(*this, IDC_INI_EDITOR_CONTENT, "IniEditorSectionContent");
+	TranslateDlgItem(*this, IDC_INI_EDITOR_KEYS, "IniEditorSectionKeys");
+	TranslateDlgItem(*this, IDC_INI_EDITOR_VAL, "IniEditorSectionValue");
+	
+	TranslateDlgItem(*this, IDC_ADDSECTION, "IniEditorAdd");
+	TranslateDlgItem(*this, IDC_DELETESECTION, "IniEditorDelete");
+	TranslateDlgItem(*this, IDC_INISECTION, "IniEditorInsert");
+
+	TranslateDlgItem(*this, IDC_ADDKEY, "IniEditorAddKey");
+	TranslateDlgItem(*this, IDC_DELETEKEY, "IniEditorDeleteKey");
+	
+}
 
 BEGIN_MESSAGE_MAP(CAll, CDialog)
 	//{{AFX_MSG_MAP(CAll)

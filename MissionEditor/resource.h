@@ -615,6 +615,11 @@
 #define IDC_USR_SCRIPTS_DESC            1539
 #define IDC_USR_SCRIPTS_REPORT          1540
 #define IDC_USR_SCRIPTS_AVA             1541
+#define IDC_INI_EDITOR_SECTIONS         1542
+#define IDC_INI_EDITOR_DESC             1543
+#define IDC_INI_EDITOR_CONTENT          1544
+#define IDC_INI_EDITOR_VAL              1545
+#define IDC_INI_EDITOR_KEYS             1546
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -711,7 +716,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        320
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1542
+#define _APS_NEXT_CONTROL_VALUE         1547
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

@@ -371,20 +371,20 @@ BEGIN
 END
 #endif
 
-IDD_ALL DIALOG 0, 0, 303, 204
+IDD_ALL DIALOGEX 0, 0, 303, 204
 STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "INI Editor"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
-    LTEXT           "We highly recommend not to use this editor except you really know what you are doing.",IDC_STATIC,6,5,290,15
-    LTEXT           "Sections:",IDC_STATIC,5,25,55,10
+    LTEXT           "We highly recommend not to use this editor except you really know what you are doing.",IDC_INI_EDITOR_DESC,6,5,290,15
+    LTEXT           "Sections:",IDC_INI_EDITOR_SECTIONS,5,25,55,10
     COMBOBOX        IDC_SECTIONS,61,25,235,85,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Keys:",IDC_STATIC,15,80,40,10
+    LTEXT           "Keys:",IDC_INI_EDITOR_KEYS,15,80,40,10
     PUSHBUTTON      "Add",IDC_ADDSECTION,60,40,55,15
     PUSHBUTTON      "Delete",IDC_DELETESECTION,120,40,55,15
-    GROUPBOX        "Section content",IDC_STATIC,6,67,290,130
+    GROUPBOX        "Section content",IDC_INI_EDITOR_CONTENT,6,67,290,130
     LISTBOX         IDC_KEYS,60,80,225,90,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Value:",IDC_STATIC,15,175,40,15
+    LTEXT           "Value:",IDC_INI_EDITOR_VAL,15,175,40,15
     EDITTEXT        IDC_VALUE,60,175,225,12,ES_AUTOHSCROLL
     PUSHBUTTON      "Add",IDC_ADDKEY,15,95,40,15
     PUSHBUTTON      "Delete",IDC_DELETEKEY,15,115,40,15
@@ -3615,6 +3615,11 @@ BEGIN
 END
 
 IDD_USERSCRIPTS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_ALL AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
