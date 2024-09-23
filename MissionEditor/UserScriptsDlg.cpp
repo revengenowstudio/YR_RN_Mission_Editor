@@ -82,11 +82,12 @@ private:
 	CString filename;
 };
 
-CUserScript::CUserScript()
+CUserScript::CUserScript(): 
+	error(0), 
+	errortext{ 0 },
+	functioncount(0),
+	functiondata(nullptr)
 {
-	functioncount = 0;
-	functiondata = NULL;
-
 }
 
 CUserScript::~CUserScript()
