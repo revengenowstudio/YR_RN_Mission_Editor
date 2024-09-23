@@ -1664,18 +1664,18 @@ BEGIN
 END
 #endif
 
-IDD_USERSCRIPTS DIALOG 0, 0, 301, 193
+IDD_USERSCRIPTS DIALOGEX 0, 0, 301, 193
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Map Scripts"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "Run",IDOK,244,40,50,14
     PUSHBUTTON      "Quit",IDCANCEL,244,57,50,14
-    LTEXT           "Scripts available:",IDC_STATIC,7,24,109,12
+    LTEXT           "Scripts available:",IDC_USR_SCRIPTS_AVA,7,24,109,12
     LISTBOX         IDC_SCRIPTS,7,39,230,74,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Report:",IDC_STATIC,7,124,117,15
+    LTEXT           "Report:",IDC_USR_SCRIPTS_REPORT,7,124,117,15
     EDITTEXT        IDC_REPORT,7,145,287,41,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | WS_VSCROLL
-    LTEXT           "For safety reasons, you should save your map before running scripts. Undo is not available.",IDC_STATIC,7,7,287,17
+    LTEXT           "For safety reasons, you should save your map before running scripts. Undo is not available.",IDC_USR_SCRIPTS_DESC,7,7,287,17
 END
 
 IDD_COMBO_UINPUT DIALOG 0, 0, 238, 63
@@ -3610,6 +3610,11 @@ BEGIN
 END
 
 IDD_NEWRA2HOUSE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_USERSCRIPTS AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

@@ -2689,6 +2689,8 @@ BOOL CUserScriptsDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	translateUI();
+
 	int k;
 	CFileFind ff;
 
@@ -2711,6 +2713,19 @@ BOOL CUserScriptsDlg::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+}
+
+void CUserScriptsDlg::translateUI()
+{
+	TranslateWindowCaption(*this, "UserScriptsDlgCaption");
+
+	TranslateDlgItem(*this, IDC_USR_SCRIPTS_DESC, "UserScriptsDlgDesc");
+	TranslateDlgItem(*this, IDC_USR_SCRIPTS_AVA, "UserScriptsDlgAvailable");
+	
+	TranslateDlgItem(*this, IDC_USR_SCRIPTS_REPORT, "UserScriptsDlgReport");
+	
+	TranslateDlgItem(*this, IDOK, "UserScriptsDlgOK");
+	TranslateDlgItem(*this, IDCANCEL, "UserScriptsDlgCancel");
 }
 
 void CUserScriptsDlg::ReportScriptError(int line)
