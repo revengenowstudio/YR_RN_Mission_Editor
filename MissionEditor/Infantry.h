@@ -36,7 +36,16 @@ class CInfantrie : public CDialog
 public:
 	void UpdateStrings();
 	CString m_strength;
-	void Init(CString house = "", CString strength = "256", CString action = "Guard", CString direction = "64", CString tag = "None", CString p1 = "0", CString p2 = "-1", CString p3 = "0", CString p4 = "0", CString p5 = "0");
+	void Init(CString house = "",
+		CString strength = "256",
+		CString action = "Guard",
+		CString direction = "0",
+		CString tag = "None",
+		CString p1 = "0",
+		CString p2 = "-1", 
+		CString p3 = "0", 
+		CString p4 = "0", 
+		CString p5 = "0");
 	CInfantrie(CWnd* pParent = NULL);   // Standardkonstruktor
 
 // Dialogfelddaten
