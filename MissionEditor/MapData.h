@@ -307,7 +307,10 @@ public:
 	}
 	INT GetStructureAt(DWORD dwPos) const
 	{
-		if (fielddata[dwPos].structure > -1) return fielddata[dwPos].structure;	return -1;
+		if (fielddata[dwPos].structure > -1) {
+			return fielddata[dwPos].structure;
+		}
+		return -1;
 	}
 	INT GetStructureAt(MapCoords pos) const
 	{

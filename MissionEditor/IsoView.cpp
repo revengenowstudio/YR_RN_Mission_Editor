@@ -5453,7 +5453,18 @@ void CIsoView::DrawMap()
 
 				// for structures we need to check if they weren´t drawn earlier
 				// (every field that this building achieves has this building as .structure)
-				if (Map->GetStructureAt(mapCoords - MapVec(-1, 0)) != m.structure && Map->GetStructureAt(mapCoords - MapVec(0, -1)) != m.structure) {
+				auto const leftStructureIdx = Map->GetStructureAt(mapCoords - MapVec(-1, 0));
+				auto const rightStructureIdx = Map->GetStructureAt(mapCoords - MapVec(0, -1));
+				bool shouldDraw = true;
+
+				if (leftStructureIdx == m.structure || rightStructureIdx == m.structure) {
+					shouldDraw = false;
+				}
+				if (mapCoords.x >= Map->GetWidth() || mapCoords.y >= Map->GetHeight()) {
+					shouldDraw = true;
+				}
+
+				if (shouldDraw) {
 
 					STRUCTUREPAINT objp;
 					Map->GetStructurePaint(m.structure, &objp);
