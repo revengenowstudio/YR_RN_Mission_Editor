@@ -2172,7 +2172,7 @@ BOOL CMapData::AddInfantry(INFANTRY* lpInfantry, LPCTSTR lpType, LPCTSTR lpHouse
 
 		infantry.action = "Guard";
 		infantry.tag = "None";
-		infantry.direction = "64";
+		infantry.direction = "0";
 		infantry.flag1 = "0";
 		infantry.flag2 = "-1";
 		infantry.flag3 = "0";
@@ -2308,7 +2308,7 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 		itoa(dwPos / Map->GetIsoSize(), cy, 10);
 
 		structure.tag = "None";
-		structure.direction = "64";
+		structure.direction = "0";
 		structure.flag1 = "1";
 		structure.flag2 = "0";
 		structure.spotlight = "0";
@@ -2570,7 +2570,7 @@ BOOL CMapData::AddAircraft(AIRCRAFT* lpAircraft, LPCTSTR lpType, LPCTSTR lpHouse
 		aircraft.house = lpHouse;
 		aircraft.action = "Guard";
 		aircraft.tag = "None";
-		aircraft.direction = "64";
+		aircraft.direction = "0";
 		aircraft.strength = "256";
 		aircraft.x = sx;
 		aircraft.y = sy;
@@ -2615,7 +2615,7 @@ BOOL CMapData::AddUnit(UNIT* lpUnit, LPCTSTR lpType, LPCTSTR lpHouse, DWORD dwPo
 		unit.house = lpHouse;
 		unit.action = "Guard";
 		unit.tag = "None";
-		unit.direction = "64";
+		unit.direction = "0";
 		unit.strength = "256";
 		unit.x = sx;
 		unit.y = sy;

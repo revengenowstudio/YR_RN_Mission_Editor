@@ -34,7 +34,15 @@ class CAircraft : public CDialog
 public:
 	void UpdateStrings();
 	CString m_strength;
-	void Init(CString house = "", CString strength = "256", CString direction = "64", CString action = "Guard", CString tag = "None", CString flag1 = "0", CString flag2 = "0", CString flag3 = "0", CString flag4 = "0");
+	void Init(CString house = "", 
+		CString strength = "256",
+		CString direction = "0",
+		CString action = "Guard", 
+		CString tag = "None", 
+		CString flag1 = "0", 
+		CString flag2 = "0",
+		CString flag3 = "0",
+		CString flag4 = "0");
 	CAircraft(CWnd* pParent = NULL);   // standard constructor
 
 // dialog field data
