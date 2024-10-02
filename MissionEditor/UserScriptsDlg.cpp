@@ -2340,7 +2340,7 @@ void CUserScriptsDlg::OnOK()
 			id.direction = GetParam(data, 7);
 			id.tag = GetParam(data, 8);
 			id.flag1 = GetParam(data, 9);
-			id.flag2 = GetParam(data, 10);
+			id.group = GetParam(data, 10);
 			id.flag3 = GetParam(data, 11);
 			id.flag4 = GetParam(data, 12);
 			id.flag5 = GetParam(data, 13);
@@ -2390,7 +2390,7 @@ void CUserScriptsDlg::OnOK()
 			unit.action = GetParam(data, 6);
 			unit.tag = GetParam(data, 7);
 			unit.flag1 = GetParam(data, 8);
-			unit.flag2 = GetParam(data, 9);
+			unit.group = GetParam(data, 9);
 			unit.flag3 = GetParam(data, 10);
 			unit.flag4 = GetParam(data, 11);
 			unit.flag5 = GetParam(data, 12);
@@ -2446,7 +2446,7 @@ void CUserScriptsDlg::OnOK()
 			air.action = GetParam(data, 6);
 			air.tag = GetParam(data, 7);
 			air.flag1 = GetParam(data, 8);
-			air.flag2 = GetParam(data, 9);
+			air.group = GetParam(data, 9);
 			air.flag3 = GetParam(data, 10);
 			air.flag4 = GetParam(data, 11);
 

@@ -2014,7 +2014,7 @@ void CIsoView::HandleProperties(int n, int type)
 			char tmp[255];
 			dlg.Init((LPCTSTR)data.house, (LPCTSTR)data.strength, (LPCTSTR)data.action,
 				(LPCTSTR)data.direction, (LPCTSTR)data.tag, (LPCTSTR)data.flag1,
-				(LPCTSTR)data.flag2, (LPCTSTR)data.flag3, (LPCTSTR)data.flag4, (LPCTSTR)data.flag5);
+				(LPCTSTR)data.group, (LPCTSTR)data.flag3, (LPCTSTR)data.flag4, (LPCTSTR)data.flag5);
 
 			int res = dlg.DoModal();
 			if (res == IDCANCEL) return;
@@ -2025,7 +2025,7 @@ void CIsoView::HandleProperties(int n, int type)
 			data.direction = dlg.m_direction;
 			data.house = dlg.m_house;
 			data.flag1 = dlg.m_flag1;
-			data.flag2 = dlg.m_flag2;
+			data.group = dlg.m_group;
 			data.flag3 = dlg.m_flag3;
 			data.flag4 = dlg.m_flag4;
 			data.flag5 = dlg.m_flag5;
@@ -2091,7 +2091,7 @@ void CIsoView::HandleProperties(int n, int type)
 			CAircraft dlg(this);
 			char tmp[255];
 			dlg.Init(data.house, data.strength, data.direction, data.action,
-				data.tag, data.flag1, data.flag2, data.flag3, data.flag4);
+				data.tag, data.flag1, data.group, data.flag3, data.flag4);
 
 			int res = dlg.DoModal();
 			if (res == IDCANCEL) return;
@@ -2102,7 +2102,7 @@ void CIsoView::HandleProperties(int n, int type)
 			data.direction = dlg.m_direction;
 			data.house = dlg.m_house;
 			data.flag1 = dlg.m_flag1;
-			data.flag2 = dlg.m_flag2;
+			data.group = dlg.m_group;
 			data.flag3 = dlg.m_flag3;
 			data.flag4 = dlg.m_flag4;
 
@@ -2124,7 +2124,7 @@ void CIsoView::HandleProperties(int n, int type)
 			CUnit dlg(this);
 			char tmp[255];
 			dlg.Init(data.house, data.strength, data.direction, data.action,
-				data.tag, data.flag1, data.flag2, data.flag3, data.flag4, data.flag5, data.flag6);
+				data.tag, data.flag1, data.group, data.flag3, data.flag4, data.flag5, data.flag6);
 
 			int res = dlg.DoModal();
 			if (res == IDCANCEL) return;
@@ -2135,7 +2135,7 @@ void CIsoView::HandleProperties(int n, int type)
 			data.direction = dlg.m_direction;
 			data.house = dlg.m_house;
 			data.flag1 = dlg.m_flag1;
-			data.flag2 = dlg.m_flag2;
+			data.group = dlg.m_group;
 			data.flag3 = dlg.m_flag3;
 			data.flag4 = dlg.m_flag4;
 			data.flag5 = dlg.m_flag5;

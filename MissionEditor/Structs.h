@@ -467,7 +467,7 @@ struct INFANTRY {
 	CString direction; // 8
 	CString tag; // 9
 	CString flag1; // 10
-	CString flag2; // 11
+	CString group; // 11
 	CString flag3; // 12
 	CString flag4; // 13
 	CString flag5; // 14
@@ -484,7 +484,7 @@ struct UNIT {
 	CString action; // 7
 	CString tag; // 8
 	CString flag1; // 9
-	CString flag2; // 10
+	CString group; // 10
 	CString flag3; // 11
 	CString flag4; // 12
 	CString flag5; // 13
@@ -504,7 +504,7 @@ struct AIRCRAFT {
 	CString action; // 7
 	CString tag; // 8
 	CString flag1; // 9
-	CString flag2; // 10
+	CString group; // 10
 	CString flag3; // 11
 	CString flag4; // 12
 	unsigned deleted : 1;

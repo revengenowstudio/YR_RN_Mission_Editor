@@ -55,7 +55,7 @@ public:
 	CString	m_direction;
 	CString	m_house;
 	CString	m_flag1;
-	CString	m_flag2;
+	CString	m_group;
 	CString	m_flag3;
 	CString	m_flag4;
 	CString	m_action;
