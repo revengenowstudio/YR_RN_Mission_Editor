@@ -909,12 +909,16 @@ void CUserScriptsDlg::OnOK()
 			// check bool
 			if (paramcount > 1) {
 				if (params[1].GetLength() > 0) {
-					if (!IsValSet(params[1])) goto nextline;
+					if (!IsValSet(params[1])) {
+						goto nextline;
+					}
 				}
 			}
 
-			int res = MessageBox(params[0], "Continue?", MB_YESNO);
-			if (res == IDNO) break;
+			int res = MessageBox(TranslateStringACP(params[0]), TranslateStringACP("Continue?"), MB_YESNO);
+			if (res == IDNO) {
+				break;
+			}
 		} else if (name == ID_MESSAGE) {
 			if (paramcount < 2) {
 				ReportScriptError(i);
