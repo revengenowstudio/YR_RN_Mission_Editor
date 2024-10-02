@@ -3127,7 +3127,7 @@ void CFinalSunDlg::OnMaptoolsAutolevel()
 
 	Sound(SOUND_POSITIVE);
 
-	auto const txt = TranslateStringACP("LevelerDlgDesc");
+	auto const txt = TranslateStringACP("AutoLevelerDlgDesc");
 	MessageBox(EscapeString(txt), TranslateStringACP("Auto Leveler"));
 
 	m_view.m_isoview->AutoLevel();
