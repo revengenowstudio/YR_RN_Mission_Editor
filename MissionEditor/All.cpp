@@ -277,8 +277,9 @@ void CAll::OnAddkey()
 	CString sec;
 	m_Sections.GetLBText(cusection, sec);
 
-	CString key, value;
-	key = InputBox("Please set the name and value for the current key here: (for example, setting a new key ""Strength"" with the value 200 can be written as ""Strength=200"". You don´t need to specify a value.)", "Create key");
+	auto const msg = TranslateStringACP("IniEditorAddKeyDesc");
+	auto const cap = TranslateStringACP("IniEditorAddKeyCap");
+	auto key = InputBox(msg, cap);
 
 	if (key.Find("=") != -1) {
 		// value specified
