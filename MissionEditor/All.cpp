@@ -246,12 +246,19 @@ void CAll::OnAddkey()
 	CString key, value;
 	key = InputBox("Please set the name and value for the current key here: (for example, setting a new key ""Strength"" with the value 200 can be written as ""Strength=200"". You don´t need to specify a value.)", "Create key");
 
+	if (key.IsEmpty()) {
+		return;
+	}
+
+	CString value;
 	if (key.Find("=") != -1) {
 		// value specified
 		// MW BUGFIX
 		value = key.Right(key.GetLength() - key.Find("=") - 1);
 		key = key.Left(key.Find("="));
 	}
+	key.Trim();
+	value.Trim();
 
 	ini.SetString(sec, key, value);
 
