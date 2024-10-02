@@ -281,12 +281,19 @@ void CAll::OnAddkey()
 	auto const cap = TranslateStringACP("IniEditorAddKeyCap");
 	auto key = InputBox(msg, cap);
 
+	if (key.IsEmpty()) {
+		return;
+	}
+
+	CString value;
 	if (key.Find("=") != -1) {
 		// value specified
 		// MW BUGFIX
 		value = key.Right(key.GetLength() - key.Find("=") - 1);
 		key = key.Left(key.Find("="));
 	}
+	key.Trim();
+	value.Trim();
 
 	ini.SetString(sec, key, value);
 
