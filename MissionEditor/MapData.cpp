@@ -1460,7 +1460,7 @@ void CMapData::UpdateInfantry(BOOL bSave)
 			id.direction = GetParam(data, 7);
 			id.tag = GetParam(data, 8);
 			id.flag1 = GetParam(data, 9);
-			id.flag2 = GetParam(data, 10);
+			id.group = GetParam(data, 10);
 			id.flag3 = GetParam(data, 11);
 			id.flag4 = GetParam(data, 12);
 			id.flag5 = GetParam(data, 13);
@@ -1508,7 +1508,7 @@ void CMapData::UpdateInfantry(BOOL bSave)
 			CString value;
 			value = infantry.house + "," + infantry.type + "," + infantry.strength + "," + infantry.y +
 				"," + infantry.x + "," + infantry.pos + "," + infantry.action + "," + infantry.direction + "," +
-				infantry.tag + "," + infantry.flag1 + "," + infantry.flag2 + "," + infantry.flag3 + "," +
+				infantry.tag + "," + infantry.flag1 + "," + infantry.group + "," + infantry.flag3 + "," +
 				infantry.flag4 + "," + infantry.flag5;
 
 			char c[50];
@@ -2174,7 +2174,7 @@ BOOL CMapData::AddInfantry(INFANTRY* lpInfantry, LPCTSTR lpType, LPCTSTR lpHouse
 		infantry.tag = "None";
 		infantry.direction = "0";
 		infantry.flag1 = "0";
-		infantry.flag2 = "-1";
+		infantry.group = "-1";
 		infantry.flag3 = "0";
 		infantry.flag4 = "1";
 		infantry.flag5 = "0";
@@ -2485,7 +2485,7 @@ void CMapData::GetUnitData(DWORD dwIndex, UNIT* lpUnit) const
 	lpUnit->action = GetParam(data, 6);
 	lpUnit->tag = GetParam(data, 7);
 	lpUnit->flag1 = GetParam(data, 8);
-	lpUnit->flag2 = GetParam(data, 9);
+	lpUnit->group = GetParam(data, 9);
 	lpUnit->flag3 = GetParam(data, 10);
 	lpUnit->flag4 = GetParam(data, 11);
 	lpUnit->flag5 = GetParam(data, 12);
@@ -2510,7 +2510,7 @@ void CMapData::GetAircraftData(DWORD dwIndex, AIRCRAFT* lpAircraft) const
 	lpAircraft->action = GetParam(data, 6);
 	lpAircraft->tag = GetParam(data, 7);
 	lpAircraft->flag1 = GetParam(data, 8);
-	lpAircraft->flag2 = GetParam(data, 9);
+	lpAircraft->group = GetParam(data, 9);
 	lpAircraft->flag3 = GetParam(data, 10);
 	lpAircraft->flag4 = GetParam(data, 11);
 }
@@ -2575,7 +2575,7 @@ BOOL CMapData::AddAircraft(AIRCRAFT* lpAircraft, LPCTSTR lpType, LPCTSTR lpHouse
 		aircraft.x = sx;
 		aircraft.y = sy;
 		aircraft.flag1 = "0";
-		aircraft.flag2 = "0";
+		aircraft.group = "-1";
 		aircraft.flag3 = "1";
 		aircraft.flag4 = "0";
 	}
@@ -2589,7 +2589,7 @@ BOOL CMapData::AddAircraft(AIRCRAFT* lpAircraft, LPCTSTR lpType, LPCTSTR lpHouse
 	CString value;
 	value = aircraft.house + "," + aircraft.type + "," + aircraft.strength + "," + aircraft.y + "," +
 		aircraft.x + "," + aircraft.direction + "," + aircraft.action + "," + aircraft.tag + ","
-		+ aircraft.flag1 + "," + aircraft.flag2 + "," + aircraft.flag3 + "," + aircraft.flag4;
+		+ aircraft.flag1 + "," + aircraft.group + "," + aircraft.flag3 + "," + aircraft.flag4;
 
 	m_mapfile.SetString("Aircraft", id, value);
 
@@ -2620,7 +2620,7 @@ BOOL CMapData::AddUnit(UNIT* lpUnit, LPCTSTR lpType, LPCTSTR lpHouse, DWORD dwPo
 		unit.x = sx;
 		unit.y = sy;
 		unit.flag1 = "0";
-		unit.flag2 = "-1";
+		unit.group = "-1";
 		unit.flag3 = "0";
 		unit.flag4 = "-1";
 		unit.flag5 = "1";
@@ -2637,7 +2637,7 @@ BOOL CMapData::AddUnit(UNIT* lpUnit, LPCTSTR lpType, LPCTSTR lpHouse, DWORD dwPo
 	CString value;
 	value = unit.house + "," + unit.type + "," + unit.strength + "," + unit.y + "," +
 		unit.x + "," + unit.direction + "," + unit.action + "," + unit.tag + ","
-		+ unit.flag1 + "," + unit.flag2 + "," + unit.flag3 + "," + unit.flag4 + "," + unit.flag5 + "," + unit.flag6;
+		+ unit.flag1 + "," + unit.group + "," + unit.flag3 + "," + unit.flag4 + "," + unit.flag5 + "," + unit.flag6;
 
 	m_mapfile.SetString("Units", id, value);
 
@@ -6874,7 +6874,7 @@ BOOL CMapData::GetInfantryINIData(int index, CString* lpINI)
 	CString value;
 	value = infantry.house + "," + infantry.type + "," + infantry.strength + "," + infantry.y +
 		"," + infantry.x + "," + infantry.pos + "," + infantry.action + "," + infantry.direction + "," +
-		infantry.tag + "," + infantry.flag1 + "," + infantry.flag2 + "," + infantry.flag3 + "," +
+		infantry.tag + "," + infantry.flag1 + "," + infantry.group + "," + infantry.flag3 + "," +
 		infantry.flag4 + "," + infantry.flag5;
 
 	*lpINI = value;

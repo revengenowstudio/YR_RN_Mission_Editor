@@ -46,7 +46,7 @@ CAircraft::CAircraft(CWnd* pParent /*=NULL*/)
 	m_direction = _T("");
 	m_house = _T("");
 	m_flag1 = _T("");
-	m_flag2 = _T("");
+	m_group = _T("");
 	m_flag3 = _T("");
 	m_flag4 = _T("");
 	m_action = _T("");
@@ -63,7 +63,7 @@ void CAircraft::DoDataExchange(CDataExchange* pDX)
 	DDX_CBString(pDX, IDC_DIRECTION, m_direction);
 	DDX_CBString(pDX, IDC_HOUSE, m_house);
 	DDX_Text(pDX, IDC_P1, m_flag1);
-	DDX_Text(pDX, IDC_P2, m_flag2);
+	DDX_Text(pDX, IDC_P2, m_group);
 	DDX_Text(pDX, IDC_P3, m_flag3);
 	DDX_Text(pDX, IDC_P4, m_flag4);
 	DDX_CBString(pDX, IDC_STATE, m_action);
@@ -80,7 +80,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // handlers for messages CAircraft 
 
-void CAircraft::Init(CString house, CString strength, CString direction, CString action, CString tag, CString flag1, CString flag2, CString flag3, CString flag4)
+void CAircraft::Init(CString house, CString strength, CString direction, CString action, CString tag, CString flag1, CString group, CString flag3, CString flag4)
 {
 	if (house.GetLength() == 0) {
 		m_house = TranslateHouse(Map->GetHouseID(0), TRUE);
@@ -90,7 +90,7 @@ void CAircraft::Init(CString house, CString strength, CString direction, CString
 
 
 	m_flag1 = flag1;
-	m_flag2 = flag2;
+	m_group = group;
 	m_flag3 = flag3;
 	m_flag4 = flag4;
 
@@ -139,7 +139,7 @@ void CAircraft::OnOK()
 	m_house = TranslateHouse(m_house, FALSE);
 	TruncSpace(m_tag);
 	TruncSpace(m_flag1);
-	TruncSpace(m_flag2);
+	TruncSpace(m_group);
 	TruncSpace(m_flag3);
 	TruncSpace(m_flag4);
 

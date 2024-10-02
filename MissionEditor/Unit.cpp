@@ -45,7 +45,7 @@ CUnit::CUnit(CWnd* pParent /*=NULL*/)
 	//{{AFX_DATA_INIT(CUnit)
 	m_direction = _T("");
 	m_flag1 = _T("");
-	m_flag2 = _T("");
+	m_group = _T("");
 	m_house = _T("");
 	m_flag3 = _T("");
 	m_flag4 = _T("");
@@ -64,7 +64,7 @@ void CUnit::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STRENGTH, m_strength_ctrl);
 	DDX_CBString(pDX, IDC_DIRECTION, m_direction);
 	DDX_Text(pDX, IDC_P1, m_flag1);
-	DDX_Text(pDX, IDC_P2, m_flag2);
+	DDX_Text(pDX, IDC_P2, m_group);
 	DDX_CBString(pDX, IDC_HOUSE, m_house);
 	DDX_Text(pDX, IDC_P3, m_flag3);
 	DDX_Text(pDX, IDC_P4, m_flag4);
@@ -84,7 +84,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CUnit 
 
-void CUnit::Init(CString house, CString strength, CString direction, CString action, CString tag, CString flag1, CString flag2, CString flag3, CString flag4, CString flag5, CString flag6)
+void CUnit::Init(CString house, CString strength, CString direction, CString action, CString tag, CString flag1, CString group, CString flag3, CString flag4, CString flag5, CString flag6)
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -99,7 +99,7 @@ void CUnit::Init(CString house, CString strength, CString direction, CString act
 	}
 
 	m_flag1 = flag1;
-	m_flag2 = flag2;
+	m_group = group;
 	m_flag3 = flag3;
 	m_flag4 = flag4;
 	m_flag5 = flag5;
