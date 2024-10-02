@@ -209,17 +209,23 @@ void CAll::OnDeletesection()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	int cusection;
-	cusection = m_Sections.GetCurSel();
+	const int cusection = m_Sections.GetCurSel();
+
 	if (cusection == -1) {
-		MessageBox("You cannot delete a section without choosing one.");
+		auto const msg = TranslateStringACP("IniEditorItemUnselected");
+		auto const cap = TranslateStringACP("Error");
+		MessageBox(msg, cap);
 		return;
 	}
 
 	CString str;
 	m_Sections.GetLBText(cusection, str);
 
-	if (MessageBox(CString((CString)"Are you sure you want to delete " + str + "? You should be really careful, you may not be able to use the map afterwards."), "Delete section", MB_YESNO) == IDNO) {
+	auto const msgBefore = TranslateStringACP("IniEditorSelectionDeletePrefix");
+	auto const msgAfter = TranslateStringACP("IniEditorSelectionDeleteSUffix");
+	auto const cap = TranslateStringACP("IniEditorDeleteSelectionCap");
+
+	if (MessageBox(msgBefore + str + msgAfter, cap, MB_YESNO) == IDNO) {
 		return;
 	}
 
