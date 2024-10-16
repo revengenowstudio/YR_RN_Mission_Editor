@@ -1756,9 +1756,8 @@ void CMapData::UpdateNodes(BOOL bSave)
 			int x = atoi(sx);
 			int y = atoi(sy);
 			int bid = buildingid[type];
-			int d, f;
-			for (d = 0; d < buildinginfo[bid].h; d++) {
-				for (f = 0; f < buildinginfo[bid].w; f++) {
+			for (auto d = 0; d < buildinginfo[bid].h; d++) {
+				for (auto f = 0; f < buildinginfo[bid].w; f++) {
 					int pos = x + d + (y + f) * GetIsoSize();
 					fielddata[pos].node.type = buildingid[type];
 					fielddata[pos].node.house = id;

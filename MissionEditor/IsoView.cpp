@@ -5585,14 +5585,21 @@ void CIsoView::DrawMap()
 			}
 
 
-			if (m.node.type > -1) {
+			if (m.node.type >= 0) {
 				last_succeeded_operation = 10102;
 
 				CString house = m.node.house;
 				CString tmp;
 
-				if (Map->GetNodeAt(mapCoords + MapVec(1, 0), tmp) != m.node.index && Map->GetNodeAt(mapCoords + MapVec(0, 1), tmp) != m.node.index) {
-					const auto drawCoordsBld = GetRenderTargetCoordinates(mapCoords - MapVec(buildinginfo[m.node.type].h - 1, buildinginfo[m.node.type].w - 1));
+				bool shouldDraw = true;
+				auto const leftNodeIdx = Map->GetNodeAt(mapCoords + MapVec(-1, 0), tmp);
+				auto const rightNodeIdx = Map->GetNodeAt(mapCoords + MapVec(0, -1), tmp);
+				if (leftNodeIdx == m.node.index || rightNodeIdx == m.node.index) {
+					shouldDraw = false;
+				}
+
+				if (shouldDraw) {
+					const auto drawCoordsBld = GetRenderTargetCoordinates(mapCoords);
 
 					COLORREF c;
 					c = GetColor(house);
