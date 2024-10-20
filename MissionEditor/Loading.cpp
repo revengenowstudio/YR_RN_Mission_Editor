@@ -1934,11 +1934,11 @@ void CLoading::SetImageData(unsigned char* pBuffer, const CString& NameInDict, i
 
 void CLoading::SetImageData(unsigned char* pBuffer, PICDATA& pData, const int FullWidth, const int FullHeight, Palette* pPal, bool forceNoRemap)
 {
-	if (pData.pic) {
-		delete[](pData.pic);
+	if (auto pPic = std::exchange(pData.pic, nullptr)) {
+		delete[](pPic);
 	}
-	if (pData.vborder) {
-		delete[](pData.vborder);
+	if (auto pBorder = std::exchange(pData.vborder, nullptr)) {
+		delete[](pBorder);
 	}
 
 	// Get available area
