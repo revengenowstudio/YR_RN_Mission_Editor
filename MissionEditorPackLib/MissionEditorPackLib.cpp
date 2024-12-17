@@ -1883,7 +1883,7 @@ namespace FSunPackLib
 
 		last_succeeded_operation = 70001;
 
-		SetColorKey(pdds[0], -1);
+		SetColorKey(pdds[0], CLR_INVALID);
 
 		last_succeeded_operation = 70002;
 
