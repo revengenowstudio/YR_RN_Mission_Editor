@@ -3881,8 +3881,11 @@ void CIsoView::DrawCell(int x, int y, int w, int h, COLORREF col, BOOL dotted, H
 #ifdef RA2_MODE
 	width = 2;
 #endif
-	if (!dotted)	p = CreatePen(PS_SOLID, width, col);
-	else	p = CreatePen(PS_DOT, 0, col);
+	if (!dotted) { 
+		p = CreatePen(PS_SOLID, width, col); 
+	} else { 
+		p = CreatePen(PS_DOT, 0, col); 
+	}
 
 	SelectObject(hDC, p);
 
@@ -3893,9 +3896,7 @@ void CIsoView::DrawCell(int x, int y, int w, int h, COLORREF col, BOOL dotted, H
 		LineTo(hDC, p3.x, p3.y + 1);
 		LineTo(hDC, p4.x - 1, p4.y);
 		LineTo(hDC, p1.x, p1.y - 1);
-	}
-
-	if (!dotted) {
+	} else {
 		MoveToEx(hDC, p1.x, p1.y, NULL);
 		LineTo(hDC, p2.x, p2.y);
 		LineTo(hDC, p3.x, p3.y);
@@ -3903,12 +3904,9 @@ void CIsoView::DrawCell(int x, int y, int w, int h, COLORREF col, BOOL dotted, H
 		LineTo(hDC, p1.x, p1.y);
 	}
 
-
-
-
-
-	if (!hDC_)
+	if (!hDC_) {
 		lpdsBack->ReleaseDC(hDC);
+	}
 
 	DeleteObject(p);
 }
