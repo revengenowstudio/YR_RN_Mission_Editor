@@ -335,7 +335,7 @@ public:
 			DDBLTFX fx;
 			memset(&fx, 0, sizeof(DDBLTFX));
 			fx.dwSize = sizeof(DDBLTFX);
-			lpdsBack->Blt(&blrect, pic, &srcRect, DDBLT_KEYSRC, &fx);
+			lpdsBack->Blt(&blrect, pic, &srcRect, DDBLT_KEYSRC, NULL);
 			return;
 		}
 
