@@ -285,12 +285,14 @@ public:
 		
 		//GetWindowRect(&r);
 
+		DDCOLORKEY ddckCKSrcBlt = { 0 };
 		if (width == -1 || height == -1) {
 			DDSURFACEDESC2 ddsd;
 			memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
 			ddsd.dwSize = sizeof(DDSURFACEDESC2);
 			ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
 			pic->GetSurfaceDesc(&ddsd);
+			ddckCKSrcBlt = ddsd.ddckCKSrcBlt;
 			width = ddsd.dwWidth;
 			height = ddsd.dwHeight;
 		}
@@ -335,7 +337,8 @@ public:
 			DDBLTFX fx;
 			memset(&fx, 0, sizeof(DDBLTFX));
 			fx.dwSize = sizeof(DDBLTFX);
-			lpdsBack->Blt(&blrect, pic, &srcRect, DDBLT_KEYSRC, NULL);
+			fx.ddckSrcColorkey = ddckCKSrcBlt;
+			lpdsBack->Blt(&blrect, pic, &srcRect, DDBLT_KEYSRC, &fx);
 			return;
 		}
 
