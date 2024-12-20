@@ -211,7 +211,7 @@ void releaseIfExists(TDD& surf)
 BOOL CIsoView::RecreateSurfaces()
 {
 	last_succeeded_operation = 7;
-
+	::MessageBoxA(NULL, "test ddraw", "test", MB_OK);
 	errstream << "\n\nDirectDrawCreate() will be called now\n";
 	errstream.flush();
 
