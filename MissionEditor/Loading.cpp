@@ -1762,30 +1762,43 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 			unsigned char* FramesBuffers[2];
 			FSunPackLib::SetCurrentSHP(FileName, nMix);
 			FSunPackLib::XCC_GetSHPHeader(&header);
+
+			const int nStartWalkFrame = art.GetInteger(ArtID, "StartWalkFrame", 0);
+			const int nWalkFrames = art.GetInteger(ArtID, "WalkFrames", 1);
+
 			for (int i = 0; i < 8; ++i) {
-				FSunPackLib::LoadSHPImage(framesToRead[i], 1, &FramesBuffers[0]);
+				if (!FSunPackLib::LoadSHPImage(framesToRead[i], 1, &FramesBuffers[0])) {
+					break;
+				}
 				CString DictName;
 				DictName.Format("%s%d", ImageID, i);
 				CString PaletteName = art.GetStringOr(ArtID, "Palette", "unit");
 				GetFullPaletteName(PaletteName, cur_theat);
 
 				if (bHasTurret) {
-					int nStartWalkFrame = art.GetInteger(ArtID, "StartWalkFrame", 0);
-					int nWalkFrames = art.GetInteger(ArtID, "WalkFrames", 1);
-					int turretFramesToRead[8];
+					do {
+						auto const turretFrameIndex = nStartWalkFrame + 8 * nWalkFrames + 4 * ((i + 1) % 8);
+						// illegal frame
+						if (turretFrameIndex >= header.c_images / 2) {
+							bHasTurret = false;
+							break;
+						}
 
-					// fix from cmcc
-					turretFramesToRead[i] = nStartWalkFrame + 8 * nWalkFrames + 4 * ((i + 1) % 8);
+						if (!FSunPackLib::LoadSHPImage(turretFrameIndex, 1, &FramesBuffers[1])) {
+							bHasTurret = false;
+							break;
+						}
+						UnionSHP_Add(FramesBuffers[0], header.cx, header.cy);
+						UnionSHP_Add(FramesBuffers[1], header.cx, header.cy);
+						unsigned char* outBuffer;
+						int outW, outH;
+						UnionSHP_GetAndClear(outBuffer, &outW, &outH);
 
-					FSunPackLib::LoadSHPImage(turretFramesToRead[i], 1, &FramesBuffers[1]);
-					UnionSHP_Add(FramesBuffers[0], header.cx, header.cy);
-					UnionSHP_Add(FramesBuffers[1], header.cx, header.cy);
-					unsigned char* outBuffer;
-					int outW, outH;
-					UnionSHP_GetAndClear(outBuffer, &outW, &outH);
-
-					SetImageData(outBuffer, DictName, outW, outH, m_palettes.LoadPalette(PaletteName));
-				} else {
+						SetImageData(outBuffer, DictName, outW, outH, m_palettes.LoadPalette(PaletteName));
+					} while (0);
+				} 
+				
+				if (!bHasTurret) {
 					SetImageData(FramesBuffers[0], DictName, header.cx, header.cy, m_palettes.LoadPalette(PaletteName));
 				}
 			}
