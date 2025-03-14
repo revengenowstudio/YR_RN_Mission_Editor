@@ -487,6 +487,8 @@ public:
 		return CPoint(static_cast<LONG>(x), static_cast<LONG>(y));
 	}
 
+	static CString GetBuildingIDBy(size_t offset);
+
 private:
 	void UpdateTubes(BOOL bSave);
 	MAPFIELDDATA* GetMappackPointer(DWORD dwPos);
@@ -504,10 +506,6 @@ private:
 	void UpdateTerrain(BOOL bSave = FALSE, int num = -1);
 	void UpdateInfantry(BOOL bSave = FALSE);
 	void UpdateAircraft(BOOL bSave = FALSE);
-
-
-
-
 
 	map<CString, int> buildingid;
 	map<CString, int> terrainid;

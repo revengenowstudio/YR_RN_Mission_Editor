@@ -77,6 +77,7 @@ This function calculates a number for the specified building type.
 Because this function is slow, you should only use it to fill the
 buildingid map
 */
+static size_t constexpr mapDefinedStartOffset = 0x0C00;
 
 int getItemNumber(const CString& section, const CString& name) {
 	auto const& ini = Map->GetIniFile();
@@ -89,9 +90,31 @@ int getItemNumber(const CString& section, const CString& name) {
 	idx = ini.GetSection(section).FindValue(name);
 	if (idx > -1) {
 		// why ?
-		return idx + 0x0C00;
+		return idx + mapDefinedStartOffset;
 	}
 	return -1;
+}
+
+CString getItemId(const CString& section, size_t offset) {
+	auto const& rulesSec = rules.GetSection(section);
+	if (offset < rulesSec.Size()) {
+		return rulesSec.Nth(offset).second;
+	}
+
+	do {
+		if (offset < mapDefinedStartOffset) {
+			break;
+		}
+		offset -= mapDefinedStartOffset;
+		auto const& mapSec = Map->GetIniFile().GetSection(section);
+		if (offset >= mapSec.Size()) {
+			break;
+		}
+		return mapSec.Nth(offset).second;
+
+	} while (0);
+
+	throw std::runtime_error("invalid offset");
 }
 
 inline int GetBuildingNumber(const CString& name)
@@ -110,6 +133,11 @@ inline int GetSmudgeNumber(const CString& name)
 	return getItemNumber("SmudgeTypes", name);
 }
 #endif
+
+CString CMapData::GetBuildingIDBy(size_t offset)
+{
+	return getItemId("BuildingTypes", offset);
+}
 
 SNAPSHOTDATA::SNAPSHOTDATA()
 {

@@ -5919,7 +5919,7 @@ void CIsoView::DrawMap()
 					//#endif
 
 					if (pic.pic == NULL) {
-						auto const& buildingId = rules.GetSection("BuildingTypes").Nth(m.node.type).second;
+						auto const& buildingId = CMapData::GetBuildingIDBy(m.node.type);
 						if (!buildingId.IsEmpty() && !missingimages[buildingId]) {
 							SetError("Loading graphics");
 							theApp.m_loading->LoadUnitGraphic(buildingId);
