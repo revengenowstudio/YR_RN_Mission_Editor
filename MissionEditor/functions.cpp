@@ -1288,19 +1288,16 @@ CString GetFreeID()
 			"Actions",
 			"AITriggerTypes",
 		};
-
+		// 0=GAPOWR ...
 		for (auto const& id : typeLists) {
-			for (auto const& [_, id] : ini[id]) {
-				if (id == input) {
-					return true;
-				}
+			if (ini[id].HasValue(input)) {
+				return true;
 			}
 		}
+		// 1000000=Foo, ...
 		for (auto const& id : itemLists) {
-			for (auto const& [id, _] : ini[id]) {
-				if (id == input) {
-					return true;
-				}
+			if (ini[id].Exists(input)) {
+				return true;
 			}
 		}
 
