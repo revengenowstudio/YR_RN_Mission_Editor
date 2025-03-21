@@ -1767,23 +1767,28 @@ void CFinalSunDlg::OnFileNew()
 			int i;
 			int count = Map->GetTerrainCount();
 			if (!bImportTrees) {
-				for (i = 0; i < count; i++)
+				for (i = 0; i < count; i++) {
 					Map->DeleteTerrain(0);
+				}
 			}
 
 			if (!bImportUnits) {
 				count = Map->GetInfantryCount();
-				for (i = 0; i < count; i++)
+				for (i = 0; i < count; i++) {
 					Map->DeleteInfantry(0);
+				}
 				count = Map->GetUnitCount();
-				for (i = 0; i < count; i++)
+				for (i = 0; i < count; i++) {
 					Map->DeleteUnit(0);
+				}
 				count = Map->GetStructureCount();
-				for (i = 0; i < count; i++)
-					Map->DeleteStructure(0);
+				for (i = count; i >= 0; i--) {
+					Map->DeleteNthStructure(0);
+				}
 				count = Map->GetAircraftCount();
-				for (i = 0; i < count; i++)
+				for (i = 0; i < count; i++) {
 					Map->DeleteAircraft(0);
+				}
 			}
 
 			ini.SetString("Basic", "Name", "Noname");

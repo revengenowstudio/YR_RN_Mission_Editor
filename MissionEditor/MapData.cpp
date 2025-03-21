@@ -1585,11 +1585,9 @@ void CMapData::UpdateStructures(BOOL bSave)
 
 	m_structurepaint.clear();
 
-	auto const& sec = m_mapfile["Structures"];
-
-	for (auto i = 0; i < sec.Size(); i++) {
+	for (auto const& [index, val] : m_mapfile.GetSection("Structures")) {
 		STRUCTUREPAINT sp;
-		auto const& val = sec.Nth(i).second;
+		const size_t indexNum = atoi(index);
 		sp.col = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->GetColor(GetParam(val, 0));
 		sp.strength = atoi(GetParam(val, 2));
 		sp.upgrade1 = GetParam(val, 12);
@@ -1605,17 +1603,17 @@ void CMapData::UpdateStructures(BOOL bSave)
 		TruncSpace(sp.upgrade2);
 		TruncSpace(sp.upgrade3);
 
-		m_structurepaint.push_back(sp);
+		m_structurepaint.insert_or_assign(indexNum, sp);
 
 		int x = atoi(GetParam(val, 4));
 		int y = atoi(GetParam(val, 3));
 		int d, e;
-		int bid = buildingid[GetParam(val, 1)];
+		int bid = buildingid.at(sp.type);
 		for (d = 0; d < buildinginfo[bid].h; d++) {
 			for (e = 0; e < buildinginfo[bid].w; e++) {
 				int pos = (x + d) + (y + e) * GetIsoSize();
 				if (pos < fielddata.size()) {
-					fielddata[pos].structure = i;
+					fielddata[pos].structure = indexNum;
 					fielddata[pos].structuretype = bid;
 				}
 
@@ -1968,7 +1966,7 @@ void CMapData::DeleteUnit(DWORD dwIndex)
 	Mini_UpdatePos(x, y, IsMultiplayer());
 }
 
-void CMapData::DeleteStructure(DWORD dwIndex)
+void CMapData::DeleteNthStructure(const size_t dwIndex)
 {
 	if (dwIndex >= GetStructureCount()) {
 		return;
@@ -1983,9 +1981,18 @@ void CMapData::DeleteStructure(DWORD dwIndex)
 
 	pSec->RemoveAt(dwIndex);
 
+#if 1
+	if (auto fieldData = GetFielddataAt(x, y)) {
+		auto const refCout = m_structurepaint.erase(fieldData->structure);
+		ASSERT(refCout == 1);
+		fieldData->structure = -1;
+		fieldData->structuretype = -1;
+	}
+#else
 	if (!m_noAutoObjectUpdate) {
 		UpdateStructures(FALSE);
 	}
+#endif
 
 	int d, e;
 	int bid = buildingid[type];
@@ -1996,6 +2003,18 @@ void CMapData::DeleteStructure(DWORD dwIndex)
 			Mini_UpdatePos(x + d, y + e, IsMultiplayer());
 		}
 	}
+}
+
+bool CMapData::DeleteStructure(const size_t id)
+{
+	CString idStr;
+	idStr.Format("%d", id);
+	auto const idx = m_mapfile.GetSection("Structures").FindIndex(idStr);
+	if (idx >= 0) {
+		DeleteNthStructure(idx);
+		return true;
+	}
+	return false;
 }
 
 void CMapData::DeleteAircraft(DWORD dwIndex)
@@ -2090,7 +2109,7 @@ BOOL CMapData::AddWaypoint(CString id, DWORD dwPos)
 
 
 
-CString CMapData::GetStructureData(DWORD dwIndex, STRUCTURE* lpStructure) const
+CString CMapData::GetNthStructureData(DWORD dwIndex, STRUCTURE* lpStructure) const
 {
 	auto const [id, data] = GetNthDataOfTechno(dwIndex, TechnoType::Building);
 	if (!ParseStructureData(data, *lpStructure)) {
@@ -2099,7 +2118,23 @@ CString CMapData::GetStructureData(DWORD dwIndex, STRUCTURE* lpStructure) const
 	return id;
 }
 
-void CMapData::GetStdStructureData(DWORD dwIndex, STDOBJECTDATA* lpStdStructure) const
+void CMapData::GetStructureData(size_t id, STRUCTURE* lpStructure) const
+{
+	auto const& data = GetDataOfTechnoByID(id, TechnoType::Building);
+	if (!data.IsEmpty()) {
+		ParseStructureData(data, *lpStructure);
+	}
+}
+
+void CMapData::GetStdStructureData(const size_t id, STDOBJECTDATA* lpStdStructure) const
+{
+	auto const& data = GetDataOfTechnoByID(id, TechnoType::Building);
+	if (!data.IsEmpty()) {
+		ParseBasicTechnoData(data, *lpStdStructure);
+	}
+}
+
+void CMapData::GetNthStdStructureData(DWORD dwIndex, STDOBJECTDATA* lpStdStructure) const
 {
 	auto const [_, data] = GetNthDataOfTechno(dwIndex, TechnoType::Building);
 	ParseBasicTechnoData(data, *lpStdStructure);
@@ -2498,7 +2533,7 @@ bool CMapData::ParseStructureData(const CString& rawText, STRUCTURE& structure) 
 	return true;
 }
 
-std::pair<CString, CString> CMapData::GetNthDataOfTechno(const size_t index, const TechnoType type) const
+static CString GetDataSection(const TechnoType type)
 {
 	CString sectionID;
 	switch (type)
@@ -2518,11 +2553,23 @@ std::pair<CString, CString> CMapData::GetNthDataOfTechno(const size_t index, con
 	default:
 		break;
 	}
-	auto const& section = m_mapfile.GetSection(sectionID);
+	return sectionID;
+}
+
+std::pair<CString, CString> CMapData::GetNthDataOfTechno(const size_t index, const TechnoType type) const
+{
+	auto const& section = m_mapfile.GetSection(GetDataSection(type));
 	if (index >= section.Size()) {
 		return {};
 	}
 	return section.Nth(index);
+}
+
+CString CMapData::GetDataOfTechnoByID(const size_t id, const TechnoType type) const
+{
+	CString idStr;
+	idStr.Format("%d", id);
+	return m_mapfile.GetString(GetDataSection(type), idStr);
 }
 
 bool CMapData::ParseBasicTechnoData(const CString& rawText, STDOBJECTDATA& data) const
@@ -2874,6 +2921,7 @@ void CMapData::GetStdAircraftData(DWORD dwIndex, STDOBJECTDATA* lpStdAircraft) c
 	auto const [_, data] = GetNthDataOfTechno(dwIndex, TechnoType::Aircraft);
 	ParseBasicTechnoData(data, *lpStdAircraft);
 }
+
 void CMapData::GetStdUnitData(DWORD dwIndex, STDOBJECTDATA* lpStdUnit) const
 {
 	auto const [_, data] = GetNthDataOfTechno(dwIndex, TechnoType::Unit);
@@ -5506,11 +5554,12 @@ void CMapData::Paste(int x, int y, int z_mod)
 	CloseClipboard();
 }
 
-void CMapData::GetStructurePaint(int index, STRUCTUREPAINT* lpStructurePaint) const
+void CMapData::GetStructurePaint(int index, STRUCTUREPAINT& structurePaint) const
 {
-	if (index < 0 || index >= m_structurepaint.size()) return;
-
-	*lpStructurePaint = m_structurepaint[index];
+	auto const it = m_structurepaint.find(index);
+	if (it != m_structurepaint.end()) {
+		structurePaint = it->second;
+	}
 }
 
 void CMapData::InitMinimap()
@@ -5721,8 +5770,9 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 
 		str[i] = obj;
 	}
-	for (int i = str_count - 1; i >= 0; i--)
-		DeleteStructure(i);
+	for (int i = str_count - 1; i >= 0; i--) {
+		DeleteNthStructure(i);
+	}
 
 	for (int i = 0; i < unit_count; i++) {
 		UNIT obj;
@@ -6194,14 +6244,14 @@ BOOL CMapData::IsYRMap()
 
 		count = GetStructureCount();
 		for (i = 0; i < count; i++) {
-			STRUCTURE str;
-			GetStructureData(i, &str);
+			STRUCTURE structure;
+			GetNthStructureData(i, &structure);
 
-			if (str.deleted) {
+			if (structure.deleted) {
 				continue;
 			}
 
-			if (g_data["YRBuildings"].Exists(str.basic.type)) {
+			if (g_data["YRBuildings"].Exists(structure.basic.type)) {
 				return TRUE;
 			}
 		}

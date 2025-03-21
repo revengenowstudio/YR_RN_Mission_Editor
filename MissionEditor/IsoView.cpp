@@ -1541,8 +1541,9 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 							int id = Map->GetNodeAt(dwPos, house);
 							Map->DeleteNode(house, id);
 						}
-						if (cur_field.structure != oldData[i][e].structure)
+						if (cur_field.structure != oldData[i][e].structure && cur_field.structure >= 0) {
 							Map->DeleteStructure(cur_field.structure);
+						}
 						if (cur_field.terrain != oldData[i][e].terrain)
 							Map->DeleteTerrain(cur_field.terrain);
 #ifdef SMUDGE_SUPP
@@ -4168,10 +4169,21 @@ void CIsoView::UpdateStatusBar(int x, int y)
 		objId = n;
 	}
 
-	if (objId >= 0 && type != TechnoType::Infantry) {
+	do {
+		if (type == TechnoType::Infantry) {
+			break;
+		}
+		if (objId < 0) {
+			break;
+		}
+		if (type == TechnoType::Building) {
+			auto const data = Map->GetDataOfTechnoByID(objId, type);
+			Map->ParseTechnoData(data, type, techno);
+			break;
+		}
 		auto const [_, data] = Map->GetNthDataOfTechno(objId, type);
 		Map->ParseTechnoData(data, type, techno);
-	}
+	} while (0);
 
 	if (techno.basic.type.GetLength() > 0) {
 		char c[50];
@@ -4975,9 +4987,13 @@ DWORD CIsoView::PlaceCurrentObjectAt(int x, int y)
 			int t = Map->GetStructureAt(expectingPos);
 			if (t >= 0) {
 				STRUCTURE structure;
-				auto const id = Map->GetStructureData(t, &structure);
+				Map->GetStructureData(t, &structure);
 				Map->DeleteStructure(t);
 				structure.basic.house = AD.data_s;
+
+				CString id;
+				id.Format("%d", t);
+
 				Map->AddStructure(&structure, nullptr, nullptr, 0, std::move(id));
 				bchanged = TRUE;
 			}
@@ -5757,7 +5773,7 @@ void CIsoView::DrawMap()
 				if (shouldDraw) {
 
 					STRUCTUREPAINT objp;
-					Map->GetStructurePaint(m.structure, &objp);
+					Map->GetStructurePaint(m.structure, objp);
 
 					const auto drawCoordsBld = GetRenderTargetCoordinates(MapCoords(objp.x, objp.y));
 					int id = m.structuretype;
