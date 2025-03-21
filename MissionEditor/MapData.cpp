@@ -1573,6 +1573,18 @@ void CMapData::UpdateAircraft(BOOL bSave)
 	}
 }
 
+void CMapData::updateMiniMapAroundStructure(const CString& typeId, const int x, const int y)
+{
+	int bid = buildingid[typeId];
+	for (int d = 0; d < buildinginfo[bid].h; d++) {
+		for (int e = 0; e < buildinginfo[bid].w; e++) {
+			int pos = (x + d) + (y + e) * GetIsoSize();
+
+			Mini_UpdatePos(x + d, y + e, IsMultiplayer());
+		}
+	}
+}
+
 void CMapData::UpdateStructures(BOOL bSave)
 {
 	if (bSave != FALSE) {
@@ -1981,28 +1993,16 @@ void CMapData::DeleteNthStructure(const size_t dwIndex)
 
 	pSec->RemoveAt(dwIndex);
 
-#if 1
-	if (auto fieldData = GetFielddataAt(x, y)) {
-		auto const refCout = m_structurepaint.erase(fieldData->structure);
-		ASSERT(refCout == 1);
-		fieldData->structure = -1;
-		fieldData->structuretype = -1;
-	}
-#else
 	if (!m_noAutoObjectUpdate) {
-		UpdateStructures(FALSE);
-	}
-#endif
-
-	int d, e;
-	int bid = buildingid[type];
-	for (d = 0; d < buildinginfo[bid].h; d++) {
-		for (e = 0; e < buildinginfo[bid].w; e++) {
-			int pos = (x + d) + (y + e) * GetIsoSize();
-
-			Mini_UpdatePos(x + d, y + e, IsMultiplayer());
+		if (auto fieldData = GetFielddataAt(x, y)) {
+			auto const refCout = m_structurepaint.erase(fieldData->structure);
+			ASSERT(refCout == 1);
+			fieldData->structure = -1;
+			fieldData->structuretype = -1;
 		}
 	}
+
+	updateMiniMapAroundStructure(type, x, y);
 }
 
 bool CMapData::DeleteStructure(const size_t id)
@@ -2337,15 +2337,14 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 	if (lpStructure != NULL) {
 		structure = *lpStructure;
 	} else {
-		char cx[10], cy[10];
-		itoa(dwPos % Map->GetIsoSize(), cx, 10);
-		itoa(dwPos / Map->GetIsoSize(), cy, 10);
+		auto const coord_x = dwPos % Map->GetIsoSize();
+		auto const coord_y = dwPos / Map->GetIsoSize();
 
 		structure.basic.strength = "256";
 		structure.basic.house = lpHouse;
 		structure.basic.type = lpType;
-		structure.basic.x = cx;
-		structure.basic.y = cy;
+		structure.basic.x.Format("%d", coord_x);
+		structure.basic.y.Format("%d", coord_y);
 		structure.tag = "None";
 		structure.direction = "0";
 		structure.flag1 = "1";
@@ -2379,7 +2378,32 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 	section.InsertOrAssign(id, value);
 
 	if (!m_noAutoObjectUpdate) {
-		UpdateStructures(FALSE);
+		auto const x = atoi(structure.basic.x);
+		auto const y = atoi(structure.basic.y);
+		const size_t idNum = atoi(id);
+		if (auto fieldData = GetFielddataAt(x, y)) {
+			STRUCTUREPAINT sp;
+			sp.col = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->GetColor(structure.basic.house);
+			sp.strength = atoi(structure.basic.strength);
+			sp.upgrade1 = structure.upgrade1;
+			sp.upgrade2 = structure.upgrade2;
+			sp.upgrade3 = structure.upgrade3;
+			sp.upradecount = atoi(structure.upgradecount);
+			sp.x = x;
+			sp.y = y;
+			sp.direction = atoi(structure.direction);
+			sp.type = structure.basic.type;
+
+			TruncSpace(sp.upgrade1);
+			TruncSpace(sp.upgrade2);
+			TruncSpace(sp.upgrade3);
+
+			m_structurepaint.insert_or_assign(idNum, sp);
+
+			fieldData->structure = idNum;
+			fieldData->structuretype = buildingid.at(sp.type);
+		}
+		updateMiniMapAroundStructure(structure.basic.type, x, y);
 	}
 
 	return TRUE;

@@ -510,6 +510,7 @@ private:
 	void UpdateTerrain(BOOL bSave = FALSE, int num = -1);
 	void UpdateInfantry(BOOL bSave = FALSE);
 	void UpdateAircraft(BOOL bSave = FALSE);
+	void updateMiniMapAroundStructure(const CString& typeId, const int x, const int y);
 
 	map<CString, int> buildingid;
 	map<CString, int> terrainid;
