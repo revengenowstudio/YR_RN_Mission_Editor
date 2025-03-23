@@ -1573,14 +1573,26 @@ void CMapData::UpdateAircraft(BOOL bSave)
 	}
 }
 
-void CMapData::updateMiniMapAroundStructure(const CString& typeId, const int x, const int y)
+void CMapData::updateFieldDataAroundStructure(const CString& typeId, const size_t id, const int x, const int y, bool reset)
 {
-	int bid = buildingid[typeId];
-	for (int d = 0; d < buildinginfo[bid].h; d++) {
-		for (int e = 0; e < buildinginfo[bid].w; e++) {
-			int pos = (x + d) + (y + e) * GetIsoSize();
+	const int typeIdx = buildingid.at(typeId);
+	for (int h = 0; h < buildinginfo[typeIdx].h; h++) {
+		for (int e = 0; e < buildinginfo[typeIdx].w; e++) {
+			const int pos = (x + h) + (y + e) * GetIsoSize();
 
-			Mini_UpdatePos(x + d, y + e, IsMultiplayer());
+			if (pos < fielddata.size()) {
+				auto& data = fielddata[pos];
+				if (reset) {
+					if (data.structure == id) {
+						data.structure = -1;
+						data.structuretype = -1;
+					}
+				} else {
+					data.structure = id;
+					data.structuretype = typeIdx;
+				}
+			}
+			Mini_UpdatePos(x + h, y + e, IsMultiplayer());
 		}
 	}
 }
@@ -1995,14 +2007,15 @@ void CMapData::DeleteNthStructure(const size_t dwIndex)
 
 	if (!m_noAutoObjectUpdate) {
 		if (auto fieldData = GetFielddataAt(x, y)) {
-			auto const refCout = m_structurepaint.erase(fieldData->structure);
+			auto const instId = fieldData->structure;
+			auto const refCout = m_structurepaint.erase(instId);
 			ASSERT(refCout == 1);
 			fieldData->structure = -1;
 			fieldData->structuretype = -1;
+			updateFieldDataAroundStructure(type, instId, x, y, true);
 		}
 	}
 
-	updateMiniMapAroundStructure(type, x, y);
 }
 
 bool CMapData::DeleteStructure(const size_t id)
@@ -2403,7 +2416,7 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 			fieldData->structure = idNum;
 			fieldData->structuretype = buildingid.at(sp.type);
 		}
-		updateMiniMapAroundStructure(structure.basic.type, x, y);
+		updateFieldDataAroundStructure(structure.basic.type, idNum, x, y);
 	}
 
 	return TRUE;
