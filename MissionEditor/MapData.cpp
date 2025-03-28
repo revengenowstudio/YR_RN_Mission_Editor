@@ -2420,8 +2420,6 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 			TruncSpace(sp.upgrade3);
 
 			m_structurepaint.insert_or_assign(idNum, sp);
-
-			fieldData->structures.emplace_back(idNum, buildingid.at(sp.type));
 		}
 		updateFieldDataAroundStructure(structure.basic.type, idNum, x, y);
 	}
