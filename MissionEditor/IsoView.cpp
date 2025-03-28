@@ -2171,7 +2171,9 @@ BOOL CIsoView::OnCommand(WPARAM wParam, LPARAM lParam)
 				} else if (Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
 					HandleProperties(Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()), 3);
 				} else {
-					auto const& structures = Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize());
+					// here must be a copy, because looping and doing HandleProperties
+					// may cause the vector erase and add
+					auto const structures = Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize());
 					for (auto const item : structures) {
 						HandleProperties(item.structure, 1);
 					}
@@ -3055,8 +3057,9 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 				if ((nFlags != MK_SHIFT)) {
 					Map->DeleteStructure(m_id);
 				}
-
-				Map->AddStructure(&structure);
+				CString idStr;
+				idStr.Format("%d", m_id);
+				Map->AddStructure(&structure, nullptr, nullptr, 0, idStr);
 
 				break;
 			}
