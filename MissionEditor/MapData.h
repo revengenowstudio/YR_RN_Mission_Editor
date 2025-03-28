@@ -353,10 +353,6 @@ public:
 	{
 		return fielddata[dwPos].structures;
 	}
-	const StructureSet* GetStructureAt(MapCoords pos) const
-	{
-		return &GetStructureAt(GetMapPos(pos));
-	}
 	const int64_t GetTopStructureAt(DWORD dwPos) const
 	{
 		auto const& structures = GetStructureAt(dwPos);
