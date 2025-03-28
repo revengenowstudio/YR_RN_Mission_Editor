@@ -2475,7 +2475,7 @@ void CUserScriptsDlg::OnOK()
 			auto const parsed = Map->ParseStructureData(data, structure);
 			ASSERT(parsed);
 
-			if (Map->GetStructureAt(atoi(structure.basic.x) + atoi(structure.basic.y) * Map->GetIsoSize()) >= 0) {
+			if (Map->GetTopStructureAt(atoi(structure.basic.x) + atoi(structure.basic.y) * Map->GetIsoSize()) >= 0) {
 				report += "AddStructure failed\r\n";
 				goto nextline;
 			}

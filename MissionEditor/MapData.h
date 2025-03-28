@@ -88,6 +88,19 @@ struct MAPFIELDDATA
 };
 #define MAPFIELDDATA_SIZE 11
 
+struct StructureData
+{
+	int64_t structure; // structure number 
+	int64_t structuretype; // structure type id
+
+	bool operator==(const StructureData& rhs) const
+	{
+		return structure == rhs.structure
+			&& structuretype == rhs.structuretype;
+	}
+};
+using StructureSet = std::vector<StructureData>;
+
 /*
 struct TILEDATA{};
 
@@ -99,8 +112,7 @@ struct FIELDDATA
 	short unit; // unit number
 	short infantry[SUBPOS_COUNT]; // infantry number
 	short aircraft; // aircraft number
-	short structure; // structure number 
-	short structuretype; // structure type id
+	StructureSet structures; // should be able to handle overlapped buildings
 	short terrain; // terrain number
 	int terraintype; // terrain type id
 #ifdef SMUDGE_SUPP
@@ -287,6 +299,11 @@ public:
 	void DeleteAircraft(DWORD dwIndex);
 	void DeleteNthStructure(const size_t dwIndex);
 	bool DeleteStructure(const size_t id);
+	/**
+	* @brief Delete all structure data in specified container
+	* @param cid id key to access structure container
+	*/
+	bool DeleteAllStructureAt(const size_t dwPos);
 	void DeleteUnit(DWORD dwIndex);
 	void DeleteCelltag(DWORD dwIndex);
 	void DeleteWaypoint(DWORD id);
@@ -328,16 +345,29 @@ public:
 	{
 		return GetAirAt(GetMapPos(pos));
 	}
-	INT GetStructureAt(DWORD dwPos) const
+	StructureSet& GetStructureAt(DWORD dwPos)
 	{
-		if (fielddata[dwPos].structure >= 0) {
-			return fielddata[dwPos].structure;
+		return fielddata[dwPos].structures;
+	}
+	const StructureSet& GetStructureAt(DWORD dwPos) const
+	{
+		return fielddata[dwPos].structures;
+	}
+	const StructureSet* GetStructureAt(MapCoords pos) const
+	{
+		return &GetStructureAt(GetMapPos(pos));
+	}
+	const int64_t GetTopStructureAt(DWORD dwPos) const
+	{
+		auto const& structures = GetStructureAt(dwPos);
+		if (!structures.empty()) {
+			return structures.back().structure;
 		}
 		return -1;
 	}
-	INT GetStructureAt(MapCoords pos) const
+	const int64_t GetTopStructureAt(MapCoords pos) const
 	{
-		return GetStructureAt(GetMapPos(pos));
+		return GetTopStructureAt(GetMapPos(pos));
 	}
 	INT GetUnitAt(DWORD dwPos) const
 	{

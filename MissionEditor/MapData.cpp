@@ -159,12 +159,10 @@ FIELDDATA::FIELDDATA()
 	smudgetype = -1;
 #endif
 	unit = -1;
-	int i;
-	for (i = 0; i < SUBPOS_COUNT; i++)
+	for (int i = 0; i < SUBPOS_COUNT; i++) {
 		infantry[i] = -1;
+	}
 	aircraft = -1;
-	structure = -1;
-	structuretype = -1;
 	terrain = -1;
 	waypoint = -1;
 	overlay = 0xFF;
@@ -1573,6 +1571,15 @@ void CMapData::UpdateAircraft(BOOL bSave)
 	}
 }
 
+void removeFromStructureSet(StructureSet& structures, const size_t id)
+{
+	auto const it = std::remove_if(structures.begin(), structures.end(),
+		[id](const StructureData& item) {
+			return id == item.structure;
+		});
+	structures.erase(it, structures.end());
+}
+
 void CMapData::updateFieldDataAroundStructure(const CString& typeId, const size_t id, const int x, const int y, bool reset)
 {
 	const int typeIdx = buildingid.at(typeId);
@@ -1583,13 +1590,9 @@ void CMapData::updateFieldDataAroundStructure(const CString& typeId, const size_
 			if (pos < fielddata.size()) {
 				auto& data = fielddata[pos];
 				if (reset) {
-					if (data.structure == id) {
-						data.structure = -1;
-						data.structuretype = -1;
-					}
+					removeFromStructureSet(data.structures, id);
 				} else {
-					data.structure = id;
-					data.structuretype = typeIdx;
+					data.structures.emplace_back(id, typeIdx);
 				}
 			}
 			Mini_UpdatePos(x + h, y + e, IsMultiplayer());
@@ -1603,8 +1606,7 @@ void CMapData::UpdateStructures(BOOL bSave)
 		return;
 	}
 	for (auto i = 0; i < GetIsoSize() * GetIsoSize(); i++) {
-		fielddata[i].structure = -1;
-		fielddata[i].structuretype = -1;
+		fielddata[i].structures.clear();
 	}
 
 	m_structurepaint.clear();
@@ -1637,8 +1639,7 @@ void CMapData::UpdateStructures(BOOL bSave)
 			for (e = 0; e < buildinginfo[bid].w; e++) {
 				int pos = (x + d) + (y + e) * GetIsoSize();
 				if (pos < fielddata.size()) {
-					fielddata[pos].structure = indexNum;
-					fielddata[pos].structuretype = bid;
+					fielddata[pos].structures.emplace_back(indexNum, bid);
 				}
 
 				Mini_UpdatePos(x + d, y + e, IsMultiplayer());
@@ -1970,6 +1971,15 @@ void CMapData::DeleteCelltag(DWORD dwIndex)
 	}
 }
 
+bool CMapData::DeleteAllStructureAt(const size_t dwPos)
+{
+	auto const structures = GetStructureAt(dwPos);
+	for (auto const& item : structures) {
+		DeleteStructure(item.structure);
+	}
+	return true;
+}
+
 void CMapData::DeleteUnit(DWORD dwIndex)
 {
 	if (dwIndex >= GetUnitCount()) {
@@ -2006,16 +2016,14 @@ void CMapData::DeleteNthStructure(const size_t dwIndex)
 	pSec->RemoveAt(dwIndex);
 
 	if (!m_noAutoObjectUpdate) {
-		if (auto fieldData = GetFielddataAt(x, y)) {
-			auto const instId = fieldData->structure;
+		if (auto const instId = GetTopStructureAt(MapCoords(x, y)); instId >= 0) {
 			auto const refCout = m_structurepaint.erase(instId);
 			ASSERT(refCout == 1);
-			fieldData->structure = -1;
-			fieldData->structuretype = -1;
 			updateFieldDataAroundStructure(type, instId, x, y, true);
+		} else {
+			ASSERT(false);
 		}
 	}
-
 }
 
 bool CMapData::DeleteStructure(const size_t id)
@@ -2413,8 +2421,7 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 
 			m_structurepaint.insert_or_assign(idNum, sp);
 
-			fieldData->structure = idNum;
-			fieldData->structuretype = buildingid.at(sp.type);
+			fieldData->structures.emplace_back(idNum, buildingid.at(sp.type));
 		}
 		updateFieldDataAroundStructure(structure.basic.type, idNum, x, y);
 	}
@@ -2897,11 +2904,13 @@ BOOL CMapData::IsGroundObjectAt(DWORD dwPos) const
 	if (m_id < 0)
 		m_id = GetAirAt(dwPos);
 	if (m_id < 0)
-		m_id = GetStructureAt(dwPos);
+		m_id = GetTopStructureAt(dwPos);
 	if (m_id < 0)
 		m_id = GetTerrainAt(dwPos);
 
-	if (m_id < 0) return FALSE;
+	if (m_id < 0) {
+		return FALSE;
+	}
 
 	return TRUE;
 
