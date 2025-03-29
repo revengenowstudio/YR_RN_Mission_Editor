@@ -1541,8 +1541,9 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 							int id = Map->GetNodeAt(dwPos, house);
 							Map->DeleteNode(house, id);
 						}
-						if (cur_field.structure != oldData[i][e].structure)
-							Map->DeleteStructure(cur_field.structure);
+						if (cur_field.structures != oldData[i][e].structures && !cur_field.structures.empty()) {
+							Map->DeleteStructure(cur_field.structures.back().structure);
+						}
 						if (cur_field.terrain != oldData[i][e].terrain)
 							Map->DeleteTerrain(cur_field.terrain);
 #ifdef SMUDGE_SUPP
@@ -1832,67 +1833,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 		}
 	} else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_NODE) // nodes
 	{
-		if (AD.type == 1) // create node, delete building
-		{
-			int n = Map->GetStructureAt(x + y * Map->GetIsoSize());
-			if (n < 0) {
-				isMoving = FALSE;
-				return;
-			}
-
-			STDOBJECTDATA sod;
-			Map->GetStdStructureData(n, &sod);
-
-			CString tmp;
-			if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0) {
-				SetError("You cannot place a node on another node");
-				{
-					isMoving = FALSE;
-					return;
-				};
-			}
-
-			Map->DeleteStructure(n);
-
-			NODE node;
-			node.x = sod.x;
-			node.y = sod.y;
-			node.house = sod.house;
-			node.type = sod.type;
-
-			Map->AddNode(&node, 0);
-			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-
-		} else if (AD.type == 0) // create node, don´t delete building
-		{
-			int n = Map->GetStructureAt(x + y * Map->GetIsoSize());
-			if (n < 0) {
-				isMoving = FALSE;
-				return;
-			}
-
-			STDOBJECTDATA sod;
-			Map->GetStdStructureData(n, &sod);
-
-			CString tmp;
-			if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0) {
-				SetError("You cannot place a node on another node");
-				{
-					isMoving = FALSE;
-					return;
-				};
-			}
-
-			NODE node;
-			node.x = sod.x;
-			node.y = sod.y;
-			node.type = sod.type;
-			node.house = sod.house;
-
-			Map->AddNode(&node, 0);
-			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-
-		} else if (AD.type == 2) // delete node
+		if (AD.type == 2) // delete node
 		{
 			CString owner;
 			int n = Map->GetNodeAt(x + y * Map->GetIsoSize(), owner);
@@ -1903,7 +1844,56 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->DeleteNode(owner, n);
 
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+		} else {
+			int n = Map->GetTopStructureAt(x + y * Map->GetIsoSize());
+			// create node, delete building
+			if (AD.type == 1 && n >= 0) 
+			{
+				STDOBJECTDATA sod;
+				Map->GetStdStructureData(n, &sod);
 
+				CString tmp;
+				if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0) {
+					SetError("You cannot place a node on another node");
+					{
+						isMoving = FALSE;
+						return;
+					};
+				}
+
+				Map->DeleteStructure(n);
+
+				NODE node;
+				node.x = sod.x;
+				node.y = sod.y;
+				node.house = sod.house;
+				node.type = sod.type;
+
+				Map->AddNode(&node, 0);
+				RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+
+			} else if (AD.type == 0) {// create node, don´t delete building
+				STDOBJECTDATA sod;
+				Map->GetStdStructureData(n, &sod);
+				CString tmp;
+				if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0) {
+					SetError("You cannot place a node on another node");
+					{
+						isMoving = FALSE;
+						return;
+					};
+				}
+
+				NODE node;
+				node.x = sod.x;
+				node.y = sod.y;
+				node.type = sod.type;
+				node.house = sod.house;
+
+				Map->AddNode(&node, 0);
+				RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+
+			}
 		}
 	} else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_ERASEFIELD) {
 		int h;
@@ -1918,10 +1908,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->DeleteUnit(h);
 		}
 
-		h = Map->GetStructureAt(dwPos);
-		if (h > -1) {
-			Map->DeleteStructure(h);
-		}
+		Map->DeleteAllStructureAt(dwPos);
 
 		h = Map->GetAirAt(dwPos);
 		if (h > -1) {
@@ -2183,8 +2170,13 @@ BOOL CIsoView::OnCommand(WPARAM wParam, LPARAM lParam)
 						if (Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize(), z) != -1) HandleProperties(Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize(), z), 0);
 				} else if (Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
 					HandleProperties(Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()), 3);
-				} else if (Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
-					HandleProperties(Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize()), 1);
+				} else {
+					// here must be a copy, because looping and doing HandleProperties
+					// may cause the vector erase and add
+					auto const structures = Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize());
+					for (auto const item : structures) {
+						HandleProperties(item.structure, 1);
+					}
 				}
 
 
@@ -2493,14 +2485,16 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 			m_type = 4;
 		}
 		if (m_id < 0) {
-			m_id = Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize());
+			m_id = Map->GetTopStructureAt(m_mapx + m_mapy * Map->GetIsoSize());
+			if (m_id >= 0) {
 
-			STDOBJECTDATA sod;
-			Map->GetStdStructureData(m_id, &sod);
-			m_mapx = atoi(sod.x);
-			m_mapy = atoi(sod.y);
+				STDOBJECTDATA sod;
+				Map->GetStdStructureData(m_id, &sod);
+				m_mapx = atoi(sod.x);
+				m_mapy = atoi(sod.y);
 
-			m_type = 1;
+				m_type = 1;
+			}
 		}
 
 	} else if (AD.mode == ACTIONMODE_SETTILE) {
@@ -3063,8 +3057,9 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 				if ((nFlags != MK_SHIFT)) {
 					Map->DeleteStructure(m_id);
 				}
-
-				Map->AddStructure(&structure);
+				CString idStr;
+				idStr.Format("%d", m_id);
+				Map->AddStructure(&structure, nullptr, nullptr, 0, idStr);
 
 				break;
 			}
@@ -4140,7 +4135,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	TECHNODATA techno;
 
 	int objId = -1;
-	if (int n = Map->GetStructureAt(x + y * Map->GetIsoSize()); n >= 0) {
+	if (int n = Map->GetTopStructureAt(x + y * Map->GetIsoSize()); n >= 0) {
 		type = TechnoType::Building;
 		statusbar = GetLanguageStringACP("StructStatus");
 		objId = n;
@@ -4168,10 +4163,21 @@ void CIsoView::UpdateStatusBar(int x, int y)
 		objId = n;
 	}
 
-	if (objId >= 0 && type != TechnoType::Infantry) {
+	do {
+		if (type == TechnoType::Infantry) {
+			break;
+		}
+		if (objId < 0) {
+			break;
+		}
+		if (type == TechnoType::Building) {
+			auto const data = Map->GetDataOfTechnoByID(objId, type);
+			Map->ParseTechnoData(data, type, techno);
+			break;
+		}
 		auto const [_, data] = Map->GetNthDataOfTechno(objId, type);
 		Map->ParseTechnoData(data, type, techno);
-	}
+	} while (0);
 
 	if (techno.basic.type.GetLength() > 0) {
 		char c[50];
@@ -4923,7 +4929,7 @@ DWORD CIsoView::PlaceCurrentObjectAt(int x, int y)
 			//RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		} break;
 		case MouseActionType::AddStructure: {
-			int n = Map->GetStructureAt(expectingPos);
+			int n = Map->GetTopStructureAt(expectingPos);
 			if (n >= 0) {
 				STDOBJECTDATA sod;
 				Map->GetStdStructureData(n, &sod);
@@ -4972,12 +4978,16 @@ DWORD CIsoView::PlaceCurrentObjectAt(int x, int y)
 			// set owner!
 			BOOL bchanged = FALSE;
 
-			int t = Map->GetStructureAt(expectingPos);
+			int t = Map->GetTopStructureAt(expectingPos);
 			if (t >= 0) {
 				STRUCTURE structure;
-				auto const id = Map->GetStructureData(t, &structure);
+				Map->GetStructureData(t, &structure);
 				Map->DeleteStructure(t);
 				structure.basic.house = AD.data_s;
+
+				CString id;
+				id.Format("%d", t);
+
 				Map->AddStructure(&structure, nullptr, nullptr, 0, std::move(id));
 				bchanged = TRUE;
 			}
@@ -5738,16 +5748,18 @@ void CIsoView::DrawMap()
 				}
 			}
 
-			if (m.structure != -1) {
+			if (!m.structures.empty()) {
 				last_succeeded_operation = 10101;
-
+				auto const& structureData = m.structures.back();
+				auto const structureIdx = structureData.structure;
+				const int id = structureData.structuretype;
 				// for structures we need to check if they weren´t drawn earlier
 				// (every field that this building achieves has this building as .structure)
-				auto const leftStructureIdx = Map->GetStructureAt(mapCoords - MapVec(-1, 0));
-				auto const rightStructureIdx = Map->GetStructureAt(mapCoords - MapVec(0, -1));
+				auto const leftStructureIdx = Map->GetTopStructureAt(mapCoords - MapVec(-1, 0));
+				auto const rightStructureIdx = Map->GetTopStructureAt(mapCoords - MapVec(0, -1));
 				bool shouldDraw = true;
 
-				if (leftStructureIdx == m.structure || rightStructureIdx == m.structure) {
+				if (leftStructureIdx == structureIdx || rightStructureIdx == structureIdx) {
 					shouldDraw = false;
 				}
 				if (mapCoords.x >= Map->GetWidth() || mapCoords.y >= Map->GetHeight()) {
@@ -5757,10 +5769,9 @@ void CIsoView::DrawMap()
 				if (shouldDraw) {
 
 					STRUCTUREPAINT objp;
-					Map->GetStructurePaint(m.structure, &objp);
+					Map->GetStructurePaint(structureIdx, objp);
 
 					const auto drawCoordsBld = GetRenderTargetCoordinates(MapCoords(objp.x, objp.y));
-					int id = m.structuretype;
 
 
 					int w = 1, h = 1;
@@ -5907,8 +5918,8 @@ void CIsoView::DrawMap()
 
 					//#ifndef NOSURFACES							
 #ifdef NOSURFACES 
-					if (m.structure >= 0) // only paint cell if we have a structure preplaced, as we have a half transparent image
-					{
+					// only paint cell if we have a structure preplaced, as we have a half transparent image
+					if (!m.structures.empty()) {
 #endif
 						// place it 2 pixels lower so that user can see the dotted lines even if the building itself has the cells drawn
 						DrawCell(ddsd.lpSurface, ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch, drawCoordsBld.x, drawCoordsBld.y + 3, w, h, colorref_conv[c], true);

@@ -88,6 +88,19 @@ struct MAPFIELDDATA
 };
 #define MAPFIELDDATA_SIZE 11
 
+struct StructureData
+{
+	int64_t structure; // structure number 
+	int64_t structuretype; // structure type id
+
+	bool operator==(const StructureData& rhs) const
+	{
+		return structure == rhs.structure
+			&& structuretype == rhs.structuretype;
+	}
+};
+using StructureSet = std::vector<StructureData>;
+
 /*
 struct TILEDATA{};
 
@@ -99,8 +112,7 @@ struct FIELDDATA
 	short unit; // unit number
 	short infantry[SUBPOS_COUNT]; // infantry number
 	short aircraft; // aircraft number
-	short structure; // structure number 
-	short structuretype; // structure type id
+	StructureSet structures; // should be able to handle overlapped buildings
 	short terrain; // terrain number
 	int terraintype; // terrain type id
 #ifdef SMUDGE_SUPP
@@ -257,6 +269,7 @@ public:
 	BOOL AddCelltag(LPCTSTR lpTag, DWORD dwPos);
 
 	std::pair<CString, CString> GetNthDataOfTechno(const size_t index, const TechnoType type) const;
+	CString GetDataOfTechnoByID(const size_t id, const TechnoType type) const;
 	bool ParseBasicTechnoData(const CString& rawText, STDOBJECTDATA& data) const;
 	bool ParseTechnoData(const CString& rawText, const TechnoType type, TECHNODATA& data) const;
 	CString GetAircraftData(DWORD dwIndex, AIRCRAFT* lpAircraft) const;
@@ -269,20 +282,28 @@ public:
 	void GetStdInfantryData(DWORD dwIndex, STDOBJECTDATA* lpStdInfantry) const;
 	void GetStdUnitData(DWORD dwIndex, STDOBJECTDATA* lpStdUnit) const;
 	void GetStdAircraftData(DWORD dwIndex, STDOBJECTDATA* lpStdAircraft) const;
-	void GetStdStructureData(DWORD dwIndex, STDOBJECTDATA* lpStdStructure) const;
+	void GetStdStructureData(const size_t id, STDOBJECTDATA* lpStdStructure) const;
+	void GetNthStdStructureData(DWORD dwIndex, STDOBJECTDATA* lpStdStructure) const;
 
 	INT GetUnitTypeID(LPCTSTR lpType);
 	void InitializeUnitTypes();
 	BOOL AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType = NULL, LPCTSTR lpHouse = NULL, DWORD dwPos = 0, CString suggestedID = "");
 	BOOL AddInfantry(INFANTRY* lpInfantry, int suggestedIndex = -1, LPCTSTR lpType = NULL, LPCTSTR lpHouse = NULL, DWORD dwPos = 0);
 	BOOL AddNode(NODE* lpNode, WORD dwPos);
-	CString GetStructureData(DWORD dwIndex, STRUCTURE* lpStructure) const;
+	CString GetNthStructureData(DWORD dwIndex, STRUCTURE* lpStructure) const;
+	void GetStructureData(size_t id, STRUCTURE* lpStructure) const;
 	BOOL AddWaypoint(CString lpID, DWORD dwPos);
 
 	void DeleteNode(const CString& house, const int index);
 	void DeleteTerrain(DWORD dwIndex);
 	void DeleteAircraft(DWORD dwIndex);
-	void DeleteStructure(DWORD dwIndex);
+	void DeleteNthStructure(const size_t dwIndex);
+	bool DeleteStructure(const size_t id);
+	/**
+	* @brief Delete all structure data in specified container
+	* @param cid id key to access structure container
+	*/
+	bool DeleteAllStructureAt(const size_t dwPos);
 	void DeleteUnit(DWORD dwIndex);
 	void DeleteCelltag(DWORD dwIndex);
 	void DeleteWaypoint(DWORD id);
@@ -324,16 +345,25 @@ public:
 	{
 		return GetAirAt(GetMapPos(pos));
 	}
-	INT GetStructureAt(DWORD dwPos) const
+	StructureSet& GetStructureAt(DWORD dwPos)
 	{
-		if (fielddata[dwPos].structure > -1) {
-			return fielddata[dwPos].structure;
+		return fielddata[dwPos].structures;
+	}
+	const StructureSet& GetStructureAt(DWORD dwPos) const
+	{
+		return fielddata[dwPos].structures;
+	}
+	const int64_t GetTopStructureAt(DWORD dwPos) const
+	{
+		auto const& structures = GetStructureAt(dwPos);
+		if (!structures.empty()) {
+			return structures.back().structure;
 		}
 		return -1;
 	}
-	INT GetStructureAt(MapCoords pos) const
+	const int64_t GetTopStructureAt(MapCoords pos) const
 	{
-		return GetStructureAt(GetMapPos(pos));
+		return GetTopStructureAt(GetMapPos(pos));
 	}
 	INT GetUnitAt(DWORD dwPos) const
 	{
@@ -506,6 +536,7 @@ private:
 	void UpdateTerrain(BOOL bSave = FALSE, int num = -1);
 	void UpdateInfantry(BOOL bSave = FALSE);
 	void UpdateAircraft(BOOL bSave = FALSE);
+	void updateFieldDataAroundStructure(const CString& typeId, const size_t id, const int x, const int y, bool reset = false);
 
 	map<CString, int> buildingid;
 	map<CString, int> terrainid;
@@ -528,7 +559,7 @@ private:
 	int m_cursnapshot;
 	int m_money;
 
-	vector<STRUCTUREPAINT> m_structurepaint;
+	std::unordered_map<size_t, STRUCTUREPAINT> m_structurepaint;
 
 
 protected:
@@ -656,7 +687,7 @@ public:
 	int GetMoneyOnMap() const;
 	int CalcMoneyOnMap();
 	void GetMinimap(BYTE** lpData, BITMAPINFO* lpBI, int* pitch);
-	void GetStructurePaint(int index, STRUCTUREPAINT* lpStructurePaint) const;
+	void GetStructurePaint(int index, STRUCTUREPAINT& structurePaint) const;
 	void Paste(int x, int y, int z_mod);
 	void Copy(int left = 0, int top = 0, int right = 0, int bottom = 0);
 	CString GetTheater();

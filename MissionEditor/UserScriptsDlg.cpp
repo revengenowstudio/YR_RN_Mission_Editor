@@ -2180,20 +2180,27 @@ void CUserScriptsDlg::OnOK()
 			// check bool
 			if (paramcount > 1) {
 				if (params[1].GetLength() > 0) {
-					if (!IsValSet(params[1])) goto nextline;
+					if (!IsValSet(params[1])) {
+						goto nextline;
+					}
 				}
 			}
 
-			if (!bDeleteAllowed) goto nextline;
+			if (!bDeleteAllowed) {
+				goto nextline;
+			}
 
-			int index = atoi(params[0]);
+			int id = atoi(params[0]);
+			CString idStr;
+			idStr.Format("%d", id);
+			auto const index = ini.GetSection("Structures").FindIndex(idStr);
 			if (index < 0 || index >= Map->GetStructureCount()) {
 				report += "Structure deletion failed, invalid index\r\n";
 				goto nextline;
 			}
 
 			lastStructureDeleted = ini["Structures"].Nth(index).first;
-			Map->DeleteStructure(index);
+			Map->DeleteNthStructure(index);
 
 			report += "Structure deleted\r\n";
 
@@ -2468,7 +2475,7 @@ void CUserScriptsDlg::OnOK()
 			auto const parsed = Map->ParseStructureData(data, structure);
 			ASSERT(parsed);
 
-			if (Map->GetStructureAt(atoi(structure.basic.x) + atoi(structure.basic.y) * Map->GetIsoSize()) >= 0) {
+			if (Map->GetTopStructureAt(atoi(structure.basic.x) + atoi(structure.basic.y) * Map->GetIsoSize()) >= 0) {
 				report += "AddStructure failed\r\n";
 				goto nextline;
 			}
