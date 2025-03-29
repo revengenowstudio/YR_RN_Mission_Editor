@@ -2008,21 +2008,18 @@ void CMapData::DeleteNthStructure(const size_t dwIndex)
 
 	auto const& pSec = m_mapfile.TryGetSection("Structures");
 	ASSERT(pSec != nullptr);
-	auto const& val = pSec->Nth(dwIndex).second;
-	int x = atoi(GetParam(val, 4));
-	int y = atoi(GetParam(val, 3));
+	auto const& [idStr, val] = pSec->Nth(dwIndex);
+	const int id = atoi(idStr);
+	const int x = atoi(GetParam(val, 4));
+	const int y = atoi(GetParam(val, 3));
 	CString type = GetParam(val, 1);
 
 	pSec->RemoveAt(dwIndex);
 
 	if (!m_noAutoObjectUpdate) {
-		if (auto const instId = GetTopStructureAt(MapCoords(x, y)); instId >= 0) {
-			auto const refCout = m_structurepaint.erase(instId);
-			ASSERT(refCout == 1);
-			updateFieldDataAroundStructure(type, instId, x, y, true);
-		} else {
-			ASSERT(false);
-		}
+		auto const refCout = m_structurepaint.erase(id);
+		ASSERT(refCout == 1);
+		updateFieldDataAroundStructure(type, id, x, y, true);
 	}
 }
 
