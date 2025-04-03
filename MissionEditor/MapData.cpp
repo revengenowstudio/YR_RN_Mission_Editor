@@ -1634,7 +1634,12 @@ void CMapData::UpdateStructures(BOOL bSave)
 		int x = atoi(GetParam(val, 4));
 		int y = atoi(GetParam(val, 3));
 		int d, e;
-		int bid = buildingid.at(sp.type);
+
+		auto const bidIt = buildingid.find(sp.type);
+		if (bidIt == buildingid.end()) {
+			continue;
+		}
+		const int bid = bidIt->second;
 		for (d = 0; d < buildinginfo[bid].h; d++) {
 			for (e = 0; e < buildinginfo[bid].w; e++) {
 				int pos = (x + d) + (y + e) * GetIsoSize();
