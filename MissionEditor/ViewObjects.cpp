@@ -994,6 +994,9 @@ void CViewObjects::UpdateDialog()
 
 	if (theApp.m_Options.bShowCameos)
 	{
+		if (m_ImageList.GetSafeHandle())
+			m_ImageList.DeleteImageList();
+
 		m_ImageList.Create(Cameo_Size, Cameo_Size, ILC_COLOR24 | ILC_MASK, 4, 4);
 
 		auto cBitmap = BitmapFromResource(IDB_DEFAULTCAMEO);
