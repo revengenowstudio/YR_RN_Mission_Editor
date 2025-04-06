@@ -1645,7 +1645,7 @@ void ScaleBitmap(CBitmap* pBitmap, int maxSize, COLORREF bgColor, bool trimBg)
 
 std::unique_ptr<CBitmap> BitmapFromPICDATA(PICDATA* pData)
 {
-	ASSERT(pData->bType == PICDATA_TYPE_SHP);
+	ASSERT(pData->bType == PICDATA_TYPE_SHP || pData->bType == PICDATA_TYPE_VXL);
 
 	std::unique_ptr<CBitmap> outBitmap(new CBitmap);
 	if (pData->wMaxWidth == 0 || pData->wMaxHeight == 0)
