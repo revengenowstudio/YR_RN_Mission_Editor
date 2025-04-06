@@ -124,6 +124,7 @@ BOOL overlay_trdebug[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALS
 CString overlay_name[] = { "Sandbags","Allied Wall", "Soviet Wall", "Black fence", "Prison camp fence", "White fence", "Yuri Wall", "Kremlin Wall", "Tracks" };
 BOOL overlay_visible[] = { TRUE,TRUE,TRUE,TRUE,TRUE,TRUE, TRUE, TRUE, TRUE };
 BOOL overlay_trail[] = { TRUE,TRUE,TRUE,TRUE,TRUE,TRUE, TRUE, TRUE, TRUE };
+BOOL overlay_wall[] = { TRUE,TRUE,TRUE,TRUE,TRUE,TRUE, TRUE, TRUE, FALSE };
 BOOL yr_only[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE };
 int overlay_count = 9;
 const std::string editor_name = "FinalAlert 2";

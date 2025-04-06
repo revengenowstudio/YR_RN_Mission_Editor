@@ -211,6 +211,7 @@ BEGIN_MESSAGE_MAP(CFinalSunDlg, CDialog)
 	ON_COMMAND(ID_MAPTOOLS_AUTOCREATESHORES, OnMaptoolsAutocreateshores)
 	ON_COMMAND(ID_OPTIONS_DISABLEAUTOSHORE, OnOptionsDisableautoshore)
 	ON_COMMAND(ID_OPTIONS_DISABLEAUTOLAT, OnOptionsDisableautolat)
+	ON_COMMAND(ID_OPTIONS_SHOWCAMEOS, OnOptionsShowcameo)
 	ON_COMMAND(ID_EDIT_PASTE, OnEditPaste)
 	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
 	ON_COMMAND(ID_EDIT_COPYWHOLEMAP, OnEditCopywholemap)
@@ -2069,6 +2070,7 @@ void CFinalSunDlg::UpdateStrings()
 	if (theApp.m_Options.bEasy) my_menu->CheckMenuItem(ID_OPTIONS_SIMPLEVIEW, MF_BYCOMMAND | MF_CHECKED);
 	if (theApp.m_Options.bDisableAutoShore) my_menu->CheckMenuItem(ID_OPTIONS_DISABLEAUTOSHORE, MF_BYCOMMAND | MF_CHECKED);
 	if (theApp.m_Options.bDisableAutoLat) my_menu->CheckMenuItem(ID_OPTIONS_DISABLEAUTOLAT, MF_BYCOMMAND | MF_CHECKED);
+	if (theApp.m_Options.bShowCameos) my_menu->CheckMenuItem(ID_OPTIONS_SHOWCAMEOS, MF_BYCOMMAND | MF_CHECKED);
 	if (theApp.m_Options.bDisableSlopeCorrection) my_menu->CheckMenuItem(ID_OPTIONS_DISABLESLOPECORRECTION, MF_BYCOMMAND | MF_CHECKED);
 	if (theApp.m_Options.bShowCells) my_menu->CheckMenuItem(ID_OPTIONS_SHOWBUILDINGOUTLINE, MF_BYCOMMAND | MF_CHECKED);
 	if (theApp.m_Options.useDefaultMouseCursor) my_menu->CheckMenuItem(ID_OPTIONS_USEDEFAULTMOUSECURSOR, MF_BYCOMMAND | MF_CHECKED);
@@ -3486,6 +3488,33 @@ void CFinalSunDlg::OnOptionsDisableautolat()
 #else
 	Options.SaveFile(u8AppDataPath + "\\FinalAlert.ini");
 #endif
+}
+
+void CFinalSunDlg::OnOptionsShowcameo()
+{
+	CIniFile Options;
+	Options.LoadFile(u8AppDataPath + "\\FinalSun.ini");
+#ifdef RA2_MODE
+	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
+#endif
+
+	if (GetMenu()->GetMenuState(ID_OPTIONS_SHOWCAMEOS, MF_BYCOMMAND) & MF_CHECKED) {
+		GetMenu()->CheckMenuItem(ID_OPTIONS_SHOWCAMEOS, MF_BYCOMMAND | MF_UNCHECKED);
+		theApp.m_Options.bShowCameos = FALSE;
+		Options.SetBool("UserInterface", "ShowCameos", false);
+	} else {
+		GetMenu()->CheckMenuItem(ID_OPTIONS_SHOWCAMEOS, MF_BYCOMMAND | MF_CHECKED);
+		theApp.m_Options.bShowCameos = TRUE;
+		Options.SetBool("UserInterface", "ShowCameos", true);
+	}
+
+#ifndef RA2_MODE
+	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");
+#else
+	Options.SaveFile(u8AppDataPath + "\\FinalAlert.ini");
+#endif
+
+	((CFinalSunDlg*)theApp.GetMainWnd())->m_view.m_objectview->UpdateDialog();
 }
 
 void CFinalSunDlg::OnEditPaste()

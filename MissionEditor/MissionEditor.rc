@@ -134,6 +134,8 @@ IDR_TERRAINBAR          BITMAP                  "res\\terrainb.bmp"
 
 IDR_CLIFFBAR            BITMAP                  "res\\clifftoo.bmp"
 
+IDB_DEFAULTCAMEO        BITMAP                  "res\\default_cameo.bmp"
+
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
 IDB_CELLTAG$(RA2_MODE)  BITMAP                  "res\\celltag_ra2.bmp"
@@ -3250,6 +3252,7 @@ BEGIN
         MENUITEM "Disable Slope Correction",    ID_OPTIONS_DISABLESLOPECORRECTION
         MENUITEM "Smooth zoom",                 ID_OPTIONS_SMOOTHZOOM
         MENUITEM "Use default mouse cursor",    ID_OPTIONS_USEDEFAULTMOUSECURSOR
+        MENUITEM "Show Cameos",    				ID_OPTIONS_SHOWCAMEOS
     END
     POPUP "Help"
     BEGIN
@@ -3357,6 +3360,7 @@ BEGIN
         MENUITEM "Disable Slope Correction",    ID_OPTIONS_DISABLESLOPECORRECTION
         MENUITEM "Smooth zoom",                 ID_OPTIONS_SMOOTHZOOM
         MENUITEM "Use default mouse cursor",    ID_OPTIONS_USEDEFAULTMOUSECURSOR
+        MENUITEM "Show Cameos",    ID_OPTIONS_SHOWCAMEOS
     END
     POPUP "Help"
     BEGIN

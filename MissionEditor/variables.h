@@ -134,6 +134,7 @@ extern int overlay_number[]; // what overlay id?
 extern CString overlay_name[]; // what name?
 extern BOOL overlay_trail[]; // is it handled as trail?
 extern BOOL overlay_trdebug[];
+extern BOOL overlay_wall[];
 extern BOOL yr_only[];
 
 

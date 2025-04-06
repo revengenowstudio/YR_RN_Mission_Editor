@@ -299,6 +299,7 @@ BOOL CFinalSunApp::InitInstance()
 	auto const& userInterfaceSec = optini["UserInterface"];
 	opts.bDisableAutoShore = userInterfaceSec.GetBool("DisableAutoShore");
 	opts.bDisableAutoLat = userInterfaceSec.GetBool("DisableAutoLat");
+	opts.bShowCameos = userInterfaceSec.GetBool("ShowCameos");
 	opts.bNoSounds = !userInterfaceSec.GetBool("Sounds");
 	opts.bDisableSlopeCorrection = userInterfaceSec.GetBool("DisableSlopeCorrection");
 	opts.fLoadScreenDelayInSeconds = userInterfaceSec.GetFloat("LoadScreenDelay", opts.fLoadScreenDelayInSeconds);
