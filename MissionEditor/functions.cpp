@@ -1494,6 +1494,9 @@ void ScaleBitmap(CBitmap* pBitmap, int maxSize, COLORREF bgColor, bool trimBg)
 	if (bmpInfo.bmWidth == maxSize && bmpInfo.bmHeight == maxSize)
 		return;
 
+	if (srcW == 0 || srcH == 0)
+		return;
+
 	BITMAPINFO bmi = {};
 	bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	bmi.bmiHeader.biWidth = srcW;
@@ -1537,6 +1540,9 @@ void ScaleBitmap(CBitmap* pBitmap, int maxSize, COLORREF bgColor, bool trimBg)
 		right = srcW;
 		bottom = srcH;
 	}
+
+	if (left > right || top > bottom)
+		return;
 
 	int cropW = right - left + 1;
 	int cropH = bottom - top + 1;
