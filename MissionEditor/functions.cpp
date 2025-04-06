@@ -1570,6 +1570,11 @@ void ScaleBitmap(CBitmap* pBitmap, int maxSize, COLORREF bgColor, bool trimBg)
 			int x1 = std::min(x0 + 1, srcW - 1);
 			int y1 = std::min(y0 + 1, srcH - 1);
 
+			x0 = std::clamp(x0, 0, srcW - 1);
+			x1 = std::clamp(x1, 0, srcW - 1);
+			y0 = std::clamp(y0, 0, srcH - 1);
+			y1 = std::clamp(y1, 0, srcH - 1);
+
 			float dx = fx - x0;
 			float dy = fy - y0;
 
