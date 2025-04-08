@@ -1272,7 +1272,7 @@ void CViewObjects::UpdateDialog()
 					}
 
 					auto p = ovrlpics[ovr][ovrd];
-					if (p->pic)
+					if (p && p->pic)
 					{
 						if (auto cBitmap = BitmapFromPICDATA(p))
 						{
