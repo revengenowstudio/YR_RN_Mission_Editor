@@ -5945,8 +5945,8 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 	const int oldIsoSize = GetIsoSize();
 	auto const old_fds = fielddata.size();
 
-	const int left = iLeft;
-	const int top = iTop;
+	const int leftExpansion = iLeft;
+	const int topExpansion = iTop;
 
 	// hmm, erase any snapshots... we probably can remove this and do coordinate conversion instead
 	// but for now we just delete them...
@@ -5976,8 +5976,8 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 
 	{
 		auto const oldVisualRect = m_mapfile.GetString("Map", "LocalSize");
-		auto const newVisualLeft = std::max(1, atoi(GetParam(oldVisualRect, 0)) + left);
-		auto const newVisualTop = std::max(1, atoi(GetParam(oldVisualRect, 1)) + top);
+		auto const newVisualLeft = std::max(1, atoi(GetParam(oldVisualRect, 0)) + leftExpansion);
+		auto const newVisualTop = std::max(1, atoi(GetParam(oldVisualRect, 1)) + topExpansion);
 		auto newVisualWidth = std::min<int>(dwNewWidth, atoi(GetParam(oldVisualRect, 2)));
 		auto newVisualHeight = std::min<int>(dwNewHeight, atoi(GetParam(oldVisualRect, 3)));
 
@@ -6023,11 +6023,11 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 	// but we want to consider left and right, as the user selected it.
 	// so, do some coordinate conversion:
 
-	x_move += top;
-	y_move += top;
+	x_move += topExpansion;
+	y_move += topExpansion;
 
-	x_move += -left;
-	y_move += left;
+	x_move += -leftExpansion;
+	y_move += leftExpansion;
 
 	//char c[50];
 	/*char d[50];
