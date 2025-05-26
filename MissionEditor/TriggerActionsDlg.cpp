@@ -539,7 +539,6 @@ void CTriggerActionsDlg::UpdateDialog()
 #endif
 
 	while (m_ActionType.DeleteString(0) != CB_ERR);
-	int i;
 	for (auto const& [eventid, eventdata] : g_data[sec]) {
 		//GetParam(*g_data.sections["Actions"].GetValue(i),13);
 /*#ifdef RA2_MODE
@@ -564,19 +563,19 @@ void CTriggerActionsDlg::UpdateDialog()
 	auto const& Data = ini["Actions"][m_currentTrigger];
 	int count = atoi(GetParam(Data, 0));
 
-	for (i = 0; i < count; i++) {
-		char c[50];
-		itoa(i, c, 10);
-
-		CString s = TranslateStringACP("Action");
-		s += " ";
-		s += c;
-
-		m_Action.SetItemData(m_Action.AddString(s), i);
+	CString actionStr;
+	auto const actionPrefixStr = TranslateStringACP("Action");
+	for (auto i = 0; i < count; i++) {
+		actionStr.Format("%s %02d", actionPrefixStr, i);
+		m_Action.SetItemData(m_Action.AddString(actionStr), i);
 	}
 
-	if (cur_sel < 0) cur_sel = 0;
-	if (cur_sel >= count) cur_sel = count - 1;
+	if (cur_sel < 0) {
+		cur_sel = 0;
+	}
+	if (cur_sel >= count) {
+		cur_sel = count - 1;
+	}
 
 	m_Action.SetCurSel(cur_sel);
 
