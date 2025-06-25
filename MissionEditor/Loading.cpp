@@ -3115,7 +3115,6 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 {
 	last_succeeded_operation = 11;
 
-	CString image; // the image used
 	SHPHEADER head;
 	char theat = cur_theat;
 	BYTE** lpT = NULL;
@@ -3185,7 +3184,7 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 	auto const istiberium = rules.GetBool(lpOvrlName, "Tiberium");
 	auto const isveins = rules.GetBool(lpOvrlName, "IsVeins");
 
-	image = rules.GetStringOr(lpOvrlName, "Image", lpOvrlName);
+	auto image = rules.GetStringOr(lpOvrlName, "Image", lpOvrlName);
 
 	TruncSpace(image);
 
@@ -3234,34 +3233,15 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 		//errstream.flush();
 
 		if (hMix == NULL) {
-			filename.SetAt(1, 'T');
-			hMix = FindFileInMix(filename);
-		}
-		if (hMix == NULL) {
-			filename.SetAt(1, 'A');
-			hMix = FindFileInMix(filename);
-		}
-		if (hMix == NULL) {
-			filename.SetAt(1, 'U');
-			hMix = FindFileInMix(filename);
-		}
-		if (hMix == NULL) {
-			filename.SetAt(1, 'N');
-			hMix = FindFileInMix(filename);
-		}
-		if (hMix == NULL) {
-			filename.SetAt(1, 'L');
-			hMix = FindFileInMix(filename);
-		}
-		if (hMix == NULL) {
-			filename.SetAt(1, 'D');
+			filename.SetAt(1, 'G');
 			hMix = FindFileInMix(filename);
 		}
 
 		if (cur_theat == 'T' || cur_theat == 'U') {
 			hPalette = m_palettes.m_hPalUnitTemp;
-		} else
+		} else {
 			hPalette = m_palettes.m_hPalUnitSnow;
+		}
 
 	}
 
