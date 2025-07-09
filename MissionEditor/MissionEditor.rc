@@ -686,7 +686,7 @@ BEGIN
     LTEXT           "Version:",IDC_LVERSION,7,37,61,9
     CTEXT           "",IDC_BUILTBY,74,52,154,13,SS_CENTERIMAGE | SS_SUNKEN
     LTEXT           "Built by:",IDC_LBUILTBY,7,52,61,9
-    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
+    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner, Zero Fanker\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
     LTEXT           "This software comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it.\nFor details open Help->Info",IDC_STATIC,6,129,221,26
 END
 #endif
@@ -1303,7 +1303,7 @@ BEGIN
     LTEXT           "Version:",IDC_LVERSION,7,37,61,9
     CTEXT           "",IDC_BUILTBY,74,52,154,13,SS_CENTERIMAGE | SS_SUNKEN
     LTEXT           "Built by:",IDC_LBUILTBY,7,52,61,9
-    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
+    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner, Zero Fanker\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
     LTEXT           "This software comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it.\nFor details open Help->Info",IDC_STATIC,6,129,221,26
 END
 #endif
@@ -3655,7 +3655,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_BUILTBY             "Matthias Wagner"
+    IDS_BUILTBY             "Matthias Wagner, Zero Fanker"
     IDS_VERSIONTEXT         TEXT("Version " PRODUCT_VERSION_STRING)
     IDS_VERSION             TEXT(PRODUCT_VERSION_STRING)
     IDS_VERSIONTEXTTS       TEXT("Version " PRODUCT_VERSION_STRING)
