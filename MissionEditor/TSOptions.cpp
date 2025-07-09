@@ -76,8 +76,8 @@ void CTSOptions::OnChoose()
 	const char* pFileName = "game.exe";
 	const char* pFileSearchPattern = "C&C EXE|game.exe|";
 #if defined(RA2_MODE)
-	pFileName = yuri_mode ? "ra2md.exe" : "ra2.exe";
-	pFileSearchPattern = yuri_mode ? "Yuri's Revenge EXE|ra2md.exe|" : "Red Alert 2 EXE|ra2.exe|";
+	pFileName = yuri_mode ? "ra2md.mix" : "ra2.mix";
+	pFileSearchPattern = yuri_mode ? "Yuri's Revenge Mix|ra2md.mix|" : "Red Alert 2 Mix|ra2.mix|";
 #else
 	pFileName = "Sun.exe";
 	pFileSearchPattern = "Tiberian Sun EXE|Sun.exe|";
