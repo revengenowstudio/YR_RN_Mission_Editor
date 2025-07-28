@@ -34,7 +34,7 @@ jobs:
           3rdParty/xcc/vcpkg_downloads
           3rdParty/xcc/vcpkg_installed
           C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: Build Main Program (MSVC)
       run: |
         devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
@@ -48,7 +48,7 @@ jobs:
           3rdParty/xcc/vcpkg_downloads
           3rdParty/xcc/vcpkg_installed
           C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: do UT
       run: |
         cd x64\Debug
