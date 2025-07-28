@@ -17,6 +17,7 @@
 */
 
 #include <stdafx.h>
+#include <array>
 #include "mix_file.h"
 
 #ifndef NO_FT_SUPPORT

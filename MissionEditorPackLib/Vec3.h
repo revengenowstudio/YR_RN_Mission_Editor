@@ -85,17 +85,17 @@ public:
 
 	inline Vec3& minimum(const Vec3& v2)
 	{
-		v[0] = min(v[0], v2[0]);
-		v[1] = min(v[1], v2[1]);
-		v[2] = min(v[2], v2[2]);
+		v[0] = std::min(v[0], v2[0]);
+		v[1] = std::min(v[1], v2[1]);
+		v[2] = std::min(v[2], v2[2]);
 		return *this;
 	}
 
 	inline Vec3& maximum(const Vec3& v2)
 	{
-		v[0] = max(v[0], v2[0]);
-		v[1] = max(v[1], v2[1]);
-		v[2] = max(v[2], v2[2]);
+		v[0] = std::max(v[0], v2[0]);
+		v[1] = std::max(v[1], v2[1]);
+		v[2] = std::max(v[2], v2[2]);
 		return *this;
 	}
 

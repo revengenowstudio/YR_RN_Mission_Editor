@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <map>
+#include <vector>
 #include "cc_file.h"
 #include "cc_structures.h"
 
