@@ -2197,13 +2197,13 @@ BOOL CLoading::InitMixFiles()
 			if (FSunPackLib::XCC_DoesFileExist(conquer + append, m_hExpand[i].hExpand)) {
 				OutputDebugString(conquer + append);
 				OutputDebugString(": ");
-				m_hExpand[i].hConquer = FSunPackLib::XCC_OpenMix((CString)conquer + append, m_hExpand[i].hExpand);
+				m_hExpand[i].hConquer = FSunPackLib::XCC_OpenMix(conquer + append, m_hExpand[i].hExpand);
 				errstream << "conquer.mix, ";
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"local" + append, m_hExpand[i].hExpand)) {
-				OutputDebugString((CString)"local" + append);
+			if (FSunPackLib::XCC_DoesFileExist("local" + append, m_hExpand[i].hExpand)) {
+				OutputDebugString("local" + append);
 				OutputDebugString(": ");
-				m_hExpand[i].hLocal = FSunPackLib::XCC_OpenMix((CString)"local" + append, m_hExpand[i].hExpand);
+				m_hExpand[i].hLocal = FSunPackLib::XCC_OpenMix("local" + append, m_hExpand[i].hExpand);
 				errstream << "local.mix, ";
 			}
 			//if(FSunPackLib::XCC_DoesFileExist("_ID1085587737", m_hExpand[i].hExpand))
@@ -2211,27 +2211,27 @@ BOOL CLoading::InitMixFiles()
 				//m_hExpand[i].hConquer=FSunPackLib::XCC_OpenMix("_ID1085587737", m_hExpand[i].hExpand);
 				//errstream << "1085587737, ";
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"temperat" + append, m_hExpand[i].hExpand)) {
-				OutputDebugString((CString)"temperat" + append);
+			if (FSunPackLib::XCC_DoesFileExist("temperat" + append, m_hExpand[i].hExpand)) {
+				OutputDebugString("temperat" + append);
 				OutputDebugString(": ");
-				m_hExpand[i].hTemperat = FSunPackLib::XCC_OpenMix((CString)"temperat" + append, m_hExpand[i].hExpand);
+				m_hExpand[i].hTemperat = FSunPackLib::XCC_OpenMix("temperat" + append, m_hExpand[i].hExpand);
 				errstream << "temperat.mix, ";
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"urban" + append, m_hExpand[i].hExpand)) {
-				OutputDebugString((CString)"urban" + append);
+			if (FSunPackLib::XCC_DoesFileExist("urban" + append, m_hExpand[i].hExpand)) {
+				OutputDebugString("urban" + append);
 				OutputDebugString(": ");
-				m_hExpand[i].hUrban = FSunPackLib::XCC_OpenMix((CString)"urban" + append, m_hExpand[i].hExpand);
+				m_hExpand[i].hUrban = FSunPackLib::XCC_OpenMix("urban" + append, m_hExpand[i].hExpand);
 				errstream << "urban.mix, ";
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"snow" + append, m_hExpand[i].hExpand)) {
-				OutputDebugString((CString)"snow" + append);
+			if (FSunPackLib::XCC_DoesFileExist("snow" + append, m_hExpand[i].hExpand)) {
+				OutputDebugString("snow" + append);
 				OutputDebugString(": ");
 
 				FSunPackLib::_DEBUG_EnableLogs = true;
 
-				HMIXFILE hM = FSunPackLib::XCC_OpenMix((CString)"snow" + append, m_hExpand[i].hExpand);
+				HMIXFILE hM = FSunPackLib::XCC_OpenMix("snow" + append, m_hExpand[i].hExpand);
 				m_hExpand[i].hSnow = hM;
 				errstream << "snow.mix, ";
 				errstream.flush();
@@ -2241,130 +2241,130 @@ BOOL CLoading::InitMixFiles()
 
 			CString generic = "generic";
 			if (i == 100) generic = "gener";
-			if (FSunPackLib::XCC_DoesFileExist((CString)generic + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hGeneric = FSunPackLib::XCC_OpenMix((CString)generic + append, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist(generic + append, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hGeneric = FSunPackLib::XCC_OpenMix(generic + append, m_hExpand[i].hExpand);
 				errstream << "generic.mix, ";
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"urbann" + nappend, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hUrbanN = FSunPackLib::XCC_OpenMix((CString)"urbann" + nappend, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("urbann" + nappend, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hUrbanN = FSunPackLib::XCC_OpenMix("urbann" + nappend, m_hExpand[i].hExpand);
 				errstream << "urbann.mix, ";
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"lunar" + nappend, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hLunar = FSunPackLib::XCC_OpenMix((CString)"lunar" + nappend, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("lunar" + nappend, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hLunar = FSunPackLib::XCC_OpenMix("lunar" + nappend, m_hExpand[i].hExpand);
 				errstream << "lunar.mix, ";
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"desert" + nappend, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hDesert = FSunPackLib::XCC_OpenMix((CString)"desert" + nappend, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("desert" + nappend, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hDesert = FSunPackLib::XCC_OpenMix("desert" + nappend, m_hExpand[i].hExpand);
 				errstream << "desert.mix, ";
 				errstream.flush();
 			}
 			CString isotemp = "isotemp";
 			if (i == 100) isotemp = "isotem";
 			if (FSunPackLib::XCC_DoesFileExist(isotemp + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hIsoTemp = FSunPackLib::XCC_OpenMix((CString)isotemp + append, m_hExpand[i].hExpand);
+				m_hExpand[i].hIsoTemp = FSunPackLib::XCC_OpenMix(isotemp + append, m_hExpand[i].hExpand);
 				errstream << "isotemp.mix, ";
 				errstream.flush();
 			}
 			CString isosnow = "isosnow";
 			if (i == 100) isosnow = "isosno";
-			if (FSunPackLib::XCC_DoesFileExist((CString)isosnow + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hIsoSnow = FSunPackLib::XCC_OpenMix((CString)isosnow + append, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist(isosnow + append, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hIsoSnow = FSunPackLib::XCC_OpenMix(isosnow + append, m_hExpand[i].hExpand);
 				errstream << "isosnow.mix, ";
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"isourb" + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hIsoUrb = FSunPackLib::XCC_OpenMix((CString)"isourb" + append, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("isourb" + append, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hIsoUrb = FSunPackLib::XCC_OpenMix("isourb" + append, m_hExpand[i].hExpand);
 				errstream << "isourb.mix, ";
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"isoubn" + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hIsoUbnMd = FSunPackLib::XCC_OpenMix((CString)"isoubn" + append, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("isoubn" + append, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hIsoUbnMd = FSunPackLib::XCC_OpenMix("isoubn" + append, m_hExpand[i].hExpand);
 				errstream << "isoubn.mix, ";
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"isolun" + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hIsoLunMd = FSunPackLib::XCC_OpenMix((CString)"isolun" + append, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("isolun" + append, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hIsoLunMd = FSunPackLib::XCC_OpenMix("isolun" + append, m_hExpand[i].hExpand);
 				errstream << "isolun.mix, ";
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"isodes" + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hIsoDesMd = FSunPackLib::XCC_OpenMix((CString)"isodes" + append, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("isodes" + append, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hIsoDesMd = FSunPackLib::XCC_OpenMix("isodes" + append, m_hExpand[i].hExpand);
 				errstream << "isodes.mix, ";
 				errstream.flush();
 			}
 
-			if (FSunPackLib::XCC_DoesFileExist((CString)"isoubn" + nappend, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hIsoUbn = FSunPackLib::XCC_OpenMix((CString)"isoubn" + nappend, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("isoubn" + nappend, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hIsoUbn = FSunPackLib::XCC_OpenMix("isoubn" + nappend, m_hExpand[i].hExpand);
 				errstream << "isoubn.mix, ";
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"isolun" + nappend, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hIsoLun = FSunPackLib::XCC_OpenMix((CString)"isolun" + nappend, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("isolun" + nappend, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hIsoLun = FSunPackLib::XCC_OpenMix("isolun" + nappend, m_hExpand[i].hExpand);
 				errstream << "isolun.mix, ";
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"isodes" + nappend, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hIsoDes = FSunPackLib::XCC_OpenMix((CString)"isodes" + nappend, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("isodes" + nappend, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hIsoDes = FSunPackLib::XCC_OpenMix("isodes" + nappend, m_hExpand[i].hExpand);
 				errstream << "isodes.mix, ";
 				errstream.flush();
 			}
 
-			if (FSunPackLib::XCC_DoesFileExist((CString)"isogen" + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hIsoGenMd = FSunPackLib::XCC_OpenMix((CString)"isogen" + append, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("isogen" + append, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hIsoGenMd = FSunPackLib::XCC_OpenMix("isogen" + append, m_hExpand[i].hExpand);
 				errstream << "isogen.mix, ";
 				errstream.flush();
 			}
 
-			if (FSunPackLib::XCC_DoesFileExist((CString)"isogen" + nappend, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hIsoGen = FSunPackLib::XCC_OpenMix((CString)"isogen" + nappend, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("isogen" + nappend, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hIsoGen = FSunPackLib::XCC_OpenMix("isogen" + nappend, m_hExpand[i].hExpand);
 				errstream << "isogen.mix, ";
 				errstream.flush();
 			}
 
 			CString cache = "ecache01";
 			if (i == 100) cache = "cache";
-			if (FSunPackLib::XCC_DoesFileExist((CString)cache + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hECache = FSunPackLib::XCC_OpenMix((CString)cache + append, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist(cache + append, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hECache = FSunPackLib::XCC_OpenMix(cache + append, m_hExpand[i].hExpand);
 				errstream << LPCSTR("ecache01" + append + ", ");
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"tem" + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hTem = FSunPackLib::XCC_OpenMix((CString)"tem" + append, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("tem" + append, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hTem = FSunPackLib::XCC_OpenMix("tem" + append, m_hExpand[i].hExpand);
 				errstream << LPCSTR("tem" + append + ", ");
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"sno" + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hSno = FSunPackLib::XCC_OpenMix((CString)"sno" + append, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("sno" + append, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hSno = FSunPackLib::XCC_OpenMix("sno" + append, m_hExpand[i].hExpand);
 				errstream << LPCSTR("sno" + append + ", ");
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"urb" + append, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hUrb = FSunPackLib::XCC_OpenMix((CString)"urb" + append, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("urb" + append, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hUrb = FSunPackLib::XCC_OpenMix("urb" + append, m_hExpand[i].hExpand);
 				errstream << LPCSTR("urb" + append + ", ");
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"ubn" + nappend, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hUbn = FSunPackLib::XCC_OpenMix((CString)"ubn" + nappend, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("ubn" + nappend, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hUbn = FSunPackLib::XCC_OpenMix("ubn" + nappend, m_hExpand[i].hExpand);
 				errstream << LPCSTR("ubn" + nappend + ", ");
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"lun" + nappend, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hLun = FSunPackLib::XCC_OpenMix((CString)"lun" + nappend, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("lun" + nappend, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hLun = FSunPackLib::XCC_OpenMix("lun" + nappend, m_hExpand[i].hExpand);
 				errstream << LPCSTR("lun" + nappend + ", ");
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"des" + nappend, m_hExpand[i].hExpand)) {
-				m_hExpand[i].hDes = FSunPackLib::XCC_OpenMix((CString)"des" + nappend, m_hExpand[i].hExpand);
+			if (FSunPackLib::XCC_DoesFileExist("des" + nappend, m_hExpand[i].hExpand)) {
+				m_hExpand[i].hDes = FSunPackLib::XCC_OpenMix("des" + nappend, m_hExpand[i].hExpand);
 				errstream << LPCSTR("des" + nappend + ", ");
 				errstream.flush();
 			}
-			if (FSunPackLib::XCC_DoesFileExist((CString)"marble" + append, m_hExpand[i].hExpand)) {
+			if (FSunPackLib::XCC_DoesFileExist("marble" + append, m_hExpand[i].hExpand)) {
 				theApp.m_Options.bSupportMarbleMadness = TRUE;
 
-				m_hExpand[i].hMarble = FSunPackLib::XCC_OpenMix((CString)"marble" + append, m_hExpand[i].hExpand);
+				m_hExpand[i].hMarble = FSunPackLib::XCC_OpenMix("marble" + append, m_hExpand[i].hExpand);
 				errstream << LPCSTR("marble" + append + ", ");
 				errstream.flush();
 			}
