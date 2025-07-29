@@ -40,6 +40,7 @@ jobs:
         cd 3rdParty/xcc
         $env:VCPKG_DOWNLOADS = $PWD
         $vcpkgPath = (Get-Command vcpkg).Source
+        rm "$vcpkgPath\.vcpkg-root"
         & "$vcpkgPath" install `
           --x-wait-for-lock `
           --triplet "x64-windows" `
