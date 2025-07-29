@@ -38,6 +38,7 @@ jobs:
     - name: Vcpkg install
       run: |
         cd 3rdParty/xcc
+        $env:VCPKG_DOWNLOADS = $PWD.Path
         vcpkg install
         ls
         ls vcpkg_installed/x64-windows
