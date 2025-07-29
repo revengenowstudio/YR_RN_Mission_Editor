@@ -39,10 +39,11 @@ jobs:
       run: |
         cd 3rdParty/xcc
         $env:VCPKG_DOWNLOADS = $PWD.Path
-        vcpkg install \
-          --x-wait-for-lock \
-          --triplet "x64-windows" \
-          --x-manifest-root="$PWD.Path\" --x-install-root="$PWD.Path\vcpkg_installed\x64-windows\"
+        vcpkg install `
+          --x-wait-for-lock `
+          --triplet "x64-windows" `
+          --x-manifest-root="$PWD.Path\" `
+          --x-install-root="$PWD.Path\vcpkg_installed\x64-windows\"
         ls
         ls vcpkg_installed/x64-windows
         # disable auto pkg in vcxproj
