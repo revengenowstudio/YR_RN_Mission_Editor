@@ -46,7 +46,7 @@ jobs:
           --triplet "x64-windows" `
           --vcpkg-root $vcpkgPath `
           --x-manifest-root="$PWD\" `
-          --x-install-root="$PWD\vcpkg_installed\x64-windows\"
+          --x-install-root="$PWD\vcpkg_installed\"
         ls
         ls vcpkg_installed/x64-windows
         ls vcpkg_installed/x64-windows/include
