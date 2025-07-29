@@ -34,11 +34,28 @@ jobs:
           3rdParty/xcc/vcpkg_downloads
           3rdParty/xcc/vcpkg_installed
           C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+    - name: Vcpkg install
+      run: |
+        cd 3rdParty/xcc
+        $env:VCPKG_DOWNLOADS = $PWD
+        $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg"
+        # rm "$vcpkgPath\.vcpkg-root"
+        & "$vcpkgPath\vcpkg" install `
+          --x-wait-for-lock `
+          --triplet "x64-windows" `
+          --vcpkg-root $vcpkgPath `
+          --x-manifest-root="$PWD\" `
+          --x-install-root="$PWD\vcpkg_installed\x64-windows\"
+        ls
+        ls vcpkg_installed/x64-windows
+        ls vcpkg_installed/x64-windows/include
     - name: Build Main Program (MSVC)
       run: |
         devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
     - name: Build UT tool (MSVC)
+      env:
+        VCPKG_ENABLE_MANIFEST: "0"
       run: |
         devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project UnitTest
     - name: Cache vcpkg
@@ -48,7 +65,7 @@ jobs:
           3rdParty/xcc/vcpkg_downloads
           3rdParty/xcc/vcpkg_installed
           C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: do UT
       run: |
         cd x64\Debug
