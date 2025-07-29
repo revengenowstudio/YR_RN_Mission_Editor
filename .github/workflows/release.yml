@@ -53,14 +53,18 @@ jobs:
     - name: Vcpkg install
       run: |
         cd 3rdParty/xcc
-        vcpkg install
+        $env:VCPKG_DOWNLOADS = $PWD
+        $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg"
+        # rm "$vcpkgPath\.vcpkg-root"
+        & "$vcpkgPath\vcpkg" install `
+          --x-wait-for-lock `
+          --triplet "x64-windows" `
+          --vcpkg-root $vcpkgPath `
+          --x-manifest-root="$PWD\" `
+          --x-install-root="$PWD\vcpkg_installed\x64-windows\"
         ls
         ls vcpkg_installed/x64-windows
-        # disable auto pkg in vcxproj
-        $vcxprojPath = "Library\XCC Library.vcxproj"
-        $content = Get-Content $vcxprojPath
-        $updatedContent = $content -replace '<VcpkgEnableManifest>true</VcpkgEnableManifest>', '<VcpkgEnableManifest>false</VcpkgEnableManifest>'
-        $updatedContent | Set-Content $vcxprojPath
+        ls vcpkg_installed/x64-windows/include
     - name: build-msvc
       run: |
         devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor

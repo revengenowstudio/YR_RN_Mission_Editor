@@ -50,11 +50,6 @@ jobs:
         ls
         ls vcpkg_installed/x64-windows
         ls vcpkg_installed/x64-windows/include
-        # disable auto pkg in vcxproj
-        # $vcxprojPath = "Library\XCC Library.vcxproj"
-        # $content = Get-Content $vcxprojPath
-        # $updatedContent = $content -replace '<VcpkgEnableManifest>true</VcpkgEnableManifest>', '<VcpkgEnableManifest>false</VcpkgEnableManifest>'
-        # $updatedContent | Set-Content $vcxprojPath
     - name: Build Main Program (MSVC)
       run: |
         devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
