@@ -49,6 +49,7 @@ jobs:
           --x-install-root="$PWD\vcpkg_installed\x64-windows\"
         ls
         ls vcpkg_installed/x64-windows
+        ls vcpkg_installed/x64-windows/include
         # disable auto pkg in vcxproj
         $vcxprojPath = "Library\XCC Library.vcxproj"
         $content = Get-Content $vcxprojPath
