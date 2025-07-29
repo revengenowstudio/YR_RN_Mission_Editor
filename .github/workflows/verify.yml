@@ -39,9 +39,9 @@ jobs:
       run: |
         cd 3rdParty/xcc
         $env:VCPKG_DOWNLOADS = $PWD
-        $vcpkgPath = (Get-Command vcpkg).Source
-        rm "$vcpkgPath\.vcpkg-root"
-        & "$vcpkgPath" install `
+        $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg"
+        # rm "$vcpkgPath\.vcpkg-root"
+        & "$vcpkgPath\vcpkg" install `
           --x-wait-for-lock `
           --triplet "x64-windows" `
           --vcpkg-root $vcpkgPath `
