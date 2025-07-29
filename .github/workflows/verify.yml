@@ -39,9 +39,11 @@ jobs:
       run: |
         cd 3rdParty/xcc
         $env:VCPKG_DOWNLOADS = $PWD
-        vcpkg install `
+        $vcpkgPath = (Get-Command vcpkg).Source
+        "$vcpkgPath" install `
           --x-wait-for-lock `
           --triplet "x64-windows" `
+          --vcpkg-root $vcpkgPath `
           --x-manifest-root="$PWD\" `
           --x-install-root="$PWD\vcpkg_installed\x64-windows\"
         ls
