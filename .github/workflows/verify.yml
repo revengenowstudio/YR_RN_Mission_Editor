@@ -40,7 +40,7 @@ jobs:
         cd 3rdParty/xcc
         vcpkg install
         ls
-        ls vcpkg_installed
+        ls vcpkg_installed/x64-windows
     - name: Build Main Program (MSVC)
       env:
         VCPKG_ENABLE_MANIFEST: "0"
