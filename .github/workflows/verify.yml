@@ -40,10 +40,15 @@ jobs:
         cd 3rdParty/xcc
         vcpkg install
         ls
+        ls vcpkg_installed
     - name: Build Main Program (MSVC)
+      env:
+        VCPKG_ENABLE_MANIFEST: "0"
       run: |
         devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
     - name: Build UT tool (MSVC)
+      env:
+        VCPKG_ENABLE_MANIFEST: "0"
       run: |
         devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project UnitTest
     - name: Cache vcpkg
