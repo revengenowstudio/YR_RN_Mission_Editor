@@ -1,11 +1,13 @@
 name: Release Product
 
 on:
-  push:
+  pull_request:
     branches:
       - "main"
       - "RN"
-  workflow_dispatch:
+    types:
+      - closed
+  workflow_dispatch: {}
 
 env:
   VERSION_MAJOR: 2
@@ -17,6 +19,7 @@ env:
 
 jobs:
   build-and-release:
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true)
     runs-on: windows-2022
     env:
       CONFIGURATION: FinalAlertRelease YR
