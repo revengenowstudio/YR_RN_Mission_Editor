@@ -39,7 +39,9 @@ jobs:
     - name: Vcpkg install
       run: |
         cd 3rdParty/xcc
-        mkdir binary-cache
+        if (-not (Test-Path "binary-cache")) {
+            mkdir "binary-cache"
+        }
         $env:VCPKG_DOWNLOADS = $PWD
         $env:VCPKG_BINARY_SOURCES="files,$PWD\binary-cache,readwrite"
         $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg"
