@@ -72,6 +72,15 @@ jobs:
     - name: build-msvc
       run: |
         devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
+    - name: Cache vcpkg
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          3rdParty/xcc/vcpkg_downloads
+          3rdParty/xcc/vcpkg_installed
+          3rdParty/xcc/binary-cache
+          C:/Users/runneradmin/AppData/Local/vcpkg
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: Pack up
       shell: pwsh
       run: |
