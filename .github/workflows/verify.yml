@@ -57,12 +57,12 @@ jobs:
         ls vcpkg_installed/x64-windows/x64-windows/include
     - name: Build Main Program (MSVC)
       run: |
-        devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
+        MSBuild.exe "MissionEditor.sln" /m /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
     - name: Build UT tool (MSVC)
       env:
         VCPKG_ENABLE_MANIFEST: "0"
       run: |
-        devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project UnitTest
+        MSBuild.exe "MissionEditor.sln" /m /Build "${{ env.CONFIGURATION }}|x64" /project UnitTest
     - name: Cache vcpkg
       uses: actions/cache/save@v4
       with:
