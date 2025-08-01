@@ -44,6 +44,9 @@ struct IUnknown;
 #include <hva_file.h>
 #include "mix_file_write.h"
 #include <locale>
+#include <utility>
+#include <unordered_map>
+#include <filesystem>
 
 #include <windows.h>
 #include <windowsx.h>
@@ -53,9 +56,10 @@ struct IUnknown;
 
 #include "VoxelNormals.h"
 
-
-Cmix_file mixfiles[2000];
-std::string mixfiles_names[2000];
+size_t constexpr mixfileCachedCapacity = 2000;
+Cmix_file mixfiles[mixfileCachedCapacity];
+std::string mixfiles_names[mixfileCachedCapacity];
+std::unordered_map<std::string_view, size_t> cacheMixFileIndexes;
 Cshp_ts_file cur_shp; // for now only support one shp at once
 Ctmp_ts_file cur_tmp;
 
@@ -386,47 +390,78 @@ namespace FSunPackLib
 		return TRUE;
 	}
 
-	HMIXFILE XCC_OpenMix(LPCTSTR szMixFile, HMIXFILE hOwner)
+	char toLower(char in)
 	{
-		DWORD i, d = 0xFFFFFFFF;
-		for (i = 0; i <= dwMixFileCount && i < 2000; i++) {
-			if (mixfiles[i].is_open() == false) {
-				d = i;
-				break;
+		return std::tolower(in);
+	}
+
+	HMIXFILE XCC_OpenMix(LPCTSTR szMixFile, HMIXFILE hParent)
+	{
+		size_t cur = 0xFFFFFFFF;
+
+		auto const fullName = [szMixFile]() -> std::string {
+			std::filesystem::path fileFullPath(szMixFile);
+			auto fullName = fileFullPath.string();
+			std::transform(fullName.begin(), fullName.end(), fullName.begin(), toLower);
+			return fullName;
+		}();
+		auto const it = cacheMixFileIndexes.find(fullName);
+		if (it == cacheMixFileIndexes.end()) {
+			auto const cacheEnd = std::min<size_t>(dwMixFileCount + 1, mixfileCachedCapacity);
+			for (auto i = 0ull; i <= cacheEnd; i++) {
+				if (mixfiles[i].is_open() == false) {
+					cur = i;
+					break;
+				}
 			}
+		} else {
+			cur = it->second;
 		}
-		if (d == 0xFFFFFFFF)
+
+		if (cur == 0xFFFFFFFF) {
 			return NULL;
-
-		std::string sMixFile = szMixFile;
-
-		if (hOwner == NULL) {
-			if (open_read(mixfiles[d], sMixFile))
-				return NULL;
-			//mixfiles[dwMixFileCount].enable_mix_expansion();
-			mixfiles_names[d] = szMixFile;
-			if (d == dwMixFileCount)
-				dwMixFileCount++;
-
-			return d + 1;//dwMixFileCount;
-		} else if (hOwner > 0 && (hOwner - 1) < dwMixFileCount) {
-			if (szMixFile[0] == L'_' && szMixFile[1] == L'I' && szMixFile[2] == L'D') {
-				char id[256];
-				strcpy_s(id, &sMixFile[3]);
-				int iId = atoi(id);
-				if (mixfiles[d].open(iId, mixfiles[hOwner - 1])) return NULL;
-			} else {
-				if (mixfiles[d].open(sMixFile, mixfiles[hOwner - 1]))
-					return NULL;
+		}
+		// no parent, open it directly
+		if (hParent == NULL) {
+			if (mixfiles[cur].is_open()) {
+				return static_cast<HMIXFILE>(cur + 1);
 			}
-
-			mixfiles_names[d] = szMixFile;
-			if (d == dwMixFileCount)
+			if (0 != open_read(mixfiles[cur], fullName)) {
+				return NULL;
+			}
+			mixfiles_names[cur] = std::move(fullName);
+			cacheMixFileIndexes.emplace(mixfiles_names[cur], cur);
+			if (cur == dwMixFileCount) {
 				dwMixFileCount++;
-			return d + 1;
+			}
+			return static_cast<HMIXFILE>(cur + 1);//dwMixFileCount;
+		} 
+		
+		auto const parent = hParent - 1;
+		if (parent >= dwMixFileCount) {
+			return NULL;
 		}
 
-		return NULL;
+		// directly open with crc id
+		if (fullName.compare(0, 3, "_ID") == 0) {
+			char id[256];
+			strcpy_s(id, fullName.c_str() + 3);
+			int iId = atoi(id);
+			if (mixfiles[cur].open(iId, mixfiles[parent])) {
+				return NULL;
+			}
+		} else {
+			if (mixfiles[cur].open(fullName, mixfiles[parent])) {
+				return NULL;
+			}
+		}
+
+		mixfiles_names[cur] = std::move(fullName);
+		cacheMixFileIndexes.emplace(mixfiles_names[cur], cur);
+		if (cur == dwMixFileCount) {
+			dwMixFileCount++;
+		}
+		return static_cast<HMIXFILE>(cur + 1);
 	}
 
 	BOOL XCC_GetMixName(HMIXFILE hOwner, std::string& sMixFile)
@@ -460,18 +495,25 @@ namespace FSunPackLib
 
 	BOOL XCC_CloseMix(HMIXFILE hMixFile)
 	{
-		if (hMixFile<1 || hMixFile>dwMixFileCount)
+		if (hMixFile < 1 || hMixFile > dwMixFileCount) {
 			return FALSE;
+		}
 
 		hMixFile--; // -1 to make it to an array index
 
+		auto const& name = mixfiles_names[hMixFile];
+		auto const erased = cacheMixFileIndexes.erase(name);
+		assert(erased == 1);
+
 		mixfiles_names[hMixFile].clear();
 
-		if (mixfiles[hMixFile].is_open()) mixfiles[hMixFile].close();
-		else
-			return FALSE;
+		if (mixfiles[hMixFile].is_open()) {
+			mixfiles[hMixFile].close();
+			return TRUE;
+		}
 
-		return TRUE;
+		return FALSE;
+
 	}
 
 	BOOL XCC_ExtractFile(const std::string& szFilename, const std::string& szSaveTo, HMIXFILE hOwner)
@@ -505,10 +547,10 @@ namespace FSunPackLib
 		if (open_write(target_file, szSaveTo))
 			return FALSE;
 
-		const int bufferSize = static_cast<int>(min(file.get_size(), 1024 * 1024));
+		const int bufferSize = static_cast<int>(std::min<size_t>(file.get_size(), 1024 * 1024));
 		std::vector<byte> buffer(bufferSize);
 		for (auto p = 0; p < file.get_size();) {
-			const auto toRead = static_cast<int>(min(file.get_size() - p, bufferSize));
+			const auto toRead = static_cast<int>(std::min<size_t>(file.get_size() - p, bufferSize));
 			if (file.read(buffer.data(), toRead))
 				return FALSE;
 			if (target_file.write(buffer.data(), toRead))
@@ -593,23 +635,24 @@ namespace FSunPackLib
 		if (cur_shp.is_open()) {
 			cur_shp.close();
 		}
-
+		auto const fileIdx = hOwner - 1;
 		if (hOwner == NULL) {
 			if (open_read(cur_shp, szSHP) != 0) {
 				return false;
 			}
-		} else {
-			auto const id = mixfiles[hOwner - 1].get_id(mixfiles[hOwner - 1].get_game(), szSHP);
-			auto const size = mixfiles[hOwner - 1].get_size(id);
-			if (size == 0) {
-				OutputDebugString("NULL size");
-				return false;
-			}
-			BYTE* b = new(BYTE[size]);
-			mixfiles[hOwner - 1].seek(mixfiles[hOwner - 1].get_offset(id));
-			mixfiles[hOwner - 1].read(b, size);
-			cur_shp.load(Cvirtual_binary(b, size));
+			return true;
 		}
+
+		auto const id = mixfiles[fileIdx].get_id(mixfiles[fileIdx].get_game(), szSHP);
+		auto const size = mixfiles[fileIdx].get_size(id);
+		if (size == 0) {
+			OutputDebugString("NULL size");
+			return false;
+		}
+		auto buffer = std::shared_ptr<BYTE>(new BYTE[size]); // this line is most important to fix memory leak
+		mixfiles[fileIdx].seek(mixfiles[fileIdx].get_offset(id));
+		mixfiles[fileIdx].read(buffer.get(), size);
+		cur_shp.load(Cvirtual_binary(buffer.get(), size, buffer));
 
 		return true;
 	};
@@ -1618,7 +1661,7 @@ namespace FSunPackLib
 								auto normalDotLightingVec = normal.dot(inverseLightDirection);
 								auto lightVal = normalDotLightingVec < 0.0f ? 0.0f : normalDotLightingVec;
 								assert(fabs(normal.squaredLength() - 1.0f) < 0.01f);
-								lighting[ofs] = max(0, static_cast<BYTE>(lightVal * 255.0f));
+								lighting[ofs] = std::max< BYTE>(0, static_cast<BYTE>(lightVal * 255.0f));
 								image_z[ofs] = static_cast<char>(d_pixel.z());
 							} else
 								r += 2;;

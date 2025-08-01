@@ -135,7 +135,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>..\3rdParty\xcc\misc;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;EF;WIN32;_LIB;NO_XIF_SUPPORT;NO_FT_SUPPORT;NO_AVI_SUPPORT;XCC_MINIMAL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;EF;WIN32;_LIB;NO_XIF_SUPPORT;NO_FT_SUPPORT;NO_AVI_SUPPORT;XCC_MINIMAL_BUILD;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Release\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\Release\MissionEditorPackLib.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\Release\</ObjectFileName>
@@ -204,7 +204,7 @@
       <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PreprocessorDefinitions>_DEBUG;WIN32;_LIB;NO_XIF_SUPPORT;NO_FT_SUPPORT;NO_AVI_SUPPORT;XCC_MINIMAL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_LIB;NO_XIF_SUPPORT;NO_FT_SUPPORT;NO_AVI_SUPPORT;XCC_MINIMAL_BUILD;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0407</Culture>
