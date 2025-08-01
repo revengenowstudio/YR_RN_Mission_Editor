@@ -75,7 +75,7 @@ jobs:
         ls vcpkg_installed/x64-windows/x64-windows
     - name: build-msvc
       run: |
-        devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
+        MSBuild MissionEditor.sln /m /p:Configuration="${{ env.CONFIGURATION }}" /p:Platform=x64 /t:MissionEditor
     - name: Cache vcpkg
       uses: actions/cache/save@v4
       with:
