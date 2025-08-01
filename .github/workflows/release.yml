@@ -66,9 +66,10 @@ jobs:
           --triplet "x64-windows" `
           --vcpkg-root $vcpkgPath `
           --x-manifest-root="$PWD\" `
-          --x-install-root="$PWD\vcpkg_installed\"
+          --x-install-root="$PWD\vcpkg_installed\x64-windows"
         ls
         ls vcpkg_installed/x64-windows
+        ls vcpkg_installed/x64-windows/x64-windows
     - name: build-msvc
       run: |
         devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
