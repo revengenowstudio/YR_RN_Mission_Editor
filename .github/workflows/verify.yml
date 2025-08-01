@@ -39,6 +39,11 @@ jobs:
     - name: Vcpkg install
       run: |
         cd 3rdParty/xcc
+        # tmp, make cache happy
+        mv vcpkg_installed/x64-windows _tmp_
+        mkdir -p vcpkg_installed/x64-windows
+        mv _tmp_ vcpkg_installed/x64-windows/x64-windows
+        # stop making happiness
         if (-not (Test-Path "binary-cache")) {
             mkdir "binary-cache"
         }
