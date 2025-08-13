@@ -112,7 +112,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)googletest\x64\lib\$(Configuration)\*.lib;$(SolutionDir)3rdParty\xcc\vcpkg_installed\x64-windows\lib\*.lib;XCC Library.lib;MissionEditorPackLibd.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)googletest\x64\lib\$(Configuration)\*.lib;$(SolutionDir)3rdParty\xcc\vcpkg_installed\x64-windows\x64-windows\lib\*.lib;XCC Library.lib;MissionEditorPackLibd.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)build\output\$(Configuration)-$(Platform)\lib;$(SolutionDir)build\output\$(Configuration)Minimal-$(Platform)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -132,7 +132,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)googletest\x64\lib\$(Configuration)\*.lib;$(SolutionDir)3rdParty\xcc\vcpkg_installed\x64-windows\lib\*.lib;XCC Library.lib;MissionEditorPackLib.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)googletest\x64\lib\$(Configuration)\*.lib;$(SolutionDir)3rdParty\xcc\vcpkg_installed\x64-windows\x64-windows\lib\*.lib;XCC Library.lib;MissionEditorPackLib.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)build\output\$(Configuration)-$(Platform)\lib;$(SolutionDir)build\output\$(Configuration)Minimal-$(Platform)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
