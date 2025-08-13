@@ -250,13 +250,13 @@ namespace FSunPackLib
 		return DP;
 	}
 
-	UINT EncodeIsoMapPack5(BYTE* sp, UINT SourceLength, BYTE** dp)
+	UINT EncodeIsoMapPack5(const BYTE* sp, UINT src_len, BYTE** ret)
 	{
-		*dp = new(BYTE[SourceLength * 2]); // as big as source, makes sure it works!
+		*ret = new(BYTE[src_len * 2]); // as big as source, makes sure it works!
 
-		UINT DP = encode5(sp, *dp, SourceLength, 5);
+		UINT encoded_len = encode5(sp, *ret, src_len, 5);
 
-		return DP;
+		return encoded_len;
 	}
 
 	bool DecodeF80(const BYTE* const sp, const size_t SourceLength, std::vector<BYTE>& dp, const std::size_t max_size)

@@ -156,7 +156,7 @@ namespace FSunPackLib
 	dp - destination buffer
 	Returns size of packed data
 	*/
-	UINT EncodeIsoMapPack5(BYTE* sp, UINT SourceLength, BYTE** dp);
+	UINT EncodeIsoMapPack5(const BYTE* sp, UINT SourceLength, BYTE** dp);
 
 	/*
 	Unpack IsoMapPack5.
