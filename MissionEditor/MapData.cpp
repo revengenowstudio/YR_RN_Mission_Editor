@@ -1046,9 +1046,10 @@ void CMapData::Unpack()
 }
 
 uint64_t toUInt64(const MAPFIELDDATA& data) {
+	auto const tileIdx = std::max<short>(static_cast<short>(data.wGround), 0);
 	return (static_cast<uint64_t>(data.wX) << 24) |
 		(static_cast<uint64_t>(data.bHeight) << 16) |
-		(static_cast<uint64_t>(data.wGround));
+		(static_cast<uint64_t>(tileIdx));
 }
 
 std::vector<BYTE> CMapData::compressAndSortMapData(const BYTE* rawData, const size_t rawLen)
@@ -1084,9 +1085,9 @@ std::vector<BYTE> CMapData::compressAndSortMapData(const BYTE* rawData, const si
 
 	assert(ret.size() % MAPFIELDDATA_SIZE == 0);
 	auto const newElementSize = ret.size() / MAPFIELDDATA_SIZE;
-	std::sort(reinterpret_cast<MAPFIELDDATA*>(ret.data()),
+	std::stable_sort(reinterpret_cast<MAPFIELDDATA*>(ret.data()),
 		reinterpret_cast<MAPFIELDDATA*>(ret.data() + ret.size()),
-		[](MAPFIELDDATA& lhs, MAPFIELDDATA& rhs) {
+		[](const MAPFIELDDATA& lhs, const MAPFIELDDATA& rhs) {
 			return toUInt64(lhs) < toUInt64(rhs);
 		}
 	);
