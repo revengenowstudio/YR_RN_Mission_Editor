@@ -77,16 +77,20 @@ struct NODEDATA
 };
 
 // mapfielddata is the data of every field in an extracted isomappack!
+#pragma pack(push, 1)
 struct MAPFIELDDATA
 {
 	unsigned short wX;
 	unsigned short wY;
-	WORD wGround;
-	BYTE bData[3];
+	WORD wGround; // TileIndex
+	WORD wTileNum;
+	BYTE bSubTile;
 	BYTE bHeight;
-	BYTE bData2[1];
+	BYTE bIceGrowth;
 };
-#define MAPFIELDDATA_SIZE 11
+#pragma pack(pop)
+#define MAPFIELDDATA_SIZE sizeof(MAPFIELDDATA)
+static_assert(MAPFIELDDATA_SIZE == 11, "malformed MAPFIELDDATA");
 
 struct StructureData
 {
@@ -520,10 +524,14 @@ public:
 	static CString GetBuildingIDBy(size_t offset);
 
 private:
+	using LUTMap = std::unordered_set<DWORD>;
+
 	void UpdateTubes(BOOL bSave);
 	MAPFIELDDATA* GetMappackPointer(DWORD dwPos);
 
 	void UpdateMapFieldData(BOOL bSave = FALSE);
+
+	std::vector<BYTE> compressAndSortMapData(const BYTE* rawData, const size_t rawLen);
 
 	DWORD m_IsoSize;
 	mutable FIELDDATA outside_f;

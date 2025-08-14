@@ -1045,9 +1045,55 @@ void CMapData::Unpack()
 
 }
 
+uint64_t toUInt64(const MAPFIELDDATA& data) {
+	auto const tileIdx = std::max<short>(static_cast<short>(data.wGround), 0);
+	return (static_cast<uint64_t>(data.wX) << 24) |
+		(static_cast<uint64_t>(data.bHeight) << 16) |
+		(static_cast<uint64_t>(tileIdx));
+}
 
+std::vector<BYTE> CMapData::compressAndSortMapData(const BYTE* rawData, const size_t rawLen)
+{
+	if ((rawLen % MAPFIELDDATA_SIZE) != 0) {
+		throw std::invalid_argument("input data packing err");
+	}
 
+	std::vector<BYTE> ret; 
+	ret.reserve(rawLen);
 
+	auto const elementSize = rawLen / MAPFIELDDATA_SIZE;
+	for (auto idx = 0; idx < elementSize; ++idx) {
+		auto const& fieldData = reinterpret_cast<const MAPFIELDDATA*>(rawData)[idx];
+#if 0 // useless
+		if (lutMap.find(MAKELONG(fieldData.wX, fieldData.wY)) == lutMap.end()) {
+			continue;
+		}
+		auto const fieldDataExt = this->GetFielddataAt(fieldData.wX, fieldData.wY);
+		if (fieldDataExt->wGround < 1 && fieldDataExt->bHeight < 1 && fieldDataExt->bSubTile < 1 && fieldDataExt->bMapData2 < 1) {
+			continue;
+		}
+#endif
+		//auto const tileKey = MAKELONG(fieldData.wGround, fieldData.wTileNum);
+		auto const tileKey = static_cast<short>(fieldData.wGround);
+		if (tileKey < 1 && fieldData.bHeight < 1 && fieldData.bSubTile < 1 && fieldData.bIceGrowth < 1) {
+			continue;
+		}
+		ret.insert(ret.end(),
+			reinterpret_cast<const BYTE*>(&fieldData),
+			reinterpret_cast<const BYTE*>(&fieldData) + MAPFIELDDATA_SIZE);
+	}
+
+	assert(ret.size() % MAPFIELDDATA_SIZE == 0);
+	auto const newElementSize = ret.size() / MAPFIELDDATA_SIZE;
+	std::stable_sort(reinterpret_cast<MAPFIELDDATA*>(ret.data()),
+		reinterpret_cast<MAPFIELDDATA*>(ret.data() + ret.size()),
+		[](const MAPFIELDDATA& lhs, const MAPFIELDDATA& rhs) {
+			return toUInt64(lhs) < toUInt64(rhs);
+		}
+	);
+
+	return ret;
+}
 
 
 void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
@@ -1213,9 +1259,12 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 	errstream << "Pack isomappack" << endl;
 	errstream.flush();
 
-
-	hexpackedLen = FSunPackLib::EncodeIsoMapPack5(m_mfd, dwIsoMapSize * MAPFIELDDATA_SIZE, &hexpacked);
-
+	auto const mapDataSize = dwIsoMapSize * MAPFIELDDATA_SIZE;
+	{
+		auto const mapRectStr = INIHelper::Split(m_mapfile.GetString("Map", "Size"));
+		auto compressedData = compressAndSortMapData(m_mfd, mapDataSize);
+		hexpackedLen = FSunPackLib::EncodeIsoMapPack5(compressedData.data(), compressedData.size(), &hexpacked);
+	}
 
 	errstream << "done" << endl;
 	errstream.flush();
@@ -3241,8 +3290,9 @@ void CMapData::UpdateMapFieldData(BOOL bSave)
 			if (pos < (GetIsoSize() + 1) * (GetIsoSize() + 1)) {
 				fielddata[pos].wGround = mfd->wGround;
 				fielddata[pos].bHeight = mfd->bHeight;
-				memcpy(&fielddata[pos].bMapData, mfd->bData, 3);
-				memcpy(&fielddata[pos].bMapData2, mfd->bData2, 1);
+				fielddata[pos].bMapData = mfd->wTileNum;
+				fielddata[pos].bSubTile = mfd->bSubTile;
+				fielddata[pos].bMapData2 = mfd->bIceGrowth;
 
 				int replacement = 0;
 				int ground = mfd->wGround;
@@ -3363,8 +3413,8 @@ void CMapData::UpdateMapFieldData(BOOL bSave)
 				mfd->wX = dwY;
 				mfd->wY = dwX;
 				mfd->bHeight = fielddata[i].bHeight;
-				memcpy(&mfd->bData, &fielddata[i].bMapData, 3); // includes fielddata[i].bSubTile!
-				memcpy(&mfd->bData2, &fielddata[i].bMapData2, 1);
+				mfd->wTileNum = fielddata[i].bMapData;
+				mfd->bSubTile = fielddata[i].bSubTile;
 
 				p++;
 			}
