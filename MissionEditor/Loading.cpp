@@ -3658,7 +3658,7 @@ void CLoading::FreeAll()
 		t = 4;
 	}
 	if (tiledata == &d_tiledata) {
-		t = 4;
+		t = 5;
 	}
 
 	//try{
