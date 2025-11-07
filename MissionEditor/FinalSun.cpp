@@ -59,7 +59,9 @@ END_MESSAGE_MAP()
 
 void __cdecl term_func()
 {
-	if (MessageBox(0, "Fatal error. Exit FinalSun?", "Fatal error", MB_YESNO) == IDCANCEL) return;
+	if (MessageBox(0, _T("Fatal error. Exit FinalSun?"), _T("Fatal error"), MB_YESNO) == IDCANCEL) {
+		return;
+	}
 
 	exit(-1);
 }
@@ -67,9 +69,11 @@ void __cdecl term_func()
 
 CFinalSunApp::CFinalSunApp()
 {
-	m_cf = RegisterClipboardFormat("FINAL*FORMAT");
+	m_cf = RegisterClipboardFormat(_T("FINAL*FORMAT"));
 
-	if (!m_cf) MessageBox(0, "Failed to register clipboard format, clipboard functions not available", "", 0);
+	if (!m_cf) {
+		MessageBox(0, _T("Failed to register clipboard format, clipboard functions not available"), _T(""), 0);
+	}
 
 	tiledata_count = &t_tiledata_count;
 	tiledata = &t_tiledata;
@@ -133,7 +137,7 @@ CFinalSunApp::CFinalSunApp()
 	ctr.dwICC = ICC_STANDARD_CLASSES;
 	if (!InitCommonControlsEx(&ctr)) {
 		errstream << "Error: Common controls could not be initialized" << std::endl;
-		MessageBox(0, "Common controls could not be initialized.", "Error", 0);
+		MessageBox(0, _T("Common controls could not be initialized."), _T("Error"), 0);
 	}
 
 	errstream << std::endl << std::endl << std::endl;
@@ -157,7 +161,7 @@ BOOL CFinalSunApp::InitInstance()
 	}
 #else
 	if (GetDeviceCaps(GetDC(GetDesktopWindow()), BITSPIXEL) <= 8) {
-		MessageBox(0, "You currently only have 8 bit color mode enabled. FinalSun/FinalAlert 2 will not work in 8 bit color mode. See readme.txt for further information!", "Error", 0);
+		MessageBox(0, _T("You currently only have 8 bit color mode enabled. FinalSun/FinalAlert 2 will not work in 8 bit color mode. See readme.txt for further information!"), _T("Error"), 0);
 		exit(0);
 	}
 #endif
@@ -166,6 +170,9 @@ BOOL CFinalSunApp::InitInstance()
 
 	// Load application data
 	std::string datafile = AppPath;
+
+	// TODO: recognize project path
+
 #ifdef TS_MODE
 	datafile += "\\FSData.ini";
 #else
@@ -184,7 +191,7 @@ BOOL CFinalSunApp::InitInstance()
 	language.LoadFile(languagefile);
 
 	if (language.Size() == 0) {
-		MessageBox(0, "FALanguage.ini does not exist or is not valid (download corrupt?)", "", 0);
+		MessageBox(0, _T("FALanguage.ini does not exist or is not valid (download corrupt?)"), _T(""), 0);
 		exit(0);
 	}
 
@@ -328,7 +335,7 @@ BOOL CFinalSunApp::InitInstance()
 	}
 
 	if (opts.bDoNotLoadTemperateGraphics && opts.bDoNotLoadSnowGraphics) {
-		MessageBox(0, "You have turned off loading of both snow and temperate terrain in 'FinalAlert.ini'. At least one of these must be loaded. The application will now quit.", "Error", 0);
+		MessageBox(0, _T("You have turned off loading of both snow and temperate terrain in 'FinalAlert.ini'. At least one of these must be loaded. The application will now quit."), _T("Error"), 0);
 		exit(-982);
 	}
 
