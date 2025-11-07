@@ -389,6 +389,20 @@ BOOL CFinalSunApp::InitInstance()
 
 void CFinalSunApp::ParseCommandLine()
 {
+	std::string_view commands(theApp.m_lpCmdLine);
+	std::string_view projectArg("--project=");
+
+	auto const prjArgPathPos = commands.find_first_of(projectArg);
+	if (prjArgPathPos != projectArg.npos) {
+		auto path = commands.substr(prjArgPathPos + projectArg.size());
+		// TODO: trim quote
+		auto const spacePos = path.find_last_of(' ');
+		if (spacePos != projectArg.npos) {
+			path = path.substr(0, spacePos);
+		}
+		m_projectFilePath = path;
+	}
+
 #if 0 // Removed as it can conflict with Steam game arguments! -LF 23.02.2024
 	char data[MAX_PATH + 30];
 

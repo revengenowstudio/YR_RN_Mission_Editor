@@ -123,6 +123,7 @@ public:
 
 private:
 	std::string m_u8LogFileName;
+	std::string m_projectFilePath; // UTF-8 encoded
 };
 
 
