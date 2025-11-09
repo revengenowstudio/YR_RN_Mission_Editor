@@ -41,12 +41,29 @@ bool isValidUtf8(const char* utf8)
 {
 	// wstring_convert and codecvt_utf8_utf16 are deprecated in C++17, fallback to Win32
 	auto utf8Count = strlen(utf8);
-	if (utf8Count == 0)
+	if (utf8Count == 0) {
 		return true;
+	}
 
 	// unterminatedCountWChars will be the count of WChars NOT including the terminating zero (due to passing in utf8.size() instead of -1)
 	auto unterminatedCountWChars = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8, utf8Count, nullptr, 0);
 	return unterminatedCountWChars > 0;
+}
+
+size_t utf8ByteCount(const CString& input)
+{
+	CT2A utf8String(input, CP_UTF8);
+	const char* utf8 = utf8String;
+
+	const size_t utf8Count = strlen(utf8);
+	if (utf8Count == 0) {
+		return 0;
+	}
+	const int wideCharCount = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8, utf8Count, nullptr, 0);
+	if (wideCharCount == 0) {
+		return utf8Count;
+	}
+	return utf8Count;
 }
 
 std::wstring utf8ToUtf16(const std::string& utf8)

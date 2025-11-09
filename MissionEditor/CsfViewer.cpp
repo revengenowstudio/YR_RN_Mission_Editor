@@ -89,23 +89,20 @@ void CCsfViewer::translateUI()
         InvalidateRect(hCSFViewer, NULL, TRUE);
     }
 
-    update();
+    resetControls();
 #endif
 }
 
 void CCsfViewer::OnClose()
 {
     EndDialog(IDCANCEL);
-    // reduce lag
-    //EndDialog(hWnd, NULL);
-    //ShowWindow(SW_HIDE);
 }
 
 void CCsfViewer::onReload()
 {
     last_succeeded_operation = 9;
 
-    update();
+    resetControls();
     // this is modal window, no need to update others
     //((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
 }
@@ -115,13 +112,14 @@ void CCsfViewer::SetSelectedString(CString str)
     if (str == m_selectedCSFLabel) {
         return;
     }
-    // TODO: reset dialog
+    // NOTE: it does not reset dialog, call applySearch to make it work
     m_selectedCSFLabel = str;
+    m_selectedCSFContent = ""; // reset this value to avoid unwanted cache
 }
 
-void CCsfViewer::update()
+void CCsfViewer::resetControls()
 {
-    displayCSFContent(AllStrings, [](const CString&) { return true; });
+    applySearch();
     m_richEditCtrl.SetWindowText("");
     m_selectedLabel.SetWindowText("");
     m_selectedCSFLabel = "";
@@ -208,6 +206,7 @@ void CCsfViewer::onViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult)
     m_selectedLabel.SetWindowText(selectedText);
 
     m_selectedCSFLabel = selectedText;
+    m_selectedCSFContent = it->second.cString;
     *pResult = 0;
 }
 

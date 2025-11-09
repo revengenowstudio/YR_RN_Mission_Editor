@@ -61,7 +61,8 @@ protected:
 // Implementierung
 protected:
 	void TranslateUI();
-	CString popUpCSFViewerAndReturn(CComboBox& cb);
+	// label, content
+	std::pair<CString, CString> popUpCSFViewerAndReturn(CComboBox& cb);
 
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CTriggerActionsDlg)

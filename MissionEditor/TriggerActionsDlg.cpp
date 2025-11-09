@@ -278,23 +278,27 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 	}
 }
 
-CString CTriggerActionsDlg::popUpCSFViewerAndReturn(CComboBox& cb)
+std::pair<CString, CString> CTriggerActionsDlg::popUpCSFViewerAndReturn(CComboBox& cb)
 {
 	CString curValue;
 	cb.GetWindowText(curValue);
 
-	auto const pMainDlg = ((CFinalSunDlg*)theApp.m_pMainWnd);
-	auto& csfDlg = pMainDlg->m_csfStrings;
+	auto& csfDlg = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_csfStrings;
 
 	if (!curValue.IsEmpty() && curValue != "0") {
+		TruncSpace(curValue);
 		csfDlg.SetSelectedString(curValue);
-	}
-	//csfDlg.UpdateDialog();
-	if (csfDlg.DoModal() == IDCANCEL) {
-		return curValue;
+	} else {
+		csfDlg.SetSelectedString("");
 	}
 
-	return csfDlg.CSFLabelSelected();
+	CString label = csfDlg.DoModal() == IDCANCEL
+		? curValue : csfDlg.CSFLabelSelected();
+
+	auto content = csfDlg.CSFContentSelected();
+	auto const countCorrected = utf8ByteCount(content);
+
+	return { label, content.Left(countCorrected) };
 }
 
 void CTriggerActionsDlg::OnSelchangeParameter()
@@ -508,13 +512,18 @@ void CTriggerActionsDlg::OnDropdownParamvalue()
 		}
 	}
 	
-	auto ret = popUpCSFViewerAndReturn(m_ParamValue);
-	//m_Parameter.SetCurSel(curselparam);
-	m_ParamValue.SetWindowText(ret);
+	auto [label, content] = popUpCSFViewerAndReturn(m_ParamValue);
+	
+	auto txt = label;
+	if (!content.IsEmpty()) {
+		txt += ' ';
+		txt += content;
+	}
+	m_ParamValue.SetWindowText(txt);
+	ini.SetString("Actions", m_currentTrigger, SetParam(ActionData, startpos + 1 + curparam, label));
 
-	ini.SetString("Actions", m_currentTrigger, SetParam(ActionData, startpos + 1 + curparam, ret));
-
-	//m_ParamValue.ShowDropDown();
+	//m_Parameter.SetCurSel(curselparam); no need if 'UpdateDialogs' is not called elsewhere
+	//m_ParamValue.ShowDropDown(); won't work but use Post
 	::PostMessage(m_ParamValue, CB_SHOWDROPDOWN, FALSE, 0);
 }
 

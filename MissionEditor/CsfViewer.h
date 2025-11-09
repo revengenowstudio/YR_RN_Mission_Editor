@@ -19,11 +19,11 @@ public:
     CCsfViewer(CWnd* pParent = nullptr);
     ~CCsfViewer();
 
-    CString CSFLabelSelected() const
-    {
-        return m_selectedCSFLabel;
-    }
+    CString CSFLabelSelected() const { return m_selectedCSFLabel; }
     void SetSelectedString(CString str);
+
+    CString CSFContentSelected() const { return m_selectedCSFContent; }
+
 protected:
     enum Controls {
         SelectedCSF = IDC_CSF_VIEW_SELECTED,
@@ -52,7 +52,7 @@ protected:
 
     afx_msg void OnClose();
     afx_msg void onReload();
-    void update();
+    void resetControls();
     //void updateTextView();
     void displayCSFContent(const TranslationMap& csfMap, const RowSearchHandler handler);
     void onEditchangeSearch();
