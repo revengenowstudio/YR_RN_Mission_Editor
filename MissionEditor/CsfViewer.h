@@ -25,10 +25,12 @@ public:
     }
     void SetSelectedString(CString str);
 
+    void Reset();
+
 protected:
     enum Controls {
-        SelectedCSF = 1001,
-        NewFile = 1002,
+        SelectedCSF = IDC_CSF_VIEW_SELECTED,
+        //NewFile = 1002,
         Search = IDC_CSF_VIEW_SELECTED,
         //Add = 1005,
         //Clone = 1006,
@@ -58,7 +60,7 @@ protected:
     void displayCSFContent(const TranslationMap& csfMap, const RowSearchHandler handler);
     void FilterRows(const CString& searchText);
     void OnEditchangeSearch();
-    void OnViewerSelectedChange();
+    void OnViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult);
     BOOL onMessageKeyDown(MSG* pMsg);
 
     //static BOOL CALLBACK DlgProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
@@ -71,5 +73,6 @@ private:
     CString CurrentSelectedCSF;
     CEdit m_selectedLabel;
     CEdit m_searchEdit;
+    bool m_userConfirmed;
 };
 

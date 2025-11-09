@@ -277,7 +277,7 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 	}
 }
 
-CString popUpCSFViewerAndReturn(CComboBox& cb)
+CString CTriggerActionsDlg::popUpCSFViewerAndReturn(CComboBox& cb)
 {
 	CString curValue;
 	cb.GetWindowText(curValue);
@@ -285,20 +285,46 @@ CString popUpCSFViewerAndReturn(CComboBox& cb)
 	auto const pMainDlg = ((CFinalSunDlg*)theApp.m_pMainWnd);
 	auto& csfDlg = pMainDlg->m_csfStrings;
 
+#if defined(MODAL_SIMULATION)
 	if (csfDlg.m_hWnd == NULL) {
-		if (!csfDlg.Create(CCsfViewer::IDD, NULL)) {
+		if (!csfDlg.Create(CCsfViewer::IDD, pMainDlg)) {
 			DWORD dwError = GetLastError();
 			CString errorMsg;
 			errorMsg.Format(_T("Create failed with error code: %lu"), dwError);
 			pMainDlg->MessageBox(GetLanguageStringACP("Err_CreateErr") + errorMsg, "Error");
 		}
 	}
+#endif
 
+	if (csfDlg.m_hWnd == NULL) {
+		// TODO: show error messagebox
+	}
+		//csfDlg.UpdateDialog();
+
+#if !defined(MODAL_SIMULATION)
 	if (csfDlg.DoModal() == IDCANCEL) {
 		return curValue;
 	}
+#else
+	csfDlg.ShowWindow(SW_SHOW);
+	csfDlg.Reset();
+	Sound(SOUND_POSITIVE);
 
-	return curValue;
+	this->EnableWindow(FALSE);
+
+	MSG msg;
+	while (::GetMessageA(&msg, NULL, 0, 0)) {
+		if (!IsDialogMessage(&msg)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	this->EnableWindow(TRUE);
+	//pMainDlg->EnableWindow(TRUE);
+#endif
+
+	return csfDlg.CSFLabelSelected();
 }
 
 void CTriggerActionsDlg::OnSelchangeParameter()
@@ -365,6 +391,7 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 			auto const listTypeIdx = atoi(ListType);
 			if (listTypeIdx == PARAMTYPE_TUTORIALTEXTS) {
 				auto const ret = popUpCSFViewerAndReturn(m_ParamValue);
+				m_ParamValue.SetWindowText(ret);
 				return;
 			}
 			HandleParamList(m_ParamValue, listTypeIdx);

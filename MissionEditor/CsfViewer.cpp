@@ -6,6 +6,7 @@
 BEGIN_MESSAGE_MAP(CCsfViewer, CDialog)
     ON_WM_CLOSE()
     ON_BN_CLICKED(Controls::Reload, onReload)
+    ON_NOTIFY(LVN_ITEMCHANGED, IDC_CSF_VIEW_LIST, &CCsfViewer::OnViewerSelectedChange)
 END_MESSAGE_MAP()
 
 #if 0
@@ -24,15 +25,21 @@ CCsfViewer::~CCsfViewer()
 
 BOOL CCsfViewer::OnInitDialog()
 {
-    CDialog::OnInitDialog();
+    if (!CDialog::OnInitDialog()) {
+        return FALSE;
+    }
 
     translateUI();
+
+    Reset();
+    onReload();
 
     return TRUE;  // return TRUE unless you set the focus to a control
 }
 
 void CCsfViewer::DoDataExchange(CDataExchange* pDX)
 {
+    CDialog::DoDataExchange(pDX);
     DDX_Control(pDX, Controls::CSFViewer, m_stringList);
     DDX_Control(pDX, Controls::ItemDetailViewer, m_richEditCtrl);
     DDX_Control(pDX, Controls::SetLabel, m_selectedLabel);
@@ -42,21 +49,21 @@ void CCsfViewer::DoDataExchange(CDataExchange* pDX)
 void CCsfViewer::translateUI()
 {
     SetWindowText(GetLanguageStringACP("CsfViewerTitle"));
-    GetDlgItem(1000)->SetWindowText(GetLanguageStringACP("CsfViewerSelectedCsfFile"));
-    GetDlgItem(1002)->SetWindowText(GetLanguageStringACP("CsfViewerNewFile"));
+    //GetDlgItem(1000)->SetWindowText(GetLanguageStringACP("CsfViewerSelectedCsfFile"));
+    //GetDlgItem(1002)->SetWindowText(GetLanguageStringACP("CsfViewerNewFile"));
     GetDlgItem(1003)->SetWindowText(GetLanguageStringACP("CsfViewerSearchLabelText"));
-    GetDlgItem(1005)->SetWindowText(GetLanguageStringACP("CsfViewerAdd"));
-    GetDlgItem(1006)->SetWindowText(GetLanguageStringACP("CsfViewerClone"));
-    GetDlgItem(1007)->SetWindowText(GetLanguageStringACP("CsfViewerDelete"));
+    //GetDlgItem(1005)->SetWindowText(GetLanguageStringACP("CsfViewerAdd"));
+    //GetDlgItem(1006)->SetWindowText(GetLanguageStringACP("CsfViewerClone"));
+    //GetDlgItem(1007)->SetWindowText(GetLanguageStringACP("CsfViewerDelete"));
     GetDlgItem(1010)->SetWindowText(GetLanguageStringACP("CsfViewerDescription1"));
-    GetDlgItem(1014)->SetWindowText(GetLanguageStringACP("CsfViewerDescription2"));
-    GetDlgItem(1011)->SetWindowText(GetLanguageStringACP("CsfViewerSave"));
+    //GetDlgItem(1014)->SetWindowText(GetLanguageStringACP("CsfViewerDescription2"));
+    //GetDlgItem(1011)->SetWindowText(GetLanguageStringACP("CsfViewerSave"));
     GetDlgItem(1012)->SetWindowText(GetLanguageStringACP("CsfViewerSetLabelName"));
-    GetDlgItem(1015)->SetWindowText(GetLanguageStringACP("CsfViewerReload"));
-    GetDlgItem(1016)->SetWindowText(GetLanguageStringACP("CsfViewerApply"));
+    GetDlgItem(Controls::Reload)->SetWindowText(GetLanguageStringACP("CsfViewerReload"));
+    //GetDlgItem(1016)->SetWindowText(GetLanguageStringACP("CsfViewerApply"));
 
     SetDlgItemText(IDOK, GetLanguageStringACP("OK"));
-    SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
+    //SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel")); // TODO: add cancel
     m_stringList.SetExtendedStyle(LVS_EX_FULLROWSELECT);
     m_richEditCtrl.SetReadOnly();
 
@@ -91,9 +98,10 @@ void CCsfViewer::translateUI()
 
 void CCsfViewer::OnClose()
 {
+    EndDialog(IDCANCEL);
     // reduce lag
     //EndDialog(hWnd, NULL);
-    ShowWindow(SW_HIDE);
+    //ShowWindow(SW_HIDE);
 }
 
 void CCsfViewer::onReload()
@@ -129,7 +137,7 @@ void CCsfViewer::SetSelectedString(CString str)
 
 void CCsfViewer::Update()
 {
-    displayCSFContent(CCStrings, [](const CString&) { return true; });
+    displayCSFContent(AllStrings, [](const CString&) { return true; });
     m_richEditCtrl.SetWindowText("");
     m_selectedLabel.SetWindowText("");
     CurrentSelectedCSF = "";
@@ -146,10 +154,10 @@ void CCsfViewer::updateTextView()
 {
     if (CurrentSelectedCSF != "")
     {
-        auto it = CCStrings.find(CurrentSelectedCSF);
-        if (it != CCStrings.end())
+        auto it = AllStrings.find(CurrentSelectedCSF);
+        if (it != AllStrings.end())
         {
-            int index = std::distance(CCStrings.begin(), it);
+            int index = std::distance(AllStrings.begin(), it);
 
             LVITEM lvItem = { 0 };
             lvItem.stateMask = LVIS_SELECTED | LVIS_FOCUSED;
@@ -177,17 +185,17 @@ BOOL CCsfViewer::PreTranslateMessage(MSG* pMsg)
 BOOL CCsfViewer::onMessageKeyDown(MSG* pMsg)
 {
     switch (pMsg->wParam) {
+    default:
+        return -1;
+    case VK_RETURN:
+    {
+        switch (::GetDlgCtrlID(pMsg->hwnd)) {
         default:
-            return -1;
-        case VK_RETURN:
-        {
-            switch (::GetDlgCtrlID(pMsg->hwnd)) {
-            default:
-                break;// never exist window (default -1) even nothing did
-            case Controls::Search: this->OnEditchangeSearch();
-                break;
-            }
+            break;// never exist window (default -1) even nothing did
+        case Controls::Search: this->OnEditchangeSearch();
+            break;
         }
+    }
     }
     return TRUE;
 }
@@ -239,16 +247,15 @@ BOOL CALLBACK CCsfViewer::DlgProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lPa
 }
 #endif
 
-void CCsfViewer::OnViewerSelectedChange()
+void CCsfViewer::OnViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
-    long nStartChar, nEndChar;
-    m_richEditCtrl.GetSel(nStartChar, nEndChar);
-
-    if (nStartChar == nEndChar) {
+    int nSelected = m_stringList.GetNextItem(-1, LVNI_SELECTED);
+    if (nSelected == -1) {
         return;
     }
 
-    CString selectedText = m_richEditCtrl.GetSelText();
+    CString selectedText = m_stringList.GetItemText(nSelected, 0);
+
     if (selectedText.IsEmpty()) {
         m_richEditCtrl.SetWindowText("");
         m_selectedLabel.SetWindowText("");
@@ -257,8 +264,8 @@ void CCsfViewer::OnViewerSelectedChange()
     }
 
     CString value = "";
-    auto const it = CCStrings.find(selectedText);
-    if (it == CCStrings.end()) {
+    auto const it = AllStrings.find(selectedText);
+    if (it == AllStrings.end()) {
         return;
     }
 
@@ -266,14 +273,23 @@ void CCsfViewer::OnViewerSelectedChange()
     m_selectedLabel.SetWindowText(selectedText);
 
     CurrentSelectedCSF = selectedText;
+    *pResult = 0;
+}
+
+void CCsfViewer::Reset()
+{
+    m_userConfirmed = false;
+    onReload();
 }
 
 // TODO: make it MB_OK
 void CCsfViewer::OnOK()
 {
     if (CurrentSelectedCSF.IsEmpty()) {
+        EndDialog(IDCANCEL);
         return;
     }
+    EndDialog(IDOK);
 }
 
 void CCsfViewer::displayCSFContent(const TranslationMap& csfMap, const RowSearchHandler handler)
@@ -300,7 +316,7 @@ void CCsfViewer::displayCSFContent(const TranslationMap& csfMap, const RowSearch
 
     int i = 0;
     for (auto const& [label, content] : csfMap) {
-        if (!handler(label) || !handler(content.cString)) {
+        if (!handler(label) && !handler(content.cString)) {
             continue;
         }
 
@@ -310,9 +326,7 @@ void CCsfViewer::displayCSFContent(const TranslationMap& csfMap, const RowSearch
         lvItem.pszText = const_cast<LPSTR>(label.operator LPCSTR());
         m_stringList.InsertItem(&lvItem);
 
-        lvItem.iSubItem = 1;
-        lvItem.pszText = const_cast<LPSTR>(content.cString.operator LPCSTR());
-        m_stringList.InsertItem(&lvItem);
+        m_stringList.SetItemText(i, 1, const_cast<LPSTR>(content.cString.operator LPCSTR()));
 
         i++;
     }
@@ -322,9 +336,9 @@ void CCsfViewer::displayCSFContent(const TranslationMap& csfMap, const RowSearch
 
 void CCsfViewer::FilterRows(const CString& searchText)
 {
-    displayCSFContent(CCStrings, [&searchText](const CString& content) {
+    displayCSFContent(AllStrings, [&searchText](const CString& content) {
         return content.FindOneOf(searchText);
-    });
+        });
 }
 
 void CCsfViewer::OnEditchangeSearch()
@@ -335,10 +349,10 @@ void CCsfViewer::OnEditchangeSearch()
     //}
 
     CString buffer;
-    m_searchEdit.GetWindowTextA(buffer);
-    
-    displayCSFContent(CCStrings, [&buffer](const CString& content) {
-        return buffer.IsEmpty() || content.FindOneOf(buffer);
+    m_searchEdit.GetWindowText(buffer);
+
+    displayCSFContent(AllStrings, [&buffer](const CString& content) {
+        return buffer.IsEmpty() || content.Find(buffer) >= 0;
     });
     //NeedUpdate = false;
 }

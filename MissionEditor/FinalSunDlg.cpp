@@ -105,7 +105,6 @@ CFinalSunDlg::CFinalSunDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_hGameCursor = AfxGetApp()->LoadCursor(MAKEINTRESOURCE(IDC_EDITOR_ARROW));
 	m_hArrowCursor = m_hGameCursor;
-
 }
 
 void CFinalSunDlg::DoDataExchange(CDataExchange* pDX)

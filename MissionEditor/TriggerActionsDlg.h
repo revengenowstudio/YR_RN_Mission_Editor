@@ -61,6 +61,7 @@ protected:
 // Implementierung
 protected:
 	void TranslateUI();
+	CString popUpCSFViewerAndReturn(CComboBox& cb);
 
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CTriggerActionsDlg)

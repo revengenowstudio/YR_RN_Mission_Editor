@@ -138,6 +138,7 @@ extern BOOL yr_only[];
 
 extern CString currentOwner;
 extern TranslationMap CCStrings;
+extern TranslationMap AllStrings;
 
 // tileset ids
 extern int cliffset;
