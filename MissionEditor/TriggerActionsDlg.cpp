@@ -101,6 +101,7 @@ BEGIN_MESSAGE_MAP(CTriggerActionsDlg, CDialog)
 	ON_CBN_SELCHANGE(IDC_ACTION, OnSelchangeAction)
 	ON_CBN_EDITCHANGE(IDC_ACTIONTYPE, OnEditchangeActiontype)
 	ON_LBN_SELCHANGE(IDC_PARAMETER, OnSelchangeParameter)
+	ON_CBN_DROPDOWN(IDC_PARAMVALUE, OnDropdownParamvalue)
 	ON_CBN_EDITCHANGE(IDC_PARAMVALUE, OnEditchangeParamvalue)
 	ON_BN_CLICKED(IDC_NEWACTION, OnNewaction)
 	ON_BN_CLICKED(IDC_DELETEACTION, OnDeleteaction)
@@ -285,44 +286,13 @@ CString CTriggerActionsDlg::popUpCSFViewerAndReturn(CComboBox& cb)
 	auto const pMainDlg = ((CFinalSunDlg*)theApp.m_pMainWnd);
 	auto& csfDlg = pMainDlg->m_csfStrings;
 
-#if defined(MODAL_SIMULATION)
-	if (csfDlg.m_hWnd == NULL) {
-		if (!csfDlg.Create(CCsfViewer::IDD, pMainDlg)) {
-			DWORD dwError = GetLastError();
-			CString errorMsg;
-			errorMsg.Format(_T("Create failed with error code: %lu"), dwError);
-			pMainDlg->MessageBox(GetLanguageStringACP("Err_CreateErr") + errorMsg, "Error");
-		}
+	if (!curValue.IsEmpty() && curValue != "0") {
+		csfDlg.SetSelectedString(curValue);
 	}
-#endif
-
-	if (csfDlg.m_hWnd == NULL) {
-		// TODO: show error messagebox
-	}
-		//csfDlg.UpdateDialog();
-
-#if !defined(MODAL_SIMULATION)
+	//csfDlg.UpdateDialog();
 	if (csfDlg.DoModal() == IDCANCEL) {
 		return curValue;
 	}
-#else
-	csfDlg.ShowWindow(SW_SHOW);
-	csfDlg.Reset();
-	Sound(SOUND_POSITIVE);
-
-	this->EnableWindow(FALSE);
-
-	MSG msg;
-	while (::GetMessageA(&msg, NULL, 0, 0)) {
-		if (!IsDialogMessage(&msg)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
-
-	this->EnableWindow(TRUE);
-	//pMainDlg->EnableWindow(TRUE);
-#endif
 
 	return csfDlg.CSFLabelSelected();
 }
@@ -390,8 +360,9 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 
 			auto const listTypeIdx = atoi(ListType);
 			if (listTypeIdx == PARAMTYPE_TUTORIALTEXTS) {
-				auto const ret = popUpCSFViewerAndReturn(m_ParamValue);
-				m_ParamValue.SetWindowText(ret);
+				// DO nothing, reacted in selchange or editchange
+				HandleParamList(m_ParamValue, PARAMTYPE_NOTHING);
+				m_ParamValue.SetWindowText(GetParam(ActionData, startpos + 1 + curparam));
 				return;
 			}
 			HandleParamList(m_ParamValue, listTypeIdx);
@@ -474,7 +445,9 @@ void CTriggerActionsDlg::OnEditchangeParamvalue()
 	TruncSpace(newVal);
 	newVal.TrimLeft();
 
-	if (newVal.Find(",", 0) >= 0) newVal.SetAt(newVal.Find(",", 0), 0);
+	if (newVal.Find(",", 0) >= 0) {
+		newVal.SetAt(newVal.Find(",", 0), 0);
+	}
 
 	if (curparam >= 0) {
 		ini.SetString("Actions", m_currentTrigger, SetParam(ActionData, startpos + 1 + curparam, newVal));
@@ -490,6 +463,59 @@ void CTriggerActionsDlg::OnEditchangeParamvalue()
 		ini.SetString("Actions", m_currentTrigger, SetParam(ini["Actions"][m_currentTrigger], pos, (LPCTSTR)waypoint));
 	}
 
+}
+
+void CTriggerActionsDlg::OnDropdownParamvalue()
+{
+	CIniFile& ini = Map->GetIniFile();
+
+	if (m_currentTrigger.GetLength() == 0) {
+		return;
+	}
+	int selev = m_Action.GetCurSel();
+	if (selev < 0) {
+		return;
+	}
+	int curev = m_Action.GetItemData(selev);
+
+	int curselparam = m_Parameter.GetCurSel();
+	if (curselparam < 0) {
+		m_ParamValue.SetWindowText("");
+		return;
+	}
+
+	auto const& ActionData = ini["Actions"][m_currentTrigger];
+	int startpos = 1 + curev * 8;
+	int curparam = m_Parameter.GetItemData(curselparam);
+
+	if (curparam < 0 || curparam >= 6) {
+		return;
+	}
+
+	auto const paramStr = GetParam(ActionData, startpos);
+	CString ParamType = GetParam(g_data["Actions"][paramStr], 1 + curparam);
+#ifdef RA2_MODE
+	if (g_data["ActionsRA2"].Exists(paramStr)) {
+		ParamType = GetParam(g_data["ActionsRA2"][paramStr], 1 + curparam);
+	}
+#endif
+	if (atoi(ParamType) >= 0) {
+		CString ListType = GetParam(g_data["ParamTypes"][ParamType], 1);
+
+		auto const listTypeIdx = atoi(ListType);
+		if (listTypeIdx != PARAMTYPE_TUTORIALTEXTS) {
+			return;
+		}
+	}
+	
+	auto ret = popUpCSFViewerAndReturn(m_ParamValue);
+	//m_Parameter.SetCurSel(curselparam);
+	m_ParamValue.SetWindowText(ret);
+
+	ini.SetString("Actions", m_currentTrigger, SetParam(ActionData, startpos + 1 + curparam, ret));
+
+	//m_ParamValue.ShowDropDown();
+	::PostMessage(m_ParamValue, CB_SHOWDROPDOWN, FALSE, 0);
 }
 
 void CTriggerActionsDlg::OnNewaction()

@@ -69,6 +69,7 @@ protected:
 	afx_msg void OnEditchangeActiontype();
 	afx_msg void OnSelchangeParameter();
 	afx_msg void OnEditchangeParamvalue();
+	afx_msg void OnDropdownParamvalue();
 	afx_msg void OnNewaction();
 	afx_msg void OnDeleteaction();
 	//}}AFX_MSG

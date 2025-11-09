@@ -21,12 +21,9 @@ public:
 
     CString CSFLabelSelected() const
     {
-        return CurrentSelectedCSF;
+        return m_selectedCSFLabel;
     }
     void SetSelectedString(CString str);
-
-    void Reset();
-
 protected:
     enum Controls {
         SelectedCSF = IDC_CSF_VIEW_SELECTED,
@@ -55,24 +52,22 @@ protected:
 
     afx_msg void OnClose();
     afx_msg void onReload();
-    void Update();
-    void updateTextView();
+    void update();
+    //void updateTextView();
     void displayCSFContent(const TranslationMap& csfMap, const RowSearchHandler handler);
-    void FilterRows(const CString& searchText);
-    void OnEditchangeSearch();
-    void OnViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult);
+    void onEditchangeSearch();
+    void applySearch(const CString keyword = {});
+    void onViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult);
     BOOL onMessageKeyDown(MSG* pMsg);
-
-    //static BOOL CALLBACK DlgProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
     DECLARE_MESSAGE_MAP()
 
 private:
     CRichEditCtrl m_richEditCtrl;
     CListCtrl m_stringList;
-    CString CurrentSelectedCSF;
     CEdit m_selectedLabel;
     CEdit m_searchEdit;
-    bool m_userConfirmed;
+    CString m_selectedCSFLabel;
+    CString m_selectedCSFContent;
 };
 
