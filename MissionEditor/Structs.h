@@ -367,7 +367,9 @@ struct XCString
 	{
 		this->len = len;
 
-		if (this->wString) delete[] this->wString;
+		if (this->wString) {
+			delete[] this->wString;
+		}
 
 		bUsedDefault = FALSE;
 

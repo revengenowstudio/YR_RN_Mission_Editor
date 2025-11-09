@@ -3873,13 +3873,26 @@ void CLoading::LoadStrings()
 
 	BYTE* lpData = NULL;
 	DWORD dwSize;
-	if (DoesFileExist((std::string(TSPath) + "\\" + file).c_str())) {
-		std::ifstream f(std::string(TSPath) + "\\" + file, std::ios::binary);
+	std::vector<BYTE> dataBuffer;
+
+	// TODO: use modern std::filesystem::path
+	auto const filePath = [&]() {
+		std::string ret;
+		ret.reserve(sizeof TSPath - 1);
+		ret = TSPath;
+		ret += "\\";
+		ret += file;
+		return ret;
+	}();
+
+	if (DoesFileExist(filePath.c_str())) {
+		std::ifstream f(filePath, std::ios::binary);
 		if (f.good()) {
 			f.seekg(0, std::ios::end);
 			auto size = f.tellg();
 			if (size > 0) {
-				lpData = new(BYTE[size]);
+				dataBuffer.resize(size);
+				lpData = dataBuffer.data();
 				dwSize = size;
 				f.seekg(0, std::ios::beg);
 				f.read(reinterpret_cast<char*>(lpData), dwSize);
@@ -3892,35 +3905,37 @@ void CLoading::LoadStrings()
 	if (!lpData) {
 		HMIXFILE hMix = FindFileInMix(file.c_str());
 		//HMIXFILE hMix=m_hLanguage;
-		if (hMix) {
-			if (FSunPackLib::XCC_ExtractFile(file, u8AppDataPath + "\\RA2Tmp.csf", hMix)) {
-				std::ifstream f(u8AppDataPath + "\\RA2Tmp.csf", std::ios::binary);
-				if (f.good()) {
-					f.seekg(0, std::ios::end);
-					auto size = f.tellg();
-					if (size > 0) {
-						lpData = new(BYTE[size]);
-						dwSize = size;
-						f.seekg(0, std::ios::beg);
-						f.read(reinterpret_cast<char*>(lpData), dwSize);
-					}
-				}
-			}
-
-			if (!lpData) {
-				MessageBox("String file not found, using rules.ini names", "Error");
-				return;
-			}
-		} else {
+		if (!hMix)  {
 			MessageBox("String file not found, using rules.ini names", "Error");
 			return;
 		}
 
+		if (FSunPackLib::XCC_ExtractFile(file, u8AppDataPath + "\\RA2Tmp.csf", hMix)) {
+			std::ifstream f(u8AppDataPath + "\\RA2Tmp.csf", std::ios::binary);
+			if (f.good()) {
+				f.seekg(0, std::ios::end);
+				auto size = f.tellg();
+				if (size > 0) {
+					dataBuffer.resize(size);
+					lpData = dataBuffer.data();
+					dwSize = size;
+					f.seekg(0, std::ios::beg);
+					f.read(reinterpret_cast<char*>(lpData), dwSize);
+				}
+			}
+		}
+
+		if (!lpData) {
+			MessageBox("String file not found, using rules.ini names", "Error");
+			return;
+		}
 	}
 
 	BYTE* orig = static_cast<BYTE*>(lpData);
 
-	if (!(lpData = Search(&lpData, (BYTE*)" FSC"))) return;
+	if (!(lpData = Search(&lpData, (BYTE*)" FSC"))) {
+		return;
+	}
 
 	RA2STRFILEHEAD head;
 	memcpy(&head, lpData, RA2STRFILEHEADSIZE);
@@ -3963,8 +3978,9 @@ void CLoading::LoadStrings()
 
 		BOOL b2Strings = FALSE;
 
-		if (lpData[0] == 'W')
+		if (lpData[0] == 'W') {
 			b2Strings = TRUE;
+		}
 
 		if (!(lpData = lpData + 4))//Search(&lpData, (BYTE*)" RTS")))
 		{
