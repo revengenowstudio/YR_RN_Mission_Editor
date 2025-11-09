@@ -28,9 +28,7 @@
 #include "variables.h"
 #include "functions.h"
 #include "inlines.h"
-
-CString GetWaypoint(int n);
-int GetWaypoint(const char* c);
+#include "Helpers.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -249,7 +247,7 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 		GetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6)
 	)
 		&& bNoWP) {
-		int number = GetWaypoint(GetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6));
+		int number = StringToWaypoint(GetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6));
 		char c[50];
 		itoa(number, c, 10);
 		ini.SetString("Actions", m_currentTrigger, SetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6, c));
@@ -258,7 +256,7 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 	)
 		&& !bNoWP) {
 		int wp = atoi(GetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6));
-		CString s = GetWaypoint(wp);
+		CString s = WaypointToString(wp);
 		ini.SetString("Actions", m_currentTrigger, SetParam(ini["Actions"][m_currentTrigger], pos + 1 + 6, s));
 	};
 
@@ -365,7 +363,7 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 		char wayp[50];
 		if (!bNoWP) {
 			ListWaypoints(m_ParamValue);
-			int iWayp = GetWaypoint(GetParam(ActionData, startpos + 1 + 6));
+			int iWayp = StringToWaypoint(GetParam(ActionData, startpos + 1 + 6));
 
 			itoa(iWayp, wayp, 10);
 		} else {
@@ -426,7 +424,7 @@ void CTriggerActionsDlg::OnEditchangeParamvalue()
 		CString waypoint = newVal;
 
 		if (!bNoWP) {
-			waypoint = GetWaypoint(atoi(newVal));
+			waypoint = WaypointToString(atoi(newVal));
 		}
 
 		ini.SetString("Actions", m_currentTrigger, SetParam(ini["Actions"][m_currentTrigger], pos, (LPCTSTR)waypoint));
@@ -541,7 +539,6 @@ void CTriggerActionsDlg::UpdateDialog()
 #endif
 
 	while (m_ActionType.DeleteString(0) != CB_ERR);
-	int i;
 	for (auto const& [eventid, eventdata] : g_data[sec]) {
 		//GetParam(*g_data.sections["Actions"].GetValue(i),13);
 /*#ifdef RA2_MODE
@@ -566,19 +563,19 @@ void CTriggerActionsDlg::UpdateDialog()
 	auto const& Data = ini["Actions"][m_currentTrigger];
 	int count = atoi(GetParam(Data, 0));
 
-	for (i = 0; i < count; i++) {
-		char c[50];
-		itoa(i, c, 10);
-
-		CString s = TranslateStringACP("Action");
-		s += " ";
-		s += c;
-
-		m_Action.SetItemData(m_Action.AddString(s), i);
+	CString actionStr;
+	auto const actionPrefixStr = TranslateStringACP("Action");
+	for (auto i = 0; i < count; i++) {
+		actionStr.Format("%s %02d", actionPrefixStr, i);
+		m_Action.SetItemData(m_Action.AddString(actionStr), i);
 	}
 
-	if (cur_sel < 0) cur_sel = 0;
-	if (cur_sel >= count) cur_sel = count - 1;
+	if (cur_sel < 0) {
+		cur_sel = 0;
+	}
+	if (cur_sel >= count) {
+		cur_sel = count - 1;
+	}
 
 	m_Action.SetCurSel(cur_sel);
 

@@ -3,6 +3,7 @@
 #pragma code_page(65001)
 
 #include "resource.h"
+#include "Version.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -278,24 +279,24 @@ BEGIN
 END
 #endif
 
-IDD_CHANGESIZE DIALOG 0, 0, 212, 194
+IDD_CHANGESIZE DIALOGEX 0, 0, 212, 194
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Change Map Size"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,155,173,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,97,173,50,14
-    LTEXT           "Please specify the new width and height of the map. Left and top will automatically be set so that the old area of the map is centered. You can change left and top to modify the left-top position (you may use negative numbers for left/top).",IDC_STATIC,7,7,198,36
-    LTEXT           "Width:",IDC_STATIC,7,54,71,13
+    LTEXT           "Please specify the new width and height of the map. Left and top will automatically be set so that the old area of the map is centered. You can change left and top to modify the left-top position (you may use negative numbers for left/top).",IDC_DESC,7,7,198,36
+    LTEXT           "Width:",IDC_CMAPSIZE_WIDTH_TXT,7,54,71,13
     EDITTEXT        IDC_WIDTH,86,52,62,15,ES_AUTOHSCROLL
-    LTEXT           "Note: If there are any units, buildings, waypoints etc. outside of the new map area, they will be deleted.",IDC_STATIC,7,132,198,19
-    LTEXT           "Height:",IDC_STATIC,7,72,71,13
+    LTEXT           "Note: If there are any units, buildings, waypoints etc. outside of the new map area, they will be deleted.",IDC_CMAPSIZE_NOTE_TXT,7,132,198,19
+    LTEXT           "Height:",IDC_CMAPSIZE_HEIGHT_TXT,7,72,71,13
     EDITTEXT        IDC_HEIGHT,86,70,62,15,ES_AUTOHSCROLL
-    LTEXT           "Left:",IDC_STATIC,7,90,71,13
+    LTEXT           "Left:",IDC_CMAPSIZE_LEFT_TXT,7,90,71,13
     EDITTEXT        IDC_LEFT,86,88,62,15,ES_AUTOHSCROLL
-    LTEXT           "Top:",IDC_STATIC,7,108,71,13
+    LTEXT           "Top:",IDC_CMAPSIZE_TOP_TXT,7,108,71,13
     EDITTEXT        IDC_TOP,86,106,62,15,ES_AUTOHSCROLL
-    LTEXT           "UNDO IS NOT AVAILABLE!",IDC_STATIC,7,152,198,16
+    LTEXT           "UNDO IS NOT AVAILABLE!",IDC_CMAPSIZE_WARNING_TXT,7,152,198,16
 END
 
 IDD_AITRIGGERADD DIALOGEX 0, 0, 223, 292
@@ -685,7 +686,7 @@ BEGIN
     LTEXT           "Version:",IDC_LVERSION,7,37,61,9
     CTEXT           "",IDC_BUILTBY,74,52,154,13,SS_CENTERIMAGE | SS_SUNKEN
     LTEXT           "Built by:",IDC_LBUILTBY,7,52,61,9
-    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
+    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner, Zero Fanker\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
     LTEXT           "This software comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it.\nFor details open Help->Info",IDC_STATIC,6,129,221,26
 END
 #endif
@@ -1223,10 +1224,10 @@ BEGIN
     COMBOBOX        IDC_ACTIONTYPE,72,30,282,184,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
     EDITTEXT        IDC_ACTIONDESCRIPTION,14,48,340,26,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     LTEXT           "Action parameters:",IDC_ACTION_PARAM_TXT,14,79,74,10
-    LISTBOX         IDC_PARAMETER,14,93,160,94,LBS_SORT | LBS_USETABSTOPS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+    LISTBOX         IDC_PARAMETER,14,93,90,94,LBS_SORT | LBS_USETABSTOPS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
     LTEXT           "Parameter value:",IDC_ACTION_VAL_TXT,186,79,118,10
-    COMBOBOX        IDC_PARAMVALUE,186,92,168,125,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_NOINTEGRALHEIGHT | CBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Select the event type first, then set all parameters.",IDC_ACTION_DESC,186,110,168,25
+    COMBOBOX        IDC_PARAMVALUE,110,92,244,125,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_NOINTEGRALHEIGHT | CBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Select the event type first, then set all parameters.",IDC_ACTION_DESC,110,110,168,25
 END
 
 IDD_GLOBALS DIALOGEX 0, 0, 186, 79
@@ -1302,7 +1303,7 @@ BEGIN
     LTEXT           "Version:",IDC_LVERSION,7,37,61,9
     CTEXT           "",IDC_BUILTBY,74,52,154,13,SS_CENTERIMAGE | SS_SUNKEN
     LTEXT           "Built by:",IDC_LBUILTBY,7,52,61,9
-    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
+    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner, Zero Fanker\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
     LTEXT           "This software comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it.\nFor details open Help->Info",IDC_STATIC,6,129,221,26
 END
 #endif
@@ -1968,6 +1969,7 @@ BEGIN
         VERTGUIDE, 6
         VERTGUIDE, 14
         VERTGUIDE, 72
+        VERTGUIDE, 110
         VERTGUIDE, 174
         VERTGUIDE, 186
         VERTGUIDE, 221
@@ -3640,6 +3642,11 @@ BEGIN
 END
 #endif
 
+IDD_CHANGESIZE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3648,10 +3655,10 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_BUILTBY             "Matthias Wagner"
-    IDS_VERSIONTEXT         "Version 2.1.0"
-    IDS_VERSION             "2.1.0"
-    IDS_VERSIONTEXTTS       "Version 2.1.0"
+    IDS_BUILTBY             "Matthias Wagner, Zero Fanker"
+    IDS_VERSIONTEXT         TEXT("Version " PRODUCT_VERSION_STRING)
+    IDS_VERSION             TEXT(PRODUCT_VERSION_STRING)
+    IDS_VERSIONTEXTTS       TEXT("Version " PRODUCT_VERSION_STRING)
 END
 
 STRINGTABLE

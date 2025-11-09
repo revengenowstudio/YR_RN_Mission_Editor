@@ -61,7 +61,6 @@ static char THIS_FILE[] = __FILE__;
 
 /* Externals */
 extern ACTIONDATA AD;
-void GetNodeName(CString& name, int n);
 /* --------- */
 
 /* Overlay picture table (maximum overlay count=0xFF) */
@@ -100,7 +99,7 @@ BOOL bDrawStats = TRUE;
 class SurfaceLocker
 {
 public:
-	SurfaceLocker(IDirectDrawSurface4* pDDS, LPRECT rect = nullptr) :
+	SurfaceLocker(IDirectDrawSurface7* pDDS, LPRECT rect = nullptr) :
 		SurfaceLocker()
 	{
 		m_hasRect = rect != nullptr;
@@ -150,7 +149,7 @@ private:
 	SurfaceLocker() = default;
 
 private:
-	IDirectDrawSurface4* m_pDDS = nullptr;
+	IDirectDrawSurface7* m_pDDS = nullptr;
 	DDSURFACEDESC2 m_ddsd = { 0 };
 	RECT m_rect = { 0 };
 	bool m_hasRect = false;
@@ -239,19 +238,11 @@ BOOL CIsoView::RecreateSurfaces()
 	releaseIfExists(isoView.dd);
 
 	if (isoView.dd_1->QueryInterface(IID_IDirectDraw7, (void**)&isoView.dd) != DD_OK) {
-		errstream << "QueryInterface() failed -> Using DirectX 6.0\n";
+		errstream << "QueryInterface() failed\n";
 		errstream.flush();
-		//ShowWindow(SW_HIDE);
-		//MessageBox("You don´t have DirectX 6.0 but an older version. Quitting...");
-		//exit(-1);
-
-		//return FALSE;
-
-		if (isoView.dd_1->QueryInterface(IID_IDirectDraw4, (void**)&isoView.dd) != DD_OK) {
-			MessageBox("You need at least DirectX 6.0 to run this program", "Error");
-			exit(-1);
-			return FALSE;
-		}
+		MessageBox("You need at least DirectX 7.0 to run this program", "Error");
+		exit(-1);
+		return FALSE;
 	}
 
 	errstream << "QueryInterface() successful\n\nNow setting cooperative level\n";
@@ -1150,7 +1141,7 @@ void CIsoView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
 	CMyViewFrame& dlg = *(CMyViewFrame*)owner;
-	dlg.m_minimap.RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	dlg.m_minimap->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
 void CIsoView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
@@ -1170,7 +1161,7 @@ void CIsoView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
 	CMyViewFrame& dlg = *(CMyViewFrame*)owner;
-	dlg.m_minimap.RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	dlg.m_minimap->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
 /*
@@ -1240,7 +1231,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			ShowCursor(TRUE);
 
 			CMyViewFrame& dlg = *(CMyViewFrame*)owner;
-			dlg.m_minimap.RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+			dlg.m_minimap->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
 		} else {
 
@@ -1518,45 +1509,48 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 		} else if ((AD.mode == ACTIONMODE_PLACE || AD.mode == ACTIONMODE_RANDOMTERRAIN) && (nFlags & ~MK_CONTROL) == 0 && AD.type != 7 && (AD.type != 6 || (AD.type == 6 && ((AD.data >= 30 && AD.data <= 33) || AD.data == 2 || AD.data == 3)))) // everything placing but not overlay!
 		{
 			FIELDDATA oldData[32][32];
-			INFANTRY infData[SUBPOS_COUNT][32][32];
-			int i, e;
+			//INFANTRY infData[SUBPOS_COUNT][32][32];
 
 			//if(AD.type!=1 || Map->GetInfantryCountAt(x+y*Map->GetIsoSize())==0)
 			{
-				for (i = 0; i < 32; i++) {
-					for (e = 0; e < 32; e++) {
+				for (auto i = 0; i < 32; i++) {
+					for (auto e = 0; e < 32; e++) {
 						oldData[i][e] = *Map->GetFielddataAt(i + x + (e + y) * Map->GetIsoSize());
-						int z;
-						for (z = 0; z < SUBPOS_COUNT; z++)
-							if (oldData[i][e].infantry[z] > -1)
-								Map->GetInfantryData(oldData[i][e].infantry[z], &infData[z][i][e]);
+						//for (auto subPos = 0; subPos < SUBPOS_COUNT; subPos++) {
+						//	if (oldData[i][e].infantry[subPos] > -1) {
+						//		Map->GetInfantryData(oldData[i][e].infantry[subPos], &infData[subPos][i][e]);
+						//	}
+						//}
 					}
 				}
 
 				PlaceCurrentObjectAt(x, y);
 				RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
-				for (i = 0; i < 32; i++) {
-					for (e = 0; e < 32; e++) {
+				for (auto i = 0; i < 32; i++) {
+					for (auto e = 0; e < 32; e++) {
 						DWORD dwPos = i + x + (e + y) * Map->GetIsoSize();
 						FIELDDATA cur_field;
 						cur_field = *Map->GetFielddataAt(dwPos);
 
-						if (cur_field.aircraft != oldData[i][e].aircraft)
+						if (cur_field.aircraft != oldData[i][e].aircraft) {
 							Map->DeleteAircraft(cur_field.aircraft);
-						int z;
-						for (z = 0; z < SUBPOS_COUNT; z++)
-							if (cur_field.infantry[z] != oldData[i][e].infantry[z]) {
-								Map->DeleteInfantry(cur_field.infantry[z]);
+						}
+
+						for (auto subPos = 0; subPos < SUBPOS_COUNT; subPos++) {
+							if (cur_field.infantry[subPos] != oldData[i][e].infantry[subPos]) {
+								Map->DeleteInfantry(cur_field.infantry[subPos]);
 							}
+						}
 
 						if (cur_field.node.index != oldData[i][e].node.index) {
 							CString house;
 							int id = Map->GetNodeAt(dwPos, house);
 							Map->DeleteNode(house, id);
 						}
-						if (cur_field.structure != oldData[i][e].structure)
-							Map->DeleteStructure(cur_field.structure);
+						if (cur_field.structures != oldData[i][e].structures && !cur_field.structures.empty()) {
+							Map->DeleteStructure(cur_field.structures.back().structure);
+						}
 						if (cur_field.terrain != oldData[i][e].terrain)
 							Map->DeleteTerrain(cur_field.terrain);
 #ifdef SMUDGE_SUPP
@@ -1599,21 +1593,12 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 
 
-	// display the coordinates	
-	char c[50];
+	// display the coordinates
 	CString cap;
-	itoa(x, c, 10);
-	cap += c;
-	cap += " / ";
-	itoa(y, c, 10);
-	cap += c;
-	cap += " - ";
-	itoa(Map->GetHeightAt(x + y * Map->GetIsoSize()), c, 10);
-	cap += c;
+	cap.Format("XY: %d, %d H: %d", y, x, Map->GetHeightAt(x + y * Map->GetIsoSize()));
 
 	CStatusBarCtrl& stat = ((CMyViewFrame*)owner)->m_statbar.GetStatusBarCtrl();
 	stat.SetText(cap, 1, 0);
-
 
 	// drag
 	if (m_drag && AD.mode == 0) {
@@ -1668,6 +1653,9 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 			for (m = left; m < right; m++) {
 				for (n = top; n < bottom; n++) {
+					if (!Map->isInside(x + m, y + n)) {
+						continue;
+					}
 					int pos = x + m + (y + n) * isosize;
 					int ground = Map->GetFielddataAt(pos)->wGround;
 					if (ground == 0xFFFF) {
@@ -1713,6 +1701,9 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 
 			for (m = left; m < right; m++) {
 				for (n = top; n < bottom; n++) {
+					if (!Map->isInside(x + m, y + n)) {
+						continue;
+					}
 					int ground = Map->GetFielddataAt(x + m + (y + n) * Map->GetIsoSize())->wGround;
 					if (ground == 0xFFFF) {
 						ground = 0;
@@ -1743,6 +1734,9 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			ASSERT(m_funcRect.top <= m_funcRect.bottom);
 			for (m = m_funcRect.left - 1; m <= m_funcRect.right + 1; m++) {
 				for (n = m_funcRect.top - 1; n <= m_funcRect.bottom + 1; n++) {
+					if (!Map->isInside(m, n)) {
+						continue;
+					}
 					Map->CreateSlopesAt(m + n * isosize);
 				}
 			}
@@ -1846,67 +1840,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 		}
 	} else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_NODE) // nodes
 	{
-		if (AD.type == 1) // create node, delete building
-		{
-			int n = Map->GetStructureAt(x + y * Map->GetIsoSize());
-			if (n < 0) {
-				isMoving = FALSE;
-				return;
-			}
-
-			STDOBJECTDATA sod;
-			Map->GetStdStructureData(n, &sod);
-
-			CString tmp;
-			if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0) {
-				SetError("You cannot place a node on another node");
-				{
-					isMoving = FALSE;
-					return;
-				};
-			}
-
-			Map->DeleteStructure(n);
-
-			NODE node;
-			node.x = sod.x;
-			node.y = sod.y;
-			node.house = sod.house;
-			node.type = sod.type;
-
-			Map->AddNode(&node, 0);
-			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-
-		} else if (AD.type == 0) // create node, don´t delete building
-		{
-			int n = Map->GetStructureAt(x + y * Map->GetIsoSize());
-			if (n < 0) {
-				isMoving = FALSE;
-				return;
-			}
-
-			STDOBJECTDATA sod;
-			Map->GetStdStructureData(n, &sod);
-
-			CString tmp;
-			if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0) {
-				SetError("You cannot place a node on another node");
-				{
-					isMoving = FALSE;
-					return;
-				};
-			}
-
-			NODE node;
-			node.x = sod.x;
-			node.y = sod.y;
-			node.type = sod.type;
-			node.house = sod.house;
-
-			Map->AddNode(&node, 0);
-			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-
-		} else if (AD.type == 2) // delete node
+		if (AD.type == 2) // delete node
 		{
 			CString owner;
 			int n = Map->GetNodeAt(x + y * Map->GetIsoSize(), owner);
@@ -1917,7 +1851,56 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->DeleteNode(owner, n);
 
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+		} else {
+			int n = Map->GetTopStructureAt(x + y * Map->GetIsoSize());
+			// create node, delete building
+			if (AD.type == 1 && n >= 0) 
+			{
+				STDOBJECTDATA sod;
+				Map->GetStdStructureData(n, &sod);
 
+				CString tmp;
+				if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0) {
+					SetError("You cannot place a node on another node");
+					{
+						isMoving = FALSE;
+						return;
+					};
+				}
+
+				Map->DeleteStructure(n);
+
+				NODE node;
+				node.x = sod.x;
+				node.y = sod.y;
+				node.house = sod.house;
+				node.type = sod.type;
+
+				Map->AddNode(&node, 0);
+				RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+
+			} else if (AD.type == 0) {// create node, don´t delete building
+				STDOBJECTDATA sod;
+				Map->GetStdStructureData(n, &sod);
+				CString tmp;
+				if (Map->GetNodeAt(atoi(sod.x) + atoi(sod.y) * Map->GetIsoSize(), tmp) >= 0) {
+					SetError("You cannot place a node on another node");
+					{
+						isMoving = FALSE;
+						return;
+					};
+				}
+
+				NODE node;
+				node.x = sod.x;
+				node.y = sod.y;
+				node.type = sod.type;
+				node.house = sod.house;
+
+				Map->AddNode(&node, 0);
+				RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+
+			}
 		}
 	} else if ((nFlags == MK_LBUTTON) && AD.mode == ACTIONMODE_ERASEFIELD) {
 		int h;
@@ -1932,10 +1915,7 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->DeleteUnit(h);
 		}
 
-		h = Map->GetStructureAt(dwPos);
-		if (h > -1) {
-			Map->DeleteStructure(h);
-		}
+		Map->DeleteAllStructureAt(dwPos);
 
 		h = Map->GetAirAt(dwPos);
 		if (h > -1) {
@@ -1962,8 +1942,6 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			AD.tool->onMouseMove(projCoords, mapCoords, MapToolMouseFlagsFromWin32(nFlags));
 	} else if ((nFlags & MK_LBUTTON) == MK_LBUTTON && (AD.mode == ACTIONMODE_PLACE || AD.mode == ACTIONMODE_RANDOMTERRAIN)) {
 		// ADD OBJECTS
-
-		if (AD.mode == ACTIONMODE_PLACE && AD.type == 6) Map->TakeSnapshot();
 
 		if (AD.mode == ACTIONMODE_PLACE && AD.type == 6 && AD.data == 5) // bridges		
 		{
@@ -2027,14 +2005,6 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			PlaceCurrentObjectAt(x, y);
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		}
-
-
-		if (AD.mode == ACTIONMODE_PLACE && AD.type == 6) {
-			Map->TakeSnapshot();
-			Map->Undo();
-		}
-
-
 	}
 
 	UpdateStatusBar(x, y);
@@ -2130,7 +2100,7 @@ void CIsoView::OnRButtonUp(UINT nFlags, CPoint point)
 		KillTimer(11);
 		ShowCursor(TRUE);
 		CMyViewFrame& dlg = *(CMyViewFrame*)owner;
-		dlg.m_minimap.RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+		dlg.m_minimap->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
 	}
 
@@ -2161,10 +2131,12 @@ void CIsoView::OnRButtonUp(UINT nFlags, CPoint point)
 
 		if (!ignoreClick) {
 			AD.reset();
-
-			CMyViewFrame& frame = *((CMyViewFrame*)owner);
-			frame.m_objectview->GetTreeCtrl().Select(NULL, TVGN_CARET);
 		}
+
+		CTreeCtrl& treeCtrl = ((CMyViewFrame*)owner)->m_objectview->GetTreeCtrl();
+		HTREEITEM hParentItem = treeCtrl.GetParentItem(treeCtrl.GetSelectedItem());
+		treeCtrl.Select(hParentItem, TVGN_CARET);
+
 		return;
 	}
 
@@ -2205,8 +2177,13 @@ BOOL CIsoView::OnCommand(WPARAM wParam, LPARAM lParam)
 						if (Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize(), z) != -1) HandleProperties(Map->GetInfantryAt(m_mapx + m_mapy * Map->GetIsoSize(), z), 0);
 				} else if (Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
 					HandleProperties(Map->GetUnitAt(m_mapx + m_mapy * Map->GetIsoSize()), 3);
-				} else if (Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize()) != -1) {
-					HandleProperties(Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize()), 1);
+				} else {
+					// here must be a copy, because looping and doing HandleProperties
+					// may cause the vector erase and add
+					auto const structures = Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize());
+					for (auto const item : structures) {
+						HandleProperties(item.structure, 1);
+					}
 				}
 
 
@@ -2229,7 +2206,9 @@ void CIsoView::HandleProperties(int n, int type)
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	if (n < 0) return;
+	if (n < 0) {
+		return;
+	}
 	switch (type) {
 		case 0:
 		{
@@ -2246,18 +2225,20 @@ void CIsoView::HandleProperties(int n, int type)
 
 			CInfantrie dlg(this);
 			char tmp[255];
-			dlg.Init((LPCTSTR)data.house, (LPCTSTR)data.strength, (LPCTSTR)data.action,
-				(LPCTSTR)data.direction, (LPCTSTR)data.tag, (LPCTSTR)data.flag1,
-				(LPCTSTR)data.group, (LPCTSTR)data.flag3, (LPCTSTR)data.flag4, (LPCTSTR)data.flag5);
+			dlg.Init(data.basic.house, data.basic.strength, data.action,
+				data.direction, data.tag, data.flag1,
+				data.group, data.flag3, data.flag4, data.flag5);
 
 			int res = dlg.DoModal();
-			if (res == IDCANCEL) return;
+			if (res == IDCANCEL) {
+				return;
+			}
 
 			data.action = dlg.m_action;
-			data.strength = dlg.m_strength;
+			data.basic.strength = dlg.m_strength;
 			data.tag = dlg.m_tag;
 			data.direction = dlg.m_direction;
-			data.house = dlg.m_house;
+			data.basic.house = dlg.m_house;
 			data.flag1 = dlg.m_flag1;
 			data.group = dlg.m_group;
 			data.flag3 = dlg.m_flag3;
@@ -2266,7 +2247,7 @@ void CIsoView::HandleProperties(int n, int type)
 
 
 			Map->DeleteInfantry(n);
-			Map->AddInfantry(&data);
+			Map->AddInfantry(&data, n);
 
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 			break;
@@ -2281,19 +2262,21 @@ void CIsoView::HandleProperties(int n, int type)
 
 			CBuilding dlg(this);
 			char tmp[255];
-			dlg.Init((LPCTSTR)data.house, (LPCTSTR)data.strength, (LPCTSTR)data.direction, (LPCTSTR)data.tag,
-				(LPCTSTR)data.flag1, (LPCTSTR)data.flag2, (LPCTSTR)data.energy,
-				(LPCTSTR)data.upgradecount, (LPCTSTR)data.spotlight, (LPCTSTR)data.upgrade1, (LPCTSTR)data.upgrade2,
-				(LPCTSTR)data.upgrade3, (LPCTSTR)data.flag3, (LPCTSTR)data.flag4);
-			dlg.m_type = data.type;
+			dlg.Init(data.basic.house, data.basic.strength, data.direction, data.tag,
+				data.flag1, data.flag2, data.energy,
+				data.upgradecount, data.spotlight, data.upgrade1, data.upgrade2,
+				data.upgrade3, data.flag3, data.flag4);
+			dlg.m_type = data.basic.type;
 
 			int res = dlg.DoModal();
-			if (res == IDCANCEL) return;
+			if (res == IDCANCEL) {
+				return;
+			}
 
-			data.strength = dlg.m_strength;
+			data.basic.strength = dlg.m_strength;
 			data.tag = dlg.m_tag;
 			data.direction = dlg.m_direction;
-			data.house = dlg.m_house;
+			data.basic.house = dlg.m_house;
 			data.spotlight = dlg.m_spotlight;
 			data.flag1 = dlg.m_flag1;
 			data.flag2 = dlg.m_flag2;
@@ -2324,17 +2307,17 @@ void CIsoView::HandleProperties(int n, int type)
 
 			CAircraft dlg(this);
 			char tmp[255];
-			dlg.Init(data.house, data.strength, data.direction, data.action,
+			dlg.Init(data.basic.house, data.basic.strength, data.direction, data.action,
 				data.tag, data.flag1, data.group, data.flag3, data.flag4);
 
 			int res = dlg.DoModal();
 			if (res == IDCANCEL) return;
 
 			data.action = dlg.m_action;
-			data.strength = dlg.m_strength;
+			data.basic.strength = dlg.m_strength;
 			data.tag = dlg.m_tag;
 			data.direction = dlg.m_direction;
-			data.house = dlg.m_house;
+			data.basic.house = dlg.m_house;
 			data.flag1 = dlg.m_flag1;
 			data.group = dlg.m_group;
 			data.flag3 = dlg.m_flag3;
@@ -2357,17 +2340,19 @@ void CIsoView::HandleProperties(int n, int type)
 
 			CUnit dlg(this);
 			char tmp[255];
-			dlg.Init(data.house, data.strength, data.direction, data.action,
+			dlg.Init(data.basic.house, data.basic.strength, data.direction, data.action,
 				data.tag, data.flag1, data.group, data.flag3, data.flag4, data.flag5, data.flag6);
 
 			int res = dlg.DoModal();
-			if (res == IDCANCEL) return;
+			if (res == IDCANCEL) {
+				return;
+			}
 
 			data.action = dlg.m_action;
-			data.strength = dlg.m_strength;
+			data.basic.strength = dlg.m_strength;
 			data.tag = dlg.m_tag;
 			data.direction = dlg.m_direction;
-			data.house = dlg.m_house;
+			data.basic.house = dlg.m_house;
 			data.flag1 = dlg.m_flag1;
 			data.group = dlg.m_group;
 			data.flag3 = dlg.m_flag3;
@@ -2507,14 +2492,16 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 			m_type = 4;
 		}
 		if (m_id < 0) {
-			m_id = Map->GetStructureAt(m_mapx + m_mapy * Map->GetIsoSize());
+			m_id = Map->GetTopStructureAt(m_mapx + m_mapy * Map->GetIsoSize());
+			if (m_id >= 0) {
 
-			STDOBJECTDATA sod;
-			Map->GetStdStructureData(m_id, &sod);
-			m_mapx = atoi(sod.x);
-			m_mapy = atoi(sod.y);
+				STDOBJECTDATA sod;
+				Map->GetStdStructureData(m_id, &sod);
+				m_mapx = atoi(sod.x);
+				m_mapy = atoi(sod.y);
 
-			m_type = 1;
+				m_type = 1;
+			}
 		}
 
 	} else if (AD.mode == ACTIONMODE_SETTILE) {
@@ -2582,6 +2569,9 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 				int oheight = Map->GetHeightAt(x + y * Map->GetIsoSize());
 				for (f = -m_BrushSize_x / 2; f < m_BrushSize_x / 2 + 1; f++) {
 					for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
+						if (!Map->isInside(x + f, y + n)) {
+							continue;
+						}
 						int pos = x + f + (y + n) * Map->GetIsoSize();
 						int ground = Map->GetFielddataAt(pos)->wGround;
 						if (ground == 0xFFFF) ground = 0;
@@ -2593,6 +2583,9 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 				}
 				for (f = -m_BrushSize_x / 2; f < m_BrushSize_x / 2 + 1; f++) {
 					for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
+						if (!Map->isInside(x + f, y + n)) {
+							continue;
+						}
 						int pos = x + f + (y + n) * Map->GetIsoSize();
 						int ground = Map->GetFielddataAt(pos)->wGround;
 						if (ground == 0xFFFF) ground = 0;
@@ -2622,6 +2615,9 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 			int f, n;
 			for (f = m_funcRect.left - 1; f <= m_funcRect.right + 1; f++) {
 				for (n = m_funcRect.top - 1; n <= m_funcRect.bottom + 1; n++) {
+					if (!Map->isInside(f, n)) {
+						continue;
+					}
 					int pos = f + (n)*Map->GetIsoSize();
 					Map->CreateSlopesAt(pos);
 				}
@@ -2675,6 +2671,9 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 				int oheight = Map->GetHeightAt(x + y * Map->GetIsoSize());
 				for (f = -m_BrushSize_x / 2; f < m_BrushSize_x / 2 + 1; f++) {
 					for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
+						if (!Map->isInside(x + f, y + n)) {
+							continue;
+						}
 						int pos = x + f + (y + n) * Map->GetIsoSize();
 						int ground = Map->GetFielddataAt(pos)->wGround;
 						if (ground == 0xFFFF) ground = 0;
@@ -2686,6 +2685,9 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 				}
 				for (f = -m_BrushSize_x / 2; f < m_BrushSize_x / 2 + 1; f++) {
 					for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
+						if (!Map->isInside(x + f, y + n)) {
+							continue;
+						}
 						int pos = x + f + (y + n) * Map->GetIsoSize();
 						int ground = Map->GetFielddataAt(pos)->wGround;
 						if (ground == 0xFFFF) ground = 0;
@@ -2712,6 +2714,9 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 			int f, n;
 			for (f = m_funcRect.left - 1; f <= m_funcRect.right + 1; f++) {
 				for (n = m_funcRect.top - 1; n <= m_funcRect.bottom + 1; n++) {
+					if (!Map->isInside(f, n)) {
+						continue;
+					}
 					int pos = f + (n)*Map->GetIsoSize();
 					Map->CreateSlopesAt(pos);
 				}
@@ -2738,19 +2743,27 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 	} else if (AD.mode == ACTIONMODE_HEIGHTENTILE) {
 		Map->TakeSnapshot();
 
-		int n, m;
-		for (m = -m_BrushSize_x / 2; m < m_BrushSize_x / 2 + 1; m++) {
-			for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
-				Map->SetHeightAt(x + m + (y + n) * Map->GetIsoSize(), Map->GetHeightAt(x + m + (y + n) * Map->GetIsoSize()) + 1);
+		for (int m = -m_BrushSize_x / 2; m < m_BrushSize_x / 2 + 1; m++) {
+			for (int n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
+				if (!Map->isInside(x + m, y + n)) {
+					continue;
+				}
+				auto const pos = x + m + (y + n) * Map->GetIsoSize();
+				Map->SetHeightAt(pos, Map->GetHeightAt(pos) + 1);
 			}
 		}
 
-		if (nFlags & MK_CONTROL)
-			for (m = -m_BrushSize_x / 2 - 1; m < m_BrushSize_x / 2 + 2; m++) {
-				for (n = -m_BrushSize_y / 2 - 1; n < m_BrushSize_y / 2 + 2; n++) {
-					Map->CreateSlopesAt(x + m + (y + n) * Map->GetIsoSize());
+		if (nFlags & MK_CONTROL) {
+			for (int m = -m_BrushSize_x / 2 - 1; m < m_BrushSize_x / 2 + 2; m++) {
+				for (int n = -m_BrushSize_y / 2 - 1; n < m_BrushSize_y / 2 + 2; n++) {
+					if (!Map->isInside(x + m, y + n)) {
+						continue;
+					}
+					auto const pos = x + m + (y + n) * Map->GetIsoSize();
+					Map->CreateSlopesAt(pos);
 				}
 			}
+		}
 
 		Map->TakeSnapshot();
 		Map->Undo();
@@ -2759,19 +2772,27 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 	} else if (AD.mode == ACTIONMODE_LOWERTILE) {
 		Map->TakeSnapshot();
 
-		int n, m;
-		for (m = -m_BrushSize_x / 2; m < m_BrushSize_x / 2 + 1; m++) {
-			for (n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
-				Map->SetHeightAt(x + m + (y + n) * Map->GetIsoSize(), Map->GetHeightAt(x + m + (y + n) * Map->GetIsoSize()) - 1);
+		for (int m = -m_BrushSize_x / 2; m < m_BrushSize_x / 2 + 1; m++) {
+			for (int n = -m_BrushSize_y / 2; n < m_BrushSize_y / 2 + 1; n++) {
+				if (!Map->isInside(x + m, y + n)) {
+					continue;
+				}
+				auto const pos = x + m + (y + n) * Map->GetIsoSize();
+				Map->SetHeightAt(pos, Map->GetHeightAt(pos) - 1);
 			}
 		}
 
-		if (nFlags & MK_CONTROL)
-			for (m = -m_BrushSize_x / 2 - 1; m < m_BrushSize_x / 2 + 2; m++) {
-				for (n = -m_BrushSize_y / 2 - 1; n < m_BrushSize_y / 2 + 2; n++) {
-					Map->CreateSlopesAt(x + m + (y + n) * Map->GetIsoSize());
+		if (nFlags & MK_CONTROL) {
+			for (int m = -m_BrushSize_x / 2 - 1; m < m_BrushSize_x / 2 + 2; m++) {
+				for (int n = -m_BrushSize_y / 2 - 1; n < m_BrushSize_y / 2 + 2; n++) {
+					if (!Map->isInside(x + m, y + n)) {
+						continue;
+					}
+					auto const pos = x + m + (y + n) * Map->GetIsoSize();
+					Map->CreateSlopesAt(pos);
 				}
 			}
+		}
 
 		Map->TakeSnapshot();
 		Map->Undo();
@@ -2795,6 +2816,10 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 		m_id = Map->GetCelltagAt(m_mapx + m_mapy * Map->GetIsoSize());
 		m_type = 5;
 	} else if ((AD.mode < 3 || AD.mode>4) || (AD.mode == 3 && AD.type == 0) || (AD.mode >= 3 && AD.mode <= 4 && AD.type == 1)) {
+		if (AD.type == 6)
+		{
+			Map->TakeSnapshot();
+		}
 		OnMouseMove(nFlags, point);
 	} else if (AD.mode == 3) {
 		if (AD.type == 2) {
@@ -2860,18 +2885,20 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CIsoView::PlaceTile(const int x, const int y, const UINT nMouseFlags)
 {
-	Map->TakeSnapshot(TRUE, x - 6, y - 6, x + (*tiledata)[AD.type].cx * m_BrushSize_x + 7, y + (*tiledata)[AD.type].cy * m_BrushSize_y + 7);
-	int i, e, f, n;
 	int p = 0;
-	int width = (*tiledata)[AD.type].cx;
-	int height = (*tiledata)[AD.type].cy;
+	auto const& tileData = (*tiledata)[AD.type];
+	const int width = tileData.cx;
+	const int height = tileData.cy;
 	int pos = x - width + 1 + (y - height + 1) * Map->GetIsoSize();
 	int startheight = Map->GetHeightAt(x + y * Map->GetIsoSize()) + AD.z_data;
 	int ground = Map->GetFielddataAt(x + y * Map->GetIsoSize())->wGround;
-	if (ground == 0xFFFF) ground = 0;
+	if (ground == 0xFFFF) {
+		ground = 0;
+	}
 	startheight -= (*tiledata)[ground].tiles[Map->GetFielddataAt(x + y * Map->GetIsoSize())->bSubTile].bZHeight;
-	for (f = 0; f < m_BrushSize_x; f++) {
-		for (n = 0; n < m_BrushSize_y; n++) {
+	Map->TakeSnapshot(TRUE, x - width - 4, y - height - 4, x - width + m_BrushSize_x * width + 7, y - height + m_BrushSize_y * height + 7);
+	for (auto f = 0; f < m_BrushSize_x; f++) {
+		for (auto n = 0; n < m_BrushSize_y; n++) {
 			int tile = AD.type;
 			if (AD.data == 1) {
 				int n = rand() * 5 / RAND_MAX;
@@ -2879,34 +2906,35 @@ void CIsoView::PlaceTile(const int x, const int y, const UINT nMouseFlags)
 
 			}
 			p = 0;
-			for (i = 0; i < (*tiledata)[AD.type].cx; i++) {
-				for (e = 0; e < (*tiledata)[AD.type].cy; e++) {
-
+			for (auto i = 0; i < width; i++) {
+				for (auto e = 0; e < height; e++) {
 					if (x - width + 1 + f * width + i >= Map->GetIsoSize() ||
 						y - height + 1 + n * height + e >= Map->GetIsoSize()) {
 
-					} else
-						if ((*tiledata)[AD.type].tiles[p].pic != NULL) {
-							Map->SetHeightAt(pos + i + f * width + (e + n * height) * Map->GetIsoSize(), startheight + (*tiledata)[AD.type].tiles[p].bZHeight);
+					} else {
+						if (tileData.tiles[p].pic != NULL) {
+							Map->SetHeightAt(pos + i + f * width + (e + n * height) * Map->GetIsoSize(), startheight + tileData.tiles[p].bZHeight);
 							Map->SetTileAt(pos + i + f * width + (e + n * height) * Map->GetIsoSize(), tile, p);
 
 						}
+					}
 					p++;
 				}
 			}
-
 		}
 	}
 
 	if (!((nMouseFlags & MK_CONTROL) && (nMouseFlags & MK_SHIFT))) {
-		if (!theApp.m_Options.bDisableAutoShore) Map->CreateShore(x - 5, y - 5, x + (*tiledata)[AD.type].cx * m_BrushSize_x + 5, y + (*tiledata)[AD.type].cy * m_BrushSize_y + 5, FALSE);
+		if (!theApp.m_Options.bDisableAutoShore) {
+			Map->CreateShore(x - width - 2, y - height - 2, x - width + width * m_BrushSize_x + 5, y - height + height * m_BrushSize_y + 5, FALSE);
+		}
 		//Map->CreateShore(0,0,Map->GetIsoSize(), Map->GetIsoSize());
 
-		for (f = 0; f < m_BrushSize_x; f++) {
-			for (n = 0; n < m_BrushSize_y; n++) {
+		for (auto f = 0; f < m_BrushSize_x; f++) {
+			for (auto n = 0; n < m_BrushSize_y; n++) {
 				p = 0;
-				for (i = -1; i < (*tiledata)[AD.type].cx + 1; i++) {
-					for (e = -1; e < (*tiledata)[AD.type].cy + 1; e++) {
+				for (auto i = -1; i < width + 1; i++) {
+					for (auto e = -1; e < height + 1; e++) {
 
 						Map->SmoothAllAt(pos + i + f * width + (e + n * height) * Map->GetIsoSize());
 
@@ -2919,7 +2947,7 @@ void CIsoView::PlaceTile(const int x, const int y, const UINT nMouseFlags)
 	}
 
 	// now make current tiles available for redo
-	Map->TakeSnapshot(TRUE, x - 6, y - 6, x + (*tiledata)[AD.type].cx * m_BrushSize_x + 6, y + (*tiledata)[AD.type].cy * m_BrushSize_y + 6);
+	Map->TakeSnapshot(TRUE, x - 6, y - 6, x + width * m_BrushSize_x + 6, y + height * m_BrushSize_y + 6);
 	Map->Undo();
 }
 
@@ -3014,15 +3042,15 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 			{
 				INFANTRY infantry;
 				Map->GetInfantryData(m_id, &infantry);
-				infantry.x = strX;
-				infantry.y = strY;
+				infantry.basic.x = strX;
+				infantry.basic.y = strY;
 				infantry.pos = "-1";
 
 				if ((nFlags != MK_SHIFT)) {
 					Map->DeleteInfantry(m_id);
 				}
 
-				Map->AddInfantry(&infantry);
+				Map->AddInfantry(&infantry, m_id);
 
 				break;
 			}
@@ -3030,14 +3058,15 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 			{
 				STRUCTURE structure;
 				Map->GetStructureData(m_id, &structure);
-				structure.x = strX;
-				structure.y = strY;
+				structure.basic.x = strX;
+				structure.basic.y = strY;
 
 				if ((nFlags != MK_SHIFT)) {
 					Map->DeleteStructure(m_id);
 				}
-
-				Map->AddStructure(&structure);
+				CString idStr;
+				idStr.Format("%d", m_id);
+				Map->AddStructure(&structure, nullptr, nullptr, 0, idStr);
 
 				break;
 			}
@@ -3045,8 +3074,8 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 			{
 				AIRCRAFT aircraft;
 				Map->GetAircraftData(m_id, &aircraft);
-				aircraft.x = strX;
-				aircraft.y = strY;
+				aircraft.basic.x = strX;
+				aircraft.basic.y = strY;
 
 
 				if ((nFlags != MK_SHIFT)) {
@@ -3061,8 +3090,8 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 			{
 				UNIT unit;
 				Map->GetUnitData(m_id, &unit);
-				unit.x = strX;
-				unit.y = strY;
+				unit.basic.x = strX;
+				unit.basic.y = strY;
 
 				if (!(nFlags == MK_SHIFT)) {
 					Map->DeleteUnit(m_id);
@@ -3328,11 +3357,13 @@ void CIsoView::OnLButtonUp(UINT nFlags, CPoint point)
 				//UpdateMap();
 				RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 			}
+			Map->TakeSnapshot();
+			Map->Undo();
 		}
 	}
 
 	CFinalSunDlg& dlg = *(CFinalSunDlg*)theApp.m_pMainWnd;
-	dlg.m_view.m_minimap.RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	dlg.m_view.m_minimap->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
 	m_moved = FALSE;
 
@@ -3390,7 +3421,7 @@ void CIsoView::OnSize(UINT nType, int cx, int cy)
 	updateFontScaled();
 
 	CMyViewFrame& dlg = *(CMyViewFrame*)owner;
-	dlg.m_minimap.RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	dlg.m_minimap->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
 	UpdateScrollRanges();
 
@@ -3578,7 +3609,7 @@ void CIsoView::ReInitializeDDraw()
 	theApp.m_loading->InitPics();
 	theApp.m_loading->InitTMPs(&dlg.m_Progress);
 
-	memset(ovrlpics, 0, max_ovrl_img * 0xFF * sizeof(LPDIRECTDRAWSURFACE4));
+	memset(ovrlpics, 0, max_ovrl_img * 0xFF * sizeof(LPDIRECTDRAWSURFACE7));
 	//UpdateOverlayPictures(-1);
 	//Map->UpdateIniFile(MAPDATA_UPDATE_FROM_INI);
 	Map->UpdateBuildingInfo();
@@ -4068,10 +4099,13 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	CString statusbar;//=TranslateStringACP("Ready");
 
 	FIELDDATA m = *Map->GetFielddataAt(x + y * Map->GetIsoSize());
-	if (m.wGround == 0xFFFF) m.wGround = 0;
+	if (m.wGround == 0xFFFF) {
+		m.wGround = 0;
+	}
 
 	if (m.wGround < (*tiledata_count) && m.bSubTile < (*tiledata)[m.wGround].wTileCount) {
-		statusbar = "Terrain type: 0x";
+		statusbar = GetLanguageStringACP("TerrainStatus");
+		statusbar += " 0x";
 		char c[50];
 		itoa((*tiledata)[m.wGround].tiles[m.bSubTile].bTerrainType, c, 16);
 		statusbar += c;
@@ -4104,56 +4138,75 @@ void CIsoView::UpdateStatusBar(int x, int y)
 		statusbar += ov;
 	}
 
-	STDOBJECTDATA sod;
-	sod.type = "";
+	auto type = TechnoType::None;
+	TECHNODATA techno;
 
-	int n = Map->GetStructureAt(x + y * Map->GetIsoSize());
-	int on = -1;
-	if (n >= 0) {
-
-		Map->GetStdStructureData(n, &sod);
+	int objId = -1;
+	if (int n = Map->GetTopStructureAt(x + y * Map->GetIsoSize()); n >= 0) {
+		type = TechnoType::Building;
 		statusbar = GetLanguageStringACP("StructStatus");
-		on = n;
+		objId = n;
 	}
 
-	n = Map->GetUnitAt(x + y * Map->GetIsoSize());
-	if (n >= 0) {
-
-		Map->GetStdUnitData(n, &sod);
+	if (int n = Map->GetUnitAt(x + y * Map->GetIsoSize()); n >= 0) {
+		type = TechnoType::Unit;
 		statusbar = GetLanguageStringACP("UnitStatus");
-		on = n;
+		objId = n;
 
 	}
 
-	n = Map->GetAirAt(x + y * Map->GetIsoSize());
-	if (n >= 0) {
-
-		Map->GetStdAircraftData(n, &sod);
+	if (int n = Map->GetAirAt(x + y * Map->GetIsoSize()); n >= 0) {
+		type = TechnoType::Aircraft;
 		statusbar = GetLanguageStringACP("AirStatus");
-		on = n;
+		objId = n;
 	}
 
-	n = Map->GetInfantryAt(x + y * Map->GetIsoSize());
-	if (n >= 0) {
-		Map->GetStdInfantryData(n, &sod);
+	if (int n = Map->GetInfantryAt(x + y * Map->GetIsoSize()); n >= 0) {
+		type = TechnoType::Infantry;
+		INFANTRY inf;
+		Map->GetInfantryData(n, &inf);
+		techno = inf;
 		statusbar = GetLanguageStringACP("InfStatus");
-		on = n;
+		objId = n;
 	}
 
-	if (sod.type.GetLength() > 0) {
+	do {
+		if (type == TechnoType::Infantry) {
+			break;
+		}
+		if (objId < 0) {
+			break;
+		}
+		if (type == TechnoType::Building) {
+			auto const data = Map->GetDataOfTechnoByID(objId, type);
+			Map->ParseTechnoData(data, type, techno);
+			break;
+		}
+		auto const [_, data] = Map->GetNthDataOfTechno(objId, type);
+		Map->ParseTechnoData(data, type, techno);
+	} while (0);
+
+	if (techno.basic.type.GetLength() > 0) {
 		char c[50];
-		itoa(on, c, 10);
+		itoa(objId, c, 10);
 		statusbar += "ID ";
 		statusbar += c;
 		statusbar += ", ";
 
-		statusbar += TranslateStringACP(Map->GetUnitName(sod.type));
+		statusbar += TranslateStringACP(Map->GetUnitName(techno.basic.type));
 		statusbar += " (";
 
-		statusbar += TranslateHouse(sod.house, TRUE);
+		statusbar += TranslateHouse(techno.basic.house, TRUE);
 		statusbar += ", ";
-		statusbar += sod.type;
+		statusbar += techno.basic.type;
 		statusbar += ")";
+
+		if (techno.tag != "None" && !techno.tag.IsEmpty()) {
+			statusbar += ", Tag: ";
+			statusbar += techno.tag;
+			statusbar += ' ';
+			statusbar += GetParam(Map->GetIniFile().GetString("Tags", techno.tag), 1);
+		}
 	}
 
 	/*
@@ -4181,9 +4234,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	itoa(td.bMapData2[0],c,10);
 	statusbar+=c;*/
 
-
-	n = Map->GetCelltagAt(x + y * Map->GetIsoSize());
-	if (n >= 0) {
+	if (int n = Map->GetCelltagAt(x + y * Map->GetIsoSize()); n >= 0) {
 		CString type;
 		CString name;
 		DWORD pos;
@@ -4205,18 +4256,20 @@ void CIsoView::UpdateStatusBar(int x, int y)
 		statusbar = GetLanguageStringACP("TilePlaceStatus");
 	}
 
-	if (AD.mode == ACTIONMODE_COPY)
+	if (AD.mode == ACTIONMODE_COPY) {
 		statusbar = GetLanguageStringACP("CopyHelp");
+	}
 
-	if (statusbar.GetLength() > 0)
+	if (statusbar.GetLength() > 0) {
 		SetError(statusbar);
+	}
 
 }
 
 void CIsoView::UpdateOverlayPictures(int id)
 {
 	if (id < 0) {
-		memset(ovrlpics, 0, max_ovrl_img * 0xFF * sizeof(LPDIRECTDRAWSURFACE4));
+		memset(ovrlpics, 0, max_ovrl_img * 0xFF * sizeof(LPDIRECTDRAWSURFACE7));
 
 		int i, e;
 		for (i = 0; i < 0xFF; i++) {
@@ -4845,11 +4898,13 @@ void CIsoView::handleMouseActionManageOverlays(int x, int y)
 	// RedrawWindow(NULL,NULL,RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
-void CIsoView::PlaceCurrentObjectAt(int x, int y)
+DWORD CIsoView::PlaceCurrentObjectAt(int x, int y)
 {
+	auto constexpr infinitePos = std::numeric_limits<DWORD>::max();
+	auto const expectingPos = x + y * Map->GetIsoSize();
 	if (AD.mode == ACTIONMODE_RANDOMTERRAIN) {
-		if (Map->GetTerrainAt(x + y * Map->GetIsoSize()) >= 0) {
-			return;
+		if (Map->GetTerrainAt(expectingPos) >= 0) {
+			return infinitePos;
 		}
 
 		CString s;
@@ -4857,65 +4912,69 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 		int n = rand() * rndterrainsrc.size() / RAND_MAX;
 
 		// safety checks...
-		if (n >= rndterrainsrc.size()) n = rndterrainsrc.size() - 1;
-		if (n < 0) n = 0;
+		if (n >= rndterrainsrc.size()) {
+			n = rndterrainsrc.size() - 1;
+		}
+		if (n < 0) {
+			n = 0;
+		}
 
 		s = rndterrainsrc[n];
 
-		Map->AddTerrain(s, x + y * Map->GetIsoSize());
+		Map->AddTerrain(s, expectingPos);
 
-		return;
+		return expectingPos;
 	}
 
 	switch (MouseActionType(AD.type)) {
 		case MouseActionType::AddInfantry: {
-			if (Map->GetInfantryCountAt(x + y * Map->GetIsoSize()) >= SUBPOS_COUNT) {
-				return;
+			if (Map->GetInfantryCountAt(expectingPos) >= SUBPOS_COUNT) {
+				return infinitePos;
 			}
 
-			Map->AddInfantry(NULL, AD.data_s, currentOwner, x + y * Map->GetIsoSize());
+			Map->AddInfantry(NULL, -1, AD.data_s, currentOwner, expectingPos);
 			//RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		} break;
 		case MouseActionType::AddStructure: {
-			int n = Map->GetStructureAt(x + y * Map->GetIsoSize());
+			int n = Map->GetTopStructureAt(expectingPos);
 			if (n >= 0) {
 				STDOBJECTDATA sod;
 				Map->GetStdStructureData(n, &sod);
 				if (strcmp(sod.type, "GAPAVE") != NULL) {
 					//isMoving=FALSE;
-					return;
+					return infinitePos;
 				}
 			}
 
 
-			Map->AddStructure(NULL, AD.data_s, currentOwner, x + y * Map->GetIsoSize());
+			Map->AddStructure(NULL, AD.data_s, currentOwner, expectingPos);
 			//RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		} break;
 		case MouseActionType::AddAircraft: {
 
-			if (Map->GetAirAt(x + y * Map->GetIsoSize()) >= 0) {
-				return;
+			if (Map->GetAirAt(expectingPos) >= 0) {
+				return infinitePos;
 			}
 
-			Map->AddAircraft(NULL, AD.data_s, currentOwner, x + y * Map->GetIsoSize());
+			Map->AddAircraft(NULL, AD.data_s, currentOwner, expectingPos);
 
 			//RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		} break;
 		case MouseActionType::AddVehicle: {
-			if (Map->GetUnitAt(x + y * Map->GetIsoSize()) >= 0) {
-				return;
+			if (Map->GetUnitAt(expectingPos) >= 0) {
+				return infinitePos;
 			}
 
-			Map->AddUnit(NULL, AD.data_s, currentOwner, x + y * Map->GetIsoSize());
+			Map->AddUnit(NULL, AD.data_s, currentOwner, expectingPos);
 
 			//RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		} break;
 		case MouseActionType::AddTerrain: {
-			if (Map->GetTerrainAt(x + y * Map->GetIsoSize()) >= 0) {
-				return;
+			if (Map->GetTerrainAt(expectingPos) >= 0) {
+				return infinitePos;
 			}
 
-			Map->AddTerrain(AD.data_s, x + y * Map->GetIsoSize());
+			Map->AddTerrain(AD.data_s, expectingPos);
 
 			//RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		} break;
@@ -4926,42 +4985,46 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 			// set owner!
 			BOOL bchanged = FALSE;
 
-			int t = Map->GetStructureAt(x + y * Map->GetIsoSize());
+			int t = Map->GetTopStructureAt(expectingPos);
 			if (t >= 0) {
 				STRUCTURE structure;
-				auto const id = Map->GetStructureData(t, &structure);
+				Map->GetStructureData(t, &structure);
 				Map->DeleteStructure(t);
-				structure.house = AD.data_s;
+				structure.basic.house = AD.data_s;
+
+				CString id;
+				id.Format("%d", t);
+
 				Map->AddStructure(&structure, nullptr, nullptr, 0, std::move(id));
 				bchanged = TRUE;
 			}
-			t = Map->GetUnitAt(x + y * Map->GetIsoSize());
+			t = Map->GetUnitAt(expectingPos);
 			if (t >= 0) {
 				UNIT unit;
 				auto const id = Map->GetUnitData(t, &unit);
 				Map->DeleteUnit(t);
-				unit.house = AD.data_s;
+				unit.basic.house = AD.data_s;
 				Map->AddUnit(&unit, nullptr, nullptr, 0, std::move(id));
 				bchanged = TRUE;
 			}
-			t = Map->GetAirAt(x + y * Map->GetIsoSize());
+			t = Map->GetAirAt(expectingPos);
 			if (t >= 0) {
 				AIRCRAFT aircraft;
 				auto const id = Map->GetAircraftData(t, &aircraft);
 				Map->DeleteAircraft(t);
-				aircraft.house = AD.data_s;
+				aircraft.basic.house = AD.data_s;
 				Map->AddAircraft(&aircraft, nullptr, nullptr, 0, std::move(id));
 				bchanged = TRUE;
 			}
 			int z;
 			for (z = 0; z < SUBPOS_COUNT; z++) {
-				t = Map->GetInfantryAt(x + y * Map->GetIsoSize(), z);
+				t = Map->GetInfantryAt(expectingPos, z);
 				if (t >= 0) {
 					INFANTRY infantry;
 					Map->GetInfantryData(t, &infantry);
 					Map->DeleteInfantry(t);
-					infantry.house = AD.data_s;
-					Map->AddInfantry(&infantry);
+					infantry.basic.house = AD.data_s;
+					Map->AddInfantry(&infantry, t);
 					bchanged = TRUE;
 				}
 			}
@@ -4969,11 +5032,12 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 			if (bchanged) {
 				//RedrawWindow(NULL,NULL,RDW_INVALIDATE | RDW_UPDATENOW);
 			}
+			return infinitePos;
 		} break;
 	#ifdef SMUDGE_SUPP		
 		case MouseActionType::AddSmudge: {
-			if (Map->GetFielddataAt(x + y * Map->GetIsoSize())->smudge >= 0) {
-				return;
+			if (Map->GetFielddataAt(expectingPos)->smudge >= 0) {
+				return infinitePos;
 			}
 
 			SMUDGE s;
@@ -4989,6 +5053,7 @@ void CIsoView::PlaceCurrentObjectAt(int x, int y)
 		default:
 			break;
 	}
+	return expectingPos;
 }
 
 void CIsoView::OnTimer(UINT_PTR nIDEvent)
@@ -5424,16 +5489,8 @@ void CIsoView::DrawMap()
 	mapwidth = Map->GetWidth();
 	mapheight = Map->GetHeight();
 
-	DDSURFACEDESC2 ddsd;
-	ZeroMemory(&ddsd, sizeof(ddsd));
-	ddsd.dwSize = sizeof(DDSURFACEDESC2);
-	ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-
-	lpdsBack->GetSurfaceDesc(&ddsd);
-
-
-#ifdef NOSURFACES				
-	lpdsBack->Lock(NULL, &ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT | DDLOCK_NOSYSLOCK, NULL);
+#ifdef NOSURFACES
+	auto ddsd = getDDDescBasic(false);
 #endif
 
 	// we render texts and waypoints last as they should be always visible anyway and because text rendering is currently done using GDI -> getting a DC for every text is too slow nowadays
@@ -5698,16 +5755,18 @@ void CIsoView::DrawMap()
 				}
 			}
 
-			if (m.structure != -1) {
+			if (!m.structures.empty()) {
 				last_succeeded_operation = 10101;
-
+				auto const& structureData = m.structures.back();
+				auto const structureIdx = structureData.structure;
+				const int id = structureData.structuretype;
 				// for structures we need to check if they weren´t drawn earlier
 				// (every field that this building achieves has this building as .structure)
-				auto const leftStructureIdx = Map->GetStructureAt(mapCoords - MapVec(-1, 0));
-				auto const rightStructureIdx = Map->GetStructureAt(mapCoords - MapVec(0, -1));
+				auto const leftStructureIdx = Map->GetTopStructureAt(mapCoords - MapVec(-1, 0));
+				auto const rightStructureIdx = Map->GetTopStructureAt(mapCoords - MapVec(0, -1));
 				bool shouldDraw = true;
 
-				if (leftStructureIdx == m.structure || rightStructureIdx == m.structure) {
+				if (leftStructureIdx == structureIdx || rightStructureIdx == structureIdx) {
 					shouldDraw = false;
 				}
 				if (mapCoords.x >= Map->GetWidth() || mapCoords.y >= Map->GetHeight()) {
@@ -5717,10 +5776,9 @@ void CIsoView::DrawMap()
 				if (shouldDraw) {
 
 					STRUCTUREPAINT objp;
-					Map->GetStructurePaint(m.structure, &objp);
+					Map->GetStructurePaint(structureIdx, objp);
 
 					const auto drawCoordsBld = GetRenderTargetCoordinates(MapCoords(objp.x, objp.y));
-					int id = m.structuretype;
 
 
 					int w = 1, h = 1;
@@ -5867,8 +5925,8 @@ void CIsoView::DrawMap()
 
 					//#ifndef NOSURFACES							
 #ifdef NOSURFACES 
-					if (m.structure >= 0) // only paint cell if we have a structure preplaced, as we have a half transparent image
-					{
+					// only paint cell if we have a structure preplaced, as we have a half transparent image
+					if (!m.structures.empty()) {
 #endif
 						// place it 2 pixels lower so that user can see the dotted lines even if the building itself has the cells drawn
 						DrawCell(ddsd.lpSurface, ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch, drawCoordsBld.x, drawCoordsBld.y + 3, w, h, colorref_conv[c], true);
@@ -5879,7 +5937,7 @@ void CIsoView::DrawMap()
 					//#endif
 
 					if (pic.pic == NULL) {
-						auto const& buildingId = rules.GetSection("BuildingTypes").Nth(m.node.type).second;
+						auto const& buildingId = CMapData::GetBuildingIDBy(m.node.type);
 						if (!buildingId.IsEmpty() && !missingimages[buildingId]) {
 							SetError("Loading graphics");
 							theApp.m_loading->LoadUnitGraphic(buildingId);
@@ -5916,10 +5974,10 @@ void CIsoView::DrawMap()
 				UNIT obj;
 				Map->GetUnitData(m.unit, &obj);
 
-				COLORREF c = GetColor(obj.house);
+				COLORREF c = GetColor(obj.basic.house);
 
 				auto const facing = atoi(obj.direction) / 32;
-				auto const imageId = theApp.m_loading->GetArtID(obj.type);
+				auto const imageId = theApp.m_loading->GetArtID(obj.basic.type);
 				CString lpPicFile = GetUnitPictureFilename(imageId, facing);
 
 #ifndef NOSURFACES
@@ -5931,9 +5989,9 @@ void CIsoView::DrawMap()
 				}
 
 				if (p.pic == NULL || lpPicFile.GetLength() == 0) {
-					if (!missingimages[obj.type]) {
+					if (!missingimages[obj.basic.type]) {
 						SetError("Loading graphics");
-						theApp.m_loading->LoadUnitGraphic(obj.type);
+						theApp.m_loading->LoadUnitGraphic(obj.basic.type);
 						lpPicFile = GetUnitPictureFilename(imageId, facing);
 						if (!lpPicFile.IsEmpty()) {
 							p = pics[lpPicFile];
@@ -5946,7 +6004,7 @@ void CIsoView::DrawMap()
 						// TextOut(drawx+f_x/4,drawy+f_y/4, obj.type,c);
 						m_texts_to_render.push_back({ obj.type, drawCoords.x + f_x / 4, drawCoords.y + f_y / 4, m_color_converter->GetColor(c) });
 #endif
-						missingimages[obj.type] = TRUE;
+						missingimages[obj.basic.type] = TRUE;
 					}
 				}
 
@@ -5969,10 +6027,10 @@ void CIsoView::DrawMap()
 				AIRCRAFT obj;
 				Map->GetAircraftData(m.aircraft, &obj);
 
-				COLORREF c = GetColor(obj.house);
+				COLORREF c = GetColor(obj.basic.house);
 
 				auto const facing = atoi(obj.direction) / 32;
-				CString lpPicFile = GetUnitPictureFilename(theApp.m_loading->GetArtID(obj.type), facing);
+				CString lpPicFile = GetUnitPictureFilename(theApp.m_loading->GetArtID(obj.basic.type), facing);
 
 #ifndef NOSURFACES
 				DrawCell(drawCoords.x, drawCoords.y, 1, 1, c);
@@ -5983,10 +6041,10 @@ void CIsoView::DrawMap()
 				}
 
 				if (p.pic == NULL) {
-					if (!missingimages[obj.type]) {
+					if (!missingimages[obj.basic.type]) {
 						SetError("Loading graphics");
-						theApp.m_loading->LoadUnitGraphic(obj.type);
-						lpPicFile = GetUnitPictureFilename(theApp.m_loading->GetArtID(obj.type), facing);
+						theApp.m_loading->LoadUnitGraphic(obj.basic.type);
+						lpPicFile = GetUnitPictureFilename(theApp.m_loading->GetArtID(obj.basic.type), facing);
 						if (!lpPicFile.IsEmpty()) {
 							p = pics[lpPicFile];
 						}
@@ -5998,7 +6056,7 @@ void CIsoView::DrawMap()
 						//TextOut(drawx+f_x/4,drawy+f_y/4, obj.type,c);
 						m_texts_to_render.push_back({ obj.type, drawCoords.x + f_x / 4, drawCoords.y + f_y / 4, m_color_converter->GetColor(c) });
 #endif
-						missingimages[obj.type] = TRUE;
+						missingimages[obj.basic.type] = TRUE;
 					}
 				}
 
@@ -6030,11 +6088,11 @@ void CIsoView::DrawMap()
 					//errstream.flush();
 
 
-					COLORREF c = GetColor(obj.house);
+					COLORREF c = GetColor(obj.basic.house);
 
 					int dir = (7 - atoi(obj.direction) / 32) % 8;
 
-					auto const imageId = theApp.m_loading->GetArtID(obj.type);
+					auto const imageId = theApp.m_loading->GetArtID(obj.basic.type);
 					CString lpPicFile = GetUnitPictureFilename(imageId, dir);
 #ifndef NOSURFACES
 					DrawCell(drawCoords.x, drawCoords.y, 1, 1, c);
@@ -6056,9 +6114,9 @@ void CIsoView::DrawMap()
 					}
 
 					if (p.pic == NULL) {
-						if (!missingimages[obj.type]) {
+						if (!missingimages[obj.basic.type]) {
 							SetError("Loading graphics");
-							theApp.m_loading->LoadUnitGraphic(obj.type);
+							theApp.m_loading->LoadUnitGraphic(obj.basic.type);
 							lpPicFile = GetUnitPictureFilename(imageId, dir);
 							if (!lpPicFile.IsEmpty()) {
 								p = pics[lpPicFile];
@@ -6071,7 +6129,7 @@ void CIsoView::DrawMap()
 							// TextOut(drawx+f_x/4,drawy+f_y/4, obj.type,c);
 							m_texts_to_render.push_back({ obj.type, drawCoordsInf.x + f_x / 4, drawCoordsInf.y + f_y / 4, RGB(0,0,0) });
 #endif
-							missingimages[obj.type] = TRUE;
+							missingimages[obj.basic.type] = TRUE;
 						}
 					}
 
@@ -6194,10 +6252,10 @@ void CIsoView::DrawMap()
 #ifdef NOSURFACES
 				lpdsBack->Unlock(NULL);
 #endif
-				Blit((LPDIRECTDRAWSURFACE4)pics["CELLTAG"].pic, drawCoords.x - 1, drawCoords.y - 1);
+				Blit((LPDIRECTDRAWSURFACE7)pics["CELLTAG"].pic, drawCoords.x - 1, drawCoords.y - 1);
 
 #ifdef NOSURFACES				
-				lpdsBack->Lock(NULL, &ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT | DDLOCK_NOSYSLOCK, NULL);
+				ddsd = getDDDescBasic(false);
 #endif
 			}
 
@@ -6237,7 +6295,7 @@ void CIsoView::DrawMap()
 				m_waypoints_to_render.push_back({ waypointImageCoords.x, waypointImageCoords.y });
 				m_texts_to_render.push_back({ ID.GetString(), waypointTextCoords.x, waypointTextCoords.y, RGB(0,0,255), false, useFont9, true });
 #ifdef NOSURFACES				
-				lpdsBack->Lock(NULL, &ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT | DDLOCK_NOSYSLOCK, NULL);
+				ddsd = getDDDescBasic(false);
 #endif
 			}
 
@@ -6255,7 +6313,7 @@ void CIsoView::DrawMap()
 
 	// delayed waypoint rendering
 	for (const auto& wp : m_waypoints_to_render) {
-		Blit((LPDIRECTDRAWSURFACE4)pics["FLAG"].pic, wp.drawx, wp.drawy);
+		Blit((LPDIRECTDRAWSURFACE7)pics["FLAG"].pic, wp.drawx, wp.drawy);
 	}
 
 	// map tool rendering
@@ -6287,7 +6345,7 @@ void CIsoView::DrawMap()
 
 	if (rscroll) {
 		const auto& sc = pics["SCROLLCURSOR"];
-		Blit((LPDIRECTDRAWSURFACE4)sc.pic, rclick_x * m_viewScale.x + r.left - sc.wWidth / 2, rclick_y * m_viewScale.y + r.top - sc.wHeight / 2);
+		Blit((LPDIRECTDRAWSURFACE7)sc.pic, rclick_x * m_viewScale.x + r.left - sc.wWidth / 2, rclick_y * m_viewScale.y + r.top - sc.wHeight / 2);
 	}
 
 	BlitBackbufferToHighRes(); // lpdsBackHighRes contains the same graphic, but scaled to the whole window
@@ -6300,9 +6358,9 @@ void CIsoView::DrawMap()
 
 }
 
-std::tuple<DDSURFACEDESC2, LPDIRECTDRAWSURFACE4, bool> CIsoView::getDDDesc(bool recreated)
+std::tuple<DDSURFACEDESC2, LPDIRECTDRAWSURFACE7, bool> CIsoView::getDDDesc(bool recreated)
 {
-	LPDIRECTDRAWSURFACE4 dds = lpdsBack;
+	LPDIRECTDRAWSURFACE7 dds = lpdsBack;
 	bool useHighRes = false;
 	if (m_viewScale != Vec2<CSProjected, float>(1.0f, 1.0f) && lpdsBackHighRes) {
 		dds = lpdsBackHighRes;
@@ -6327,6 +6385,25 @@ std::tuple<DDSURFACEDESC2, LPDIRECTDRAWSURFACE4, bool> CIsoView::getDDDesc(bool 
 	ASSERT(ddsd.lpSurface != nullptr);
 
 	return { ddsd, dds, useHighRes };
+}
+
+DDSURFACEDESC2 CIsoView::getDDDescBasic(bool recreated)
+{
+	DDSURFACEDESC2 ddsd;
+	ZeroMemory(&ddsd, sizeof(ddsd));
+	ddsd.dwSize = sizeof(DDSURFACEDESC2);
+	ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
+
+	lpdsBack->GetSurfaceDesc(&ddsd);
+
+	auto const lockRet = lpdsBack->Lock(NULL, &ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT | DDLOCK_NOSYSLOCK, NULL);
+	if (lockRet == DDERR_SURFACELOST && !recreated) {
+		ReInitializeDDraw();
+		return getDDDescBasic(true);
+	}
+	ASSERT(lockRet == S_OK);
+	ASSERT(ddsd.lpSurface != nullptr);
+	return ddsd;
 }
 
 void CIsoView::RenderUIOverlay()
@@ -6499,7 +6576,7 @@ BOOL CIsoView::OnMouseWheel(UINT nFlags, short zDelta, CPoint ptScreen)
 
 	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 	CMyViewFrame& dlg = *(CMyViewFrame*)owner;
-	dlg.m_minimap.RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	dlg.m_minimap->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
 	return CView::OnMouseWheel(nFlags, zDelta, pt);
 }

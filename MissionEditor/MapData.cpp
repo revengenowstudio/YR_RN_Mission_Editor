@@ -32,6 +32,8 @@
 #include "progressdlg.h"
 #include "Structs.h"
 #include "Tube.h"
+#include "IniMega.h"
+#include "Helpers.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -48,10 +50,6 @@ void DoEvents()
 		DispatchMessage(&msg);
 	}*/
 }
-
-
-void GetNodeName(CString& name, int n);
-
 
 CString GetFree(const char* sectionName)
 {
@@ -79,6 +77,7 @@ This function calculates a number for the specified building type.
 Because this function is slow, you should only use it to fill the
 buildingid map
 */
+static size_t constexpr mapDefinedStartOffset = 0x0C00;
 
 int getItemNumber(const CString& section, const CString& name) {
 	auto const& ini = Map->GetIniFile();
@@ -91,9 +90,31 @@ int getItemNumber(const CString& section, const CString& name) {
 	idx = ini.GetSection(section).FindValue(name);
 	if (idx > -1) {
 		// why ?
-		return idx + 0x0C00;
+		return idx + mapDefinedStartOffset;
 	}
 	return -1;
+}
+
+CString getItemId(const CString& section, size_t offset) {
+	auto const& rulesSec = rules.GetSection(section);
+	if (offset < rulesSec.Size()) {
+		return rulesSec.Nth(offset).second;
+	}
+
+	do {
+		if (offset < mapDefinedStartOffset) {
+			break;
+		}
+		offset -= mapDefinedStartOffset;
+		auto const& mapSec = Map->GetIniFile().GetSection(section);
+		if (offset >= mapSec.Size()) {
+			break;
+		}
+		return mapSec.Nth(offset).second;
+
+	} while (0);
+
+	throw std::runtime_error("invalid offset");
 }
 
 inline int GetBuildingNumber(const CString& name)
@@ -112,6 +133,11 @@ inline int GetSmudgeNumber(const CString& name)
 	return getItemNumber("SmudgeTypes", name);
 }
 #endif
+
+CString CMapData::GetBuildingIDBy(size_t offset)
+{
+	return getItemId("BuildingTypes", offset);
+}
 
 SNAPSHOTDATA::SNAPSHOTDATA()
 {
@@ -133,12 +159,10 @@ FIELDDATA::FIELDDATA()
 	smudgetype = -1;
 #endif
 	unit = -1;
-	int i;
-	for (i = 0; i < SUBPOS_COUNT; i++)
+	for (int i = 0; i < SUBPOS_COUNT; i++) {
 		infantry[i] = -1;
+	}
 	aircraft = -1;
-	structure = -1;
-	structuretype = -1;
 	terrain = -1;
 	waypoint = -1;
 	overlay = 0xFF;
@@ -154,6 +178,8 @@ FIELDDATA::FIELDDATA()
 	bRedrawTerrain = 0;
 	terraintype = -1;
 	bHide = FALSE;
+    bShoreProcessed = false;
+    bShoreLATNeeded = false;
 	//sTube = 0xFFFF;
 	//cTubePart = -1;
 
@@ -181,8 +207,6 @@ CMapData::CMapData()
 	m_noAutoObjectUpdate = FALSE;
 	m_money = 0;
 	m_cursnapshot = -1;
-	fielddata = NULL;
-	fielddata_size = 0;
 	m_IsoSize = 0;
 	isInitialized = FALSE;
 	tiledata = NULL;
@@ -212,9 +236,6 @@ CMapData::~CMapData()
 	tiledata = NULL;
 	if (m_mfd != NULL) delete[] m_mfd;
 	m_mfd = NULL;
-	if (fielddata != NULL) delete[] fielddata;
-	fielddata = NULL;
-	fielddata_size = 0;
 
 	int i;
 
@@ -465,6 +486,7 @@ void CMapData::UpdateIniFile(DWORD dwFlags)
 		cliffset_start = GetTileID(cliffset, 0);
 		waterset = tiles->GetInteger("General", "WaterSet");
 		shoreset = tiles->GetInteger("General", "ShorePieces");
+		greenset = tiles->GetInteger("General", "GreenTile");
 		rampset_start = GetTileID(rampset, 0);
 		ramp2set = g_data.GetInteger("NewUrbanInfo", "Ramps2");
 		ramp2set_start = GetTileID(ramp2set, 0);
@@ -541,9 +563,7 @@ void CMapData::LoadMap(const std::string& file)
 	errstream << "LoadMap() frees memory\n";
 	errstream.flush();
 
-	if (fielddata != NULL) {
-		delete[] fielddata;
-	}
+	fielddata.clear();
 
 	for (auto i = 0; i < dwSnapShotCount; i++) {
 		delete[] m_snapshots[i].bHeight;
@@ -556,12 +576,10 @@ void CMapData::LoadMap(const std::string& file)
 		delete[] m_snapshots[i].overlaydata;
 		// m_snapshots[i].mapfile.Clear();
 	}
-	if (m_snapshots != NULL) delete[] m_snapshots;
+	if (m_snapshots != NULL) {
+		delete[] m_snapshots;
+	}
 
-
-
-	fielddata = NULL;
-	fielddata_size = 0;
 	m_snapshots = NULL;
 	dwSnapShotCount = 0;
 	m_cursnapshot = -1;
@@ -881,8 +899,7 @@ void CMapData::LoadMap(const std::string& file)
 	errstream << "LoadMap() allocates fielddata\n";
 	errstream.flush();
 
-	fielddata = new(FIELDDATA[(GetIsoSize() + 1) * (GetIsoSize() + 1)]);
-	fielddata_size = (GetIsoSize() + 1) * (GetIsoSize() + 1);
+	fielddata.resize((GetIsoSize() + 1)* (GetIsoSize() + 1));
 
 	errstream << "LoadMap() unpacks data\n";
 	errstream.flush();
@@ -1028,9 +1045,55 @@ void CMapData::Unpack()
 
 }
 
+uint64_t toUInt64(const MAPFIELDDATA& data) {
+	auto const tileIdx = std::max<short>(static_cast<short>(data.wGround), 0);
+	return (static_cast<uint64_t>(data.wX) << 24) |
+		(static_cast<uint64_t>(data.bHeight) << 16) |
+		(static_cast<uint64_t>(tileIdx));
+}
 
+std::vector<BYTE> CMapData::compressAndSortMapData(const BYTE* rawData, const size_t rawLen)
+{
+	if ((rawLen % MAPFIELDDATA_SIZE) != 0) {
+		throw std::invalid_argument("input data packing err");
+	}
 
+	std::vector<BYTE> ret; 
+	ret.reserve(rawLen);
 
+	auto const elementSize = rawLen / MAPFIELDDATA_SIZE;
+	for (auto idx = 0; idx < elementSize; ++idx) {
+		auto const& fieldData = reinterpret_cast<const MAPFIELDDATA*>(rawData)[idx];
+#if 0 // useless
+		if (lutMap.find(MAKELONG(fieldData.wX, fieldData.wY)) == lutMap.end()) {
+			continue;
+		}
+		auto const fieldDataExt = this->GetFielddataAt(fieldData.wX, fieldData.wY);
+		if (fieldDataExt->wGround < 1 && fieldDataExt->bHeight < 1 && fieldDataExt->bSubTile < 1 && fieldDataExt->bMapData2 < 1) {
+			continue;
+		}
+#endif
+		//auto const tileKey = MAKELONG(fieldData.wGround, fieldData.wTileNum);
+		auto const tileKey = static_cast<short>(fieldData.wGround);
+		if (tileKey < 1 && fieldData.bHeight < 1 && fieldData.bSubTile < 1 && fieldData.bIceGrowth < 1) {
+			continue;
+		}
+		ret.insert(ret.end(),
+			reinterpret_cast<const BYTE*>(&fieldData),
+			reinterpret_cast<const BYTE*>(&fieldData) + MAPFIELDDATA_SIZE);
+	}
+
+	assert(ret.size() % MAPFIELDDATA_SIZE == 0);
+	auto const newElementSize = ret.size() / MAPFIELDDATA_SIZE;
+	std::stable_sort(reinterpret_cast<MAPFIELDDATA*>(ret.data()),
+		reinterpret_cast<MAPFIELDDATA*>(ret.data() + ret.size()),
+		[](const MAPFIELDDATA& lhs, const MAPFIELDDATA& rhs) {
+			return toUInt64(lhs) < toUInt64(rhs);
+		}
+	);
+
+	return ret;
+}
 
 
 void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
@@ -1196,9 +1259,12 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 	errstream << "Pack isomappack" << endl;
 	errstream.flush();
 
-
-	hexpackedLen = FSunPackLib::EncodeIsoMapPack5(m_mfd, dwIsoMapSize * MAPFIELDDATA_SIZE, &hexpacked);
-
+	auto const mapDataSize = dwIsoMapSize * MAPFIELDDATA_SIZE;
+	{
+		auto const mapRectStr = INIHelper::Split(m_mapfile.GetString("Map", "Size"));
+		auto compressedData = compressAndSortMapData(m_mfd, mapDataSize);
+		hexpackedLen = FSunPackLib::EncodeIsoMapPack5(compressedData.data(), compressedData.size(), &hexpacked);
+	}
 
 	errstream << "done" << endl;
 	errstream.flush();
@@ -1247,7 +1313,7 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 		BITMAPINFO biinfo;
 		BYTE* lpDibData;
 		int pitch;
-		((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_minimap.DrawMinimap(&lpDibData, biinfo, pitch);
+		((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_minimap->DrawMinimap(&lpDibData, biinfo, pitch);
 
 		m_mapfile.DeleteSection("PreviewPack");
 		m_mapfile.SetString("Preview", "Size", m_mapfile.GetString("Map", "Size"));
@@ -1371,7 +1437,9 @@ void CMapData::SetOverlayAt(DWORD dwPos, BYTE bValue)
 
 BYTE CMapData::GetOverlayAt(DWORD dwPos)
 {
-	if (dwPos > fielddata_size) return 0;
+	if (dwPos > fielddata.size()) {
+		return 0;
+	}
 	return fielddata[dwPos].overlay;
 }
 
@@ -1470,30 +1538,20 @@ void CMapData::UpdateInfantry(BOOL bSave)
 			int pos = x + y * GetIsoSize();
 
 			INFANTRY id;
+			ParseInfantryData(data, id);
+
 			id.deleted = 0;
-			id.house = GetParam(data, 0);
-			id.type = GetParam(data, 1);
-			id.strength = GetParam(data, 2);
-			id.y = GetParam(data, 3);
-			id.x = GetParam(data, 4);
-			id.pos = GetParam(data, 5);
-			id.action = GetParam(data, 6);
-			id.direction = GetParam(data, 7);
-			id.tag = GetParam(data, 8);
-			id.flag1 = GetParam(data, 9);
-			id.group = GetParam(data, 10);
-			id.flag3 = GetParam(data, 11);
-			id.flag4 = GetParam(data, 12);
-			id.flag5 = GetParam(data, 13);
 
 			iv.push_back(id);
 
 			int spp = sp - 1;
 			if (spp < 0) spp = 0;
 
-			if (spp < SUBPOS_COUNT)
-				if (pos < fielddata_size)
+			if (spp < SUBPOS_COUNT) {
+				if (pos < fielddata.size()) {
 					fielddata[pos].infantry[spp] = iv.size() - 1;
+				}
+			}
 
 			Mini_UpdatePos(x, y, IsMultiplayer());
 
@@ -1522,13 +1580,12 @@ void CMapData::UpdateInfantry(BOOL bSave)
 
 	int count = 0;
 	for (i = 0; i < iv.size(); i++) {
-		INFANTRY& id = iv[i];
-		if (!id.deleted) {
-			INFANTRY& infantry = id;
+		const INFANTRY& infantry = iv[i];
+		if (!infantry.deleted) {
 
 			CString value;
-			value = infantry.house + "," + infantry.type + "," + infantry.strength + "," + infantry.y +
-				"," + infantry.x + "," + infantry.pos + "," + infantry.action + "," + infantry.direction + "," +
+			value = infantry.basic.house + "," + infantry.basic.type + "," + infantry.basic.strength + "," + infantry.basic.y +
+				"," + infantry.basic.x + "," + infantry.pos + "," + infantry.action + "," + infantry.direction + "," +
 				infantry.tag + "," + infantry.flag1 + "," + infantry.group + "," + infantry.flag3 + "," +
 				infantry.flag4 + "," + infantry.flag5;
 
@@ -1556,10 +1613,39 @@ void CMapData::UpdateAircraft(BOOL bSave)
 		int x = atoi(GetParam(sec.Nth(i).second, 4));
 		int y = atoi(GetParam(sec.Nth(i).second, 3));
 		int pos = x + y * GetIsoSize();
-		if (pos < fielddata_size) {
+		if (pos < fielddata.size()) {
 			fielddata[pos].aircraft = i;
 		}
 		Mini_UpdatePos(x, y, IsMultiplayer());
+	}
+}
+
+void removeFromStructureSet(StructureSet& structures, const size_t id)
+{
+	auto const it = std::remove_if(structures.begin(), structures.end(),
+		[id](const StructureData& item) {
+			return id == item.structure;
+		});
+	structures.erase(it, structures.end());
+}
+
+void CMapData::updateFieldDataAroundStructure(const CString& typeId, const size_t id, const int x, const int y, bool reset)
+{
+	const int typeIdx = buildingid.at(typeId);
+	for (int h = 0; h < buildinginfo[typeIdx].h; h++) {
+		for (int e = 0; e < buildinginfo[typeIdx].w; e++) {
+			const int pos = (x + h) + (y + e) * GetIsoSize();
+
+			if (pos < fielddata.size()) {
+				auto& data = fielddata[pos];
+				if (reset) {
+					removeFromStructureSet(data.structures, id);
+				} else {
+					data.structures.emplace_back(id, typeIdx);
+				}
+			}
+			Mini_UpdatePos(x + h, y + e, IsMultiplayer());
+		}
 	}
 }
 
@@ -1569,17 +1655,14 @@ void CMapData::UpdateStructures(BOOL bSave)
 		return;
 	}
 	for (auto i = 0; i < GetIsoSize() * GetIsoSize(); i++) {
-		fielddata[i].structure = -1;
-		fielddata[i].structuretype = -1;
+		fielddata[i].structures.clear();
 	}
 
 	m_structurepaint.clear();
 
-	auto const& sec = m_mapfile["Structures"];
-
-	for (auto i = 0; i < sec.Size(); i++) {
+	for (auto const& [index, val] : m_mapfile.GetSection("Structures")) {
 		STRUCTUREPAINT sp;
-		auto const& val = sec.Nth(i).second;
+		const size_t indexNum = atoi(index);
 		sp.col = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->GetColor(GetParam(val, 0));
 		sp.strength = atoi(GetParam(val, 2));
 		sp.upgrade1 = GetParam(val, 12);
@@ -1595,18 +1678,22 @@ void CMapData::UpdateStructures(BOOL bSave)
 		TruncSpace(sp.upgrade2);
 		TruncSpace(sp.upgrade3);
 
-		m_structurepaint.push_back(sp);
+		m_structurepaint.insert_or_assign(indexNum, sp);
 
 		int x = atoi(GetParam(val, 4));
 		int y = atoi(GetParam(val, 3));
 		int d, e;
-		int bid = buildingid[GetParam(val, 1)];
+
+		auto const bidIt = buildingid.find(sp.type);
+		if (bidIt == buildingid.end()) {
+			continue;
+		}
+		const int bid = bidIt->second;
 		for (d = 0; d < buildinginfo[bid].h; d++) {
 			for (e = 0; e < buildinginfo[bid].w; e++) {
 				int pos = (x + d) + (y + e) * GetIsoSize();
-				if (pos < fielddata_size) {
-					fielddata[pos].structure = i;
-					fielddata[pos].structuretype = bid;
+				if (pos < fielddata.size()) {
+					fielddata[pos].structures.emplace_back(indexNum, bid);
 				}
 
 				Mini_UpdatePos(x + d, y + e, IsMultiplayer());
@@ -1711,7 +1798,7 @@ void CMapData::UpdateUnits(BOOL bSave)
 			int x = atoi(GetParam(sec.Nth(i).second, 4));
 			int y = atoi(GetParam(sec.Nth(i).second, 3));
 			int pos = x + y * GetIsoSize();
-			if (pos < fielddata_size) {
+			if (pos < fielddata.size()) {
 				fielddata[pos].unit = i;
 			}
 			Mini_UpdatePos(x, y, IsMultiplayer());
@@ -1738,7 +1825,7 @@ void CMapData::UpdateWaypoints(BOOL bSave)
 		PosToXY(coord, &x, &y);
 
 		int pos = x + y * GetIsoSize();
-		if (pos < 0 || pos >= fielddata_size) {
+		if (pos < 0 || pos >= fielddata.size()) {
 			continue;
 		}
 		fielddata[pos].waypoint = atoi(id);
@@ -1767,20 +1854,19 @@ void CMapData::UpdateNodes(BOOL bSave)
 		int nodeCount = sec.GetInteger("NodeCount");
 		for (auto idx = 0; idx < nodeCount; idx++) {
 			CString nodeName;
-			GetNodeName(nodeName, idx);
+			GetNodeID(nodeName, idx);
 			auto const& nodeVal = sec.GetString(nodeName);
-			CString type, sx, sy;
-			type = GetParam(nodeVal, 0);
-			sy = GetParam(nodeVal, 1);
-			sx = GetParam(nodeVal, 2);
+			const auto type = GetParam(nodeVal, 0);
+			const auto sy = GetParam(nodeVal, 1);
+			const auto sx = GetParam(nodeVal, 2);
 
-			int x = atoi(sx);
-			int y = atoi(sy);
-			int bid = buildingid[type];
+			const int x = atoi(sx);
+			const int y = atoi(sy);
+			const int bid = buildingid.at(type);
 			for (auto d = 0; d < buildinginfo[bid].h; d++) {
 				for (auto f = 0; f < buildinginfo[bid].w; f++) {
 					int pos = x + d + (y + f) * GetIsoSize();
-					fielddata[pos].node.type = buildingid[type];
+					fielddata[pos].node.type = bid;
 					fielddata[pos].node.house = id;
 					fielddata[pos].node.index = idx;
 				}
@@ -1835,7 +1921,7 @@ void CMapData::UpdateCelltags(BOOL bSave)
 		PosToXY(sec.Nth(i).first, &x, &y);
 
 		int pos = x + y * GetIsoSize();
-		if (pos < fielddata_size) {
+		if (pos < fielddata.size()) {
 			fielddata[pos].celltag = i;
 		}
 	}
@@ -1870,15 +1956,15 @@ void CMapData::DeleteInfantry(DWORD dwIndex)
 
 	m_infantry[dwIndex].deleted = 1;
 
-	int x = atoi(m_infantry[dwIndex].x);
-	int y = atoi(m_infantry[dwIndex].y);
+	int x = atoi(m_infantry[dwIndex].basic.x);
+	int y = atoi(m_infantry[dwIndex].basic.y);
 	int pos = atoi(m_infantry[dwIndex].pos);
 
 	if (pos > 0) {
 		pos--;
 	}
 
-	if (x + y * m_IsoSize < fielddata_size) {
+	if (x + y * m_IsoSize < fielddata.size()) {
 		fielddata[x + y * m_IsoSize].infantry[pos] = -1;
 	}
 
@@ -1938,6 +2024,15 @@ void CMapData::DeleteCelltag(DWORD dwIndex)
 	}
 }
 
+bool CMapData::DeleteAllStructureAt(const size_t dwPos)
+{
+	auto const structures = GetStructureAt(dwPos);
+	for (auto const& item : structures) {
+		DeleteStructure(item.structure);
+	}
+	return true;
+}
+
 void CMapData::DeleteUnit(DWORD dwIndex)
 {
 	if (dwIndex >= GetUnitCount()) {
@@ -1958,7 +2053,7 @@ void CMapData::DeleteUnit(DWORD dwIndex)
 	Mini_UpdatePos(x, y, IsMultiplayer());
 }
 
-void CMapData::DeleteStructure(DWORD dwIndex)
+void CMapData::DeleteNthStructure(const size_t dwIndex)
 {
 	if (dwIndex >= GetStructureCount()) {
 		return;
@@ -1966,26 +2061,31 @@ void CMapData::DeleteStructure(DWORD dwIndex)
 
 	auto const& pSec = m_mapfile.TryGetSection("Structures");
 	ASSERT(pSec != nullptr);
-	auto const& val = pSec->Nth(dwIndex).second;
-	int x = atoi(GetParam(val, 4));
-	int y = atoi(GetParam(val, 3));
+	auto const& [idStr, val] = pSec->Nth(dwIndex);
+	const int id = atoi(idStr);
+	const int x = atoi(GetParam(val, 4));
+	const int y = atoi(GetParam(val, 3));
 	CString type = GetParam(val, 1);
 
 	pSec->RemoveAt(dwIndex);
 
 	if (!m_noAutoObjectUpdate) {
-		UpdateStructures(FALSE);
+		auto const refCout = m_structurepaint.erase(id);
+		ASSERT(refCout == 1);
+		updateFieldDataAroundStructure(type, id, x, y, true);
 	}
+}
 
-	int d, e;
-	int bid = buildingid[type];
-	for (d = 0; d < buildinginfo[bid].h; d++) {
-		for (e = 0; e < buildinginfo[bid].w; e++) {
-			int pos = (x + d) + (y + e) * GetIsoSize();
-
-			Mini_UpdatePos(x + d, y + e, IsMultiplayer());
-		}
+bool CMapData::DeleteStructure(const size_t id)
+{
+	CString idStr;
+	idStr.Format("%d", id);
+	auto const idx = m_mapfile.GetSection("Structures").FindIndex(idStr);
+	if (idx >= 0) {
+		DeleteNthStructure(idx);
+		return true;
 	}
+	return false;
 }
 
 void CMapData::DeleteAircraft(DWORD dwIndex)
@@ -2026,33 +2126,16 @@ void CMapData::DeleteTerrain(DWORD dwIndex)
 	m_terrain[dwIndex].deleted = 1;
 
 	int pos = x + y * GetIsoSize();
-	if (x + y * m_IsoSize < fielddata_size) {
+	if (x + y * m_IsoSize < fielddata.size()) {
 		fielddata[pos].terrain = -1;
 		fielddata[pos].terraintype = -1;
 	}
 
 }
 
-void CMapData::DeleteNode(LPCTSTR lpHouse, DWORD dwIndex)
+void CMapData::DeleteNode(const CString& house, const int dwIndex)
 {
-	CString nodeName; // p is last node
-	auto const nodeCount = m_mapfile.GetInteger(lpHouse, "NodeCount");
-	GetNodeName(nodeName, nodeCount - 1);
-
-	for (auto i = dwIndex; i < nodeCount - 1; i++) {
-		CString prevNodeName, nextNodeName;
-		GetNodeName(prevNodeName, i);
-		GetNodeName(nextNodeName, i + 1);
-		m_mapfile.SetString(lpHouse, prevNodeName, m_mapfile.GetString(lpHouse, nextNodeName));
-	}
-
-	auto const& pSec = m_mapfile.TryGetSection(lpHouse);
-	pSec->RemoveAt(dwIndex);
-
-	char nodeCountStr[50];
-	itoa(nodeCount - 1, nodeCountStr, 10);
-	m_mapfile.SetString(lpHouse, "NodeCount", nodeCountStr);
-
+	DeleteBuildingNodeFrom(house, dwIndex, m_mapfile);
 	UpdateNodes(FALSE);
 }
 
@@ -2097,52 +2180,38 @@ BOOL CMapData::AddWaypoint(CString id, DWORD dwPos)
 
 
 
-CString CMapData::GetStructureData(DWORD dwIndex, STRUCTURE* lpStructure) const
+CString CMapData::GetNthStructureData(DWORD dwIndex, STRUCTURE* lpStructure) const
 {
-	auto const& section = m_mapfile.GetSection("Structures");
-	if (dwIndex >= section.Size()) {
+	auto const [id, data] = GetNthDataOfTechno(dwIndex, TechnoType::Building);
+	if (!ParseStructureData(data, *lpStructure)) {
 		return {};
 	}
-
-	auto const& [id, data] = section.Nth(dwIndex);
-
-	lpStructure->house = GetParam(data, 0);
-	lpStructure->type = GetParam(data, 1);
-	lpStructure->strength = GetParam(data, 2);
-	lpStructure->y = GetParam(data, 3);
-	lpStructure->x = GetParam(data, 4);
-	lpStructure->direction = GetParam(data, 5);
-	lpStructure->tag = GetParam(data, 6);
-	lpStructure->flag1 = GetParam(data, 7);
-	lpStructure->flag2 = GetParam(data, 8);
-	lpStructure->energy = GetParam(data, 9);
-	lpStructure->upgradecount = GetParam(data, 10);
-	lpStructure->spotlight = GetParam(data, 11);
-	lpStructure->upgrade1 = GetParam(data, 12);
-	lpStructure->upgrade2 = GetParam(data, 13);
-	lpStructure->upgrade3 = GetParam(data, 14);
-	lpStructure->flag3 = GetParam(data, 15);
-	lpStructure->flag4 = GetParam(data, 16);
-
 	return id;
 }
 
-void CMapData::GetStdStructureData(DWORD dwIndex, STDOBJECTDATA* lpStdStructure) const
+void CMapData::GetStructureData(size_t id, STRUCTURE* lpStructure) const
 {
-	auto const& section = m_mapfile.GetSection("Structures");
-	if (dwIndex >= section.Size()) {
-		return;
+	auto const& data = GetDataOfTechnoByID(id, TechnoType::Building);
+	if (!data.IsEmpty()) {
+		ParseStructureData(data, *lpStructure);
 	}
-	auto const& data = section.Nth(dwIndex).second;
-
-	lpStdStructure->house = GetParam(data, 0);
-	lpStdStructure->type = GetParam(data, 1);
-	lpStdStructure->strength = GetParam(data, 2);
-	lpStdStructure->y = GetParam(data, 3);
-	lpStdStructure->x = GetParam(data, 4);
 }
 
-BOOL CMapData::AddNode(NODE* lpNode, WORD dwPos)
+void CMapData::GetStdStructureData(const size_t id, STDOBJECTDATA* lpStdStructure) const
+{
+	auto const& data = GetDataOfTechnoByID(id, TechnoType::Building);
+	if (!data.IsEmpty()) {
+		ParseBasicTechnoData(data, *lpStdStructure);
+	}
+}
+
+void CMapData::GetNthStdStructureData(DWORD dwIndex, STDOBJECTDATA* lpStdStructure) const
+{
+	auto const [_, data] = GetNthDataOfTechno(dwIndex, TechnoType::Building);
+	ParseBasicTechnoData(data, *lpStdStructure);
+}
+
+BOOL CMapData::AddNode(const NODE* lpNode, WORD dwPos, bool reloadAll)
 {
 	NODE node;
 	if (lpNode != NULL) {
@@ -2167,25 +2236,30 @@ BOOL CMapData::AddNode(NODE* lpNode, WORD dwPos)
 
 	nodeCount--;
 	CString p;
-	GetNodeName(p, nodeCount);
+	GetNodeID(p, nodeCount);
 
 	auto&& nodeRecord = node.type
 		+ "," + node.y + "," + node.x;
 
 	m_mapfile.SetString(node.house, p, std::move(nodeRecord));
 
-	UpdateNodes(FALSE);
+	if (reloadAll) {
+		UpdateNodes(FALSE);
+	}
 
 	return TRUE;
 }
 
-BOOL CMapData::AddInfantry(INFANTRY* lpInfantry, LPCTSTR lpType, LPCTSTR lpHouse, DWORD dwPos, int suggestedIndex)
+BOOL CMapData::AddInfantry(INFANTRY* lpInfantry, int suggestedIndex, LPCTSTR lpType, LPCTSTR lpHouse, DWORD dwPos)
 {
+	if (dwPos >= fielddata.size()) {
+		return FALSE;
+	}
 
 	INFANTRY infantry;
 	if (lpInfantry != NULL) {
 		infantry = *lpInfantry;
-		dwPos = atoi(infantry.x) + atoi(infantry.y) * Map->GetIsoSize();
+		dwPos = atoi(infantry.basic.x) + atoi(infantry.basic.y) * Map->GetIsoSize();
 
 		// MW Bugfix: not checking if infantry.pos does already exist caused crashes with user scripts!
 		if (GetInfantryAt(dwPos, atoi(infantry.pos)) >= 0) {
@@ -2206,47 +2280,50 @@ BOOL CMapData::AddInfantry(INFANTRY* lpInfantry, LPCTSTR lpType, LPCTSTR lpHouse
 		infantry.flag3 = "0";
 		infantry.flag4 = "1";
 		infantry.flag5 = "0";
-		infantry.strength = "256";
-		infantry.house = lpHouse;
 		infantry.pos = "-1";
-		infantry.type = lpType;
-		infantry.x = cx;
-		infantry.y = cy;
+		infantry.basic.strength = "256";
+		infantry.basic.house = lpHouse;
+		infantry.basic.type = lpType;
+		infantry.basic.x = cx;
+		infantry.basic.y = cy;
 
 
 	}
 
 	if (infantry.pos == "-1") {
 		int subpos = -1;
-		int i;
 
 		if (GetInfantryCountAt(dwPos) == 0) {
 			subpos = 0;
 		} else {
+		// TODO: do not take pos 0, but always use 1~3
+#if 0
 			int oldInf = GetInfantryAt(dwPos, 0);
-			if (oldInf > -1) {
-				INFANTRY inf;
-				GetInfantryData(oldInf, &inf);
+			if (oldInf >= 0) {
+				INFANTRY infExisitingData;
+				GetInfantryData(oldInf, &infExisitingData);
 
-				if (inf.pos == "0")
-					for (i = 1; i < SUBPOS_COUNT; i++) {
-						if (GetInfantryAt(dwPos, i) == -1) {
+				if (infExisitingData.pos == "0")
+					for (auto i = 1; i < SUBPOS_COUNT; i++) {
+						// not taken, move existing infantry to the sub position
+						if (GetInfantryAt(dwPos, i) < 0) {
 							//subpos=i+1;
 
 							char c[50];
 							itoa(i, c, 10);
-							inf.pos = c;
+							infExisitingData.pos = c;
 							DeleteInfantry(oldInf);
-							AddInfantry(&inf);
+							AddInfantry(&infExisitingData, oldInf);
 							break;
 						}
 
 					}
 			}
+#endif
 
 			// if(GetInfantryAt(dwPos, 0)==oldInf) return FALSE;
 
-			for (i = 0; i < SUBPOS_COUNT; i++) {
+			for (auto i = 0; i < SUBPOS_COUNT; i++) {
 				if (GetInfantryAt(dwPos, i) == -1) {
 					subpos = i + 1;
 					break;
@@ -2257,10 +2334,8 @@ BOOL CMapData::AddInfantry(INFANTRY* lpInfantry, LPCTSTR lpType, LPCTSTR lpHouse
 		if (subpos < 0) {
 			return FALSE;
 		}
-		char c[50];
-		itoa(subpos, c, 10);
 
-		infantry.pos = c;
+		infantry.pos.Format("%d", subpos);
 	}
 
 
@@ -2304,9 +2379,7 @@ BOOL CMapData::AddInfantry(INFANTRY* lpInfantry, LPCTSTR lpType, LPCTSTR lpHouse
 		// reuse slot
 		if (m_infantry[suggestedIndex].deleted) {
 			m_infantry[suggestedIndex] = infantry;
-			if (dwPos < fielddata_size) {
-				fielddata[dwPos].infantry[sp] = suggestedIndex;
-			}
+			fielddata[dwPos].infantry[sp] = suggestedIndex;
 			bFound = TRUE;
 
 		}
@@ -2317,18 +2390,15 @@ BOOL CMapData::AddInfantry(INFANTRY* lpInfantry, LPCTSTR lpType, LPCTSTR lpHouse
 			// yep, found one, replace it
 			if (m_infantry[i].deleted) {
 				m_infantry[i] = infantry;
-				if (dwPos < fielddata_size) {
-					fielddata[dwPos].infantry[sp] = i;
-				}
+				fielddata[dwPos].infantry[sp] = i;
 				bFound = TRUE;
 				break;
 			}
 		}
-
+	}
+	if (!bFound) {
 		m_infantry.push_back(infantry);
-		if (dwPos < fielddata_size) {
-			fielddata[dwPos].infantry[sp] = m_infantry.size() - 1;
-		}
+		fielddata[dwPos].infantry[sp] = m_infantry.size() - 1;
 	}
 
 	return TRUE;
@@ -2340,10 +2410,14 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 	if (lpStructure != NULL) {
 		structure = *lpStructure;
 	} else {
-		char cx[10], cy[10];
-		itoa(dwPos % Map->GetIsoSize(), cx, 10);
-		itoa(dwPos / Map->GetIsoSize(), cy, 10);
+		auto const coord_x = dwPos % Map->GetIsoSize();
+		auto const coord_y = dwPos / Map->GetIsoSize();
 
+		structure.basic.strength = "256";
+		structure.basic.house = lpHouse;
+		structure.basic.type = lpType;
+		structure.basic.x.Format("%d", coord_x);
+		structure.basic.y.Format("%d", coord_y);
 		structure.tag = "None";
 		structure.direction = "0";
 		structure.flag1 = "1";
@@ -2356,11 +2430,6 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 		structure.upgrade2 = "None";
 		structure.upgrade3 = "None";
 		structure.upgradecount = "0";
-		structure.strength = "256";
-		structure.house = lpHouse;
-		structure.type = lpType;
-		structure.x = cx;
-		structure.y = cy;
 
 
 	}
@@ -2373,8 +2442,8 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 	}
 
 	CString value;
-	value = structure.house + "," + structure.type + "," + structure.strength + "," + structure.y +
-		"," + structure.x + "," + structure.direction + "," + structure.tag + "," + structure.flag1 + "," +
+	value = structure.basic.house + "," + structure.basic.type + "," + structure.basic.strength + "," + structure.basic.y +
+		"," + structure.basic.x + "," + structure.direction + "," + structure.tag + "," + structure.flag1 + "," +
 		structure.flag2 + "," + structure.energy + "," + structure.upgradecount + "," + structure.spotlight + ","
 		+ structure.upgrade1 + "," + structure.upgrade2 + "," + structure.upgrade3 + "," + structure.flag3 + "," + structure.flag4;
 
@@ -2382,7 +2451,29 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 	section.InsertOrAssign(id, value);
 
 	if (!m_noAutoObjectUpdate) {
-		UpdateStructures(FALSE);
+		auto const x = atoi(structure.basic.x);
+		auto const y = atoi(structure.basic.y);
+		const size_t idNum = atoi(id);
+		if (auto fieldData = GetFielddataAt(x, y)) {
+			STRUCTUREPAINT sp;
+			sp.col = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->GetColor(structure.basic.house);
+			sp.strength = atoi(structure.basic.strength);
+			sp.upgrade1 = structure.upgrade1;
+			sp.upgrade2 = structure.upgrade2;
+			sp.upgrade3 = structure.upgrade3;
+			sp.upradecount = atoi(structure.upgradecount);
+			sp.x = x;
+			sp.y = y;
+			sp.direction = atoi(structure.direction);
+			sp.type = structure.basic.type;
+
+			TruncSpace(sp.upgrade1);
+			TruncSpace(sp.upgrade2);
+			TruncSpace(sp.upgrade3);
+
+			m_structurepaint.insert_or_assign(idNum, sp);
+		}
+		updateFieldDataAroundStructure(structure.basic.type, idNum, x, y);
 	}
 
 	return TRUE;
@@ -2446,22 +2537,8 @@ INT CMapData::GetUnitTypeID(LPCTSTR lpType)
 
 void CMapData::GetStdInfantryData(DWORD dwIndex, STDOBJECTDATA* lpStdInfantry) const
 {
-	/*CString data=*m_mapfile.sections["Infantry"].GetValue(dwIndex);
-
-	lpStdInfantry->house=GetParam(data, 0);
-	lpStdInfantry->type=GetParam(data, 1);
-	lpStdInfantry->strength=atoi(GetParam(data, 2));
-	lpStdInfantry->y=GetParam(data, 3);
-	lpStdInfantry->x=atoi(GetParam(data, 4));*/
-
-	lpStdInfantry->house = m_infantry[dwIndex].house;
-	lpStdInfantry->type = m_infantry[dwIndex].type;
-	lpStdInfantry->strength = m_infantry[dwIndex].strength;
-	lpStdInfantry->y = m_infantry[dwIndex].y;
-	lpStdInfantry->x = m_infantry[dwIndex].x;
-
+	*lpStdInfantry = m_infantry[dwIndex].basic;
 }
-
 void CMapData::GetInfantryData(DWORD dwIndex, INFANTRY* lpInfantry) const
 {
 	ASSERT(dwIndex < m_infantry.size());
@@ -2469,100 +2546,167 @@ void CMapData::GetInfantryData(DWORD dwIndex, INFANTRY* lpInfantry) const
 	if (dwIndex >= m_infantry.size()) {
 		return;
 	}
-
-	/*lpInfantry->house=m_infantry.house;
-	lpInfantry->type=m_infantry.;
-	lpInfantry->strength=m_infantry.;
-	lpInfantry->y=m_infantry.;
-	lpInfantry->x=m_infantry.;
-	lpInfantry->pos=m_infantry.;
-	lpInfantry->action=m_infantry.;
-	lpInfantry->direction=m_infantry.;
-	lpInfantry->tag=m_infantry.;
-	lpInfantry->flag1=m_infantry.;
-	lpInfantry->flag2=m_infantry.;
-	lpInfantry->flag3=m_infantry.;
-	lpInfantry->flag4=m_infantry.;
-	lpInfantry->flag5=m_infantry.;*/
 	*lpInfantry = m_infantry[dwIndex];
-
-	//memcpy(lpInfantry, &m_infantry[dwIndex], sizeof(INFANTRY));
-
-	//ASSERT(dwIndex>=0 && dwIndex<m_mapfile.sections["Infantry"].values.size());
-
-
-
-	/*if(dwIndex>=m_mapfile.sections["Infantry"].values.size()) return;
-
-	CString data=*m_mapfile.sections["Infantry"].GetValue(dwIndex);
-
-	lpInfantry->house=GetParam(data, 0);
-	lpInfantry->type=GetParam(data, 1);
-	lpInfantry->strength=GetParam(data, 2);
-	lpInfantry->y=GetParam(data, 3);
-	lpInfantry->x=GetParam(data, 4);
-	lpInfantry->pos=GetParam(data, 5);
-	lpInfantry->action=GetParam(data, 6);
-	lpInfantry->direction=GetParam(data, 7);
-	lpInfantry->tag=GetParam(data, 8);
-	lpInfantry->flag1=GetParam(data, 9);
-	lpInfantry->flag2=GetParam(data, 10);
-	lpInfantry->flag3=GetParam(data, 11);
-	lpInfantry->flag4=GetParam(data, 12);
-	lpInfantry->flag5=GetParam(data, 13);*/
-
 }
-
 CString CMapData::GetUnitData(DWORD dwIndex, UNIT* lpUnit) const
 {
-	auto const& section = m_mapfile.GetSection("Units");
-	if (dwIndex >= section.Size()) {
+	auto const [id, data] = GetNthDataOfTechno(dwIndex, TechnoType::Unit);
+	if (!ParseUnitData(data, *lpUnit)) {
 		return {};
 	}
-
-	auto const& [id, data] = section.Nth(dwIndex);
-
-	lpUnit->house = GetParam(data, 0);
-	lpUnit->type = GetParam(data, 1);
-	lpUnit->strength = GetParam(data, 2);
-	lpUnit->y = GetParam(data, 3);
-	lpUnit->x = GetParam(data, 4);
-	lpUnit->direction = GetParam(data, 5);
-	lpUnit->action = GetParam(data, 6);
-	lpUnit->tag = GetParam(data, 7);
-	lpUnit->flag1 = GetParam(data, 8);
-	lpUnit->group = GetParam(data, 9);
-	lpUnit->flag3 = GetParam(data, 10);
-	lpUnit->flag4 = GetParam(data, 11);
-	lpUnit->flag5 = GetParam(data, 12);
-	lpUnit->flag6 = GetParam(data, 13);
-
+	return id;
+}
+CString CMapData::GetAircraftData(DWORD dwIndex, AIRCRAFT* lpAircraft) const
+{
+	auto const [id, data] = GetNthDataOfTechno(dwIndex, TechnoType::Aircraft);
+	if (!ParseAircraftData(data, *lpAircraft)) {
+		return {};
+	}
 	return id;
 }
 
-CString CMapData::GetAircraftData(DWORD dwIndex, AIRCRAFT* lpAircraft) const
+bool CMapData::ParseInfantryData(const CString& rawText, INFANTRY& infantry) const
 {
-	auto const& section = m_mapfile.GetSection("Aircraft");
-	if (dwIndex >= section.Size()) {
+	if (!ParseTechnoData(rawText, TechnoType::Infantry, infantry)) {
+		return false;
+	}
+	infantry.pos = GetParam(rawText, 5);
+	infantry.action = GetParam(rawText, 6);
+	infantry.flag1 = GetParam(rawText, 9);
+	infantry.group = GetParam(rawText, 10);
+	infantry.flag3 = GetParam(rawText, 11);
+	infantry.flag4 = GetParam(rawText, 12);
+	infantry.flag5 = GetParam(rawText, 13);
+
+	return true;
+}
+bool CMapData::ParseUnitData(const CString& rawText, UNIT& unit) const
+{
+	if (!ParseTechnoData(rawText, TechnoType::Unit, unit)) {
+		return false;
+	}
+	unit.action = GetParam(rawText, 6);
+	unit.flag1 = GetParam(rawText, 8);
+	unit.group = GetParam(rawText, 9);
+	unit.flag3 = GetParam(rawText, 10);
+	unit.flag4 = GetParam(rawText, 11);
+	unit.flag5 = GetParam(rawText, 12);
+	unit.flag6 = GetParam(rawText, 13);
+
+	return true;
+}
+bool CMapData::ParseAircraftData(const CString& rawText, AIRCRAFT& aircraft) const
+{
+	if (!ParseTechnoData(rawText, TechnoType::Aircraft, aircraft)) {
+		return false;
+	}
+	aircraft.action = GetParam(rawText, 6);
+	aircraft.flag1 = GetParam(rawText, 8);
+	aircraft.group = GetParam(rawText, 9);
+	aircraft.flag3 = GetParam(rawText, 10);
+	aircraft.flag4 = GetParam(rawText, 11);
+
+	return true;
+}
+bool CMapData::ParseStructureData(const CString& rawText, STRUCTURE& structure) const
+{
+	if (!ParseTechnoData(rawText, TechnoType::Building, structure)) {
+		return false;
+	}
+	structure.flag1 = GetParam(rawText, 7);
+	structure.flag2 = GetParam(rawText, 8);
+	structure.energy = GetParam(rawText, 9);
+	structure.upgradecount = GetParam(rawText, 10);
+	structure.spotlight = GetParam(rawText, 11);
+	structure.upgrade1 = GetParam(rawText, 12);
+	structure.upgrade2 = GetParam(rawText, 13);
+	structure.upgrade3 = GetParam(rawText, 14);
+	structure.flag3 = GetParam(rawText, 15);
+	structure.flag4 = GetParam(rawText, 16);
+
+	return true;
+}
+
+static CString GetDataSection(const TechnoType type)
+{
+	CString sectionID;
+	switch (type)
+	{
+	case TechnoType::Building:
+		sectionID = "Structures";
+		break;
+	case TechnoType::Unit:
+		sectionID = "Units";
+		break;
+	case TechnoType::Aircraft:
+		sectionID = "Aircraft";
+		break;
+	case TechnoType::Infantry:
+		throw std::runtime_error("infantry raw data does not support retrieving in this way");
+		break;
+	default:
+		break;
+	}
+	return sectionID;
+}
+
+std::pair<CString, CString> CMapData::GetNthDataOfTechno(const size_t index, const TechnoType type) const
+{
+	auto const& section = m_mapfile.GetSection(GetDataSection(type));
+	if (index >= section.Size()) {
 		return {};
 	}
+	return section.Nth(index);
+}
 
-	auto const& [id, data] = section.Nth(dwIndex);
+CString CMapData::GetDataOfTechnoByID(const size_t id, const TechnoType type) const
+{
+	CString idStr;
+	idStr.Format("%d", id);
+	return m_mapfile.GetString(GetDataSection(type), idStr);
+}
 
-	lpAircraft->house = GetParam(data, 0);
-	lpAircraft->type = GetParam(data, 1);
-	lpAircraft->strength = GetParam(data, 2);
-	lpAircraft->y = GetParam(data, 3);
-	lpAircraft->x = GetParam(data, 4);
-	lpAircraft->direction = GetParam(data, 5);
-	lpAircraft->action = GetParam(data, 6);
-	lpAircraft->tag = GetParam(data, 7);
-	lpAircraft->flag1 = GetParam(data, 8);
-	lpAircraft->group = GetParam(data, 9);
-	lpAircraft->flag3 = GetParam(data, 10);
-	lpAircraft->flag4 = GetParam(data, 11);
+bool CMapData::ParseBasicTechnoData(const CString& rawText, STDOBJECTDATA& data) const
+{
+	if (rawText.IsEmpty()) {
+		return false;
+	}
+	data.house = GetParam(rawText, 0);
+	data.type = GetParam(rawText, 1);
+	data.strength = GetParam(rawText, 2);
+	data.y = GetParam(rawText, 3);
+	data.x = GetParam(rawText, 4);
+	return true;
+}
 
-	return id;
+bool CMapData::ParseTechnoData(const CString& rawText, const TechnoType type, TECHNODATA& data) const
+{
+	if (!ParseBasicTechnoData(rawText, data.basic)) {
+		return false;
+	}
+	switch (type)
+	{
+	case TechnoType::Building:
+		data.direction = GetParam(rawText, 5);
+		data.tag = GetParam(rawText, 6);
+		break;
+	case TechnoType::Infantry:
+		data.direction = GetParam(rawText, 7);
+		data.tag = GetParam(rawText, 8);
+		break;
+	case TechnoType::Unit:
+		data.direction = GetParam(rawText, 5);
+		data.tag = GetParam(rawText, 7);
+		break;
+	case TechnoType::Aircraft:
+		data.direction = GetParam(rawText, 5);
+		data.tag = GetParam(rawText, 7);
+		break;
+	default:
+		break;
+	}
+
+	return true;
 }
 
 BOOL CMapData::AddCelltag(LPCTSTR lpTag, DWORD dwPos)
@@ -2616,14 +2760,14 @@ BOOL CMapData::AddAircraft(AIRCRAFT* lpAircraft, LPCTSTR lpType, LPCTSTR lpHouse
 		itoa(dwPos % GetIsoSize(), sx, 10);
 		itoa(dwPos / GetIsoSize(), sy, 10);
 
-		aircraft.type = lpType;
-		aircraft.house = lpHouse;
+		aircraft.basic.type = lpType;
+		aircraft.basic.house = lpHouse;
+		aircraft.basic.strength = "256";
+		aircraft.basic.x = sx;
+		aircraft.basic.y = sy;
 		aircraft.action = "Guard";
 		aircraft.tag = "None";
 		aircraft.direction = "0";
-		aircraft.strength = "256";
-		aircraft.x = sx;
-		aircraft.y = sy;
 		aircraft.flag1 = "0";
 		aircraft.group = "-1";
 		aircraft.flag3 = "1";
@@ -2637,8 +2781,8 @@ BOOL CMapData::AddAircraft(AIRCRAFT* lpAircraft, LPCTSTR lpType, LPCTSTR lpHouse
 	}
 
 	CString value;
-	value = aircraft.house + "," + aircraft.type + "," + aircraft.strength + "," + aircraft.y + "," +
-		aircraft.x + "," + aircraft.direction + "," + aircraft.action + "," + aircraft.tag + ","
+	value = aircraft.basic.house + "," + aircraft.basic.type + "," + aircraft.basic.strength + "," + aircraft.basic.y + "," +
+		aircraft.basic.x + "," + aircraft.direction + "," + aircraft.action + "," + aircraft.tag + ","
 		+ aircraft.flag1 + "," + aircraft.group + "," + aircraft.flag3 + "," + aircraft.flag4;
 
 	m_mapfile.AddSection("Aircraft").InsertOrAssign(id, value);
@@ -2661,14 +2805,14 @@ BOOL CMapData::AddUnit(UNIT* lpUnit, LPCTSTR lpType, LPCTSTR lpHouse, DWORD dwPo
 		itoa(dwPos % GetIsoSize(), sx, 10);
 		itoa(dwPos / GetIsoSize(), sy, 10);
 
-		unit.type = lpType;
-		unit.house = lpHouse;
+		unit.basic.type = lpType;
+		unit.basic.house = lpHouse;
+		unit.basic.strength = "256";
+		unit.basic.x = sx;
+		unit.basic.y = sy;
 		unit.action = "Guard";
 		unit.tag = "None";
 		unit.direction = "0";
-		unit.strength = "256";
-		unit.x = sx;
-		unit.y = sy;
 		unit.flag1 = "0";
 		unit.group = "-1";
 		unit.flag3 = "0";
@@ -2685,8 +2829,8 @@ BOOL CMapData::AddUnit(UNIT* lpUnit, LPCTSTR lpType, LPCTSTR lpHouse, DWORD dwPo
 	}
 
 	CString value;
-	value = unit.house + "," + unit.type + "," + unit.strength + "," + unit.y + "," +
-		unit.x + "," + unit.direction + "," + unit.action + "," + unit.tag + ","
+	value = unit.basic.house + "," + unit.basic.type + "," + unit.basic.strength + "," + unit.basic.y + "," +
+		unit.basic.x + "," + unit.direction + "," + unit.action + "," + unit.tag + ","
 		+ unit.flag1 + "," + unit.group + "," + unit.flag3 + "," + unit.flag4 + "," + unit.flag5 + "," + unit.flag6;
 
 	m_mapfile.AddSection("Units").InsertOrAssign(id, value);
@@ -2761,7 +2905,7 @@ BOOL CMapData::AddTerrain(LPCTSTR lpType, DWORD dwPos, int suggestedIndex)
 	if (suggestedIndex >= 0 && suggestedIndex < m_terrain.size()) {
 		if (m_terrain[suggestedIndex].deleted) {
 			m_terrain[suggestedIndex] = td;
-			if (dwPos < fielddata_size) {
+			if (dwPos < fielddata.size()) {
 				fielddata[dwPos].terrain = suggestedIndex;
 				fielddata[dwPos].terraintype = terrainid[lpType];
 			}
@@ -2776,7 +2920,7 @@ BOOL CMapData::AddTerrain(LPCTSTR lpType, DWORD dwPos, int suggestedIndex)
 			if (m_terrain[i].deleted) // yep, found one, replace it
 			{
 				m_terrain[i] = td;
-				if (dwPos < fielddata_size) {
+				if (dwPos < fielddata.size()) {
 					fielddata[dwPos].terrain = i;
 					fielddata[dwPos].terraintype = terrainid[lpType];
 				}
@@ -2788,7 +2932,7 @@ BOOL CMapData::AddTerrain(LPCTSTR lpType, DWORD dwPos, int suggestedIndex)
 	if (!bFound) {
 		m_terrain.push_back(td);
 		int pos = x + y * GetIsoSize();
-		if (pos < fielddata_size) {
+		if (pos < fielddata.size()) {
 			fielddata[pos].terrain = m_terrain.size() - 1;
 			fielddata[pos].terraintype = terrainid[lpType];
 		}
@@ -2810,11 +2954,13 @@ BOOL CMapData::IsGroundObjectAt(DWORD dwPos) const
 	if (m_id < 0)
 		m_id = GetAirAt(dwPos);
 	if (m_id < 0)
-		m_id = GetStructureAt(dwPos);
+		m_id = GetTopStructureAt(dwPos);
 	if (m_id < 0)
 		m_id = GetTerrainAt(dwPos);
 
-	if (m_id < 0) return FALSE;
+	if (m_id < 0) {
+		return FALSE;
+	}
 
 	return TRUE;
 
@@ -2868,39 +3014,42 @@ void CMapData::GetWaypointData(DWORD dwId, CString* lpID, DWORD* lpdwPos) const
 
 void CMapData::GetStdAircraftData(DWORD dwIndex, STDOBJECTDATA* lpStdAircraft) const
 {
-	auto const& section = m_mapfile.GetSection("Aircraft");
-	if (dwIndex >= section.Size()) {
-		return;
-	}
-
-	auto const& data = section.Nth(dwIndex).second;
-
-	lpStdAircraft->house = GetParam(data, 0);
-	lpStdAircraft->type = GetParam(data, 1);
-	lpStdAircraft->strength.Format("%d", atoi(GetParam(data, 2)));
-	lpStdAircraft->y = GetParam(data, 3);
-	lpStdAircraft->x.Format("%d", atoi(GetParam(data, 4)));
+	auto const [_, data] = GetNthDataOfTechno(dwIndex, TechnoType::Aircraft);
+	ParseBasicTechnoData(data, *lpStdAircraft);
 }
 
 void CMapData::GetStdUnitData(DWORD dwIndex, STDOBJECTDATA* lpStdUnit) const
 {
-	auto const& section = m_mapfile.GetSection("Units");
-	if (dwIndex >= section.Size()) {
-		return;
-	}
-
-	auto const& data = section.Nth(dwIndex).second;
-
-	lpStdUnit->house = GetParam(data, 0);
-	lpStdUnit->type = GetParam(data, 1);
-	lpStdUnit->strength.Format("%d", atoi(GetParam(data, 2)));
-	lpStdUnit->y = GetParam(data, 3);
-	lpStdUnit->x.Format("%d", atoi(GetParam(data, 4)));
+	auto const [_, data] = GetNthDataOfTechno(dwIndex, TechnoType::Unit);
+	ParseBasicTechnoData(data, *lpStdUnit);
 }
 
 DWORD CMapData::GetInfantryCount() const
 {
 	return m_infantry.size();//m_mapfile.sections["Infantry"].values.size();
+}
+
+std::vector<NODE> CMapData::CollectAllBaseNodes() const
+{
+	size_t total = 0;
+	for (auto const& [seq, id] : m_mapfile[MAPHOUSES]) {
+		total += m_mapfile.GetInteger(id, "NodeCount");
+	}
+	std::vector<NODE> ret;
+	ret.reserve(total);
+
+	for (auto const& [seq, id] : m_mapfile[MAPHOUSES]) {
+		auto const& sec = m_mapfile.GetSection(id);
+		const int nodeCount = sec.GetInteger("NodeCount");
+		for (auto idx = 0; idx < nodeCount; idx++) {
+			auto const& nodeVal = sec.GetString(GetNodeID(idx));
+			auto const type = GetParam(nodeVal, 0);
+			const CString y = GetParam(nodeVal, 1);
+			const CString x = GetParam(nodeVal, 2);
+			ret.push_back(NODE{ id, type, x, y });
+		}
+	}
+	return ret;
 }
 
 DWORD CMapData::GetUnitCount() const
@@ -2932,40 +3081,47 @@ Note: takes care of the current mapfile settings
 WCHAR unknown[] = L"MISSING";
 WCHAR* CMapData::GetUnitName(LPCTSTR lpID) const
 {
-	WCHAR* res = NULL;
+	auto name = GetUnitDisplayName(lpID);
+	if (name) {
+		return name->wString;
+	}
+	return nullptr;
+}
 
-	auto const& renameStr = g_data.GetString("Rename", lpID);
+const XCString* CMapData::GetUnitDisplayName(const CString& id) const
+{
+	XCString* res = NULL;
+
+	auto const& renameStr = g_data.GetString("Rename", id);
 	if (!renameStr.IsEmpty()) {
-		CCStrings[lpID].SetString(GetLanguageStringACP(renameStr));
-		res = CCStrings[lpID].wString;
-		return res;
+		CCStrings[id].SetString(GetLanguageStringACP(renameStr));
+		return &CCStrings.at(id);
 	}
 
-	if (CCStrings.find(lpID) != CCStrings.end() && CCStrings[lpID].len > 0) {
-		res = CCStrings[lpID].wString;
+	if (CCStrings.find(id) != CCStrings.end() && CCStrings.at(id).len > 0) {
+		res = &CCStrings.at(id);
 	}
 
 	if (!res) {
-		auto const& section = m_mapfile.GetSection(lpID);
+		auto const& section = m_mapfile.GetSection(id);
 		auto const& nameVal = section.GetString("Name");
 		if (!nameVal.IsEmpty()) {
-			CCStrings[lpID].SetString(nameVal);
-
-			res = CCStrings[lpID].wString;
+			CCStrings[id].SetString(nameVal);
+			res = &CCStrings.at(id);
 		}
 	}
 
 	if (!res) {
-		auto const& nameStr = rules.GetString(lpID, "Name");
+		auto const& nameStr = rules.GetString(id, "Name");
 		if (!nameStr.IsEmpty()) {
-			CCStrings[lpID].SetString(nameStr);
-			res = CCStrings[lpID].wString;
+			CCStrings[id].SetString(nameStr);
+			res = &CCStrings.at(id);
 		}
 	}
 
 	if (!res) {
-		CCStrings[lpID].SetString(L"MISSING", 7);
-		res = CCStrings[lpID].wString;
+		CCStrings[id].SetString(L"MISSING", 7);
+		res = &CCStrings.at(id);
 	}
 	return res;
 }
@@ -3158,8 +3314,9 @@ void CMapData::UpdateMapFieldData(BOOL bSave)
 			if (pos < (GetIsoSize() + 1) * (GetIsoSize() + 1)) {
 				fielddata[pos].wGround = mfd->wGround;
 				fielddata[pos].bHeight = mfd->bHeight;
-				memcpy(&fielddata[pos].bMapData, mfd->bData, 3);
-				memcpy(&fielddata[pos].bMapData2, mfd->bData2, 1);
+				fielddata[pos].bMapData = mfd->wTileNum;
+				fielddata[pos].bSubTile = mfd->bSubTile;
+				fielddata[pos].bMapData2 = mfd->bIceGrowth;
 
 				int replacement = 0;
 				int ground = mfd->wGround;
@@ -3265,7 +3422,7 @@ void CMapData::UpdateMapFieldData(BOOL bSave)
 		int dwX, dwY;
 		for (dwX = 0; dwX <= m_IsoSize; dwX++) {
 			for (dwY = 0; dwY <= m_IsoSize; dwY++) {
-				/*for(i=0;i<fielddata_size;i++)
+				/*for(i=0;i<fielddata.size();i++)
 				{*/
 				//int dwX=i%m_IsoSize;
 				//int dwY=i/m_IsoSize;
@@ -3280,8 +3437,8 @@ void CMapData::UpdateMapFieldData(BOOL bSave)
 				mfd->wX = dwY;
 				mfd->wY = dwX;
 				mfd->bHeight = fielddata[i].bHeight;
-				memcpy(&mfd->bData, &fielddata[i].bMapData, 3); // includes fielddata[i].bSubTile!
-				memcpy(&mfd->bData2, &fielddata[i].bMapData2, 1);
+				mfd->wTileNum = fielddata[i].bMapData;
+				mfd->bSubTile = fielddata[i].bSubTile;
 
 				p++;
 			}
@@ -3525,15 +3682,15 @@ BuildingFoundation getBuildingFoundation(const CString& artId) {
 // TODO: simplify this function, remove duplicated codes
 void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 {
-	CIniFile& ini = GetIniFile();
+	auto const& rulesGroup = IniMegaFile::GetRules();
 
 	if (!lpUnitType) {
 		memset(buildinginfo, 0, buildingInfoCapacity * sizeof(BUILDING_INFO));
 
-		for (auto const& [seq, id] : rules.GetSection("BuildingTypes")) {
+		for (auto const& [seq, id] : rulesGroup.GetSection("BuildingTypes")) {
 			auto const& type = id;
-			auto artname = rules.GetStringOr(type, "Image", type);
-			artname = ini.GetStringOr(type, "Image", artname);
+			auto artname = rulesGroup.GetStringOr(type, "Image", type);
+			artname = rulesGroup.GetStringOr(type, "Image", artname);
 
 			auto const foundation = getBuildingFoundation(artname);
 
@@ -3588,9 +3745,9 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 
 		}
 
-		for (auto const& [seq, id] : rules.GetSection("BuildingTypes")) {
+		for (auto const& [seq, id] : rulesGroup.GetSection("BuildingTypes")) {
 			auto const& type = id;
-			auto artname = ini.GetStringOr(type, "Image", type);
+			auto artname = rulesGroup.GetStringOr(type, "Image", type);
 
 			auto const foundation = getBuildingFoundation(artname);
 
@@ -3624,8 +3781,8 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 
 	// only for specific building -> faster
 	auto const& type = *lpUnitType;
-	auto artname = rules.GetStringOr(type, "Image", type);
-	artname = ini.GetStringOr(type, "Image", artname);
+	auto artname = rulesGroup.GetStringOr(type, "Image", type);
+	artname = rulesGroup.GetStringOr(type, "Image", artname);
 
 	auto const foundation = getBuildingFoundation(artname);
 
@@ -3756,9 +3913,7 @@ MAPFIELDDATA* CMapData::GetMappackPointer(DWORD dwPos)
 
 void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, DWORD dwGroundHeight)
 {
-	if (fielddata != NULL) {
-		delete[] fielddata;
-	}
+	fielddata.clear();
 	int i;
 	for (i = 0; i < dwSnapShotCount; i++) {
 		delete[] m_snapshots[i].bHeight;
@@ -3775,11 +3930,6 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 		delete[] m_snapshots;
 	}
 
-
-
-
-	fielddata = NULL;
-	fielddata_size = 0;
 	m_snapshots = NULL;
 	dwSnapShotCount = 0;
 	m_cursnapshot = -1;
@@ -4108,12 +4258,11 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 	ClearOverlayData();
 
 	isInitialized = TRUE;
-	if (fielddata != NULL) delete[] fielddata;
+	fielddata.clear();
 
 	errstream << "CreateMap() allocates memory\n";
 	errstream.flush();
-	fielddata = new(FIELDDATA[(GetIsoSize() + 1) * (GetIsoSize() + 1)]); // +1 because of some unpacking problems
-	fielddata_size = (GetIsoSize() + 1) * (GetIsoSize() + 1);
+	fielddata.resize((GetIsoSize() + 1)* (GetIsoSize() + 1)); // +1 because of some unpacking problems
 	dwIsoMapSize = 0;
 
 	errstream << "CreateMap() frees m_mfd\n";
@@ -4132,7 +4281,7 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 	errstream.flush();
 
 
-	for (i = 0; i < fielddata_size; i++) {
+	for (i = 0; i < fielddata.size(); i++) {
 		fielddata[i].bHeight = dwGroundHeight;
 	}
 
@@ -4487,7 +4636,7 @@ or if loading maps made with modified tilesets
 BOOL CMapData::CheckMapPackData()
 {
 	int i;
-	for (i = 0; i < fielddata_size; i++) {
+	for (i = 0; i < fielddata.size(); i++) {
 		int gr = fielddata[i].wGround;
 		if (gr != 0xFFFF && gr >= (*tiledata_count))
 			return FALSE;
@@ -4722,7 +4871,7 @@ void CMapData::Redo()
 
 	/*
 	int i;
-	for(i=0;i<fielddata_size;i++)
+	for(i=0;i<fielddata.size();i++)
 	{
 		fielddata[i].bHeight=m_snapshots[m_cursnapshot+1].bHeight[i];
 		fielddata[i].bMapData=m_snapshots[m_cursnapshot+1].bMapData[i];
@@ -4778,7 +4927,7 @@ void CMapData::SmoothAllAt(DWORD dwPos)
 		return;
 	}
 
-	if (dwPos > fielddata_size) {
+	if (dwPos > fielddata.size()) {
 		return;
 	}
 
@@ -4805,878 +4954,482 @@ void CMapData::SmoothAllAt(DWORD dwPos)
 	}
 }
 
-void CMapData::CreateShore(int left, int top, int right, int bottom, BOOL bRemoveUseless)
+bool CMapData::IsTileIntact(int x, int y, int startX, int startY, int right, int bottom)
 {
-
-
-	int i;
-	int isosize = Map->GetIsoSize();
-	int mapsize = isosize * isosize;
-	int mapwidth = Map->GetWidth();
-	int mapheight = Map->GetHeight();
-	// int shoreset=atoi((*tiles).sections["General"].values["ShorePieces"]);
-
-	short* tsets = new(short[mapsize]);
-	BYTE* terrain = new(BYTE[mapsize]);
-	int* tile = new(int[mapsize]);
-	BOOL* hasChanged = new(BOOL[isosize * isosize]);
-	BOOL* noChange = new(BOOL[isosize * isosize]);
-	//BOOL* replaced=new(BOOL[isosize*isosize]); // replaced by water<->ground
-
-	memset(hasChanged, 0, sizeof(BOOL) * isosize * isosize);
-	memset(noChange, 0, sizeof(BOOL) * isosize * isosize);
-	//memset(replaced, 0, sizeof(BOOL)*isosize*isosize);
-
-	int watercliffset = tiles->GetInteger("General", "WaterCliffs");
-	int xx, yy;
-
-	for (i = 0; i < *tiledata_count; i++) {
-		if ((*tiledata)[i].wTileSet == waterset && (*tiledata)[i].cx == 1 && (*tiledata)[i].cy == 1) {
-			break;
-		}
+	if (!IsCoordInMap(x, y)) {
+		return false;
+	}
+	const int pos = GetCoordIndex(x, y);
+	auto const cell = GetFielddataAt(pos);
+	int tileIndex = cell->wGround;
+	if (tileIndex == 0xFFFF) {
+		tileIndex = 0;
 	}
 
-	int smallwater = i;
+	const int oriX = x - cell->bSubTile / (*tiledata)[tileIndex].cy;
+	const int oriY = y - cell->bSubTile % (*tiledata)[tileIndex].cy;
 
+	int subIdx = 0;
+	for (int m = 0; m < (*tiledata)[tileIndex].cx; m++) {
+		for (int n = 0; n < (*tiledata)[tileIndex].cy; n++) {
+			if (!IsCoordInMap(m + oriX, n + oriY)) {
+				return false;
+			}
+			if (startX >= 0) {
+				if (m + oriX < startX || n + oriY < startY || m + oriX >= right || n + oriY >= bottom) {
+					return false;
+				}
+			}
 
+			auto cell2 = GetFielddataAt(m + oriX, n + oriY);
+			int tileIndex2 = cell2->wGround;
+			if (tileIndex2 == 0xFFFF) {
+				tileIndex2 = 0;
+			}
 
+			if ((*tiledata)[tileIndex].tiles[subIdx].pic != NULL) {
+				if (tileIndex != tileIndex2) {
+					return false;
+				}
+				if (cell2->bSubTile != subIdx) {
+					return false;
+				}
+			}
+			subIdx++;
+		}
+	}
+	return true;
+}
 
-	last_succeeded_operation = 7002;
+std::vector<MapCoords> CMapData::GetIntactTileCoords(int x, int y, bool oriIntact)
+{
+	std::vector<MapCoords> ret;
+	if (!oriIntact || IsTileIntact(x, y)) {
+		const int pos = GetCoordIndex(x, y);
+		auto const cell = GetFielddataAt(pos);
+		int tileIndex = cell->wGround;
+		if (tileIndex == 0xFFFF) {
+			tileIndex = 0;
+		}
 
+		const int oriX = x - cell->bSubTile / (*tiledata)[tileIndex].cy;
+		const int oriY = y - cell->bSubTile % (*tiledata)[tileIndex].cy;
 
-	map<int, int> softsets;
-	CString sec = "SoftTileSets";
+		int subIdx = 0;
+		for (int m = 0; m < (*tiledata)[tileIndex].cx; m++) {
+			for (int n = 0; n < (*tiledata)[tileIndex].cy; n++) {
+				if ((*tiledata)[tileIndex].tiles[subIdx].pic != NULL) {
+					MapCoords mc;
+					mc.x = m + oriX;
+					mc.y = n + oriY;
+					ret.push_back(mc);
+				}
+				subIdx++;
+			}
+		}
+		return ret;
+	}
+	return ret;
+}
 
-	for (auto const& [key, val] : g_data[sec]) {
-		CString tset = key;
-		TruncSpace(tset);
-		auto const& generalSec = tiles->GetSection("General");
-		int idx = generalSec.FindIndex(tset);
-		if (idx < 0) {
+// Return SUBTILE->bHackedTerrainType
+// Beach -> Water, Rough->Ground, WaterSet -> Water
+// And FA2 makes a special hack in [ShoreTerrainRA2]
+char CMapData::GetHackedTerrainType(int tileIndex, int TileSubIndex)
+{
+	if (tileIndex == 0xFFFF) {
+		tileIndex = 0;
+	}
+
+	return (*tiledata)[tileIndex].tiles[TileSubIndex].bHackedTerrainType;
+}
+
+void CMapData::CreateShore(int left, int top, int right, int bottom, BOOL bRemoveUseless)
+{
+	int shorePieces = shoreset; 
+	int greenTiles = greenset;
+	int waterSet = waterset;
+	if (shorePieces < 0 || shorePieces > tilesets_start.size()
+		|| greenTiles < 0 || greenTiles > tilesets_start.size()
+		|| waterSet < 0 || waterSet > tilesets_start.size()) {
+		return;
+	}
+
+	auto constexpr shoreGroupCount = 42;
+	auto constexpr largeShoreStart = 40;
+	auto constexpr largeShoreEnd = 42;
+	int tileStart = tilesets_start[shorePieces];
+	int tileLast = tilesets_start[shorePieces + 1] - 1;
+	if (tileLast - tileStart < (shoreGroupCount - 1) || tileLast >= *tiledata_count) {
+		return;
+	}
+
+	int waterSetStart = tilesets_start[waterSet];
+	int waterSetLast = tilesets_start[waterSet + 1] - 1;
+	int greenTile = tilesets_start[greenTiles];
+
+	std::vector<int> SmallWaterTiles;
+	std::vector<int> SpecialShores;
+	// 0-5: large water pieces
+	// 6-7: large water debris
+	// 8-12: small water pieces
+	// 13: small water debris
+	auto constexpr largeWaterEnd = 8;
+	auto constexpr smallWaterEnd = 13;
+	for (int i = largeWaterEnd; i < smallWaterEnd; i++) {
+		SmallWaterTiles.push_back(i + tilesets_start[waterSet]);
+	}
+	for (int i = largeShoreStart; i < largeShoreEnd; i++) {
+		SpecialShores.push_back(i + tilesets_start[shorePieces]);
+	}
+	// a trick to avoid affecting other shorelines
+	// ignore the working shore
+	auto tileNameHasShore = [&](int setIdx) {
+		if (setIdx == shorePieces) {
+			return false;
+		}
+		CString secName;
+		secName.Format("TileSet%04d", setIdx);
+		CString setName = tiles->GetString(secName, "SetName");
+		setName.MakeLower();
+		if (setName.Find("shore") != -1) {
+			return true;
+		}
+		return false;
+	};
+
+	std::vector<int> tiles_2x3;
+	std::vector<int> tiles_3x2;
+	std::vector<int> tiles_2x2;
+	std::vector<int> tiles_2x2Corners;
+	std::vector<int> tiles_1x2;
+	std::vector<int> tiles_2x1;
+
+	// 1 means rough (or land), 2 means beach (or water)
+	int shoreMatch_2x3[2][3] = { 0 };
+	int shoreMatch_3x2[3][2] = { 0 };
+	int shoreMatch_2x2[2][2] = { 0 };
+	int shoreMatch_1x2[1][2] = { 0 };
+	int shoreMatch_2x1[2][1] = { 0 };
+
+	for (int i = tileStart; i <= tileLast; i++) {
+		auto const& tile = (*tiledata)[i];
+
+		if (tile.cy == 2 && tile.cx == 3) {
+			tiles_2x3.push_back(i);
 			continue;
 		}
 
-		int set = atoi(generalSec.Nth(idx).second);
-		if (atoi(val)) {
-			softsets[set] = 1;
+		if (tile.cy == 3 && tile.cx == 2) {
+			tiles_3x2.push_back(i);
+			continue;
 		}
+
+		if (tile.cy == 2 && tile.cx == 2) {
+			int beachCount = 0;
+			for (int m = 0; m < 2; m++) {
+				for (int n = 0; n < 2; n++) {
+					int subTileidx = n * 2 + m;
+					auto ttype = GetHackedTerrainType(i, subTileidx);
+					if (ttype == TERRAINTYPE_WATER) {
+						beachCount++;
+					}
+				}
+			}
+			if (beachCount == 1 || beachCount == 3) {
+				tiles_2x2Corners.push_back(i);
+			} else {
+				tiles_2x2.push_back(i);
+			}
+			continue;
+		}
+
+		if (tile.cy == 1 && tile.cx == 2) {
+			tiles_1x2.push_back(i);
+			continue;
+		}
+
+		if (tile.cy == 2 && tile.cx == 1) {
+			tiles_2x1.push_back(i);
+			continue;
+		}
+	}
+	
+	for (int x = left - 5; x < right + 5; x++) {
+		for (int y = top - 5; y < bottom + 5; y++) {
+			if (!IsCoordInMap(x, y)) {
+				continue;
+			}
+
+			int pos = GetCoordIndex(x, y);
+			auto cell = GetFielddataAt(x, y);
+			ASSERT(cell != nullptr);
+			cell->bShoreProcessed = false;
+			cell->bShoreLATNeeded = false;
+		}
+	}
+
+	for (int x = left; x < right; x++) {
+		for (int y = top; y < bottom; y++) {
+			if (!IsCoordInMap(x, y)) {
+				continue;
+			}
+
+			auto cell = GetFielddataAt(x, y);
+			int tileIndex = cell->wGround;
+			if (tileIndex == 0xFFFF) {
+				tileIndex = 0;
+			}
+
+			// remove broken beaches
+			if ((tileIndex >= tileStart && tileIndex <= tileLast) && !IsTileIntact(x, y)) {
+				auto ttype = GetHackedTerrainType(tileIndex, cell->bSubTile);
+				if (ttype == TERRAINTYPE_GROUND) {
+					SetTileAt(GetCoordIndex(x, y), greenTile, 0);
+				} else if (ttype == TERRAINTYPE_WATER) {
+					SetTileAt(GetCoordIndex(x, y), SmallWaterTiles[rand() * (SmallWaterTiles.size() - 1) / RAND_MAX], 0);
+				}
+			}
+			// keep special shores
+			else if (std::find(SpecialShores.begin(), SpecialShores.end(), tileIndex) != SpecialShores.end() && IsTileIntact(x, y)) {
+				for (auto& mc : GetIntactTileCoords(x, y, true)) {
+					if (!IsCoordInMap(mc.x, mc.y)) {
+						continue;
+					}
+					int pos = GetCoordIndex(mc.x, mc.y);
+					auto& cell = fielddata[pos];
+
+					cell.bShoreProcessed = true;
+				}
+			}
+		}
+	}
+
+	// remove 1x1 land and water
+	// only used in bmp2map, not necessary
+	if (bRemoveUseless) {
 
 	}
 
-	last_succeeded_operation = 7001;
+	auto process = [&](int w, int h, std::vector<int>tiles, int* shoreMatch) {
+			for (int x = left; x < right; x++) {
+				for (int y = top; y < bottom; y++) {
+					if (!IsCoordInMap(x, y)) {
+						continue;
+					}
 
-	// remove partial shore pieces (wrong ones)
-	for (xx = left - 2; xx < right + 2; xx++) {
-		for (yy = top - 2; yy < bottom + 2; yy++) {
+					const int pos = GetCoordIndex(x, y);
+					auto const cell = GetFielddataAt(pos);
 
-			if (xx < 1 || yy < 1 || xx + yy<mapwidth + 1 || xx + yy>mapwidth + mapheight * 2 || (yy + 1 > mapwidth && xx - 1 < yy - mapwidth) || (xx + 1 > mapwidth && yy + mapwidth - 1 < xx)) continue;
+					if (cell->bShoreProcessed) {
+						continue;
+					}
 
-			int pos = xx + yy * isosize;
-			if (noChange[pos]) continue;
+					std::vector<int> targetBeachTiles;
 
-			FIELDDATA* fd = Map->GetFielddataAt(pos);
-			int ground = fd->wGround;
-			if (ground == 0xFFFF) ground = 0;
-			TILEDATA& td = (*tiledata)[ground];
-			if (td.wTileSet != shoreset) continue;
-
-			// we have a shore piece here. check if it is set correct
-			BOOL bCorrect = TRUE;
-
-			int of = fd->bSubTile;
-
-			int ox = of / td.cy;
-			int oy = of % td.cy;
-
-
-			int xxx, yyy;
-			int p = 0;
-			for (xxx = xx - ox; xxx < xx + td.cx - ox; xxx++) {
-				for (yyy = yy - oy; yyy < yy + td.cy - oy; yyy++) {
-					int pos = xxx + yyy * isosize;
-					if (td.tiles[p].pic != NULL) {
-						FIELDDATA* curf = Map->GetFielddataAt(pos);
-						int curg = curf->wGround;
-						if (curg == 0xFFFF) curg = 0;
-
-						if (curg != ground || curf->bSubTile != p) {
-							bCorrect = FALSE;
+					bool breakCheck = false;
+					const int oriHeight = cell->bHeight;
+					for (int m = 0; m < w; m++) {
+						if (breakCheck) {
 							break;
 						}
-					}
-					p++;
-				}
-				if (!bCorrect) break;
-			}
+						for (int n = 0; n < h; n++) {
+							if (breakCheck) {
+								break;
+							}
+							if (!IsCoordInMap(x + n, y + m)) {
+								continue;
+							}
 
-			if (!bCorrect) {
-				int iWaterFound = 0;
-				/*for(xxx=xx-1;xxx<=xx+1;xxx++)
-				{
-					for(yyy=yy-1;yyy<=yy+1;yyy++)
-					{
-						if(xxx==xx && yyy==yy) continue;
+							const int whPos = GetCoordIndex(x + n, y + m);
+							auto whCell = GetFielddataAt(whPos);
+							int tileIndex = whCell->wGround;
+							if (tileIndex == 0xFFFF) {
+								tileIndex = 0;
+							}
 
-						int pos=xxx+yyy*isosize;
-						FIELDDATA* curf=Map->GetFielddataAt(pos);
-						int curg=curf->wGround;
-						if(curg==0xFFFF) curg=0;
+							// skip intact tiles on the edges
+							if (x + n < left + 1 || y + m < top + 1 || x + n >= right - 1 || y + m >= bottom - 1) {
+								if (IsTileIntact(x + n, y + m) && !IsTileIntact(x + n, y + m, left, top, right, bottom)) {
+									for (auto& mc : GetIntactTileCoords(x + n, y + m, true)) {
+										int edgePos = GetCoordIndex(mc.x, mc.y);
+										GetFielddataAt(edgePos)->bShoreProcessed = true;
+									}
+								}
+							}
 
-						if((*tiledata)[curg].tiles[curf->bSubTile].bHackedTerrainType==TERRAINTYPE_WATER)
-							iWaterFound++;
+							if ((*tiledata)[tileIndex].tiles[whCell->bSubTile].bDirection != 0) {
+								whCell->bShoreProcessed = true;
+							}
 
-					}
-				}*/
+							if (whCell->bHeight != oriHeight) {
+								whCell->bShoreProcessed = true;
+							}
 
-				int pos = xx + yy * isosize;
-				FIELDDATA* curf = Map->GetFielddataAt(pos);
-				int curg = curf->wGround;
-				if (curg == 0xFFFF) curg = 0;
+							if (whCell->bShoreProcessed) {
+								breakCheck = true;
+							}
 
-				if ((*tiledata)[curg].tiles[curf->bSubTile].bHackedTerrainType == TERRAINTYPE_WATER) iWaterFound = 8;
+							auto const ttype = GetHackedTerrainType(tileIndex, whCell->bSubTile);
 
-				if (iWaterFound > 7) {
-					for (i = 0; i < *tiledata_count; i++) {
-						if ((*tiledata)[i].wTileSet == waterset && (*tiledata)[i].cx == 1 && (*tiledata)[i].cy == 1) break;
-					}
-					SetTileAt(xx + yy * isosize, i, 0);
-					noChange[xx + yy * isosize] = FALSE;
-					//replaced[xx+yy*isosize]=TRUE;
-				} else {
-					SetTileAt(xx + yy * isosize, 0, 0);
-					noChange[xx + yy * isosize] = FALSE;
-					//replaced[xx+yy*isosize]=TRUE;
+							if (ttype == TERRAINTYPE_GROUND) {
+								auto const& tile = (*tiledata)[tileIndex];
+								bool skip = false;
+								// check cliffs with beachs
+								for (int m = 0; m < tile.cy; m++) {
+									for (int n = 0; n < tile.cx; n++) {
+										int subIdx = n * tile.cy + m;
+										auto ttype2 = GetHackedTerrainType(tileIndex, subIdx);
+										if (ttype2 == TERRAINTYPE_IMPASSABLE) {
+											skip = true;
+										}
+									}
+								}
+								if (tileNameHasShore(tile.wTileSet)) {
+									skip = true;
+								}
+								shoreMatch[m * h + n] = skip ? 0 : 1;
+							} else if ((tileIndex >= tileStart && tileIndex <= tileLast && ttype == TERRAINTYPE_WATER)
+								|| (tileIndex >= waterSetStart && tileIndex <= waterSetLast && ttype == TERRAINTYPE_WATER)) {
+								shoreMatch[m * h + n] = 2;
+							} else {
+								shoreMatch[m * h + n] = 0;
+							}
 
-				}
-			}
-
-		}
-	}
-
-
-	// remove too small water and ground pieces (NEW)
-	if (bRemoveUseless) {
-		for (xx = left; xx < right; xx++) {
-			for (yy = top; yy < bottom; yy++) {
-
-				if (xx < 1 || yy < 1 || xx + yy<mapwidth + 1 || xx + yy>mapwidth + mapheight * 2 || (yy + 1 > mapwidth && xx - 1 < yy - mapwidth) || (xx + 1 > mapwidth && yy + mapwidth - 1 < xx)) continue;
-
-				int dwPos = xx + yy * isosize;
-
-				//if(noChange[dwPos]) continue;
-
-				FIELDDATA* fd = Map->GetFielddataAt(dwPos);
-				int ground = fd->wGround;
-				if (ground == 0xFFFF) ground = 0;
-				TILEDATA& td = (*tiledata)[ground];
-
-				if (softsets.find(td.wTileSet) == softsets.end()) continue;
-
-				if (td.tiles[fd->bSubTile].bHackedTerrainType != TERRAINTYPE_WATER && td.tiles[fd->bSubTile].bHackedTerrainType != TERRAINTYPE_GROUND) continue;
-
-				int ts[3][3];  // terrain info
-				int i, e;
-				for (i = 0; i < 3; i++) {
-					for (e = 0; e < 3; e++) {
-						int pos = dwPos + (i - 1) + (e - 1) * m_IsoSize;
-						if (pos < 0 || pos >= fielddata_size) {
-							ts[i][e] = 0;
-						} else {
-							FIELDDATA m2 = *GetFielddataAt(pos);
-							if (m2.wGround == 0xFFFF) m2.wGround = 0;
-
-							ts[i][e] = (*tiledata)[m2.wGround].tiles[m2.bSubTile].bHackedTerrainType;
 						}
 					}
-				}
-
-
-				if ((ts[1][0] != ts[1][1] && ts[1][2] != ts[1][1]) ||
-					(ts[0][1] != ts[1][1] && ts[2][1] != ts[1][1])) {
-					if (ts[1][1] == TERRAINTYPE_WATER) {
-						SetTileAt(dwPos, 0, 0);
-						//replaced[dwPos]=TRUE;
-					} else if (ts[1][1] == TERRAINTYPE_GROUND) {
-						if ((ts[1][0] == TERRAINTYPE_WATER && ts[1][2] == TERRAINTYPE_WATER) || (ts[0][1] == TERRAINTYPE_WATER && ts[2][1] == TERRAINTYPE_WATER)) {
-							SetTileAt(dwPos, smallwater, 0);
-							//replaced[dwPos]=TRUE;
+					if (breakCheck) {
+						continue;
+					}
+					for (auto index : tiles) {
+						bool match = true;
+						for (int m = 0; m < w; m++) {
+							for (int n = 0; n < h; n++) {
+								int subTileidx = n * w + m;
+								auto ttype = GetHackedTerrainType(index, subTileidx);
+								int thisType = -1;
+								if (ttype == TERRAINTYPE_GROUND) {
+									thisType = 1;
+								}
+								if (ttype == TERRAINTYPE_WATER) {
+									thisType = 2;
+								}
+								if (shoreMatch[m * h + n] != thisType) {
+									match = false;
+								}
+							}
+						}
+						if (match) {
+							targetBeachTiles.push_back(index);
 						}
 					}
-				}
+					if (!targetBeachTiles.empty()) {
+						int targetBeachTile = targetBeachTiles[rand() * (targetBeachTiles.size() - 1) / RAND_MAX];
+						for (int m = 0; m < w; m++) {
+							for (int n = 0; n < h; n++) {
+								if (!IsCoordInMap(x + n, y + m)) {
+									continue;
+								}
 
-			}
-		}
-	}
+								int whPos = GetCoordIndex(x + n, y + m);
+								SetTileAt(whPos, targetBeachTile, n* w + m);								
+								GetFielddataAt(whPos)->bShoreProcessed = true;
 
-
-	last_succeeded_operation = 7003;
-
-	// retrieve non-changeable fields
-	for (xx = left; xx < right; xx++) {
-		for (yy = top; yy < bottom; yy++) {
-			if (xx < 1 || yy < 1 || xx + yy<mapwidth + 1 || xx + yy>mapwidth + mapheight * 2 || (yy + 1 > mapwidth && xx - 1 < yy - mapwidth) || (xx + 1 > mapwidth && yy + mapwidth - 1 < xx)) continue;
-
-			int pos = xx + yy * isosize;
-			FIELDDATA* fd = GetFielddataAt(pos);
-			int ground = fd->wGround;
-			if (ground == 0xFFFF) ground = 0;
-
-			tsets[pos] = (*tiledata)[ground].wTileSet;
-			terrain[pos] = (*tiledata)[ground].tiles[fd->bSubTile].bHackedTerrainType;
-			tile[pos] = ground;
-
-			if (xx >= left && xx < right && yy >= top && yy < bottom) {
-
-				if (softsets.find((*tiledata)[ground].wTileSet) == softsets.end()/*(*tiledata)[ground].wTileSet==cliffset || (*tiledata)[ground].wTileSet==watercliffset*/) {
-					noChange[pos] = TRUE; continue;
-				}
-
-
-
-				TILEDATA& td = (*tiledata)[ground];
-
-				if (td.wTileSet == shoreset) {
-					int of = fd->bSubTile;
-
-					int ox = of / td.cy;
-					int oy = of % td.cy;
-
-					if (xx - ox < left || yy - oy < top || xx - ox + td.cx >= right || yy - oy + td.cy >= bottom) {
-						/*if(!replaced[pos])*/ noChange[pos] = TRUE;
+							}
+						}
 					}
+
 				}
 			}
-		}
-	}
+		};
 
+	process(2, 3, tiles_2x3, &shoreMatch_2x3[0][0]);
+	process(3, 2, tiles_3x2, &shoreMatch_3x2[0][0]);
+	process(2, 2, tiles_2x2Corners, &shoreMatch_2x2[0][0]);
+	process(2, 2, tiles_2x2, &shoreMatch_2x2[0][0]);
+	process(1, 2, tiles_1x2, &shoreMatch_1x2[0][0]);
+	process(2, 1, tiles_2x1, &shoreMatch_2x1[0][0]);
 
-
-
-	/*CProgressCtrl pc;
-	RECT r,rw;
-	GetWindowRect(&r);
-	rw.left=r.left+(r.right-r.left)/2-80;
-	rw.top=r.top+(r.bottom-r.top)/2-15;
-	rw.right=rw.left+160;
-	rw.bottom=rw.top+30;
-	pc.Create(WS_POPUPWINDOW | PBS_SMOOTH, rw, m_view.m_isoview, 0);*/
-
-	int tStart, tEnd;
-	tStart = -1;
-	tEnd = 0;
-	for (i = 0; i < *tiledata_count; i++) {
-		if ((*tiledata)[i].wTileSet == shoreset) {
-			if (tStart < 0) tStart = i;
-			if (i > tEnd) tEnd = i;
-		}
-	}
-
-	/*pc.SetRange(0, (tEnd-tStart)*2);
-		pc.ShowWindow(SW_SHOW);
-		pc.RedrawWindow();*/
-
-
-	last_succeeded_operation = 7004;
-
-	for (i = tStart; i <= tEnd; i++) {
-		/*pc.SetPos(i-tStart);
-		pc.UpdateWindow();*/
-		TILEDATA& td = (*tiledata)[i];
-
-		if (td.wTileSet == shoreset) {
-			int pos = i - tStart;
-			if (pos != 4 && pos != 5 && pos != 12 && pos != 13 && pos != 20 && pos != 21 && pos != 28 && pos != 29
-				&& pos != 6 && pos != 7 && pos != 14 && pos != 15 && pos != 22 && pos != 23 && pos != 30 && pos != 31 && (pos < 32 || pos>39))
+	// now add green tile around beaches
+	for (int x = left - 1; x < right + 1; x++) {
+		for (int y = top - 1; y < bottom + 1; y++) {
+			if (!IsCoordInMap(x, y)) {
 				continue;
-
-			int x, y;
-			int water_count = 0;
-			int p = 0;
-			for (x = 0; x < td.cx; x++) {
-				for (y = 0; y < td.cy; y++) {
-					if (td.tiles[p].bHackedTerrainType == TERRAINTYPE_WATER)
-						water_count++;
-					p++;
-				}
 			}
 
-			// tsets now has the tileset of every single field in range (x+16, y+16)
-			// terrain has the terrain type of every single field
-			int max_x = td.cx < 16 ? td.cx : 16;
-			int max_y = td.cy < 16 ? td.cy : 16;
+			int pos = GetCoordIndex(x, y);
+			auto cell = GetFielddataAt(pos);
+			int tileIndex = cell->wGround;
+			if (tileIndex == 0xFFFF) {
+				tileIndex = 0;
+			}
 
-			for (x = left; x < right; x++) {
-				for (y = top; y < bottom; y++) {
-					last_succeeded_operation = 7010;
+			if ((*tiledata)[tileIndex].tiles[cell->bSubTile].bDirection != 0) {
+				continue;
+			}
 
-					int xx, yy;
+			auto tile = (*tiledata)[tileIndex];
+			auto ttype = GetHackedTerrainType(tileIndex, cell->bSubTile);
 
-					//if(!replaced[x+y*isosize] && (x<left || y<top || x>=right || y>=bottom)) continue;
-					if (x < 1 || y < 1 || x + y<mapwidth + 1 || x + y>mapwidth + mapheight * 2 || (y + 1 > mapwidth && x - 1 < y - mapwidth) || (x + 1 > mapwidth && y + mapwidth - 1 < x)) continue;
-
-
-					/*BOOL wat_ex=FALSE;
-					for(xx=x;xx<x+max_x;xx++)
-					{
-						for(yy=y;yy<y+max_y;yy++)
-						{
-							FIELDDATA* fd=Map->GetFielddataAt(xx+yy*isosize);
-							int ground=fd->wGround;
-							if(ground==0xFFFF) ground=0;
-							int tile_t=(*tiledata)[ground].tiles[fd->bSubTile].bHackedTerrainType;
-							if(tile_t==TERRAINTYPE_WATER || tile_t==0xa)
-								wat_ex=TRUE;
-							if(wat_ex) break;
+			if ((tileIndex < tileStart || tileIndex > tileLast)
+				&& (ttype == TERRAINTYPE_GROUND)) {
+				bool skip = false;
+				// check cliffs with beachs
+				for (int m = 0; m < tile.cy; m++) {
+					for (int n = 0; n < tile.cx; n++) {
+						const int subIdx = n * tile.cy + m;
+						auto const surroundingTType = GetHackedTerrainType(tileIndex, subIdx);
+						if (surroundingTType == TERRAINTYPE_IMPASSABLE) {
+							skip = true;
 						}
-						if(wat_ex) break;
 					}
-					if(!wat_ex) continue;*/
+				}
+				if (tileNameHasShore(tile.wTileSet)) {
+					skip = true;
+				}
+				if (skip) {
+					continue;
+				}
 
-					BOOL bFits = TRUE;
-					int p = 0;
-					for (xx = x; xx < x + max_x; xx++) {
-						for (yy = y; yy < y + max_y; yy++) {
-							if (xx >= isosize || yy >= isosize) continue;
+				const int loop[4][2] = { {0, -1},{0, 1},{1, 0},{-1, 0} };
+				for (auto const [offsetX, offsetY] : loop) {
+					const int newX = offsetX + x;
+					const int newY = offsetY + y;
 
-
-							int tpos = i - tStart;
-							int xadd = 0, yadd = 0;
-
-							/*
-							if(tpos>=0 && tpos<=7) xadd=1;
-							if(tpos>=6 && tpos<=15) yadd=1;
-							if(tpos>=14 && tpos<=23) xadd=-1;
-							if(tpos>=22 && tpos<=31) yadd=-1;
-							if(tpos>=30 && tpos<=31) xadd=1;
-
-							if(tpos>=32 && tpos<=33)
-							{
-								xadd=1; yadd=1;
-
-							}
-
-							if(tpos>=34 && tpos<=35)
-							{
-								xadd=-1; yadd=1;
-
-							}
-
-							if(tpos>=36 && tpos<=37)
-							{
-								xadd=-1; yadd=-1;
-
-							}
-
-							if(tpos>=38 && tpos<=39)
-							{
-								xadd=1; yadd=-1;
-
-							}*/
-
-							/*if(tpos>=32 && tpos<=33)
-							{
-								xadd=1; yadd=1;
-								if(
-								terrain[xx+1+yy*isosize]==TERRAINTYPE_WATER || terrain[xx+(yy+1)*isosize]==TERRAINTYPE_WATER
-								)
-								{bFits=FALSE; break;}
-							}
-
-							if(tpos>=34 && tpos<=35)
-							{
-								xadd=-1; yadd=1;
-								if(
-								terrain[xx-1+yy*isosize]==TERRAINTYPE_WATER || terrain[xx+(yy+1)*isosize]==TERRAINTYPE_WATER
-								)
-								{bFits=FALSE; break;}
-							}
-
-							if(tpos>=36 && tpos<=37)
-							{
-								xadd=-1; yadd=-1;
-								if(
-								terrain[xx-1+yy*isosize]==TERRAINTYPE_WATER || terrain[xx+(yy-1)*isosize]==TERRAINTYPE_WATER
-								)
-								{bFits=FALSE; break;}
-							}
-
-							if(tpos>=38 && tpos<=39)
-							{
-								xadd=1; yadd=-1;
-								if(
-								terrain[xx+1+yy*isosize]==TERRAINTYPE_WATER || terrain[xx+(yy-1)*isosize]==TERRAINTYPE_WATER
-								)
-								{bFits=FALSE; break;}
-							}*/
-
-							last_succeeded_operation = 7011;
-
-							if (xadd && yadd) {
-								if (tsets[xx + xadd + yy * isosize] == waterset || tsets[xx + (yy + yadd) * isosize] == waterset) {
-									bFits = FALSE;
-									break;
-								}
-							}
-
-
-							int pos_water = xx + xadd + (yy + yadd) * isosize;
-							int pos_data = xx + yy * isosize;
-
-
-
-							BYTE& tile_t = td.tiles[p].bHackedTerrainType;
-
-							if (tsets[pos_data] == shoreset) {
-								if (hasChanged[pos_data]) // only cancel if this routine set the shore
-								{
-									// curves are preferred
-									if ((max_x != 2 || max_y != 2 || water_count != 3)) {
-										if (!((max_x == 3 && max_y == 2) || (max_x == 2 && max_y == 3))) {
-											bFits = FALSE;
-											break;
-										}
-
-									}
-
-								}
-							}
-
-							last_succeeded_operation = 7012;
-
-							// one step curves
-							if (noChange[pos_data]) {
-								bFits = FALSE;
-								break;
-							}
-
-
-							// 2 big shore pieces need special treatment
-							if (tile[pos_data] <= tEnd && tile[pos_data] >= tEnd - 2)
-								bFits = FALSE;
-
-							if (tile_t == TERRAINTYPE_WATER) {
-								if (terrain[pos_water] != TERRAINTYPE_WATER) {
-									bFits = FALSE;
-								}
-							} else {
-								if (terrain[pos_water] != TERRAINTYPE_GROUND)
-									//if(tsets[pos_water]==waterset)
-								{
-									bFits = FALSE;
-								}
-							}
-
-
-							if (!bFits) break;
-							p++;
-						}
-						if (!bFits) break;
+					if (!IsCoordInMap(newX, newY)) {
+						continue;
 					}
-
-					last_succeeded_operation = 7012;
-
-					if (bFits) // ok, place shore (later we need to do random choose of the different tiles here
-					{
-						// find similar shore piece (randomness)
-						int count = 0;
-						int pieces[16];
-						int k;
-						TILEDATA& t_orig = (*tiledata)[i];
-						for (k = 0; k < *tiledata_count; k++) {
-							TILEDATA& t = (*tiledata)[k];
-
-							if (t.bMarbleMadness) continue;
-
-							if (t.cx != t_orig.cx || t.cy != t_orig.cy) continue;
-
-							if (k != 4 && k != 5 && k != 12 && k != 13 && k != 20 && k != 21 && k != 28 && k != 29
-								&& (k < 32 || k>39)) {
-							} else continue;
-
-							int xx, yy;
-							BOOL bSame = TRUE;
-							int p = 0;
-							for (xx = 0; xx < t.cx; xx++) {
-								for (yy = 0; yy < t.cy; yy++) {
-									if (t.tiles[p].bHackedTerrainType != t_orig.tiles[p].bHackedTerrainType)
-										bSame = FALSE;
-									p++;
-									if (!bSame) break;
-								}
-								if (!bSame) break;
-							}
-
-							if (bSame && count < 16) {
-								pieces[count] = k;
-								count++;
-							}
-						}
-
-						last_succeeded_operation = 7013;
-
-						k = ((float)rand() * count) / (float)RAND_MAX;
-						if (k >= count) k = count - 1;
-						k = pieces[k];
-
-						TILEDATA& t = (*tiledata)[k];
-						int p = 0;
-						int xx, yy;
-						int startheight = GetHeightAt(x + y * isosize);
-						for (xx = 0; xx < t.cx; xx++) {
-							for (yy = 0; yy < t.cy; yy++) {
-								if (x + xx >= isosize || y + yy >= isosize) continue;
-
-								int pos = x + xx + (y + yy) * isosize;
-								last_succeeded_operation = 7014;
-
-								if (t.tiles[p].pic != NULL) {
-									SetHeightAt(pos, startheight + t.tiles[p].bZHeight);
-									SetTileAt(pos, k, p);
-									last_succeeded_operation = 7015;
-									tile[pos] = i;
-									tsets[pos] = (*tiledata)[k].wTileSet;
-									terrain[pos] = (*tiledata)[k].tiles[p].bHackedTerrainType;
-									hasChanged[pos] = TRUE;
-									if ((t.cx == 3 && t.cy == 2) || (t.cx == 2 && t.cy == 3)) noChange[pos] = TRUE;
-								}
-								p++;
-							}
-						}
-
-
+					int newPos = GetCoordIndex(newX, newY);
+					auto newCell = GetFielddataAt(newPos);
+					int newTileIndex = newCell->wGround;
+					if (newTileIndex == 0xFFFF) {
+						newTileIndex = 0;
 					}
-
+					auto ttype2 = GetHackedTerrainType(newTileIndex, newCell->bSubTile);
+					if (newTileIndex >= tileStart && newTileIndex <= tileLast
+						&& ttype2 == TERRAINTYPE_GROUND
+						&& newCell->bShoreProcessed) {
+						SetTileAt(pos, greenTile, 0);
+						cell->bShoreLATNeeded = true;
+						break;
+					}
 				}
 			}
 		}
 	}
-
-	last_succeeded_operation = 7005;
-
-
-	for (i = tStart; i <= tEnd; i++) {
-		/*pc.SetPos(i-tStart+(tEnd-tStart));
-		pc.UpdateWindow();*/
-		TILEDATA& td = (*tiledata)[i];
-
-		if ((*tiledata)[i].wTileSet == shoreset) {
-			int pos = i - tStart;
-			if (pos != 4 && pos != 5 && pos != 12 && pos != 13 && pos != 20 && pos != 21 && pos != 28 && pos != 29
-				&& pos != 6 && pos != 7 && pos != 14 && pos != 15 && pos != 22 && pos != 23 && pos != 30 && pos != 31 && (pos < 32 || pos>39))
-
-			{
-			} else continue;
-
-			int x, y;
-			int water_count = 0;
-			int p = 0;
-			for (x = 0; x < td.cx; x++) {
-				for (y = 0; y < td.cy; y++) {
-					if (td.tiles[p].bHackedTerrainType == TERRAINTYPE_WATER)
-						water_count++;
-					p++;
-				}
+	// LAT
+	for (int x = left - 1; x < right + 1; x++) {
+		for (int y = top - 1; y < bottom + 1; y++) {
+			if (!IsCoordInMap(x, y)) {
+				continue;
 			}
-
-
-			// tsets now has the tileset of every single field in range (x+16, y+16)
-			// terrain has the terrain type of every single field
-			int max_x = td.cx < 16 ? td.cx : 16;
-			int max_y = td.cy < 16 ? td.cy : 16;
-
-			for (x = left; x < right; x++) {
-				for (y = top; y < bottom; y++) {
-					int xx, yy;
-
-					//if(!replaced[x+y*isosize] && (x<left || y<top || x>=right || y>=bottom)) continue;
-					if (x < 1 || y < 1 || x + y<mapwidth + 1 || x + y>mapwidth + mapheight * 2 || (y + 1 > mapwidth && x - 1 < y - mapwidth) || (x + 1 > mapwidth && y + mapwidth - 1 < x)) continue;
-
-
-
-
-
-					/*BOOL wat_ex=FALSE;
-					for(xx=x;xx<x+max_x;xx++)
-					{
-						for(yy=y;yy<y+max_y;yy++)
-						{
-							FIELDDATA* fd=Map->GetFielddataAt(xx+yy*isosize);
-							int ground=fd->wGround;
-							if(ground==0xFFFF) ground=0;
-							int tile_t=(*tiledata)[ground].tiles[fd->bSubTile].bHackedTerrainType;
-							if(tile_t==TERRAINTYPE_WATER || tile_t==0xa)
-								wat_ex=TRUE;
-							if(wat_ex) break;
-						}
-						if(wat_ex) break;
-					}
-					if(!wat_ex) continue;*/
-
-
-					BOOL bFits = TRUE;
-					int p = 0;
-					for (xx = x; xx < x + max_x; xx++) {
-						for (yy = y; yy < y + max_y; yy++) {
-							if (xx >= isosize || yy >= isosize) continue;
-
-							int tpos = i - tStart;
-							int xadd = 0, yadd = 0;
-
-							/*if(tpos>=0 && tpos<=7) xadd=1;
-							if(tpos>=6 && tpos<=15) yadd=1;
-							if(tpos>=14 && tpos<=23) xadd=-1;
-							if(tpos>=22 && tpos<=31) yadd=-1;
-							if(tpos>=30 && tpos<=31) xadd=1;
-
-							if(tpos>=32 && tpos<=33)
-							{
-								xadd=1; yadd=1;
-
-							}
-
-							if(tpos>=34 && tpos<=35)
-							{
-								xadd=-1; yadd=1;
-
-							}
-
-							if(tpos>=36 && tpos<=37)
-							{
-								xadd=-1; yadd=-1;
-
-							}
-
-							if(tpos>=38 && tpos<=39)
-							{
-								xadd=1; yadd=-1;
-
-							}
-
-
-							if(xadd && yadd)
-							{
-								if(tsets[xx+xadd+yy*isosize]==waterset || tsets[xx+(yy+yadd)*isosize]==waterset)
-								{
-									bFits=FALSE;
-									break;
-								}
-							}*/
-
-
-
-
-							int pos_water = xx + xadd + (yy + yadd) * isosize;
-							int pos_data = xx + yy * isosize;
-
-							BYTE& tile_t = td.tiles[p].bHackedTerrainType;
-
-							if (tsets[pos_data] == shoreset) {
-								if (hasChanged[pos_data]) // only cancel if this routine set the shore
-								{
-									// curves are preferred
-									if ((max_x != 2 || max_y != 2 || water_count != 3)) {
-										if (!((max_x == 3 && max_y == 2) || (max_x == 2 && max_y == 3))) {
-											bFits = FALSE;
-											break;
-										}
-									}
-
-								}
-							}
-
-							// one step curves
-							if (noChange[pos_data]) {
-								bFits = FALSE;
-								break;
-							}
-
-
-							if (tile[pos_data] <= tEnd && tile[pos_data] >= tEnd - 2)
-								bFits = FALSE;
-
-							if (tile_t == TERRAINTYPE_WATER) {
-								if (terrain[pos_water] != TERRAINTYPE_WATER) {
-									bFits = FALSE;
-								}
-							} else {
-								if (terrain[pos_water] != TERRAINTYPE_GROUND)
-									//if(tsets[pos_water]==waterset)
-								{
-									bFits = FALSE;
-								}
-							}
-
-
-							if (!bFits) break;
-							p++;
-						}
-						if (!bFits) break;
-					}
-
-					last_succeeded_operation = 7031;
-					if (bFits) // ok, place shore 
-					{
-						// find similar shore piece (randomness)
-						int count = 0;
-						int pieces[16];
-						int k;
-						TILEDATA& t_orig = (*tiledata)[i];
-						for (k = 0; k < *tiledata_count; k++) {
-							TILEDATA& t = (*tiledata)[k];
-							if (t.cx != t_orig.cx || t.cy != t_orig.cy) continue;
-
-							if (t.bMarbleMadness) continue;
-
-							if (k != 4 && k != 5 && k != 12 && k != 13 && k != 20 && k != 21 && k != 28 && k != 29
-								&& (k < 32 || k>39)) {
-							} else continue;
-
-							int xx, yy;
-							BOOL bSame = TRUE;
-							int p = 0;
-							for (xx = 0; xx < t.cx; xx++) {
-								for (yy = 0; yy < t.cy; yy++) {
-									if (t.tiles[p].bHackedTerrainType != t_orig.tiles[p].bHackedTerrainType)
-										bSame = FALSE;
-									p++;
-									if (!bSame) break;
-								}
-								if (!bSame) break;
-							}
-
-							if (bSame && count < 16) {
-								pieces[count] = k;
-								count++;
-							}
-						}
-
-						last_succeeded_operation = 7032;
-
-						k = ((float)rand() * count) / (float)RAND_MAX;
-						if (k >= count) k = count - 1;
-						k = pieces[k];
-
-						TILEDATA& t = (*tiledata)[k];
-						int p = 0;
-						int xx, yy;
-						int startheight = GetHeightAt(x + y * isosize);
-						for (xx = 0; xx < t.cx; xx++) {
-							for (yy = 0; yy < t.cy; yy++) {
-								if (x + xx >= isosize || y + yy >= isosize) continue;
-
-								int pos = x + xx + (y + yy) * isosize;
-
-								if (t.tiles[p].pic != NULL) {
-									SetHeightAt(pos, startheight + t.tiles[p].bZHeight);
-									SetTileAt(pos, k, p);
-									tile[pos] = i;
-									tsets[pos] = (*tiledata)[k].wTileSet;
-									terrain[pos] = (*tiledata)[k].tiles[p].bHackedTerrainType;
-									hasChanged[pos] = TRUE;
-									if ((t.cx == 3 && t.cy == 2) || (t.cx == 2 && t.cy == 3)) noChange[pos] = TRUE;
-								}
-								p++;
-							}
-						}
-					}
-
-				}
+			int pos = GetCoordIndex(x, y);
+			auto const cell = GetFielddataAt(pos);
+			if (cell->bShoreLATNeeded) {
+				SmoothAllAt(pos);
 			}
 		}
 	}
-
-	last_succeeded_operation = 7006;
-
-	memset(hasChanged, 0, sizeof(BOOL) * isosize * isosize);
-
-	// now make LAT (RA2 only)
-
-#ifdef RA2_MODE
-	int x, y;
-	for (x = left; x < right; x++) {
-		for (y = top; y < bottom; y++) {
-			int xx, yy;
-			if (x < 1 || y < 1 || x + y<mapwidth + 1 || x + y>mapwidth + mapheight * 2 || (y + 1 > mapwidth && x - 1 < y - mapwidth) || (x + 1 > mapwidth && y + mapwidth - 1 < x)) continue;
-
-			int pos = x + y * isosize;
-
-			if (noChange[pos]) continue;
-			if (terrain[pos] == TERRAINTYPE_GROUND && tsets[pos] != shoreset && tsets[pos] != cliffset && tsets[pos] != watercliffset) {
-				int i, e;
-				BOOL bShoreFound = FALSE;
-				for (i = x - 1; i <= x + 1; i++) {
-					for (e = y - 1; e <= y + 1; e++) {
-						if (tsets[i + e * isosize] == shoreset) bShoreFound = TRUE;
-						if (bShoreFound) break;
-					}
-					if (bShoreFound) break;
-				}
-
-				if (bShoreFound) {
-					int sandtile = tiles->GetInteger("General", "GreenTile");
-					int sandlat = tiles->GetInteger("General", "ClearToGreenLat");
-
-					int i;
-					for (i = 0; i < *tiledata_count; i++)
-						if ((*tiledata)[i].wTileSet == sandtile) break;
-					Map->SetTileAt(pos, i, 0);
-					hasChanged[pos] = TRUE;
-
-				}
-
-			}
-		}
-	}
-
-	for (x = left - 1; x < right + 1; x++) {
-		for (y = top - 1; y < bottom + 1; y++) {
-			int xx, yy;
-			if (x < 1 || y < 1 || x + y<mapwidth + 1 || x + y>mapwidth + mapheight * 2 || (y + 1 > mapwidth && x - 1 < y - mapwidth) || (x + 1 > mapwidth && y + mapwidth - 1 < x)) continue;
-
-			int pos = x + y * isosize;
-			if (noChange[pos]) continue;
-
-			if (terrain[pos] == TERRAINTYPE_GROUND && tsets[pos] != shoreset && tsets[pos] != cliffset && tsets[pos] != watercliffset) {
-				int i, e;
-				BOOL bShoreFound = FALSE;
-				BOOL bSomethingChanged = FALSE;
-				for (i = x - 1; i <= x + 1; i++) {
-					for (e = y - 1; e <= y + 1; e++) {
-						if (tsets[i + e * isosize] == shoreset) bShoreFound = TRUE;
-						if (hasChanged[i + e * isosize]) bSomethingChanged = TRUE;
-						if (bShoreFound && hasChanged[i + e * isosize]) break;
-					}
-					if (bShoreFound && hasChanged[i + e * isosize]) break;
-				}
-
-
-
-				if (bShoreFound && hasChanged) {
-					int sandtile = tiles->GetInteger("General", "GreenTile");
-					int sandlat = tiles->GetInteger("General", "ClearToGreenLat");
-
-
-					SmoothAt(pos, sandtile, sandlat, tiles->GetInteger("General", "ClearTile"));
-				}
-
-			}
-		}
-	}
-#endif
-
-
-
-	//delete[] replaced;
-	delete[] hasChanged;
-	delete[] noChange;
-	delete[] tsets;
-	delete[] terrain;
-	delete[] tile;
-
-	//pc.DestroyWindow();
-
-
-
 }
 
 BOOL CMapData::IsMultiplayer()
@@ -5921,11 +5674,12 @@ void CMapData::Paste(int x, int y, int z_mod)
 	CloseClipboard();
 }
 
-void CMapData::GetStructurePaint(int index, STRUCTUREPAINT* lpStructurePaint) const
+void CMapData::GetStructurePaint(int index, STRUCTUREPAINT& structurePaint) const
 {
-	if (index < 0 || index >= m_structurepaint.size()) return;
-
-	*lpStructurePaint = m_structurepaint[index];
+	auto const it = m_structurepaint.find(index);
+	if (it != m_structurepaint.end()) {
+		structurePaint = it->second;
+	}
 }
 
 void CMapData::InitMinimap()
@@ -5989,7 +5743,7 @@ int CMapData::CalcMoneyOnMap()
 {
 	int i;
 	int money = 0;
-	for (i = 0; i < fielddata_size; i++) {
+	for (i = 0; i < fielddata.size(); i++) {
 		FIELDDATA& fd = fielddata[i];
 
 		BYTE& ovrl = fd.overlay;
@@ -6111,53 +5865,54 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 	CString* ct_tag = new(CString[GetCelltagCount()]);
 	int ct_count = GetCelltagCount();
 	DWORD* ct_pos = new(DWORD[GetCelltagCount()]);
-
-	int i;
+	auto baseNodes = CollectAllBaseNodes();
+	auto const smudgeSize = m_mapfile["Smudge"].Size();
 
 	// Now copy the objects into above arrays and delete them from map
-	for (i = 0; i < inf_count; i++) {
+	for (int i = 0; i < inf_count; i++) {
 		INFANTRY obj;
 		GetInfantryData(i, &obj);
 		inf[i] = obj;
 	}
-	for (i = inf_count - 1; i >= 0; i--)
+	for (int i = inf_count - 1; i >= 0; i--)
 		DeleteInfantry(i);
 
-	for (i = 0; i < air_count; i++) {
+	for (int i = 0; i < air_count; i++) {
 		AIRCRAFT obj;
 		GetAircraftData(i, &obj);
 
 		air[i] = obj;
 	}
-	for (i = air_count - 1; i >= 0; i--)
+	for (int i = air_count - 1; i >= 0; i--)
 		DeleteAircraft(i);
 
-	for (i = 0; i < str_count; i++) {
+	for (int i = 0; i < str_count; i++) {
 		STRUCTURE obj;
 		GetStructureData(i, &obj);
 
 		str[i] = obj;
 	}
-	for (i = str_count - 1; i >= 0; i--)
-		DeleteStructure(i);
+	for (int i = str_count - 1; i >= 0; i--) {
+		DeleteNthStructure(i);
+	}
 
-	for (i = 0; i < unit_count; i++) {
+	for (int i = 0; i < unit_count; i++) {
 		UNIT obj;
 		GetUnitData(i, &obj);
 
 		unit[i] = obj;
 	}
-	for (i = unit_count - 1; i >= 0; i--)
+	for (int i = unit_count - 1; i >= 0; i--)
 		DeleteUnit(i);
 
-	for (i = 0; i < terrain_count; i++) {
+	for (int i = 0; i < terrain_count; i++) {
 		terrain[i] = m_terrain[i];
 	}
-	for (i = 0; i < terrain_count; i++)
+	for (int i = 0; i < terrain_count; i++)
 		DeleteTerrain(i);
 
 
-	for (i = 0; i < wp_count; i++) {
+	for (int i = 0; i < wp_count; i++) {
 		DWORD pos;
 		CString id;
 
@@ -6170,7 +5925,7 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 	// for(i=0;i<wp_count;i++) DeleteWaypoint(0);
 
 
-	for (i = 0; i < ct_count; i++) {
+	for (int i = 0; i < ct_count; i++) {
 		DWORD pos;
 		CString tag;
 
@@ -6180,22 +5935,22 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 		ct_pos[i] = pos;
 	}
 
-	for (i = 0; i < ct_count; i++) DeleteCelltag(0);
+	for (int i = 0; i < ct_count; i++) {
+		DeleteCelltag(0);
+	}
 
+	auto const old_fd = std::exchange(fielddata, {});
+	const int oldWidth = GetWidth();
+	const int oldHeight = GetHeight();
+	const int oldIsoSize = GetIsoSize();
+	auto const old_fds = fielddata.size();
 
-	FIELDDATA* old_fd = fielddata;
-	int ow = GetWidth();
-	int oh = GetHeight();
-	int os = GetIsoSize();
-	int old_fds = fielddata_size;
-
-	int left = iLeft;
-	int top = iTop;
-
+	const int leftExpansion = iLeft;
+	const int topExpansion = iTop;
 
 	// hmm, erase any snapshots... we probably can remove this and do coordinate conversion instead
 	// but for now we just delete them...
-	for (i = 0; i < dwSnapShotCount; i++) {
+	for (int i = 0; i < dwSnapShotCount; i++) {
 		delete[] m_snapshots[i].bHeight;
 		delete[] m_snapshots[i].bMapData;
 		delete[] m_snapshots[i].bSubTile;
@@ -6206,36 +5961,37 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 		delete[] m_snapshots[i].overlaydata;
 		// m_snapshots[i].mapfile.Clear();
 	}
-	if (m_snapshots != NULL) delete[] m_snapshots;
+	if (m_snapshots != NULL) {
+		delete[] m_snapshots;
+	}
 
-
-	fielddata = NULL;
-	fielddata_size = 0;
 	m_snapshots = NULL;
 	dwSnapShotCount = 0;
 	m_cursnapshot = -1;
 
-
-	char c[50];
 	CString mapsize;
-	itoa(dwNewWidth, c, 10);
-	mapsize = "0,0,";
-	mapsize += c;
-	itoa(dwNewHeight, c, 10);
-	mapsize += ",";
-	mapsize += c;
+	mapsize.Format("0,0,%d,%d", dwNewWidth, dwNewHeight);
 
 	m_mapfile.SetString("Map", "Size", mapsize);
 
-	itoa(dwNewWidth - 4, c, 10);
-	mapsize = "2,4,";
-	mapsize += c;
-	itoa(dwNewHeight - 6, c, 10);
-	mapsize += ",";
-	mapsize += c;
+	{
+		auto const oldVisualRect = m_mapfile.GetString("Map", "LocalSize");
+		auto const newVisualLeft = std::max(1, atoi(GetParam(oldVisualRect, 0)) + leftExpansion);
+		auto const newVisualTop = std::max(1, atoi(GetParam(oldVisualRect, 1)) + topExpansion);
+		auto newVisualWidth = std::min<int>(dwNewWidth, atoi(GetParam(oldVisualRect, 2)));
+		auto newVisualHeight = std::min<int>(dwNewHeight, atoi(GetParam(oldVisualRect, 3)));
 
-	m_mapfile.SetString("Map", "LocalSize", mapsize);
+		if (newVisualWidth + newVisualLeft > dwNewWidth) {
+			newVisualWidth = dwNewWidth - newVisualLeft - 1;
+		}
+		if (newVisualHeight + newVisualTop > dwNewHeight) {
+			newVisualHeight = dwNewHeight - newVisualTop - 1;
+		}
 
+		mapsize.Format("%d,%d,%d,%d", newVisualLeft, newVisualTop, newVisualWidth, newVisualHeight);
+
+		m_mapfile.SetString("Map", "LocalSize", mapsize);
+	}
 
 	CalcMapRect();
 	ClearOverlay();
@@ -6245,21 +6001,21 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 
 	errstream << "ResizeMap() allocates memory\n";
 	errstream.flush();
-	fielddata = new(FIELDDATA[(GetIsoSize() + 1) * (GetIsoSize() + 1)]); // +1 because of some unpacking problems
-	fielddata_size = (GetIsoSize() + 1) * (GetIsoSize() + 1);
+	fielddata.resize((GetIsoSize() + 1)* (GetIsoSize() + 1)); // +1 because of some unpacking problems
 	dwIsoMapSize = 0; // our iso mappack is empty now, as we didn´t load from a file
 
 	errstream << "ResizeMap() frees m_mfd\n";
 	errstream.flush();
-	if (m_mfd != NULL) delete[] m_mfd;
+	if (m_mfd != NULL) {
+		delete[] m_mfd;
+	}
 	m_mfd = NULL;
-
 
 	// x_move and y_move specify the movement for each field, related to the old position
 	int x_move = 0;
 	int y_move = 0;
 
-	x_move += (dwNewWidth - ow);
+	x_move += (dwNewWidth - oldWidth);
 
 
 	// x_move and y_move now take care of the map sizing. This means,
@@ -6267,31 +6023,33 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 	// but we want to consider left and right, as the user selected it.
 	// so, do some coordinate conversion:
 
-	x_move += top;
-	y_move += top;
+	x_move += topExpansion;
+	y_move += topExpansion;
 
-	x_move += -left;
-	y_move += left;
+	x_move += -leftExpansion;
+	y_move += leftExpansion;
 
 	//char c[50];
 	/*char d[50];
 	itoa(y_move, d, 10);
 	itoa(x_move, c, 10);
 	MessageBox(0, c, d,0);*/
-
+	auto const isInMap = [isoSize = m_IsoSize](const int x, const int y) -> bool {
+		return x >= 0 && y >= 0 && x < isoSize && y < isoSize;
+	};
 
 	// copy tiles now
-	int e;
-	for (i = 0; i < os; i++) {
-		for (e = 0; e < os; e++) {
-			int x, y;
-			x = i + x_move;
-			y = e + y_move;
+	for (int i = 0; i < oldIsoSize; i++) {
+		for (int e = 0; e < oldIsoSize; e++) {
+			const int x = i + x_move;
+			const int y = e + y_move;
 
-			if (x < 0 || y < 0 || x >= m_IsoSize || y >= m_IsoSize) continue;
+			if (!isInMap(x, y)) {
+				continue;
+			}
 
 			FIELDDATA& fdd = fielddata[x + y * m_IsoSize];
-			FIELDDATA& fdo = old_fd[i + e * os];
+			const FIELDDATA& fdo = old_fd.at(i + e * oldIsoSize);
 
 			fdd.bCliffHack = fdo.bCliffHack;
 			fdd.bHeight = fdo.bHeight;
@@ -6304,22 +6062,46 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 			fdd.overlay = fdo.overlay;
 			fdd.overlaydata = fdo.overlaydata;
 			fdd.wGround = fdo.wGround;
+			fdd.node = fdo.node;
+			fdd.smudge = fdo.smudge;
+			fdd.smudgetype = fdo.smudgetype;
 		}
 	}
 
 	// MW 07/22/01: Added Progress dialog - it just was slow, and did not crash...
-	int allcount = GetInfantryCount() + GetAircraftCount() + GetUnitCount() + GetStructureCount() + GetTerrainCount() + GetWaypointCount() + GetCelltagCount();
-	int curcount = 0;
+	const int allcount = GetInfantryCount() 
+		+ GetAircraftCount() 
+		+ GetUnitCount() 
+		+ GetStructureCount()
+		+ GetTerrainCount() 
+		+ GetWaypointCount() 
+		+ GetCelltagCount()
+		+ baseNodes.size()
+		+ smudgeSize
+		;
+	int progress = 0;
 	CProgressDlg* dlg = new(CProgressDlg)("Updating objects, please wait");
 	dlg->SetRange(0, allcount - 1);
 	dlg->ShowWindow(SW_SHOW);
 
 	//m_noAutoObjectUpdate=TRUE; // deactivate Update*()... faster
 
+	auto updateCoords = [isInMap](STDOBJECTDATA& data, const int x_move, const int y_move) -> bool {
+		const int x = atoi(data.x) + x_move;
+		const int y = atoi(data.y) + y_move;
+
+		if (!isInMap(x, y)) {
+			return false;
+		}
+		data.x.Format("%d", x);
+		data.y.Format("%d", y);
+		return true;
+	};
+
 	int count = inf_count; // this temp variable is *needed* (infinite loop)!!!
-	for (i = 0; i < count; i++) {
+	for (int i = 0; i < count; i++) {
 		if (inf[i].deleted) {
-			dlg->SetPosition(i + curcount);
+			dlg->SetPosition(i + progress);
 			dlg->UpdateWindow();
 
 			continue; // MW June 12 01
@@ -6328,110 +6110,86 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 		INFANTRY obj;
 		obj = inf[i];
 
-		char c[50];
-		obj.x = itoa(atoi(obj.x) + x_move, c, 10);
-		obj.y = itoa(atoi(obj.y) + y_move, c, 10);
-
-		int x = atoi(obj.x);
-		int y = atoi(obj.y);
-
-
-		if (x < 0 || y < 0 || x >= m_IsoSize || y >= m_IsoSize) continue;
+		if (!updateCoords(obj.basic, x_move, y_move)) {
+			continue;
+		}
 
 		AddInfantry(&obj);
 
-		dlg->SetPosition(i + curcount);
+		dlg->SetPosition(i + progress);
 		dlg->UpdateWindow();
 
 	}
 
-	curcount += count;
+	progress += count;
 
 	count = air_count;
-	for (i = 0; i < count; i++) {
+	for (int i = 0; i < count; i++) {
 		// if(air[i].deleted) continue;
 
 		AIRCRAFT obj;
 		obj = air[i];
 
-		char c[50];
-		obj.x = itoa(atoi(obj.x) + x_move, c, 10);
-		obj.y = itoa(atoi(obj.y) + y_move, c, 10);
-
-		int x = atoi(obj.x);
-		int y = atoi(obj.y);
-
-
-		if (x < 0 || y < 0 || x >= m_IsoSize || y >= m_IsoSize) continue;
+		if (!updateCoords(obj.basic, x_move, y_move)) {
+			continue;
+		}
 
 		AddAircraft(&obj);
 
-		dlg->SetPosition(i + curcount);
+		dlg->SetPosition(i + progress);
 		dlg->UpdateWindow();
 	}
 
 	UpdateAircraft(FALSE);
 
-	curcount += count;
+	progress += count;
 
 	count = str_count;
-	for (i = 0; i < count; i++) {
+	for (int i = 0; i < count; i++) {
 		// if(str[i].deleted) continue;
 
 		STRUCTURE obj;
 		obj = str[i];
 
-		char c[50];
-		obj.x = itoa(atoi(obj.x) + x_move, c, 10);
-		obj.y = itoa(atoi(obj.y) + y_move, c, 10);
-
-		int x = atoi(obj.x);
-		int y = atoi(obj.y);
-
-
-		if (x < 0 || y < 0 || x >= m_IsoSize || y >= m_IsoSize) continue;
+		if (!updateCoords(obj.basic, x_move, y_move)) {
+			continue;
+		}
 
 		AddStructure(&obj);
 
-		dlg->SetPosition(i + curcount);
+		dlg->SetPosition(i + progress);
 		dlg->UpdateWindow();
 	}
 
 	UpdateStructures(FALSE);
 
-	curcount += count;
+	progress += count;
 
 	count = unit_count;
-	for (i = 0; i < count; i++) {
+	for (int i = 0; i < count; i++) {
 		// if(units[i].deleted) continue;
 
 		UNIT obj;
 		obj = unit[i];
 
-		char c[50];
-		obj.x = itoa(atoi(obj.x) + x_move, c, 10);
-		obj.y = itoa(atoi(obj.y) + y_move, c, 10);
-
-		int x = atoi(obj.x);
-		int y = atoi(obj.y);
-
-
-		if (x < 0 || y < 0 || x >= m_IsoSize || y >= m_IsoSize) continue;
+		if (!updateCoords(obj.basic, x_move, y_move)) {
+			continue;
+		}
 
 		AddUnit(&obj);
 
-		dlg->SetPosition(i + curcount);
+		dlg->SetPosition(i + progress);
 		dlg->UpdateWindow();
 	}
 
 	UpdateUnits(FALSE);
 
-	curcount += count;
+	progress += count;
 
 	count = terrain_count;
-	for (i = 0; i < count; i++) {
+	for (int i = 0; i < count; i++) {
 		if (terrain[i].deleted) {
-			dlg->SetPosition(i + curcount);
+			dlg->SetPosition(i + progress);
 			dlg->UpdateWindow();
 			continue; // MW June 12 01
 		}
@@ -6447,60 +6205,119 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 		y = y + y_move;
 
 
-		if (x < 0 || y < 0 || x >= m_IsoSize || y >= m_IsoSize) continue;
+		if (!isInMap(x, y)) {
+			continue;
+		}
 
 		AddTerrain(obj, x + y * m_IsoSize);
 
-		dlg->SetPosition(i + curcount);
+		dlg->SetPosition(i + progress);
 		dlg->UpdateWindow();
 	}
 
 	//UpdateTerrain(TRUE);
 	//UpdateTerrain(FALSE);
 
-	curcount += count;
+	progress += count;
 
 	count = wp_count;
-	for (i = 0; i < count; i++) {
+	for (int i = 0; i < count; i++) {
 		DWORD pos;
 		CString id;
 
 		pos = wp_pos[i];
 		id = wp_id[i];
 
-		int x = pos % os + x_move;
-		int y = pos / os + y_move;
+		int x = pos % oldIsoSize + x_move;
+		int y = pos / oldIsoSize + y_move;
 
-		if (x < 0 || y < 0 || x >= m_IsoSize || y >= m_IsoSize) continue;
+		if (!isInMap(x, y)) {
+			continue;
+		}
 
 		AddWaypoint(id, x + y * m_IsoSize);
 
-		dlg->SetPosition(i + curcount);
+		dlg->SetPosition(i + progress);
 		dlg->UpdateWindow();
 	}
 
 	UpdateWaypoints(FALSE);
 
-	curcount += count;
+	progress += count;
 
 
-	for (i = 0; i < ct_count; i++) {
+	for (int i = 0; i < ct_count; i++) {
 		DWORD pos = ct_pos[i];
 		CString tag = ct_tag[i];
 
-		int x = pos % os + x_move;
-		int y = pos / os + y_move;
+		int x = pos % oldIsoSize + x_move;
+		int y = pos / oldIsoSize + y_move;
 
-		if (x < 0 || y < 0 || x >= m_IsoSize || y >= m_IsoSize) continue;
+		if (!isInMap(x, y)) {
+			continue;
+		}
 
 		AddCelltag(tag, x + y * m_IsoSize);
 
-		dlg->SetPosition(i + curcount);
+		dlg->SetPosition(i + progress);
 		dlg->UpdateWindow();
 	}
+	progress += ct_count;
 
 	UpdateCelltags(FALSE);
 
+	// base nodes
+	if (!baseNodes.empty()) {
+		int progressCounter = 0;
+		CString lastHouse;
+		for (auto& node : baseNodes) {
+			const int x = atoi(node.x) + x_move;
+			const int y = atoi(node.y) + y_move;
+
+			if (!isInMap(x, y)) {
+				continue;
+			}
+			node.x.Format("%d", x);
+			node.y.Format("%d", y);
+
+			if (node.house != lastHouse) {
+				lastHouse = node.house;
+				// first time handling this house, reset
+				if (auto pNodeSec = m_mapfile.TryGetSection(node.house)) {
+					for (auto idx = m_mapfile.GetInteger(node.house, "NodeCount") - 1; idx >= 0; --idx) {
+						DeleteBuildingNodeFrom(node.house, idx, m_mapfile);
+					}
+				}
+			}
+			AddNode(&node, 0, false);
+
+			dlg->SetPosition(progressCounter++ + progress);
+			dlg->UpdateWindow();
+		}
+		progress += progressCounter;
+	}
+
+	if (!m_smudges.empty()) {
+		int progressCounter = 0;
+		for (auto& smudge : m_smudges) {
+			const int x = smudge.x + x_move;
+			const int y = smudge.y + y_move;
+
+			if (!isInMap(x, y)) {
+				smudge.deleted = true;
+				continue;
+			}
+			smudge.x = x;
+			smudge.y = y;
+
+			dlg->SetPosition(progressCounter++ + progress);
+			dlg->UpdateWindow();
+		}
+		UpdateSmudges(TRUE);
+		progress += progressCounter;
+	}
+
+	// data transfer complete!
 	m_noAutoObjectUpdate = FALSE;
 
 	errstream << "Delete old_fd" << endl;
@@ -6512,8 +6329,6 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 	dlg->SetRange(0, m_IsoSize * m_IsoSize);
 	dlg->ShowWindow(SW_SHOW);
 
-	if (old_fd) delete[] old_fd;
-
 	errstream << "Init minimap" << endl;
 	errstream.flush();
 
@@ -6523,8 +6338,8 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 	errstream.flush();
 
 	const bool mp = IsMultiplayer();
-	for (i = 0; i < m_IsoSize; i++) {
-		for (e = 0; e < m_IsoSize; e++) {
+	for (int i = 0; i < m_IsoSize; i++) {
+		for (int e = 0; e < m_IsoSize; e++) {
 			Mini_UpdatePos(i, e, mp);
 
 			count++;
@@ -6548,8 +6363,6 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 	if (ct_pos) delete[] ct_pos;
 
 	dlg->DestroyWindow();
-
-
 }
 
 /*
@@ -6593,7 +6406,7 @@ BOOL CMapData::IsYRMap()
 
 		int yroverlay = g_data.GetInteger("YROverlay", "Begin");
 
-		for (i = 0; i < fielddata_size; i++) {
+		for (i = 0; i < fielddata.size(); i++) {
 			if (fielddata[i].wGround != 0xFFFF && fielddata[i].wGround >= max) {
 				return TRUE;
 			}
@@ -6612,21 +6425,21 @@ BOOL CMapData::IsYRMap()
 				continue;
 			}
 
-			if (g_data["YRInfantry"].Exists(inf.type)) {
+			if (g_data["YRInfantry"].Exists(inf.basic.type)) {
 				return TRUE;
 			}
 		}
 
 		count = GetStructureCount();
 		for (i = 0; i < count; i++) {
-			STRUCTURE str;
-			GetStructureData(i, &str);
+			STRUCTURE structure;
+			GetNthStructureData(i, &structure);
 
-			if (str.deleted) {
+			if (structure.deleted) {
 				continue;
 			}
 
-			if (g_data["YRBuildings"].Exists(str.type)) {
+			if (g_data["YRBuildings"].Exists(structure.basic.type)) {
 				return TRUE;
 			}
 		}
@@ -6640,7 +6453,7 @@ BOOL CMapData::IsYRMap()
 				continue;
 			}
 
-			if (g_data["YRUnits"].Exists(unit.type)) {
+			if (g_data["YRUnits"].Exists(unit.basic.type)) {
 				return TRUE;
 			}
 		}
@@ -6654,7 +6467,7 @@ BOOL CMapData::IsYRMap()
 				continue;
 			}
 
-			if (g_data["YRAircraft"].Exists(air.type)) {
+			if (g_data["YRAircraft"].Exists(air.basic.type)) {
 				return TRUE;
 			}
 		}
@@ -6716,7 +6529,9 @@ BOOL CMapData::AddSmudge(SMUDGE* lpSmudge)
 	td = *lpSmudge;
 	int pos = td.x + td.y * GetIsoSize();
 
-	if (smudgeid.find(td.type) == smudgeid.end()) return FALSE;
+	if (smudgeid.find(td.type) == smudgeid.end()) {
+		return FALSE;
+	}
 
 	BOOL bFound = FALSE;
 
@@ -6725,7 +6540,7 @@ BOOL CMapData::AddSmudge(SMUDGE* lpSmudge)
 		if (m_smudges[i].deleted) // yep, found one, replace it
 		{
 			m_smudges[i] = td;
-			if (pos < fielddata_size) {
+			if (pos < fielddata.size()) {
 				fielddata[pos].smudge = i;
 				fielddata[pos].smudgetype = smudgeid[td.type];
 			}
@@ -6738,7 +6553,7 @@ BOOL CMapData::AddSmudge(SMUDGE* lpSmudge)
 	if (!bFound) {
 		m_smudges.push_back(td);
 
-		if (pos < fielddata_size) {
+		if (pos < fielddata.size()) {
 			fielddata[pos].smudge = m_smudges.size() - 1;
 			fielddata[pos].smudgetype = smudgeid[td.type];
 		}
@@ -6759,7 +6574,7 @@ void CMapData::DeleteSmudge(DWORD dwIndex)
 	m_smudges[dwIndex].deleted = 1;
 
 	int pos = x + y * GetIsoSize();
-	if (x + y * m_IsoSize < fielddata_size) {
+	if (x + y * m_IsoSize < fielddata.size()) {
 		fielddata[pos].smudge = -1;
 		fielddata[pos].smudgetype = -1;
 	}
@@ -6767,7 +6582,6 @@ void CMapData::DeleteSmudge(DWORD dwIndex)
 
 void CMapData::UpdateSmudges(BOOL bSave, int num)
 {
-	vector<SMUDGE>& smudges = m_smudges;
 
 	if (bSave == FALSE) {
 		auto const& sec = m_mapfile.GetSection("Smudge");
@@ -6776,8 +6590,8 @@ void CMapData::UpdateSmudges(BOOL bSave, int num)
 		}
 
 		if (num < 0) {
-			smudges.clear();
-			smudges.reserve(100);
+			m_smudges.clear();
+			m_smudges.reserve(100);
 
 			for (auto i = 0; i < GetIsoSize() * GetIsoSize(); i++) {
 				fielddata[i].smudge = -1;
@@ -6803,7 +6617,7 @@ void CMapData::UpdateSmudges(BOOL bSave, int num)
 				td.x = x;
 				td.y = y;
 
-				smudges.push_back(td);
+				m_smudges.push_back(td);
 
 				int pos = x + y * GetIsoSize();
 				fielddata[pos].smudge = i;
@@ -6817,15 +6631,15 @@ void CMapData::UpdateSmudges(BOOL bSave, int num)
 	}
 
 
-
+	// SAVE == TRUE
 	//if(num<0)
 	{
 		//if(m_mapfile.sections.find("Smudge")!=m_mapfile.sections.end()) MessageBox(0,"Reupdate!","",0);
 		m_mapfile.DeleteSection("Smudge");
 		int i;
 
-		for (i = 0; i < smudges.size(); i++) {
-			auto const& td = smudges[i];
+		for (i = 0; i < m_smudges.size(); i++) {
+			auto const& td = m_smudges[i];
 			if (!td.deleted) {
 				char numBuffer[50];
 				CString val = td.type;
@@ -6924,8 +6738,8 @@ BOOL CMapData::GetInfantryINIData(int index, CString* lpINI)
 
 	INFANTRY& infantry = m_infantry[index];
 	CString value;
-	value = infantry.house + "," + infantry.type + "," + infantry.strength + "," + infantry.y +
-		"," + infantry.x + "," + infantry.pos + "," + infantry.action + "," + infantry.direction + "," +
+	value = infantry.basic.house + "," + infantry.basic.type + "," + infantry.basic.strength + "," + infantry.basic.y +
+		"," + infantry.basic.x + "," + infantry.pos + "," + infantry.action + "," + infantry.direction + "," +
 		infantry.tag + "," + infantry.flag1 + "," + infantry.group + "," + infantry.flag3 + "," +
 		infantry.flag4 + "," + infantry.flag5;
 

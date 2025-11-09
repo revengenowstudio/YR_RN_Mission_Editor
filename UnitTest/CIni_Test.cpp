@@ -1,31 +1,7 @@
-#include "stdafx.h"
+#include "StdAfx.h"
+#include "CIni_Test.h"
 #include "../MissionEditor/IniFile.h"
 
-class IniTestHelper
-{
-	std::string m_fileName;
-
-	void writeDownContent(const char* pContent) {
-		std::ofstream iniFile(m_fileName.c_str());
-		ASSERT(iniFile.is_open() == true);
-		iniFile << pContent;
-		iniFile.flush();
-		iniFile.close();
-	}
-
-public:
-	IniTestHelper(std::string&& name, const char* pContent) :
-		m_fileName(std::move(name))
-	{
-		ASSERT(!m_fileName.empty());
-		ASSERT(pContent != nullptr);
-		writeDownContent(pContent);
-	}
-	~IniTestHelper() {
-		remove(m_fileName.c_str());
-	}
-
-};
 
 TEST(CIniFileClass, LoadFileTest) {
 	auto const fileName = "test.ini";
@@ -275,4 +251,34 @@ TEST(CIniFileClass, IniLowerBoundInsertTest) {
 	EXPECT_EQ(987654, file.GetInteger("Waypoints", "11"));
 	EXPECT_EQ("987654", file["Waypoints"].Nth(pSec->Size() - 1).second);
 	EXPECT_EQ("159356", file["Waypoints"].Nth(pSec->Size() - 2).second);
+}
+
+
+TEST(CIniFileClass, IniRegistryTest) {
+	auto const fileName = "test.ini";
+	IniTestHelper helper(fileName, R"(
+[BuildingTypes]
+0=GAPOWR
+1=NAPOWR
+2=GACNST
+5=NACNST
+6=GAPOWR
+6=NAFAKE
+
+
+)");
+
+	CIniFile file;
+	ASSERT_EQ(file.LoadFile(std::string(fileName)), 0);
+
+	EXPECT_EQ("NAFAKE", file.GetString("BuildingTypes", "6"));
+
+	auto const& sec = file.GetSection("BuildingTypes");
+	EXPECT_EQ(5, sec.Size());
+
+	EXPECT_EQ("GAPOWR", sec.Nth(0).second);
+	EXPECT_EQ("NAPOWR", sec.Nth(1).second);
+	EXPECT_EQ("GACNST", sec.Nth(2).second);
+	EXPECT_EQ("NACNST", sec.Nth(3).second);
+	EXPECT_EQ("NAFAKE", sec.Nth(4).second);
 }

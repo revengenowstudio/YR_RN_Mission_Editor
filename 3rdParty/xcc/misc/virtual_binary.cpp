@@ -30,8 +30,9 @@ Cvirtual_binary_source::Cvirtual_binary_source(const void* d, size_t cb_d, const
 	} else {
 		m_data = new byte[cb_d];
 		m_size = cb_d;
-		if (d)
+		if (d) {
 			memcpy(m_data, d, cb_d);
+		}
 	}
 	mc_references = 1;
 }
