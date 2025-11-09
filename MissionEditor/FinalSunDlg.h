@@ -45,6 +45,7 @@
 #include "TileSetBrowserFrame.h"	// Hinzugefügt von der Klassenansicht
 #include "ToolSettingsBar.h"
 #include "TriggerEditorDlg.h"
+#include "CsfViewer.h"
 
 #if _MSC_VER > 1000
 #pragma once
@@ -83,6 +84,7 @@ public:
 	CTags m_tags;
 	CTaskForce m_taskforces;
 	CTeamTypes m_teamtypes;
+	CCsfViewer m_csfStrings;
 
 	CHouses m_houses;
 

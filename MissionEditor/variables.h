@@ -30,7 +30,6 @@
 #include "MapData.h"
 
 class CMapData;
-using TranslationMap = map<CString, XCString>;
 
 // the map
 extern CMapData* Map;

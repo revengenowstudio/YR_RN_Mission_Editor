@@ -657,6 +657,6 @@ struct RA2STRINGENTRY
 	DWORD value_asc_size;
 };
 
-
+using TranslationMap = map<CString, XCString>;
 
 #endif

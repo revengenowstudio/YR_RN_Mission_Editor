@@ -36,6 +36,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+extern CFinalSunApp theApp;
 
 BOOL IsWaypointFormat(CString s)
 {
@@ -276,13 +277,41 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 	}
 }
 
+CString popUpCSFViewerAndReturn(CComboBox& cb)
+{
+	CString curValue;
+	cb.GetWindowText(curValue);
+
+	auto const pMainDlg = ((CFinalSunDlg*)theApp.m_pMainWnd);
+	auto& csfDlg = pMainDlg->m_csfStrings;
+
+	if (csfDlg.m_hWnd == NULL) {
+		if (!csfDlg.Create(CCsfViewer::IDD, NULL)) {
+			DWORD dwError = GetLastError();
+			CString errorMsg;
+			errorMsg.Format(_T("Create failed with error code: %lu"), dwError);
+			pMainDlg->MessageBox(GetLanguageStringACP("Err_CreateErr") + errorMsg, "Error");
+		}
+	}
+
+	if (csfDlg.DoModal() == IDCANCEL) {
+		return curValue;
+	}
+
+	return curValue;
+}
+
 void CTriggerActionsDlg::OnSelchangeParameter()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	if (m_currentTrigger.GetLength() == 0) return;
+	if (m_currentTrigger.GetLength() == 0) {
+		return;
+	}
 	int selev = m_Action.GetCurSel();
-	if (selev < 0) return;
+	if (selev < 0) {
+		return;
+	}
 	int curev = m_Action.GetItemData(selev);
 
 	int curselparam = m_Parameter.GetCurSel();
@@ -293,7 +322,7 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 
 
 
-	int curparam = m_Parameter.GetItemData(curselparam);
+	const int curparam = m_Parameter.GetItemData(curselparam);
 
 
 
@@ -309,6 +338,20 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 		bNoWP = TRUE;
 	}
 
+	if (curparam == -1) {
+		char wayp[50];
+		if (!bNoWP) {
+			ListWaypoints(m_ParamValue);
+			int iWayp = StringToWaypoint(GetParam(ActionData, startpos + 1 + 6));
+			itoa(iWayp, wayp, 10);
+		} else {
+			strcpy(wayp, GetParam(ActionData, startpos + 1 + 6));
+			HandleParamList(m_ParamValue, PARAMTYPE_NOTHING);
+		}
+		m_ParamValue.SetWindowText(wayp);
+		return;
+	}
+
 	if (curparam >= 0 && curparam < 6) {
 		CString ParamType = GetParam(g_data["Actions"][GetParam(ActionData, startpos)], 1 + curparam);
 #ifdef RA2_MODE
@@ -318,7 +361,13 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 #endif
 		if (atoi(ParamType) >= 0) {
 			CString ListType = GetParam(g_data["ParamTypes"][ParamType], 1);
-			HandleParamList(m_ParamValue, atoi(ListType));
+
+			auto const listTypeIdx = atoi(ListType);
+			if (listTypeIdx == PARAMTYPE_TUTORIALTEXTS) {
+				auto const ret = popUpCSFViewerAndReturn(m_ParamValue);
+				return;
+			}
+			HandleParamList(m_ParamValue, listTypeIdx);
 			m_ParamValue.SetWindowText(GetParam(ActionData, startpos + 1 + curparam));
 
 			int i;
@@ -357,22 +406,6 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 			}*/
 		}
 		return;
-	}
-
-	if (curparam == -1) {
-		char wayp[50];
-		if (!bNoWP) {
-			ListWaypoints(m_ParamValue);
-			int iWayp = StringToWaypoint(GetParam(ActionData, startpos + 1 + 6));
-
-			itoa(iWayp, wayp, 10);
-		} else {
-			strcpy(wayp, GetParam(ActionData, startpos + 1 + 6));
-			HandleParamList(m_ParamValue, 0);
-		}
-
-
-		m_ParamValue.SetWindowText(wayp);
 	}
 }
 

@@ -1688,6 +1688,22 @@ BEGIN
     COMBOBOX        IDC_COMBO1,7,23,224,160,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
+IDD_CSF_VIEWER DIALOGEX 0, 0, 357, 329
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
+CAPTION "CSF Viewer"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Search Label/Text:",1003,7,30,63,8
+    EDITTEXT        IDC_CSF_VIEW_SELECTED,77,28,110,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "OK",IDOK,231,28,45,13
+    PUSHBUTTON      "Reload CSF",IDC_CSF_VIEW_RELOAD,281,28,70,13
+    CONTROL         "",IDC_CSF_VIEW_LIST,"SysListView32",LVS_REPORT | WS_BORDER | WS_TABSTOP,7,44,343,176
+    CONTROL         "",IDC_CSF_VIEW_RICH_EDT,"RichEdit20",WS_BORDER | WS_VSCROLL | WS_TABSTOP | 0x4,7,239,343,81
+    LTEXT           "When the trigger editor is to open and the parameter of the selected action is CSF, Click 'Apply' or double click item to apply the currently selected CSF text",1010,7,5,343,18
+    LTEXT           "Label Name:",1012,7,226,68,8
+    EDITTEXT        IDC_CSF_VIEW_CUR_LABEL,77,223,110,13,ES_AUTOHSCROLL | ES_READONLY
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2118,6 +2134,10 @@ BEGIN
         RIGHTMARGIN, 231
         TOPMARGIN, 7
         BOTTOMMARGIN, 56
+    END
+
+    IDD_CSF_VIEWER, DIALOG
+    BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -3643,6 +3663,11 @@ END
 #endif
 
 IDD_CHANGESIZE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_CSF_VIEWER AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
