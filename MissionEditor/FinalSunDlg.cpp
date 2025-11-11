@@ -482,6 +482,22 @@ void CFinalSunDlg::OnCancel()
 	// stub
 }
 
+bool checkProjectPathAndRelaunch(CString filePath)
+{ // check whether there is a project file in the map folder
+	auto const folderPath = filePath.Left(filePath.ReverseFind('\\'));
+	auto const projectFile = folderPath + "\\FinalAlertProject.ini";
+	if (projectFile != theApp.ProjectFilePath() && DoesFileExist(projectFile)) {
+		TCHAR exePath[MAX_PATH];
+		GetModuleFileName(NULL, exePath, MAX_PATH);
+
+		CString cmdLine;
+		cmdLine.Format(_T("\"%s\" --project \"%s\" --file \"%s\""), exePath, projectFile, filePath);
+		ShellExecute(NULL, NULL, exePath, cmdLine, NULL, SW_SHOWNORMAL);
+		return true;
+	}
+	return false;
+}
+
 void CFinalSunDlg::OnOptionsTiberiansunoptions()
 {
 	CIniFile optini;
@@ -515,18 +531,8 @@ void CFinalSunDlg::OnFileOpenmap()
 		return;
 	}
 
-	
-	{ // check whether there is a project file in the map folder
-		auto const projectFile = dlg.GetFolderPath() + "\\FinalAlertProject.ini";
-		if (projectFile != theApp.ProjectFilePath() && DoesFileExist(projectFile)) {
-			TCHAR exePath[MAX_PATH];
-			GetModuleFileName(NULL, exePath, MAX_PATH);
-
-			CString cmdLine;
-			cmdLine.Format(_T("\"%s\" --project \"%s\" --file \"%s\""), exePath, projectFile, dlg.GetPathName());
-			ShellExecute(NULL, NULL, exePath, cmdLine, NULL, SW_SHOWNORMAL);
-			exit(0);
-		}
+	if (checkProjectPathAndRelaunch(dlg.GetPathName())) {
+		reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->EndDialog(0);
 	}
 
 	m_PKTHeader.Clear();
@@ -3715,25 +3721,16 @@ void CFinalSunDlg::InsertPrevFile(CString lpFilename)
 }
 
 // MW 07/20/01: New: for files clicked in the file list... copied from OnFileOpenmap();
-void CFinalSunDlg::OpenMap(LPCSTR lpFilename)
+void CFinalSunDlg::OpenMap(const CString lpFilename)
 {
-	CString r = GetLanguageStringACP("SAVEDLG_FILETYPES");
-	r = TranslateStringVariables(8, r, ";");
-	//CFileDialog dlg(TRUE, NULL, NULL,  OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, r);
-
-	char cuPath[MAX_PATH];
-	GetCurrentDirectory(MAX_PATH, cuPath);
-	//dlg.m_ofn.lpstrInitialDir=cuPath;
-
-	//if(theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir=(char*)(LPCTSTR)theApp.m_Options.TSExe;
-
-
-	//if(dlg.DoModal()==IDCANCEL) return;	
-
+	// TODO: check project path
+	if (checkProjectPathAndRelaunch(lpFilename)) {
+		reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->EndDialog(0);
+	}
 
 	m_PKTHeader.Clear();
 
-	CString fileToOpen = lpFilename;//dlg.GetPathName();
+	CString fileToOpen = lpFilename;
 	fileToOpen.MakeLower();
 	CString ext = fileToOpen.Right(fileToOpen.GetLength() - fileToOpen.ReverseFind('.') - 1); //dlg.GetFileExt();
 
@@ -3779,7 +3776,7 @@ void CFinalSunDlg::OpenMap(LPCSTR lpFilename)
 
 	CString str = GetLanguageStringACP("MainDialogCaption");
 	str += " (";
-	str += (char*)(LPCTSTR)lpFilename;
+	str += lpFilename;
 	str += ")";
 
 	// MW 07/20/01: Update prev. files
