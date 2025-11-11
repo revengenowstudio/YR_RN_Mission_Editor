@@ -4,6 +4,7 @@
     <Import Project="$(MSBuildThisFileDirectory)/Common.props" />
   </ImportGroup>
   <PropertyGroup>
+  <!-- Why duplicated 'x64-windows' ? Because it is how vcpkg automatically does, shitty -->
   <XccVcpkgDirTriplet>$(XccDir)\vcpkg_installed\$(Platform)-windows\$(Platform)-windows</XccVcpkgDirTriplet>
     <XccVcpkgDir>$(XccVcpkgDirTriplet)</XccVcpkgDir>
     <VxlLibDir>$(SolutionDir)$(Platform)\Release</VxlLibDir>

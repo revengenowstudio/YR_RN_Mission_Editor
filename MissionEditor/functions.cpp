@@ -657,29 +657,30 @@ void listSpecifcTechnoTypes(CComboBox& cb, const CString& sectionName, bool clea
 	if (clear) {
 		while (cb.DeleteString(0) != CB_ERR);
 	}
+	auto const& rules = IniMegaFile::GetRules();
 	auto const& sec = rules.GetSection(sectionName);
-	for (auto idx = 0; idx < sec.Size(); ++idx) {
-		char idxNum[50];
-		_itoa_s(idx, idxNum, 10);
-		CString record = idxNum;
-
-		auto const& kvPair = sec.Nth(idx);
+	auto idx = 0;
+	for (auto& [_, id] : sec) {
+		CString record;
 
 		if (useIniName) {
-			record = kvPair.second;
-		}
-		else {
+			record = id;
+		} else {
+			char idxNum[50];
+			_itoa_s(idx, idxNum, 10);
+			record = idxNum;
 			record += ' ';
-			record += kvPair.second;
+			record += id;
 		}
 		record += " ";
 
-		CString translated = Map->GetUnitName(kvPair.second);
+		CString translated = Map->GetUnitName(id);
 		//if(t!="MISSING")
 		{
 			record += translated;
 			cb.AddString(record);
 		}
+		++idx;
 	}
 }
 
@@ -865,7 +866,7 @@ void ListAnimations(CComboBox& cb)
 
 void ListParticles(CComboBox& cb)
 {
-	listSpecifcTypesWithSequence(cb, "Particles");
+	listSpecifcTypesWithSequence(cb, "ParticleSystems");
 }
 
 void ListCrateTypes(CComboBox& cb)
@@ -1287,19 +1288,16 @@ CString GetFreeID()
 			"Actions",
 			"AITriggerTypes",
 		};
-
+		// 0=GAPOWR ...
 		for (auto const& id : typeLists) {
-			for (auto const& [_, id] : ini[id]) {
-				if (id == input) {
-					return true;
-				}
+			if (ini[id].HasValue(input)) {
+				return true;
 			}
 		}
+		// 1000000=Foo, ...
 		for (auto const& id : itemLists) {
-			for (auto const& [id, _] : ini[id]) {
-				if (id == input) {
-					return true;
-				}
+			if (ini[id].Exists(input)) {
+				return true;
 			}
 		}
 
@@ -1319,27 +1317,7 @@ CString GetFreeID()
 	return "";
 }
 
-void GetNodeName(CString& name, int n)
-{
-	char c[5];
-	char p[6];
-	memset(p, 0, 6);
-	_itoa_s(n, c, 10);
-	strcpy_s(p, c);
-
-	if (strlen(c) == 1) {
-		memcpy(c, "00", 2);
-		strcpy_s(c + 2, sizeof(c) - 2, p);
-	} else if (strlen(c) == 2) {
-		memcpy(c, "0", 1);
-		strcpy_s(c + 1, sizeof(c) - 1, p);
-	} else if (strlen(c) == 3) {
-		strcpy_s(c, p);
-	}
-
-	name = c;
-}
-
+// UNUSED
 int GetNodeAt(CString& owner, CString& buildingTypeID, int x, int y)
 {
 	CIniFile& ini = Map->GetIniFile();
@@ -1361,7 +1339,7 @@ int GetNodeAt(CString& owner, CString& buildingTypeID, int x, int y)
 
 		for (auto i = 0; i < nodeCount; i++) {
 			CString nodeName;
-			GetNodeName(nodeName, i);
+			GetNodeID(nodeName, i);
 
 			CString sx, sy;
 			buildingTypeID = GetParam(ownerSection.GetString(nodeName), 0);
@@ -1464,7 +1442,7 @@ void GetDrawBorder(const BYTE* data, int width, int line, int& left, int& right,
 	}
 }
 
-CComPtr<IDirectDrawSurface4> BitmapToSurface(IDirectDraw4* pDD, const CBitmap& bitmap)
+CComPtr<IDirectDrawSurface7> BitmapToSurface(IDirectDraw7* pDD, const CBitmap& bitmap)
 {
 	BITMAP bm;
 	GetObject(bitmap, sizeof(bm), &bm);
@@ -1477,7 +1455,7 @@ CComPtr<IDirectDrawSurface4> BitmapToSurface(IDirectDraw4* pDD, const CBitmap& b
 	desc.dwWidth = bm.bmWidth;
 	desc.dwHeight = bm.bmHeight;
 
-	auto pSurface = CComPtr<IDirectDrawSurface4>();
+	auto pSurface = CComPtr<IDirectDrawSurface7>();
 	if (pDD->CreateSurface(&desc, &pSurface, nullptr) != DD_OK)
 		return nullptr;
 

@@ -77,6 +77,10 @@ public:
 		ASSERT(index < value_pairs.size());
 		return this->value_pairs[index];
 	}
+	auto& Nth(size_t index)  {
+		ASSERT(index < value_pairs.size());
+		return this->value_pairs[index];
+	}
 	int64_t FindIndex(const CString& key) const noexcept;
 	int64_t FindValue(CString val) const noexcept;
 
@@ -282,8 +286,6 @@ public:
 		return *this;
 	}
 
-	[[deprecated("instead use GetString")]]
-	CString GetValueByName(const CString& sectionName, const CString& valueName, const CString& defaultValue) const;
 	void Clear();
 	WORD InsertFile(const CString& filename, const char* Section, BOOL bNoSpaces = FALSE);
 	WORD InsertFile(const std::string& filename, const char* Section, BOOL bNoSpaces = FALSE);

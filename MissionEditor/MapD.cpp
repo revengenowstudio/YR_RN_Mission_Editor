@@ -124,7 +124,7 @@ void CMapD::UpdateStrings()
 	GetDlgItem(IDC_LTHEATER)->SetWindowText(GetLanguageStringACP("MapTheater"));
 	GetDlgItem(IDC_MAP_D_WIDTH)->SetWindowText(GetLanguageStringACP("MapWidth"));
 	GetDlgItem(IDC_MAP_D_HEIGHT)->SetWindowText(GetLanguageStringACP("MapHeight"));
-	GetDlgItem(IDC_CHANGELOCAL)->SetWindowText(GetLanguageStringACP("MapChange"));
+	GetDlgItem(IDC_CHANGELOCAL)->SetWindowText(GetLanguageStringACP("MapChangeLocal"));
 	GetDlgItem(IDC_CHANGE)->SetWindowText(GetLanguageStringACP("MapChange"));
 }
 
@@ -151,7 +151,9 @@ void CMapD::OnChange()
 	*/
 
 	CChangeSizeDlg dlg;
-	if (dlg.DoModal() == IDCANCEL) return;
+	if (dlg.DoModal() == IDCANCEL) {
+		return;
+	}
 
 	if (dlg.m_Width < 16 || dlg.m_Width>400 || dlg.m_Height < 16 || dlg.m_Height>400 || (dlg.m_Width + dlg.m_Height) > 512) {
 		MessageBox("Width and Height must both be between 16 and 400 and both added must be less than 512.", "Error");
@@ -162,7 +164,7 @@ void CMapD::OnChange()
 
 
 	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_minimap.UpdateView();
+	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_minimap->UpdateView();
 
 	char c[50];
 	itoa(dlg.m_Width, c, 10);

@@ -7,7 +7,7 @@
     <DisableFastUpToDateCheck>True</DisableFastUpToDateCheck>
   </PropertyGroup>
   <PropertyGroup>
-    <XccDir>$(MSBuildThisFileDirectory)..\..\3rdParty\xcc</XccDir>
+    <XccDir>$(SolutionDir)\3rdParty\xcc</XccDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

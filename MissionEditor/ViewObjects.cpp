@@ -102,21 +102,35 @@ void CViewObjects::Dump(CDumpContext& dc) const
 }
 #endif //_DEBUG
 
-CString GetTheaterLanguageString(LPCSTR lpString)
+CString GetTheaterLanguageString(const CString& l10nTag)
 {
-	CString s = lpString;
-	CString t = lpString;
+	CString s = l10nTag;
+	CString t = l10nTag;
 
-	if ((tiledata) == &t_tiledata) t += "TEM";
-	if ((tiledata) == &s_tiledata) t += "SNO";
-	if ((tiledata) == &u_tiledata) t += "URB";
-	if ((tiledata) == &un_tiledata) t += "UBN";
-	if ((tiledata) == &l_tiledata) t += "LUN";
-	if ((tiledata) == &d_tiledata) t += "DES";
+#define TO_ADDR(x) reinterpret_cast<const size_t>(x)
 
+	if (TO_ADDR(tiledata) == TO_ADDR(&t_tiledata)) {
+		t += "TEM";
+	}
+	else if (TO_ADDR(tiledata) == TO_ADDR(&s_tiledata)) {
+		t += "SNO";
+	}
+	else if (TO_ADDR(tiledata) == TO_ADDR(&u_tiledata)) {
+		t += "URB";
+	}
+	else if (TO_ADDR(tiledata) == TO_ADDR(&un_tiledata)) {
+		t += "UBN";
+	}
+	else if (TO_ADDR(tiledata) == TO_ADDR(&l_tiledata)) {
+		t += "LUN";
+	}
+	else if (TO_ADDR(tiledata) == TO_ADDR(&d_tiledata)) {
+		t += "DES";
+	}
 	CString res = GetLanguageStringACP(t);
-	if (res.GetLength() == 0) res = GetLanguageStringACP(s);
-
+	if (res.Left(l10nTag.GetLength()) == l10nTag || res.GetLength() == 0) {
+		res = GetLanguageStringACP(s);
+	}
 	return res;
 }
 
@@ -717,22 +731,32 @@ void TreeViewBuilder::updateBuildingTypes(HTREEITEM parentNode) {
 			continue;
 		}
 
-		WCHAR* addedString = Map->GetUnitName(unitname);
-		if (!addedString) {
+		auto const unitDisplayName = Map->GetUnitDisplayName(unitname);
+		if (!unitDisplayName) {
 			continue;
 		}
 
 		int id = Map->GetBuildingID(unitname);
-		if (id < 0 /*|| (buildinginfo[id].pic[0].bTerrain!=0 && buildinginfo[id].pic[0].bTerrain!=needed_terrain)*/)
+		if (id < 0 /*|| (buildinginfo[id].pic[0].bTerrain!=0 && buildinginfo[id].pic[0].bTerrain!=needed_terrain)*/) {
 			continue;
+		}
 
 		if (theater == THEATER0 && !buildinginfo[id].bTemp) { /*MessageBox("Ignored", unitname,0);*/ continue; }
 		if (theater == THEATER1 && !buildinginfo[id].bSnow) { /*MessageBox("Ignored", unitname,0);*/ continue; }
 		if (theater == THEATER2 && !buildinginfo[id].bUrban) { /*MessageBox("Ignored", unitname,0);*/ continue; }
 
+		
+		CString addedString = unitname;
+		addedString += ' ';
+		addedString += unitDisplayName->cString;
+
+		XCString addedStrW;
+		addedStrW.SetString(addedString.GetString());
 
 		auto const& name = sideHelper.GetSideName(unitname, TreeViewTechnoType::Building);
-		TV_InsertItemW(tree.m_hWnd, addedString, wcslen(addedString), TVI_LAST, structhouses.GetOrAdd(name), baseOffset + i);
+		TV_InsertItemW(tree.m_hWnd, 
+			addedStrW.wString,
+			addedStrW.len, TVI_LAST, structhouses.GetOrAdd(name), baseOffset + i);
 	}
 
 	// okay, now the user-defined types:
@@ -748,14 +772,18 @@ void TreeViewBuilder::updateBuildingTypes(HTREEITEM parentNode) {
 			continue;
 		}
 		CString undefinedName;
+		CString addedString;
 		auto const& name = ini[typeId]["Name"];
-		auto addedString = std::ref(name);
 		if (name.IsEmpty()) {
 			undefinedName = typeId + " UNDEFINED";
 			addedString = undefinedName;
+		} else {
+			addedString += typeId;
+			addedString += ' ';
+			addedString += name;
 		}
 		auto const& sideName = sideHelper.GetSideName(typeId, TreeViewTechnoType::Building);
-		tree.InsertItem(TVIF_PARAM | TVIF_TEXT, addedString.get(), 0, 0, 0, 0, baseOffset + i, structhouses.GetOrAdd(sideName), TVI_LAST);
+		tree.InsertItem(TVIF_PARAM | TVIF_TEXT, addedString, 0, 0, 0, 0, baseOffset + i, structhouses.GetOrAdd(sideName), TVI_LAST);
 	}
 }
 

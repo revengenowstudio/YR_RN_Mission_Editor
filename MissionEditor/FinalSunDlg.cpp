@@ -693,7 +693,7 @@ void CFinalSunDlg::UpdateDialogs(BOOL bOnlyMissionControl, BOOL bNoRepos)
 
 		m_view.m_isoview->UpdateDialog(!bNoRepos);
 		m_view.m_objectview->UpdateDialog();
-		m_view.m_minimap.UpdateView();
+		m_view.m_minimap->UpdateView();
 
 		if (tiles != NULL && tiledata != NULL && tiledata_count != NULL) {
 			m_view.m_browser->m_bar.Update();
@@ -1281,7 +1281,8 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 		char c[50];
 		for (auto e = 0; e < sec.Size(); e++) {
 			auto const& [key, value] = sec.Nth(e);
-			fi = key;
+			// restore += format
+			fi = key[0] != '+' ? key : '+';
 			fi += "=";
 			fi += value;
 			fi += "\n";
@@ -1766,23 +1767,28 @@ void CFinalSunDlg::OnFileNew()
 			int i;
 			int count = Map->GetTerrainCount();
 			if (!bImportTrees) {
-				for (i = 0; i < count; i++)
+				for (i = 0; i < count; i++) {
 					Map->DeleteTerrain(0);
+				}
 			}
 
 			if (!bImportUnits) {
 				count = Map->GetInfantryCount();
-				for (i = 0; i < count; i++)
+				for (i = 0; i < count; i++) {
 					Map->DeleteInfantry(0);
+				}
 				count = Map->GetUnitCount();
-				for (i = 0; i < count; i++)
+				for (i = 0; i < count; i++) {
 					Map->DeleteUnit(0);
+				}
 				count = Map->GetStructureCount();
-				for (i = 0; i < count; i++)
-					Map->DeleteStructure(0);
+				for (i = count; i >= 0; i--) {
+					Map->DeleteNthStructure(0);
+				}
 				count = Map->GetAircraftCount();
-				for (i = 0; i < count; i++)
+				for (i = 0; i < count; i++) {
 					Map->DeleteAircraft(0);
+				}
 			}
 
 			ini.SetString("Basic", "Name", "Noname");
@@ -2007,7 +2013,7 @@ void CFinalSunDlg::OnFileNew()
 	//	MessageBox("Repaired houses");
 
 	m_view.m_isoview->UpdateDialog(TRUE);
-	m_view.m_minimap.RedrawWindow();
+	m_view.m_minimap->RedrawWindow();
 	UpdateDialogs();
 
 	last_succeeded_operation = 11002;
@@ -2203,7 +2209,7 @@ void CFinalSunDlg::UnloadAll()
 		tutorial.Clear();
 		g_data.Clear();
 		language.Clear();
-
+		m_view.m_minimap.reset();
 		DestroyWindow();
 	} catch (...) {
 		DestroyWindow();
@@ -2246,7 +2252,7 @@ void CFinalSunDlg::OnOptionsSimpleview()
 void CFinalSunDlg::OnOptionsShowminimap()
 {
 	bMiniMapClosedByUser = FALSE;
-	this->m_view.m_minimap.UpdateView();
+	this->m_view.m_minimap->UpdateView();
 }
 
 void CFinalSunDlg::HideAllDialogs()
@@ -2343,9 +2349,9 @@ void CFinalSunDlg::OnSize(UINT nType, int cx, int cy)
 	CDialog::OnSize(nType, cx, cy);
 
 	if (nType == SIZE_MINIMIZED) {
-		if (!bMiniMapClosedByUser) m_view.m_minimap.ShowWindow(SW_MINIMIZE);
+		if (!bMiniMapClosedByUser) m_view.m_minimap->ShowWindow(SW_MINIMIZE);
 	} else if (nType == SIZE_MAXIMIZED) {
-		if (!bMiniMapClosedByUser) m_view.m_minimap.ShowWindow(SW_RESTORE);
+		if (!bMiniMapClosedByUser) m_view.m_minimap->ShowWindow(SW_RESTORE);
 	}
 
 	RecalcLayout();

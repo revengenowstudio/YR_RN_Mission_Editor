@@ -133,8 +133,9 @@ static const std::string GetAppDataPath()
 {
 	_setmbcp(CP_UTF8);
 	setlocale(LC_ALL, "C");
-	if (!setlocale(LC_CTYPE, ".65001"))
+	if (!setlocale(LC_CTYPE, ".65001")) {
 		setlocale(LC_CTYPE, "");
+	}
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	CComPtr<IKnownFolderManager> manager;
 	CComPtr<IKnownFolder> local_app_data;
@@ -165,11 +166,11 @@ static const std::string GetAppDataPath()
 }
 
 /* Application specific global variables */
-char AppPath[MAX_PATH + 1] = { 0 };
+TCHAR AppPath[MAX_PATH + 1] = { 0 };
 const std::string u8AppDataPath = GetAppDataPath();
 const std::wstring u16AppDataPath = utf8ToUtf16(u8AppDataPath);
-char TSPath[MAX_PATH + 1] = { 0 };
-char currentMapFile[MAX_PATH + 1] = { 0 };
+TCHAR TSPath[MAX_PATH + 1] = { 0 };
+TCHAR currentMapFile[MAX_PATH + 1] = { 0 };
 BOOL bOptionsStartup = FALSE;
 bool bAllowAccessBehindCliffs = false;
 
@@ -206,6 +207,7 @@ int dirttunnelset;
 int dirttracktunnelset;
 int waterset;
 int shoreset;
+int greenset;
 int ramp2set_start;
 int pave2set_start;
 int rampset_start;

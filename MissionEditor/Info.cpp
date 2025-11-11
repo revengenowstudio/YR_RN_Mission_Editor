@@ -72,7 +72,8 @@ BOOL CInfo::OnInitDialog()
 #ifdef YR_MODE
 	CStringA license = R"(FinalAlert 2: Yuri's Revenge Mission Editor
 Copyright (C) 1999-2024 Electronic Arts, Inc.
-Authored by Matthias Wagner
+Authored by Matthias Wagner, Zero Fanker
+Also credits for Secsome, Handama
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

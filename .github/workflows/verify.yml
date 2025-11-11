@@ -33,21 +33,52 @@ jobs:
         path: |
           3rdParty/xcc/vcpkg_downloads
           3rdParty/xcc/vcpkg_installed
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+          3rdParty/xcc/binary-cache
+          C:/Users/runneradmin/AppData/Local/vcpkg
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+    - name: Vcpkg install
+      run: |
+        cd 3rdParty/xcc
+        if (-not (Test-Path "binary-cache")) {
+            mkdir "binary-cache"
+        }
+        $env:VCPKG_DOWNLOADS = $PWD
+        $env:VCPKG_BINARY_SOURCES="files,$PWD\binary-cache,readwrite"
+        $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg"
+        # rm "$vcpkgPath\.vcpkg-root"
+        & "$vcpkgPath\vcpkg" install `
+          --x-wait-for-lock `
+          --triplet "x64-windows" `
+          --vcpkg-root $vcpkgPath `
+          --x-manifest-root="$PWD\" `
+          --x-install-root="$PWD\vcpkg_installed\x64-windows"
+        ls
+        ls vcpkg_installed/x64-windows/x64-windows
+        ls vcpkg_installed/x64-windows/x64-windows/include
     - name: Build Main Program (MSVC)
       run: |
-        devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
+        MSBuild MissionEditor.sln /m /p:Configuration="${{ env.CONFIGURATION }}" /p:Platform=x64 /t:MissionEditor
     - name: Build UT tool (MSVC)
+      env:
+        VCPKG_ENABLE_MANIFEST: "0"
       run: |
-        devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project UnitTest
+        MSBuild MissionEditor.sln /m /p:Configuration="${{ env.CONFIGURATION }}" /p:Platform=x64 /t:UnitTest
     - name: Cache vcpkg
       uses: actions/cache/save@v4
       with:
         path: |
           3rdParty/xcc/vcpkg_downloads
           3rdParty/xcc/vcpkg_installed
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+          3rdParty/xcc/binary-cache
+          C:/Users/runneradmin/AppData/Local/vcpkg
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: do UT
       run: |
         cd x64\Debug
         ./UnitTest
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: RN-Mission-Editor-pr-${{ github.run_number }}
+        path: dist/FinalAlert2YR
+        retention-days: 7
