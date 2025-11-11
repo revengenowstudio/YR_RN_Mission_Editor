@@ -1,4 +1,6 @@
 name: Release Product
+permissions:
+  write-all
 
 on:
   pull_request:
