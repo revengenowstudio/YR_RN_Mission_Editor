@@ -123,7 +123,7 @@ extern std::ofstream errstream;
 extern char AppPath[MAX_PATH + 1];
 extern const std::string u8AppDataPath;
 extern const std::wstring u16AppDataPath;
-extern char TSPath[MAX_PATH + 1];
+extern CString TSPath;
 
 extern bool bAllowAccessBehindCliffs;
 

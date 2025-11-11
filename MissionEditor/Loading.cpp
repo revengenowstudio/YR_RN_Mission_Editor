@@ -967,16 +967,15 @@ void CLoading::LoadTSIni(LPCTSTR lpFilename, CIniFile* lpIniFile, BOOL bIsExpans
 	}
 
 	if (theApp.m_Options.bSearchLikeTS) {
-
-
 		// check if Rules.ini is available
-		if (DoesFileExist((CString)TSPath + lpFilename)) {
+		auto const fileFullPath = TSPath + lpFilename;
+		if (DoesFileExist(fileFullPath)) {
 			errstream << "File found in TS directory (" << TSPath << ")" << endl;
 			errstream.flush();
 			if (!bIsExpansion)
-				lpIniFile->LoadFile((CString)TSPath + lpFilename, TRUE);
+				lpIniFile->LoadFile(fileFullPath, TRUE);
 			else
-				lpIniFile->InsertFile((CString)TSPath + lpFilename, NULL, TRUE);
+				lpIniFile->InsertFile(fileFullPath, NULL, TRUE);
 			return;
 		}
 
@@ -2066,32 +2065,32 @@ BOOL CLoading::InitMixFiles()
 
 
 	// load tibsun.mix and local.mix
-	if (DoesFileExist((CString)TSPath + (CString)"\\" + MAINMIX)) {
-		errstream << "Loading " MAINMIX ".mix";
-		errstream.flush();
-		m_hTibSun = FSunPackLib::XCC_OpenMix((CString)TSPath + (CString)"\\" + MAINMIX, NULL);
-		if (m_hTibSun != NULL) {
-			errstream << " success" << endl;
-			errstream.flush();
-		} else {
-			ShowWindow(SW_HIDE);
-			MessageBox(GetLanguageStringACP("Err_TSNotInstalled"));
-			exit(200);
-		}
-
-		m_hLanguage = FSunPackLib::XCC_OpenMix((CString)TSPath + (CString)"\\Language.mix", NULL);
-		m_hLangMD = FSunPackLib::XCC_OpenMix((CString)TSPath + (CString)"\\Langmd.mix", NULL);
-		m_hMarble = FSunPackLib::XCC_OpenMix((CString)TSPath + (CString)"\\marble.mix", NULL);
-
-		//if(!m_hLanguage) MessageBox("No language file found");
-
-		if (!m_hMarble) {
-			m_hMarble = FSunPackLib::XCC_OpenMix((CString)AppPath + (CString)"\\marble.mix", NULL);
-		}
-	} else {
+	auto const mainMixPath = TSPath + CString("\\" MAINMIX);
+	if (!DoesFileExist(mainMixPath)) {
+		 
 		ShowWindow(SW_HIDE);
 		MessageBox(GetLanguageStringACP("Err_TSNotInstalled"));
 		exit(199);
+	}
+	errstream << "Loading " MAINMIX ".mix";
+	errstream.flush();
+	m_hTibSun = FSunPackLib::XCC_OpenMix(mainMixPath, NULL);
+	if (m_hTibSun == NULL) {
+		ShowWindow(SW_HIDE);
+		MessageBox(GetLanguageStringACP("Err_TSNotInstalled"));
+		exit(200);
+	}
+	errstream << " success" << endl;
+	errstream.flush();
+
+	m_hLanguage = FSunPackLib::XCC_OpenMix((CString)TSPath + (CString)"\\Language.mix", NULL);
+	m_hLangMD = FSunPackLib::XCC_OpenMix((CString)TSPath + (CString)"\\Langmd.mix", NULL);
+	m_hMarble = FSunPackLib::XCC_OpenMix((CString)TSPath + (CString)"\\marble.mix", NULL);
+
+	//if(!m_hLanguage) MessageBox("No language file found");
+
+	if (!m_hMarble) {
+		m_hMarble = FSunPackLib::XCC_OpenMix((CString)AppPath + (CString)"\\marble.mix", NULL);
 	}
 
 	errstream << "Loading local.mix";

@@ -490,26 +490,44 @@ void CFinalSunDlg::OnOptionsTiberiansunoptions()
 
 void CFinalSunDlg::OnFileOpenmap()
 {
-
 	//CMapOpenDialog dlg(TRUE, NULL, NULL,  OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, "TS maps|*.mpr;*.map|TS multi maps|*.mpr|TS single maps|*.map|");
-	CString r = GetLanguageStringACP("SAVEDLG_FILETYPES");
+	CString fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES");
 	if (yuri_mode) {
-		r = GetLanguageStringACP("SAVEDLG_FILETYPES_YR");
+		fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES_YR");
 	}
-	r = TranslateStringVariables(8, r, ";");
+	fileSearchString = TranslateStringVariables(8, fileSearchString, ";");
 
-	if (!yuri_mode) r.Replace(".yrm", ".mpr");
+	if (!yuri_mode) {
+		fileSearchString.Replace(".yrm", ".mpr");
+	}
 
-	CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, r);
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, fileSearchString);
 
 	char cuPath[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, cuPath);
 	dlg.m_ofn.lpstrInitialDir = cuPath;
 
-	if (theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir = (char*)(LPCTSTR)theApp.m_Options.TSExe;
+	if (theApp.m_Options.TSExe.GetLength()) {
+		dlg.m_ofn.lpstrInitialDir = theApp.m_Options.TSExe.operator LPCTSTR();
+	}
 
+	if (dlg.DoModal() == IDCANCEL) {
+		return;
+	}
 
-	if (dlg.DoModal() == IDCANCEL) return;
+	
+	{ // check whether there is a project file in the map folder
+		auto const projectFile = dlg.GetFolderPath() + "\\FinalAlertProject.ini";
+		if (projectFile != theApp.ProjectFilePath() && DoesFileExist(projectFile)) {
+			TCHAR exePath[MAX_PATH];
+			GetModuleFileName(NULL, exePath, MAX_PATH);
+
+			CString cmdLine;
+			cmdLine.Format(_T("\"%s\" --project \"%s\" --file \"%s\""), exePath, projectFile, dlg.GetPathName());
+			ShellExecute(NULL, NULL, exePath, cmdLine, NULL, SW_SHOWNORMAL);
+			exit(0);
+		}
+	}
 
 	m_PKTHeader.Clear();
 
@@ -522,7 +540,9 @@ void CFinalSunDlg::OnFileOpenmap()
 		HMIXFILE hMix = FSunPackLib::XCC_OpenMix(fileToOpen, NULL);
 		fileToOpen.Replace(".mmx", ".map");
 
-		if (fileToOpen.ReverseFind('\\') >= 0) fileToOpen = fileToOpen.Right(fileToOpen.GetLength() - fileToOpen.ReverseFind('\\') - 1);
+		if (fileToOpen.ReverseFind('\\') >= 0) {
+			fileToOpen = fileToOpen.Right(fileToOpen.GetLength() - fileToOpen.ReverseFind('\\') - 1);
+		}
 
 		CString extractFile = u8AppDataPath.c_str();
 		CString pktFile = fileToOpen;

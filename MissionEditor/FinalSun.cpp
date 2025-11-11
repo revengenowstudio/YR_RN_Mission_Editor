@@ -80,10 +80,13 @@ CFinalSunApp::CFinalSunApp()
 
 	// first: set up global variable AppPath
 	// [02/16/2000] using GetModuleFileName() instead of GetCurrentDirectory(): always the correct path
-	wchar_t AppPathUtf16[MAX_PATH] = { 0 };
-	GetModuleFileNameW(NULL, AppPathUtf16, MAX_PATH);
-	strcpy_s(AppPath, utf16ToUtf8(AppPathUtf16).c_str());
-	*(strrchr(AppPath, '\\') + 1) = 0;
+	{
+		wchar_t AppPathUtf16[MAX_PATH] = { 0 };
+		GetModuleFileNameW(NULL, AppPathUtf16, MAX_PATH);
+		auto const appPathStdStr = utf16ToUtf8(AppPathUtf16);
+		strcpy_s(AppPath, appPathStdStr.c_str());
+		*(strrchr(AppPath, '\\') + 1) = 0;
+	}
 
 	// Initialize AppData
 	const std::wstring AppDataPathFolder = utf8ToUtf16(u8AppDataPath.substr(0, u8AppDataPath.size() - 1));
@@ -146,7 +149,6 @@ CFinalSunApp::CFinalSunApp()
 
 }
 
-
 /////////////////////////////////////////////////////////////////////////////
 // CFinalSunApp initialization
 
@@ -173,19 +175,13 @@ BOOL CFinalSunApp::InitInstance()
 
 	ParseCommandLine();
 
-	// Load application data
-	std::string datafile = AppPath;
-
-	// TODO: recognize project path
-
-#ifdef TS_MODE
-	datafile += "\\FSData.ini";
+#ifdef RA2_MODE
+	CString game = "RA2";
+	CString app = "FinalAlert";
 #else
-	datafile += "\\FAData.ini";
+	CString game = "TS";
+	CString app = "FinalSun";
 #endif
-
-	g_data.LoadFile(datafile);
-
 	// Load language data
 	std::string languagefile = AppPath;
 #ifndef RA2_MODE
@@ -210,24 +206,19 @@ BOOL CFinalSunApp::InitInstance()
 
 	// ok lets get some options
 	CIniFile optini;
-	std::string iniFile = u8AppDataPath + iniName;
+	std::string userOptIniFile = u8AppDataPath + iniName;
 	std::string templateIniFile = std::string(AppPath) + defaultIniName;
 
 	bool copiedDefaultFile = false;
-	if (!DoesFileExist(iniFile.c_str())) {
-		if (CopyFileW(utf8ToUtf16(templateIniFile).c_str(), utf8ToUtf16(iniFile).c_str(), TRUE))
+	if (!DoesFileExist(userOptIniFile.c_str())) {
+		if (CopyFileW(utf8ToUtf16(templateIniFile).c_str(), utf8ToUtf16(userOptIniFile).c_str(), TRUE)) {
 			copiedDefaultFile = true;
+		}
 	}
 
-	optini.LoadFile(iniFile);
+	optini.LoadFile(userOptIniFile);
 
-#ifdef RA2_MODE
-	CString game = "RA2";
-	CString app = "FinalAlert";
-#else
-	CString game = "TS";
-	CString app = "FinalSun";
-#endif
+
 
 	std::wstring key;
 #ifdef RA2_MODE
@@ -277,22 +268,73 @@ BOOL CFinalSunApp::InitInstance()
 		opts.TSExe = optini.GetString(game, "Exe");
 	}
 
+	bool showFirstTimeOption = copiedDefaultFile;
+	if (!showFirstTimeOption) {
+		do {
+			showFirstTimeOption = true;
+			if (optini.Size() == 0) {
+				break;
+			}
+
+			if (opts.TSExe.IsEmpty()) {
+				break;
+			}
+
+			if (optini[app].GetString("Language").IsEmpty()) {
+				break;
+			}
+
+			if (!optini[app].GetBool("FileSearchLikeGame")) {
+				break;
+			}
+
+			if (!optini[app].GetBool("PreferLocalTheaterFiles")) {
+				break;
+			}
+			showFirstTimeOption = false;
+		} while (0);
+	}
+
 	// settings incomplete
-	if (copiedDefaultFile ||
-		optini.Size() == 0 ||
-		opts.TSExe.IsEmpty() ||
-		optini[app].GetString("Language").IsEmpty() ||
-		!optini[app].GetBool("FileSearchLikeGame") ||
-		!optini[app].GetBool("PreferLocalTheaterFiles")) {
+	if (showFirstTimeOption) {
 		opts.bSearchLikeTS = TRUE;
 		bOptionsStartup = TRUE;
 		ShowOptionsDialog(optini);
 		bOptionsStartup = FALSE;
-
 	} else {
 		opts.LanguageName = optini[app].GetString("Language");
 		opts.bSearchLikeTS = optini[app].GetBool("FileSearchLikeGame");
 	}
+
+	CString datafile = AppPath;
+#ifdef TS_MODE
+	datafile += "\\FSData.ini";
+#else
+	datafile += "\\FAData.ini";
+#endif
+	if (!m_projectFilePath.IsEmpty()) {
+		if (!DoesFileExist(m_projectFilePath)) {
+			MessageBox(NULL, _T(GetLanguageStringACP("Error")), _T("Project File Not Found"), MB_OK);
+			exit(1);
+		}
+		CIniFile projectIni;
+		projectIni.LoadFile(m_projectFilePath, true);
+
+		auto const resourceFolder = projectIni.GetStringOr("General", "ResourcesDir", m_projectFilePath);
+		TSPath = resourceFolder;
+		datafile = projectIni.GetStringOr("General", "FADataPath", datafile);
+	} else {
+		CString cTSPath = theApp.m_Options.TSExe;
+		auto lastSlash = cTSPath.ReverseFind('\\');
+		if (lastSlash >= 0) {
+			cTSPath = cTSPath.Left(lastSlash + 1); // keep last '\\'
+		}
+		TSPath = cTSPath;
+		errstream << "TSPath len: " << TSPath.GetLength() << std::endl;
+		errstream << "TSPath: " << TSPath << std::endl;
+		// Load application data
+	}
+	g_data.LoadFile(datafile);
 
 	auto const& appSec = optini[app];
 	opts.bPreferLocalTheaterFiles = appSec.GetBool("PreferLocalTheaterFiles", opts.bPreferLocalTheaterFiles);
@@ -329,7 +371,7 @@ BOOL CFinalSunApp::InitInstance()
 	// MW 07/19/01
 	opts.bShowCells = userInterfaceSec.GetBool("ShowBuildingCells");
 
-	optini.SaveFile(iniFile);
+	optini.SaveFile(userOptIniFile);
 
 	// MW 07/20/01: Load file list
 	int i;
@@ -349,9 +391,9 @@ BOOL CFinalSunApp::InitInstance()
 		MessageBox(0, GetLanguageStringACP("ExplainEasyView"), GetLanguageStringACP("ExplainEasyViewCap"), 0);
 		EasyView = 1;
 
-		optini.LoadFile(iniFile);
+		optini.LoadFile(userOptIniFile);
 		optini.SetInteger("UserInterface", "EasyView", 1);
-		optini.SaveFile(iniFile);
+		optini.SaveFile(userOptIniFile);
 	} else {
 		EasyView = userInterfaceSec.GetInteger("EasyView");
 	}
@@ -359,18 +401,9 @@ BOOL CFinalSunApp::InitInstance()
 		theApp.m_Options.bEasy = TRUE;
 	}
 
-
-
-
-	CString cTSPath = theApp.m_Options.TSExe;
-	auto lastSlash = cTSPath.ReverseFind('\\');
-	if (lastSlash >= 0)
-		cTSPath.SetAt(lastSlash + 1, 0);
-	strcpy(TSPath, cTSPath);
-
 	// MW 01/23/2013: changed the global CMapData Map to a global CMapData* to get rid of static initialization/shutdown problems
 	{
-		std::unique_ptr<CMapData> mapData(new CMapData());
+		auto const mapData = std::make_unique<CMapData>();
 		Map = mapData.get();
 
 		CLoading loading(NULL);
@@ -389,8 +422,8 @@ BOOL CFinalSunApp::InitInstance()
 
 void CFinalSunApp::ParseCommandLine()
 {
-	std::string_view commands(theApp.m_lpCmdLine);
-	std::string_view projectArg("--project=");
+	auto const commands = std::string_view(theApp.m_lpCmdLine);
+	decltype(commands) projectArg("--project=");
 
 	auto const prjArgPathPos = commands.find_first_of(projectArg);
 	if (prjArgPathPos != projectArg.npos) {
@@ -400,7 +433,7 @@ void CFinalSunApp::ParseCommandLine()
 		if (spacePos != projectArg.npos) {
 			path = path.substr(0, spacePos);
 		}
-		m_projectFilePath = path;
+		m_projectFilePath = CString(path.data(), path.size());
 	}
 
 #if 0 // Removed as it can conflict with Steam game arguments! -LF 23.02.2024
