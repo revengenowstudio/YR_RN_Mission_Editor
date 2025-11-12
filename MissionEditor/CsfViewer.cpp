@@ -190,14 +190,8 @@ void CCsfViewer::setSelectedCSFText(const CString& selectedText)
 
 void CCsfViewer::onViewerDoubleClickApply(NMHDR* pNMHDR, LRESULT* pResult)
 {
-    LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
-
-    int nItem = pNMItemActivate->iItem;
-    if (nItem >= 0)
-    {
-        CString selectedText = getSelectedCSFText();
-        setSelectedCSFText(selectedText);
-    }
+    CString selectedText = getSelectedCSFText();
+    setSelectedCSFText(selectedText);
     OnOK();
     *pResult = 0;
 }
