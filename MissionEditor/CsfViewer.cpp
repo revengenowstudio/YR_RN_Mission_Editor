@@ -169,7 +169,6 @@ CString CCsfViewer::getSelectedCSFText()
     return  m_stringList.GetItemText(nSelected, 0);
 }
 
-
 void CCsfViewer::setSelectedCSFText(const CString& selectedText)
 {
     if (selectedText.IsEmpty()) {
