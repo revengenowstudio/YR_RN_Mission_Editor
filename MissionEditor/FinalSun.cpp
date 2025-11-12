@@ -421,20 +421,61 @@ BOOL CFinalSunApp::InitInstance()
 	return FALSE;
 }
 
+auto parseArgs(const std::string_view commands) {
+	std::unordered_map<std::string_view, std::string_view> argsMap;
+	std::vector<size_t> positions;
+
+	// First pass: Find all positions of `--`
+	size_t pos = 0;
+	while ((pos = commands.find("--", pos)) != std::string_view::npos) {
+		positions.push_back(pos);
+		pos += 2; // Move past `--`
+	}
+
+	// Second pass: Extract keys and values
+	for (size_t i = 0; i < positions.size(); ++i) {
+		size_t start = positions[i]; // Start after `--`
+		size_t end = (i + 1 < positions.size()) ? positions[i + 1] : commands.size(); // Next `--` or end
+
+		// Extract the parameter substring
+		auto paramGroup = commands.substr(start, end - start);
+		auto firstSpace = paramGroup.find(' ');
+		if (firstSpace == paramGroup.npos) {
+			errstream << "invalid command param group " << paramGroup << std::endl;
+			break;
+		}
+		auto const paramName = paramGroup.substr(0, firstSpace);
+		if (paramName.size() == paramGroup.size()) {
+			break;
+		}
+		auto  paramValue = paramGroup.substr(firstSpace);
+
+		// Trim any spaces and quotes from the parameter
+		Trim(paramValue, ' ', TrimDir::Both);
+		Trim(paramValue, '\"', TrimDir::Both);
+		Trim(paramValue, '\'', TrimDir::Both);
+
+		// Store in the map
+		argsMap.emplace(paramName, paramValue);
+	}
+
+	return argsMap;
+}
+
 void CFinalSunApp::ParseCommandLine()
 {
-	auto const commands = std::string_view(theApp.m_lpCmdLine);
-	decltype(commands) projectArg("--project=");
 
-	auto const prjArgPathPos = commands.find_first_of(projectArg);
-	if (prjArgPathPos != projectArg.npos) {
-		auto path = commands.substr(prjArgPathPos + projectArg.size());
-		// TODO: trim quote
-		auto const spacePos = path.find_last_of(' ');
-		if (spacePos != projectArg.npos) {
-			path = path.substr(0, spacePos);
-		}
-		m_projectFilePath = CString(path.data(), path.size());
+
+	auto const argMap = parseArgs(theApp.m_lpCmdLine);
+	using ArgType = decltype(argMap)::value_type::first_type;
+	ArgType projectArg("--project");
+	ArgType fileArg("--file");
+
+	if (auto pathIt = argMap.find(projectArg); pathIt != argMap.end()) {
+		m_projectFilePath = CString(pathIt->second.data(), pathIt->second.size());
+	}
+	if (auto pathIt = argMap.find(fileArg); pathIt != argMap.end()) {
+		currentMapFile = CString(pathIt->second.data(), pathIt->second.size());
 	}
 
 #if 0 // Removed as it can conflict with Steam game arguments! -LF 23.02.2024
