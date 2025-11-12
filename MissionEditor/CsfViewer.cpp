@@ -131,27 +131,6 @@ void CCsfViewer::resetControls()
     }
 }
 
-//void CCsfViewer::updateTextView()
-//{
-//    if (m_selectedCSFLabel != "") {
-//        auto it = AllStrings.find(m_selectedCSFLabel);
-//        if (it != AllStrings.end())
-//        {
-//            int index = std::distance(AllStrings.begin(), it);
-//
-//            LVITEM lvItem = { 0 };
-//            lvItem.stateMask = LVIS_SELECTED | LVIS_FOCUSED;
-//            lvItem.state = LVIS_SELECTED | LVIS_FOCUSED;
-//
-//            m_stringList.SetItemState(index, &lvItem);
-//            m_stringList.EnsureVisible(index, TRUE);
-//
-//            m_stringList.SetFocus();
-//        }
-//    }
-//    m_selectedCSFLabel = "";
-//}
-
 BOOL CCsfViewer::PreTranslateMessage(MSG* pMsg)
 {
     int ret = -1;

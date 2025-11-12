@@ -27,17 +27,11 @@ public:
 protected:
     enum Controls {
         SelectedCSF = IDC_CSF_VIEW_SELECTED,
-        //NewFile = 1002,
         Search = IDC_CSF_VIEW_SELECTED,
-        //Add = 1005,
-        //Clone = 1006,
-        //Delete = 1007,
         CSFViewer = IDC_CSF_VIEW_LIST,
         ItemDetailViewer = IDC_CSF_VIEW_RICH_EDT,
-        //Save = 1011,
         SetLabel = IDC_CSF_VIEW_CUR_LABEL,
         Reload = IDC_CSF_VIEW_RELOAD,
-        //Apply = 1016
     };
 
     using RowSearchHandler = std::function<bool(const CString&)>;
@@ -53,7 +47,6 @@ protected:
     afx_msg void OnClose();
     afx_msg void onReload();
     void resetControls();
-    //void updateTextView();
     void displayCSFContent(const TranslationMap& csfMap, const RowSearchHandler handler);
     void onEditchangeSearch();
     void applySearch(const CString keyword = {});
