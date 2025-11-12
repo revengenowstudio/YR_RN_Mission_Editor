@@ -457,9 +457,16 @@ void CTriggerEventsDlg::OnSelchangeParameter()
 	}
 
 	CString ListType = GetParam(g_data["ParamTypes"][ParamType], 1);
+	auto const listTypeIdx = atoi(ListType);
 
-	HandleParamList(m_ParamValue, atoi(ListType));
+	HandleParamList(m_ParamValue, listTypeIdx);
 	m_ParamValue.SetWindowText(GetParam(EventData, startpos + 1 + original_cuparam));
+
+	//if (listTypeIdx == PARAMTYPE_TUTORIALTEXTS) {
+	//	CString csfVal;
+	//	m_ParamValue.GetWindowText()
+	//	return;
+	//}
 
 	int i;
 	BOOL bFound = FALSE;

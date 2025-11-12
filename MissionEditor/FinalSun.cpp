@@ -154,6 +154,11 @@ BOOL CFinalSunApp::InitInstance()
 {
 	m_hAccel = LoadAccelerators(this->m_hInstance, MAKEINTRESOURCE(IDR_MAIN));
 
+	if (!AfxInitRichEdit2()) {
+		::MessageBox(NULL, _T("Failed to initialize RichEdit control"), _T("Error"), MB_ICONERROR);
+		return FALSE;
+	}
+
 #ifndef NOSURFACES
 	if (GetDeviceCaps(GetDC(GetDesktopWindow()), BITSPIXEL) <= 8) {
 		MessageBox(0, "You currently only have 8 bit color mode enabled. This is not recommended. You can continue, but this will cause a significant slowdown while loading graphics, and result in poor graphics quality", "Error", 0);

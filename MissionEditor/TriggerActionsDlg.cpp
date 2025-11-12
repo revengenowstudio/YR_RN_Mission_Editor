@@ -36,6 +36,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+extern CFinalSunApp theApp;
 
 BOOL IsWaypointFormat(CString s)
 {
@@ -100,6 +101,7 @@ BEGIN_MESSAGE_MAP(CTriggerActionsDlg, CDialog)
 	ON_CBN_SELCHANGE(IDC_ACTION, OnSelchangeAction)
 	ON_CBN_EDITCHANGE(IDC_ACTIONTYPE, OnEditchangeActiontype)
 	ON_LBN_SELCHANGE(IDC_PARAMETER, OnSelchangeParameter)
+	ON_CBN_DROPDOWN(IDC_PARAMVALUE, OnDropdownParamvalue)
 	ON_CBN_EDITCHANGE(IDC_PARAMVALUE, OnEditchangeParamvalue)
 	ON_BN_CLICKED(IDC_NEWACTION, OnNewaction)
 	ON_BN_CLICKED(IDC_DELETEACTION, OnDeleteaction)
@@ -276,13 +278,40 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 	}
 }
 
+std::pair<CString, CString> CTriggerActionsDlg::popUpCSFViewerAndReturn(CComboBox& cb)
+{
+	CString curValue;
+	cb.GetWindowText(curValue);
+
+	auto& csfDlg = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_csfStrings;
+
+	if (!curValue.IsEmpty() && curValue != "0") {
+		TruncSpace(curValue);
+		csfDlg.SetSelectedString(curValue);
+	} else {
+		csfDlg.SetSelectedString("");
+	}
+
+	CString label = csfDlg.DoModal() == IDCANCEL
+		? curValue : csfDlg.CSFLabelSelected();
+
+	auto content = csfDlg.CSFContentSelected();
+	auto const countCorrected = utf8ByteCount(content);
+
+	return { label, content.Left(countCorrected) };
+}
+
 void CTriggerActionsDlg::OnSelchangeParameter()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	if (m_currentTrigger.GetLength() == 0) return;
+	if (m_currentTrigger.GetLength() == 0) {
+		return;
+	}
 	int selev = m_Action.GetCurSel();
-	if (selev < 0) return;
+	if (selev < 0) {
+		return;
+	}
 	int curev = m_Action.GetItemData(selev);
 
 	int curselparam = m_Parameter.GetCurSel();
@@ -293,7 +322,7 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 
 
 
-	int curparam = m_Parameter.GetItemData(curselparam);
+	const int curparam = m_Parameter.GetItemData(curselparam);
 
 
 
@@ -309,6 +338,20 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 		bNoWP = TRUE;
 	}
 
+	if (curparam == -1) {
+		char wayp[50];
+		if (!bNoWP) {
+			ListWaypoints(m_ParamValue);
+			int iWayp = StringToWaypoint(GetParam(ActionData, startpos + 1 + 6));
+			itoa(iWayp, wayp, 10);
+		} else {
+			strcpy(wayp, GetParam(ActionData, startpos + 1 + 6));
+			HandleParamList(m_ParamValue, PARAMTYPE_NOTHING);
+		}
+		m_ParamValue.SetWindowText(wayp);
+		return;
+	}
+
 	if (curparam >= 0 && curparam < 6) {
 		CString ParamType = GetParam(g_data["Actions"][GetParam(ActionData, startpos)], 1 + curparam);
 #ifdef RA2_MODE
@@ -318,7 +361,15 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 #endif
 		if (atoi(ParamType) >= 0) {
 			CString ListType = GetParam(g_data["ParamTypes"][ParamType], 1);
-			HandleParamList(m_ParamValue, atoi(ListType));
+
+			auto const listTypeIdx = atoi(ListType);
+			if (listTypeIdx == PARAMTYPE_TUTORIALTEXTS) {
+				// DO nothing, reacted in selchange or editchange
+				HandleParamList(m_ParamValue, PARAMTYPE_NOTHING);
+				m_ParamValue.SetWindowText(GetParam(ActionData, startpos + 1 + curparam));
+				return;
+			}
+			HandleParamList(m_ParamValue, listTypeIdx);
 			m_ParamValue.SetWindowText(GetParam(ActionData, startpos + 1 + curparam));
 
 			int i;
@@ -357,22 +408,6 @@ void CTriggerActionsDlg::OnSelchangeParameter()
 			}*/
 		}
 		return;
-	}
-
-	if (curparam == -1) {
-		char wayp[50];
-		if (!bNoWP) {
-			ListWaypoints(m_ParamValue);
-			int iWayp = StringToWaypoint(GetParam(ActionData, startpos + 1 + 6));
-
-			itoa(iWayp, wayp, 10);
-		} else {
-			strcpy(wayp, GetParam(ActionData, startpos + 1 + 6));
-			HandleParamList(m_ParamValue, 0);
-		}
-
-
-		m_ParamValue.SetWindowText(wayp);
 	}
 }
 
@@ -414,7 +449,9 @@ void CTriggerActionsDlg::OnEditchangeParamvalue()
 	TruncSpace(newVal);
 	newVal.TrimLeft();
 
-	if (newVal.Find(",", 0) >= 0) newVal.SetAt(newVal.Find(",", 0), 0);
+	if (newVal.Find(",", 0) >= 0) {
+		newVal.SetAt(newVal.Find(",", 0), 0);
+	}
 
 	if (curparam >= 0) {
 		ini.SetString("Actions", m_currentTrigger, SetParam(ActionData, startpos + 1 + curparam, newVal));
@@ -430,6 +467,64 @@ void CTriggerActionsDlg::OnEditchangeParamvalue()
 		ini.SetString("Actions", m_currentTrigger, SetParam(ini["Actions"][m_currentTrigger], pos, (LPCTSTR)waypoint));
 	}
 
+}
+
+void CTriggerActionsDlg::OnDropdownParamvalue()
+{
+	CIniFile& ini = Map->GetIniFile();
+
+	if (m_currentTrigger.GetLength() == 0) {
+		return;
+	}
+	int selev = m_Action.GetCurSel();
+	if (selev < 0) {
+		return;
+	}
+	int curev = m_Action.GetItemData(selev);
+
+	int curselparam = m_Parameter.GetCurSel();
+	if (curselparam < 0) {
+		m_ParamValue.SetWindowText("");
+		return;
+	}
+
+	auto const& ActionData = ini["Actions"][m_currentTrigger];
+	int startpos = 1 + curev * 8;
+	int curparam = m_Parameter.GetItemData(curselparam);
+
+	if (curparam < 0 || curparam >= 6) {
+		return;
+	}
+
+	auto const paramStr = GetParam(ActionData, startpos);
+	CString ParamType = GetParam(g_data["Actions"][paramStr], 1 + curparam);
+#ifdef RA2_MODE
+	if (g_data["ActionsRA2"].Exists(paramStr)) {
+		ParamType = GetParam(g_data["ActionsRA2"][paramStr], 1 + curparam);
+	}
+#endif
+	if (atoi(ParamType) >= 0) {
+		CString ListType = GetParam(g_data["ParamTypes"][ParamType], 1);
+
+		auto const listTypeIdx = atoi(ListType);
+		if (listTypeIdx != PARAMTYPE_TUTORIALTEXTS) {
+			return;
+		}
+	}
+	
+	auto [label, content] = popUpCSFViewerAndReturn(m_ParamValue);
+	
+	auto txt = label;
+	if (!content.IsEmpty()) {
+		txt += ' ';
+		txt += content;
+	}
+	m_ParamValue.SetWindowText(txt);
+	ini.SetString("Actions", m_currentTrigger, SetParam(ActionData, startpos + 1 + curparam, label));
+
+	//m_Parameter.SetCurSel(curselparam); no need if 'UpdateDialogs' is not called elsewhere
+	//m_ParamValue.ShowDropDown(); won't work but use Post
+	::PostMessage(m_ParamValue, CB_SHOWDROPDOWN, FALSE, 0);
 }
 
 void CTriggerActionsDlg::OnNewaction()

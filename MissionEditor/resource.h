@@ -2,6 +2,9 @@
 // Microsoft Visual C++ generated include file.
 // Used by MissionEditor.rc
 //
+#define PRODUCT_VERSION_REVISION        0
+#define PRODUCT_VERSION_MINOR           1
+#define PRODUCT_VERSION_MAJOR           2
 #define IDD_TIBERIANSUNMISSIONEDITOR_DIALOG 102
 #define IDD_FINALSUN_DIALOG             102
 #define IDB_LIGHTBULB                   103
@@ -97,6 +100,7 @@
 #define IDD_USERSCRIPTS                 288
 #define IDD_COMBO_UINPUT                289
 #define IDC_EDITOR_ARROW                299
+#define IDD_CSF_VIEWER                  300
 #define IDC_BULB                        1000
 #define IDC_STARTUP                     1001
 #define IDC_NEXTTIP                     1002
@@ -108,6 +112,7 @@
 #define IDC_CARRYOVERCAP                1012
 #define IDC_MAX                         1012
 #define IDC_ENDOFGAME                   1013
+#define IDC_CSF_VIEW_CUR_LABEL          1013
 #define IDC_NEXTSCENARIO                1014
 #define IDC_ALTNEXTSCENARIO             1015
 #define IDC_SKIPSCORE                   1016
@@ -628,6 +633,11 @@
 #define IDC_CMAPSIZE_TOP_TXT            1552
 #define IDC_CMAPSIZE_NOTE_TXT           1553
 #define IDC_CMAPSIZE_WARNING_TXT        1554
+#define IDC_CSF_VIEW_SELECTED           1555
+#define IDC_CSF_VIEW_RELOAD             1556
+#define IDC_CSF_VIEW_SEARCH_EDT         1557
+#define IDC_CSF_VIEW_LIST               1558
+#define IDC_CSF_VIEW_RICH_EDT           1559
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -722,7 +732,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        322
+#define _APS_NEXT_RESOURCE_VALUE        323
 #define _APS_NEXT_COMMAND_VALUE         40144
 #define _APS_NEXT_CONTROL_VALUE         1555
 #define _APS_NEXT_SYMED_VALUE           111

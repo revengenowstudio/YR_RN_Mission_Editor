@@ -52,6 +52,7 @@ bool RepairTrigger(CString& triggerdata);
 void GetDrawBorder(const BYTE* data, int width, int line, int& left, int& right, unsigned int flags, BOOL* TranspInside = NULL);
 
 // String conversion
+size_t utf8ByteCount(const CString& input);
 std::wstring utf8ToUtf16(const char* utf8);
 std::wstring utf8ToUtf16(const std::string& utf8);
 std::string utf16ToUtf8(const std::wstring& utf16);
