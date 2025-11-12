@@ -329,7 +329,13 @@ BOOL CFinalSunApp::InitInstance()
 		cTSPath = projectIni.GetStringOr("General", "ResourcesDir", cTSPath);
 		datafile = projectIni.GetStringOr("General", "FADataPath", datafile);
 	}
-
+	if (cTSPath.GetAt(cTSPath.GetLength() - 1) != '\\') {
+		cTSPath.AppendChar('\\');
+	}
+	if (cTSPath.IsEmpty()) {
+		errstream << "invalid game resource dir" << std::endl;
+		exit(1);
+	}
 	TSPath = cTSPath;
 	errstream << "TSPath len: " << TSPath.GetLength() << std::endl;
 	errstream << "TSPath: " << TSPath << std::endl;
