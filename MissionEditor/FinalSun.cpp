@@ -313,8 +313,9 @@ BOOL CFinalSunApp::InitInstance()
 	datafile += "\\FAData.ini";
 #endif
 	if (!m_projectFilePath.IsEmpty()) {
+		errstream << "Got project file path: " << m_projectFilePath << std::endl;
 		if (!DoesFileExist(m_projectFilePath)) {
-			MessageBox(NULL, _T(GetLanguageStringACP("Error")), _T("Project File Not Found"), MB_OK);
+			MessageBox(NULL, _T("Project File Not Found"), _T(GetLanguageStringACP("Error")), MB_OK);
 			exit(1);
 		}
 		CIniFile projectIni;

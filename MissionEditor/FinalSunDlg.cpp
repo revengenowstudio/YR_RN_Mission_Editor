@@ -532,7 +532,8 @@ void CFinalSunDlg::OnFileOpenmap()
 	}
 
 	if (checkProjectPathAndRelaunch(dlg.GetPathName())) {
-		reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->EndDialog(0);
+		reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->UnloadAll(false);
+		return;
 	}
 
 	m_PKTHeader.Clear();
@@ -2207,12 +2208,15 @@ void CFinalSunDlg::OnHelpTipoftheday()
 
 }
 
-void CFinalSunDlg::UnloadAll()
+void CFinalSunDlg::UnloadAll(bool ask)
 {
-	int iQuit = MessageBox(GetLanguageStringACP("MainDialogExitQuestion"), GetLanguageStringACP("MainDialogExitQuestionCap"), MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2);
-	if (iQuit == IDNO) {
-		return;
+	if (ask) {
+		int iQuit = MessageBox(GetLanguageStringACP("MainDialogExitQuestion"), GetLanguageStringACP("MainDialogExitQuestionCap"), MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2);
+		if (iQuit == IDNO) {
+			return;
+		}
 	}
+
 	try {
 
 		CShutDownDlg dlg(this);
@@ -3725,7 +3729,8 @@ void CFinalSunDlg::OpenMap(const CString lpFilename)
 {
 	// TODO: check project path
 	if (checkProjectPathAndRelaunch(lpFilename)) {
-		reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->EndDialog(0);
+		reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->UnloadAll(false);
+		return;
 	}
 
 	m_PKTHeader.Clear();
