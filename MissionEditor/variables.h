@@ -56,7 +56,7 @@ extern CIniFile* tiles;
 extern BOOL bOptionsStartup;
 
 // the current file beeing edited.
-extern char currentMapFile[MAX_PATH + 1];
+extern CString currentMapFile;
 
 // all the pictures shown in the mapview
 extern map<CString, PICDATA> pics;

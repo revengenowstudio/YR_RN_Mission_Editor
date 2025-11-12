@@ -558,7 +558,7 @@ void CMapData::UpdateIniFile(DWORD dwFlags)
 
 }
 
-void CMapData::LoadMap(const std::string& file)
+void CMapData::LoadMap(const CString& file)
 {
 	errstream << "LoadMap() frees memory\n";
 	errstream.flush();
@@ -603,7 +603,7 @@ void CMapData::LoadMap(const std::string& file)
 
 	// any .mpr is a multi map. Previous FinalAlert/FinalSun versions did not set this value correctly->
 	char lowc[MAX_PATH] = { 0 };
-	strcpy_s(lowc, file.c_str());
+	strcpy_s(lowc, file);
 	_strlwr(lowc);
 	if (strstr(lowc, ".mpr")) {
 		m_mapfile.SetString("Basic", "MultiplayerOnly", "1");

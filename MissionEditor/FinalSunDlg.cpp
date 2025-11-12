@@ -636,9 +636,10 @@ void CFinalSunDlg::OnFileOpenmap()
 	if (!bNoMapFile) {
 		if (bLoadedFromMMX) {
 			//currentMapFile[0]=0;
-			strcpy(currentMapFile, dlg.GetPathName());
-		} else
-			strcpy(currentMapFile, fileToOpen);
+			currentMapFile = dlg.GetPathName();
+		} else {
+			currentMapFile = fileToOpen;
+		}
 	}
 
 	Sleep(200);
@@ -759,7 +760,7 @@ void CFinalSunDlg::OnFileSaveas()
 	if (theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir = (char*)(LPCTSTR)theApp.m_Options.TSExe;
 
 	if (dlg.DoModal() != IDCANCEL) {
-		strcpy(currentMapFile, dlg.GetPathName());
+		currentMapFile = dlg.GetPathName();
 
 		CString str = GetLanguageStringACP("MainDialogCaption");
 		str += " (";
@@ -848,12 +849,16 @@ void CFinalSunDlg::OnFileSave()
 		return;
 	}
 
-	if (strlen(currentMapFile) == 0) { OnFileSaveas(); return; }
+	if (currentMapFile.IsEmpty()) { 
+		OnFileSaveas();
+		return; 
+	}
 
 	CMapValidator validator;
 	int iCancel = validator.DoModal();
-	if (iCancel == IDCANCEL) return;
-
+	if (iCancel == IDCANCEL) {
+		return;
+	}
 	SaveMap(currentMapFile);
 }
 
@@ -1759,7 +1764,7 @@ void CFinalSunDlg::OnFileNew()
 	m_TerrainDlg.DestroyWindow();
 
 	// set currentMapFile to nothing and update window caption
-	strcpy(currentMapFile, "");
+	currentMapFile.Empty();
 	CString cap;
 	cap = GetLanguageStringACP("MainDialogCaption");
 	cap += " (";
@@ -3831,9 +3836,10 @@ void CFinalSunDlg::OpenMap(const CString lpFilename)
 	if (!bNoMapFile) {
 		if (bLoadedFromMMX) {
 			//currentMapFile[0]=0;
-			strcpy(currentMapFile, lpFilename);
-		} else
-			strcpy(currentMapFile, fileToOpen);
+			currentMapFile = lpFilename;
+		} else {
+			currentMapFile = fileToOpen;
+		}
 	}
 
 	Sleep(200);

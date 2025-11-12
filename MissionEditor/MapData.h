@@ -473,7 +473,7 @@ public:
 	{
 		return m_IsoSize;
 	}
-	void LoadMap(const std::string& file);
+	void LoadMap(const CString& file);
 	void UpdateIniFile(DWORD dwFlags = MAPDATA_UPDATE_TO_INI);
 	CIniFile& GetIniFile();
 	CString GetAITriggerTypeID(DWORD dwAITriggerType);

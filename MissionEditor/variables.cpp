@@ -170,7 +170,7 @@ TCHAR AppPath[MAX_PATH + 1] = { 0 };
 const std::string u8AppDataPath = GetAppDataPath();// "%LOCALAPPDATA%, user data
 const std::wstring u16AppDataPath = utf8ToUtf16(u8AppDataPath);
 CString TSPath; // game resource path, with \\ ending
-TCHAR currentMapFile[MAX_PATH + 1] = { 0 };
+CString currentMapFile;
 BOOL bOptionsStartup = FALSE;
 bool bAllowAccessBehindCliffs = false;
 
