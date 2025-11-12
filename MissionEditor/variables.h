@@ -43,6 +43,7 @@ extern CIniFile tutorial;
 extern CIniFile eva;
 extern CIniFile theme;
 extern CIniFile g_data;
+extern CIniFile g_project; //!< project specification
 extern CIniFile language;
 extern CIniFile tiles_t;
 extern CIniFile tiles_s;

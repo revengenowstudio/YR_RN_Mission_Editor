@@ -323,11 +323,10 @@ BOOL CFinalSunApp::InitInstance()
 			MessageBox(NULL, _T("Project File Not Found"), _T(GetLanguageStringACP("Error")), MB_OK);
 			exit(1);
 		}
-		CIniFile projectIni;
-		projectIni.LoadFile(m_projectFilePath, true);
+		g_project.LoadFile(m_projectFilePath, true);
 
-		cTSPath = projectIni.GetStringOr("General", "ResourcesDir", cTSPath);
-		datafile = projectIni.GetStringOr("General", "FADataPath", datafile);
+		cTSPath = g_project.GetStringOr("General", "ResourcesDir", cTSPath);
+		datafile = g_project.GetStringOr("General", "FADataPath", datafile);
 	}
 	if (cTSPath.GetAt(cTSPath.GetLength() - 1) != '\\') {
 		cTSPath.AppendChar('\\');
