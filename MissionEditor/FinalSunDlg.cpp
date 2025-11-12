@@ -486,12 +486,24 @@ bool checkProjectPathAndRelaunch(CString filePath)
 { // check whether there is a project file in the map folder
 	auto const folderPath = filePath.Left(filePath.ReverseFind('\\'));
 	auto const projectFile = folderPath + "\\FinalAlertProject.ini";
-	if (projectFile != theApp.ProjectFilePath() && DoesFileExist(projectFile)) {
+	// There are several cases:
+	// 1. Currently now project file vs incoming project file
+	// 2. Current project file differs from incoming one
+	// 3. Current using project file vs incoming none
+	if (projectFile != theApp.ProjectFilePath()) {
 		TCHAR exePath[MAX_PATH];
 		GetModuleFileName(NULL, exePath, MAX_PATH);
 
 		CString cmdLine;
-		cmdLine.Format(_T("\"%s\" --project \"%s\" --file \"%s\""), exePath, projectFile, filePath);
+		cmdLine.Format(_T("\"%s\" --file \"%s\""), exePath, filePath);
+
+		// only append project parameter if incoming project exists
+		if (DoesFileExist(projectFile)) {
+			CString projectParam;
+			projectParam.Format(" --project \"%s\"", projectFile);
+			cmdLine += projectParam;
+		}
+
 		ShellExecute(NULL, NULL, exePath, cmdLine, NULL, SW_SHOWNORMAL);
 		return true;
 	}
