@@ -50,6 +50,8 @@ protected:
     void displayCSFContent(const TranslationMap& csfMap, const RowSearchHandler handler);
     void onEditchangeSearch();
     void applySearch(const CString keyword = {});
+    CString getSelectedCSFText();
+	void setSelectedCSFText(const CString& selectedText);
     void onViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult);
     void onViewerDoubleClickApply(NMHDR* pNMHDR, LRESULT* pResult);
 

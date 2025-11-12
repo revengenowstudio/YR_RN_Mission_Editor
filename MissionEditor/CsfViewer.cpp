@@ -18,7 +18,7 @@ LRESULT CALLBACK CCsfViewer::ListViewSubclassProc(HWND hWnd, UINT uMsg, WPARAM w
 }
 #endif
 
-CCsfViewer::CCsfViewer(CWnd* pParent) 
+CCsfViewer::CCsfViewer(CWnd* pParent)
     : CDialog(CCsfViewer::IDD, pParent)
 {
 }
@@ -160,6 +160,35 @@ BOOL CCsfViewer::onMessageKeyDown(MSG* pMsg)
     return TRUE;
 }
 
+CString CCsfViewer::getSelectedCSFText()
+{
+    int nSelected = m_stringList.GetNextItem(-1, LVNI_SELECTED);
+    if (nSelected == -1)
+        return "";
+
+    return  m_stringList.GetItemText(nSelected, 0);
+}
+
+
+void CCsfViewer::setSelectedCSFText(const CString& selectedText)
+{
+    if (selectedText.IsEmpty()) {
+        m_richEditCtrl.SetWindowText("");
+        m_selectedLabel.SetWindowText("");
+        m_selectedCSFLabel.Empty();
+        return;
+    }
+
+    auto it = AllStrings.find(selectedText);
+    if (it == AllStrings.end())
+        return;
+
+    m_richEditCtrl.SetWindowText(it->second.cString);
+    m_selectedLabel.SetWindowText(selectedText);
+    m_selectedCSFLabel = selectedText;
+    m_selectedCSFContent = it->second.cString;
+}
+
 void CCsfViewer::onViewerDoubleClickApply(NMHDR* pNMHDR, LRESULT* pResult)
 {
     LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
@@ -167,63 +196,17 @@ void CCsfViewer::onViewerDoubleClickApply(NMHDR* pNMHDR, LRESULT* pResult)
     int nItem = pNMItemActivate->iItem;
     if (nItem >= 0)
     {
-        int nSelected = m_stringList.GetNextItem(-1, LVNI_SELECTED);
-        if (nSelected == -1) {
-            return;
-        }
-        CString selectedText = m_stringList.GetItemText(nSelected, 0);
-
-        if (selectedText.IsEmpty()) {
-            m_richEditCtrl.SetWindowText("");
-            m_selectedLabel.SetWindowText("");
-            m_selectedCSFLabel = "";
-            return;
-        }
-
-		CString value = "";
-        auto const it = AllStrings.find(selectedText);
-        if (it == AllStrings.end()) {
-            return;
-        }
-
-        m_richEditCtrl.SetWindowText(it->second.cString);
-        m_selectedLabel.SetWindowText(selectedText);
-
-        m_selectedCSFLabel = selectedText;
-        m_selectedCSFContent = it->second.cString;
+        CString selectedText = getSelectedCSFText();
+        setSelectedCSFText(selectedText);
     }
     OnOK();
-
     *pResult = 0;
 }
 
 void CCsfViewer::onViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
-    int nSelected = m_stringList.GetNextItem(-1, LVNI_SELECTED);
-    if (nSelected == -1) {
-        return;
-    }
-
-    CString selectedText = m_stringList.GetItemText(nSelected, 0);
-
-    if (selectedText.IsEmpty()) {
-        m_richEditCtrl.SetWindowText("");
-        m_selectedLabel.SetWindowText("");
-        m_selectedCSFLabel = "";
-        return;
-    }
-
-    CString value = "";
-    auto const it = AllStrings.find(selectedText);
-    if (it == AllStrings.end()) {
-        return;
-    }
-
-    m_richEditCtrl.SetWindowText(it->second.cString);
-    m_selectedLabel.SetWindowText(selectedText);
-
-    m_selectedCSFLabel = selectedText;
-    m_selectedCSFContent = it->second.cString;
+    CString selectedText = getSelectedCSFText();
+    setSelectedCSFText(selectedText);
     *pResult = 0;
 }
 
