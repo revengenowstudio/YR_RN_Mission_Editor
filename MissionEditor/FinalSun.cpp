@@ -340,6 +340,10 @@ BOOL CFinalSunApp::InitInstance()
 	errstream << "TSPath len: " << TSPath.GetLength() << std::endl;
 	errstream << "TSPath: " << TSPath << std::endl;
 	// Load application data
+	if (!DoesFileExist(datafile)) {
+		errstream << "invalid FA2 control ini path" << std::endl;
+		exit(1);
+	}
 	g_data.LoadFile(datafile);
 
 	auto const& appSec = optini[app];
