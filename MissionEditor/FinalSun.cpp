@@ -312,6 +312,11 @@ BOOL CFinalSunApp::InitInstance()
 #else
 	datafile += "\\FAData.ini";
 #endif
+	CString cTSPath = theApp.m_Options.TSExe;
+	auto lastSlash = cTSPath.ReverseFind('\\');
+	if (lastSlash >= 0) {
+		cTSPath = cTSPath.Left(lastSlash + 1); // keep last '\\'
+	}
 	if (!m_projectFilePath.IsEmpty()) {
 		errstream << "Got project file path: " << m_projectFilePath << std::endl;
 		if (!DoesFileExist(m_projectFilePath)) {
@@ -321,20 +326,14 @@ BOOL CFinalSunApp::InitInstance()
 		CIniFile projectIni;
 		projectIni.LoadFile(m_projectFilePath, true);
 
-		auto const resourceFolder = projectIni.GetStringOr("General", "ResourcesDir", m_projectFilePath);
-		TSPath = resourceFolder;
+		cTSPath = projectIni.GetStringOr("General", "ResourcesDir", cTSPath);
 		datafile = projectIni.GetStringOr("General", "FADataPath", datafile);
-	} else {
-		CString cTSPath = theApp.m_Options.TSExe;
-		auto lastSlash = cTSPath.ReverseFind('\\');
-		if (lastSlash >= 0) {
-			cTSPath = cTSPath.Left(lastSlash + 1); // keep last '\\'
-		}
-		TSPath = cTSPath;
-		errstream << "TSPath len: " << TSPath.GetLength() << std::endl;
-		errstream << "TSPath: " << TSPath << std::endl;
-		// Load application data
 	}
+
+	TSPath = cTSPath;
+	errstream << "TSPath len: " << TSPath.GetLength() << std::endl;
+	errstream << "TSPath: " << TSPath << std::endl;
+	// Load application data
 	g_data.LoadFile(datafile);
 
 	auto const& appSec = optini[app];
