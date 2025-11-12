@@ -5,11 +5,16 @@ This repository contains the source code for the FinalAlert (YR) Mission Editor,
 The official version for both applications has been increased to v2.0 in order to illustrate they now run properly on modern operating systems. We also used this opporunity to update the application and fix some known issues.
 
 # Ongoing Changes:
-- Refactored most of Ini handling, using safe and efficient ways. Most importantly, aligned with game Ini sequencing especially for type items (e.g. Animation)
-- Transformed to x86_64 architecture
-- Introduced unit test by using google test (works on x64 environment only)
+- Advanced Ini handling, align with game Ini sequencing especially for type items (e.g. Animation), still missing duplication registeration handle
+- L10n, Simplified Chinese 90% coverage
+- Project support, allow switch to different workspace (ini definition, editor customization, artwork assets), which means you can use just one editor but for different MODs
+- \* Full D3D support, low priority right now
+- Align with FA2sp & HDM edition major features
 
 # Fixes and Changes
+- \* **x86_64 architecture fully supported**
+- \* Refactored most of Ini handling, using safe and efficient ways.
+- \* Unit test powered by Google Test
 - Fixed a few code issues to allow the application to run on modern operating systems.
 - Updated the application icons with new 256x256 graphics.
 - You can now zoom in & out with the middle mouse button or wheel
