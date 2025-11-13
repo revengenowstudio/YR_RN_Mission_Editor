@@ -160,46 +160,48 @@ BOOL CCsfViewer::onMessageKeyDown(MSG* pMsg)
     return TRUE;
 }
 
-CString CCsfViewer::getSelectedCSFText()
+BOOL CCsfViewer::applyViewerSelectionChange()
 {
     int nSelected = m_stringList.GetNextItem(-1, LVNI_SELECTED);
     if (nSelected == -1)
-        return "";
+        return FALSE;
 
-    return  m_stringList.GetItemText(nSelected, 0);
-}
+    CString selectedText = m_stringList.GetItemText(nSelected, 0);
 
-void CCsfViewer::setSelectedCSFText(const CString& selectedText)
-{
     if (selectedText.IsEmpty()) {
         m_richEditCtrl.SetWindowText("");
         m_selectedLabel.SetWindowText("");
         m_selectedCSFLabel.Empty();
-        return;
+        return FALSE;
     }
 
     auto it = AllStrings.find(selectedText);
     if (it == AllStrings.end())
-        return;
+        return FALSE;
 
     m_richEditCtrl.SetWindowText(it->second.cString);
     m_selectedLabel.SetWindowText(selectedText);
     m_selectedCSFLabel = selectedText;
     m_selectedCSFContent = it->second.cString;
+    return TRUE;
 }
 
 void CCsfViewer::onViewerDoubleClickApply(NMHDR* pNMHDR, LRESULT* pResult)
 {
-    CString selectedText = getSelectedCSFText();
-    setSelectedCSFText(selectedText);
-    OnOK();
+
+    if (!applyViewerSelectionChange()) {
+        return;
+    }
+
     *pResult = 0;
+    OnOK();
 }
 
 void CCsfViewer::onViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
-    CString selectedText = getSelectedCSFText();
-    setSelectedCSFText(selectedText);
+    if (!applyViewerSelectionChange()) {
+        return;
+    }
     *pResult = 0;
 }
 
