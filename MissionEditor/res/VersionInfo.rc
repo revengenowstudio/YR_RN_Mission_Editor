@@ -1,0 +1,147 @@
+
+#pragma code_page(65001)
+
+#include <afxres.h>
+#include "..\Version.h"
+#include "..\resource.h"
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDD_LOADING$(TS_MODE) DIALOGEX 0, 0, 235, 165
+#else
+IDD_LOADING DIALOGEX 0, 0, 235, 165
+#endif
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    LTEXT           "Loading...",IDC_CAP,7,7,221,9
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH,7,18,221,13,WS_EX_DLGMODALFRAME
+    LTEXT           "Homepage: http://www.ea.com",IDC_STATIC,7,78,221,11,WS_BORDER
+    CTEXT           "",IDC_VERSION,74,37,154,13,SS_CENTERIMAGE | SS_SUNKEN
+    LTEXT           "Version:",IDC_LVERSION,7,37,61,9
+    CTEXT           "",IDC_BUILTBY,74,52,154,13,SS_CENTERIMAGE | SS_SUNKEN
+    LTEXT           "Built by:",IDC_LBUILTBY,7,52,61,9
+    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner, Zero Fanker\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
+    LTEXT           "This software comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it.\nFor details open Help->Info",IDC_STATIC,6,129,221,26
+END
+#endif
+
+#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDD_LOADING$(RA2_MODE) DIALOGEX 0, 0, 235, 165
+#else
+IDD_LOADING DIALOGEX 0, 0, 235, 165
+#endif
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    LTEXT           "Loading...",IDC_CAP,7,7,221,9
+    CONTROL         "Progress1",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH,7,18,221,13,WS_EX_DLGMODALFRAME
+    LTEXT           "Homepage: http://www.ea.com",IDC_STATIC,7,78,221,11,WS_BORDER
+    CTEXT           "",IDC_VERSION,74,37,154,13,SS_CENTERIMAGE | SS_SUNKEN
+    LTEXT           "Version:",IDC_LVERSION,7,37,61,9
+    CTEXT           "",IDC_BUILTBY,74,52,154,13,SS_CENTERIMAGE | SS_SUNKEN
+    LTEXT           "Built by:",IDC_LBUILTBY,7,52,61,9
+    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner, Zero Fanker\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
+    LTEXT           "This software comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it.\nFor details open Help->Info",IDC_STATIC,6,129,221,26
+END
+#endif
+
+#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
+#if defined(APSTUDIO_INVOKED)
+VS_VERSION_INFO$(RA2_MODE) VERSIONINFO
+#else
+VS_VERSION_INFO VERSIONINFO
+#endif
+ FILEVERSION 1,0,0,2
+ PRODUCTVERSION 1,0,0,2
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x2bL
+#else
+ FILEFLAGS 0x2aL
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "FinalAlert 2: Yuri's Revenge Mission Editor"
+            VALUE "CompanyName", "Electronic Arts, Inc."
+            VALUE "FileDescription", "FinalAlert 2: Yuri's Revenge"
+            VALUE "FileVersion", "2.1.0"
+            VALUE "InternalName", "FinalAlert 2: Yuri's Revenge Mission Editor"
+            VALUE "LegalCopyright", "Copyright (C) 1999-2024 Electronic Arts, Inc."
+            VALUE "LegalTrademarks", "FinalAlert 2: Yuri's Revenge"
+            VALUE "OriginalFilename", "FinalAlert2YR.EXE"
+            VALUE "ProductName", "FinalAlert 2: Yuri's Revenge"
+            VALUE "ProductVersion", "2.1.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+#endif
+
+#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
+#if defined(APSTUDIO_INVOKED)
+VS_VERSION_INFO$(TS_MODE) VERSIONINFO
+#else
+VS_VERSION_INFO VERSIONINFO
+#endif
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x23L
+#else
+ FILEFLAGS 0x22L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "FinalSun Mission Editor"
+            VALUE "CompanyName", "Electronic Arts, Inc."
+            VALUE "FileDescription", "FinalSun"
+            VALUE "FileVersion", "2.1.0"
+            VALUE "InternalName", "FinalSun Mission Editor"
+            VALUE "LegalCopyright", "Copyright (C) 1999-2024 Electronic Arts, Inc."
+            VALUE "LegalTrademarks", "FinalSun"
+            VALUE "OriginalFilename", "FinalSun.EXE"
+            VALUE "ProductName", "FinalSun"
+            VALUE "ProductVersion", "2.1.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_BUILTBY             "Matthias Wagner, Zero Fanker"
+    IDS_VERSIONTEXT         TEXT("Version " PRODUCT_VERSION_STRING)
+    IDS_VERSION             TEXT(PRODUCT_VERSION_STRING)
+    IDS_VERSIONTEXTTS       TEXT("Version " PRODUCT_VERSION_STRING)
+END

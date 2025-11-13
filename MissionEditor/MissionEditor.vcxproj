@@ -600,6 +600,7 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MissionEditor.rc" />
+    <ResourceCompile Include="res\VersionInfo.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Aircraft.h" />
