@@ -188,11 +188,9 @@ BOOL CCsfViewer::applyViewerSelectionChange()
 
 void CCsfViewer::onViewerDoubleClickApply(NMHDR* pNMHDR, LRESULT* pResult)
 {
-
     if (!applyViewerSelectionChange()) {
         return;
     }
-
     *pResult = 0;
     OnOK();
 }
