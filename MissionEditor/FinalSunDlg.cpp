@@ -491,6 +491,12 @@ bool checkProjectPathAndRelaunch(CString filePath)
 	// 2. Current project file differs from incoming one
 	// 3. Current using project file vs incoming none
 	if (projectFile != theApp.ProjectFilePath()) {
+		const bool targetProjectExists = DoesFileExist(projectFile);
+		// prevent no project mode always restart editor
+		if (!targetProjectExists && theApp.ProjectFilePath().IsEmpty()) {
+			return false;
+		}
+
 		TCHAR exePath[MAX_PATH];
 		GetModuleFileName(NULL, exePath, MAX_PATH);
 
@@ -498,7 +504,7 @@ bool checkProjectPathAndRelaunch(CString filePath)
 		cmdLine.Format(_T("\"%s\" --file \"%s\""), exePath, filePath);
 
 		// only append project parameter if incoming project exists
-		if (DoesFileExist(projectFile)) {
+		if (targetProjectExists) {
 			CString projectParam;
 			projectParam.Format(" --project \"%s\"", projectFile);
 			cmdLine += projectParam;
