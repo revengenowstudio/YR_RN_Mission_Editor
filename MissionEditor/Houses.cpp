@@ -289,12 +289,10 @@ void CHouses::AddHouse(const CString& name)
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	if (ini.TryGetSection(name)) {
-		MessageBox("Sorry this name is not available. " + name + " is already used in the map file. You need to use another name.");
-		return;
-	}
-	if (ini.TryGetSection(TranslateHouse(name))) {
-		MessageBox("Sorry this name is not available. " + name + " is already used in the map file. You need to use another name.");
+	if (ini.TryGetSection(name) || ini.TryGetSection(TranslateHouse(name))) {
+		CString errMsg;
+		errMsg.Format(TranslateStringACP("HouseAddErrorMsg"), name);
+		MessageBox(errMsg, TranslateStringACP("Error"));
 		return;
 	}
 #ifdef RA2_MODE
