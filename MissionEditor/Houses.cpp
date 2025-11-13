@@ -241,18 +241,31 @@ void CHouses::OnPreparehouses()
 {
 	CIniFile& ini = Map->GetIniFile();
 
+	auto& mapHouses = ini.AddSection(MAPHOUSES);
+
+	if (mapHouses.Size() != 0) {
+		auto const title = TranslateStringACP("HouseDuplicatedCreatingCaption");
+		auto const content = TranslateStringACP("HouseDuplicatedCreatingTip");
+		if (MessageBox(content, title, MB_YESNO) != IDYES) {
+			return;
+		}
+	}
+	for (auto const& [_, id] : mapHouses) {
+		ini.DeleteSection(id);
+	}
+	mapHouses.Clear();
+
 #ifdef RA2_MODE
 	if (Map->IsMultiplayer()) {
 		ini.SetInteger("Basic", "MultiplayerOnly", 1);
-
-		auto const rulesHouseSec = rules[HOUSES];
-		for (auto i = 0; i < rulesHouseSec.Size(); ++i) {
-			char c[50];
-			int k = i;
-			itoa(k, c, 10);
-			auto const& country = rulesHouseSec.Nth(i).second;
+		
+		auto const& rulesHouseSec = rules.GetSection(HOUSES);
+		CString listId;
+		for (auto idx = 0u; idx < rulesHouseSec.Size(); ++idx) {
+			listId.Format("%d", idx);
+			auto const& country = rulesHouseSec.Nth(idx).second;
 			// we now create a MAPHOUSE with the same name as the current rules house
-			ini.SetString(MAPHOUSES, c, country);
+			ini.SetString(MAPHOUSES, listId, country);
 
 			ini.SetString(country, "IQ", "0");
 			ini.SetString(country, "Edge", "North");
@@ -264,7 +277,6 @@ void CHouses::OnPreparehouses()
 			ini.SetString(country, "TechLevel", "1");
 			ini.SetString(country, "PercentBuilt", "0");
 			ini.SetString(country, "PlayerControl", "no");
-
 		}
 
 		UpdateDialog();
@@ -273,19 +285,15 @@ void CHouses::OnPreparehouses()
 #endif
 
 	// import the rules.ini houses
-	if (ini[MAPHOUSES].Size() > 0) {
-		auto const title = TranslateStringACP("HouseDuplicatedCreatingCaption");
-		auto const content = TranslateStringACP("HouseDuplicatedCreatingTip");
-		MessageBox(content, title);
-		return;
+	for (auto const& [seq, id] : rules.GetSection(HOUSES)) {
+		AddHouse(GetHouseSectionName(id), false);
 	}
 
-	for (auto const& [seq, id] : rules[HOUSES]) {
-		AddHouse(GetHouseSectionName(id));
-	}
+	UpdateDialog();
+	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs();
 }
 
-void CHouses::AddHouse(const CString& name)
+void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -295,12 +303,20 @@ void CHouses::AddHouse(const CString& name)
 		MessageBox(errMsg, TranslateStringACP("Error"));
 		return;
 	}
+
+	CString templateCountry = name;
+	TruncSpace(templateCountry);
+
+	if (showCountryTemplateDlg) {
 #ifdef RA2_MODE
-	CNewRA2HouseDlg dlg;
-	if (dlg.DoModal() == IDCANCEL) {
-		return;
-	}
+		CNewRA2HouseDlg dlg;
+		if (dlg.DoModal() == IDCANCEL) {
+			return;
+		}
+		templateCountry = dlg.m_Country;
 #endif
+	}
+
 
 	// this method is problematic,
 	// insert house in the middle will rouin all exisiting scrips/triggers relying on the sequence
@@ -333,12 +349,13 @@ void CHouses::AddHouse(const CString& name)
 	}
 #endif
 #endif
-	auto const globalHouseCount = rules[HOUSES].Size();
+	auto const& rulesHouseSec = rules[HOUSES];
+	auto const globalHouseCount = rulesHouseSec.Size();
 	// if this name is defined in rules, then it should have existing position already
-	auto pos = rules[HOUSES].FindValue(name);
+	auto pos = rulesHouseSec.FindValue(name);
 	// if only map defined, its sequence always appends to the end of both exiting records
 	if (pos < 0) {
-		pos = std::max<int>(globalHouseCount + ini[HOUSES].Size() - 1, 0);
+		pos = std::max<int>(ini[MAPHOUSES].Size(), 0);
 	}
 
 	CString countrySeqStr;
@@ -351,9 +368,7 @@ void CHouses::AddHouse(const CString& name)
 	country = name;
 	country.Replace(" House", "");
 	country.Replace("House", "");
-	if (country.Find(" ") >= 0) {
-		country.Replace(" ", "_"); //=country.Left(country.Find(" "));
-	}
+	country.Replace(" ", "_");
 
 #ifdef RA2_MODE
 	// map defined only
@@ -366,7 +381,7 @@ void CHouses::AddHouse(const CString& name)
 	ini.SetString(realHouseID, "Allies", realHouseID);
 
 	CString side = name;
-	auto const parentCountryID = TranslateHouse(dlg.m_Country);
+	auto const parentCountryID = TranslateHouse(templateCountry);
 #ifdef RA2_MODE
 	side = rules.GetString(parentCountryID, "Side");
 #endif
@@ -379,8 +394,7 @@ void CHouses::AddHouse(const CString& name)
 		}
 #endif
 		ini.SetString(realHouseID, "Color", "DarkRed");
-	}
-	else if (side.Find("GDI") >= 0) {
+	} else if (side.Find("GDI") >= 0) {
 #if defined(RA2_MODE)
 		ini.SetString(realHouseID, "Color", "DarkBlue");
 #else
@@ -413,11 +427,13 @@ void CHouses::AddHouse(const CString& name)
 	ini.SetInteger(country, "CostUnitsMult", 1);
 #endif
 
-	int cusel = m_houses.GetCurSel();
-	UpdateDialog();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs();
-	if (cusel != -1) {
-		m_houses.SetCurSel(cusel);
+	if (showCountryTemplateDlg) {
+		int cusel = m_houses.GetCurSel();
+		UpdateDialog();
+		((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs();
+		if (cusel != -1) {
+			m_houses.SetCurSel(cusel);
+		}
 	}
 }
 

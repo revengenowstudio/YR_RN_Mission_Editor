@@ -68,7 +68,7 @@ class CHouses : public CDialog
 	// Konstruktion
 public:
 	void UpdateStrings();
-	void AddHouse(const CString& name);
+	void AddHouse(const CString& name, bool showCountryTemplateDlg = true);
 	void UpdateDialog();
 	CHouses();
 	~CHouses();

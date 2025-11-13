@@ -241,6 +241,11 @@ public:
 		}
 	}
 
+	void Clear() {
+		value_pos.clear();
+		value_pairs.clear();
+	}
+
 	auto begin() const noexcept
 	{
 		return value_pairs.begin();
