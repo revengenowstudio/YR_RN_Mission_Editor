@@ -60,7 +60,8 @@ class CFinalSunDlg : public CDialog
 {
 	// Konstruktion
 public:
-	void OpenMap(LPCSTR lpFilename);
+	void UnloadAll(bool ask = true);
+	void OpenMap(const CString lpFilename);
 	void InsertPrevFile(CString lpFilename);
 	void CheckAvail(CCmdUI* pCmdUI);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -232,7 +233,6 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
-	void UnloadAll();
 
 	HCURSOR m_hGameCursor;
 

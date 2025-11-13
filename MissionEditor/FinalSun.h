@@ -121,8 +121,11 @@ public:
 	void ShowTipAtStartup(void);
 	void ShowTipOfTheDay(void);
 
+	const CString ProjectFilePath() const { return m_projectFilePath; }
+
 private:
 	std::string m_u8LogFileName;
+	CString m_projectFilePath; // UTF-8 encoded
 };
 
 

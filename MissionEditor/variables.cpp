@@ -44,6 +44,7 @@ CIniFile tutorial;
 CIniFile eva;
 CIniFile theme;
 CIniFile g_data; // FAData.ini
+CIniFile g_project;
 CIniFile language;
 CIniFile tiles_t; // temperat.ini shouldn´t be used except in CMapData::UpdateIniFile() and CLoading
 CIniFile tiles_s; // snow.ini shouldn´t be used except in CMapData::UpdateIniFile() and CLoading
@@ -167,10 +168,10 @@ static const std::string GetAppDataPath()
 
 /* Application specific global variables */
 TCHAR AppPath[MAX_PATH + 1] = { 0 };
-const std::string u8AppDataPath = GetAppDataPath();
+const std::string u8AppDataPath = GetAppDataPath();// "%LOCALAPPDATA%, user data
 const std::wstring u16AppDataPath = utf8ToUtf16(u8AppDataPath);
-TCHAR TSPath[MAX_PATH + 1] = { 0 };
-TCHAR currentMapFile[MAX_PATH + 1] = { 0 };
+CString TSPath; // game resource path, with \\ ending
+CString currentMapFile;
 BOOL bOptionsStartup = FALSE;
 bool bAllowAccessBehindCliffs = false;
 

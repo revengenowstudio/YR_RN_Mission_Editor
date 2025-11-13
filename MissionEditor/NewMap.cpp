@@ -179,10 +179,13 @@ void CNewMap::OnBrowse()
 	GetCurrentDirectory(MAX_PATH, cuPath);
 	dlg.m_ofn.lpstrInitialDir = cuPath;
 
-	if (theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir = (char*)(LPCTSTR)theApp.m_Options.TSExe;
+	if (theApp.m_Options.TSExe.GetLength()) {
+		dlg.m_ofn.lpstrInitialDir = theApp.m_Options.TSExe.operator LPCSTR();
+	}
 
-
-	if (dlg.DoModal() == IDCANCEL) return;
+	if (dlg.DoModal() == IDCANCEL) {
+		return;
+	}
 
 	m_ImportFile.SetWindowText(dlg.GetPathName());
 

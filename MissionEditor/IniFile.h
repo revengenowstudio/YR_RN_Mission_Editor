@@ -30,6 +30,7 @@
 #endif // _MSC_VER > 1000
 
 
+#include <afxwin.h>
 #include <map>
 #include <CString>
 #include <fstream>

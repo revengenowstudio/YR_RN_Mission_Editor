@@ -146,3 +146,22 @@ inline CString GetNodeID(int n)
 	GetNodeID(ret, n);
 	return ret;
 }
+
+enum class TrimDir {
+	Left,
+	Right,
+	Both
+};
+
+inline void Trim(std::string_view& str, char ch, TrimDir dir) {
+	if (dir == TrimDir::Left || dir == TrimDir::Both) {
+		while (!str.empty() && str.front() == ch) {
+			str.remove_prefix(1);
+		}
+	}
+	if (dir == TrimDir::Right || dir == TrimDir::Both) {
+		while (!str.empty() && str.back() == ch) {
+			str.remove_suffix(1);
+		}
+	}
+}

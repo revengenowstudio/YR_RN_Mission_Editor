@@ -43,6 +43,7 @@ extern CIniFile tutorial;
 extern CIniFile eva;
 extern CIniFile theme;
 extern CIniFile g_data;
+extern CIniFile g_project; //!< project specification
 extern CIniFile language;
 extern CIniFile tiles_t;
 extern CIniFile tiles_s;
@@ -56,7 +57,7 @@ extern CIniFile* tiles;
 extern BOOL bOptionsStartup;
 
 // the current file beeing edited.
-extern char currentMapFile[MAX_PATH + 1];
+extern CString currentMapFile;
 
 // all the pictures shown in the mapview
 extern map<CString, PICDATA> pics;
@@ -123,7 +124,7 @@ extern std::ofstream errstream;
 extern char AppPath[MAX_PATH + 1];
 extern const std::string u8AppDataPath;
 extern const std::wstring u16AppDataPath;
-extern char TSPath[MAX_PATH + 1];
+extern CString TSPath;
 
 extern bool bAllowAccessBehindCliffs;
 
