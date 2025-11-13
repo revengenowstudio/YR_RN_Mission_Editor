@@ -51,6 +51,9 @@ protected:
     void onEditchangeSearch();
     void applySearch(const CString keyword = {});
     void onViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult);
+    void onViewerDoubleClickApply(NMHDR* pNMHDR, LRESULT* pResult);
+    bool applyViewerSelectionChange();
+
     BOOL onMessageKeyDown(MSG* pMsg);
 
     DECLARE_MESSAGE_MAP()

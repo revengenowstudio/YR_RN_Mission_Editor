@@ -8,6 +8,7 @@ BEGIN_MESSAGE_MAP(CCsfViewer, CDialog)
     ON_BN_CLICKED(Controls::Reload, onReload)
     ON_CBN_KILLFOCUS(IDC_CSF_VIEW_SELECTED, onEditchangeSearch)
     ON_NOTIFY(LVN_ITEMCHANGED, IDC_CSF_VIEW_LIST, onViewerSelectedChange)
+    ON_NOTIFY(NM_DBLCLK, IDC_CSF_VIEW_LIST, onViewerDoubleClickApply)
 END_MESSAGE_MAP()
 
 #if 0
@@ -17,7 +18,7 @@ LRESULT CALLBACK CCsfViewer::ListViewSubclassProc(HWND hWnd, UINT uMsg, WPARAM w
 }
 #endif
 
-CCsfViewer::CCsfViewer(CWnd* pParent) 
+CCsfViewer::CCsfViewer(CWnd* pParent)
     : CDialog(CCsfViewer::IDD, pParent)
 {
 }
@@ -159,11 +160,11 @@ BOOL CCsfViewer::onMessageKeyDown(MSG* pMsg)
     return TRUE;
 }
 
-void CCsfViewer::onViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult)
+bool CCsfViewer::applyViewerSelectionChange()
 {
     int nSelected = m_stringList.GetNextItem(-1, LVNI_SELECTED);
     if (nSelected == -1) {
-        return;
+        return false;
     }
 
     CString selectedText = m_stringList.GetItemText(nSelected, 0);
@@ -171,21 +172,36 @@ void CCsfViewer::onViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult)
     if (selectedText.IsEmpty()) {
         m_richEditCtrl.SetWindowText("");
         m_selectedLabel.SetWindowText("");
-        m_selectedCSFLabel = "";
-        return;
+        m_selectedCSFLabel.Empty();
+        return false;
     }
 
-    CString value = "";
-    auto const it = AllStrings.find(selectedText);
+    auto it = AllStrings.find(selectedText);
     if (it == AllStrings.end()) {
-        return;
+        return false;
     }
 
     m_richEditCtrl.SetWindowText(it->second.cString);
     m_selectedLabel.SetWindowText(selectedText);
-
     m_selectedCSFLabel = selectedText;
     m_selectedCSFContent = it->second.cString;
+    return true;
+}
+
+void CCsfViewer::onViewerDoubleClickApply(NMHDR* pNMHDR, LRESULT* pResult)
+{
+    if (!applyViewerSelectionChange()) {
+        return;
+    }
+    *pResult = 0;
+    OnOK();
+}
+
+void CCsfViewer::onViewerSelectedChange(NMHDR* pNMHDR, LRESULT* pResult)
+{
+    if (!applyViewerSelectionChange()) {
+        return;
+    }
     *pResult = 0;
 }
 
