@@ -35,34 +35,20 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CSaveMapOptionsDlg 
-
-
 CSaveMapOptionsDlg::CSaveMapOptionsDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CSaveMapOptionsDlg::IDD, pParent)
 {
-	//{{AFX_DATA_INIT(CSaveMapOptionsDlg)
+	CIniFile& ini = Map->GetIniFile();
+
 	m_Compress = 1;
 	m_PreviewMode = PREVIEW_MINIMAP;
-	m_MinPlayers = 2;
-	m_MapName = _T("");
-	m_AirWar = FALSE;
-	m_Cooperative = FALSE;
-	m_Duel = FALSE;
-	m_Meatgrind = FALSE;
-	m_Megawealth = FALSE;
-	m_Navalwar = FALSE;
-	m_Nukewar = FALSE;
-	m_Standard = FALSE;
-	m_TeamGame = FALSE;
-	//}}AFX_DATA_INIT
+	auto const defMinPlayers = g_data.GetInteger("Customizations", "DefaultMinPlayers");
+	m_MinPlayers = ini.GetInteger("Basic", "MinPlayer", defMinPlayers);
+	m_MapName = ini.GetString("Basic", "Name");
 
-	CIniFile& ini = Map->GetIniFile();
 	if (!Map->IsMultiplayer()) {
 		m_PreviewMode = PREVIEW_DONT_CHANGE;
 	}
-
-	m_MapName = ini.GetString("Basic", "Name");
-	m_MinPlayers = ini.GetInteger("Basic", "MinPlayer");
 }
 
 
@@ -73,7 +59,7 @@ void CSaveMapOptionsDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_PREVIEWMODE, reinterpret_cast<int&>(m_PreviewMode));
 	DDX_Text(pDX, IDC_MAPNAME, m_MapName);
 	DDX_Text(pDX, IDC_SAVE_OPT_M_PLAYERS, m_MinPlayers);
-#ifdef RA2_MODE
+#if 0
 	DDX_Check(pDX, IDC_AIRWAR, m_AirWar);
 	DDX_Check(pDX, IDC_COOPERATIVE, m_Cooperative);
 	DDX_Check(pDX, IDC_DUEL, m_Duel);
@@ -89,8 +75,7 @@ void CSaveMapOptionsDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CSaveMapOptionsDlg, CDialog)
-	//{{AFX_MSG_MAP(CSaveMapOptionsDlg)
-	//}}AFX_MSG_MAP
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -99,6 +84,7 @@ END_MESSAGE_MAP()
 BOOL CSaveMapOptionsDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+	translateUI();
 
 	CIniFile& ini = Map->GetIniFile();
 	if (!Map->IsMultiplayer()) {
@@ -123,7 +109,9 @@ BOOL CSaveMapOptionsDlg::OnInitDialog()
 				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }
 
-void translateUI()
+void CSaveMapOptionsDlg::translateUI()
 {
+
+
 	//IDC_SAVE_OPT_MP_TXT;
 }
