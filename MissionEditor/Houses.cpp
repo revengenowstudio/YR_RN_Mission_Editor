@@ -206,7 +206,9 @@ void CHouses::OnSelchangeHouses()
 
 	int cusel;
 	cusel = m_houses.GetCurSel();
-	if (cusel == -1) return;
+	if (cusel == -1) {
+		return;
+	}
 
 	CString name;
 	m_houses.GetLBText(cusel, name);
@@ -601,7 +603,9 @@ void CHouses::OnKillfocusColor()
 
 	int cusel;
 	cusel = m_houses.GetCurSel();
-	if (cusel == -1) return;
+	if (cusel == -1) {
+		return;
+	}
 
 	CString name;
 	m_houses.GetLBText(cusel, name);
