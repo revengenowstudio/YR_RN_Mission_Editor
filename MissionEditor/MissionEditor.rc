@@ -1502,7 +1502,7 @@ STYLE DS_SETFONT | DS_CENTER | WS_POPUP | WS_CAPTION
 CAPTION "Saving"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LTEXT           "Please wait a few seconds while FinalAlert 2 is saving. On very large maps this may even take some minutes, please do not cancel! More information is available in the status bar, most time will be needed for packing.",IDC_STATIC,7,7,249,32
+    LTEXT           "Please wait a few seconds while FinalAlert 2 is saving. On very large maps this may even take some minutes, please do not cancel! More information is available in the status bar, most time will be needed for packing.",IDC_SAV_DLG_DSC,7,7,249,32
 END
 #endif
 

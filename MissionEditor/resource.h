@@ -635,6 +635,7 @@
 #define IDC_CMAPSIZE_WARNING_TXT        1554
 #define IDC_CSF_VIEW_SELECTED           1555
 #define IDC_CSF_VIEW_RELOAD             1556
+#define IDC_SAV_DLG_DSC                 1556
 #define IDC_CSF_VIEW_SEARCH_EDT         1557
 #define IDC_CSF_VIEW_LIST               1558
 #define IDC_CSF_VIEW_RICH_EDT           1559
@@ -732,9 +733,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        323
+#define _APS_NEXT_RESOURCE_VALUE        324
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1555
+#define _APS_NEXT_CONTROL_VALUE         1557
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

@@ -49,13 +49,14 @@ public:
 	// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
 	//{{AFX_VIRTUAL(CSavingDlg)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
-	virtual void PostNcDestroy();
+	virtual BOOL OnInitDialog() override;
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
+	virtual void PostNcDestroy() override;
 	//}}AFX_VIRTUAL
 
 // Implementierung
 protected:
-
+	void translateUI();
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CSavingDlg)
 		// HINWEIS: Der Klassen-Assistent fügt hier Member-Funktionen ein
