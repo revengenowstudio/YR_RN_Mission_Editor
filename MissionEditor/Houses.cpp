@@ -288,8 +288,9 @@ void CHouses::OnPreparehouses()
 	for (auto const& [seq, id] : rules.GetSection(HOUSES)) {
 		AddHouse(GetHouseSectionName(id), false);
 	}
+	m_houses.SetCurSel(0);
 
-	UpdateDialog();
+	OnSelchangeHouses();
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs();
 }
 
