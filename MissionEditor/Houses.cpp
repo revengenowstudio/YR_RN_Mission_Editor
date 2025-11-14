@@ -299,17 +299,14 @@ void CHouses::OnPreparehouses()
 // has top priority and they have reserved slots
 int getGlobalCountrySlot(const CString& countryID)
 {
-	int64_t ret = -1;
-	auto const rulesHouseSec = rules[HOUSES];
-	ret = rulesHouseSec.FindValue(countryID);
-	if (ret >= 0) {
+	auto const rulesHouseSec = rules[HOUSES];	
+	if (auto ret = rulesHouseSec.FindValue(countryID); ret >= 0) {
 		return ret;
 	}
 	// This happens mostly on civilian houses
 	auto const& ini = Map->GetIniFile();
 	auto const countryName = ini.GetString(countryID, "Name");
-	ret = rulesHouseSec.FindValue(countryName);
-	return ret;
+	return rulesHouseSec.FindValue(countryName);
 }
 
 void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
@@ -355,37 +352,6 @@ void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
 	ini.SetInteger(country, "CostUnitsMult", 1);
 #endif
 
-	// this method is problematic,
-	// insert house in the middle will rouin all exisiting scrips/triggers relying on the sequence
-#if 0
-	//okay, get a free slot
-	int pos = -1;
-#ifdef RA2_MODE
-	int pos2 = -1;
-#endif
-	for (auto c = 0; c > -1; c++) {
-		char k[50];
-		itoa(c, k, 10);
-		if (!ini[MAPHOUSES].Exists(k)) {
-			pos = c;
-		}
-		if (pos != -1) {
-			break;
-		}
-	}
-#ifdef RA2_MODE
-	for (auto c = 0; c > -1; c++) {
-		char k[50];
-		itoa(c, k, 10);
-		if (!ini[HOUSES].Exists(k)) {
-			pos2 = c;
-		}
-		if (pos2 != -1) {
-			break;
-		}
-	}
-#endif
-#endif
 	auto const& rulesHouseSec = rules[HOUSES];
 	auto const globalHouseCount = rulesHouseSec.Size();
 	// if this name is defined in rules, then it should have existing position already
@@ -488,8 +454,7 @@ void CHouses::OnShowWindow(BOOL bShow, UINT nStatus)
 
 #endif
 		}
-	}
-	else {
+	} else {
 		// call all KillFocus !
 		OnKillfocusIq();
 		OnEditchangeActslike();
