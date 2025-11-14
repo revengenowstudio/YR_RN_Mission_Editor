@@ -287,7 +287,11 @@ void CHouses::OnPreparehouses()
 
 	// import the rules.ini houses
 	for (auto const& [seq, id] : rules.GetSection(HOUSES)) {
-		AddHouse(GetHouseSectionName(id), false);
+		auto const name = GetHouseSectionName(id);
+		// sorry, GDI and Nod are NOT standard
+		if (name != "GDI" && name != "Nod") {
+			AddHouse(name, false);
+		}
 	}
 	m_houses.SetCurSel(0);
 
@@ -365,17 +369,15 @@ void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
 	}
 	// if only map defined, its sequence always appends to the end of both exiting records
 	if (pos < 0) {
-		do {
-			auto const houseSec = ini[MAPHOUSES];
-			auto const curHouseCount = houseSec.Size();
-			auto const lastId = houseSec.LastIndexKey().value_or(0);
-			// say the lastId is 14, and globalHouseCount is 13 (YR)
-			if (lastId < globalHouseCount - 1) {
-				pos = std::max<int>(curHouseCount, 0);
-				break;
-			}
+		auto const houseSec = ini[MAPHOUSES];
+		auto const curHouseCount = houseSec.Size();
+		auto lastId = houseSec.LastIndexKey().value_or(0);
+		// map defined index always starts after global reserved slots
+		if (lastId < static_cast<int>(globalHouseCount)) {
+			pos = globalHouseCount;
+		} else {
 			pos = std::max<int>(lastId + 1, 0);
-		} while (0);
+		}
 	}
 
 	CString countrySeqStr;
@@ -516,12 +518,20 @@ void CHouses::OnDeletehouse()
 		return;
 	}
 
+	if (auto country = ini.GetString(name, "Country"); !country.IsEmpty()) {
+		ini.RemoveValue(HOUSES, country);
+		ini.DeleteSection(country);
+	}
+
 	ini.DeleteSection(name);
 
 	ini.RemoveValue(MAPHOUSES, name);
 
 	if (ini[MAPHOUSES].Size() == 0) {
 		ini.DeleteSection(MAPHOUSES);
+	}
+	if (ini[HOUSES].Size() == 0) {
+		ini.DeleteSection(HOUSES);
 	}
 
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs();
