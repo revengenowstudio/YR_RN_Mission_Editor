@@ -199,6 +199,83 @@ BOOL CHouses::OnInitDialog()
 	// EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }
 
+
+BOOL CHouses::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
+
+BOOL CHouses::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+	case VK_RETURN:
+	{
+		switch (::GetDlgCtrlID(pMsg->hwnd)) {
+		default:
+			break;// never exist window (default -1) even nothing did
+		case IDC_HOUSES:
+			this->OnSelchangeHouses();
+			break;
+		case IDC_PREPAREHOUSES:
+			this->OnPreparehouses();
+			break;
+		case IDC_ADDHOUSE:
+			this->OnAddhouse();
+			break;
+		case IDC_DELETEHOUSE:
+			this->OnDeletehouse();
+			break;
+		case IDC_IQ:
+			this->OnKillfocusIq();
+			break;
+		case IDC_EDGE:
+			this->OnKillfocusEdge();
+			break;
+		case IDC_SIDE:
+			this->OnKillfocusSide();
+			break;
+		case IDC_COLOR:
+			this->OnKillfocusColor();
+			break;
+		case IDC_CREDITS:
+			this->OnKillfocusCredits();
+			break;
+		case IDC_ACTSLIKE:
+			this->OnEditchangeActslike();
+			break;
+		case IDC_NODECOUNT:
+			this->OnKillfocusNodecount();
+			break;
+		case IDC_TECHLEVEL:
+			this->OnKillfocusTechlevel();
+			break;
+		case IDC_PERCENTBUILT:
+			this->OnKillfocusPercentbuilt();
+			break;
+		case IDC_PLAYERCONTROL:
+			this->OnKillfocusPlayercontrol();
+			break;
+		case IDC_HUMANPLAYER:
+			this->OnSelchangeHumanplayer();
+			break;
+#if !defined(RA2_MODE)
+		case IDC_ACTSLIKE:
+			this->OnSelchangeActslike();
+			break;
+#endif
+		}
+	}
+	}
+	return TRUE;
+}
+
 void CHouses::OnSelchangeHouses()
 {
 	CIniFile& ini = Map->GetIniFile();
