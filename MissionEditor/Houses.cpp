@@ -130,8 +130,7 @@ void CHouses::UpdateDialog()
 
 	if (ini[MAPHOUSES].Size() <= 0) {
 		// MessageBox("No houses do exist, if you want to use houses, you should use ""Prepare houses"" before doing anything else.");
-	}
-	else {
+	} else {
 		m_HumanPlayer.AddString("None");
 		m_HumanPlayer.SetCurSel(0);
 		for (auto const& [seq, id] : ini[MAPHOUSES]) {
