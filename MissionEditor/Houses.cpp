@@ -296,10 +296,27 @@ void CHouses::OnPreparehouses()
 	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs();
 }
 
+// This is a very tricky check, since rules defined country 
+// has top priority and they have reserved slots
+int getGlobalCountrySlot(const CString& countryID)
+{
+	int64_t ret = -1;
+	auto const rulesHouseSec = rules[HOUSES];
+	ret = rulesHouseSec.FindValue(countryID);
+	if (ret >= 0) {
+		return ret;
+	}
+	// This happens mostly on civilian houses
+	auto const& ini = Map->GetIniFile();
+	auto const countryName = ini.GetString(countryID, "Name");
+	ret = rulesHouseSec.FindValue(countryName);
+	return ret;
+}
+
 void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
 {
 	CIniFile& ini = Map->GetIniFile();
-
+	// incoming name could either be a ini ID or a translated multibyte string
 	if (ini.TryGetSection(name) || ini.TryGetSection(TranslateHouse(name))) {
 		CString errMsg;
 		errMsg.Format(TranslateStringACP("HouseAddErrorMsg"), name);
@@ -320,6 +337,24 @@ void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
 #endif
 	}
 
+	auto const countryRulesSecID = TranslateHouse(templateCountry);
+
+#ifdef RA2_MODE
+	CString country;
+	country = name;
+	country.Replace(" House", "");
+	country.Replace("House", "");
+	country.Replace(" ", "_");
+	country = TranslateHouse(country);
+
+	ini.SetString(country, "ParentCountry", countryRulesSecID);
+	ini.SetString(country, "Name", country);
+	ini.SetString(country, "Suffix", rules.GetString(countryRulesSecID, "Suffix"));
+	ini.SetString(country, "Prefix", rules.GetString(countryRulesSecID, "Prefix"));
+	ini.SetString(country, "Side", rules.GetString(countryRulesSecID, "Side"));
+	ini.SetString(country, "SmartAI", rules.GetString(countryRulesSecID, "SmartAI"));
+	ini.SetInteger(country, "CostUnitsMult", 1);
+#endif
 
 	// this method is problematic,
 	// insert house in the middle will rouin all exisiting scrips/triggers relying on the sequence
@@ -355,38 +390,50 @@ void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
 	auto const& rulesHouseSec = rules[HOUSES];
 	auto const globalHouseCount = rulesHouseSec.Size();
 	// if this name is defined in rules, then it should have existing position already
-	auto pos = rulesHouseSec.FindValue(name);
+	auto pos = -1;
+	// TODO: correct house index when load a map
+	// first instance of this parent country, use that country slot
+	if (rules.TryGetSection(country) != nullptr) {
+		if (auto slotIdx = getGlobalCountrySlot(country); slotIdx >= 0) {
+			pos = slotIdx;
+		}
+	}
 	// if only map defined, its sequence always appends to the end of both exiting records
 	if (pos < 0) {
-		pos = std::max<int>(ini[MAPHOUSES].Size(), 0);
+		do {
+			auto const houseSec = ini[MAPHOUSES];
+			auto const curHouseCount = houseSec.Size();
+			auto const lastId = houseSec.LastIndexKey().value_or(0);
+			// say the lastId is 14, and globalHouseCount is 13 (YR)
+			if (lastId < globalHouseCount - 1) {
+				pos = std::max<int>(curHouseCount, 0);
+				break;
+			}
+			pos = std::max<int>(lastId + 1, 0);
+		} while (0);
 	}
 
 	CString countrySeqStr;
 	countrySeqStr.Format("%d", static_cast<int>(pos));
+#ifdef RA2_MODE
+	ini.AddSection(HOUSES).InsertOrAssign(countrySeqStr, country);
+#endif
 
 	auto const realHouseID = TranslateHouse(name);
 	ini.AddSection(MAPHOUSES).InsertOrAssign(countrySeqStr, realHouseID);
 
-	CString country;
-	country = name;
-	country.Replace(" House", "");
-	country.Replace("House", "");
-	country.Replace(" ", "_");
-
-#ifdef RA2_MODE
-	// map defined only
-	if (pos >= globalHouseCount) {
-		ini.AddSection(HOUSES).InsertOrAssign(countrySeqStr, country);
-	}
-#endif
 	ini.SetInteger(realHouseID, "IQ", 0);
 	ini.SetString(realHouseID, "Edge", "North");
 	ini.SetString(realHouseID, "Allies", realHouseID);
+#ifndef RA2_MODE
+	ini.SetInteger(realHouseID, "ActsLike", 0);
+#else
+	ini.SetString(realHouseID, "Country", country);
+#endif
 
 	CString side = name;
-	auto const parentCountryID = TranslateHouse(templateCountry);
 #ifdef RA2_MODE
-	side = rules.GetString(parentCountryID, "Side");
+	side = rules.GetString(countryRulesSecID, "Side");
 #endif
 
 	if (side.Find("Nod") >= 0) {
@@ -407,30 +454,14 @@ void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
 		}
 #endif
 	} else {
-		ini.SetString(realHouseID, "Color", rules.GetString(parentCountryID, "Color"));
+		ini.SetString(realHouseID, "Color", rules.GetString(countryRulesSecID, "Color"));
 	}
 
 	ini.SetInteger(realHouseID, "Credits", 0);
-#ifndef RA2_MODE
-	ini.SetInteger(realHouseID, "ActsLike", 0);
-#else
-	ini.SetString(realHouseID, "Country", TranslateHouse(country));
-#endif
 	ini.SetInteger(realHouseID, "NodeCount", 0);
 	ini.SetInteger(realHouseID, "TechLevel", 10);
 	ini.SetInteger(realHouseID, "PercentBuilt", 100);
 	ini.SetBool(realHouseID, "PlayerControl", false);
-
-#ifdef RA2_MODE
-	country = TranslateHouse(country);
-	ini.SetString(country, "ParentCountry", parentCountryID);
-	ini.SetString(country, "Name", country);
-	ini.SetString(country, "Suffix", rules.GetString(parentCountryID, "Suffix"));
-	ini.SetString(country, "Prefix", rules.GetString(parentCountryID, "Prefix"));
-	ini.SetString(country, "Side", rules.GetString(parentCountryID, "Side"));
-	ini.SetString(country, "SmartAI", rules.GetString(parentCountryID, "SmartAI"));
-	ini.SetInteger(country, "CostUnitsMult", 1);
-#endif
 
 	if (showCountryTemplateDlg) {
 		int cusel = m_houses.GetCurSel();
