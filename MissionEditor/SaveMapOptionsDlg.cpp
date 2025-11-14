@@ -28,6 +28,7 @@
 #include "functions.h"
 #include "inifile.h"
 #include "res/resource.h"
+#include <set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -113,12 +114,19 @@ void CSaveMapOptionsDlg::initializeModeList()
 		m_modeList.InsertItem(0, defMode);
 		return;
 	}
+
+	for (auto& mode : m_modes) {
+		TruncSpace(mode);
+	}
 	
 	for (auto idx = 0; idx < gameModeSec.Size();++idx) {
-		auto const& [mode, name] = gameModeSec.Nth(idx);
+		auto const [mode, name] = gameModeSec.Nth(idx);
+		auto modeCpy = mode;
+		TruncSpace(modeCpy);
 		m_modeList.InsertItem(idx, name);
-		m_modeList.SetItemText(idx, 1, mode);
-		if (mode == defMode) {
+		m_modeList.SetItemText(idx, 1, modeCpy);
+		if (m_modes.empty() && mode == defMode
+			|| std::find(m_modes.begin(), m_modes.end(), modeCpy) != m_modes.end()) {
 			m_modeList.SetCheck(idx);
 		}
 	}
@@ -126,7 +134,17 @@ void CSaveMapOptionsDlg::initializeModeList()
 
 void CSaveMapOptionsDlg::OnOK()
 {
-	// TODO: translate m_modeList into m_modes
+	auto const itemCount = m_modeList.GetItemCount();
+	std::set<CString> dedupSet;
+	m_modes.clear();
+	for (int idx = 0; idx < itemCount; ++idx) {
+		if (m_modeList.GetCheck(idx)) {
+			auto mode = m_modeList.GetItemText(idx, 1);
+			if (dedupSet.emplace(mode).second) {
+				m_modes.push_back(mode);
+			}
+		}
+	}
 
 	EndDialog(IDOK);
 }
