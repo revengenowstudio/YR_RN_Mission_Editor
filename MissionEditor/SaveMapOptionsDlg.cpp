@@ -25,6 +25,7 @@
 #include "finalsun.h"
 #include "SaveMapOptionsDlg.h"
 #include "variables.h"
+#include "functions.h"
 #include "inifile.h"
 #include "res/resource.h"
 
@@ -82,9 +83,12 @@ BOOL CSaveMapOptionsDlg::OnInitDialog()
 		GetDlgItem(IDC_NOPREVIEW)->EnableWindow(FALSE);
 		GetDlgItem(IDC_EXISTINGPREVIEW)->EnableWindow(FALSE);
 #ifndef TS_MODE
-		GetDlgItem(IDC_SAV_OPT_DLG_MODE_LIST)->EnableWindow(FALSE);
-#endif	
+		m_modeList.EnableWindow(FALSE);
+#endif
+		return TRUE;
 	}
+
+	initializeModeList();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
@@ -95,4 +99,34 @@ void CSaveMapOptionsDlg::translateUI()
 
 
 	//IDC_SAVE_OPT_MP_TXT;
+}
+
+void CSaveMapOptionsDlg::initializeModeList()
+{
+	m_modeList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES);
+	m_modeList.InsertColumn(0, TranslateStringACP("CSaveMapOptionsModeName"), LVCFMT_LEFT, 125);
+	m_modeList.InsertColumn(1, TranslateStringACP("CSaveMapOptionsModeID"), LVCFMT_LEFT, 80);
+
+	auto const gameModeSec = g_data.GetSection("GameModes");
+	auto const defMode = g_data.GetStringOr("Customizations", "DefaultGameMode", "standard");
+	if (gameModeSec.Size() == 0) {
+		m_modeList.InsertItem(0, defMode);
+		return;
+	}
+	
+	for (auto idx = 0; idx < gameModeSec.Size();++idx) {
+		auto const& [mode, name] = gameModeSec.Nth(idx);
+		m_modeList.InsertItem(idx, name);
+		m_modeList.SetItemText(idx, 1, mode);
+		if (mode == defMode) {
+			m_modeList.SetCheck(idx);
+		}
+	}
+}
+
+void CSaveMapOptionsDlg::OnOK()
+{
+	// TODO: translate m_modeList into m_modes
+
+	EndDialog(IDOK);
 }

@@ -60,11 +60,13 @@ public:
 protected:
 	virtual BOOL OnInitDialog() override;
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
+	virtual void OnOK() override;
 	//}}AFX_VIRTUAL
 
 // Implementierung
 protected:
 	void translateUI();
+	void initializeModeList();
 
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CSaveMapOptionsDlg)
