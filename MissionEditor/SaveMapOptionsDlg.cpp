@@ -26,6 +26,7 @@
 #include "SaveMapOptionsDlg.h"
 #include "variables.h"
 #include "inifile.h"
+#include "res/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -55,22 +56,11 @@ CSaveMapOptionsDlg::CSaveMapOptionsDlg(CWnd* pParent /*=NULL*/)
 void CSaveMapOptionsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CSaveMapOptionsDlg)
+
 	DDX_Radio(pDX, IDC_PREVIEWMODE, reinterpret_cast<int&>(m_PreviewMode));
 	DDX_Text(pDX, IDC_MAPNAME, m_MapName);
 	DDX_Text(pDX, IDC_SAVE_OPT_M_PLAYERS, m_MinPlayers);
-#if 0
-	DDX_Check(pDX, IDC_AIRWAR, m_AirWar);
-	DDX_Check(pDX, IDC_COOPERATIVE, m_Cooperative);
-	DDX_Check(pDX, IDC_DUEL, m_Duel);
-	DDX_Check(pDX, IDC_MEATGRIND, m_Meatgrind);
-	DDX_Check(pDX, IDC_MEGAWEALTH, m_Megawealth);
-	DDX_Check(pDX, IDC_NAVALWAR, m_Navalwar);
-	DDX_Check(pDX, IDC_NUKEWAR, m_Nukewar);
-	DDX_Check(pDX, IDC_STANDARD, m_Standard);
-	DDX_Check(pDX, IDC_TEAMGAME, m_TeamGame);
-#endif
-	//}}AFX_DATA_MAP
+	DDX_Control(pDX, IDC_SAV_OPT_DLG_MODE_LIST, m_modeList);
 }
 
 
@@ -91,17 +81,8 @@ BOOL CSaveMapOptionsDlg::OnInitDialog()
 		GetDlgItem(IDC_PREVIEWMODE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_NOPREVIEW)->EnableWindow(FALSE);
 		GetDlgItem(IDC_EXISTINGPREVIEW)->EnableWindow(FALSE);
-
 #ifndef TS_MODE
-		GetDlgItem(IDC_AIRWAR)->EnableWindow(FALSE);
-		GetDlgItem(IDC_COOPERATIVE)->EnableWindow(FALSE);
-		GetDlgItem(IDC_DUEL)->EnableWindow(FALSE);
-		GetDlgItem(IDC_MEATGRIND)->EnableWindow(FALSE);
-		GetDlgItem(IDC_MEGAWEALTH)->EnableWindow(FALSE);
-		GetDlgItem(IDC_NAVALWAR)->EnableWindow(FALSE);
-		GetDlgItem(IDC_NUKEWAR)->EnableWindow(FALSE);
-		GetDlgItem(IDC_STANDARD)->EnableWindow(FALSE);
-		GetDlgItem(IDC_TEAMGAME)->EnableWindow(FALSE);
+		GetDlgItem(IDC_SAV_OPT_DLG_MODE_LIST)->EnableWindow(FALSE);
 #endif	
 	}
 

@@ -71,7 +71,7 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-	CListCtrl m_stringList;
+	CListCtrl m_modeList;
 };
 
 //{{AFX_INSERT_LOCATION}}

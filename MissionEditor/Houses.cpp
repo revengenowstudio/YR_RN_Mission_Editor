@@ -24,7 +24,7 @@
 #include "stdafx.h"
 #include "FinalSun.h"
 #include "Houses.h"
-#include "resource.h"
+#include "res/resource.h"
 #include "finalsundlg.h"
 #include "mapdata.h"
 #include "variables.h"

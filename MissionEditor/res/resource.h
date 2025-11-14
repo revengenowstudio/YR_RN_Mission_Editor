@@ -494,7 +494,7 @@
 #define IDC_MEATGRIND                   1427
 #define IDC_NAVALWAR                    1428
 #define IDC_NUKEWAR                     1429
-#define IDC_AIRWAR                      1430
+#define IDC_SAV_OPT_DLG_MODE_LIST       1430
 #define IDC_MEGAWEALTH                  1431
 #define IDC_DUEL                        1432
 #define IDC_COOPERATIVE                 1433

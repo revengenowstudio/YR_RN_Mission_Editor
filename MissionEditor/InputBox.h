@@ -27,7 +27,7 @@
 // InputBox.h : Header-Datei
 //
 
-#include "resource.h"
+#include "res/resource.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CInputBox 

@@ -21,7 +21,7 @@
 #if !defined(AFX_SAVINGDLG_H__9E604CC1_850C_11D4_9C87_BC8AE639B54A__INCLUDED_)
 #define AFX_SAVINGDLG_H__9E604CC1_850C_11D4_9C87_BC8AE639B54A__INCLUDED_
 
-#include "resource.h"
+#include "res/resource.h"
 
 #if _MSC_VER > 1000
 #pragma once

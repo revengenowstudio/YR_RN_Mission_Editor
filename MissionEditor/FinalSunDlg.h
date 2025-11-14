@@ -39,7 +39,7 @@
 #include "myviewframe.h"
 #include "AiTriggerTypesEnable.h"
 #include "AITriggerTypes.h"
-#include "resource.h"
+#include "res/resource.h"
 #include "SingleplayerSettings.h"	// Hinzugefügt von der Klassenansicht
 #include "loading.h"
 #include "TileSetBrowserFrame.h"	// Hinzugefügt von der Klassenansicht
