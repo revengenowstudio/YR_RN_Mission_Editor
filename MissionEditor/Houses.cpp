@@ -377,7 +377,7 @@ void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
 	}
 #endif
 	ini.SetInteger(realHouseID, "IQ", 0);
-	ini.SetString(realHouseID, "Edge", "West");
+	ini.SetString(realHouseID, "Edge", "North");
 	ini.SetString(realHouseID, "Allies", realHouseID);
 
 	CString side = name;
@@ -403,7 +403,10 @@ void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
 			ini.SetString(realHouseID, "Color", "Gold");
 		}
 #endif
+	} else {
+		ini.SetString(realHouseID, "Color", rules.GetString(parentCountryID, "Color"));
 	}
+
 	ini.SetInteger(realHouseID, "Credits", 0);
 #ifndef RA2_MODE
 	ini.SetInteger(realHouseID, "ActsLike", 0);
@@ -421,7 +424,6 @@ void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
 	ini.SetString(country, "Name", country);
 	ini.SetString(country, "Suffix", rules.GetString(parentCountryID, "Suffix"));
 	ini.SetString(country, "Prefix", rules.GetString(parentCountryID, "Prefix"));
-	ini.SetString(country, "Color", rules.GetString(parentCountryID, "Color"));
 	ini.SetString(country, "Side", rules.GetString(parentCountryID, "Side"));
 	ini.SetString(country, "SmartAI", rules.GetString(parentCountryID, "SmartAI"));
 	ini.SetInteger(country, "CostUnitsMult", 1);
