@@ -366,7 +366,7 @@ void CHouses::OnPreparehouses()
 	for (auto const& [seq, id] : rules.GetSection(HOUSES)) {
 		auto const name = GetHouseSectionName(id);
 		// sorry, GDI and Nod are NOT standard
-		if (name != "GDI" && name != "Nod") {
+		if (name.Find("GDI") < 0  && name.Find("Nod") < 0) {
 			AddHouse(name, false);
 		}
 	}
