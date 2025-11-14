@@ -68,7 +68,7 @@ class CHouses : public CDialog
 	// Konstruktion
 public:
 	void UpdateStrings();
-	void AddHouse(const CString& name);
+	void AddHouse(const CString& name, bool showCountryTemplateDlg = true);
 	void UpdateDialog();
 	CHouses();
 	~CHouses();
@@ -98,6 +98,7 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
 	virtual void PostNcDestroy() override;
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 	//}}AFX_VIRTUAL
 
 // Implementierung
@@ -125,6 +126,7 @@ protected:
 	afx_msg void OnBnClickedHousesChangeAllies();
 	//}}AFX_MSG
 
+	BOOL onMessageKeyDown(MSG* pMsg);
 };
 
 
