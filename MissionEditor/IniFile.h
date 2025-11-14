@@ -36,6 +36,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 #include <ios>
 #include "IniHelper.h"
 
@@ -72,6 +73,16 @@ public:
 	[[deprecated("instead use GetString or TryGetString")]]
 	const CString& AccessValueByName(const CString& name) const {
 		return GetString(name);
+	}
+
+	auto begin() const noexcept
+	{
+		return value_pairs.begin();
+	}
+
+	auto end() const noexcept
+	{
+		return value_pairs.end();
 	}
 
 	auto const& Nth(size_t index) const {
@@ -140,6 +151,18 @@ public:
 	}
 	bool HasValue(const CString& val) const {
 		return this->FindValue(val) >= 0;
+	}
+
+	/**
+	 * @brief Try get last key as an sequenced integer index
+	 * @return signed, return -1 means not applicable
+	 */
+	std::optional<int> LastIndexKey() const {
+		if (Size() == 0) {
+			return std::nullopt;
+		}
+		auto const key = std::prev(end())->first;
+		return atoi(key);
 	}
 
 	// <pos, existed?>
@@ -244,16 +267,6 @@ public:
 	void Clear() {
 		value_pos.clear();
 		value_pairs.clear();
-	}
-
-	auto begin() const noexcept
-	{
-		return value_pairs.begin();
-	}
-
-	auto end() const noexcept
-	{
-		return value_pairs.end();
 	}
 
 	[[deprecated("instead use iterators or for_each")]]
