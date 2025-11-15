@@ -57,27 +57,20 @@ public:
 	int		m_GroundHeight;
 	//}}AFX_DATA
 
-
-// Überschreibungen
-	// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
-	//{{AFX_VIRTUAL(CNewMap)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
-	//}}AFX_VIRTUAL
+	virtual void DoDataExchange(CDataExchange* pDX) override;	
+	virtual BOOL OnInitDialog() override;
+	virtual void OnOK() override;
 
 // Implementierung
 protected:
 
-	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CNewMap)
-	virtual BOOL OnInitDialog();
 	afx_msg void OnBrowse();
-	virtual void OnOK();
 	afx_msg void OnMultiplayer();
 	afx_msg void OnEditchangeImportfile();
 	afx_msg void OnImport();
 	afx_msg void OnNew();
-	//}}AFX_MSG
+
 	DECLARE_MESSAGE_MAP()
 private:
 	CMyComboBox	m_ImportFile;

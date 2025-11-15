@@ -1690,12 +1690,16 @@ void CFinalSunDlg::OnFileNew()
 {
 
 	CNewMapTypeDlg typedlg;
-	if (typedlg.DoModal() == IDCANCEL) return;
+	if (typedlg.DoModal() == IDCANCEL) {
+		return;
+	}
 
 	BOOL bSingleplayer = !typedlg.m_Singleplayer;
 
 	CNewMapCreateDlg createdlg;
-	if (createdlg.DoModal() == IDCANCEL) return;
+	if (createdlg.DoModal() == IDCANCEL) {
+		return;
+	}
 
 	BOOL bCreateNew = !createdlg.m_CreateType;
 
@@ -1704,7 +1708,9 @@ void CFinalSunDlg::OnFileNew()
 	BOOL bImportTrees, bImportUnits, bImportOverlay;
 	if (bCreateNew) {
 		CNewMapCreateNewDlg createnewdlg;
-		if (createnewdlg.DoModal() == IDCANCEL) return;
+		if (createnewdlg.DoModal() == IDCANCEL) {
+			return;
+		}
 		width = createnewdlg.m_Width;
 		height = createnewdlg.m_Height;
 		stdheight = createnewdlg.m_StartingHeight;
@@ -1712,7 +1718,9 @@ void CFinalSunDlg::OnFileNew()
 	} else {
 		while (!DoesFileExist(importmap)) {
 			CNewMapImportDlg impdlg;
-			if (impdlg.DoModal() == IDCANCEL) return;
+			if (impdlg.DoModal() == IDCANCEL) {
+				return;
+			}
 			importmap = impdlg.m_ImportFile;
 			bImportTrees = impdlg.m_ImportTrees;
 			bImportUnits = impdlg.m_ImportUnits;
@@ -1743,10 +1751,7 @@ void CFinalSunDlg::OnFileNew()
 	// set currentMapFile to nothing and update window caption
 	currentMapFile.Empty();
 	CString cap;
-	cap = GetLanguageStringACP("MainDialogCaption");
-	cap += " (";
-	cap += GetLanguageStringACP("NewMap");
-	cap += ")";
+	cap.Format("%s (%s)", GetLanguageStringACP("MainDialogCaption"), GetLanguageStringACP("NewMap"));
 	SetWindowText(cap);
 
 	// set cursor to wait
@@ -1757,10 +1762,9 @@ void CFinalSunDlg::OnFileNew()
 		file.MakeLower();
 		if (file.Find(".bmp") >= 0) {
 			CBitmap2MapConverter conv;
-			HBITMAP hBitmap = (HBITMAP)LoadImageW(NULL, utf8ToUtf16(file.GetString()).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-
+			auto const wFileName = utf8ToUtf16(file.GetString());
+			auto const hBitmap = reinterpret_cast<HBITMAP>(LoadImageW(NULL, wFileName.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE));
 			conv.Convert(hBitmap, *Map);
-
 			DeleteObject(hBitmap);
 		} else {
 			Map->LoadMap(file.GetString());
@@ -1820,11 +1824,15 @@ void CFinalSunDlg::OnFileNew()
 
 	} else {
 		// ok, create a new map
-		CString theater_s;
-		if (theater == 0) theater_s = THEATER0; else if (theater == 1) theater_s = THEATER1;
-		else if (theater == 2) theater_s = THEATER2;  else if (theater == 3) theater_s = THEATER3;
-		else if (theater == 4) theater_s = THEATER4; else if (theater == 5) theater_s = THEATER5;
-
+		static const char* theaterStrings[] = {
+			THEATER0,
+			THEATER1,
+			THEATER2,
+			THEATER3,
+			THEATER4,
+			THEATER5,
+		};
+		CString theater_s = theaterStrings[theater];
 		Map->CreateMap(width, height, theater_s, stdheight);
 
 		if (!bSingleplayer) {
