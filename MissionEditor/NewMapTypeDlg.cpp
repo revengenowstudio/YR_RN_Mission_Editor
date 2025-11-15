@@ -82,6 +82,6 @@ void CNewMapTypeDlg::translateUI()
 	GetDlgItem(IDC_SINGLE)->SetWindowText(GetLanguageStringACP("NewMapTypeSingle"));
 	GetDlgItem(IDC_MULTI)->SetWindowText(GetLanguageStringACP("NewMapTypeMulti"));
 
-	SetDlgItemText(IDOK, GetLanguageStringACP("OK"));
+	SetDlgItemText(IDOK, GetLanguageStringACP("NewMapTypeOK"));
 	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
 }

@@ -24,6 +24,7 @@
 #include "stdafx.h"
 #include "finalsun.h"
 #include "NewMapCreateDlg.h"
+#include "functions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -67,9 +68,23 @@ BOOL CNewMapCreateDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	translateUI();
+
 	m_CreateType = 0;
 	UpdateData(FALSE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+}
+
+void CNewMapCreateDlg::translateUI()
+{
+	SetWindowText(GetLanguageStringACP("NewMapCreateCaption"));
+	GetDlgItem(IDC_NEWMAPCREATE_TXT_DSC)->SetWindowText(GetLanguageStringACP("NewMapCreateDesc"));
+	GetDlgItem(IDC_CREATE)->SetWindowText(GetLanguageStringACP("NewMapCreateAllNew"));
+	GetDlgItem(IDC_IMPORT)->SetWindowText(GetLanguageStringACP("NewMapCreateImport"));
+	GetDlgItem(IDC_AITRIGGERS)->SetWindowText(GetLanguageStringACP("NewMapCreateEnableAITriggers"));
+
+	SetDlgItemText(IDOK, GetLanguageStringACP("NewMapTypeOK"));
+	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
 }
