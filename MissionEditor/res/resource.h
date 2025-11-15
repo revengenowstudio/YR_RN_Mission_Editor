@@ -650,6 +650,7 @@
 #define IDC_NEWMAPCREATENEW_TXT_THEATER 1565
 #define IDC_NEWMAPCREATENEW_TXT_INIT_HEIGHT 1566
 #define IDC_NEWMAPIMPORT_TXT_DSC        1567
+#define IDC_NEWMAPSP_TXT_DSC            1568
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -744,9 +745,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        328
+#define _APS_NEXT_RESOURCE_VALUE        329
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1568
+#define _APS_NEXT_CONTROL_VALUE         1569
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

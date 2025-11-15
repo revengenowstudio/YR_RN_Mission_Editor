@@ -162,19 +162,19 @@ BEGIN
 END
 #endif
 
-IDD_NEWMAPSPOPTIONS DIALOG 0, 0, 222, 129
+IDD_NEWMAPSPOPTIONS DIALOGEX 0, 0, 222, 129
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Create new map - Step 4"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
     CONTROL         "Prepare standard houses (recommended)",IDC_PREPAREHOUSES,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,39,159,13
     COMBOBOX        IDC_HOUSE,87,63,115,99,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Player house:",IDC_LPLAYERHOUSE,15,63,52,15
+    LTEXT           "Player house:",IDC_LPLAYERHOUSE,15,63,64,15
     CONTROL         "Set Auto-Production triggers",IDC_AUTOPROD,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,14,78,192,14
-    LTEXT           "Please select the human player. It is recommended to leave the other options as they are.",IDC_STATIC,7,7,208,26
+    LTEXT           "Please select the human player. It is recommended to leave the other options as they are.",IDC_NEWMAPSP_TXT_DSC,7,7,208,26
     GROUPBOX        "",IDC_STATIC,7,52,208,46
 END
 
@@ -400,6 +400,11 @@ BEGIN
 END
 
 IDD_NEWMAPIMPORT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_NEWMAPSPOPTIONS AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
