@@ -68,8 +68,8 @@ void CSavingDlg::DoDataExchange(CDataExchange* pDX)
 
 void CSavingDlg::translateUI()
 {
-	SetWindowText(GetLanguageStringACP("SavingDlgCaption"));
-	GetDlgItem(IDC_SAV_DLG_DSC)->SetWindowText(GetLanguageStringACP("SavingDlgDesc"));
+	TranslateWindowCaption(*this, "SavingDlgCaption");
+	TranslateDlgItem(*this, IDC_SAV_DLG_DSC, "SavingDlgDesc");
 }
 
 

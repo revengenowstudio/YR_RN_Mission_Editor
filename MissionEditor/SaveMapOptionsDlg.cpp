@@ -96,17 +96,17 @@ BOOL CSaveMapOptionsDlg::OnInitDialog()
 
 void CSaveMapOptionsDlg::translateUI()
 {
-	SetWindowText(GetLanguageStringACP("SaveMapOptionsCaption"));
-	GetDlgItem(IDC_SAVOPT_DLG_TXT_MAPNAME)->SetWindowText(GetLanguageStringACP("SaveMapOptionsMapName"));
-	GetDlgItem(IDC_SAVOPT_DLG_TXT_PREVIEW)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviews"));
-	GetDlgItem(IDC_SAVOPT_DLG_DSC)->SetWindowText(GetLanguageStringACP("SaveMapOptionsDesc"));
-	GetDlgItem(IDC_PREVIEWMODE)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviewCreate"));
-	GetDlgItem(IDC_EXISTINGPREVIEW)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviewDoNotChange"));
-	GetDlgItem(IDC_NOPREVIEW)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviewRemove"));
-	GetDlgItem(IDC_SAVE_OPT_MP_TXT)->SetWindowText(GetLanguageStringACP("SaveMapOptionsMinPlayers"));
+	TranslateWindowCaption(*this, "SaveMapOptionsCaption");
+	TranslateDlgItem(*this, IDC_SAVOPT_DLG_TXT_MAPNAME, "SaveMapOptionsMapName");
+	TranslateDlgItem(*this, IDC_SAVOPT_DLG_TXT_PREVIEW, "SaveMapOptionsPreviews");
+	TranslateDlgItem(*this, IDC_SAVOPT_DLG_DSC, "SaveMapOptionsDesc");
+	TranslateDlgItem(*this, IDC_PREVIEWMODE, "SaveMapOptionsPreviewCreate");
+	TranslateDlgItem(*this, IDC_EXISTINGPREVIEW, "SaveMapOptionsPreviewDoNotChange");
+	TranslateDlgItem(*this, IDC_NOPREVIEW, "SaveMapOptionsPreviewRemove");
+	TranslateDlgItem(*this, IDC_SAVE_OPT_MP_TXT, "SaveMapOptionsMinPlayers");
 
-	SetDlgItemText(IDOK, GetLanguageStringACP("OK"));
-	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
+	TranslateDlgItem(*this, IDOK, "OK");
+	TranslateDlgItem(*this, IDCANCEL, "Cancel");
 }
 
 void CSaveMapOptionsDlg::initializeModeList()

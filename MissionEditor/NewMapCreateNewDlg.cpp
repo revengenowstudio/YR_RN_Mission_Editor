@@ -123,14 +123,14 @@ void CNewMapCreateNewDlg::OnOK()
 
 void CNewMapCreateNewDlg::translateUI()
 {
-	SetWindowText(GetLanguageStringACP("NewMapCreateNewCaption"));
-	GetDlgItem(IDC_NEWMAPCREATENEW_TXT_DSC)->SetWindowText(GetLanguageStringACP("NewMapCreateNewDesc"));
-	GetDlgItem(IDC_NEWMAPCREATENEW_TXT_WIDTH)->SetWindowText(GetLanguageStringACP("NewMapCreateNewWidth"));
-	GetDlgItem(IDC_NEWMAPCREATENEW_TXT_HEIGHT)->SetWindowText(GetLanguageStringACP("NewMapCreateNewHeight"));
-	GetDlgItem(IDC_NEWMAPCREATENEW_TXT_THEATER)->SetWindowText(GetLanguageStringACP("NewMapCreateNewTheater"));
-	GetDlgItem(IDC_NEWMAPCREATENEW_TXT_INIT_HEIGHT)->SetWindowText(GetLanguageStringACP("NewMapCreateNewInitHeight"));
+	TranslateWindowCaption(*this, "NewMapCreateNewCaption");
+	TranslateDlgItem(*this, IDC_NEWMAPCREATENEW_TXT_DSC, "NewMapCreateNewDesc");
+	TranslateDlgItem(*this, IDC_NEWMAPCREATENEW_TXT_WIDTH, "NewMapCreateNewWidth");
+	TranslateDlgItem(*this, IDC_NEWMAPCREATENEW_TXT_HEIGHT, "NewMapCreateNewHeight");
+	TranslateDlgItem(*this, IDC_NEWMAPCREATENEW_TXT_THEATER, "NewMapCreateNewTheater");
+	TranslateDlgItem(*this, IDC_NEWMAPCREATENEW_TXT_INIT_HEIGHT, "NewMapCreateNewInitHeight");
 
-	SetDlgItemText(IDOK, GetLanguageStringACP("NewMapTypeOK"));
-	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
+	TranslateDlgItem(*this, IDOK, "NewMapTypeOK");
+	TranslateDlgItem(*this, IDCANCEL, "Cancel");
 }
 

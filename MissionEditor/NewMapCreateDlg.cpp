@@ -79,12 +79,12 @@ BOOL CNewMapCreateDlg::OnInitDialog()
 
 void CNewMapCreateDlg::translateUI()
 {
-	SetWindowText(GetLanguageStringACP("NewMapCreateCaption"));
-	GetDlgItem(IDC_NEWMAPCREATE_TXT_DSC)->SetWindowText(GetLanguageStringACP("NewMapCreateDesc"));
-	GetDlgItem(IDC_CREATE)->SetWindowText(GetLanguageStringACP("NewMapCreateAllNew"));
-	GetDlgItem(IDC_IMPORT)->SetWindowText(GetLanguageStringACP("NewMapCreateImport"));
-	GetDlgItem(IDC_AITRIGGERS)->SetWindowText(GetLanguageStringACP("NewMapCreateEnableAITriggers"));
+	TranslateWindowCaption(*this, "NewMapCreateCaption");
+	TranslateDlgItem(*this, IDC_NEWMAPCREATE_TXT_DSC, "NewMapCreateDesc");
+	TranslateDlgItem(*this, IDC_CREATE, "NewMapCreateAllNew");
+	TranslateDlgItem(*this, IDC_IMPORT, "NewMapCreateImport");
+	TranslateDlgItem(*this, IDC_AITRIGGERS, "NewMapCreateEnableAITriggers");
 
-	SetDlgItemText(IDOK, GetLanguageStringACP("NewMapTypeOK"));
-	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
+	TranslateDlgItem(*this, IDOK, "NewMapTypeOK");
+	TranslateDlgItem(*this, IDCANCEL, "Cancel");
 }

@@ -77,11 +77,11 @@ BOOL CNewMapTypeDlg::OnInitDialog()
 
 void CNewMapTypeDlg::translateUI()
 {
-	SetWindowText(GetLanguageStringACP("NewMapTypeCaption"));
-	GetDlgItem(IDC_NEWMAPTYPE_TXT_DSC)->SetWindowText(GetLanguageStringACP("NewMapTypeDesc"));
-	GetDlgItem(IDC_SINGLE)->SetWindowText(GetLanguageStringACP("NewMapTypeSingle"));
-	GetDlgItem(IDC_MULTI)->SetWindowText(GetLanguageStringACP("NewMapTypeMulti"));
+	TranslateWindowCaption(*this, "NewMapTypeCaption");
+	TranslateDlgItem(*this, IDC_NEWMAPTYPE_TXT_DSC, "NewMapTypeDesc");
+	TranslateDlgItem(*this, IDC_SINGLE, "NewMapTypeSingle");
+	TranslateDlgItem(*this, IDC_MULTI, "NewMapTypeMulti");
 
-	SetDlgItemText(IDOK, GetLanguageStringACP("NewMapTypeOK"));
-	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
+	TranslateDlgItem(*this, IDOK, "NewMapTypeOK");
+	TranslateDlgItem(*this, IDCANCEL, "Cancel");
 }
