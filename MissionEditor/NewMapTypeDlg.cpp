@@ -24,6 +24,7 @@
 #include "stdafx.h"
 #include "finalsun.h"
 #include "NewMapTypeDlg.h"
+#include "functions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -65,9 +66,22 @@ BOOL CNewMapTypeDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	translateUI();
+
 	m_Singleplayer = 1;
 	UpdateData(FALSE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+}
+
+void CNewMapTypeDlg::translateUI()
+{
+	SetWindowText(GetLanguageStringACP("NewMapTypeCaption"));
+	GetDlgItem(IDC_NEWMAPTYPE_TXT_DSC)->SetWindowText(GetLanguageStringACP("NewMapTypeDesc"));
+	GetDlgItem(IDC_SINGLE)->SetWindowText(GetLanguageStringACP("NewMapTypeSingle"));
+	GetDlgItem(IDC_MULTI)->SetWindowText(GetLanguageStringACP("NewMapTypeMulti"));
+
+	SetDlgItemText(IDOK, GetLanguageStringACP("OK"));
+	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
 }

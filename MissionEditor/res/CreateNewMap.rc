@@ -128,14 +128,14 @@ BEGIN
     COMBOBOX        IDC_GROUNDHEIGHT,178,50,52,71,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
-IDD_NEWMAPTYPE DIALOG 0, 0, 222, 129
+IDD_NEWMAPTYPE DIALOGEX 0, 0, 222, 129
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Create new map - Step 1"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
-    LTEXT           "Please select if you want to create a new singleplayer map or multiplayer map. Multiplayer maps are maps used in both skirmish and multiplayer games.",IDC_STATIC,7,7,208,33
+    LTEXT           "Please select if you want to create a new singleplayer map or multiplayer map. Multiplayer maps are maps used in both skirmish and multiplayer games.",IDC_NEWMAPTYPE_TXT_DSC,7,7,208,33
     CONTROL         "Singleplayer map (only for experienced users that can handle advanced mode)",IDC_SINGLE,
                     "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP,7,55,208,20
     CONTROL         "Multiplayer map",IDC_MULTI,"Button",BS_AUTORADIOBUTTON,7,76,208,11
@@ -369,6 +369,17 @@ BEGIN
 0x0037, 
     IDC_STARTINGHEIGHT, 0x403, 2, 0
 0x0038, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_NEWMAPTYPE AFX_DIALOG_LAYOUT
+BEGIN
     0
 END
 
