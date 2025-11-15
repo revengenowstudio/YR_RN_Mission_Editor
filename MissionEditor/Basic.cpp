@@ -24,7 +24,7 @@
 #include "stdafx.h"
 #include "FinalSun.h"
 #include "Basic.h"
-#include "resource.h"
+#include "res/resource.h"
 #include "mapdata.h"
 #include "variables.h"
 #include "functions.h"

@@ -3,7 +3,7 @@
 
 #include <afxres.h>
 #include "..\Version.h"
-#include "..\resource.h"
+#include "resource.h"
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version

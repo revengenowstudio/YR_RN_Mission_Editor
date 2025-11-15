@@ -34,6 +34,14 @@ BOOL CCsfViewer::OnInitDialog()
 
     translateUI();
 
+    m_stringList.SetExtendedStyle(LVS_EX_FULLROWSELECT);
+    m_richEditCtrl.SetReadOnly();
+
+    //ExtraWindow::SetEditControlFontSize(m_richEditCtrl, 1.4f, true);
+    CFont font;
+    font.CreatePointFont(100, _T("Tahoma"));
+    m_richEditCtrl.SetFont(&font);
+
     if (!m_selectedCSFLabel.IsEmpty()) {
         m_searchEdit.SetWindowText(m_selectedCSFLabel);
     }
@@ -61,14 +69,7 @@ void CCsfViewer::translateUI()
 
     SetDlgItemText(IDOK, GetLanguageStringACP("OK"));
     //SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel")); // TODO: add cancel
-    m_stringList.SetExtendedStyle(LVS_EX_FULLROWSELECT);
-    m_richEditCtrl.SetReadOnly();
-
-    //ExtraWindow::SetEditControlFontSize(m_richEditCtrl, 1.4f, true);
-    CFont font;
-    font.CreatePointFont(100, _T("Tahoma"));
-    m_richEditCtrl.SetFont(&font);
-
+ 
 #if 0
     if (ExtConfigs::EnableDarkMode)
     {

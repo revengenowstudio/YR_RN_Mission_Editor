@@ -599,7 +599,8 @@
     <ClCompile Include="MapCode.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="MissionEditor.rc" />
+    <ResourceCompile Include="res\MissionEditor.rc" />
+    <ResourceCompile Include="res\SaveOptions.rc" />
     <ResourceCompile Include="res\VersionInfo.rc" />
   </ItemGroup>
   <ItemGroup>
@@ -664,6 +665,7 @@
     <ClInclude Include="Palettes.h" />
     <ClInclude Include="ProgressDlg.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="res\resource.h" />
     <ClInclude Include="RightFrame.h" />
     <ClInclude Include="RTPDlg.h" />
     <ClInclude Include="SaveMapOptionsDlg.h" />

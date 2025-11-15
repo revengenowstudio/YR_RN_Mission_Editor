@@ -49,15 +49,8 @@ public:
 	PreviewType		m_PreviewMode;
 	int				m_MinPlayers;
 	CString			m_MapName;
-	BOOL			m_AirWar;
-	BOOL			m_Cooperative;
-	BOOL			m_Duel;
-	BOOL			m_Meatgrind;
-	BOOL			m_Megawealth;
-	BOOL			m_Navalwar;
-	BOOL			m_Nukewar;
-	BOOL			m_Standard;
-	BOOL			m_TeamGame;
+
+	std::vector<CString> m_modes;
 	//}}AFX_DATA
 
 
@@ -65,17 +58,22 @@ public:
 	// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
 	//{{AFX_VIRTUAL(CSaveMapOptionsDlg)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
+	virtual BOOL OnInitDialog() override;
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
+	virtual void OnOK() override;
 	//}}AFX_VIRTUAL
 
 // Implementierung
 protected:
+	void translateUI();
+	void initializeModeList();
 
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CSaveMapOptionsDlg)
-	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+	CListCtrl m_modeList;
 };
 
 //{{AFX_INSERT_LOCATION}}

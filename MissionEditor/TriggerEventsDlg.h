@@ -21,7 +21,7 @@
 #if !defined(AFX_TRIGGEREVENTSDLG_H__13CDEBA1_961C_11D4_9C87_BD9803B9B54A__INCLUDED_)
 #define AFX_TRIGGEREVENTSDLG_H__13CDEBA1_961C_11D4_9C87_BD9803B9B54A__INCLUDED_
 
-#include "resource.h"
+#include "res/resource.h"
 
 #if _MSC_VER > 1000
 #pragma once

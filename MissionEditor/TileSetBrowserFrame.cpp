@@ -24,7 +24,7 @@
 #include "stdafx.h"
 #include "finalsun.h"
 #include "TileSetBrowserFrame.h"
-#include "resource.h"
+#include "res/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

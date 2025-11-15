@@ -878,7 +878,7 @@ void ListSpecialWeapons(CComboBox& cb)
 
 void ListAnimations(CComboBox& cb)
 {
-	listSpecifcTypesWithSequence(cb, g_data.GetStringOr("Customzations", "AnimationListID", "Animations"));
+	listSpecifcTypesWithSequence(cb, g_data.GetStringOr("Customizations", "AnimationListID", "Animations"));
 }
 
 void ListParticles(CComboBox& cb)

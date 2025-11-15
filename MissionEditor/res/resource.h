@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by MissionEditor.rc
+// Used by SaveOptions.rc
 //
 #define PRODUCT_VERSION_REVISION        0
 #define PRODUCT_VERSION_MINOR           1
@@ -494,7 +494,7 @@
 #define IDC_MEATGRIND                   1427
 #define IDC_NAVALWAR                    1428
 #define IDC_NUKEWAR                     1429
-#define IDC_AIRWAR                      1430
+#define IDC_SAV_OPT_DLG_MODE_LIST       1430
 #define IDC_MEGAWEALTH                  1431
 #define IDC_DUEL                        1432
 #define IDC_COOPERATIVE                 1433
@@ -635,9 +635,13 @@
 #define IDC_CMAPSIZE_WARNING_TXT        1554
 #define IDC_CSF_VIEW_SELECTED           1555
 #define IDC_CSF_VIEW_RELOAD             1556
+#define IDC_SAV_DLG_DSC                 1556
 #define IDC_CSF_VIEW_SEARCH_EDT         1557
+#define IDC_SAVOPT_DLG_TXT_MAPNAME      1557
 #define IDC_CSF_VIEW_LIST               1558
+#define IDC_SAVOPT_DLG_TXT_PREVIEW      1558
 #define IDC_CSF_VIEW_RICH_EDT           1559
+#define IDC_SAVOPT_DLG_DSC              1559
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -732,9 +736,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        323
+#define _APS_NEXT_RESOURCE_VALUE        324
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1555
+#define _APS_NEXT_CONTROL_VALUE         1560
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

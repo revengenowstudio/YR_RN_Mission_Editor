@@ -62,16 +62,18 @@ void CMMXSavingOptionsDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CMMXSavingOptionsDlg)
 	DDX_Text(pDX, IDC_DESCRIPTION, m_Description);
+	DDX_CBIndex(pDX, IDC_MAXPLAYERS, m_Maxplayers);
+#if 0
 	DDX_Check(pDX, IDC_AIRWAR, m_AirWar);
 	DDX_Check(pDX, IDC_COOPERATIVE, m_Cooperative);
 	DDX_Check(pDX, IDC_DUEL, m_Duel);
-	DDX_CBIndex(pDX, IDC_MAXPLAYERS, m_Maxplayers);
 	DDX_Check(pDX, IDC_MEATGRIND, m_Meatgrind);
 	DDX_Check(pDX, IDC_MEGAWEALTH, m_MegaWealth);
 	DDX_CBIndex(pDX, IDC_MINPLAYERS, m_MinPlayers);
 	DDX_Check(pDX, IDC_NAVALWAR, m_NavalWar);
 	DDX_Check(pDX, IDC_NUKEWAR, m_NukeWar);
 	DDX_Check(pDX, IDC_STANDARD, m_Standard);
+#endif
 	//}}AFX_DATA_MAP
 }
 

@@ -25,7 +25,10 @@
 #include "finalsun.h"
 #include "SaveMapOptionsDlg.h"
 #include "variables.h"
+#include "functions.h"
 #include "inifile.h"
+#include "res/resource.h"
+#include <set>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,62 +38,35 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CSaveMapOptionsDlg 
-
-
 CSaveMapOptionsDlg::CSaveMapOptionsDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CSaveMapOptionsDlg::IDD, pParent)
 {
-	//{{AFX_DATA_INIT(CSaveMapOptionsDlg)
+	CIniFile& ini = Map->GetIniFile();
+
 	m_Compress = 1;
 	m_PreviewMode = PREVIEW_MINIMAP;
-	m_MinPlayers = 2;
-	m_MapName = _T("");
-	m_AirWar = FALSE;
-	m_Cooperative = FALSE;
-	m_Duel = FALSE;
-	m_Meatgrind = FALSE;
-	m_Megawealth = FALSE;
-	m_Navalwar = FALSE;
-	m_Nukewar = FALSE;
-	m_Standard = FALSE;
-	m_TeamGame = FALSE;
-	//}}AFX_DATA_INIT
+	auto const defMinPlayers = g_data.GetInteger("Customizations", "DefaultMinPlayers");
+	m_MinPlayers = ini.GetInteger("Basic", "MinPlayer", defMinPlayers);
+	m_MapName = ini.GetString("Basic", "Name");
 
-	CIniFile& ini = Map->GetIniFile();
 	if (!Map->IsMultiplayer()) {
 		m_PreviewMode = PREVIEW_DONT_CHANGE;
 	}
-
-	m_MapName = ini.GetString("Basic", "Name");
-	m_MinPlayers = ini.GetInteger("Basic", "MinPlayer");
 }
 
 
 void CSaveMapOptionsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CSaveMapOptionsDlg)
+
 	DDX_Radio(pDX, IDC_PREVIEWMODE, reinterpret_cast<int&>(m_PreviewMode));
 	DDX_Text(pDX, IDC_MAPNAME, m_MapName);
 	DDX_Text(pDX, IDC_SAVE_OPT_M_PLAYERS, m_MinPlayers);
-#ifdef RA2_MODE
-	DDX_Check(pDX, IDC_AIRWAR, m_AirWar);
-	DDX_Check(pDX, IDC_COOPERATIVE, m_Cooperative);
-	DDX_Check(pDX, IDC_DUEL, m_Duel);
-	DDX_Check(pDX, IDC_MEATGRIND, m_Meatgrind);
-	DDX_Check(pDX, IDC_MEGAWEALTH, m_Megawealth);
-	DDX_Check(pDX, IDC_NAVALWAR, m_Navalwar);
-	DDX_Check(pDX, IDC_NUKEWAR, m_Nukewar);
-	DDX_Check(pDX, IDC_STANDARD, m_Standard);
-	DDX_Check(pDX, IDC_TEAMGAME, m_TeamGame);
-#endif
-	//}}AFX_DATA_MAP
+	DDX_Control(pDX, IDC_SAV_OPT_DLG_MODE_LIST, m_modeList);
 }
 
-
 BEGIN_MESSAGE_MAP(CSaveMapOptionsDlg, CDialog)
-	//{{AFX_MSG_MAP(CSaveMapOptionsDlg)
-	//}}AFX_MSG_MAP
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -99,31 +75,83 @@ END_MESSAGE_MAP()
 BOOL CSaveMapOptionsDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+	translateUI();
 
 	CIniFile& ini = Map->GetIniFile();
 	if (!Map->IsMultiplayer()) {
 		GetDlgItem(IDC_PREVIEWMODE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_NOPREVIEW)->EnableWindow(FALSE);
 		GetDlgItem(IDC_EXISTINGPREVIEW)->EnableWindow(FALSE);
-
 #ifndef TS_MODE
-		GetDlgItem(IDC_AIRWAR)->EnableWindow(FALSE);
-		GetDlgItem(IDC_COOPERATIVE)->EnableWindow(FALSE);
-		GetDlgItem(IDC_DUEL)->EnableWindow(FALSE);
-		GetDlgItem(IDC_MEATGRIND)->EnableWindow(FALSE);
-		GetDlgItem(IDC_MEGAWEALTH)->EnableWindow(FALSE);
-		GetDlgItem(IDC_NAVALWAR)->EnableWindow(FALSE);
-		GetDlgItem(IDC_NUKEWAR)->EnableWindow(FALSE);
-		GetDlgItem(IDC_STANDARD)->EnableWindow(FALSE);
-		GetDlgItem(IDC_TEAMGAME)->EnableWindow(FALSE);
-#endif	
+		m_modeList.EnableWindow(FALSE);
+#endif
+		return TRUE;
 	}
+
+	initializeModeList();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
 }
 
-void translateUI()
+void CSaveMapOptionsDlg::translateUI()
 {
-	//IDC_SAVE_OPT_MP_TXT;
+	SetWindowText(GetLanguageStringACP("SaveMapOptionsCaption"));
+	GetDlgItem(IDC_SAVOPT_DLG_TXT_MAPNAME)->SetWindowText(GetLanguageStringACP("SaveMapOptionsMapName"));
+	GetDlgItem(IDC_SAVOPT_DLG_TXT_PREVIEW)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviews"));
+	GetDlgItem(IDC_SAVOPT_DLG_DSC)->SetWindowText(GetLanguageStringACP("SaveMapOptionsDesc"));
+	GetDlgItem(IDC_PREVIEWMODE)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviewCreate"));
+	GetDlgItem(IDC_EXISTINGPREVIEW)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviewDoNotChange"));
+	GetDlgItem(IDC_NOPREVIEW)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviewRemove"));
+	GetDlgItem(IDC_SAVE_OPT_MP_TXT)->SetWindowText(GetLanguageStringACP("SaveMapOptionsMinPlayers"));
+
+	SetDlgItemText(IDOK, GetLanguageStringACP("OK"));
+	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
+}
+
+void CSaveMapOptionsDlg::initializeModeList()
+{
+	m_modeList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES);
+	m_modeList.InsertColumn(0, TranslateStringACP("SaveMapOptionsModeName"), LVCFMT_LEFT, 125);
+	m_modeList.InsertColumn(1, TranslateStringACP("SaveMapOptionsModeID"), LVCFMT_LEFT, 80);
+
+	auto const gameModeSec = g_data.GetSection("GameModes");
+	auto const defMode = g_data.GetStringOr("Customizations", "DefaultGameMode", "standard");
+	if (gameModeSec.Size() == 0) {
+		m_modeList.InsertItem(0, defMode);
+		return;
+	}
+
+	for (auto& mode : m_modes) {
+		TruncSpace(mode);
+	}
+	
+	for (auto idx = 0; idx < gameModeSec.Size();++idx) {
+		auto const [mode, name] = gameModeSec.Nth(idx);
+		auto modeCpy = mode;
+		TruncSpace(modeCpy);
+		m_modeList.InsertItem(idx, name);
+		m_modeList.SetItemText(idx, 1, modeCpy);
+		if (m_modes.empty() && mode == defMode
+			|| std::find(m_modes.begin(), m_modes.end(), modeCpy) != m_modes.end()) {
+			m_modeList.SetCheck(idx);
+		}
+	}
+}
+
+void CSaveMapOptionsDlg::OnOK()
+{
+	auto const itemCount = m_modeList.GetItemCount();
+	std::set<CString> dedupSet;
+	m_modes.clear();
+	for (int idx = 0; idx < itemCount; ++idx) {
+		if (m_modeList.GetCheck(idx)) {
+			auto mode = m_modeList.GetItemText(idx, 1);
+			if (dedupSet.emplace(mode).second) {
+				m_modes.push_back(mode);
+			}
+		}
+	}
+
+	EndDialog(IDOK);
 }

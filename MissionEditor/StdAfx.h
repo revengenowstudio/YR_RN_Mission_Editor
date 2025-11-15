@@ -52,7 +52,7 @@
 // #include "functions.h"
 // #include "inlines.h"
 // #include "MapData.h"
-#include "resource.h"
+#include "res/resource.h"
 #include "TipDlg.h"
 
 using std::endl;

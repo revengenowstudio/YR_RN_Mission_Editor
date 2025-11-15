@@ -27,7 +27,7 @@
 // MapValidator.h : Header file
 //
 
-#include "resource.h"
+#include "res/resource.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // dialog field CMapValidator 

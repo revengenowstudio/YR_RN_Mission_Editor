@@ -1032,64 +1032,23 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 	if (!bSaveAsMMX) {
 		CSaveMapOptionsDlg opt;
 
-
 		CString gm = Map->GetIniFile().GetString("Basic", "GameMode");
 		gm.MakeLower();
-		if (gm.GetLength()) {
-			opt.m_Standard = gm.Find("standard") >= 0;
-			opt.m_AirWar = gm.Find("airwar") >= 0;
-			opt.m_Cooperative = gm.Find("cooperative") >= 0;
-			opt.m_Duel = gm.Find("duel") >= 0;
-			opt.m_Navalwar = gm.Find("navalwar") >= 0;
-			opt.m_Nukewar = gm.Find("nukewar") >= 0;
-			opt.m_Meatgrind = gm.Find("meatgrind") >= 0;
-			opt.m_Megawealth = gm.Find("megawealth") >= 0;
-			opt.m_TeamGame = gm.Find("teamgame") >= 0;
+		if (!gm.IsEmpty()) {
+			opt.m_modes = INIHelper::Split(gm);
 		} else {
-			opt.m_Standard = TRUE;
+			opt.m_modes = { g_data.GetStringOr("Customizations", "DefaultGameMode", "standard")};
 		}
 
 		if (opt.DoModal() == IDCANCEL) {
 			return;
 		}
 
-		gm = "";
-		if (opt.m_Standard) {
-			gm += "standard, ";
-		}
-		if (opt.m_Meatgrind) {
-			gm += "meatgrind, ";
-		}
-		if (opt.m_Navalwar) {
-			gm += "navalwar, ";
-		}
-		if (opt.m_Nukewar) {
-			gm += "nukewar, ";
-		}
-		if (opt.m_AirWar) {
-			gm += "airwar, ";
-		}
-		if (opt.m_Megawealth) {
-			gm += "megawealth, ";
-		}
-		if (opt.m_Duel) {
-			gm += "duel, ";
-		}
-		if (opt.m_Cooperative) {
-			gm += "cooperative, ";
-		}
-		if (opt.m_TeamGame) {
-			gm += "teamgame, ";
-		}
-
-		if (gm.ReverseFind(',') >= 0) {
-			gm = gm.Left(gm.ReverseFind(','));
-		}
+		gm = INIHelper::Join(opt.m_modes);
 
 		if (gm.GetLength() == 0) {
-			gm = "standard";
+			gm = { g_data.GetStringOr("Customizations", "DefaultGameMode", "standard") };
 		}
-
 
 		Map->GetIniFile().SetString("Basic", "Name", opt.m_MapName);
 		Map->GetIniFile().SetString("Basic", "GameMode", gm);

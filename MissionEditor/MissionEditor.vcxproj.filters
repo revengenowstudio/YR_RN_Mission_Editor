@@ -302,10 +302,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="MissionEditor.rc">
+    <ResourceCompile Include="res\VersionInfo.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
-    <ResourceCompile Include="res\VersionInfo.rc">
+    <ResourceCompile Include="res\SaveOptions.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\MissionEditor.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -608,6 +611,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CsfViewer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="res\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

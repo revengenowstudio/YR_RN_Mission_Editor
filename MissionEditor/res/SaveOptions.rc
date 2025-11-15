@@ -1,0 +1,248 @@
+// Microsoft Visual C++ generated resource script.
+//
+#pragma code_page(65001)
+
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// German (Germany) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(65001)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\FinalSun.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
+    "#include ""afxres.rc""         // Standardkomponenten\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // German (Germany) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDD_SAVEOPTIONS$(TS_MODE) DIALOG 0, 0, 233, 125
+#else
+IDD_SAVEOPTIONS DIALOG 0, 0, 233, 125
+#endif
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Save options"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,176,104,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,117,104,50,14
+    CONTROL         "Compress map",IDC_COMPRESS,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE | WS_GROUP,19,42,118,12
+    CONTROL         "Don't compress map (use this if any problems with the map occur in RA2/TS)",IDC_NOCOMPRESSION,
+                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | NOT WS_VISIBLE,19,52,192,21
+    CONTROL         "Create new preview using minimap",IDC_PREVIEWMODE,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,19,40,150,13
+    CONTROL         "Use existing preview (if possible)",IDC_EXISTINGPREVIEW,
+                    "Button",BS_AUTORADIOBUTTON,19,53,141,12
+    CONTROL         "Don't save any preview",IDC_NOPREVIEW,"Button",BS_AUTORADIOBUTTON,19,66,141,12
+    GROUPBOX        "Compression",IDC_STATIC,7,28,219,52,NOT WS_VISIBLE
+    GROUPBOX        "Preview",IDC_STATIC,7,29,219,56
+    LTEXT           "If you want to play the map online, you should try to make the file size as low as possible. This includes turning off the preview. You should also try using compression.",IDC_STATIC,7,90,219,27,NOT WS_VISIBLE
+    LTEXT           "Map name:",IDC_STATIC,7,7,63,13
+    EDITTEXT        IDC_MAPNAME,73,7,153,12,ES_AUTOHSCROLL
+END
+#endif
+
+#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDD_SAVEOPTIONS$(RA2_MODE) DIALOGEX 0, 0, 233, 313
+#else
+IDD_SAVEOPTIONS DIALOGEX 0, 0, 233, 313
+#endif
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Save options"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,176,292,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,117,292,50,14
+    CONTROL         "Create new preview using minimap",IDC_PREVIEWMODE,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,19,40,129,13
+    CONTROL         "Use existing preview (if possible)",IDC_EXISTINGPREVIEW,
+                    "Button",BS_AUTORADIOBUTTON,19,53,127,12
+    CONTROL         "Don't save any preview",IDC_NOPREVIEW,"Button",BS_AUTORADIOBUTTON,19,66,127,12
+    GROUPBOX        "Preview",IDC_SAVOPT_DLG_TXT_PREVIEW,7,29,145,56
+    LTEXT           "If you want to play the map online, you should try to make the file size as low as possible. This includes turning off the preview.",IDC_SAVOPT_DLG_DSC,7,268,219,21
+    LTEXT           "Map name:",IDC_SAVOPT_DLG_TXT_MAPNAME,14,7,75,13
+    EDITTEXT        IDC_MAPNAME,85,7,141,12,ES_AUTOHSCROLL
+    LTEXT           "Min players:",IDC_SAVE_OPT_MP_TXT,159,30,57,8
+    EDITTEXT        IDC_SAVE_OPT_M_PLAYERS,157,42,69,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SAV_OPT_DLG_MODE_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,84,219,183
+END
+#endif
+
+IDD_MMXOPTIONS DIALOG 0, 0, 268, 172
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "MMX options"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,211,151,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,141,151,50,14
+    LTEXT           "If description tag does not exist, RA2 will place MISSING: in front of the map name, this does not affect the game!",IDC_STATIC,7,7,254,21
+    LTEXT           "Description tag:",IDC_STATIC,7,37,80,12
+    EDITTEXT        IDC_DESCRIPTION,90,37,171,15,ES_AUTOHSCROLL
+    CONTROL         "Standard",IDC_STANDARD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,89,80,14
+    CONTROL         "Meatgrind",IDC_MEATGRIND,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,90,80,14
+    CONTROL         "Naval War",IDC_NAVALWAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,174,90,80,14
+    CONTROL         "Nuke War",IDC_NUKEWAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,105,80,14
+    CONTROL         "Mega Wealth",IDC_MEGAWEALTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,174,105,80,14
+    CONTROL         "Duel",IDC_DUEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,121,80,14
+    CONTROL         "Cooperative",IDC_COOPERATIVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,121,80,14
+    LTEXT           "Min players:",IDC_STATIC,7,63,54,12
+    COMBOBOX        IDC_MINPLAYERS,89,62,40,103,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Max players:",IDC_STATIC,148,63,54,12
+    COMBOBOX        IDC_MAXPLAYERS,221,61,40,104,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    "IDD_SAVEOPTIONS$(TS_MODE)", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 226
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 118
+    END
+
+    "IDD_SAVEOPTIONS$(RA2_MODE)", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 226
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 306
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDD_SAVEOPTIONS$(RA2_MODE) AFX_DIALOG_LAYOUT
+#else
+IDD_SAVEOPTIONS AFX_DIALOG_LAYOUT
+#endif
+BEGIN
+    0
+END
+#endif
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(65001)
+#endif //_WIN32
+#include "res\FinalSun.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
+#include "afxres.rc"         // Standardkomponenten
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
