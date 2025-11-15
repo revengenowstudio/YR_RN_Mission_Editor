@@ -65,7 +65,6 @@ void CSaveMapOptionsDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SAV_OPT_DLG_MODE_LIST, m_modeList);
 }
 
-
 BEGIN_MESSAGE_MAP(CSaveMapOptionsDlg, CDialog)
 	ON_WM_CLOSE()
 END_MESSAGE_MAP()
@@ -97,16 +96,24 @@ BOOL CSaveMapOptionsDlg::OnInitDialog()
 
 void CSaveMapOptionsDlg::translateUI()
 {
+	SetWindowText(GetLanguageStringACP("SaveMapOptionsCaption"));
+	GetDlgItem(IDC_SAVOPT_DLG_TXT_MAPNAME)->SetWindowText(GetLanguageStringACP("SaveMapOptionsMapName"));
+	GetDlgItem(IDC_SAVOPT_DLG_TXT_PREVIEW)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviews"));
+	GetDlgItem(IDC_SAVOPT_DLG_DSC)->SetWindowText(GetLanguageStringACP("SaveMapOptionsDesc"));
+	GetDlgItem(IDC_PREVIEWMODE)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviewCreate"));
+	GetDlgItem(IDC_EXISTINGPREVIEW)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviewDoNotChange"));
+	GetDlgItem(IDC_NOPREVIEW)->SetWindowText(GetLanguageStringACP("SaveMapOptionsPreviewRemove"));
+	GetDlgItem(IDC_SAVE_OPT_MP_TXT)->SetWindowText(GetLanguageStringACP("SaveMapOptionsMinPlayers"));
 
-
-	//IDC_SAVE_OPT_MP_TXT;
+	SetDlgItemText(IDOK, GetLanguageStringACP("OK"));
+	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
 }
 
 void CSaveMapOptionsDlg::initializeModeList()
 {
 	m_modeList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES);
-	m_modeList.InsertColumn(0, TranslateStringACP("CSaveMapOptionsModeName"), LVCFMT_LEFT, 125);
-	m_modeList.InsertColumn(1, TranslateStringACP("CSaveMapOptionsModeID"), LVCFMT_LEFT, 80);
+	m_modeList.InsertColumn(0, TranslateStringACP("SaveMapOptionsModeName"), LVCFMT_LEFT, 125);
+	m_modeList.InsertColumn(1, TranslateStringACP("SaveMapOptionsModeID"), LVCFMT_LEFT, 80);
 
 	auto const gameModeSec = g_data.GetSection("GameModes");
 	auto const defMode = g_data.GetStringOr("Customizations", "DefaultGameMode", "standard");

@@ -14,8 +14,83 @@
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
+/////////////////////////////////////////////////////////////////////////////
+// German (Germany) resources
+
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(65001)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\FinalSun.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
+    "#include ""afxres.rc""         // Standardkomponenten\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // German (Germany) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -67,10 +142,10 @@ BEGIN
     CONTROL         "Use existing preview (if possible)",IDC_EXISTINGPREVIEW,
                     "Button",BS_AUTORADIOBUTTON,19,53,127,12
     CONTROL         "Don't save any preview",IDC_NOPREVIEW,"Button",BS_AUTORADIOBUTTON,19,66,127,12
-    GROUPBOX        "Preview",IDC_STATIC,7,29,145,56
-    LTEXT           "If you want to play the map online, you should try to make the file size as low as possible. This includes turning off the preview.",IDC_STATIC,7,268,219,21
-    LTEXT           "Map name:",IDC_STATIC,7,7,41,13
-    EDITTEXT        IDC_MAPNAME,52,7,174,12,ES_AUTOHSCROLL
+    GROUPBOX        "Preview",IDC_SAVOPT_DLG_TXT_PREVIEW,7,29,145,56
+    LTEXT           "If you want to play the map online, you should try to make the file size as low as possible. This includes turning off the preview.",IDC_SAVOPT_DLG_DSC,7,268,219,21
+    LTEXT           "Map name:",IDC_SAVOPT_DLG_TXT_MAPNAME,14,7,75,13
+    EDITTEXT        IDC_MAPNAME,85,7,141,12,ES_AUTOHSCROLL
     LTEXT           "Min players:",IDC_SAVE_OPT_MP_TXT,159,30,57,8
     EDITTEXT        IDC_SAVE_OPT_M_PLAYERS,157,42,69,14,ES_AUTOHSCROLL
     CONTROL         "",IDC_SAV_OPT_DLG_MODE_LIST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,84,219,183
@@ -99,6 +174,7 @@ BEGIN
     LTEXT           "Max players:",IDC_STATIC,148,63,54,12
     COMBOBOX        IDC_MAXPLAYERS,221,61,40,104,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
 END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -143,32 +219,7 @@ BEGIN
 END
 #endif
 
-
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
-
-1 TEXTINCLUDE 
-BEGIN
-    "resource.h\0"
-END
-
-2 TEXTINCLUDE 
-BEGIN
-    "\0"
-END
-
-3 TEXTINCLUDE 
-BEGIN
-    "\r\n"
-    "\0"
-END
-
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Chinese (Simplified, China) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -178,7 +229,19 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
 
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(65001)
+#endif //_WIN32
+#include "res\FinalSun.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
+#include "afxres.rc"         // Standardkomponenten
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
