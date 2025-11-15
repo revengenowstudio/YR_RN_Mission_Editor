@@ -311,6 +311,9 @@
     <ResourceCompile Include="res\MissionEditor.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
+    <ResourceCompile Include="res\CreateNewMap.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Aircraft.h">

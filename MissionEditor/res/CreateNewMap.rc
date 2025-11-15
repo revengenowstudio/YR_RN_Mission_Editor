@@ -1,0 +1,401 @@
+// Microsoft Visual C++ generated resource script.
+//
+#pragma code_page(65001)
+
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// German (Germany) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(65001)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\FinalSun.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
+    "#include ""afxres.rc""         // Standardkomponenten\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // German (Germany) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_NEWMAP DIALOG 0, 0, 248, 226
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "New map assistant"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,191,205,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,134,205,50,14
+    PUSHBUTTON      "Browse",IDC_BROWSE,189,106,44,12
+    GROUPBOX        "Import options",IDC_LIMPORTOPTIONS,7,93,234,64
+    CONTROL         "Import Trees",IDC_IMPORTTREES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,125,91,12
+    CONTROL         "Import Overlay",IDC_IMPORTOVERLAY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,138,103,13
+    CONTROL         "Import Units/Buildings",IDC_IMPORTUNITS,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,128,122,94,19
+    CONTROL         "Multiplayer",IDC_MULTIPLAYER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,167,85,12
+    COMBOBOX        IDC_IMPORTFILE,15,106,161,206,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Prepare standard houses",IDC_PREPAREHOUSES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,120,167,113,13
+    COMBOBOX        IDC_HOUSE,177,183,56,99,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Player house:",IDC_LPLAYERHOUSE,119,183,52,15
+    CONTROL         "Set Auto-Production triggers",IDC_AUTOPROD,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,7,178,102,19
+    CONTROL         "Import existing map",IDC_IMPORT,"Button",BS_AUTORADIOBUTTON | WS_GROUP,7,81,234,11
+    CONTROL         "Create new map",IDC_NEW,"Button",BS_AUTORADIOBUTTON,7,8,234,15
+    GROUPBOX        "New map options",IDC_STATIC,7,21,234,51
+    EDITTEXT        IDC_WIDTH,51,31,51,14,ES_AUTOHSCROLL
+    LTEXT           "Width:",IDC_STATIC,13,31,33,14
+    EDITTEXT        IDC_HEIGHT,178,31,51,14,ES_AUTOHSCROLL
+    LTEXT           "Height:",IDC_STATIC,130,31,41,14
+    LTEXT           "Theater:",IDC_STATIC,13,49,38,12
+    COMBOBOX        IDC_THEATER,51,49,68,71,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Ground height:",IDC_STATIC,130,50,47,16
+    COMBOBOX        IDC_GROUNDHEIGHT,178,50,52,71,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_NEWMAPTYPE DIALOG 0, 0, 222, 129
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create new map - Step 1"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
+    LTEXT           "Please select if you want to create a new singleplayer map or multiplayer map. Multiplayer maps are maps used in both skirmish and multiplayer games.",IDC_STATIC,7,7,208,33
+    CONTROL         "Singleplayer map (only for experienced users that can handle advanced mode)",IDC_SINGLE,
+                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP,7,55,208,20
+    CONTROL         "Multiplayer map",IDC_MULTI,"Button",BS_AUTORADIOBUTTON,7,76,208,11
+END
+
+#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDD_NEWMAPCREATE$(TS_MODE) DIALOG 0, 0, 222, 129
+#else
+IDD_NEWMAPCREATE DIALOG 0, 0, 222, 129
+#endif
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create new map - Step 2"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
+    LTEXT           "Please select here if you want to create a completely new map from scratch or if you want to import an already existing map (Note: You cannot import maps created by the random map generator of RA2 or of TS version 1.15 or higher)",IDC_STATIC,7,7,208,37
+    CONTROL         "Create a completely new map",IDC_CREATE,"Button",BS_AUTORADIOBUTTON | WS_GROUP,7,55,208,11
+    CONTROL         "Import an existing map or bitmap (BMP)",IDC_IMPORT,
+                    "Button",BS_AUTORADIOBUTTON,7,67,208,11
+    CONTROL         "Activate AI Triggers (results in better AI)",IDC_AITRIGGERS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,83,208,14
+END
+#endif
+
+IDD_NEWMAPSPOPTIONS DIALOG 0, 0, 222, 129
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create new map - Step 4"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
+    CONTROL         "Prepare standard houses (recommended)",IDC_PREPAREHOUSES,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,39,159,13
+    COMBOBOX        IDC_HOUSE,87,63,115,99,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Player house:",IDC_LPLAYERHOUSE,15,63,52,15
+    CONTROL         "Set Auto-Production triggers",IDC_AUTOPROD,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,14,78,192,14
+    LTEXT           "Please select the human player. It is recommended to leave the other options as they are.",IDC_STATIC,7,7,208,26
+    GROUPBOX        "",IDC_STATIC,7,52,208,46
+END
+
+IDD_NEWMAPCREATENEW DIALOG 0, 0, 222, 129
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create new map - Step 3"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
+    LTEXT           "Please select size, theater and starting height here. The size should be below 100x100 for best results.",IDC_STATIC,7,7,208,32
+    LTEXT           "Width:",IDC_STATIC,7,39,35,11
+    EDITTEXT        IDC_WIDTH,130,39,85,13,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Height:",IDC_STATIC,7,55,35,11
+    EDITTEXT        IDC_HEIGHT,130,55,85,13,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Theater:",IDC_STATIC,7,71,53,12
+    COMBOBOX        IDC_THEATER,130,71,85,58,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Starting height:",IDC_STATIC,7,87,64,12
+    COMBOBOX        IDC_STARTINGHEIGHT,130,87,85,93,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_NEWMAPIMPORT DIALOG 0, 0, 222, 129
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create new map - Step 3"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
+    PUSHBUTTON      "Browse",IDC_BROWSE,155,51,60,12
+    CONTROL         "Import Trees",IDC_IMPORTTREES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,69,91,12
+    CONTROL         "Import Overlay",IDC_IMPORTOVERLAY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,82,103,13
+    CONTROL         "Import Units/Buildings",IDC_IMPORTUNITS,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,120,66,94,19
+    COMBOBOX        IDC_IMPORTFILE,7,51,131,206,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Please select the map you want to import. No triggers or houses will be imported. Bitmaps will be scaled down to appropiate size. Currently bitmaps will always be converted to temperate theater maps.",IDC_STATIC,7,7,208,43
+END
+
+#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDD_NEWMAPCREATE$(RA2_MODE) DIALOG 0, 0, 222, 129
+#else
+IDD_NEWMAPCREATE DIALOG 0, 0, 222, 129
+#endif
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create new map - Step 2"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
+    LTEXT           "Please select here if you want to create a completely new map from scratch or if you want to import an already existing map (Note: You cannot import maps created by the random map generator of RA2)",IDC_STATIC,7,7,208,37
+    CONTROL         "Create a completely new map",IDC_CREATE,"Button",BS_AUTORADIOBUTTON | WS_GROUP,7,55,208,11
+    CONTROL         "Import an existing map or bitmap (BMP)",IDC_IMPORT,
+                    "Button",BS_AUTORADIOBUTTON,7,67,208,11
+    CONTROL         "Activate AI Triggers (results in better AI)",IDC_AITRIGGERS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,83,208,14
+END
+#endif
+
+IDD_NEWMAPBITMAP DIALOG 0, 0, 222, 129
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create new map - Step 3"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
+    LTEXT           "Please select size, theater and starting height here. The size should be below 150x150.",IDC_STATIC,7,7,208,32
+    LTEXT           "Width:",IDC_STATIC,7,39,35,11
+    EDITTEXT        IDC_WIDTH,130,39,85,13,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Height:",IDC_STATIC,7,55,35,11
+    EDITTEXT        IDC_HEIGHT,130,55,85,13,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Theater:",IDC_STATIC,7,71,53,12
+    COMBOBOX        IDC_THEATER,130,71,85,58,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Starting height:",IDC_STATIC,7,87,64,12
+    COMBOBOX        IDC_STARTINGHEIGHT,130,87,85,93,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_NEWMAP, DIALOG
+    BEGIN
+    END
+
+    IDD_NEWMAPTYPE, DIALOG
+    BEGIN
+    END
+
+    "IDD_NEWMAPCREATE$(TS_MODE)", DIALOG
+    BEGIN
+    END
+
+    IDD_NEWMAPSPOPTIONS, DIALOG
+    BEGIN
+    END
+
+    IDD_NEWMAPCREATENEW, DIALOG
+    BEGIN
+    END
+
+    IDD_NEWMAPIMPORT, DIALOG
+    BEGIN
+    END
+
+    "IDD_NEWMAPCREATE$(RA2_MODE)", DIALOG
+    BEGIN
+    END
+
+    IDD_NEWMAPBITMAP, DIALOG
+    BEGIN
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_NEWMAP DLGINIT
+BEGIN
+    IDC_GROUNDHEIGHT, 0x403, 2, 0
+0x0030, 
+    IDC_GROUNDHEIGHT, 0x403, 2, 0
+0x0031, 
+    IDC_GROUNDHEIGHT, 0x403, 2, 0
+0x0032, 
+    IDC_GROUNDHEIGHT, 0x403, 2, 0
+0x0033, 
+    IDC_GROUNDHEIGHT, 0x403, 2, 0
+0x0034, 
+    IDC_GROUNDHEIGHT, 0x403, 2, 0
+0x0035, 
+    IDC_GROUNDHEIGHT, 0x403, 2, 0
+0x0036, 
+    IDC_GROUNDHEIGHT, 0x403, 2, 0
+0x0037, 
+    IDC_GROUNDHEIGHT, 0x403, 2, 0
+0x0038, 
+    IDC_GROUNDHEIGHT, 0x403, 2, 0
+0x0039, 
+    IDC_GROUNDHEIGHT, 0x403, 3, 0
+0x3031, "\000" 
+    0
+END
+
+IDD_NEWMAPCREATENEW DLGINIT
+BEGIN
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0030, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0031, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0032, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0033, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0034, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0035, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0036, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0037, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0038, 
+    0
+END
+
+IDD_NEWMAPBITMAP DLGINIT
+BEGIN
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0030, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0031, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0032, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0033, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0034, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0035, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0036, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0037, 
+    IDC_STARTINGHEIGHT, 0x403, 2, 0
+0x0038, 
+    0
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(65001)
+#endif //_WIN32
+#include "res\FinalSun.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
+#include "afxres.rc"         // Standardkomponenten
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
