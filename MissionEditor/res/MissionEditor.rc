@@ -49,7 +49,7 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(65001)\r\n"
     "#endif //_WIN32\r\n"
-    "#include ""res\\FinalSun.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
+    "#include ""FinalSun.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
     "#include ""afxres.rc""         // Standardkomponenten\r\n"
     "#endif\r\n"
     "\0"
@@ -74,19 +74,19 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDC_EDITOR_ARROW$(TS_MODE) CURSOR                  "res\\ts_arrow.cur"
+IDC_EDITOR_ARROW$(TS_MODE) CURSOR                  "ts_arrow.cur"
 
 #else
-IDC_EDITOR_ARROW        CURSOR                  "res\\ts_arrow.cur"
+IDC_EDITOR_ARROW        CURSOR                  "ts_arrow.cur"
 
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDC_EDITOR_ARROW$(RA2_MODE) CURSOR                  "res\\ra2_arrow.cur"
+IDC_EDITOR_ARROW$(RA2_MODE) CURSOR                  "ra2_arrow.cur"
 
 #else
-IDC_EDITOR_ARROW        CURSOR                  "res\\ra2_arrow.cur"
+IDC_EDITOR_ARROW        CURSOR                  "ra2_arrow.cur"
 
 #endif
 #endif
@@ -98,65 +98,65 @@ IDC_EDITOR_ARROW        CURSOR                  "res\\ra2_arrow.cur"
 
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDB_FLAG$(TS_MODE)      BITMAP                  "res\\wp_ts.bmp"
+IDB_FLAG$(TS_MODE)      BITMAP                  "wp_ts.bmp"
 
 #else
-IDB_FLAG                BITMAP                  "res\\wp_ts.bmp"
+IDB_FLAG                BITMAP                  "wp_ts.bmp"
 
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDB_CELLTAG$(TS_MODE)   BITMAP                  "res\\celltag_ts.bmp"
+IDB_CELLTAG$(TS_MODE)   BITMAP                  "celltag_ts.bmp"
 
 #else
-IDB_CELLTAG             BITMAP                  "res\\celltag_ts.bmp"
+IDB_CELLTAG             BITMAP                  "celltag_ts.bmp"
 
 #endif
 #endif
-IDB_LIGHTBULB           BITMAP                  "res\\litebulb.bmp"
+IDB_LIGHTBULB           BITMAP                  "litebulb.bmp"
 
-IDB_MV_ICONS            BITMAP                  "res\\bmp00005.bmp"
+IDB_MV_ICONS            BITMAP                  "bmp00005.bmp"
 
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDB_SCROLLCURSOR$(TS_MODE) BITMAP                  "res\\scrollcursor_ts.bmp"
+IDB_SCROLLCURSOR$(TS_MODE) BITMAP                  "scrollcursor_ts.bmp"
 
 #else
-IDB_SCROLLCURSOR        BITMAP                  "res\\scrollcursor_ts.bmp"
+IDB_SCROLLCURSOR        BITMAP                  "scrollcursor_ts.bmp"
 
 #endif
 #endif
-IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDR_MAINFRAME           BITMAP                  "Toolbar.bmp"
 
-IDR_TERRAINBAR          BITMAP                  "res\\terrainb.bmp"
+IDR_TERRAINBAR          BITMAP                  "terrainb.bmp"
 
-IDR_CLIFFBAR            BITMAP                  "res\\clifftoo.bmp"
+IDR_CLIFFBAR            BITMAP                  "clifftoo.bmp"
 
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDB_CELLTAG$(RA2_MODE)  BITMAP                  "res\\celltag_ra2.bmp"
+IDB_CELLTAG$(RA2_MODE)  BITMAP                  "celltag_ra2.bmp"
 
 #else
-IDB_CELLTAG             BITMAP                  "res\\celltag_ra2.bmp"
-
-#endif
-#endif
-#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDB_FLAG$(RA2_MODE)     BITMAP                  "res\\wp_ra2.bmp"
-
-#else
-IDB_FLAG                BITMAP                  "res\\wp_ra2.bmp"
+IDB_CELLTAG             BITMAP                  "celltag_ra2.bmp"
 
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDB_SCROLLCURSOR$(RA2_MODE) BITMAP                  "res\\scrollcursor_ra2.bmp"
+IDB_FLAG$(RA2_MODE)     BITMAP                  "wp_ra2.bmp"
 
 #else
-IDB_SCROLLCURSOR        BITMAP                  "res\\scrollcursor_ra2.bmp"
+IDB_FLAG                BITMAP                  "wp_ra2.bmp"
+
+#endif
+#endif
+#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDB_SCROLLCURSOR$(RA2_MODE) BITMAP                  "scrollcursor_ra2.bmp"
+
+#else
+IDB_SCROLLCURSOR        BITMAP                  "scrollcursor_ra2.bmp"
 
 #endif
 #endif
@@ -2639,28 +2639,28 @@ END
 // remains consistent on all systems.
 #if defined(APSTUDIO_INVOKED) || defined(YR_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDR_MAINFRAME$(YR_MODE) ICON                    "res\\FinalAlert2YR.ico"
+IDR_MAINFRAME$(YR_MODE) ICON                    "FinalAlert2YR.ico"
 
 #else
-IDR_MAINFRAME           ICON                    "res\\FinalAlert2YR.ico"
+IDR_MAINFRAME           ICON                    "FinalAlert2YR.ico"
 
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE_ICON)
 #if defined(APSTUDIO_INVOKED)
-IDR_MAINFRAME$(RA2_MODE_ICON) ICON                    "res\\FinalAlert2.ico"
+IDR_MAINFRAME$(RA2_MODE_ICON) ICON                    "FinalAlert2.ico"
 
 #else
-IDR_MAINFRAME           ICON                    "res\\FinalAlert2.ico"
+IDR_MAINFRAME           ICON                    "FinalAlert2.ico"
 
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDR_MAINFRAME$(TS_MODE) ICON                    "res\\FinalSun.ico"
+IDR_MAINFRAME$(TS_MODE) ICON                    "FinalSun.ico"
 
 #else
-IDR_MAINFRAME           ICON                    "res\\FinalSun.ico"
+IDR_MAINFRAME           ICON                    "FinalSun.ico"
 
 #endif
 #endif
@@ -2670,13 +2670,13 @@ IDR_MAINFRAME           ICON                    "res\\FinalSun.ico"
 // WAVE
 //
 
-IDR_WAVE1               WAVE                    "RES\\uacbopen.wav"
+IDR_WAVE1               WAVE                    "uacbopen.wav"
 
-IDR_WAVE2               WAVE                    "RES\\ugamclos.wav"
+IDR_WAVE2               WAVE                    "ugamclos.wav"
 
-IDR_WAVE3               WAVE                    "RES\\umenscol.wav"
+IDR_WAVE3               WAVE                    "umenscol.wav"
 
-IDR_WAVE4               WAVE                    "RES\\uqeue.wav"
+IDR_WAVE4               WAVE                    "uqeue.wav"
 
 
 
