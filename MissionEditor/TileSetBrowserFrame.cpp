@@ -70,6 +70,8 @@ BOOL CTileSetBrowserFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* p
 
 	m_bar.TranslateUI();
 	m_bar.ShowWindow(SW_SHOW);
+	m_bar.GetDlgItem(IDC_TERRAINBAR_GENERATOR)->EnableWindow(FALSE); // not yet ready, disable it
+
 	CRect rect;
 	GetClientRect(rect);
 
