@@ -495,6 +495,7 @@
     <ClCompile Include="FloatEdit.cpp" />
     <ClCompile Include="FrontCliffModifier.cpp" />
     <ClCompile Include="functions.cpp" />
+    <ClCompile Include="GlobalObjectPool.cpp" />
     <ClCompile Include="GlobalsDlg.cpp" />
     <ClCompile Include="Houses.cpp" />
     <ClCompile Include="ImportINI.cpp" />
@@ -621,6 +622,7 @@
     <ClInclude Include="ComboUInputDlg.h" />
     <ClInclude Include="CsfViewer.h" />
     <ClInclude Include="defines.h" />
+    <ClInclude Include="GlobalObjectPool.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="IniHelper.h" />
     <ClInclude Include="IniMega.h" />

@@ -28,6 +28,7 @@
 #include "mapdata.h"
 #include "variables.h"
 #include "functions.h"
+#include "GlobalObjectPool.h"
 
 extern ACTIONDATA AD;
 
@@ -79,11 +80,6 @@ void CTileSetBrowserView::OnInitialUpdate()
 
 
 }
-
-// for fast overlay drawing use IsoView´s overlay table
-extern PICDATA* ovrlpics[0xFF][max_ovrl_img];
-
-
 
 void CTileSetBrowserView::OnDraw(CDC* pDC)
 {
@@ -250,8 +246,9 @@ void CTileSetBrowserView::OnDraw(CDC* pDC)
 	else if (m_CurrentMode == 2) {
 		int i;
 
+		auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
 		for (i = 0; i < max_ovrl_img; i++) {
-			PICDATA* p = ovrlpics[m_currentOverlay][i];
+			const PICDATA* p = overlayCache.Read(m_currentOverlay, i);
 			if (p != NULL && p->pic != NULL) {
 
 				int curwidth = p->wMaxWidth;
@@ -780,8 +777,9 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 		}
 	} else if (m_CurrentMode == 2) {
 		int i;
+		auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
 		for (i = 0; i < max_ovrl_img; i++) {
-			PICDATA* p = ovrlpics[m_currentOverlay][i];
+			const PICDATA* p = overlayCache.Read(m_currentOverlay, i);
 			if (p != NULL && p->pic != NULL) {
 				int curwidth = m_tile_width;
 				int curheight = m_tile_height;
@@ -847,15 +845,15 @@ int CTileSetBrowserView::GetAddedHeight(DWORD dwID)
 
 void CTileSetBrowserView::SetOverlay(DWORD dwID)
 {
-	int k;
 	int need_pos = -1;
 	int need_width = 0;
 	int need_height = 0;
 	// m_tilecount=0;
 	int iovrlcount = 0;
 	BOOL bFound = FALSE;
-	for (k = 0; k < max_ovrl_img; k++) {
-		PICDATA* p = ovrlpics[dwID][k];
+	auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
+	for (int k = 0; k < max_ovrl_img; k++) {
+		const PICDATA* p = overlayCache.Read(dwID, k);
 		if (p != NULL && p->pic != NULL) {
 			bFound = TRUE;
 		}
@@ -863,22 +861,17 @@ void CTileSetBrowserView::SetOverlay(DWORD dwID)
 	if (!bFound) {
 		theApp.m_loading->LoadOverlayGraphic(rules["OverlayTypes"].Nth(dwID).second, dwID);
 		((CFinalSunDlg*)(theApp.m_pMainWnd))->m_view.m_isoview->UpdateOverlayPictures();
-		//p=ovrlpics[dwID][k];
 	}
-	for (k = 0; k < max_ovrl_img; k++) {
-		PICDATA* p = ovrlpics[dwID][k];
-		if (p == NULL || p->pic == NULL) {
-			//if(!p->bTried)
-			{
 
-			}
-		}
+	for (int k = 0; k < max_ovrl_img; k++) {
+		const PICDATA* p = overlayCache.Read(dwID, k);
 		if (p != NULL && p->pic != NULL) {
 			iovrlcount++;
 		}
 	}
-	for (k = 0; k < max_ovrl_img; k++) {
-		PICDATA* p = ovrlpics[dwID][k];
+
+	for (int k = 0; k < max_ovrl_img; k++) {
+		const PICDATA* p = overlayCache.Read(dwID, k);
 		if (p != NULL && p->pic != NULL) {
 			need_pos = k;
 			need_width = p->wMaxWidth;
@@ -887,15 +880,14 @@ void CTileSetBrowserView::SetOverlay(DWORD dwID)
 		}
 	}
 
-	if (need_pos < 0)
+	if (need_pos < 0) {
 		return;
+	}
 
 	((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = 0;
 	((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
 	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = 1;
 	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = 1;
-
-
 
 	m_CurrentMode = 2;
 	m_tile_width = 0;

@@ -29,6 +29,7 @@
 #include "variables.h"
 #include "functions.h"
 #include "inlines.h"
+#include "GlobalObjectPool.h"
 #include <string>
 
 extern ACTIONDATA AD;
@@ -103,9 +104,6 @@ BOOL CTerrainDlg::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dw
 {
 	return CWnd::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
 }
-
-// needed to find out if pic exists
-extern PICDATA* ovrlpics[0xFF][max_ovrl_img];
 
 void CTerrainDlg::handleTiles()
 {
@@ -201,6 +199,7 @@ void CTerrainDlg::Update()
 
 
 	int e = 0;
+	auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
 	auto const& types = rules["OverlayTypes"];
 	for (auto i = 0; i < types.Size(); i++) {
 		CString id = types.Nth(i).second;
@@ -213,7 +212,7 @@ void CTerrainDlg::Update()
 				int p;
 				BOOL bListIt = TRUE;
 				for (p = 0; p < max_ovrl_img; p++) {
-					if (ovrlpics[i][p] != NULL && ovrlpics[i][p]->pic != NULL) {
+					if (auto const pData = overlayCache.Read(i, p); pData && pData->pic) {
 						bListIt = TRUE;
 					}
 				}
