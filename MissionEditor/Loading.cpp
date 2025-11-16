@@ -803,7 +803,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	DDSURFACEDESC2 ddsd;
 	::memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
 	ddsd.dwSize = sizeof(DDSURFACEDESC2);
-	ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+	ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
 	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
 	ddsd.dwWidth = f_x;
 	ddsd.dwHeight = f_y;

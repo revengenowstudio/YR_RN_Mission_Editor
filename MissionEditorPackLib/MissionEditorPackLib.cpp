@@ -794,7 +794,7 @@ namespace FSunPackLib
 					ddsd.dwWidth = head.cx;
 					ddsd.dwHeight = head.cy;
 					ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH /*| DDSD_PIXELFORMAT*/;
-					ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+					ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
 
 					if (pdd->CreateSurface(&ddsd, &pdds[pic], NULL) != DD_OK)
 						return NULL;

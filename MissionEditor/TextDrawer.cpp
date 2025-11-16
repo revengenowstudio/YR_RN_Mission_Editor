@@ -47,7 +47,7 @@ TextDrawer::TextDrawer(IDirectDraw7* pDirectDraw, int fontSizeInPoints, COLORREF
 	DDSURFACEDESC2 desc = { 0 };
 	desc.dwSize = sizeof(desc);
 	desc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
-	desc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+	desc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
 	desc.dwWidth = extent.cx;
 	desc.dwHeight = extent.cy * 2;
 
