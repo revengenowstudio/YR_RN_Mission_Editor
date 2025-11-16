@@ -1,8 +1,8 @@
-# FinalAlert（尤里的复仇）任务编辑器 RN 特别版
+# FinalAlert（尤里的复仇）地图编辑器 RN 特别版
 
-本项目是《FinalAlert（YR）任务编辑器》 RN 团队二次定制版本，虽然名为"RN特别版"，但是也并非只支持RN这一个mod。我们在EA开源版地编的基础上，添加了一系列对地图开发者和mod开发者友好的功能。
+本项目是《FinalAlert（YR）地图编辑器》 RN 团队二次定制版本，虽然名为"RN特别版"，但是也并非只支持RN这一个Mod。我们在EA开源版地编的基础上，添加了一系列对地图开发者和Mod开发者友好的功能。
 
-我们的目标是使FA2的功能和性能和现代IDE靠拢，尽可能减轻地图开发者和mod开发者的地图开发工作负担
+我们的目标是使FA2的功能和性能和现代IDE靠拢，尽可能减轻地图开发者和Mod开发者的地图开发工作负担
 
 除此之外，本仓库已经大规模重构了EA版FA2的代码，引入了了C++20标准和单元测试等能提高地编开发效率和代码质量的开发工具，我们也为想给地编添加新功能的各路开发者提供了便利
 
@@ -13,7 +13,7 @@
 ## 下载和安装
 1. 访问本仓库[Releases页面](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases)即可下载最新版本
 2. 确保已经安装[VC++14 运行时](https://learn.microsoft.com/zh-cn/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version)
-3. 解压从Release下载的zip压缩包，运行`FinalAlert2YR.exe`，首次运行需要指定ra2或者mod资源的位置，运行程序后，在弹出的`基本选项`窗口中的`Language`选择`简体中文`，奠基`Red Alert 2 EXE`右侧的按钮，选择`ra2.mix`即可
+3. 解压从Release下载的zip压缩包，运行`FinalAlert2YR.exe`，首次运行需要指定ra2或者Mod资源的位置，运行程序后，在弹出的`基本选项`窗口中的`Language`选择`简体中文`，奠基`Red Alert 2 EXE`右侧的按钮，选择`ra2.mix`即可
 
   ![1763296772166](image/README/1763296772166.png)
 
@@ -28,10 +28,10 @@
 ## 正在进行的改动（Ongoing Changes）
 - 强化 INI 解析，顺序与游戏原生保持一致（如 Animation 类），尚未处理重复注册
 - 本地化：简体中文覆盖率 ≈ 95%
-- 项目（Project）体系：一键切换工作空间（INI 定义、编辑器个性化、素材），单编辑器即可适配多个 MOD
+- 项目（Project）体系：一键切换工作空间（INI 定义、编辑器个性化、素材），单编辑器即可适配多个 Mod
 - 全 D3D 渲染（* 低优先级，暂缓）
 - 支持读取XML格式的CSF内容
-- 同步 FA2sp & HDM 版主要特性
+- 同步 FA2SP & HDM 版主要特性
 
 ## 已完成的修复与改进（Fixes & Changes）
 
