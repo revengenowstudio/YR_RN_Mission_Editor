@@ -1,8 +1,10 @@
 # FinalAlert（尤里的复仇）任务编辑器 RN 特别版
 
-本项目是《FinalAlert（YR）任务编辑器》 RN 团队二次定制版本,虽然名为"RN特别版",但是也并非只支持RN这一个mod.我们在EA开源版地编的基础上,添加了一系列对地图开发者和mod开发者友好的功能.我们的目标是使FA2的功能和性能和现代IDE靠拢,尽可能减轻地图开发者和mod开发者的地图开发工作负担
+本项目是《FinalAlert（YR）任务编辑器》 RN 团队二次定制版本，虽然名为"RN特别版"，但是也并非只支持RN这一个mod。我们在EA开源版地编的基础上，添加了一系列对地图开发者和mod开发者友好的功能。
 
-除此之外,本仓库已经大规模重构了EA版FA2的代码,引入了了C++20标准和单元测试等能提高地编开发效率和代码质量的开发工具
+我们的目标是使FA2的功能和性能和现代IDE靠拢，尽可能减轻地图开发者和mod开发者的地图开发工作负担
+
+除此之外，本仓库已经大规模重构了EA版FA2的代码，引入了了C++20标准和单元测试等能提高地编开发效率和代码质量的开发工具，我们也为想给地编添加新功能的各路开发者提供了便利
 
 官方主版本号已统一升至 2.0，以表明它们能在现代操作系统下正常运行。
 
@@ -11,17 +13,17 @@
 ## 下载和安装
 - 访问本仓库[Releases页面](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases)即可下载最新版本
 - 确保已经安装[VC++14 运行时](https://learn.microsoft.com/zh-cn/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version)
-- 解压从Release下载的zip压缩包,运行`FinalAlert2YR.exe`,首次运行需要指定ra2或者mod资源的位置,运行程序后,在弹出的`基本选项`窗口中的`Language`选择`简体中文`,奠基`Red Alert 2 EXE`右侧的按钮,选择`ra2.mix`即可
+- 解压从Release下载的zip压缩包，运行`FinalAlert2YR.exe`，首次运行需要指定ra2或者mod资源的位置，运行程序后，在弹出的`基本选项`窗口中的`Language`选择`简体中文`，奠基`Red Alert 2 EXE`右侧的按钮，选择`ra2.mix`即可
 
   ![1763296772166](image/README/1763296772166.png)
 
-- 若需要修改`FinalAlert.ini`,FA2 RN版的`FinalAlert.ini`并不保存在exe所在目录下,二手位于用户目录 : `%LOCALAPPDATA%/FinalAlert 2/FinalAlert.ini`(贴到资源管理器的路径栏即可打开)
+- 若需要修改`FinalAlert.ini`，FA2 RN版的`FinalAlert.ini`并不保存在exe所在目录下，二手位于用户目录 : `%LOCALAPPDATA%/FinalAlert 2/FinalAlert.ini`(贴到资源管理器的路径栏即可打开)
 
 
 ## 本项目相较于FA2SP的开发优势
-- 基于EA开源版FA2代码库基础上进行开发,源码可见,无需像FA2SP那样需要依赖`syringe`注入器和高超的逆向知识才能开发新功能和修复FA2的众多bug
-- 在ZeroFanker的不谢努力下,本项目引入了现代的单元测试,重构了大部分可读性堪忧的旧代码并重构位64位程序,等现代的开发流程和现代的代码工具,这也意味着在此仓库的开发体验会比FA2SP优秀许多
-- 得益与现代编译器的优化和ZeroFanker的相关代码重构方面的努力,本项目的运行速度能比FA2SP更优
+- 基于EA开源版FA2代码库基础上进行开发，源码可见，无需像FA2SP那样需要依赖`syringe`注入器和高超的逆向知识才能开发新功能和修复FA2的众多bug
+- 在ZeroFanker的不谢努力下，本项目引入了现代的单元测试，重构了大部分可读性堪忧的旧代码并重构位64位程序，等现代的开发流程和现代的代码工具，这也意味着在此仓库的开发体验会比FA2SP优秀许多
+- 得益与现代编译器的优化和ZeroFanker的相关代码重构方面的努力，本项目的运行速度能比FA2SP更优
 
 ## 正在进行的改动（Ongoing Changes）
 - 强化 INI 解析，顺序与游戏原生保持一致（如 Animation 类），尚未处理重复注册
@@ -49,7 +51,7 @@
 ### Bug 修复
 1. 修复多次重新读取地图导致内存溢出的问题(ZeroFanker)
 2. 修复调整窗体大小或渲染区域超出屏幕时极易崩溃的问题(ZeroFanker)
-3. 修复抬升地图边缘时崩溃的问题(handama, ZeroFanker)
+3. 修复抬升地图边缘时崩溃的问题(handama， ZeroFanker)
 4. 修复步兵单元格显示位置与游戏内不一致
 5. 修复触发事件 23 不显示小队（handama）
 6. 修复小队脚本缺少脚本/路径点参数的问题(ZeroFanker)
@@ -62,7 +64,7 @@
 1. 地图渲染整体性能优化(ZeroFanker)
 2. 使用 ddraw7 接口替换老旧 ddraw4，提升绘制效率(ZeroFanker)
 3. 重写大部分 INI 读写逻辑，降低内存占用并加快解析速度(ZeroFanker)
-4. 撤销系统算法优化，减少卡顿与内存峰值(ZeroFanker,handama)
+4. 撤销系统算法优化，减少卡顿与内存峰值(ZeroFanker，handama)
 5. 引入 Google Test 单元测试，持续锁定性能回归(ZeroFanker)
 6. 正式提供 64 位构建（完整 x86_64 支持）(ZeroFanker)
 
@@ -109,7 +111,7 @@
 
 
 ## 手动打包发行（Creating a distribution）
-目前本仓库已Github Action流水线,可自动完成编译工作
+目前本仓库已Github Action流水线，可自动完成编译工作
 若改完代码仍然想手动发版，请先自行核对所有开源协议（含修改声明、版权追加等）。
 
 脚本一键打包：
@@ -146,9 +148,9 @@
   - 额外编码、开源流程梳理、新图标与素材
 
 - @ZeroFanker
-  - RN特别版地编核心开发,主持整个RN特别版地编的功能重构/开发/维护
+  - RN特别版地编核心开发，主持整个RN特别版地编的功能重构/开发/维护
 - @handama
-  - FA2SP HDM Edition 主创,基于 FA2SP 的逆向成果接手FA2SP的功能开发,给RN特别版地编提供了非常多idea和代码支持
+  - FA2SP HDM Edition 主创，基于 FA2SP 的逆向成果接手FA2SP的功能开发，给RN特别版地编提供了非常多idea和代码支持
 
 特别感谢 EA 官方批准开源。
 
