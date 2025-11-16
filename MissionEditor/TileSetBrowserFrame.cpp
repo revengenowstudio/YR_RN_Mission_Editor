@@ -64,7 +64,10 @@ void CTileSetBrowserFrame::PostNcDestroy()
 
 BOOL CTileSetBrowserFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 {
-	((CDialogBar*)&m_bar)->Create(this, IDD_TERRAINBAR, CBRS_TOP, 5);
+	if (!m_bar.CDialogBar::Create(this, IDD_TERRAINBAR, CBRS_TOP, 5)) {
+		return FALSE;
+	}
+
 	m_bar.TranslateUI();
 	m_bar.ShowWindow(SW_SHOW);
 	CRect r;
