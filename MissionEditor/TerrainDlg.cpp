@@ -79,6 +79,8 @@ void CTerrainDlg::TranslateUI()
 {
 	TranslateDlgItem(*this, IDD_TERRAINBAR_TG, "TerrainDlgTerrainGround");
 	TranslateDlgItem(*this, IDD_TERRAINBAR_OS, "TerrainDlgOverlaySpecial");
+	TranslateDlgItem(*this, IDC_TERRAINBAR_MANAGER, "TerrainDlgManagement");
+	TranslateDlgItem(*this, IDC_TERRAINBAR_GENERATOR, "TerrainDlgGenerator");
 }
 
 void CTerrainDlg::OnSelchangeTileset()
@@ -99,10 +101,7 @@ void CTerrainDlg::OnSelchangeTileset()
 
 BOOL CTerrainDlg::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
-
 	return CWnd::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
-
-
 }
 
 // needed to find out if pic exists
@@ -273,12 +272,12 @@ DWORD CTerrainDlg::GetTileID(DWORD dwTileSet, int iTile)
 
 void CTerrainDlg::OnSelchangeOverlay()
 {
-	CComboBox* Overlay;
-	Overlay = (CComboBox*)GetDlgItem(IDC_OVERLAY);
+	auto Overlay = reinterpret_cast<CComboBox*>(GetDlgItem(IDC_OVERLAY));
 	//TileSet->GetLBText(TileSet->GetCurSel(), currentTileSet);
 	int n = Overlay->GetCurSel();
-
-	if (n < 0) return;
+	if (n < 0) {
+		return;
+	}
 
 	int sel = Overlay->GetItemData(n);
 
