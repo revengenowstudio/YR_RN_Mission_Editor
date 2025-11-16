@@ -107,87 +107,91 @@ BOOL CTerrainDlg::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dw
 // needed to find out if pic exists
 extern PICDATA* ovrlpics[0xFF][max_ovrl_img];
 
+void CTerrainDlg::handleTiles()
+{
+	auto TileSet = reinterpret_cast<CComboBox*>(GetDlgItem(IDC_TILESET));
+
+	int tilecount = 0;
+	for (auto i = 0; i < 10000; i++) {
+		CString tset;
+		char c[50];
+		itoa(i, c, 10);
+		int e;
+		for (e = 0; e < 4 - strlen(c); e++) {
+			tset += "0";
+		}
+		tset += c;
+		CString sec = "TileSet";
+		sec += tset;
+
+		auto const pSec = tiles->TryGetSection(sec);
+
+		if (!pSec) {
+			break;
+		}
+		if (pSec->GetInteger("TilesInSet") == 0) {
+			continue;
+		}
+
+		CString string;
+		string = tset;
+		string += " (";
+		string += TranslateStringACP(pSec->GetString("SetName"));
+		string += ")";
+
+		bool bForced = false;
+		bool bIgnore = false;
+
+
+		// force yes
+		auto const& theaterType = Map->GetTheater();
+		auto tsetc = CString(std::to_string(atoi(tset)).c_str());
+
+		if (g_data["UseSet" + theaterType].HasValue(tsetc)) {
+			bForced = true;
+		}
+
+		// force no
+		if (g_data["IgnoreSet" + theaterType].HasValue(tsetc)) {
+			bIgnore = true;
+		}
+
+		auto legal = false;
+		do {
+			if (bForced) {
+				legal = true;
+				break;
+			}
+			if (bIgnore) {
+				break;
+			}
+			auto const& tile = (*tiledata)[tilecount];
+			if (tile.bMarbleMadness) {
+				break;
+			}
+			if (tile.bAllowToPlace) {
+				legal = true;
+			}
+		} while (0);
+
+		if (legal) {
+			TileSet->SetItemData(TileSet->AddString(string), i);
+		}
+
+		tilecount += tiles->GetInteger(sec, "TilesInSet");
+	}
+
+	TileSet->SetCurSel(0);
+	OnSelchangeTileset();
+}
+
 void CTerrainDlg::Update()
 {
-	CComboBox* TileSet;
-	TileSet = (CComboBox*)GetDlgItem(IDC_TILESET);
-
+	auto TileSet = reinterpret_cast<CComboBox*>(GetDlgItem(IDC_TILESET));
 	while (TileSet->DeleteString(0) != CB_ERR);
 
 	if (tiles) {
-		int i;
-		int tilecount = 0;
-		for (i = 0; i < 10000; i++) {
-			CString tset;
-			char c[50];
-			itoa(i, c, 10);
-			int e;
-			for (e = 0; e < 4 - strlen(c); e++) {
-				tset += "0";
-			}
-			tset += c;
-			CString sec = "TileSet";
-			sec += tset;
-
-			auto const pSec = tiles->TryGetSection(sec);
-
-			if (!pSec) {
-				break;
-			}
-			if (pSec->GetInteger("TilesInSet") == 0) {
-				continue;
-			}
-
-			CString string;
-			string = tset;
-			string += " (";
-			string += TranslateStringACP(pSec->GetString("SetName"));
-			string += ")";
-
-			bool bForced = false;
-			bool bIgnore = false;
-
-
-			// force yes
-			auto const& theaterType = Map->GetTheater();
-			auto tsetc = CString(std::to_string(atoi(tset)).c_str());
-
-			if (g_data["UseSet" + theaterType].HasValue(tsetc)) {
-				bForced = true;
-			}
-
-			// force no
-			if (g_data["IgnoreSet" + theaterType].HasValue(tsetc)) {
-				bIgnore = true;
-			}
-
-			auto legal = false;
-			do {
-				if (bForced) {
-					legal = true;
-					break;
-				}
-				if (bIgnore) {
-					break;
-				}
-				auto const& tile = (*tiledata)[tilecount];
-				if (tile.bMarbleMadness) {
-					break;
-				}
-				if (tile.bAllowToPlace) {
-					legal = true;
-				}
-			} while (0);
-
-			if (legal) {
-				TileSet->SetItemData(TileSet->AddString(string), i);
-			}
-
-			tilecount += tiles->GetInteger(sec, "TilesInSet");
-		}
-
-		TileSet->SetCurSel(0);
-		OnSelchangeTileset();
+		handleTiles();
 	}
 
 	CComboBox* Overlays;
