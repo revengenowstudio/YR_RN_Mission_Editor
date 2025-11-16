@@ -38,30 +38,23 @@ public:
 	void Update();
 	CTerrainDlg(CWnd* pParent = NULL);   // Standardkonstruktor
 
-// Dialogfelddaten
-	//{{AFX_DATA(CTerrainDlg)
 	enum { IDD = IDD_TERRAINBAR };
-	//}}AFX_DATA
+
 	void TranslateUI();
 
-// Überschreibungen
-	// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
-	//{{AFX_VIRTUAL(CTerrainDlg)
-public:
-	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext = NULL);
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
-	virtual void PostNcDestroy();
-	//}}AFX_VIRTUAL
+	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, 
+		DWORD dwStyle, const RECT& rect, CWnd* pParentWnd,
+		UINT nID, CCreateContext* pContext = NULL) override;
 
-// Implementierung
 protected:
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
+	virtual void PostNcDestroy() override;
 
-	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CTerrainDlg)
+	void handleTiles();
+
 	afx_msg void OnSelchangeTileset();
 	afx_msg void OnSelchangeOverlay();
-	//}}AFX_MSG
+
 	DECLARE_MESSAGE_MAP()
 };
 

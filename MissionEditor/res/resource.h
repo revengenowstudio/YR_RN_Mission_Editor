@@ -651,6 +651,8 @@
 #define IDC_NEWMAPCREATENEW_TXT_INIT_HEIGHT 1566
 #define IDC_NEWMAPIMPORT_TXT_DSC        1567
 #define IDC_NEWMAPSP_TXT_DSC            1568
+#define IDC_TERRAINBAR_MANAGER          1569
+#define IDC_TERRAINBAR_GENERATOR        1570
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003

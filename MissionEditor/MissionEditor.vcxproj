@@ -602,6 +602,7 @@
     <ResourceCompile Include="res\CreateNewMap.rc" />
     <ResourceCompile Include="res\MissionEditor.rc" />
     <ResourceCompile Include="res\SaveOptions.rc" />
+    <ResourceCompile Include="res\TerrainBar.rc" />
     <ResourceCompile Include="res\VersionInfo.rc" />
   </ItemGroup>
   <ItemGroup>
