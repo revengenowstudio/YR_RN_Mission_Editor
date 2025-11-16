@@ -1468,7 +1468,7 @@ CComPtr<IDirectDrawSurface7> BitmapToSurface(IDirectDraw7* pDD, const CBitmap& b
 	ZeroMemory(&desc, sizeof(desc));
 	desc.dwSize = sizeof(desc);
 	desc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
-	desc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+	desc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
 	desc.dwWidth = bm.bmWidth;
 	desc.dwHeight = bm.bmHeight;
 

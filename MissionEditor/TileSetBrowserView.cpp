@@ -604,7 +604,7 @@ LPDIRECTDRAWSURFACE7 CTileSetBrowserView::RenderTile(DWORD dwID)
 	memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
 	ddsd.dwSize = sizeof(DDSURFACEDESC2);
 	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
-	ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+	ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
 	int added_height = GetAddedHeight(dwID);
 	ddsd.dwHeight = (*tiledata)[dwID].rect.bottom - (*tiledata)[dwID].rect.top + added_height;
 	ddsd.dwWidth = (*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left;
