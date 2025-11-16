@@ -3204,7 +3204,7 @@ END
 LANGUAGE 9, 1
 #pragma code_page(65001)
 #endif //_WIN32
-#include "res\FinalSun.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
+#include "FinalSun.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
 #include "afxres.rc"         // Standardkomponenten
 #endif
 
