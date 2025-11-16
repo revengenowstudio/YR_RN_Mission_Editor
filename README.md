@@ -11,13 +11,13 @@
 
 
 ## 下载和安装
-- 访问本仓库[Releases页面](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases)即可下载最新版本
-- 确保已经安装[VC++14 运行时](https://learn.microsoft.com/zh-cn/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version)
-- 解压从Release下载的zip压缩包，运行`FinalAlert2YR.exe`，首次运行需要指定ra2或者mod资源的位置，运行程序后，在弹出的`基本选项`窗口中的`Language`选择`简体中文`，奠基`Red Alert 2 EXE`右侧的按钮，选择`ra2.mix`即可
+1. 访问本仓库[Releases页面](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases)即可下载最新版本
+2. 确保已经安装[VC++14 运行时](https://learn.microsoft.com/zh-cn/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version)
+3. 解压从Release下载的zip压缩包，运行`FinalAlert2YR.exe`，首次运行需要指定ra2或者mod资源的位置，运行程序后，在弹出的`基本选项`窗口中的`Language`选择`简体中文`，奠基`Red Alert 2 EXE`右侧的按钮，选择`ra2.mix`即可
 
   ![1763296772166](image/README/1763296772166.png)
 
-- 若需要修改`FinalAlert.ini`，FA2 RN版的`FinalAlert.ini`并不保存在exe所在目录下，二手位于用户目录 : `%LOCALAPPDATA%/FinalAlert 2/FinalAlert.ini`(贴到资源管理器的路径栏即可打开)
+4. 若需要修改`FinalAlert.ini`，FA2 RN版的`FinalAlert.ini`并不保存在exe所在目录下，二手位于用户目录 : `%LOCALAPPDATA%/FinalAlert 2/FinalAlert.ini`(贴到资源管理器的路径栏即可打开)
 
 
 ## 本项目相较于FA2SP的开发优势
