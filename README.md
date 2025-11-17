@@ -1,24 +1,23 @@
 # FinalAlert（尤里的复仇）地图编辑器 RN 特别版
 
-本项目是《FinalAlert（YR）地图编辑器》 RN 团队二次定制版本（下文以"FA2 RN版"、"RN特别版地编"或"本地编"代称），虽然名为"RN特别版"，但是也并非只支持RN这一个Mod。本地编在EA开源版地编的基础上，兼顾了软件开发维护者的开发体验和地图编辑器成品用户体验，目的在于打造一个易于维护的，功能友好的工具软件。
+本项目是《FinalAlert（YR）地图编辑器》 RN 团队二次开发强化版本（下文以"FR - Final Revenge"、"RN定制版地图编辑器"或"本编辑器"代称），虽然名为"RN特别版"，但是也期望可以支持除RN之外的Mod和原版游戏。
+本编辑器对EA开源程序进行了大量重构优化，对软件开发维护者的开发体验和地图编辑器用户的使用体验体验都有很大的提升，我们旨在于打造一个易于维护的、功能友好的工具软件。
 
-官方主版本号已统一升至 2.0，以表明它们能在现代操作系统下正常运行。
-
+本软件必须在现代64位操作系统下才能正常运行。
 
 ## 下载和安装
-1. 访问本仓库[Releases页面](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases)即可下载最新版本
+1. 访问本仓库[Releases页面](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases)即可获得最新发布版本
 2. 确保已经安装[VC++14 运行时](https://learn.microsoft.com/zh-cn/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version)
-3. 解压从Release下载的zip压缩包，运行`FinalAlert2YR.exe`，首次运行需要指定ra2或者Mod资源的位置，运行程序后，在弹出的`基本选项`窗口中的`Language`选择`简体中文`，奠基`Red Alert 2 EXE`右侧的按钮，选择`ra2.mix`即可
+3. 解压从Release下载的zip压缩包，运行`FinalAlert2YR.exe`，首次运行需要指定游戏本体或者Mod资源文件夹的位置，运行程序后，在弹出的`基本选项`窗口中的`Language`选择`简体中文`，再点击`Red Alert 2 EXE`右侧的按钮，选择`ra2.mix`即可设置默认资源路径
 
   ![1763296772166](image/README/1763296772166.png)
 
-4. 本地编的`FinalAlert.ini`并不保存在exe所在目录，而是位于 : `%LOCALAPPDATA%/FinalAlert 2/FinalAlert.ini`(此路径粘贴到资源管理器的路径栏即可打开)
-
 > [!NOTE]
-> 即便现阶段本地编功能不完整,我们仍不推荐手动修改`FinalAlert.ini`，未来本地编会有独立的窗口来便捷控制这个文件的配置。
+> 本编辑器的`FinalAlert.ini`用户个性化配置文件位于 `%LOCALAPPDATA%/FinalAlert 2/FinalAlert.ini` 可以通过文件资源管理器访问找到。
+> 现阶段本编辑器部分功能仍在完善中,但我们依然不推荐手动修改`FinalAlert.ini`用户个性化配置文件，未来本编辑器会提供独立的对话框供用户进行自定义。
 
 
-## 本项目相较于FA2SP的开发优势
+## 本编辑器与其它FA2扩展版本的对比
 - 基于EA开源版FA2代码库基础上进行开发，源码可见，无需像FA2SP那样需要依赖`syringe`注入器和高超的逆向知识才能开发新功能和修复FA2的众多bug
 - 在Zero-Fanker的不懈努力下，本项目引入了现代的单元测试，重构了大部分可读性堪忧的旧代码并重构位64位程序，等现代的开发流程和现代的代码工具，这也意味着在此仓库的开发体验会比FA2SP优秀许多
 - 得益与现代编译器的优化和Zero-Fanker的相关代码重构方面的努力，本地编有望获得比其它FA2原版扩展程序更好的性能和更稳定的体验。
