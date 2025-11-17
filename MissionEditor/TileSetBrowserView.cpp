@@ -666,81 +666,133 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 	GetScrollInfo(SB_VERT, &scrinfo);
 	point.y += scrinfo.nPos;
 
-
 	int max_r = r.right / m_tile_width;
 
 	if (max_r == 0) {
 		max_r = 1;
 	}
 
+	if (m_CurrentMode == PlaceMode::TileSet) {
+		onPlaceTileSet(point, max_r);
+	} else if (m_CurrentMode == PlaceMode::Overlay) {
+		onPlaceOverlay(point, max_r);
+	}
+
+	theApp.MainWindow()->m_view.m_isoview->SetForegroundWindow();
+	theApp.MainWindow()->m_view.m_isoview->SetFocus();
+
+	CScrollView::OnLButtonDown(nFlags, point);
+}
+
+void CTileSetBrowserView::onPlaceTileSet(const CPoint point, int max_r)
+{
 	int cur_y = 0;
 	int cur_x = 0;
 
 	int tile_width = m_tile_width;
 	int tile_height = m_tile_height;
 
-	if (m_CurrentMode == PlaceMode::TileSet) {
-		DWORD dwID = GetTileID(m_currentTileSet, 0);
+	DWORD dwID = GetTileID(m_currentTileSet, 0);
 
-
-
-		int i;
-		for (i = 0; i < m_tilecount; i++) {
-			int curwidth = (*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left;
-			int curheight = (*tiledata)[dwID].rect.bottom - (*tiledata)[dwID].rect.top;
-			curwidth = m_tile_width;
-			curheight = m_tile_height;
+	for (int i = 0; i < m_tilecount; i++) {
+		int curwidth = (*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left;
+		int curheight = (*tiledata)[dwID].rect.bottom - (*tiledata)[dwID].rect.top;
+		curwidth = m_tile_width;
+		curheight = m_tile_height;
 
 #ifdef RA2_MODE
-			if ((m_currentTileSet == 80 && Map->GetTheater() == "TEMPERATE") || (m_currentTileSet == 73 && Map->GetTheater() == "SNOW") || (m_currentTileSet == 101 && Map->GetTheater() == "URBAN")) {
+		auto const theater = Map->GetTheater();
+		if ((m_currentTileSet == 80 && theater == "TEMPERATE")
+			|| (m_currentTileSet == 73 && theater == "SNOW")
+			|| (m_currentTileSet == 101 && theater == "URBAN")) {
 
-				if (i == 10 || i == 15) {
-					dwID++; // don´t forget this
-					continue;
+			if (i == 10 || i == 15) {
+				dwID++; // don´t forget this
+				continue;
+			}
+		}
+#endif
+
+		int posaddedx = (m_tile_width - curwidth) / 2;
+		int posaddedy = (m_tile_height - curheight) / 2;
+
+		if (point.x > cur_x + posaddedx
+			&& point.y > cur_y + posaddedy
+			&& point.x < cur_x + tile_width - posaddedx
+			&& point.y < cur_y + tile_height - posaddedy) {
+			char c[50];
+			itoa(GetAddedHeight(dwID), c, 10);
+			OutputDebugString(c);
+
+			int oldmode = AD.mode;
+			int oldid = AD.type;
+
+			AD.mode = ACTIONMODE_SETTILE;
+			AD.type = dwID;
+			AD.data = 0;
+			AD.data2 = 0;
+			AD.data3 = 0;
+			AD.z_data = 0;
+
+			if (oldid > *tiledata_count) oldid = 0;
+
+			if (oldmode != ACTIONMODE_SETTILE || (*tiledata)[oldid].wTileSet != m_currentTileSet) {
+				theApp.MainWindow()->m_settingsbar.m_BrushSize = 0;
+				theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = 1;
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = 1;
+
+				for (auto const& [n, val] : g_data["StdBrushSize"]) {
+					if (tiles->GetSection("General").Exists(n)) {
+						int tset = tiles->GetInteger("General", n);
+						if (tset == m_currentTileSet) {
+							int bs = atoi(val);
+							theApp.MainWindow()->m_settingsbar.m_BrushSize = bs - 1;
+							theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
+							theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = bs;
+							theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = bs;
+						}
+					}
 				}
 			}
-#endif
+
+			RedrawWindow();
+			return;
+		}
+
+		cur_x += tile_width;
+		if (i % max_r == max_r - 1) {
+			cur_y += tile_height;
+			cur_x = 0;
+		}
+		dwID++;
+	}
+}
+
+void CTileSetBrowserView::onPlaceOverlay(const CPoint point, int max_r)
+{
+	int cur_y = 0;
+	int cur_x = 0;
+
+	int tile_width = m_tile_width;
+	int tile_height = m_tile_height;
+	auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
+
+	for (int i = 0; i < max_ovrl_img; i++) {
+		const PICDATA* p = overlayCache.Read(m_currentOverlay, i);
+		if (p != NULL && p->pic != NULL) {
+			int curwidth = m_tile_width;
+			int curheight = m_tile_height;
 
 			int posaddedx = (m_tile_width - curwidth) / 2;
 			int posaddedy = (m_tile_height - curheight) / 2;
 
 			if (point.x > cur_x + posaddedx && point.y > cur_y + posaddedy && point.x < cur_x + tile_width - posaddedx && point.y < cur_y + tile_height - posaddedy) {
-				char c[50];
-				itoa(GetAddedHeight(dwID), c, 10);
-				OutputDebugString(c);
-
-				int oldmode = AD.mode;
-				int oldid = AD.type;
-
-				AD.mode = ACTIONMODE_SETTILE;
-				AD.type = dwID;
-				AD.data = 0;
-				AD.data2 = 0;
-				AD.data3 = 0;
-				AD.z_data = 0;
-
-				if (oldid > *tiledata_count) oldid = 0;
-
-				if (oldmode != ACTIONMODE_SETTILE || (*tiledata)[oldid].wTileSet != m_currentTileSet) {
-					theApp.MainWindow()->m_settingsbar.m_BrushSize = 0;
-					theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
-					theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = 1;
-					theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = 1;
-
-					for (auto const& [n, val] : g_data["StdBrushSize"]) {
-						if (tiles->GetSection("General").Exists(n)) {
-							int tset = tiles->GetInteger("General", n);
-							if (tset == m_currentTileSet) {
-								int bs = atoi(val);
-								theApp.MainWindow()->m_settingsbar.m_BrushSize = bs - 1;
-								theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
-								theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = bs;
-								theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = bs;
-							}
-						}
-					}
-				}
-
+				AD.mode = ACTIONMODE_PLACE;
+				AD.type = 6;
+				AD.data = 33;
+				AD.data2 = m_currentOverlay;
+				AD.data3 = i;
 				RedrawWindow();
 				return;
 			}
@@ -750,48 +802,9 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 				cur_y += tile_height;
 				cur_x = 0;
 			}
-
-
-
-			dwID++;
 		}
-	} else if (m_CurrentMode == PlaceMode::Overlay) {
-		int i;
-		auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
-		for (i = 0; i < max_ovrl_img; i++) {
-			const PICDATA* p = overlayCache.Read(m_currentOverlay, i);
-			if (p != NULL && p->pic != NULL) {
-				int curwidth = m_tile_width;
-				int curheight = m_tile_height;
 
-				int posaddedx = (m_tile_width - curwidth) / 2;
-				int posaddedy = (m_tile_height - curheight) / 2;
-
-				if (point.x > cur_x + posaddedx && point.y > cur_y + posaddedy && point.x < cur_x + tile_width - posaddedx && point.y < cur_y + tile_height - posaddedy) {
-					AD.mode = ACTIONMODE_PLACE;
-					AD.type = 6;
-					AD.data = 33;
-					AD.data2 = m_currentOverlay;
-					AD.data3 = i;
-					RedrawWindow();
-					return;
-				}
-
-				cur_x += tile_width;
-				if (i % max_r == max_r - 1) {
-					cur_y += tile_height;
-					cur_x = 0;
-				}
-			}
-
-		}
 	}
-
-
-	theApp.MainWindow()->m_view.m_isoview->SetForegroundWindow();
-	theApp.MainWindow()->m_view.m_isoview->SetFocus();
-
-	CScrollView::OnLButtonDown(nFlags, point);
 }
 
 // calculates additional height added to the top of a tile if needed

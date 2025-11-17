@@ -65,6 +65,9 @@ protected:
 	void onDrawTileSetPlacement(CDC* pDC);
 	void onDrawOverlayPlacement(CDC* pDC);
 
+	void onPlaceTileSet(const CPoint point, int max_r);
+	void onPlaceOverlay(const CPoint point, int max_r);
+
 #ifdef _DEBUG
 	virtual void AssertValid() const override;
 	virtual void Dump(CDumpContext& dc) const override;
