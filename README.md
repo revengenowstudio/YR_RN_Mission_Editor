@@ -77,6 +77,7 @@
 
 ## 作者与致谢（Authors & Thanks）
 - Electronic Arts Inc.
+  - 特别感谢 Electronic Arcts 提供该程序的原始开源版本。 
 - Matthias Wagner  
   - FinalSun & FinalAlert2 原生作者  
   - Bug 修复、功能更新、构建系统升级
@@ -87,9 +88,6 @@
   - RN特别版地编核心开发，主持整个RN特别版地编的功能重构/开发/维护
 - @handama
   - FA2SP HDM Edition 主创，基于 FA2SP 的逆向成果接手FA2SP的功能开发，给RN特别版地编提供了非常多idea和代码支持
-
-特别感谢 EA 官方批准开源。
-
 
 ## 法律声明 
 《命令与征服：泰伯利亚之日》《命令与征服：红色警戒 2》《命令与征服：尤里的复仇》版权归属 Westwood Studios，Westwood 为 Electronic Arts 商标。  
