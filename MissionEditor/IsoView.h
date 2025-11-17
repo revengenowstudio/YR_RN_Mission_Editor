@@ -280,9 +280,8 @@ public:
 		y += 1;
 		//y-=f_y;
 
-		RECT r = GetScaledDisplayRect();
-		//GetDesktopWindow()->GetWindowRect(&r);
-		
+		RECT r;
+		GetDesktopWindow()->GetWindowRect(&r);
 		//GetWindowRect(&r);
 
 		if (width == -1 || height == -1) {

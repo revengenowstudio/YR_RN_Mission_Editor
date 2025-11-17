@@ -334,19 +334,8 @@ BOOL CIsoView::RecreateSurfaces()
 
 	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
 
-
-	DDSURFACEDESC2 ddsdBackAndTemp;
-	memcpy(&ddsdBackAndTemp, &ddsd, sizeof(DDSURFACEDESC2));
-
-	// make sure the ddsd size is big enough for heightest zoom-out;
-	if (theApp.m_Options.bHighResUI)
-	{
-		ddsdBackAndTemp.dwWidth *= theApp.m_Options.viewScaleSteps[0];
-		ddsdBackAndTemp.dwHeight *= theApp.m_Options.viewScaleSteps[0];
-	}
-
 	releaseIfExists(isoView.lpdsBack);
-	if (isoView.dd->CreateSurface(&ddsdBackAndTemp, &isoView.lpdsBack, NULL) != DD_OK) {
+	if (isoView.dd->CreateSurface(&ddsd, &isoView.lpdsBack, NULL) != DD_OK) {
 		errstream << "CreateSurface() failed\n";
 		errstream.flush();
 		ShowWindow(SW_HIDE);
@@ -376,7 +365,7 @@ BOOL CIsoView::RecreateSurfaces()
 		return FALSE;
 	}
 	releaseIfExists(isoView.lpdsTemp);
-	if (isoView.dd->CreateSurface(&ddsdBackAndTemp, &isoView.lpdsTemp, NULL) != DD_OK) {
+	if (isoView.dd->CreateSurface(&ddsd, &isoView.lpdsTemp, NULL) != DD_OK) {
 		errstream << "CreateSurface() failed\n";
 		errstream.flush();
 		ShowWindow(SW_HIDE);
@@ -6588,8 +6577,8 @@ void CIsoView::Zoom(CPoint& pt, float f)
 
 	auto oldViewScaleControl = m_viewScaleControl;
 	m_viewScaleControl *= (1.0f - f * theApp.m_Options.viewScaleSpeed);
-	if (m_viewScaleControl > 2.0f)
-		m_viewScaleControl = 2.0f;
+	if (m_viewScaleControl > 1.0f)
+		m_viewScaleControl = 1.0f;
 	if (m_viewScaleControl < 0.1f)
 		m_viewScaleControl = 0.1f;
 
