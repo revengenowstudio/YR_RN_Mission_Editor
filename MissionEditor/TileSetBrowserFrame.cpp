@@ -79,7 +79,7 @@ BOOL CTileSetBrowserFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* p
 
 	RecalcLayout(TRUE);
 
-	const CSize sizeTotal{ rect.right,  m_view.m_bottom_needed };
+	const CSize sizeTotal{ rect.right,  m_view.BottomNeeded() };
 	GetClientRect(&rect);
 
 	m_view.SetScrollSizes(MM_TEXT, sizeTotal);
@@ -102,7 +102,7 @@ void CTileSetBrowserFrame::RecalcLayout(BOOL bNotify)
 	m_view.GetClientRect(&rect);
 	CSize sizeTotal;
 	sizeTotal.cx = rect.right;
-	sizeTotal.cy = m_view.m_bottom_needed;
+	sizeTotal.cy = m_view.BottomNeeded();
 	m_view.SetScrollSizes(MM_TEXT, sizeTotal);
 
 	CFrameWnd::RecalcLayout(bNotify);

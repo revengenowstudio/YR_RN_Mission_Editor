@@ -677,8 +677,9 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 	RECT r;
 	GetClientRect(&r);
 
-	if (m_tilecount == 0)
+	if (m_tilecount == 0) {
 		return;
+	}
 
 	SCROLLINFO scrinfo;
 	scrinfo.cbSize = sizeof(SCROLLINFO);
@@ -691,7 +692,9 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 
 	int max_r = r.right / m_tile_width;
 
-	if (max_r == 0) max_r = 1;
+	if (max_r == 0) {
+		max_r = 1;
+	}
 
 	int cur_y = 0;
 	int cur_x = 0;
