@@ -371,9 +371,6 @@ BOOL CFinalSunApp::InitInstance()
 
 	opts.fMiniMapScale = optini["MiniMap"].GetFloat("Scale", opts.fMiniMapScale);
 
-	auto defaultViewSteps = CString(Join(",", opts.viewScaleSteps | std::views::transform([](auto v) {return std::to_string(v); })).c_str());
-	auto viewScaleStepsRange = SplitParams(userInterfaceSec.GetStringOr("ViewScaleSteps", defaultViewSteps)) | std::views::transform([](auto v) { return static_cast<float>(std::atof(v)); });
-	opts.viewScaleSteps.assign(viewScaleStepsRange.begin(), viewScaleStepsRange.end());
 	opts.viewScaleUseSteps = userInterfaceSec.GetBool("ViewScaleUseSteps", opts.viewScaleUseSteps);
 	opts.viewScaleSpeed = userInterfaceSec.GetFloat("ViewScaleSpeed", opts.viewScaleSpeed);
 
