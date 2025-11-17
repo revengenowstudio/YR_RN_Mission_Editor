@@ -51,6 +51,13 @@ public:
 	const auto CurrentTileSet() const { return m_currentTileSet; }
 
 protected:
+	enum class PlaceMode : unsigned
+	{
+		None,
+		TileSet,
+		Overlay,
+	};
+
 	virtual void OnDraw(CDC* pDC) override;      // Überschrieben zum Zeichnen dieser Ansicht
 	virtual void OnInitialUpdate() override;     // Zum ersten Mal nach der Konstruktion
 	virtual void PostNcDestroy() override;
@@ -65,7 +72,7 @@ protected:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	DECLARE_MESSAGE_MAP()
 
-	int m_CurrentMode;
+	PlaceMode m_CurrentMode;
 	int m_tilecount;
 	int m_tile_height;
 	int m_tile_width;
