@@ -50,7 +50,7 @@
 11. Voxel 单位光影同步；SHP 炮塔 & Voxel 炮塔/炮管坐标修正；附加炮塔显示修正(by @Zero-Fanker)
 
 ### Bug 修复
-1. 修复多次重新读取地图导致内存溢出的问题(by @Zero-Fanker)
+1. 修复编辑器运行状态下重复加载地图导致内存泄漏持续增长的问题(by @Zero-Fanker)
 2. 修复调整窗体大小或渲染区域超出屏幕时极易崩溃的问题(by @Zero-Fanker)
 3. 修复抬升地图边缘时崩溃的问题(by @handama，@Zero-Fanker)
 4. 修复步兵单元格显示位置与游戏内不一致
