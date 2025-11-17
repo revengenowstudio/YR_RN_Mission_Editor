@@ -3545,7 +3545,7 @@ void CFinalSunDlg::OnMarblemadness()
 	theApp.m_Options.bMarbleMadness = !theApp.m_Options.bMarbleMadness;
 
 	m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	m_view.m_browser->m_view.SetTileSet(m_view.m_browser->m_view.m_currentTileSet, TRUE);
+	m_view.m_browser->m_view.SetTileSet(m_view.m_browser->m_view.CurrentTileSet(), TRUE);
 }
 
 void CFinalSunDlg::CheckAvail(CCmdUI* pCmdUI)

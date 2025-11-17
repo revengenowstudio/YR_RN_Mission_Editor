@@ -56,15 +56,13 @@ static char THIS_FILE[] = __FILE__;
 #include <chrono>
 #include <algorithm>
 #include "TextDrawer.h"
+#include "GlobalObjectPool.h"
 
 /* -------- */
 
 /* Externals */
 extern ACTIONDATA AD;
 /* --------- */
-
-/* Overlay picture table (maximum overlay count=0xFF) */
-PICDATA* ovrlpics[0x1000][max_ovrl_img];
 
 // cancel draw flag
 BOOL bCancelDraw = FALSE;
@@ -3613,7 +3611,7 @@ void CIsoView::ReInitializeDDraw()
 	theApp.m_loading->InitPics();
 	theApp.m_loading->InitTMPs(&dlg.m_Progress);
 
-	memset(ovrlpics, 0, max_ovrl_img * 0xFF * sizeof(LPDIRECTDRAWSURFACE7));
+	GlobalObjectPool::Instance().Overlays().ResetAll();
 	//UpdateOverlayPictures(-1);
 	//Map->UpdateIniFile(MAPDATA_UPDATE_FROM_INI);
 	Map->UpdateBuildingInfo();
@@ -4272,24 +4270,20 @@ void CIsoView::UpdateStatusBar(int x, int y)
 
 void CIsoView::UpdateOverlayPictures(int id)
 {
+	auto& pool = GlobalObjectPool::Instance().Overlays();
+	// reset all
 	if (id < 0) {
-		memset(ovrlpics, 0, max_ovrl_img * 0xFF * sizeof(LPDIRECTDRAWSURFACE7));
-
-		int i, e;
-		for (i = 0; i < 0xFF; i++) {
-			for (e = 0; e < max_ovrl_img; e++) {
-				/*PICDATA& p=GetOverlayPic(i, e);
-				if(p.pic!=NULL)		ovrlpics[i][e]=&p;
-				else
-					ovrlpics[i][e]=NULL;*/
-				ovrlpics[i][e] = GetOverlayPic(i, e);
+		pool.ResetAll();
+		for (auto i = 0; i < 0xFF; i++) {
+			for (auto e = 0; e < max_ovrl_img; e++) {
+				pool.Set(i, e, GetOverlayPic(i, e));
 			}
 		}
-	} else {
-		int e;
-		for (e = 0; e < max_ovrl_img; e++) {
-			ovrlpics[id][e] = GetOverlayPic(id, e);
-		}
+		return;
+	}
+
+	for (int e = 0; e < max_ovrl_img; e++) {
+		pool.Set(id, e, GetOverlayPic(id, e));
 	}
 }
 
@@ -5676,8 +5670,9 @@ void CIsoView::DrawMap()
 				PICDATA pic;
 				pic.pic = NULL;
 
-				if (ovrlpics[m.overlay][m.overlaydata] != NULL) {
-					pic = *ovrlpics[m.overlay][m.overlaydata];
+				auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
+				if (auto pOverlayPic = overlayCache.Read(m.overlay, m.overlaydata)) {
+					pic = *pOverlayPic;
 				}
 
 
@@ -5688,8 +5683,8 @@ void CIsoView::DrawMap()
 							SetError("Loading graphics");
 							theApp.m_loading->LoadOverlayGraphic(overlayId, m.overlay);
 							UpdateOverlayPictures(m.overlay);
-							if (ovrlpics[m.overlay][m.overlaydata] != NULL) {
-								pic = *ovrlpics[m.overlay][m.overlaydata];
+							if (auto pOverlayPic = overlayCache.Read(m.overlay, m.overlaydata)) {
+								pic = *pOverlayPic;
 							}
 						}
 					}

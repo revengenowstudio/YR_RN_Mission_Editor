@@ -28,6 +28,7 @@
 #include "mapdata.h"
 #include "variables.h"
 #include "functions.h"
+#include "GlobalObjectPool.h"
 
 extern ACTIONDATA AD;
 
@@ -46,7 +47,7 @@ CTileSetBrowserView::CTileSetBrowserView()
 {
 	m_lpDDS = NULL;
 	m_bottom_needed = 1000;
-	m_CurrentMode = 0;
+	m_CurrentMode = PlaceMode::None;
 }
 
 CTileSetBrowserView::~CTileSetBrowserView()
@@ -80,39 +81,40 @@ void CTileSetBrowserView::OnInitialUpdate()
 
 }
 
-// for fast overlay drawing use IsoView´s overlay table
-extern PICDATA* ovrlpics[0xFF][max_ovrl_img];
-
-
-
 void CTileSetBrowserView::OnDraw(CDC* pDC)
 {
 	//ReleaseDC(pDC);
 
 
 
-	if (((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->b_IsLoading || ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->lpds == NULL || ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->lpds->IsLost() != DD_OK)
+	if (theApp.MainWindow()->m_view.m_isoview->b_IsLoading
+		|| theApp.MainWindow()->m_view.m_isoview->lpds == NULL
+		|| theApp.MainWindow()->m_view.m_isoview->lpds->IsLost() != DD_OK) {
 		return;
+	}
 
 
 	RECT r;
 	GetClientRect(&r);
 
-	if (tiledata == NULL || (*tiledata) == NULL)
+	if (tiledata == NULL || (*tiledata) == NULL) {
 		return;
+	}
 
-	if (m_tilecount == 0)
+	if (m_tilecount == 0) {
 		return;
-
-	if (m_tile_width == 0)
-		return; // just to make sure I never divide through 0 here...
+	}
+	// just to make sure I never divide through 0 here...
+	if (m_tile_width == 0) {
+		return;
+	}
 
 	int max_r = r.right / m_tile_width;
 
 	int cur_y = 0;
 	int cur_x = 0;
 
-	if (m_CurrentMode == 1) {
+	if (m_CurrentMode == PlaceMode::TileSet) {
 		DWORD dwID = GetTileID(m_currentTileSet, 0);
 
 		int i;
@@ -125,7 +127,9 @@ void CTileSetBrowserView::OnDraw(CDC* pDC)
 			//pDC.TextOut(cur_x, cur_y, c);
 
 #ifdef RA2_MODE
-			if ((m_currentTileSet == 80 && Map->GetTheater() == "TEMPERATE") || (m_currentTileSet == 73 && Map->GetTheater() == "SNOW") || (m_currentTileSet == 101 && Map->GetTheater() == "URBAN")) {
+			if ((m_currentTileSet == 80 && Map->GetTheater() == "TEMPERATE")
+				|| (m_currentTileSet == 73 && Map->GetTheater() == "SNOW")
+				|| (m_currentTileSet == 101 && Map->GetTheater() == "URBAN")) {
 				if (i == 10 || i == 15) {
 					dwID++; // don´t forget this here, too
 					continue;
@@ -133,11 +137,14 @@ void CTileSetBrowserView::OnDraw(CDC* pDC)
 			}
 #endif
 
-			if (!m_lpDDS[i]) continue;
+			if (!m_lpDDS[i]) {
+				continue;
+			}
 
 			RECT r;
 			GetClientRect(&r);
-			if (cur_y + curheight + (m_tile_height - curheight) / 2 >= this->GetScrollPos(SB_VERT) && cur_y <= GetScrollPos(SB_VERT) + r.bottom) {
+			if (cur_y + curheight + (m_tile_height - curheight) / 2 >= this->GetScrollPos(SB_VERT) 
+				&& cur_y <= GetScrollPos(SB_VERT) + r.bottom) {
 
 				HDC hDC = NULL;
 				m_lpDDS[i]->GetDC(&hDC);
@@ -152,7 +159,10 @@ void CTileSetBrowserView::OnDraw(CDC* pDC)
 				m_lpDDS[i]->ReleaseDC(hDC);
 
 
-				BitBlt(pDC->GetSafeHdc(), cur_x + (m_tile_width - curwidth) / 2, cur_y + (m_tile_height - curheight) / 2, curwidth, curheight, hTmpDC, 0, 0, SRCCOPY);
+				BitBlt(pDC->GetSafeHdc(), 
+					cur_x + (m_tile_width - curwidth) / 2,
+					cur_y + (m_tile_height - curheight) / 2,
+					curwidth, curheight, hTmpDC, 0, 0, SRCCOPY);
 
 
 				DeleteDC(hTmpDC);
@@ -168,7 +178,8 @@ void CTileSetBrowserView::OnDraw(CDC* pDC)
 
 					pDC->SetBkMode(TRANSPARENT);
 					pDC->SelectObject(&b);
-					pDC->Rectangle(cur_x + 2, cur_y + 2, cur_x + m_tile_width - 2, cur_y + m_tile_height - 2);
+					pDC->Rectangle(cur_x + 2, cur_y + 2, 
+						cur_x + m_tile_width - 2, cur_y + m_tile_height - 2);
 
 					pDC->SelectObject(old);
 				}
@@ -185,73 +196,12 @@ void CTileSetBrowserView::OnDraw(CDC* pDC)
 
 			dwID++;
 		}
-	}
-#ifndef NOSURFACES
-	else if (m_CurrentMode == 2) {
+	} else if (m_CurrentMode == PlaceMode::Overlay) {
 		int i;
 
+		auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
 		for (i = 0; i < max_ovrl_img; i++) {
-			PICDATA* p = ovrlpics[m_currentOverlay][i];
-			if (p != NULL && p->pic != NULL) {
-
-				DDSURFACEDESC2 desc;
-				memset(&desc, 0, sizeof(DDSURFACEDESC2));
-				desc.dwSize = sizeof(DDSURFACEDESC2);
-				desc.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-				p->pic->GetSurfaceDesc(&desc);
-
-				int curwidth = desc.dwWidth;
-				int curheight = desc.dwHeight;
-
-				HDC hDC = NULL;
-				p->pic->GetDC(&hDC);
-
-
-				HDC hTmpDC = CreateCompatibleDC(hDC);
-				HBITMAP hBitmap = CreateCompatibleBitmap(hDC, curwidth, curheight);
-				SelectObject(hTmpDC, hBitmap);
-
-				BitBlt(hTmpDC, 0, 0, curwidth, curheight, hDC, 0, 0, SRCCOPY);
-
-				p->pic->ReleaseDC(hDC);
-
-
-				BitBlt(pDC->GetSafeHdc(), cur_x + (m_tile_width - curwidth) / 2, cur_y + (m_tile_height - curheight) / 2, curwidth, curheight, hTmpDC, 0, 0, SRCCOPY);
-
-
-				DeleteDC(hTmpDC);
-				DeleteObject(hBitmap);
-
-				if (AD.mode == ACTIONMODE_PLACE && AD.data2 == m_currentOverlay && AD.data3 == i && AD.data == 33 && AD.type == 6) {
-					CPen p;
-					CBrush b;
-					p.CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
-					b.CreateStockObject(NULL_BRUSH);
-
-					CPen* old = pDC->SelectObject(&p);
-
-					pDC->SetBkMode(TRANSPARENT);
-					pDC->SelectObject(&b);
-					pDC->Rectangle(cur_x + 2, cur_y + 2, cur_x + m_tile_width - 2, cur_y + m_tile_height - 2);
-
-					pDC->SelectObject(old);
-				}
-
-				cur_x += m_tile_width;
-				if (max_r == 0) max_r = 1;
-				if (i % max_r == max_r - 1) {
-					cur_y += m_tile_height;
-					cur_x = 0;
-				}
-			}
-		}
-	}
-#else
-	else if (m_CurrentMode == 2) {
-		int i;
-
-		for (i = 0; i < max_ovrl_img; i++) {
-			PICDATA* p = ovrlpics[m_currentOverlay][i];
+			const PICDATA* p = overlayCache.Read(m_currentOverlay, i);
 			if (p != NULL && p->pic != NULL) {
 
 				int curwidth = p->wMaxWidth;
@@ -324,9 +274,6 @@ void CTileSetBrowserView::OnDraw(CDC* pDC)
 			}
 		}
 	}
-#endif
-
-
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -391,7 +338,7 @@ DWORD CTileSetBrowserView::GetTileID(DWORD dwTileSet, DWORD dwType)
 void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 {
 	m_currentTileSet = dwTileSet;
-	m_CurrentMode = 1;
+	m_CurrentMode = PlaceMode::TileSet;
 
 	char currentTileSet[50];
 	itoa(m_currentTileSet, currentTileSet, 10);
@@ -418,20 +365,20 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 			AD.data2 = 0;
 			AD.z_data = 0;
 
-			((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = 0;
-			((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
-			((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = 1;
-			((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = 1;
+			theApp.MainWindow()->m_settingsbar.m_BrushSize = 0;
+			theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
+			theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = 1;
+			theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = 1;
 
 			for (auto const& [n, val] : g_data["StdBrushSize"]) {
 				if (tiles->GetSection("General").Exists(n)) {
 					int tset = tiles->GetInteger("General", n);
 					if (tset == m_currentTileSet) {
 						int bs = atoi(val);
-						((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = bs - 1;
-						((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
-						((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = bs;
-						((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = bs;
+						theApp.MainWindow()->m_settingsbar.m_BrushSize = bs - 1;
+						theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
+						theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = bs;
+						theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = bs;
 					}
 				}
 			}
@@ -481,8 +428,8 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 
 	RedrawWindow();
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->SetForegroundWindow();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->SetFocus();
+	theApp.MainWindow()->m_view.m_isoview->SetForegroundWindow();
+	theApp.MainWindow()->m_view.m_isoview->SetFocus();
 
 	//DrawIt();
 }
@@ -598,7 +545,7 @@ LPDIRECTDRAWSURFACE7 CTileSetBrowserView::RenderTile(DWORD dwID)
 	}
 
 	LPDIRECTDRAWSURFACE7 lpdds = NULL;
-	LPDIRECTDRAW7 lpdd = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd;
+	LPDIRECTDRAW7 lpdd = theApp.MainWindow()->m_view.m_isoview->dd;
 
 	DDSURFACEDESC2 ddsd;
 	memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
@@ -680,8 +627,9 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 	RECT r;
 	GetClientRect(&r);
 
-	if (m_tilecount == 0)
+	if (m_tilecount == 0) {
 		return;
+	}
 
 	SCROLLINFO scrinfo;
 	scrinfo.cbSize = sizeof(SCROLLINFO);
@@ -694,7 +642,9 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 
 	int max_r = r.right / m_tile_width;
 
-	if (max_r == 0) max_r = 1;
+	if (max_r == 0) {
+		max_r = 1;
+	}
 
 	int cur_y = 0;
 	int cur_x = 0;
@@ -702,7 +652,7 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 	int tile_width = m_tile_width;
 	int tile_height = m_tile_height;
 
-	if (m_CurrentMode == 1) {
+	if (m_CurrentMode == PlaceMode::TileSet) {
 		DWORD dwID = GetTileID(m_currentTileSet, 0);
 
 
@@ -745,20 +695,20 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 				if (oldid > *tiledata_count) oldid = 0;
 
 				if (oldmode != ACTIONMODE_SETTILE || (*tiledata)[oldid].wTileSet != m_currentTileSet) {
-					((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = 0;
-					((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
-					((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = 1;
-					((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = 1;
+					theApp.MainWindow()->m_settingsbar.m_BrushSize = 0;
+					theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
+					theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = 1;
+					theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = 1;
 
 					for (auto const& [n, val] : g_data["StdBrushSize"]) {
 						if (tiles->GetSection("General").Exists(n)) {
 							int tset = tiles->GetInteger("General", n);
 							if (tset == m_currentTileSet) {
 								int bs = atoi(val);
-								((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = bs - 1;
-								((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
-								((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = bs;
-								((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = bs;
+								theApp.MainWindow()->m_settingsbar.m_BrushSize = bs - 1;
+								theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
+								theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = bs;
+								theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = bs;
 							}
 						}
 					}
@@ -778,10 +728,11 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 
 			dwID++;
 		}
-	} else if (m_CurrentMode == 2) {
+	} else if (m_CurrentMode == PlaceMode::Overlay) {
 		int i;
+		auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
 		for (i = 0; i < max_ovrl_img; i++) {
-			PICDATA* p = ovrlpics[m_currentOverlay][i];
+			const PICDATA* p = overlayCache.Read(m_currentOverlay, i);
 			if (p != NULL && p->pic != NULL) {
 				int curwidth = m_tile_width;
 				int curheight = m_tile_height;
@@ -810,8 +761,8 @@ void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->SetForegroundWindow();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->SetFocus();
+	theApp.MainWindow()->m_view.m_isoview->SetForegroundWindow();
+	theApp.MainWindow()->m_view.m_isoview->SetFocus();
 
 	CScrollView::OnLButtonDown(nFlags, point);
 }
@@ -847,15 +798,15 @@ int CTileSetBrowserView::GetAddedHeight(DWORD dwID)
 
 void CTileSetBrowserView::SetOverlay(DWORD dwID)
 {
-	int k;
 	int need_pos = -1;
 	int need_width = 0;
 	int need_height = 0;
 	// m_tilecount=0;
 	int iovrlcount = 0;
 	BOOL bFound = FALSE;
-	for (k = 0; k < max_ovrl_img; k++) {
-		PICDATA* p = ovrlpics[dwID][k];
+	auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
+	for (int k = 0; k < max_ovrl_img; k++) {
+		const PICDATA* p = overlayCache.Read(dwID, k);
 		if (p != NULL && p->pic != NULL) {
 			bFound = TRUE;
 		}
@@ -863,22 +814,17 @@ void CTileSetBrowserView::SetOverlay(DWORD dwID)
 	if (!bFound) {
 		theApp.m_loading->LoadOverlayGraphic(rules["OverlayTypes"].Nth(dwID).second, dwID);
 		((CFinalSunDlg*)(theApp.m_pMainWnd))->m_view.m_isoview->UpdateOverlayPictures();
-		//p=ovrlpics[dwID][k];
 	}
-	for (k = 0; k < max_ovrl_img; k++) {
-		PICDATA* p = ovrlpics[dwID][k];
-		if (p == NULL || p->pic == NULL) {
-			//if(!p->bTried)
-			{
 
-			}
-		}
+	for (int k = 0; k < max_ovrl_img; k++) {
+		const PICDATA* p = overlayCache.Read(dwID, k);
 		if (p != NULL && p->pic != NULL) {
 			iovrlcount++;
 		}
 	}
-	for (k = 0; k < max_ovrl_img; k++) {
-		PICDATA* p = ovrlpics[dwID][k];
+
+	for (int k = 0; k < max_ovrl_img; k++) {
+		const PICDATA* p = overlayCache.Read(dwID, k);
 		if (p != NULL && p->pic != NULL) {
 			need_pos = k;
 			need_width = p->wMaxWidth;
@@ -887,17 +833,16 @@ void CTileSetBrowserView::SetOverlay(DWORD dwID)
 		}
 	}
 
-	if (need_pos < 0)
+	if (need_pos < 0) {
 		return;
+	}
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = 0;
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = 1;
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = 1;
+	theApp.MainWindow()->m_settingsbar.m_BrushSize = 0;
+	theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
+	theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = 1;
+	theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = 1;
 
-
-
-	m_CurrentMode = 2;
+	m_CurrentMode = PlaceMode::Overlay;
 	m_tile_width = 0;
 	m_tile_height = 0;
 	m_currentOverlay = dwID;
@@ -917,81 +862,10 @@ void CTileSetBrowserView::SetOverlay(DWORD dwID)
 	GetParentFrame()->RecalcLayout(TRUE);
 	RedrawWindow();
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->SetForegroundWindow();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->SetFocus();
+	theApp.MainWindow()->m_view.m_isoview->SetForegroundWindow();
+	theApp.MainWindow()->m_view.m_isoview->SetFocus();
 
 }
-
-#ifdef IGNORETHIS
-LPDIRECTDRAWSURFACE7 CTileSetBrowserView::RenderOverlay(DWORD dwType, DWORD dwData)
-{
-	LPDIRECTDRAWSURFACE7 lpdds = NULL;
-	LPDIRECTDRAW4 lpdd = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd;
-
-	DDSURFACEDESC2 ddsd;
-	memset(&ddsd, 0, sizeof(DDSURFACEDESC2));
-	ddsd.dwSize = sizeof(DDSURFACEDESC2);
-	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
-	ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
-	int added_height = GetAddedHeight(dwID);
-	ddsd.dwHeight =//(*tiledata)[dwID].rect.bottom-(*tiledata)[dwID].rect.top+added_height;
-		ddsd.dwWidth = (*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left;
-	if (lpdd->CreateSurface(&ddsd, &lpdds, NULL) != DD_OK) {
-		return NULL;
-	}
-
-	DDBLTFX ddfx;
-	memset(&ddfx, 0, sizeof(DDBLTFX));
-	ddfx.dwSize = sizeof(DDBLTFX);
-	lpdds->Blt(NULL, NULL, NULL, DDBLT_COLORFILL, &ddfx);
-
-
-	int y_added = ddsd.dwHeight - ((*tiledata)[dwID].cx * f_y / 2 + (*tiledata)[dwID].cy * f_y / 2);
-
-	int i, e, p = 0;;
-	for (i = 0; i < (*tiledata)[dwID].cx; i++) {
-		for (e = 0; e < (*tiledata)[dwID].cy; e++) {
-			int drawx = e * f_x / 2 - i * f_x / 2 - (*tiledata)[dwID].rect.left;
-			int drawy = e * f_y / 2 + i * f_y / 2 - (*tiledata)[dwID].rect.top;
-
-			drawx += (*tiledata)[dwID].tiles[p].sX;
-			drawy += added_height + (*tiledata)[dwID].tiles[p].sY - (*tiledata)[dwID].tiles[p].bZHeight * f_y / 2;
-			//drawy+=y_added;
-
-			if ((*tiledata)[dwID].tiles[p].pic) {
-				RECT dest;
-				dest.left = drawx;
-				dest.top = drawy;
-				dest.right = drawx + (*tiledata)[dwID].tiles[p].wWidth;
-				dest.bottom = drawy + (*tiledata)[dwID].tiles[p].wHeight;
-				DDBLTFX fx;
-				memset(&fx, 0, sizeof(DDBLTFX));
-				fx.dwSize = sizeof(DDBLTFX);
-
-
-				DDSURFACEDESC2 ddsd;
-				ZeroMemory(&ddsd, sizeof(ddsd));
-				ddsd.dwSize = sizeof(DDSURFACEDESC2);
-				ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
-
-				lpdds->GetSurfaceDesc(&ddsd);
-
-				lpdds->Lock(NULL, &ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT | DDLOCK_NOSYSLOCK, NULL);
-
-				BlitTerrainTSB(ddsd.lpSurface, drawx, drawy, 0, 0, ddsd.lPitch, ddsd.dwWidth, ddsd.dwHeight, (*tiledata)[dwID].tiles[p]);
-				lpdds->Unlock(NULL);
-
-
-			}
-
-			p++;
-		}
-	}
-
-	SetSurfaceColorKey(lpdds, -1);
-}
-
-#endif
 
 void CTileSetBrowserView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {

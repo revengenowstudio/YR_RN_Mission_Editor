@@ -37,6 +37,7 @@
 #include "ddeml.h"
 #include "loading.h"
 
+class CFinalSunDlg;
 static auto constexpr RecentFilesSlots = 10;
 
 struct OPTIONS {
@@ -94,7 +95,7 @@ public:
 	{
 		return m_u8LogFileName;
 	}
-
+	CFinalSunDlg* MainWindow() { return reinterpret_cast<CFinalSunDlg*>(m_pMainWnd); }
 
 	// Überladungen
 		// Vom Klassenassistenten generierte Überladungen virtueller Funktionen
