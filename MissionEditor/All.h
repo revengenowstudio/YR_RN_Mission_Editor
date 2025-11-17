@@ -49,24 +49,24 @@ protected:
 
 	afx_msg void OnSelchangeSections();
 	afx_msg void OnChangeValue();
-	afx_msg void OnSelchangeKeys();
+	//afx_msg void OnSelchangeKeys();
 	afx_msg void OnUpdateValue();
 	afx_msg void OnAddsection();
 	afx_msg void OnDeletesection();
-	afx_msg void OnDeletekey();
-	afx_msg void OnAddkey();
+	//afx_msg void OnDeletekey();
+	//afx_msg void OnAddkey();
 	afx_msg void OnInisection();
 
 	DECLARE_MESSAGE_MAP()
 
-	CEdit	m_Value;
-	CListBox	m_Keys;
-	CButton	m_IniSection;
-	CButton	m_DeleteSection;
-	CButton	m_DeleteKey;
-	CButton	m_AddSection;
-	CButton	m_AddKey;
-	CComboBox	m_Sections;
+	CRichEditCtrl	m_Value;
+	CListBox		m_Sections;
+	CButton			m_IniSection;
+	CButton			m_AddSection;
+	CButton			m_DeleteSection;
+	//CButton	m_DeleteKey;
+	//CButton	m_AddKey;
+	//CComboBox	m_Sections;
 };
 
 //{{AFX_INSERT_LOCATION}}
