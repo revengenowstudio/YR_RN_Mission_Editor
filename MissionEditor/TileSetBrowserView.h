@@ -62,6 +62,9 @@ protected:
 	virtual void OnInitialUpdate() override;     // Zum ersten Mal nach der Konstruktion
 	virtual void PostNcDestroy() override;
 
+	void onDrawTileSetPlacement(CDC* pDC);
+	void onDrawOverlayPlacement(CDC* pDC);
+
 #ifdef _DEBUG
 	virtual void AssertValid() const override;
 	virtual void Dump(CDumpContext& dc) const override;

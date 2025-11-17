@@ -84,18 +84,11 @@ void CTileSetBrowserView::OnInitialUpdate()
 void CTileSetBrowserView::OnDraw(CDC* pDC)
 {
 	//ReleaseDC(pDC);
-
-
-
 	if (theApp.MainWindow()->m_view.m_isoview->b_IsLoading
 		|| theApp.MainWindow()->m_view.m_isoview->lpds == NULL
 		|| theApp.MainWindow()->m_view.m_isoview->lpds->IsLost() != DD_OK) {
 		return;
 	}
-
-
-	RECT r;
-	GetClientRect(&r);
 
 	if (tiledata == NULL || (*tiledata) == NULL) {
 		return;
@@ -109,168 +102,199 @@ void CTileSetBrowserView::OnDraw(CDC* pDC)
 		return;
 	}
 
-	int max_r = r.right / m_tile_width;
+	if (m_CurrentMode == PlaceMode::TileSet) {
+		onDrawTileSetPlacement(pDC);
+		return;
+	}
+	
+	if (m_CurrentMode == PlaceMode::Overlay) {
+		onDrawOverlayPlacement(pDC);
+		return;
+	}
+}
 
+void CTileSetBrowserView::onDrawTileSetPlacement(CDC* pDC)
+{
+	DWORD dwID = GetTileID(m_currentTileSet, 0);
+
+	int i;
 	int cur_y = 0;
 	int cur_x = 0;
 
-	if (m_CurrentMode == PlaceMode::TileSet) {
-		DWORD dwID = GetTileID(m_currentTileSet, 0);
+	RECT r;
+	GetClientRect(&r);
 
-		int i;
-		for (i = 0; i < m_tilecount; i++) {
-			char c[50];
-			itoa(i, c, 10);
+	int max_r = r.right / m_tile_width;
 
-			int curwidth = (*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left;
-			int curheight = GetAddedHeight(dwID) + (*tiledata)[dwID].rect.bottom - (*tiledata)[dwID].rect.top;
-			//pDC.TextOut(cur_x, cur_y, c);
+	for (i = 0; i < m_tilecount; i++) {
+		char c[50];
+		itoa(i, c, 10);
+
+		int curwidth = (*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left;
+		int curheight = GetAddedHeight(dwID) + (*tiledata)[dwID].rect.bottom - (*tiledata)[dwID].rect.top;
+		//pDC.TextOut(cur_x, cur_y, c);
 
 #ifdef RA2_MODE
-			if ((m_currentTileSet == 80 && Map->GetTheater() == "TEMPERATE")
-				|| (m_currentTileSet == 73 && Map->GetTheater() == "SNOW")
-				|| (m_currentTileSet == 101 && Map->GetTheater() == "URBAN")) {
-				if (i == 10 || i == 15) {
-					dwID++; // don´t forget this here, too
-					continue;
-				}
+		if ((m_currentTileSet == 80 && Map->GetTheater() == "TEMPERATE")
+			|| (m_currentTileSet == 73 && Map->GetTheater() == "SNOW")
+			|| (m_currentTileSet == 101 && Map->GetTheater() == "URBAN")) {
+			if (i == 10 || i == 15) {
+				dwID++; // don´t forget this here, too
+				continue;
 			}
+		}
 #endif
 
-			if (!m_lpDDS[i]) {
+		if (!m_lpDDS[i]) {
+			continue;
+		}
+
+		RECT r;
+		GetClientRect(&r);
+		if (cur_y + curheight + (m_tile_height - curheight) / 2 >= this->GetScrollPos(SB_VERT)
+			&& cur_y <= GetScrollPos(SB_VERT) + r.bottom) {
+
+			HDC hDC = NULL;
+			m_lpDDS[i]->GetDC(&hDC);
+
+
+			HDC hTmpDC = CreateCompatibleDC(hDC);
+			HBITMAP hBitmap = CreateCompatibleBitmap(hDC, curwidth, curheight);
+			SelectObject(hTmpDC, hBitmap);
+
+			BitBlt(hTmpDC, 0, 0, curwidth, curheight, hDC, 0, 0, SRCCOPY);
+
+			m_lpDDS[i]->ReleaseDC(hDC);
+
+
+			BitBlt(pDC->GetSafeHdc(),
+				cur_x + (m_tile_width - curwidth) / 2,
+				cur_y + (m_tile_height - curheight) / 2,
+				curwidth, curheight, hTmpDC, 0, 0, SRCCOPY);
+
+
+			DeleteDC(hTmpDC);
+			DeleteObject(hBitmap);
+
+			if (AD.mode == ACTIONMODE_SETTILE && AD.type == dwID) {
+				CPen p;
+				CBrush b;
+				p.CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
+				b.CreateStockObject(NULL_BRUSH);
+
+				CPen* old = pDC->SelectObject(&p);
+
+				pDC->SetBkMode(TRANSPARENT);
+				pDC->SelectObject(&b);
+				pDC->Rectangle(cur_x + 2, cur_y + 2,
+					cur_x + m_tile_width - 2, cur_y + m_tile_height - 2);
+
+				pDC->SelectObject(old);
+			}
+		}
+
+		cur_x += m_tile_width;
+		if (max_r == 0) max_r = 1;
+		if (i % max_r == max_r - 1) {
+			cur_y += m_tile_height;
+			cur_x = 0;
+		}
+		dwID++;
+	}
+}
+
+void CTileSetBrowserView::onDrawOverlayPlacement(CDC* pDC)
+{
+	int i;
+	int cur_y = 0;
+	int cur_x = 0;
+
+	RECT r;
+	GetClientRect(&r);
+
+	int max_r = r.right / m_tile_width;
+
+	auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
+	for (i = 0; i < max_ovrl_img; i++) {
+		const PICDATA* p = overlayCache.Read(m_currentOverlay, i);
+		if (p != NULL && p->pic != NULL) {
+
+			int curwidth = p->wMaxWidth;
+			int curheight = p->wMaxHeight;
+
+			BITMAPINFO biinfo;
+			memset(&biinfo, 0, sizeof(BITMAPINFO));
+			biinfo.bmiHeader.biBitCount = 24;
+			biinfo.bmiHeader.biWidth = curwidth;
+			biinfo.bmiHeader.biHeight = curheight;
+			biinfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+			biinfo.bmiHeader.biClrUsed = 0;
+			biinfo.bmiHeader.biPlanes = 1;
+			biinfo.bmiHeader.biCompression = BI_RGB;
+			biinfo.bmiHeader.biClrImportant = 0;
+
+			int pitch = curwidth * 3;
+			if (pitch == 0) {
 				continue;
 			}
 
-			RECT r;
-			GetClientRect(&r);
-			if (cur_y + curheight + (m_tile_height - curheight) / 2 >= this->GetScrollPos(SB_VERT) 
-				&& cur_y <= GetScrollPos(SB_VERT) + r.bottom) {
+			if (pitch % sizeof(DWORD)) {
+				pitch += sizeof(DWORD) - (curwidth * 3) % sizeof(DWORD);
+			}
 
-				HDC hDC = NULL;
-				m_lpDDS[i]->GetDC(&hDC);
+			BYTE* colors = new(BYTE[pitch * curheight]);
+			memset(colors, 255, pitch * (curheight));
 
+			RGBTRIPLE* pal = palIso;
+			if (p->pal == iPalTheater)
+				pal = palTheater;
+			if (p->pal == iPalUnit)
+				pal = palUnit;
 
-				HDC hTmpDC = CreateCompatibleDC(hDC);
-				HBITMAP hBitmap = CreateCompatibleBitmap(hDC, curwidth, curheight);
-				SelectObject(hTmpDC, hBitmap);
-
-				BitBlt(hTmpDC, 0, 0, curwidth, curheight, hDC, 0, 0, SRCCOPY);
-
-				m_lpDDS[i]->ReleaseDC(hDC);
-
-
-				BitBlt(pDC->GetSafeHdc(), 
-					cur_x + (m_tile_width - curwidth) / 2,
-					cur_y + (m_tile_height - curheight) / 2,
-					curwidth, curheight, hTmpDC, 0, 0, SRCCOPY);
-
-
-				DeleteDC(hTmpDC);
-				DeleteObject(hBitmap);
-
-				if (AD.mode == ACTIONMODE_SETTILE && AD.type == dwID) {
-					CPen p;
-					CBrush b;
-					p.CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
-					b.CreateStockObject(NULL_BRUSH);
-
-					CPen* old = pDC->SelectObject(&p);
-
-					pDC->SetBkMode(TRANSPARENT);
-					pDC->SelectObject(&b);
-					pDC->Rectangle(cur_x + 2, cur_y + 2, 
-						cur_x + m_tile_width - 2, cur_y + m_tile_height - 2);
-
-					pDC->SelectObject(old);
+			int k, l;
+			for (k = 0; k < curheight; k++) {
+				for (l = 0; l < curwidth; l++) {
+					if (((BYTE*)p->pic)[l + k * curwidth]) {
+						memcpy(&colors[l * 3 + (curheight - k - 1) * pitch], &pal[((BYTE*)p->pic)[l + k * curwidth]], 3);
+					}
 				}
+			}
+
+			StretchDIBits(pDC->GetSafeHdc(), 
+				cur_x + (m_tile_width - curwidth) / 2,
+				cur_y + (m_tile_height - curheight) / 2,
+				curwidth, curheight,
+				0, 0, curwidth, curheight, colors, 
+				&biinfo, DIB_RGB_COLORS, SRCCOPY);
+
+			delete[] colors;
+
+			if (AD.mode == ACTIONMODE_PLACE 
+				&& AD.data2 == m_currentOverlay 
+				&& AD.data3 == i 
+				&& AD.data == 33 
+				&& AD.type == 6) {
+				CPen p;
+				CBrush b;
+				p.CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
+				b.CreateStockObject(NULL_BRUSH);
+
+				CPen* old = pDC->SelectObject(&p);
+
+				pDC->SetBkMode(TRANSPARENT);
+				pDC->SelectObject(&b);
+				pDC->Rectangle(cur_x + 2, cur_y + 2, cur_x + m_tile_width - 2, cur_y + m_tile_height - 2);
+
+				pDC->SelectObject(old);
 			}
 
 			cur_x += m_tile_width;
-			if (max_r == 0) max_r = 1;
+			if (max_r == 0) {
+				max_r = 1;
+			}
 			if (i % max_r == max_r - 1) {
 				cur_y += m_tile_height;
 				cur_x = 0;
-			}
-
-
-
-			dwID++;
-		}
-	} else if (m_CurrentMode == PlaceMode::Overlay) {
-		int i;
-
-		auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
-		for (i = 0; i < max_ovrl_img; i++) {
-			const PICDATA* p = overlayCache.Read(m_currentOverlay, i);
-			if (p != NULL && p->pic != NULL) {
-
-				int curwidth = p->wMaxWidth;
-				int curheight = p->wMaxHeight;
-
-				BITMAPINFO biinfo;
-				memset(&biinfo, 0, sizeof(BITMAPINFO));
-				biinfo.bmiHeader.biBitCount = 24;
-				biinfo.bmiHeader.biWidth = curwidth;
-				biinfo.bmiHeader.biHeight = curheight;
-				biinfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-				biinfo.bmiHeader.biClrUsed = 0;
-				biinfo.bmiHeader.biPlanes = 1;
-				biinfo.bmiHeader.biCompression = BI_RGB;
-				biinfo.bmiHeader.biClrImportant = 0;
-
-				int pitch = curwidth * 3;
-				if (pitch == 0)
-					continue;
-
-				if (pitch % sizeof(DWORD)) {
-					pitch += sizeof(DWORD) - (curwidth * 3) % sizeof(DWORD);
-				}
-
-				BYTE* colors = new(BYTE[pitch * curheight]);
-				memset(colors, 255, pitch * (curheight));
-
-				RGBTRIPLE* pal = palIso;
-				if (p->pal == iPalTheater)
-					pal = palTheater;
-				if (p->pal == iPalUnit)
-					pal = palUnit;
-
-				int k, l;
-				for (k = 0; k < curheight; k++) {
-					for (l = 0; l < curwidth; l++) {
-						if (((BYTE*)p->pic)[l + k * curwidth]) {
-							memcpy(&colors[l * 3 + (curheight - k - 1) * pitch], &pal[((BYTE*)p->pic)[l + k * curwidth]], 3);
-						}
-					}
-				}
-
-				StretchDIBits(pDC->GetSafeHdc(), cur_x + (m_tile_width - curwidth) / 2, cur_y + (m_tile_height - curheight) / 2, curwidth, curheight,
-					0, 0, curwidth, curheight, colors, &biinfo, DIB_RGB_COLORS, SRCCOPY);
-
-				delete[] colors;
-
-				if (AD.mode == ACTIONMODE_PLACE && AD.data2 == m_currentOverlay && AD.data3 == i && AD.data == 33 && AD.type == 6) {
-					CPen p;
-					CBrush b;
-					p.CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
-					b.CreateStockObject(NULL_BRUSH);
-
-					CPen* old = pDC->SelectObject(&p);
-
-					pDC->SetBkMode(TRANSPARENT);
-					pDC->SelectObject(&b);
-					pDC->Rectangle(cur_x + 2, cur_y + 2, cur_x + m_tile_width - 2, cur_y + m_tile_height - 2);
-
-					pDC->SelectObject(old);
-				}
-
-				cur_x += m_tile_width;
-				if (max_r == 0)
-					max_r = 1;
-				if (i % max_r == max_r - 1) {
-					cur_y += m_tile_height;
-					cur_x = 0;
-				}
 			}
 		}
 	}
