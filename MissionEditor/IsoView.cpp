@@ -335,18 +335,18 @@ BOOL CIsoView::RecreateSurfaces()
 	ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
 
 
-	DDSURFACEDESC2 ddsdBackAndTemp;
-	memcpy(&ddsdBackAndTemp, &ddsd, sizeof(DDSURFACEDESC2));
+	DDSURFACEDESC2 ddsdBackAdjusted;
+	memcpy(&ddsdBackAdjusted, &ddsd, sizeof(DDSURFACEDESC2));
 
 	// make sure the ddsd size is big enough for heightest zoom-out;
 	if (theApp.m_Options.bHighResUI)
 	{
-		ddsdBackAndTemp.dwWidth *= theApp.m_Options.viewScaleSteps[0];
-		ddsdBackAndTemp.dwHeight *= theApp.m_Options.viewScaleSteps[0];
+		ddsdBackAdjusted.dwWidth *= theApp.m_Options.viewScaleSteps[0];
+		ddsdBackAdjusted.dwHeight *= theApp.m_Options.viewScaleSteps[0];
 	}
 
 	releaseIfExists(isoView.lpdsBack);
-	if (isoView.dd->CreateSurface(&ddsdBackAndTemp, &isoView.lpdsBack, NULL) != DD_OK) {
+	if (isoView.dd->CreateSurface(&ddsdBackAdjusted, &isoView.lpdsBack, NULL) != DD_OK) {
 		errstream << "CreateSurface() failed\n";
 		errstream.flush();
 		ShowWindow(SW_HIDE);
@@ -376,7 +376,7 @@ BOOL CIsoView::RecreateSurfaces()
 		return FALSE;
 	}
 	releaseIfExists(isoView.lpdsTemp);
-	if (isoView.dd->CreateSurface(&ddsdBackAndTemp, &isoView.lpdsTemp, NULL) != DD_OK) {
+	if (isoView.dd->CreateSurface(&ddsdBackAdjusted, &isoView.lpdsTemp, NULL) != DD_OK) {
 		errstream << "CreateSurface() failed\n";
 		errstream.flush();
 		ShowWindow(SW_HIDE);
