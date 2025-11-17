@@ -72,6 +72,10 @@ BOOL CAll::OnInitDialog()
 
 	translateUI();
 
+	CFont font;
+	font.CreatePointFont(100, _T("Tahoma"));
+	m_Value.SetFont(&font);
+
 	return ret;
 }
 
