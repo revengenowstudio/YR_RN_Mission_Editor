@@ -1,0 +1,201 @@
+// Microsoft Visual C++ generated resource script.
+//
+#pragma code_page(65001)
+
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// German (Germany) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(65001)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""FinalSun.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
+    "#include ""afxres.rc""         // Standardkomponenten\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // German (Germany) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ALL DIALOGEX 0, 0, 303, 204
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
+CAPTION "INI Editor"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    LTEXT           "We highly recommend not to use this editor except you really know what you are doing.",IDC_INI_EDITOR_DESC,6,5,290,15
+    LTEXT           "Sections:",IDC_INI_EDITOR_SECTIONS,5,25,55,10
+    COMBOBOX        IDC_SECTIONS,61,25,235,85,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Keys:",IDC_INI_EDITOR_KEYS,15,80,40,10
+    PUSHBUTTON      "Add",IDC_ADDSECTION,60,40,55,15
+    PUSHBUTTON      "Delete",IDC_DELETESECTION,120,40,55,15
+    GROUPBOX        "Section content",IDC_INI_EDITOR_CONTENT,6,67,290,130
+    LISTBOX         IDC_KEYS,60,80,225,90,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Value:",IDC_INI_EDITOR_VAL,15,175,40,15
+    EDITTEXT        IDC_VALUE,60,175,225,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Add",IDC_ADDKEY,15,95,40,15
+    PUSHBUTTON      "Delete",IDC_DELETEKEY,15,115,40,15
+    PUSHBUTTON      "Insert another INI file content",IDC_INISECTION,181,40,115,15
+END
+
+IDD_IMPORTINI DIALOG 0, 0, 229, 150
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Insert INI file section"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,170,5,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,170,25,50,14
+    LTEXT           "Choose the sections you want to import in the map. Be careful! If you import a section that already exists, keys of the already existing section may be overwritten!",IDC_STATIC,5,5,155,35
+    LISTBOX         IDC_AVAILABLE,5,75,215,55,LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Available sections:",IDC_STATIC,5,65,100,10
+    CONTROL         "Import all sections",IDC_ALLSECTIONS,"Button",BS_AUTORADIOBUTTON,5,40,155,10
+    CONTROL         "Specify sections to be imported",IDC_SPECIFYSECTIONS,
+                    "Button",BS_AUTORADIOBUTTON,5,50,150,10
+    LTEXT           "Select the sections you wish to import.",IDC_STATIC,5,135,215,10
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+
+    IDD_ALL, DIALOG
+    BEGIN
+    END
+
+    IDD_IMPORTINI, DIALOG
+    BEGIN
+    END
+
+END
+#endif    // APSTUDIO_INVOKED
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_ALL AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(65001)
+#endif //_WIN32
+#include "FinalSun.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
+#include "afxres.rc"         // Standardkomponenten
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
