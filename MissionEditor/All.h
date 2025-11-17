@@ -33,37 +33,20 @@
 class CAll : public CDialog
 {
 	// Konstruktion
-public:
+public:	
+	enum { IDD = IDD_ALL };
+
 	void UpdateDialog();
 	CAll(CWnd* pParent = NULL);   // Standardkonstruktor
 
-// Dialogfelddaten
-	//{{AFX_DATA(CAll)
-	enum { IDD = IDD_ALL };
-	CEdit	m_Value;
-	CListBox	m_Keys;
-	CButton	m_IniSection;
-	CButton	m_DeleteSection;
-	CButton	m_DeleteKey;
-	CButton	m_AddSection;
-	CButton	m_AddKey;
-	CComboBox	m_Sections;
-	//}}AFX_DATA
-
-
-// Überschreibungen
-	// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
-	//{{AFX_VIRTUAL(CAll)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
 	virtual BOOL OnInitDialog() override;
 	//}}AFX_VIRTUAL
 
 // Implementierung
-protected:
 	void translateUI();
-	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CAll)
+
 	afx_msg void OnSelchangeSections();
 	afx_msg void OnChangeValue();
 	afx_msg void OnSelchangeKeys();
@@ -73,8 +56,17 @@ protected:
 	afx_msg void OnDeletekey();
 	afx_msg void OnAddkey();
 	afx_msg void OnInisection();
-	//}}AFX_MSG
+
 	DECLARE_MESSAGE_MAP()
+
+	CEdit	m_Value;
+	CListBox	m_Keys;
+	CButton	m_IniSection;
+	CButton	m_DeleteSection;
+	CButton	m_DeleteKey;
+	CButton	m_AddSection;
+	CButton	m_AddKey;
+	CComboBox	m_Sections;
 };
 
 //{{AFX_INSERT_LOCATION}}
