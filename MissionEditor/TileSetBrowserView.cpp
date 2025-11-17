@@ -475,15 +475,16 @@ __forceinline void BlitTerrainTSB(void* dst, int x, int y, int dleft, int dtop, 
 	unsigned short& swidth = st.wWidth;
 	unsigned short& sheight = st.wHeight;
 
-
-	if (src == NULL || dst == NULL)
+	if (src == NULL || dst == NULL) {
 		return;
+	}
 
-	if (x + swidth < dleft || y + sheight < dtop)
+	if (x + swidth < dleft || y + sheight < dtop) {
 		return;
-	if (x >= dright || y >= dbottom)
+	}
+	if (x >= dright || y >= dbottom) {
 		return;
-
+	}
 
 	BlitRect blrect;
 	BlitRect srcRect;
@@ -512,10 +513,7 @@ __forceinline void BlitTerrainTSB(void* dst, int x, int y, int dleft, int dtop, 
 		blrect.bottom = dbottom;
 	}
 
-
 	short i, e;
-
-
 
 #ifdef NOSURFACES_EXTRACT
 	int pos = 0;
@@ -531,31 +529,30 @@ __forceinline void BlitTerrainTSB(void* dst, int x, int y, int dleft, int dtop, 
 				pos += (right - left + 1) * bpp;
 			}
 		}
-	} else
-
+		return;
+	}
 #endif
 
-		for (e = srcRect.top; e < srcRect.bottom; e++) {
-			short& left = st.vborder[e].left;
-			short& right = st.vborder[e].right;
+	for (e = srcRect.top; e < srcRect.bottom; e++) {
+		short& left = st.vborder[e].left;
+		short& right = st.vborder[e].right;
 
-			for (i = left; i <= right; i++) {
-				if (i < srcRect.left || i >= srcRect.right) {
-					//dest+=bpp;
-				} else {
+		for (i = left; i <= right; i++) {
+			if (i < srcRect.left || i >= srcRect.right) {
+				//dest+=bpp;
+			}
+			else {
 
-					BYTE& val = src[i + e * swidth];
-					if (val) {
-						void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * dpitch);
+				BYTE& val = src[i + e * swidth];
+				if (val) {
+					void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * dpitch);
 
-						memcpy(dest, &iPalIso[val], bpp);
-					}
+					memcpy(dest, &iPalIso[val], bpp);
 				}
 			}
-
 		}
 
-
+	}
 }
 #endif
 
@@ -625,12 +622,8 @@ LPDIRECTDRAWSURFACE7 CTileSetBrowserView::RenderTile(DWORD dwID)
 				if (lpdds->Blt(&dest, (*tiledata)[dwID].tiles[p].pic, NULL, DDBLT_KEYSRC, &fx) != DD_OK)
 					TRACE("Blit failed\n");
 #else
-
-
-
 				BlitTerrainTSB(ddsd.lpSurface, drawx, drawy, 0, 0, ddsd.lPitch, ddsd.dwWidth, ddsd.dwHeight, (*tiledata)[dwID].tiles[p]);
 #endif
-
 			}
 
 			p++;
@@ -645,8 +638,6 @@ LPDIRECTDRAWSURFACE7 CTileSetBrowserView::RenderTile(DWORD dwID)
 void CTileSetBrowserView::DrawIt()
 {
 	CPaintDC myDC(this);
-
-
 }
 
 void CTileSetBrowserView::OnLButtonDown(UINT nFlags, CPoint point)
@@ -822,16 +813,15 @@ int CTileSetBrowserView::GetAddedHeight(DWORD dwID)
 
 				drawy += (*tiledata)[dwID].tiles[p].sY - (*tiledata)[dwID].tiles[p].bZHeight * f_y / 2;
 
-				if (drawy < cur_added) cur_added = drawy;
-
+				if (drawy < cur_added) {
+					cur_added = drawy;
+				}
 				p++;
 			}
 		}
 
 
 	}
-
-
 
 	return -cur_added;
 }
