@@ -6371,14 +6371,22 @@ because they become modified whenever the map is saved by the editor itself.
 */
 bool CMapData::IsMapSection(const CString& str)
 {
+	static std::unordered_set<CString, CStringHash> mapReadOnlySections = {
+		"IsoMapPack5",
+		"OverlayPack",
+		"OverlayDataPack",
+		"Preview",
+		"PreviewPack",
+		"Map",
+		"Structures",
+		"Terrain",
+		"Units",
+		"Aircraft",
+		"Infantry",
+		"Variables",
+	};
 
-	if (str == "IsoMapPack5" || str == "OverlayPack" || str == "OverlayDataPack" ||
-		str == "Preview" || str == "PreviewPack" || str == "Map" ||
-		str == "Structures" || str == "Terrain" || str == "Units" || str == "Aircraft" || str == "Infantry"
-		|| str == "Variables")
-		return TRUE;
-
-	return FALSE;
+	return mapReadOnlySections.find(str) != mapReadOnlySections.end();
 }
 
 int GetEventParamStart(const CString& EventData, int param);
