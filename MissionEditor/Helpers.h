@@ -2,6 +2,7 @@
 #include <afx.h>
 #include <algorithm>
 #include <array>
+#include <functional>
 
 // coordinate functions
 inline void PosToXY(const char* pos, int* X, int* Y)
@@ -165,3 +166,18 @@ inline void Trim(std::string_view& str, char ch, TrimDir dir) {
 		}
 	}
 }
+
+class DeferUnlock
+{
+	using Action = std::function<void(void)>;
+public:
+	DeferUnlock(Action&& action) :
+		unlockAction(std::move(action))
+	{ }
+	~DeferUnlock() {
+		unlockAction();
+	}
+
+private:
+	Action unlockAction;
+};

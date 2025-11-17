@@ -588,8 +588,18 @@ LPDIRECTDRAWSURFACE7 CTileSetBrowserView::RenderTile(DWORD dwID)
 	ddfx.dwSize = sizeof(DDBLTFX);
 	lpdds->Blt(NULL, NULL, NULL, DDBLT_COLORFILL, &ddfx);
 
-
 	int y_added = ddsd.dwHeight - ((*tiledata)[dwID].cx * f_y / 2 + (*tiledata)[dwID].cy * f_y / 2);
+
+	ZeroMemory(&ddsd, sizeof(ddsd));
+	ddsd.dwSize = sizeof(DDSURFACEDESC2);
+	ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
+
+	lpdds->GetSurfaceDesc(&ddsd);
+
+	lpdds->Lock(NULL, &ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT | DDLOCK_NOSYSLOCK, NULL);
+	DeferUnlock unlocker([&lpdds] {
+		lpdds->Unlock(NULL);
+	});
 
 	int i, e, p = 0;;
 	for (i = 0; i < (*tiledata)[dwID].cx; i++) {
@@ -615,17 +625,10 @@ LPDIRECTDRAWSURFACE7 CTileSetBrowserView::RenderTile(DWORD dwID)
 				if (lpdds->Blt(&dest, (*tiledata)[dwID].tiles[p].pic, NULL, DDBLT_KEYSRC, &fx) != DD_OK)
 					TRACE("Blit failed\n");
 #else
-				DDSURFACEDESC2 ddsd;
-				ZeroMemory(&ddsd, sizeof(ddsd));
-				ddsd.dwSize = sizeof(DDSURFACEDESC2);
-				ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT;
 
-				lpdds->GetSurfaceDesc(&ddsd);
 
-				lpdds->Lock(NULL, &ddsd, DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT | DDLOCK_NOSYSLOCK, NULL);
 
 				BlitTerrainTSB(ddsd.lpSurface, drawx, drawy, 0, 0, ddsd.lPitch, ddsd.dwWidth, ddsd.dwHeight, (*tiledata)[dwID].tiles[p]);
-				lpdds->Unlock(NULL);
 #endif
 
 			}
