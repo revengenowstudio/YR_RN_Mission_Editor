@@ -67,11 +67,11 @@
 3. 重写大部分 INI 读写逻辑，降低内存占用并加快解析速度(by @Zero-Fanker)
 4. 撤销系统算法优化，减少卡顿与内存峰值(by @Zero-Fanker，by @handama)
 5. 引入 Google Test 单元测试，持续锁定性能回归(by @Zero-Fanker)
-6. 本地编彻底改造成为64位应用程序(by @Zero-Fanker)
+6. 本编辑器彻底改造成为64位应用程序(by @Zero-Fanker)
 
 
 ## 使用指南和开发指南
-- 本地编详细使用指南参见 : [使用指南](./docs/UserGuide/README.md)
+- 本编辑器详细使用指南参见 : [使用指南](./docs/UserGuide/README.md)
 - 开发指南参见 : [开发指南](./docs/DevelopGuide/README.md)
 
 
@@ -85,7 +85,7 @@
 - Luke "CCHyper" Feenan  
   - 额外编码、开源流程梳理、新图标与素材
 - @Zero-Fanker
-  - RN特别版地编核心开发，主持整个RN特别版地编的功能重构/开发/维护
+  - RN定制版地图编辑器核心开发，主持整个项目的功能重构/开发/维护
 - @handama
   - FA2SP HDM Edition 主创，基于 FA2SP 的逆向成果接手FA2SP的功能开发，给RN特别版地编提供了非常多idea和代码支持
 
