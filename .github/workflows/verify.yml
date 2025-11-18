@@ -9,7 +9,9 @@ on:
       - opened
       - synchronize
     paths-ignore:
+      - '.github/**'
       - '**/*.md'
+      - '**/*.{png,jpg,jpeg,gif}'
   workflow_dispatch:
 
 jobs:

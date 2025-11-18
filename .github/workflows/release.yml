@@ -9,6 +9,10 @@ on:
       - "RN"
     types:
       - closed
+    paths-ignore:
+      - '.github/**'
+      - '**/*.md'
+      - '**/*.{png,jpg,jpeg,gif}'
   workflow_dispatch: {}
 
 env:
