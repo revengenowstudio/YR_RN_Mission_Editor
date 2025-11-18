@@ -12,7 +12,7 @@
 本软件必须在现代64位操作系统下才能正常运行。
 
 ## 下载和安装
-1. 访问本仓库[Releases页面](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases)即可获得最新发布版本
+1. 访问本仓库[Releases页面](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases/latest)即可获得最新发布版本
 2. 确保已经安装[VC++14 运行时](https://learn.microsoft.com/zh-cn/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version)
 3. 解压从Release下载的zip压缩包，运行`FinalAlert2YR.exe`，首次运行需要指定游戏本体或者Mod资源文件夹的位置，运行程序后，在弹出的`基本选项`窗口中的`Language`选择`简体中文`，再点击`Red Alert 2 EXE`右侧的按钮，选择`ra2.mix`即可设置默认资源路径
 
