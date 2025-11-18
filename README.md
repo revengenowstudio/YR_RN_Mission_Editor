@@ -11,6 +11,7 @@
 
 本软件必须在现代64位操作系统下才能正常运行。
 
+
 ## 下载和安装
 1. 访问本仓库[Releases页面](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases/latest)即可获得最新发布版本
 2. 确保已经安装[VC++14 运行时](https://learn.microsoft.com/zh-cn/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version)
