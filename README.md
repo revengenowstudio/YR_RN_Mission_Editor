@@ -41,14 +41,14 @@
 ### 功能改进
 1. 主视角支持鼠标滚轮自由缩放（by @handama）
 2. 撤销步数上限提升至 64 步；可一次性撤销“长按连续放置”的覆盖物，大地形撤销不再残留（by @handama）
-3. 隧道系统彻底重做：提供隧道地形集，可视化编辑端点，支持曲线/单向隧道(by @Zero-Fanker)
+3. 隧道系统彻底重做：提供隧道地形集，可视化编辑端点，支持曲线/单向隧道
 4. 最大地图尺寸放开至 400×112 或 112×400
-5. 泰伯利亚之日温带地图新增水晶/沼泽 LAT(by @Zero-Fanker)
+5. 泰伯利亚之日温带地图新增水晶/沼泽 LAT
 6. 自动海岸重写：不会在非海岸区误创海岸，可正确摆放特殊海岸（by @handama）
-7. 引入 HDM 版 CSF 查看器窗口，支持双击应用 CSF 内容(by @Zero-Fanker)
-8. 地图保存时支持“最小玩家数”设置(by @Zero-Fanker)
-9. 工作区功能：读取地图时同步加载同目录 FinalAlertProject.ini，重新挂载指定游戏资源(by @Zero-Fanker)
-10. 玩家颜色自动读取 map 或 rules.ini；单位与建筑正确晕染玩家色(by @Zero-Fanker)
+7. 引入 HDM 版 CSF 查看器窗口，支持完整查看和选择 CSF 文本内容(by @Zero-Fanker)
+8. 地图保存对话框功能强化，支持“最小玩家数”设置，支持自定义游戏模式列表(by @Zero-Fanker)
+9. 工作区功能：读取地图时感知并加载同一目录下的 FinalAlertProject.ini，按照工作区定义加载相关数据和美术资源(by @Zero-Fanker)
+10. 所有单位的所属色按照实际定义正确显示
 11. Voxel 单位光影同步；SHP 炮塔 & Voxel 炮塔/炮管坐标修正；附加炮塔显示修正(by @Zero-Fanker)
 
 ### Bug 修复
@@ -60,14 +60,13 @@
 6. 修复小队脚本缺少脚本/路径点参数的问题(by @Zero-Fanker)
 7. 修复部分子窗口功能不正确问题的问题(by @Zero-Fanker)
 8. 修复物品栏取消选择后焦点自动跳回顶端（by @handama）
-9. 修复非正方形地图小地图显示错误的问题(by @Zero-Fanker)
-10. 修复Win10/11 下若干代码级兼容问题导致无法直接运行的问题(by @Zero-Fanker)
+9. 修复非正方形地图小地图显示错误的问题
 
 ### 性能优化
 1. 地图渲染整体性能优化(by @Zero-Fanker)
-2. 使用 ddraw7 接口替换老旧 ddraw4，提升绘制效率(by @Zero-Fanker)
-3. 重写大部分 INI 读写逻辑，降低内存占用并加快解析速度(by @Zero-Fanker)
-4. 撤销系统算法优化，减少卡顿与内存峰值(by @Zero-Fanker，by @handama)
+2. 使用 ddraw7 接口替换老旧 ddraw4，提升绘制效率
+3. 重写 Ini 读写逻辑，使得Ini操作更加稳定、高效、安全(by @Zero-Fanker)
+4. 撤销功能优化，减少卡顿与内存峰值(by @Zero-Fanker，by @handama)
 5. 引入 Google Test 单元测试，持续锁定性能回归(by @Zero-Fanker)
 6. 本编辑器彻底改造成为64位应用程序(by @Zero-Fanker)
 
@@ -88,8 +87,14 @@
   - 额外编码、开源流程梳理、新图标与素材
 - @Zero-Fanker
   - RN定制版地图编辑器核心开发，主持整个项目的功能重构/开发/维护
+- @shuiping233
+  - 主要测试人员，文档维护，devops辅助
 - @handama
   - FA2SP HDM Edition 主创，基于 FA2SP 的逆向成果接手FA2SP的功能开发，给RN特别版地编提供了非常多idea和代码支持
+- @secsome
+  - FA2SP 项目主创
+- @ThomasSneddon
+  - CncVxlRenderText 图形库作者
 
 ## 法律声明 
 《命令与征服：泰伯利亚之日》《命令与征服：红色警戒 2》《命令与征服：尤里的复仇》版权归属 Westwood Studios，Westwood 为 Electronic Arts 商标。  
