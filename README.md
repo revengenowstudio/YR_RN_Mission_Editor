@@ -1,6 +1,8 @@
 # FinalAlert（尤里的复仇）地图编辑器 RN 特别版
 
 [![release](https://img.shields.io/github/v/release/revengenowstudio/YR_RN_Mission_Editor)](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases/latest)
+[![basic verify ci](https://github.com/revengenowstudio/YR_RN_Mission_Editor/actions/workflows/verify.yml/badge.svg)](https://github.com/revengenowstudio/YR_RN_Mission_Editor/actions/workflows/verify.yml)
+[![release ci](https://github.com/revengenowstudio/YR_RN_Mission_Editor/actions/workflows/release.yml/badge.svg)](https://github.com/revengenowstudio/YR_RN_Mission_Editor/actions/workflows/release.yml)
 
 简体中文 | [English](./README_en.md)
 
