@@ -1,5 +1,7 @@
 # FinalAlert（尤里的复仇）地图编辑器 RN 特别版
 
+[![release](https://img.shields.io/github/v/release/revengenowstudio/YR_RN_Mission_Editor)](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases/latest)
+
 [简体中文](./README.md) | [English](./README_en.md)
 
 本项目是《FinalAlert（YR）地图编辑器》 RN 团队二次开发强化版本（下文以"FR - Final Revenge"、"RN定制版地图编辑器"或"本编辑器"代称），虽然名为"RN特别版"，但是也期望可以支持除RN之外的Mod和原版游戏。
