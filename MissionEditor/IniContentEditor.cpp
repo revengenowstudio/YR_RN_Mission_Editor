@@ -4,6 +4,7 @@
 #include <sstream>
 
 BEGIN_MESSAGE_MAP(CIniContentEditor, CDialog)
+	ON_EN_KILLFOCUS(IDC_INI_E_CUR_SEC_VAL, onSectionChanged)
 END_MESSAGE_MAP()
 
 CIniContentEditor::CIniContentEditor(CWnd* pParent)
@@ -102,4 +103,23 @@ BOOL CIniContentEditor::onMessageKeyDown(MSG* pMsg)
 		}
 	}
 	return TRUE;
+}
+
+void CIniContentEditor::onSectionChanged()
+{
+	CString newSecName;
+	m_sectionValue.GetWindowText(newSecName);
+	newSecName.TrimLeft();
+	newSecName.TrimRight();
+
+	if (newSecName == m_sectionID) {
+		return;
+	}
+	// msg box to hint sure to change section ID ?
+	auto const allow = MessageBox(GetLanguageStringACP("You just changed section ID, are you sure?"),
+		GetLanguageStringACP("Warning"), MB_YESNO) == IDYES;
+	if (!allow) {
+		m_sectionValue.SetWindowText(m_sectionID);
+	}
+	m_sectionID = newSecName;
 }

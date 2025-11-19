@@ -48,6 +48,8 @@ protected:
 	void translateUI();
 	BOOL onMessageKeyDown(MSG* pMsg);
 
+	afx_msg void onSectionChanged();
+
 	DECLARE_MESSAGE_MAP()
 
 protected:
