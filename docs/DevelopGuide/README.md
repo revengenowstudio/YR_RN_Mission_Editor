@@ -16,20 +16,14 @@
 - Git™ for Windows（使用 vcpkg 期间请勿混用其他 Git）
 
 
-## 编译源码（Building the source code）
+## 编译源码
 源码含 2 个项目：
 - MissionEditor：主程序
 - MissionEditorPackLib：用 C 函数封装 XCC 对象，提供加载/打包逻辑
 
-### 编译步骤（以尤里版为例）
-1. 用 VS2022 打开 MissionEditor.sln
-2. 顶部配置切换为「FinalAlertYRRelease」，输出自动指向 FinalAlert2YR.exe
-3. F7 生成解决方案，产物在 dist/FinalAlert2 目录
-4. F5 即可调试运行
 
-
-
-## 更新三方库（Updating third-party libraries）
+## 更新三方库
+MissionEditor依赖了xcc，而xcc需要使用vcpkg安装一些第三方库，所以编译前需要用vcpkg拉取第三方库源码到本地
 打开「Developer Command Prompt for VS2022」，cd 到 3rdParty\xcc，确认 PATH 含 git & vcpkg：
 
     git --version
@@ -37,11 +31,16 @@
 
 > [!NOTE]
 > xcc是已经内联修改了，不是按打patch的方式来的
-<!-- > 仓库已内嵌裁剪版 XCC，补丁位于 `3rdParty\xcc\patch.<COMMIT_HASH>.diff`。如要升级 XCC，请替换文件后重新打补丁。 -->
+~~ 仓库已内嵌裁剪版 XCC，补丁位于 `3rdParty\xcc\patch.<COMMIT_HASH>.diff`。如要升级 XCC，请替换文件后重新打补丁。 ~~
 
 
+### 编译步骤（以尤里版为例）
+1. 用 VS2022 打开 MissionEditor.sln
+2. 顶部配置切换为「FinalAlertDebug YR」，输出自动指向 FinalAlert2YR.exe
+3. F5 即可自动编译并调试运行
 
-## 手动打包发行（Creating a distribution）
+
+## 手动打包发行
 目前本仓库已Github Action流水线，可自动完成编译工作
 若改完代码仍然想手动发版，请先自行核对所有开源协议（含修改声明、版权追加等）。
 
@@ -60,8 +59,7 @@
 **再强调：发版时务必自行满足本仓库及所有三方库的许可证义务，脚本不保证自动合规。**
 
 
-
-## 目录结构速查（Directories）
+## 目录结构速查
 - MissionEditor\data\shared：FS/FA2 共用数据
 - MissionEditor\data\FinalAlert2：FA2 专有数据
 - MissionEditor\data\FinalSun：FS 专有数据
