@@ -40,6 +40,7 @@ void CIniContentEditor::translateUI()
 	SetWindowText(GetLanguageStringACP("IniContentCaption"));
 
 	TranslateDlgItem(*this, IDC_INI_E_CUR_SEC, "IniContentCurrentSection");
+	TranslateDlgItem(*this, IDC_INI_E_DISABLE_VALIDATION, "IniContentDisableValidation");
 }
 
 BOOL CIniContentEditor::PreTranslateMessage(MSG* pMsg)
@@ -53,7 +54,20 @@ BOOL CIniContentEditor::PreTranslateMessage(MSG* pMsg)
 
 void CIniContentEditor::OnOK()
 {
-	m_contentText.GetWindowText(m_content);
+	auto const pCheckBox = reinterpret_cast<CButton*>(GetDlgItem(IDC_INI_E_DISABLE_VALIDATION));
+	auto const validationOff = pCheckBox && pCheckBox->GetCheck() == BST_CHECKED;
+
+	CString curIniContent;
+	m_contentText.GetWindowText(curIniContent);
+
+	if (!validationOff) {
+		// TODO: validate ini text
+		// 
+		//if (fail) {
+		//	return;
+		//}
+	}
+	m_content = curIniContent;
 
 	std::string line;
 	std::istringstream parseStream(m_content.operator LPCSTR());
