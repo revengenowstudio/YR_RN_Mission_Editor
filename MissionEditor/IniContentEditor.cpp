@@ -41,6 +41,8 @@ void CIniContentEditor::translateUI()
 
 	TranslateDlgItem(*this, IDC_INI_E_CUR_SEC, "IniContentCurrentSection");
 	TranslateDlgItem(*this, IDC_INI_E_DISABLE_VALIDATION, "IniContentDisableValidation");
+	TranslateDlgItem(*this, IDOK, "OK");
+	TranslateDlgItem(*this, IDCANCEL, "Cancel");
 }
 
 BOOL CIniContentEditor::PreTranslateMessage(MSG* pMsg)
