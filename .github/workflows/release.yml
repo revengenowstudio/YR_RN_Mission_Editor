@@ -9,6 +9,10 @@ on:
       - "RN"
     types:
       - closed
+    paths-ignore:
+      - 'image/**'
+      - 'docs/**'
+      - '**/*.md'
   workflow_dispatch: {}
 
 env:

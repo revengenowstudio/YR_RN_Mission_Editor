@@ -8,6 +8,10 @@ on:
     types:
       - opened
       - synchronize
+    paths-ignore:
+      - 'image/**'
+      - 'docs/**'
+      - '**/*.md'
   workflow_dispatch:
 
 jobs:
