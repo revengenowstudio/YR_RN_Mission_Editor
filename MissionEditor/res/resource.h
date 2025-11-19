@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by CreateNewMap.rc
+// Used by IniEdit.rc
 //
 #define PRODUCT_VERSION_REVISION        0
 #define PRODUCT_VERSION_MINOR           1
@@ -101,6 +101,7 @@
 #define IDD_COMBO_UINPUT                289
 #define IDC_EDITOR_ARROW                299
 #define IDD_CSF_VIEWER                  300
+#define IDD_INI_EDITOR                  329
 #define IDC_BULB                        1000
 #define IDC_STARTUP                     1001
 #define IDC_NEXTTIP                     1002
@@ -132,6 +133,7 @@
 #define IDC_INITTIME                    1030
 #define IDC_REQUIREDADDON               1031
 #define IDC_EDIT1                       1034
+#define IDC_INI_E_CUR_SEC_VAL           1034
 #define IDC_CHOOSE                      1035
 #define IDC_EDITOR_SEARCH               1036
 #define IDC_LEFT                        1036
@@ -652,7 +654,10 @@
 #define IDC_NEWMAPIMPORT_TXT_DSC        1567
 #define IDC_NEWMAPSP_TXT_DSC            1568
 #define IDC_TERRAINBAR_MANAGER          1569
+#define IDC_RICHEDIT21                  1569
+#define IDC_SECTION_TEXT                1569
 #define IDC_TERRAINBAR_GENERATOR        1570
+#define IDC_INI_E_CUR_SEC               1570
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -747,9 +752,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        329
+#define _APS_NEXT_RESOURCE_VALUE        331
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1569
+#define _APS_NEXT_CONTROL_VALUE         1571
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

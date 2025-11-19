@@ -27,6 +27,7 @@
 #include "mapdata.h"
 #include "variables.h"
 #include "functions.h"
+#include "IniContentEditor.h"
 #include <sstream>
 
 #ifdef _DEBUG
@@ -59,7 +60,7 @@ void CAll::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDITOR_SECTIONS, m_Sections);
 	DDX_Control(pDX, IDC_INISECTION, m_IniSection);
 	DDX_Control(pDX, IDC_DELETESECTION, m_DeleteSection);
-	//DDX_Control(pDX, IDC_DELETEKEY, m_DeleteKey);
+	DDX_Control(pDX, IDC_EDITOR_EDIT_BUTTON, m_EditButton);
 	DDX_Control(pDX, IDC_ADDSECTION, m_AddSection);
 	//DDX_Control(pDX, IDC_ADDKEY, m_AddKey);
 	//DDX_Control(pDX, IDC_SECTIONS, m_Sections);
@@ -75,6 +76,7 @@ BOOL CAll::OnInitDialog()
 	CFont font;
 	font.CreatePointFont(100, _T("Tahoma"));
 	m_Value.SetFont(&font);
+	m_Value.SetReadOnly();
 
 	return ret;
 }
@@ -107,7 +109,7 @@ BEGIN_MESSAGE_MAP(CAll, CDialog)
 	//ON_EN_UPDATE(IDC_VALUE, OnUpdateValue)
 	ON_BN_CLICKED(IDC_ADDSECTION, OnAddsection)
 	ON_BN_CLICKED(IDC_DELETESECTION, OnDeletesection)
-	//ON_BN_CLICKED(IDC_DELETEKEY, OnDeletekey)
+	ON_BN_CLICKED(IDC_EDITOR_EDIT_BUTTON, OnEditSection)
 	//ON_BN_CLICKED(IDC_ADDKEY, OnAddkey)
 	ON_BN_CLICKED(IDC_INISECTION, OnInisection)
 	//}}AFX_MSG_MAP
@@ -125,7 +127,6 @@ void CAll::UpdateDialog()
 
 	m_Value.SetWindowText("");
 
-	int i;
 	for (auto const& [name, sec] : ini) {
 		if (!Map->IsMapSection(name)) {
 			m_Sections.InsertString(-1, name);
@@ -155,9 +156,8 @@ void CAll::OnSelchangeSections()
 	}
 }
 
-void CAll::OnChangeValue()
+void CAll::OnEditSection()
 {
-	CIniFile& ini = Map->GetIniFile();
 	CString curSection;
 	if (auto const selected = m_Sections.GetCurSel(); selected >= 0) {
 		m_Sections.GetText(selected, curSection);
@@ -166,25 +166,23 @@ void CAll::OnChangeValue()
 		return;
 	}
 
-	CString curItems;
-	m_Value.GetWindowText(curItems);
+	CIniContentEditor innerEditor;
 
-	std::string line;
-	std::istringstream parseStream(curItems.operator LPCSTR());
-	while (std::getline(parseStream, line)) {
-		// TODO: parse INI and validate
-		auto const eqlPos = line.find('=');
-		// TODO: handle ; and trim
-		if (eqlPos == line.npos) {
-			continue;
-		}
-		ini.SetString(curSection, CString(line.data(), eqlPos - 1), CString(line.data() + eqlPos));
+	innerEditor.SetSection(curSection);
+	{
+		CString curItems;
+		m_Value.GetWindowText(curItems);
+		innerEditor.SetContent(curItems);
 	}
-}
 
-void CAll::OnUpdateValue()
-{
+	if (innerEditor.DoModal() == IDCANCEL) {
+		return;
+	}
 
+	m_Value.SetWindowText(innerEditor.Content());
+
+	auto& ini = Map->GetIniFile();
+	ini.AddSection(curSection) = innerEditor.PopSection();
 }
 
 void CAll::OnAddsection()

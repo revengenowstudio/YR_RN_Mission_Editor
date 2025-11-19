@@ -104,14 +104,13 @@ FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
     LTEXT           "We highly recommend not to use this editor except you really know what you are doing.",IDC_INI_EDITOR_DESC,6,5,290,15
     LTEXT           "Search:",IDC_INI_EDITOR_TXT_SEARCH,7,23,30,12
-    PUSHBUTTON      "New Section",IDC_ADDSECTION,220,21,50,14
-    PUSHBUTTON      "Delete",IDC_DELETESECTION,275,21,40,14
-    PUSHBUTTON      "Import From File",IDC_INISECTION,320,7,68,14
+    PUSHBUTTON      "New Section",IDC_ADDSECTION,222,20,50,14
+    PUSHBUTTON      "Delete",IDC_DELETESECTION,277,20,40,14
+    PUSHBUTTON      "Import From File",IDC_INISECTION,322,20,68,14
     EDITTEXT        IDC_EDITOR_SEARCH,40,21,87,14,ES_AUTOHSCROLL
     LISTBOX         IDC_EDITOR_SECTIONS,7,40,120,250,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_INI_EDITOR_CONTENT,"RichEdit20A",ES_MULTILINE | WS_BORDER | WS_VSCROLL | WS_TABSTOP,133,40,257,250
-    EDITTEXT        IDC_EDITOR_NEW_SECTION,133,21,84,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Edit",IDC_EDITOR_EDIT_BUTTON,320,21,68,14
+    PUSHBUTTON      "Edit",IDC_EDITOR_EDIT_BUTTON,146,20,68,14
 END
 
 IDD_IMPORTINI DIALOG 0, 0, 229, 150
@@ -130,6 +129,19 @@ BEGIN
     LTEXT           "Select the sections you wish to import.",IDC_STATIC,5,135,215,10
 END
 
+IDD_INI_EDITOR DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Ini Section Editor"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,198,155,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,252,155,50,14
+    CONTROL         "",IDC_SECTION_TEXT,"RichEdit20A",ES_MULTILINE | WS_BORDER | WS_VSCROLL | WS_TABSTOP,23,40,261,110
+    LTEXT           "Current section:",IDC_INI_E_CUR_SEC,23,22,68,8
+    EDITTEXT        IDC_INI_E_CUR_SEC_VAL,103,20,180,14,ES_AUTOHSCROLL
+END
+
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // DESIGNINFO
@@ -138,17 +150,26 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO
 BEGIN
-
     IDD_ALL, DIALOG
     BEGIN
+        HORZGUIDE, 20
+        HORZGUIDE, 34
     END
 
     IDD_IMPORTINI, DIALOG
     BEGIN
     END
 
+    IDD_INI_EDITOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
 END
 #endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -160,19 +181,15 @@ BEGIN
     0
 END
 
+IDD_INI_EDITOR AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// Bitmap
-//
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Toolbar
-//
 
 #ifndef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

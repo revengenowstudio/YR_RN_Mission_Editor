@@ -53,7 +53,7 @@ protected:
 	afx_msg void OnUpdateValue();
 	afx_msg void OnAddsection();
 	afx_msg void OnDeletesection();
-	//afx_msg void OnDeletekey();
+	afx_msg void OnEditSection();
 	//afx_msg void OnAddkey();
 	afx_msg void OnInisection();
 
@@ -64,7 +64,7 @@ protected:
 	CButton			m_IniSection;
 	CButton			m_AddSection;
 	CButton			m_DeleteSection;
-	//CButton	m_DeleteKey;
+	CButton			m_EditButton;
 	//CButton	m_AddKey;
 	//CComboBox	m_Sections;
 };

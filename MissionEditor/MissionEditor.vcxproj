@@ -501,6 +501,7 @@
     <ClCompile Include="ImportINI.cpp" />
     <ClCompile Include="Infantry.cpp" />
     <ClCompile Include="Info.cpp" />
+    <ClCompile Include="IniContentEditor.cpp" />
     <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="INIMeta.cpp" />
     <ClCompile Include="InputBox.cpp" />
@@ -625,6 +626,7 @@
     <ClInclude Include="defines.h" />
     <ClInclude Include="GlobalObjectPool.h" />
     <ClInclude Include="Helpers.h" />
+    <ClInclude Include="IniContentEditor.h" />
     <ClInclude Include="IniHelper.h" />
     <ClInclude Include="IniMega.h" />
     <ClInclude Include="INIMeta.h" />
