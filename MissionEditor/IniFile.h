@@ -61,6 +61,13 @@ public:
 	}
 };
 
+struct CStringHash {
+	auto operator()(const CString& sv) const noexcept {
+		std::string_view view(sv.operator LPCSTR(), sv.GetLength());
+		return std::hash<decltype(view)>()(view);
+	}
+};
+
 class CIniFileSection
 {
 public:

@@ -501,6 +501,7 @@
     <ClCompile Include="ImportINI.cpp" />
     <ClCompile Include="Infantry.cpp" />
     <ClCompile Include="Info.cpp" />
+    <ClCompile Include="IniContentEditor.cpp" />
     <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="INIMeta.cpp" />
     <ClCompile Include="InputBox.cpp" />
@@ -601,6 +602,7 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\CreateNewMap.rc" />
+    <ResourceCompile Include="res\IniEdit.rc" />
     <ResourceCompile Include="res\MissionEditor.rc" />
     <ResourceCompile Include="res\SaveOptions.rc" />
     <ResourceCompile Include="res\TerrainBar.rc" />
@@ -624,6 +626,7 @@
     <ClInclude Include="defines.h" />
     <ClInclude Include="GlobalObjectPool.h" />
     <ClInclude Include="Helpers.h" />
+    <ClInclude Include="IniContentEditor.h" />
     <ClInclude Include="IniHelper.h" />
     <ClInclude Include="IniMega.h" />
     <ClInclude Include="INIMeta.h" />

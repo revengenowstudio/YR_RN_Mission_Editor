@@ -27,7 +27,8 @@
 #include "mapdata.h"
 #include "variables.h"
 #include "functions.h"
-
+#include "IniContentEditor.h"
+#include <sstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -54,16 +55,16 @@ CAll::CAll(CWnd* pParent /*=NULL*/)
 void CAll::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CAll)
-	DDX_Control(pDX, IDC_VALUE, m_Value);
-	DDX_Control(pDX, IDC_KEYS, m_Keys);
+
+	DDX_Control(pDX, IDC_INI_EDITOR_CONTENT, m_Value);
+	DDX_Control(pDX, IDC_EDITOR_SECTIONS, m_Sections);
 	DDX_Control(pDX, IDC_INISECTION, m_IniSection);
 	DDX_Control(pDX, IDC_DELETESECTION, m_DeleteSection);
-	DDX_Control(pDX, IDC_DELETEKEY, m_DeleteKey);
+	DDX_Control(pDX, IDC_EDITOR_EDIT_BUTTON, m_EditButton);
 	DDX_Control(pDX, IDC_ADDSECTION, m_AddSection);
-	DDX_Control(pDX, IDC_ADDKEY, m_AddKey);
-	DDX_Control(pDX, IDC_SECTIONS, m_Sections);
-	//}}AFX_DATA_MAP
+	//DDX_Control(pDX, IDC_ADDKEY, m_AddKey);
+	//DDX_Control(pDX, IDC_SECTIONS, m_Sections);
+
 }
 
 BOOL CAll::OnInitDialog()
@@ -71,6 +72,13 @@ BOOL CAll::OnInitDialog()
 	auto const ret = CDialog::OnInitDialog();
 
 	translateUI();
+
+	CFont font;
+	font.CreatePointFont(100, _T("Tahoma"));
+	m_Value.SetFont(&font);
+	m_Value.SetReadOnly();
+
+	m_IniSection.EnableWindow(FALSE); // disable import feature for now
 
 	return ret;
 }
@@ -80,123 +88,146 @@ void CAll::translateUI()
 	TranslateWindowCaption(*this, "IniEditorCaption");
 
 	TranslateDlgItem(*this, IDC_INI_EDITOR_DESC, "IniEditorDesc");
-	TranslateDlgItem(*this, IDC_INI_EDITOR_SECTIONS, "IniEditorSections");
-	TranslateDlgItem(*this, IDC_INI_EDITOR_CONTENT, "IniEditorSectionContent");
+	//TranslateDlgItem(*this, IDC_INI_EDITOR_SECTIONS, "IniEditorSections");
+	//TranslateDlgItem(*this, IDC_INI_EDITOR_CONTENT, "IniEditorSectionContent");
+	TranslateDlgItem(*this, IDC_EDITOR_EDIT_BUTTON, "IniEditorEditSection");
 	TranslateDlgItem(*this, IDC_INI_EDITOR_KEYS, "IniEditorSectionKeys");
-	TranslateDlgItem(*this, IDC_INI_EDITOR_VAL, "IniEditorSectionValue");
+	TranslateDlgItem(*this, IDC_INI_EDITOR_TXT_SEARCH, "IniEditorSearch");
 	
 	TranslateDlgItem(*this, IDC_ADDSECTION, "IniEditorAdd");
 	TranslateDlgItem(*this, IDC_DELETESECTION, "IniEditorDelete");
 	TranslateDlgItem(*this, IDC_INISECTION, "IniEditorInsert");
 
-	TranslateDlgItem(*this, IDC_ADDKEY, "IniEditorAddKey");
-	TranslateDlgItem(*this, IDC_DELETEKEY, "IniEditorDeleteKey");
+	//TranslateDlgItem(*this, IDC_ADDKEY, "IniEditorAddKey");
+	//TranslateDlgItem(*this, IDC_DELETEKEY, "IniEditorDeleteKey");
 	
 }
 
 BEGIN_MESSAGE_MAP(CAll, CDialog)
 	//{{AFX_MSG_MAP(CAll)
-	ON_CBN_SELCHANGE(IDC_SECTIONS, OnSelchangeSections)
-	ON_EN_CHANGE(IDC_VALUE, OnChangeValue)
-	ON_LBN_SELCHANGE(IDC_KEYS, OnSelchangeKeys)
-	ON_EN_UPDATE(IDC_VALUE, OnUpdateValue)
-	ON_BN_CLICKED(IDC_ADDSECTION, OnAddsection)
-	ON_BN_CLICKED(IDC_DELETESECTION, OnDeletesection)
-	ON_BN_CLICKED(IDC_DELETEKEY, OnDeletekey)
-	ON_BN_CLICKED(IDC_ADDKEY, OnAddkey)
-	ON_BN_CLICKED(IDC_INISECTION, OnInisection)
+	ON_LBN_SELCHANGE(IDC_EDITOR_SECTIONS, OnSelchangeSections)
+	//ON_EN_CHANGE(IDC_VALUE, OnChangeValue)
+	//ON_LBN_SELCHANGE(IDC_EDITOR_SECTIONS, OnSelchangeKeys)
+	//ON_EN_UPDATE(IDC_VALUE, OnUpdateValue)
+	ON_BN_CLICKED(IDC_ADDSECTION, OnAddSection)
+	ON_BN_CLICKED(IDC_DELETESECTION, OnDeleteSection)
+	ON_BN_CLICKED(IDC_EDITOR_EDIT_BUTTON, OnEditSection)
+	//ON_BN_CLICKED(IDC_ADDKEY, OnAddkey)
+	ON_BN_CLICKED(IDC_INISECTION, OnIniSectionImport)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CAll 
 
+BOOL CAll::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
+
+BOOL CAll::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+	case VK_RETURN:
+	{
+		switch (::GetDlgCtrlID(pMsg->hwnd)) {
+		default:
+			break;// never exist window (default -1) even nothing did
+			//case IDC_INI_E_CUR_SEC_VAL: this->onEditchangeSearch();
+			//	break;
+		}
+	}
+	}
+	return TRUE;
+}
+
 void CAll::UpdateDialog()
 {
 	//m_Sections.Clear();
 
 	while (m_Sections.DeleteString(0) != -1);
-	while (m_Keys.DeleteString(0) != -1);
 	CIniFile& ini = Map->GetIniFile();
-
 
 	m_Value.SetWindowText("");
 
-	int i;
 	for (auto const& [name, sec] : ini) {
 		if (!Map->IsMapSection(name)) {
 			m_Sections.InsertString(-1, name);
 		}
 	}
 
-	m_Sections.SetCurSel(1);
+	m_Sections.SetCurSel(0);
 	OnSelchangeSections();
 }
 
 void CAll::OnSelchangeSections()
 {
-	while (m_Keys.DeleteString(0) != CB_ERR);
 	CIniFile& ini = Map->GetIniFile();
 
-	CString cuSection;
-	m_Sections.GetWindowText(cuSection);
+	CString curSection;
+	if (auto const selected = m_Sections.GetCurSel(); selected >= 0) {
+		m_Sections.GetText(selected, curSection);
+	}
 
-	if (cuSection.GetLength()) {
-		int i;
-		m_Keys.SetRedraw(FALSE);
-		SetCursor(LoadCursor(0, IDC_WAIT));
-		for (auto const& [key, val] : ini[cuSection]) {
-			m_Keys.InsertString(-1, key);
-
+	if (curSection.GetLength()) {
+		std::stringstream sectionItems;
+		for (auto const& [key, val] : ini[curSection]) {
+			sectionItems << key << '=' << val << std::endl;
 		}
-		SetCursor(m_hArrowCursor);
-		m_Keys.SetRedraw(TRUE);
-		m_Keys.RedrawWindow();
+		auto const itemString = sectionItems.str();
+		m_Value.SetWindowText(itemString.c_str());
 	}
 }
 
-
-void CAll::OnChangeValue()
+void CAll::OnEditSection()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString t;
-	m_Value.GetWindowText(t);
-
-	CString cuSection;
-	m_Sections.GetWindowText(cuSection);
-
-
-	CString cuKey;
-	if (m_Keys.GetCurSel() >= 0) {
-		m_Keys.GetText(m_Keys.GetCurSel(), cuKey);
+	CString curSection;
+	if (auto const selected = m_Sections.GetCurSel(); selected >= 0) {
+		m_Sections.GetText(selected, curSection);
+	}
+	if (curSection.IsEmpty()) {
+		return;
 	}
 
-	ini.SetString(cuSection, cuKey, t);
+	CIniContentEditor innerEditor;
 
+	innerEditor.SetSection(curSection);
+	{
+		CString curItems;
+		m_Value.GetWindowText(curItems);
+		innerEditor.SetContent(curItems);
+	}
+
+	if (innerEditor.DoModal() == IDCANCEL) {
+		return;
+	}
+
+	m_Value.SetWindowText(innerEditor.Content());
+
+	auto& ini = Map->GetIniFile();
+	ini.AddSection(curSection) = innerEditor.PopSection();
 }
 
-void CAll::OnSelchangeKeys()
+void CAll::OnAddSection()
 {
-	CIniFile& ini = Map->GetIniFile();
+	CString name = InputBox(TranslateStringACP("IniEditorAddTip"), TranslateStringACP("IniEditorAdd"));
 
-	CString cuSection;
-	m_Sections.GetWindowText(cuSection);
+	name.Trim();
 
-	CString cuKey;
-	m_Keys.GetText(m_Keys.GetCurSel(), cuKey);
+	if (name.IsEmpty()) {
+		return;
+	}
 
-	m_Value.SetWindowText(ini.GetString(cuSection, cuKey));
-}
-
-void CAll::OnUpdateValue()
-{
-
-}
-
-void CAll::OnAddsection()
-{
-	CString name = InputBox("Please set the name of the new section (the section may already exist)", "Insert Section");
+	if (Map->IsMapSection(name)) {
+		MessageBox(TranslateStringACP("IniEditorAddNotAllowed"), TranslateStringACP("Error"), MB_OK);
+		return;
+	}
 
 	CIniFile& ini = Map->GetIniFile();
 
@@ -205,7 +236,7 @@ void CAll::OnAddsection()
 	UpdateDialog();
 }
 
-void CAll::OnDeletesection()
+void CAll::OnDeleteSection()
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -219,10 +250,10 @@ void CAll::OnDeletesection()
 	}
 
 	CString str;
-	m_Sections.GetLBText(cusection, str);
+	m_Sections.GetText(cusection, str);
 
 	auto const msgBefore = TranslateStringACP("IniEditorSelectionDeletePrefix");
-	auto const msgAfter = TranslateStringACP("IniEditorSelectionDeleteSUffix");
+	auto const msgAfter = TranslateStringACP("IniEditorSelectionDeleteSuffix");
 	auto const cap = TranslateStringACP("IniEditorDeleteSelectionCap");
 
 	if (MessageBox(msgBefore + str + msgAfter, cap, MB_YESNO) == IDNO) {
@@ -234,75 +265,7 @@ void CAll::OnDeletesection()
 	UpdateDialog();
 }
 
-void CAll::OnDeletekey()
-{
-	CIniFile& ini = Map->GetIniFile();
-
-	int cukey;
-	if (m_Sections.GetCurSel() < 0) return;
-	cukey = m_Keys.GetCurSel();
-	if (cukey == -1) {
-		MessageBox("You cannot delete a key without choosing one.");
-		return;
-	}
-
-	CString str;
-	CString sec;
-	int cuSection = m_Sections.GetCurSel();
-	m_Sections.GetLBText(cuSection, sec);
-	m_Keys.GetText(cukey, str);
-
-	if (MessageBox(CString((CString)"Are you sure you want to delete " + str + "? You should be really careful, you may not be able to use the map afterwards."), "Delete key", MB_YESNO) == IDNO) {
-		return;
-	}
-
-	ini.RemoveValueByKey(sec, str);
-
-	UpdateDialog();
-
-	m_Sections.SetCurSel(cuSection);
-	OnSelchangeSections();
-}
-
-void CAll::OnAddkey()
-{
-	CIniFile& ini = Map->GetIniFile();
-	int cusection;
-	cusection = m_Sections.GetCurSel();
-	if (cusection == -1) {
-		MessageBox("You need to specify a section first.");
-		return;
-	}
-
-	CString sec;
-	m_Sections.GetLBText(cusection, sec);
-
-	auto const msg = TranslateStringACP("IniEditorAddKeyDesc");
-	auto const cap = TranslateStringACP("IniEditorAddKeyCap");
-	auto key = InputBox(msg, cap);
-
-	if (key.IsEmpty()) {
-		return;
-	}
-
-	CString value;
-	if (key.Find("=") != -1) {
-		// value specified
-		// MW BUGFIX
-		value = key.Right(key.GetLength() - key.Find("=") - 1);
-		key = key.Left(key.Find("="));
-	}
-	key.Trim();
-	value.Trim();
-
-	ini.SetString(sec, key, value);
-
-	UpdateDialog();
-	m_Sections.SetCurSel(cusection);
-	OnSelchangeSections();
-}
-
-void CAll::OnInisection()
+void CAll::OnIniSectionImport()
 {
 	CFileDialog dlg(FALSE, ".ini", "*.ini", OFN_HIDEREADONLY | OFN_FILEMUSTEXIST, "INI files|*.ini|");
 
@@ -312,7 +275,9 @@ void CAll::OnInisection()
 	GetCurrentDirectory(MAX_PATH, cuPath);
 	dlg.m_ofn.lpstrInitialDir = cuPath;
 
-	if (theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir = (char*)(LPCTSTR)theApp.m_Options.TSExe;
+	if (theApp.m_Options.TSExe.GetLength()) {
+		dlg.m_ofn.lpstrInitialDir = theApp.m_Options.TSExe;
+	}
 
 	if (dlg.DoModal() != IDCANCEL) {
 		CImportINI impini;

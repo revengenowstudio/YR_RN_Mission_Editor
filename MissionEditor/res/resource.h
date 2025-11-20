@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by CreateNewMap.rc
+// Used by IniEdit.rc
 //
 #define PRODUCT_VERSION_REVISION        0
 #define PRODUCT_VERSION_MINOR           1
@@ -101,6 +101,7 @@
 #define IDD_COMBO_UINPUT                289
 #define IDC_EDITOR_ARROW                299
 #define IDD_CSF_VIEWER                  300
+#define IDD_INI_EDITOR                  329
 #define IDC_BULB                        1000
 #define IDC_STARTUP                     1001
 #define IDC_NEXTTIP                     1002
@@ -132,16 +133,17 @@
 #define IDC_INITTIME                    1030
 #define IDC_REQUIREDADDON               1031
 #define IDC_EDIT1                       1034
+#define IDC_INI_E_CUR_SEC_VAL           1034
 #define IDC_CHOOSE                      1035
-#define IDC_SECTIONS                    1036
+#define IDC_EDITOR_SEARCH               1036
 #define IDC_LEFT                        1036
 #define IDC_ADDSECTION                  1037
 #define IDC_TOP                         1037
 #define IDC_DELETESECTION               1038
-#define IDC_KEYS                        1039
-#define IDC_ADDKEY                      1040
-#define IDC_DELETEKEY                   1041
+#define IDC_EDITOR_SECTIONS             1039
+#define IDC_EDITOR_EDIT_BUTTON          1040
 #define IDC_INISECTION                  1042
+#define IDC_EDITOR_NEW_SECTION          1043
 #define IDC_VALUE                       1043
 #define IDC__SIZE                       1044
 #define IDC__SIZEX                      1044
@@ -620,7 +622,7 @@
 #define IDC_USR_SCRIPTS_DESC            1539
 #define IDC_USR_SCRIPTS_REPORT          1540
 #define IDC_USR_SCRIPTS_AVA             1541
-#define IDC_INI_EDITOR_SECTIONS         1542
+#define IDC_INI_EDITOR_TXT_SEARCH       1542
 #define IDC_INI_EDITOR_DESC             1543
 #define IDC_INI_EDITOR_CONTENT          1544
 #define IDC_INI_EDITOR_VAL              1545
@@ -652,7 +654,10 @@
 #define IDC_NEWMAPIMPORT_TXT_DSC        1567
 #define IDC_NEWMAPSP_TXT_DSC            1568
 #define IDC_TERRAINBAR_MANAGER          1569
+#define IDC_SECTION_TEXT                1569
 #define IDC_TERRAINBAR_GENERATOR        1570
+#define IDC_INI_E_CUR_SEC               1570
+#define IDC_INI_E_DISABLE_VALIDATION    1571
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -747,9 +752,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        329
+#define _APS_NEXT_RESOURCE_VALUE        331
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1569
+#define _APS_NEXT_CONTROL_VALUE         1572
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif
