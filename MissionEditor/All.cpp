@@ -29,6 +29,7 @@
 #include "functions.h"
 #include "IniContentEditor.h"
 #include <sstream>
+#include <regex>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -62,9 +63,7 @@ void CAll::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DELETESECTION, m_DeleteSection);
 	DDX_Control(pDX, IDC_EDITOR_EDIT_BUTTON, m_EditButton);
 	DDX_Control(pDX, IDC_ADDSECTION, m_AddSection);
-	//DDX_Control(pDX, IDC_ADDKEY, m_AddKey);
-	//DDX_Control(pDX, IDC_SECTIONS, m_Sections);
-
+	DDX_Control(pDX, IDC_EDITOR_SEARCH, m_SearchString);
 }
 
 BOOL CAll::OnInitDialog()
@@ -88,25 +87,22 @@ void CAll::translateUI()
 	TranslateWindowCaption(*this, "IniEditorCaption");
 
 	TranslateDlgItem(*this, IDC_INI_EDITOR_DESC, "IniEditorDesc");
-	//TranslateDlgItem(*this, IDC_INI_EDITOR_SECTIONS, "IniEditorSections");
-	//TranslateDlgItem(*this, IDC_INI_EDITOR_CONTENT, "IniEditorSectionContent");
 	TranslateDlgItem(*this, IDC_EDITOR_EDIT_BUTTON, "IniEditorEditSection");
 	TranslateDlgItem(*this, IDC_INI_EDITOR_KEYS, "IniEditorSectionKeys");
 	TranslateDlgItem(*this, IDC_INI_EDITOR_TXT_SEARCH, "IniEditorSearch");
+	TranslateDlgItem(*this, IDC_INI_E_RE_SEARCH, "IniEditorSearchRegex");
 	
 	TranslateDlgItem(*this, IDC_ADDSECTION, "IniEditorAdd");
 	TranslateDlgItem(*this, IDC_DELETESECTION, "IniEditorDelete");
 	TranslateDlgItem(*this, IDC_INISECTION, "IniEditorInsert");
-
-	//TranslateDlgItem(*this, IDC_ADDKEY, "IniEditorAddKey");
-	//TranslateDlgItem(*this, IDC_DELETEKEY, "IniEditorDeleteKey");
 	
 }
 
 BEGIN_MESSAGE_MAP(CAll, CDialog)
 	//{{AFX_MSG_MAP(CAll)
+	ON_WM_TIMER()
 	ON_LBN_SELCHANGE(IDC_EDITOR_SECTIONS, OnSelchangeSections)
-	//ON_EN_CHANGE(IDC_VALUE, OnChangeValue)
+	ON_EN_CHANGE(IDC_EDITOR_SEARCH, OnSearchEditChange)
 	//ON_LBN_SELCHANGE(IDC_EDITOR_SECTIONS, OnSelchangeKeys)
 	//ON_EN_UPDATE(IDC_VALUE, OnUpdateValue)
 	ON_BN_CLICKED(IDC_ADDSECTION, OnAddSection)
@@ -145,6 +141,15 @@ BOOL CAll::onMessageKeyDown(MSG* pMsg)
 	}
 	}
 	return TRUE;
+}
+
+void CAll::OnTimer(UINT_PTR nIDEvent)
+{
+	if (nIDEvent == TIMER_IDX_SEARCH) {
+		KillTimer(TIMER_IDX_SEARCH);
+		OnSearchApply();
+	}
+	CDialog::OnTimer(nIDEvent);
 }
 
 void CAll::UpdateDialog()
@@ -216,7 +221,7 @@ void CAll::OnEditSection()
 
 void CAll::OnAddSection()
 {
-	CString name = InputBox(TranslateStringACP("IniEditorAddTip"), TranslateStringACP("IniEditorAdd"));
+	CString name = InputBox(GetLanguageStringACP("IniEditorAddTip"), GetLanguageStringACP("IniEditorAdd"));
 
 	name.Trim();
 
@@ -225,7 +230,7 @@ void CAll::OnAddSection()
 	}
 
 	if (Map->IsMapSection(name)) {
-		MessageBox(TranslateStringACP("IniEditorAddNotAllowed"), TranslateStringACP("Error"), MB_OK);
+		MessageBox(GetLanguageStringACP("IniEditorAddNotAllowed"), GetLanguageStringACP("Error"), MB_OK);
 		return;
 	}
 
@@ -234,6 +239,63 @@ void CAll::OnAddSection()
 	ini.AddSection(name);
 
 	UpdateDialog();
+}
+
+void CAll::OnSearchEditChange()
+{
+	// Control tick
+	SetTimer(TIMER_IDX_SEARCH, SEARCH_DELAY_MS, NULL);
+}
+
+void CAll::OnSearchApply()
+{
+	CString searchString;
+	m_SearchString.GetWindowText(searchString);
+
+	if (searchString.IsEmpty()) {
+		UpdateDialog();
+		return;
+	}
+
+	auto const regexSearchCB = reinterpret_cast<CButton*>(GetDlgItem(IDC_INI_E_RE_SEARCH));
+	auto const regexSearch = regexSearchCB && regexSearchCB->GetCheck() == BST_CHECKED;
+	if (!regexSearch) {
+		// TODO: icase string contains
+
+		return;
+	}
+
+	try {
+		auto const& ini = Map->GetIniFile();
+		std::regex rule(searchString.operator LPCSTR(), std::regex_constants::icase);
+		std::vector<CIniFile::Const_It> results;
+		results.reserve(ini.Size());
+		for (auto it = ini.begin(); it != ini.end(); ++it) {
+			if (Map->IsMapSection(it->first)) {
+				continue;
+			}
+			if (std::regex_search(it->first.operator LPCSTR(), rule)) {
+				results.emplace_back(it);
+			}
+		}
+
+		while (m_Sections.DeleteString(0) != -1);
+		m_Value.SetWindowText("");
+
+		for (auto const& it : results) {		
+			m_Sections.InsertString(-1, it->first);
+		}
+		if (m_Sections.GetCount() > 0) {
+			m_Sections.SetCurSel(0);
+			OnSelchangeSections();
+		}
+
+	} catch (const std::regex_error& e) {
+		errstream << "Regex error: " << e.what() << std::endl;
+		MessageBox(GetLanguageStringACP("IniEditorRegexError"), GetLanguageStringACP("Error"), MB_OK);
+		return;
+	}
+
 }
 
 void CAll::OnDeleteSection()

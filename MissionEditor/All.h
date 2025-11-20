@@ -50,25 +50,26 @@ protected:
 	BOOL onMessageKeyDown(MSG* pMsg);
 
 	afx_msg void OnSelchangeSections();
-	afx_msg void OnChangeValue();
-	//afx_msg void OnSelchangeKeys();
-	afx_msg void OnUpdateValue();
+	afx_msg void OnSearchEditChange();
+	afx_msg void OnSearchApply();
 	afx_msg void OnAddSection();
 	afx_msg void OnDeleteSection();
 	afx_msg void OnEditSection();
-	//afx_msg void OnAddkey();
 	afx_msg void OnIniSectionImport();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 
 	DECLARE_MESSAGE_MAP()
 
+	static constexpr int TIMER_IDX_SEARCH = 1;
+	static constexpr int SEARCH_DELAY_MS = 1000;
+
+	CEdit			m_SearchString;
 	CRichEditCtrl	m_Value;
 	CListBox		m_Sections;
 	CButton			m_IniSection;
 	CButton			m_AddSection;
 	CButton			m_DeleteSection;
 	CButton			m_EditButton;
-	//CButton	m_AddKey;
-	//CComboBox	m_Sections;
 };
 
 //{{AFX_INSERT_LOCATION}}
