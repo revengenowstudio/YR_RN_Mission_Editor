@@ -120,6 +120,33 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CAll 
 
+BOOL CAll::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
+
+BOOL CAll::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+	case VK_RETURN:
+	{
+		switch (::GetDlgCtrlID(pMsg->hwnd)) {
+		default:
+			break;// never exist window (default -1) even nothing did
+			//case IDC_INI_E_CUR_SEC_VAL: this->onEditchangeSearch();
+			//	break;
+		}
+	}
+	}
+	return TRUE;
+}
+
 void CAll::UpdateDialog()
 {
 	//m_Sections.Clear();

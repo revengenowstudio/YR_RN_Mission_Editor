@@ -42,10 +42,12 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
 	virtual BOOL OnInitDialog() override;
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 	//}}AFX_VIRTUAL
 
 // Implementierung
 	void translateUI();
+	BOOL onMessageKeyDown(MSG* pMsg);
 
 	afx_msg void OnSelchangeSections();
 	afx_msg void OnChangeValue();
