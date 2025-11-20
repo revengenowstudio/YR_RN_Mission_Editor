@@ -529,8 +529,7 @@ void TruncSpace(string& str)
 }
 void TruncSpace(CString& str)
 {
-	str.TrimLeft();
-	str.TrimRight();
+	str.Trim();
 	auto const spacePos = str.Find(" ");
 	if (spacePos >= 0) {
 		str.Delete(spacePos, str.GetLength() - spacePos);

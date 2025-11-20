@@ -203,8 +203,7 @@ void CTerrainDlg::Update()
 	auto const& types = rules["OverlayTypes"];
 	for (auto i = 0; i < types.Size(); i++) {
 		CString id = types.Nth(i).second;
-		id.TrimLeft();
-		id.TrimRight();
+		id.Trim();
 
 		if (id.GetLength() > 0) {
 

@@ -1158,8 +1158,7 @@ void CUserScriptsDlg::OnOK()
 				}
 			}
 
-			variables[params[0]].TrimLeft();
-			variables[params[0]].TrimRight();
+			variables[params[0]].Trim();
 		} else if (name == ID_NOT) {
 			if (paramcount < 1) {
 				ReportScriptError(i);
