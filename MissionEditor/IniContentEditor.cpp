@@ -81,7 +81,7 @@ void CIniContentEditor::OnOK()
 		if (eqlPos == line.npos) {
 			continue;
 		}
-		m_section.SetString(CString(line.data(), eqlPos - 1), CString(line.data() + eqlPos + 1));
+		m_section.SetString(CString(line.data(), eqlPos), CString(line.data() + eqlPos + 1));
 	}
 
 	EndDialog(IDOK);
