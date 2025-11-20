@@ -75,13 +75,16 @@ void CIniContentEditor::OnOK()
 	std::string line;
 	std::istringstream parseStream(m_content.operator LPCSTR());
 	while (std::getline(parseStream, line)) {
-		// TODO: parse INI and validate
 		auto const eqlPos = line.find('=');
 		// TODO: handle ; and trim
 		if (eqlPos == line.npos) {
 			continue;
 		}
-		m_section.SetString(CString(line.data(), eqlPos), CString(line.data() + eqlPos + 1));
+		auto key = CString(line.data(), eqlPos);
+		auto value = CString(line.data() + eqlPos + 1);
+		key.Trim();
+		value.Trim();
+		m_section.SetString(key, value);
 	}
 
 	EndDialog(IDOK);
