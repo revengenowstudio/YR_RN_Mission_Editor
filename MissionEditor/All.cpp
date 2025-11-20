@@ -191,8 +191,7 @@ void CAll::OnAddSection()
 {
 	CString name = InputBox(TranslateStringACP("IniEditorAddTip"), TranslateStringACP("IniEditorAdd"));
 
-	name.TrimLeft();
-	name.TrimRight();
+	name.Trim();
 
 	if (name.IsEmpty()) {
 		return;

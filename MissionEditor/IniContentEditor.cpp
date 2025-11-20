@@ -109,8 +109,7 @@ void CIniContentEditor::onSectionChanged()
 {
 	CString newSecName;
 	m_sectionValue.GetWindowText(newSecName);
-	newSecName.TrimLeft();
-	newSecName.TrimRight();
+	newSecName.Trim();
 
 	if (newSecName == m_sectionID) {
 		return;
