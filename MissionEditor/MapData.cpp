@@ -6388,7 +6388,7 @@ bool CMapData::IsMapSection(const CString& str)
 		"TaskForces",
 		"Triggers",
 		"Events",
-		"Actions"
+		"Actions",
 		"Tags",
 		"AITriggerTypes",
 	};
