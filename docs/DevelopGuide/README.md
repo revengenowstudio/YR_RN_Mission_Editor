@@ -30,8 +30,7 @@ MissionEditor依赖了xcc，而xcc需要使用vcpkg安装一些第三方库，�
     vcpkg x-update-baseline
 
 > [!NOTE]
-> xcc是已经内联修改了，不是按打patch的方式来的
-~~ 仓库已内嵌裁剪版 XCC，补丁位于 `3rdParty\xcc\patch.<COMMIT_HASH>.diff`。如要升级 XCC，请替换文件后重新打补丁。 ~~
+> XCC 已经搬运至本仓库内，并且进行了裁剪和部分优化，已不再跟随原始版本
 
 
 ### 编译步骤（以尤里版为例）
@@ -39,9 +38,12 @@ MissionEditor依赖了xcc，而xcc需要使用vcpkg安装一些第三方库，�
 2. 顶部配置切换为「FinalAlertDebug YR」，输出自动指向 FinalAlert2YR.exe
 3. F5 即可自动编译并调试运行
 
+> [!NOTE]
+> 如果选择「FinalAlertRelease YR」编译将获得最佳的性能体验，但会极大地削弱调试能力。
+
 
 ## 手动打包发行
-目前本仓库已Github Action流水线，可自动完成编译工作
+目前本仓库已配置好Github Action流水线，合并PR分支后流水线会自动完成编译和Release工作
 若改完代码仍然想手动发版，请先自行核对所有开源协议（含修改声明、版权追加等）。
 
 脚本一键打包：
@@ -51,8 +53,8 @@ MissionEditor依赖了xcc，而xcc需要使用vcpkg安装一些第三方库，�
 
 生成文件（dist 目录）：
 - FinalSun.zip → 泰伯利亚之日版
-- FinalAlert2.zip → 红警 2 版
-- FinalAlert2YR.zip → 尤里的复仇版
+- FinalAlert2.zip → 红色警戒2 原版
+- FinalAlert2YR.zip → 红色警戒2 - 尤里的复仇资料片版本（以及相关的Mod支持）
 - MissionEditorSource.zip → 当前仓库源码（不含未提交变更）
 - MissionEditorExternalSources.zip → 三方源码/二进制归档（可能含禁止再分发内容，仅留档）
 
