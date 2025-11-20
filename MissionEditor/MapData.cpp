@@ -6391,6 +6391,15 @@ bool CMapData::IsMapSection(const CString& str)
 		"Actions",
 		"Tags",
 		"AITriggerTypes",
+		"AITriqqerTypesEnable",
+		"CellTags",
+		"Countries",
+		"Digest",
+		"Houses",
+		"ScriptTypes",
+		"TeamTypes",
+		"VariableNames",
+		"Waypoints"
 	};
 
 	return mapReadOnlySections.find(str) != mapReadOnlySections.end();
