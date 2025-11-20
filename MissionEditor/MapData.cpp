@@ -6371,6 +6371,7 @@ because they become modified whenever the map is saved by the editor itself.
 */
 bool CMapData::IsMapSection(const CString& str)
 {
+	// TODO: make it configurable by workspace
 	static std::unordered_set<CString, CStringHash> mapReadOnlySections = {
 		"IsoMapPack5",
 		"OverlayPack",
@@ -6384,6 +6385,12 @@ bool CMapData::IsMapSection(const CString& str)
 		"Aircraft",
 		"Infantry",
 		"Variables",
+		"TaskForces",
+		"Triggers",
+		"Events",
+		"Actions"
+		"Tags",
+		"AITriggerTypes",
 	};
 
 	return mapReadOnlySections.find(str) != mapReadOnlySections.end();

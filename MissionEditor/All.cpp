@@ -78,6 +78,8 @@ BOOL CAll::OnInitDialog()
 	m_Value.SetFont(&font);
 	m_Value.SetReadOnly();
 
+	m_IniSection.EnableWindow(FALSE); // disable import feature for now
+
 	return ret;
 }
 
@@ -90,7 +92,7 @@ void CAll::translateUI()
 	//TranslateDlgItem(*this, IDC_INI_EDITOR_CONTENT, "IniEditorSectionContent");
 	TranslateDlgItem(*this, IDC_EDITOR_EDIT_BUTTON, "IniEditorEditSection");
 	TranslateDlgItem(*this, IDC_INI_EDITOR_KEYS, "IniEditorSectionKeys");
-	//TranslateDlgItem(*this, IDC_INI_EDITOR_VAL, "IniEditorSectionValue");
+	TranslateDlgItem(*this, IDC_INI_EDITOR_TXT_SEARCH, "IniEditorSearch");
 	
 	TranslateDlgItem(*this, IDC_ADDSECTION, "IniEditorAdd");
 	TranslateDlgItem(*this, IDC_DELETESECTION, "IniEditorDelete");
@@ -107,11 +109,11 @@ BEGIN_MESSAGE_MAP(CAll, CDialog)
 	//ON_EN_CHANGE(IDC_VALUE, OnChangeValue)
 	//ON_LBN_SELCHANGE(IDC_EDITOR_SECTIONS, OnSelchangeKeys)
 	//ON_EN_UPDATE(IDC_VALUE, OnUpdateValue)
-	ON_BN_CLICKED(IDC_ADDSECTION, OnAddsection)
-	ON_BN_CLICKED(IDC_DELETESECTION, OnDeletesection)
+	ON_BN_CLICKED(IDC_ADDSECTION, OnAddSection)
+	ON_BN_CLICKED(IDC_DELETESECTION, OnDeleteSection)
 	ON_BN_CLICKED(IDC_EDITOR_EDIT_BUTTON, OnEditSection)
 	//ON_BN_CLICKED(IDC_ADDKEY, OnAddkey)
-	ON_BN_CLICKED(IDC_INISECTION, OnInisection)
+	ON_BN_CLICKED(IDC_INISECTION, OnIniSectionImport)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -185,9 +187,21 @@ void CAll::OnEditSection()
 	ini.AddSection(curSection) = innerEditor.PopSection();
 }
 
-void CAll::OnAddsection()
+void CAll::OnAddSection()
 {
-	CString name = InputBox("Please set the name of the new section (the section may already exist)", "Insert Section");
+	CString name = InputBox(TranslateStringACP("IniEditorAddTip"), TranslateStringACP("IniEditorAdd"));
+
+	name.TrimLeft();
+	name.TrimRight();
+
+	if (name.IsEmpty()) {
+		return;
+	}
+
+	if (Map->IsMapSection(name)) {
+		MessageBox(TranslateStringACP("IniEditorAddNotAllowed"), TranslateStringACP("Error"), MB_OK);
+		return;
+	}
 
 	CIniFile& ini = Map->GetIniFile();
 
@@ -196,7 +210,7 @@ void CAll::OnAddsection()
 	UpdateDialog();
 }
 
-void CAll::OnDeletesection()
+void CAll::OnDeleteSection()
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -213,7 +227,7 @@ void CAll::OnDeletesection()
 	m_Sections.GetText(cusection, str);
 
 	auto const msgBefore = TranslateStringACP("IniEditorSelectionDeletePrefix");
-	auto const msgAfter = TranslateStringACP("IniEditorSelectionDeleteSUffix");
+	auto const msgAfter = TranslateStringACP("IniEditorSelectionDeleteSuffix");
 	auto const cap = TranslateStringACP("IniEditorDeleteSelectionCap");
 
 	if (MessageBox(msgBefore + str + msgAfter, cap, MB_YESNO) == IDNO) {
@@ -225,7 +239,7 @@ void CAll::OnDeletesection()
 	UpdateDialog();
 }
 
-void CAll::OnInisection()
+void CAll::OnIniSectionImport()
 {
 	CFileDialog dlg(FALSE, ".ini", "*.ini", OFN_HIDEREADONLY | OFN_FILEMUSTEXIST, "INI files|*.ini|");
 
@@ -235,7 +249,9 @@ void CAll::OnInisection()
 	GetCurrentDirectory(MAX_PATH, cuPath);
 	dlg.m_ofn.lpstrInitialDir = cuPath;
 
-	if (theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir = (char*)(LPCTSTR)theApp.m_Options.TSExe;
+	if (theApp.m_Options.TSExe.GetLength()) {
+		dlg.m_ofn.lpstrInitialDir = theApp.m_Options.TSExe;
+	}
 
 	if (dlg.DoModal() != IDCANCEL) {
 		CImportINI impini;

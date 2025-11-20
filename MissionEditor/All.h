@@ -51,11 +51,11 @@ protected:
 	afx_msg void OnChangeValue();
 	//afx_msg void OnSelchangeKeys();
 	afx_msg void OnUpdateValue();
-	afx_msg void OnAddsection();
-	afx_msg void OnDeletesection();
+	afx_msg void OnAddSection();
+	afx_msg void OnDeleteSection();
 	afx_msg void OnEditSection();
 	//afx_msg void OnAddkey();
-	afx_msg void OnInisection();
+	afx_msg void OnIniSectionImport();
 
 	DECLARE_MESSAGE_MAP()
 
