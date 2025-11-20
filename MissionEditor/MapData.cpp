@@ -6391,7 +6391,7 @@ bool CMapData::IsMapSection(const CString& str)
 		"Actions",
 		"Tags",
 		"AITriggerTypes",
-		"AITriqqerTypesEnable",
+		"AITriggerTypesEnable",
 		"CellTags",
 		"Countries",
 		"Digest",
