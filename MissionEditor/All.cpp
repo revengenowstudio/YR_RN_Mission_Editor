@@ -162,7 +162,7 @@ void CAll::UpdateDialog()
 		}
 	}
 
-	m_Sections.SetCurSel(1);
+	m_Sections.SetCurSel(0);
 	OnSelchangeSections();
 }
 
