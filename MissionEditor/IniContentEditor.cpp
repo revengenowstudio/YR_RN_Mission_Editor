@@ -97,12 +97,18 @@ BOOL CIniContentEditor::onMessageKeyDown(MSG* pMsg)
 			switch (::GetDlgCtrlID(pMsg->hwnd)) {
 			default:
 				break;// never exist window (default -1) even nothing did
-			//case IDC_INI_E_CUR_SEC_VAL: this->onEditchangeSearch();
-			//	break;
+			case IDC_SECTION_TEXT: 
+				this->onTextInsertLineEnd();
+				break;
 			}
 		}
 	}
 	return TRUE;
+}
+
+void CIniContentEditor::onTextInsertLineEnd()
+{
+	m_contentText.ReplaceSel(_T("\r\n"), TRUE);
 }
 
 void CIniContentEditor::onSectionChanged()

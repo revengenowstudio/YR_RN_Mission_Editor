@@ -47,6 +47,7 @@ protected:
 
 	void translateUI();
 	BOOL onMessageKeyDown(MSG* pMsg);
+	void onTextInsertLineEnd();
 
 	afx_msg void onSectionChanged();
 
