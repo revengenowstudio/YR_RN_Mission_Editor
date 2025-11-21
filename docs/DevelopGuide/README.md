@@ -3,11 +3,11 @@
 - MissionEditor：主程序
 - MissionEditorPackLib：用 C 函数封装 XCC 对象，提供加载/打包逻辑
 
+
 ## 搭建编译环境
 - 需要准备以下软件搭建开发环境
   - `Microsoft Visual Studio 2022` (IDE)
   - `Git™ for Windows` (代码仓库Clone)
-
 1. 确保已安装 [Visual Studio Community 2022](https://visualstudio.microsoft.com/zh-hans/vs/) 和 [Git for Windows](https://git-scm.com/install/windows)。此处省略Git安装步骤和配置步骤
 2. 启动 `Visual Studio Installer`
 3. 点 `Visual Studio Community 2022` 右侧的`修改`按钮，勾选以下内容
@@ -83,7 +83,6 @@ vcpkg x-update-baseline
 - MissionEditor\data\FinalSun：FS 专有数据
 - MissionEditor\PropertySheets：公共属性表，方便管理多配置
 - dist：最终输出，含 exe、依赖 DLL 与 data，由 common.props 自动拷贝
-
 
 
 ## 常见问题
