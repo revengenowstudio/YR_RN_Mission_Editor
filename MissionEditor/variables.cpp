@@ -111,18 +111,12 @@ vector<CString> rndterrainsrc;
 
 /* Overlay tile data */
 #ifndef RA2_MODE
-int overlay_number[] = { 0x0,0x2, 0x1a, 0x7e, 0xa7, 0x27 };
-CString overlay_name[] = { "Sandbags","GDI Wall", "Nod Wall", "Veins", "Veinhole monster", "Tracks" };
 BOOL overlay_visible[] = { TRUE,TRUE,TRUE,FALSE,FALSE, TRUE };
 BOOL overlay_trail[] = { TRUE,TRUE,TRUE,FALSE,FALSE, TRUE };
-BOOL overlay_trdebug[] = { FALSE,FALSE,FALSE,FALSE,FALSE, FALSE };
 BOOL yr_only[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 int overlay_count = 6;
 const std::string editor_name = "FinalSun";
 #else
-int overlay_number[] = { 0x0,0x2, 0x1a, 0xcb, 0xf1, 0xcc,0xf3,0xf0, 0x27 };
-BOOL overlay_trdebug[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE };
-CString overlay_name[] = { "Sandbags","Allied Wall", "Soviet Wall", "Black fence", "Prison camp fence", "White fence", "Yuri Wall", "Kremlin Wall", "Tracks" };
 BOOL overlay_visible[] = { TRUE,TRUE,TRUE,TRUE,TRUE,TRUE, TRUE, TRUE, TRUE };
 BOOL overlay_trail[] = { TRUE,TRUE,TRUE,TRUE,TRUE,TRUE, TRUE, TRUE, TRUE };
 BOOL yr_only[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE };

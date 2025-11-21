@@ -130,10 +130,33 @@ extern bool bAllowAccessBehindCliffs;
 
 // overlay types (the ones with additional information like name etc.)
 extern int overlay_count; // number of overlay ids that have additional information
-extern int overlay_number[]; // what overlay id?
-extern CString overlay_name[]; // what name?
+#if defined(RA2_MODE)
+static constexpr BOOL overlay_trdebug[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE };
+static constexpr int overlay_number[] = { 0x0,0x2, 0x1a, 0xcb, 0xf1, 0xcc,0xf3,0xf0, 0x27 };
+static constexpr const char* overlay_name[] = {
+	"Sandbags",
+	"Allied Wall",
+	"Soviet Wall", 
+	"Black fence", 
+	"Prison camp fence", 
+	"White fence", 
+	"Yuri Wall", 
+	"Kremlin Wall", 
+	"Tracks" 
+};
+#else
+static constexpr BOOL overlay_trdebug[] = { FALSE,FALSE,FALSE,FALSE,FALSE, FALSE };
+static constexpr int overlay_number[] = { 0x0,0x2, 0x1a, 0x7e, 0xa7, 0x27 };
+static constexpr const char* overlay_name[] = {
+	"Sandbags",
+	"GDI Wall", 
+	"Nod Wall",
+	"Veins",
+	"Veinhole monster",
+	"Tracks" 
+};
+#endif
 extern BOOL overlay_trail[]; // is it handled as trail?
-extern BOOL overlay_trdebug[];
 extern BOOL yr_only[];
 
 

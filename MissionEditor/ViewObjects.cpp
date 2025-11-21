@@ -66,9 +66,6 @@ BEGIN_MESSAGE_MAP(CViewObjects, CTreeView)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-
-extern int overlay_number[];
-extern CString overlay_name[];
 extern BOOL overlay_visible[];
 extern BOOL overlay_trail[];
 
@@ -1084,23 +1081,64 @@ void CViewObjects::UpdateDialog()
 	}
 
 
-	for (i = 0; i < overlay_count; i++) {
-		if (overlay_visible[i] && (!yr_only[i] || yuri_mode)) {
-			if (!overlay_trdebug[i] || g_data.GetBool("Debug", "EnableTrackLogic"))
-				tree.InsertItem(TVIF_PARAM | TVIF_TEXT, TranslateStringACP(overlay_name[i]), 0, 0, 0, 0, valadded * 6 + 3000 + overlay_number[i], alloverlay, TVI_LAST);
+	auto const& overlayTypeSec = rules["OverlayTypes"];
+	auto const sizeLimit = std::min<unsigned int>(overlayTypeSec.Size(), 255);
+	auto getOverlayDisplayName = [](const CString& id) -> CString {
+		auto const& uiName = rules.GetString(id, "UIName");
+		auto it = AllStrings.find(uiName);
+		if (it != AllStrings.end()) {
+			return it->second.cString;
 		}
+		return GetLanguageStringACP(id);
+	};
+
+	for (i = 0; i < sizeLimit; i++) {
+		bool allowedToList = false;
+		auto const& unitname = overlayTypeSec.Nth(i).second;
+		if (rules.GetBool(unitname, "Wall") && rules.GetBool(unitname, "Wall.HasConnection", true)) {
+			allowedToList = true;
+		}
+
+		do {
+			if (allowedToList) {
+				break;
+			}
+			if (!overlay_visible[i]) {
+				allowedToList = false;
+				break;
+			}
+			if (yr_only[i] && !yuri_mode) {
+				allowedToList = false;
+				break;
+			}
+#if 0 // haven't figured out what it is
+			if (i < std::size(overlay_trdebug) && overlay_trdebug[i] && g_data.GetBool("Debug", "EnableTrackLogic")) {
+				allowedToList = true;
+				break;
+			}
+#endif
+		} while (0);
+
+		auto const& overlayName = getOverlayDisplayName(unitname);
+
+		if (allowedToList) {
+			tree.InsertItem(TVIF_PARAM | TVIF_TEXT, overlayName,
+				0, 0, 0, 0, valadded * 6 + 3000 + i, alloverlay, TVI_LAST);
+		}
+
 	}
 
 	auto const ignoreSet = CollectIgnoreSet();
 
 	e = 0;
 	if (!theApp.m_Options.bEasy) {
-		for (i = 0; i < rules["OverlayTypes"].Size(); i++) {
+		auto const sizeLimit = std::min<unsigned int>(overlayTypeSec.Size(), 255);
+		for (i = 0; i < sizeLimit; i++) {
 			// it seems there is somewhere a bug that lists empty overlay ids... though they are not in the rules.ini
 			// so this here is the workaround:
-			auto const& unitname = rules["OverlayTypes"].Nth(i).second;
+			auto const& unitname = overlayTypeSec.Nth(i).second;
 			auto id = unitname;
-			//if(strchr(id,' ')!=NULL){ id[strchr(id,' ')-id;};		
+
 			if (id.Find(' ') >= 0) {
 				id = id.Left(id.Find(' '));
 			}
