@@ -125,6 +125,9 @@ void CTileSetBrowserView::onDrawTileSetPlacement(CDC* pDC)
 	GetClientRect(&r);
 
 	int max_r = r.right / m_tile_width;
+	if (max_r == 0) {
+		max_r = 1;
+	}
 
 	for (i = 0; i < m_tilecount; i++) {
 		char c[50];
@@ -148,6 +151,12 @@ void CTileSetBrowserView::onDrawTileSetPlacement(CDC* pDC)
 		if (!m_lpDDS[i]) {
 			continue;
 		}
+
+		if (cur_x + curwidth > r.right) { // move to next row
+			cur_x = 0; // reset to first column
+			cur_y += m_tile_height;
+		}
+
 
 		RECT r;
 		GetClientRect(&r);
@@ -194,8 +203,8 @@ void CTileSetBrowserView::onDrawTileSetPlacement(CDC* pDC)
 		}
 
 		cur_x += m_tile_width;
-		if (max_r == 0) max_r = 1;
-		if (i % max_r == max_r - 1) {
+
+		if ((i % max_r) == max_r - 1) {
 			cur_y += m_tile_height;
 			cur_x = 0;
 		}
@@ -351,6 +360,17 @@ DWORD CTileSetBrowserView::GetTileID(DWORD dwTileSet, DWORD dwType)
 	return tilecount;
 }
 
+void CTileSetBrowserView::RecalcBottomNeeded()
+{
+	RECT r;
+	GetClientRect(&r);
+	int col_count = r.right / m_tile_width;
+	if (col_count <= 0) {
+		col_count = 1;
+	}
+	m_bottom_needed = m_tile_height * (1 + m_tilecount / col_count);
+}
+
 void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 {
 	m_currentTileSet = dwTileSet;
@@ -394,9 +414,8 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 			}
 		}
 	}
-	DWORD dwID;
 	for (i = 0; i < max; i++) {
-		dwID = dwStartID + i; // just faster than always calling GetTileID()
+		DWORD dwID = dwStartID + i; // just faster than always calling GetTileID()
 		if (dwID < *tiledata_count) {
 			if ((*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left > m_tile_width) {
 				m_tile_width = (*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left;
@@ -426,13 +445,7 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 		m_lpDDS[i] = RenderTile(dwStartID + i);
 	}
 
-	RECT r;
-	GetClientRect(&r);
-	int max_r = r.right / m_tile_width;
-	if (max_r <= 0) {
-		max_r = 1;
-	}
-	m_bottom_needed = m_tile_height * (1 + m_tilecount / max_r);
+	RecalcBottomNeeded();
 	GetParentFrame()->RecalcLayout(TRUE);
 
 	RedrawWindow();

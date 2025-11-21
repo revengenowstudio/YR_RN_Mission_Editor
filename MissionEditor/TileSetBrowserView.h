@@ -49,6 +49,7 @@ public:
 	DWORD GetTileID(DWORD dwTileSet, DWORD dwType);
 	const auto BottomNeeded() const { return m_bottom_needed; }
 	const auto CurrentTileSet() const { return m_currentTileSet; }
+	void RecalcBottomNeeded();
 
 protected:
 	enum class PlaceMode : unsigned
