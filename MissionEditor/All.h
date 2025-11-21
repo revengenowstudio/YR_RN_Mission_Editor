@@ -36,7 +36,7 @@ class CAll : public CDialog
 public:	
 	enum { IDD = IDD_ALL };
 
-	void UpdateDialog();
+	void UpdateDialog(CString selection = {});
 	CAll(CWnd* pParent = NULL);   // Standardkonstruktor
 
 protected:
@@ -49,26 +49,29 @@ protected:
 	void translateUI();
 	BOOL onMessageKeyDown(MSG* pMsg);
 
-	afx_msg void OnSelchangeSections();
-	afx_msg void OnChangeValue();
-	//afx_msg void OnSelchangeKeys();
-	afx_msg void OnUpdateValue();
+	afx_msg void OnSelChangeSections();
+	afx_msg void OnSearchEditChange();
+	afx_msg void OnSearchApply();
 	afx_msg void OnAddSection();
 	afx_msg void OnDeleteSection();
 	afx_msg void OnEditSection();
-	//afx_msg void OnAddkey();
 	afx_msg void OnIniSectionImport();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 
 	DECLARE_MESSAGE_MAP()
 
+	static constexpr int TIMER_IDX_SEARCH = 1;
+
+	CEdit			m_SearchString;
 	CRichEditCtrl	m_Value;
 	CListBox		m_Sections;
+	CButton			m_Cased;
 	CButton			m_IniSection;
 	CButton			m_AddSection;
 	CButton			m_DeleteSection;
 	CButton			m_EditButton;
-	//CButton	m_AddKey;
-	//CComboBox	m_Sections;
+
+	bool			m_skipSearchOnce;
 };
 
 //{{AFX_INSERT_LOCATION}}

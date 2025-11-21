@@ -294,6 +294,8 @@ class CIniFile
 	static const CIniFileSection EmptySection;
 
 public:
+	using Const_It = typename StorageMap::const_iterator;
+
 	CIniFile(CIniFile&& rhs) noexcept :
 		m_filename(std::move(rhs.m_filename)),
 		sections(std::move(rhs.sections))

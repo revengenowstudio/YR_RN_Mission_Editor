@@ -29,6 +29,7 @@
 #include "functions.h"
 #include "IniContentEditor.h"
 #include <sstream>
+#include <regex>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -43,8 +44,9 @@ extern CFinalSunApp theApp;
 // Dialogfeld CAll 
 
 
-CAll::CAll(CWnd* pParent /*=NULL*/)
-	: CDialog(CAll::IDD, pParent)
+CAll::CAll(CWnd* pParent /*=NULL*/) : 
+	CDialog(CAll::IDD, pParent),
+	m_skipSearchOnce(false)
 {
 	//{{AFX_DATA_INIT(CAll)
 		// HINWEIS: Der Klassen-Assistent fügt hier Elementinitialisierung ein
@@ -62,9 +64,8 @@ void CAll::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DELETESECTION, m_DeleteSection);
 	DDX_Control(pDX, IDC_EDITOR_EDIT_BUTTON, m_EditButton);
 	DDX_Control(pDX, IDC_ADDSECTION, m_AddSection);
-	//DDX_Control(pDX, IDC_ADDKEY, m_AddKey);
-	//DDX_Control(pDX, IDC_SECTIONS, m_Sections);
-
+	DDX_Control(pDX, IDC_EDITOR_SEARCH, m_SearchString);
+	DDX_Control(pDX, IDC_INI_E_SEARCH_CASED, m_Cased);
 }
 
 BOOL CAll::OnInitDialog()
@@ -88,31 +89,26 @@ void CAll::translateUI()
 	TranslateWindowCaption(*this, "IniEditorCaption");
 
 	TranslateDlgItem(*this, IDC_INI_EDITOR_DESC, "IniEditorDesc");
-	//TranslateDlgItem(*this, IDC_INI_EDITOR_SECTIONS, "IniEditorSections");
-	//TranslateDlgItem(*this, IDC_INI_EDITOR_CONTENT, "IniEditorSectionContent");
 	TranslateDlgItem(*this, IDC_EDITOR_EDIT_BUTTON, "IniEditorEditSection");
 	TranslateDlgItem(*this, IDC_INI_EDITOR_KEYS, "IniEditorSectionKeys");
 	TranslateDlgItem(*this, IDC_INI_EDITOR_TXT_SEARCH, "IniEditorSearch");
+	TranslateDlgItem(*this, IDC_INI_E_SEARCH_CASED, "IniEditorSearchCased");
 	
 	TranslateDlgItem(*this, IDC_ADDSECTION, "IniEditorAdd");
 	TranslateDlgItem(*this, IDC_DELETESECTION, "IniEditorDelete");
 	TranslateDlgItem(*this, IDC_INISECTION, "IniEditorInsert");
-
-	//TranslateDlgItem(*this, IDC_ADDKEY, "IniEditorAddKey");
-	//TranslateDlgItem(*this, IDC_DELETEKEY, "IniEditorDeleteKey");
 	
 }
 
 BEGIN_MESSAGE_MAP(CAll, CDialog)
 	//{{AFX_MSG_MAP(CAll)
-	ON_LBN_SELCHANGE(IDC_EDITOR_SECTIONS, OnSelchangeSections)
-	//ON_EN_CHANGE(IDC_VALUE, OnChangeValue)
-	//ON_LBN_SELCHANGE(IDC_EDITOR_SECTIONS, OnSelchangeKeys)
-	//ON_EN_UPDATE(IDC_VALUE, OnUpdateValue)
+	ON_WM_TIMER()
+	ON_LBN_SELCHANGE(IDC_EDITOR_SECTIONS, OnSelChangeSections)
+	ON_EN_CHANGE(IDC_EDITOR_SEARCH, OnSearchEditChange)
+	ON_BN_CLICKED(IDC_INI_E_SEARCH_CASED, OnSearchEditChange)
 	ON_BN_CLICKED(IDC_ADDSECTION, OnAddSection)
 	ON_BN_CLICKED(IDC_DELETESECTION, OnDeleteSection)
 	ON_BN_CLICKED(IDC_EDITOR_EDIT_BUTTON, OnEditSection)
-	//ON_BN_CLICKED(IDC_ADDKEY, OnAddkey)
 	ON_BN_CLICKED(IDC_INISECTION, OnIniSectionImport)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -147,26 +143,38 @@ BOOL CAll::onMessageKeyDown(MSG* pMsg)
 	return TRUE;
 }
 
-void CAll::UpdateDialog()
+void CAll::OnTimer(UINT_PTR nIDEvent)
 {
-	//m_Sections.Clear();
+	if (nIDEvent == TIMER_IDX_SEARCH) {
+		KillTimer(TIMER_IDX_SEARCH);
+		OnSearchApply();
+	}
+	CDialog::OnTimer(nIDEvent);
+}
 
+void CAll::UpdateDialog(CString selection)
+{
 	while (m_Sections.DeleteString(0) != -1);
-	CIniFile& ini = Map->GetIniFile();
 
 	m_Value.SetWindowText("");
+	m_SearchString.SetWindowText("");
 
+	CIniFile& ini = Map->GetIniFile();
 	for (auto const& [name, sec] : ini) {
 		if (!Map->IsMapSection(name)) {
 			m_Sections.InsertString(-1, name);
 		}
 	}
 
-	m_Sections.SetCurSel(0);
-	OnSelchangeSections();
+	int selectionIdx = 0;
+	if (int index = m_Sections.FindString(-1, selection); index != LB_ERR) {
+		selectionIdx = index;
+	}
+	m_Sections.SetCurSel(selectionIdx);
+	OnSelChangeSections();
 }
 
-void CAll::OnSelchangeSections()
+void CAll::OnSelChangeSections()
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -216,7 +224,7 @@ void CAll::OnEditSection()
 
 void CAll::OnAddSection()
 {
-	CString name = InputBox(TranslateStringACP("IniEditorAddTip"), TranslateStringACP("IniEditorAdd"));
+	CString name = InputBox(GetLanguageStringACP("IniEditorAddTip"), GetLanguageStringACP("IniEditorAdd"));
 
 	name.Trim();
 
@@ -225,7 +233,7 @@ void CAll::OnAddSection()
 	}
 
 	if (Map->IsMapSection(name)) {
-		MessageBox(TranslateStringACP("IniEditorAddNotAllowed"), TranslateStringACP("Error"), MB_OK);
+		MessageBox(GetLanguageStringACP("IniEditorAddNotAllowed"), GetLanguageStringACP("Error"), MB_OK);
 		return;
 	}
 
@@ -233,7 +241,77 @@ void CAll::OnAddSection()
 
 	ini.AddSection(name);
 
-	UpdateDialog();
+	m_skipSearchOnce = true;
+	UpdateDialog(name);
+}
+
+void CAll::OnSearchEditChange()
+{
+	// search string set will trigger OnSearchEditChange again
+	if (std::exchange(m_skipSearchOnce, false)) {
+		return;
+	}
+	// Control tick
+	auto const secCount = Map->GetIniFile().Size();
+	size_t delayMs = 200;
+	if (secCount > 100) {
+		delayMs = secCount * 2;
+	}
+	delayMs = std::min(delayMs, 1000ull);
+
+	SetTimer(TIMER_IDX_SEARCH, delayMs, NULL);
+}
+
+void CAll::OnSearchApply()
+{
+	CString searchString;
+	m_SearchString.GetWindowText(searchString);
+
+	if (searchString.IsEmpty()) {
+		m_skipSearchOnce = true;
+		UpdateDialog();
+		return;
+	}
+
+	try {
+		// TODO: optional ECMAScript
+		std::regex_constants::syntax_option_type regexOpts{ std::regex_constants::ECMAScript };
+		if (m_Cased.GetCheck() != BST_CHECKED) {
+			regexOpts |= std::regex_constants::icase;
+		}
+
+		auto const& ini = Map->GetIniFile();
+		std::regex rule(searchString.operator LPCSTR(), regexOpts);
+		static std::vector<CIniFile::Const_It> results; // hold buffer memory, do not reallocate frequently
+		results.clear();
+		results.reserve(ini.Size());
+		for (auto it = ini.begin(); it != ini.end(); ++it) {
+			if (Map->IsMapSection(it->first)) {
+				continue;
+			}
+			if (std::regex_search(it->first.operator LPCSTR(), rule)) {
+				results.emplace_back(it);
+			}
+		}
+
+		while (m_Sections.DeleteString(0) != -1);
+		m_Value.SetWindowText("");
+
+		for (auto const& it : results) {		
+			m_Sections.InsertString(-1, it->first);
+		}
+
+		if (m_Sections.GetCount() > 0) {
+			m_Sections.SetCurSel(0);
+			OnSelChangeSections();
+		}
+
+	} catch (const std::regex_error& e) {
+		errstream << "Regex error: " << e.what() << std::endl;
+		MessageBox(GetLanguageStringACP("IniEditorRegexError"), GetLanguageStringACP("Error"), MB_OK);
+		return;
+	}
+
 }
 
 void CAll::OnDeleteSection()

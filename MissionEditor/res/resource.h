@@ -658,6 +658,7 @@
 #define IDC_TERRAINBAR_GENERATOR        1570
 #define IDC_INI_E_CUR_SEC               1570
 #define IDC_INI_E_DISABLE_VALIDATION    1571
+#define IDC_INI_E_SEARCH_CASED          1572
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -754,7 +755,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        331
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1572
+#define _APS_NEXT_CONTROL_VALUE         1573
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif
