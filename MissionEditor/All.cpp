@@ -44,8 +44,9 @@ extern CFinalSunApp theApp;
 // Dialogfeld CAll 
 
 
-CAll::CAll(CWnd* pParent /*=NULL*/)
-	: CDialog(CAll::IDD, pParent)
+CAll::CAll(CWnd* pParent /*=NULL*/) : 
+	CDialog(CAll::IDD, pParent),
+	m_skipSearchOnce(false)
 {
 	//{{AFX_DATA_INIT(CAll)
 		// HINWEIS: Der Klassen-Assistent fügt hier Elementinitialisierung ein
@@ -151,15 +152,12 @@ void CAll::OnTimer(UINT_PTR nIDEvent)
 	CDialog::OnTimer(nIDEvent);
 }
 
-void CAll::UpdateDialog(bool updateSearchString)
+void CAll::UpdateDialog(CString selection)
 {
 	while (m_Sections.DeleteString(0) != -1);
 
 	m_Value.SetWindowText("");
-
-	if (updateSearchString) {
-		m_SearchString.SetWindowText("");
-	}
+	m_SearchString.SetWindowText("");
 
 	CIniFile& ini = Map->GetIniFile();
 	for (auto const& [name, sec] : ini) {
@@ -168,7 +166,11 @@ void CAll::UpdateDialog(bool updateSearchString)
 		}
 	}
 
-	m_Sections.SetCurSel(0);
+	int selectionIdx = 0;
+	if (int index = m_Sections.FindString(-1, selection); index != LB_ERR) {
+		selectionIdx = index;
+	}
+	m_Sections.SetCurSel(selectionIdx);
 	OnSelChangeSections();
 }
 
@@ -239,11 +241,16 @@ void CAll::OnAddSection()
 
 	ini.AddSection(name);
 
-	UpdateDialog();
+	m_skipSearchOnce = true;
+	UpdateDialog(name);
 }
 
 void CAll::OnSearchEditChange()
 {
+	// search string set will trigger OnSearchEditChange again
+	if (std::exchange(m_skipSearchOnce, false)) {
+		return;
+	}
 	// Control tick
 	SetTimer(TIMER_IDX_SEARCH, SEARCH_DELAY_MS, NULL);
 }
@@ -254,7 +261,8 @@ void CAll::OnSearchApply()
 	m_SearchString.GetWindowText(searchString);
 
 	if (searchString.IsEmpty()) {
-		UpdateDialog(false); // search string set will trigger OnSearchEditChange again
+		m_skipSearchOnce = true;
+		UpdateDialog();
 		return;
 	}
 

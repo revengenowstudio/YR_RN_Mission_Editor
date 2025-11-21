@@ -36,7 +36,7 @@ class CAll : public CDialog
 public:	
 	enum { IDD = IDD_ALL };
 
-	void UpdateDialog(bool updateSearchString = true);
+	void UpdateDialog(CString selection = {});
 	CAll(CWnd* pParent = NULL);   // Standardkonstruktor
 
 protected:
@@ -71,6 +71,8 @@ protected:
 	CButton			m_AddSection;
 	CButton			m_DeleteSection;
 	CButton			m_EditButton;
+
+	bool			m_skipSearchOnce;
 };
 
 //{{AFX_INSERT_LOCATION}}
