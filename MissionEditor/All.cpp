@@ -151,11 +151,15 @@ void CAll::OnTimer(UINT_PTR nIDEvent)
 	CDialog::OnTimer(nIDEvent);
 }
 
-void CAll::UpdateDialog()
+void CAll::UpdateDialog(bool updateSearchString)
 {
 	while (m_Sections.DeleteString(0) != -1);
 
 	m_Value.SetWindowText("");
+
+	if (updateSearchString) {
+		m_SearchString.SetWindowText("");
+	}
 
 	CIniFile& ini = Map->GetIniFile();
 	for (auto const& [name, sec] : ini) {
@@ -250,7 +254,7 @@ void CAll::OnSearchApply()
 	m_SearchString.GetWindowText(searchString);
 
 	if (searchString.IsEmpty()) {
-		UpdateDialog();
+		UpdateDialog(false); // search string set will trigger OnSearchEditChange again
 		return;
 	}
 

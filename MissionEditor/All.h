@@ -36,7 +36,7 @@ class CAll : public CDialog
 public:	
 	enum { IDD = IDD_ALL };
 
-	void UpdateDialog();
+	void UpdateDialog(bool updateSearchString = true);
 	CAll(CWnd* pParent = NULL);   // Standardkonstruktor
 
 protected:
