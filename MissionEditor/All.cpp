@@ -252,7 +252,14 @@ void CAll::OnSearchEditChange()
 		return;
 	}
 	// Control tick
-	SetTimer(TIMER_IDX_SEARCH, SEARCH_DELAY_MS, NULL);
+	auto const secCount = Map->GetIniFile().Size();
+	size_t delayMs = 200;
+	if (secCount > 100) {
+		delayMs = secCount * 2;
+	}
+	delayMs = std::min(delayMs, 1000ull);
+
+	SetTimer(TIMER_IDX_SEARCH, delayMs, NULL);
 }
 
 void CAll::OnSearchApply()

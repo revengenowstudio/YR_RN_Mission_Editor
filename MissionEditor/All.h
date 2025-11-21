@@ -61,7 +61,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	static constexpr int TIMER_IDX_SEARCH = 1;
-	static constexpr int SEARCH_DELAY_MS = 1000;
 
 	CEdit			m_SearchString;
 	CRichEditCtrl	m_Value;
