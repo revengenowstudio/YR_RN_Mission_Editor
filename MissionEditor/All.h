@@ -49,7 +49,7 @@ protected:
 	void translateUI();
 	BOOL onMessageKeyDown(MSG* pMsg);
 
-	afx_msg void OnSelchangeSections();
+	afx_msg void OnSelChangeSections();
 	afx_msg void OnSearchEditChange();
 	afx_msg void OnSearchApply();
 	afx_msg void OnAddSection();
@@ -66,6 +66,7 @@ protected:
 	CEdit			m_SearchString;
 	CRichEditCtrl	m_Value;
 	CListBox		m_Sections;
+	CButton			m_Cased;
 	CButton			m_IniSection;
 	CButton			m_AddSection;
 	CButton			m_DeleteSection;

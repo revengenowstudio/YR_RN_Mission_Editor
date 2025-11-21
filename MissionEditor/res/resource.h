@@ -658,7 +658,7 @@
 #define IDC_TERRAINBAR_GENERATOR        1570
 #define IDC_INI_E_CUR_SEC               1570
 #define IDC_INI_E_DISABLE_VALIDATION    1571
-#define IDC_INI_E_RE_SEARCH             1572
+#define IDC_INI_E_SEARCH_CASED          1572
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003

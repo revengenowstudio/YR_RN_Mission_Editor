@@ -64,6 +64,7 @@ void CAll::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDITOR_EDIT_BUTTON, m_EditButton);
 	DDX_Control(pDX, IDC_ADDSECTION, m_AddSection);
 	DDX_Control(pDX, IDC_EDITOR_SEARCH, m_SearchString);
+	DDX_Control(pDX, IDC_INI_E_SEARCH_CASED, m_Cased);
 }
 
 BOOL CAll::OnInitDialog()
@@ -90,7 +91,7 @@ void CAll::translateUI()
 	TranslateDlgItem(*this, IDC_EDITOR_EDIT_BUTTON, "IniEditorEditSection");
 	TranslateDlgItem(*this, IDC_INI_EDITOR_KEYS, "IniEditorSectionKeys");
 	TranslateDlgItem(*this, IDC_INI_EDITOR_TXT_SEARCH, "IniEditorSearch");
-	TranslateDlgItem(*this, IDC_INI_E_RE_SEARCH, "IniEditorSearchRegex");
+	TranslateDlgItem(*this, IDC_INI_E_SEARCH_CASED, "IniEditorSearchCased");
 	
 	TranslateDlgItem(*this, IDC_ADDSECTION, "IniEditorAdd");
 	TranslateDlgItem(*this, IDC_DELETESECTION, "IniEditorDelete");
@@ -101,8 +102,9 @@ void CAll::translateUI()
 BEGIN_MESSAGE_MAP(CAll, CDialog)
 	//{{AFX_MSG_MAP(CAll)
 	ON_WM_TIMER()
-	ON_LBN_SELCHANGE(IDC_EDITOR_SECTIONS, OnSelchangeSections)
+	ON_LBN_SELCHANGE(IDC_EDITOR_SECTIONS, OnSelChangeSections)
 	ON_EN_CHANGE(IDC_EDITOR_SEARCH, OnSearchEditChange)
+	ON_BN_CLICKED(IDC_INI_E_SEARCH_CASED, OnSearchEditChange)
 	ON_BN_CLICKED(IDC_ADDSECTION, OnAddSection)
 	ON_BN_CLICKED(IDC_DELETESECTION, OnDeleteSection)
 	ON_BN_CLICKED(IDC_EDITOR_EDIT_BUTTON, OnEditSection)
@@ -151,13 +153,11 @@ void CAll::OnTimer(UINT_PTR nIDEvent)
 
 void CAll::UpdateDialog()
 {
-	//m_Sections.Clear();
-
 	while (m_Sections.DeleteString(0) != -1);
-	CIniFile& ini = Map->GetIniFile();
 
 	m_Value.SetWindowText("");
 
+	CIniFile& ini = Map->GetIniFile();
 	for (auto const& [name, sec] : ini) {
 		if (!Map->IsMapSection(name)) {
 			m_Sections.InsertString(-1, name);
@@ -165,10 +165,10 @@ void CAll::UpdateDialog()
 	}
 
 	m_Sections.SetCurSel(0);
-	OnSelchangeSections();
+	OnSelChangeSections();
 }
 
-void CAll::OnSelchangeSections()
+void CAll::OnSelChangeSections()
 {
 	CIniFile& ini = Map->GetIniFile();
 
@@ -254,18 +254,17 @@ void CAll::OnSearchApply()
 		return;
 	}
 
-	auto const regexSearchCB = reinterpret_cast<CButton*>(GetDlgItem(IDC_INI_E_RE_SEARCH));
-	auto const regexSearch = regexSearchCB && regexSearchCB->GetCheck() == BST_CHECKED;
-	if (!regexSearch) {
-		// TODO: icase string contains
-
-		return;
-	}
-
 	try {
+		// TODO: optional ECMAScript
+		std::regex_constants::syntax_option_type regexOpts{ std::regex_constants::ECMAScript };
+		if (m_Cased.GetCheck() != BST_CHECKED) {
+			regexOpts |= std::regex_constants::icase;
+		}
+
 		auto const& ini = Map->GetIniFile();
-		std::regex rule(searchString.operator LPCSTR(), std::regex_constants::icase);
-		std::vector<CIniFile::Const_It> results;
+		std::regex rule(searchString.operator LPCSTR(), regexOpts);
+		static std::vector<CIniFile::Const_It> results; // hold buffer memory, do not reallocate frequently
+		results.clear();
 		results.reserve(ini.Size());
 		for (auto it = ini.begin(); it != ini.end(); ++it) {
 			if (Map->IsMapSection(it->first)) {
@@ -282,9 +281,10 @@ void CAll::OnSearchApply()
 		for (auto const& it : results) {		
 			m_Sections.InsertString(-1, it->first);
 		}
+
 		if (m_Sections.GetCount() > 0) {
 			m_Sections.SetCurSel(0);
-			OnSelchangeSections();
+			OnSelChangeSections();
 		}
 
 	} catch (const std::regex_error& e) {
