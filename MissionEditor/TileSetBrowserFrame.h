@@ -50,7 +50,7 @@ public:
 		// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
 		//{{AFX_VIRTUAL(CTileSetBrowserFrame)
 public:
-	virtual void RecalcLayout(BOOL bNotify = TRUE);
+	virtual void RecalcLayout(BOOL bNotify = TRUE) override;
 protected:
 	virtual void PostNcDestroy();
 	virtual BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);

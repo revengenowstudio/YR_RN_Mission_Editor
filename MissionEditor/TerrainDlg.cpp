@@ -95,7 +95,9 @@ void CTerrainDlg::OnSelchangeTileset()
 
 	TruncSpace(currentTileSet);
 
-	((CTileSetBrowserFrame*)GetParentFrame())->m_view.SetTileSet(atoi(currentTileSet));
+	auto const frame = reinterpret_cast<CTileSetBrowserFrame*>(GetParentFrame());
+	frame->m_view.SetTileSet(atoi(currentTileSet));
+	frame->RecalcLayout();
 }
 
 
@@ -283,5 +285,7 @@ void CTerrainDlg::OnSelchangeOverlay()
 
 	int sel = Overlay->GetItemData(n);
 
-	((CTileSetBrowserFrame*)GetParentFrame())->m_view.SetOverlay(sel);
+	auto const frame = reinterpret_cast<CTileSetBrowserFrame*>(GetParentFrame());
+	frame->m_view.SetOverlay(sel);
+	frame->RecalcLayout();
 }

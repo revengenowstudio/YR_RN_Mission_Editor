@@ -45,9 +45,6 @@ IMPLEMENT_DYNCREATE(CTileSetBrowserView, CScrollView)
 
 CTileSetBrowserView::CTileSetBrowserView()
 {
-	m_lpDDS = NULL;
-	m_bottom_needed = 1000;
-	m_CurrentMode = PlaceMode::None;
 }
 
 CTileSetBrowserView::~CTileSetBrowserView()
@@ -125,6 +122,9 @@ void CTileSetBrowserView::onDrawTileSetPlacement(CDC* pDC)
 	GetClientRect(&r);
 
 	int max_r = r.right / m_tile_width;
+	if (max_r == 0) {
+		max_r = 1;
+	}
 
 	for (i = 0; i < m_tilecount; i++) {
 		char c[50];
@@ -148,6 +148,12 @@ void CTileSetBrowserView::onDrawTileSetPlacement(CDC* pDC)
 		if (!m_lpDDS[i]) {
 			continue;
 		}
+
+		if (cur_x + curwidth > r.right) { // move to next row
+			cur_x = 0; // reset to first column
+			cur_y += m_tile_height;
+		}
+
 
 		RECT r;
 		GetClientRect(&r);
@@ -194,8 +200,8 @@ void CTileSetBrowserView::onDrawTileSetPlacement(CDC* pDC)
 		}
 
 		cur_x += m_tile_width;
-		if (max_r == 0) max_r = 1;
-		if (i % max_r == max_r - 1) {
+
+		if ((i % max_r) == max_r - 1) {
 			cur_y += m_tile_height;
 			cur_x = 0;
 		}
@@ -246,10 +252,12 @@ void CTileSetBrowserView::onDrawOverlayPlacement(CDC* pDC)
 			memset(colors, 255, pitch * (curheight));
 
 			RGBTRIPLE* pal = palIso;
-			if (p->pal == iPalTheater)
+			if (p->pal == iPalTheater) {
 				pal = palTheater;
-			if (p->pal == iPalUnit)
+			}
+			if (p->pal == iPalUnit) {
 				pal = palUnit;
+			}
 
 			int k, l;
 			for (k = 0; k < curheight; k++) {
@@ -330,33 +338,34 @@ DWORD CTileSetBrowserView::GetTileID(DWORD dwTileSet, DWORD dwType)
 	int i, e;
 	DWORD tilecount = 0;
 	for (i = 0; i < 10000; i++) {
-		CString tset;
-		char c[50];
-		itoa(i, c, 10);
-		int e;
-		for (e = 0; e < 4 - strlen(c); e++)
-			tset += "0";
-		tset += c;
-		CString sec = "TileSet";
-		sec += tset;
+		CString sec;
+		sec.Format("TileSet%04d", i);
 
 		auto const pSec = tiles->TryGetSection(sec);
 		if (!pSec) {
 			return 0xFFFFFFFF;
 		}
-
 		auto const tilesInSet = pSec->GetInteger("TilesInSet");
 		for (e = 0; e < tilesInSet; e++) {
-			if (i == dwTileSet && e == dwType)
+			if (i == dwTileSet && e == dwType) {
 				return tilecount;
+			}
 			tilecount++;
-
 		}
-
-
 	}
 
 	return tilecount;
+}
+
+void CTileSetBrowserView::RecalcBottomNeeded()
+{
+	RECT rect;
+	GetClientRect(&rect);
+	int col_count = rect.right / m_tile_width;
+	if (col_count <= 0) {
+		col_count = 1;
+	}
+	m_bottom_needed = m_tile_height * (1 + m_curItemCount / col_count);
 }
 
 void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
@@ -364,16 +373,9 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 	m_currentTileSet = dwTileSet;
 	m_CurrentMode = PlaceMode::TileSet;
 
-	char currentTileSet[50];
-	itoa(m_currentTileSet, currentTileSet, 10);
 	CString tset;
 
-	int e;
-	for (e = 0; e < 4 - strlen(currentTileSet); e++) {
-		tset += "0";
-	}
-
-	tset += currentTileSet;
+	tset.Format("%04d", m_currentTileSet);
 
 	m_tile_width = 0;
 	m_tile_height = 0;
@@ -389,38 +391,35 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 			AD.data2 = 0;
 			AD.z_data = 0;
 
-			theApp.MainWindow()->m_settingsbar.m_BrushSize = 0;
-			theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
-			theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = 1;
-			theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = 1;
+			auto const pMainWnd = theApp.MainWindow();
+			pMainWnd->m_settingsbar.m_BrushSize = 0;
+			pMainWnd->m_settingsbar.UpdateData(FALSE);
+			pMainWnd->m_view.m_isoview->m_BrushSize_x = 1;
+			pMainWnd->m_view.m_isoview->m_BrushSize_y = 1;
 
 			for (auto const& [n, val] : g_data["StdBrushSize"]) {
 				if (tiles->GetSection("General").Exists(n)) {
 					int tset = tiles->GetInteger("General", n);
 					if (tset == m_currentTileSet) {
 						int bs = atoi(val);
-						theApp.MainWindow()->m_settingsbar.m_BrushSize = bs - 1;
-						theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
-						theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = bs;
-						theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = bs;
+						pMainWnd->m_settingsbar.m_BrushSize = bs - 1;
+						pMainWnd->m_settingsbar.UpdateData(FALSE);
+						pMainWnd->m_view.m_isoview->m_BrushSize_x = bs;
+						pMainWnd->m_view.m_isoview->m_BrushSize_y = bs;
 					}
 				}
 			}
 		}
 	}
-	DWORD dwID;
 	for (i = 0; i < max; i++) {
-		CString str;
-		char c[50];
-		itoa(i, c, 10);
-		for (e = 0; e < 2 - strlen(c); e++)
-			str += "0";
-		str += c;
-
-		dwID = dwStartID + i; // just faster than always calling GetTileID()
+		DWORD dwID = dwStartID + i; // just faster than always calling GetTileID()
 		if (dwID < *tiledata_count) {
-			if ((*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left > m_tile_width) m_tile_width = (*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left;
-			if (GetAddedHeight(dwID) + (*tiledata)[dwID].rect.bottom - (*tiledata)[dwID].rect.top > m_tile_height) m_tile_height = GetAddedHeight(dwID) + (*tiledata)[dwID].rect.bottom - (*tiledata)[dwID].rect.top;
+			if ((*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left > m_tile_width) {
+				m_tile_width = (*tiledata)[dwID].rect.right - (*tiledata)[dwID].rect.left;
+			}
+			if (GetAddedHeight(dwID) + (*tiledata)[dwID].rect.bottom - (*tiledata)[dwID].rect.top > m_tile_height) {
+				m_tile_height = GetAddedHeight(dwID) + (*tiledata)[dwID].rect.bottom - (*tiledata)[dwID].rect.top;
+			}
 		}
 	}
 
@@ -428,9 +427,10 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 	m_tile_height += 6;
 
 	if (m_lpDDS) {
-		int i;
-		for (i = 0; i < m_tilecount; i++) {
-			if (m_lpDDS[i]) m_lpDDS[i]->Release();
+		for (int i = 0; i < m_tilecount; i++) {
+			if (m_lpDDS[i]) {
+				m_lpDDS[i]->Release();
+			}
 		}
 		delete[] m_lpDDS;
 	}
@@ -442,13 +442,8 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 		m_lpDDS[i] = RenderTile(dwStartID + i);
 	}
 
-	RECT r;
-	GetClientRect(&r);
-	int max_r = r.right / m_tile_width;
-	if (max_r <= 0) max_r = 1;
-	m_bottom_needed = m_tile_height * (1 + m_tilecount / max_r);
+	m_curItemCount = max;
 	GetParentFrame()->RecalcLayout(TRUE);
-
 
 	RedrawWindow();
 
@@ -540,18 +535,14 @@ __forceinline void BlitTerrainTSB(void* dst, int x, int y, int dleft, int dtop, 
 		for (i = left; i <= right; i++) {
 			if (i < srcRect.left || i >= srcRect.right) {
 				//dest+=bpp;
+				continue;
 			}
-			else {
-
-				BYTE& val = src[i + e * swidth];
-				if (val) {
-					void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * dpitch);
-
-					memcpy(dest, &iPalIso[val], bpp);
-				}
+			BYTE& val = src[i + e * swidth];
+			if (val) {
+				void* dest = ((BYTE*)dst + (blrect.left + i) * bpp + (blrect.top + e) * dpitch);
+				memcpy(dest, &iPalIso[val], bpp);
 			}
 		}
-
 	}
 }
 #endif
@@ -725,23 +716,25 @@ void CTileSetBrowserView::onPlaceTileSet(const CPoint point, int max_r)
 			AD.data3 = 0;
 			AD.z_data = 0;
 
-			if (oldid > *tiledata_count) oldid = 0;
-
+			if (oldid > *tiledata_count) {
+				oldid = 0;
+			}
+			auto const mainWnd = theApp.MainWindow();
 			if (oldmode != ACTIONMODE_SETTILE || (*tiledata)[oldid].wTileSet != m_currentTileSet) {
-				theApp.MainWindow()->m_settingsbar.m_BrushSize = 0;
-				theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
-				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = 1;
-				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = 1;
+				mainWnd->m_settingsbar.m_BrushSize = 0;
+				mainWnd->m_settingsbar.UpdateData(FALSE);
+				mainWnd->m_view.m_isoview->m_BrushSize_x = 1;
+				mainWnd->m_view.m_isoview->m_BrushSize_y = 1;
 
 				for (auto const& [n, val] : g_data["StdBrushSize"]) {
 					if (tiles->GetSection("General").Exists(n)) {
 						int tset = tiles->GetInteger("General", n);
 						if (tset == m_currentTileSet) {
 							int bs = atoi(val);
-							theApp.MainWindow()->m_settingsbar.m_BrushSize = bs - 1;
-							theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
-							theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = bs;
-							theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = bs;
+							mainWnd->m_settingsbar.m_BrushSize = bs - 1;
+							mainWnd->m_settingsbar.UpdateData(FALSE);
+							mainWnd->m_view.m_isoview->m_BrushSize_x = bs;
+							mainWnd->m_view.m_isoview->m_BrushSize_y = bs;
 						}
 					}
 				}
@@ -843,7 +836,7 @@ void CTileSetBrowserView::SetOverlay(DWORD dwID)
 	}
 	if (!bFound) {
 		theApp.m_loading->LoadOverlayGraphic(rules["OverlayTypes"].Nth(dwID).second, dwID);
-		((CFinalSunDlg*)(theApp.m_pMainWnd))->m_view.m_isoview->UpdateOverlayPictures();
+		theApp.MainWindow()->m_view.m_isoview->UpdateOverlayPictures();
 	}
 
 	for (int k = 0; k < max_ovrl_img; k++) {
@@ -877,18 +870,10 @@ void CTileSetBrowserView::SetOverlay(DWORD dwID)
 	m_tile_height = 0;
 	m_currentOverlay = dwID;
 
-
-
 	m_tile_width = need_width + 6;
 	m_tile_height = need_height + 6;
 
-
-
-	RECT r;
-	GetClientRect(&r);
-	int max_r = r.right / m_tile_width;
-	if (max_r <= 0) max_r = 1;
-	m_bottom_needed = m_tile_height * (1 + (iovrlcount) / max_r);
+	m_curItemCount = iovrlcount;
 	GetParentFrame()->RecalcLayout(TRUE);
 	RedrawWindow();
 

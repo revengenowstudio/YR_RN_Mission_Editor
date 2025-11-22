@@ -77,6 +77,7 @@ BOOL CTileSetBrowserFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* p
 
 	m_view.Create(NULL, NULL, WS_CHILD | WS_VSCROLL | WS_HSCROLL | WS_VISIBLE, rect, this, 1, NULL);
 
+	m_view.RecalcBottomNeeded();
 	RecalcLayout(TRUE);
 
 	const CSize sizeTotal{ rect.right,  m_view.BottomNeeded() };
@@ -91,13 +92,13 @@ BOOL CTileSetBrowserFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* p
 
 void CTileSetBrowserFrame::RecalcLayout(BOOL bNotify)
 {
-
 	RECT rect;
 	RECT rm;
 	GetClientRect(&rm);
 	m_bar.GetClientRect(&rect);
 
 	m_view.SetWindowPos(NULL, 0, rect.bottom, rm.right, rm.bottom - rect.bottom, SWP_NOZORDER);
+	m_view.RecalcBottomNeeded();
 
 	m_view.GetClientRect(&rect);
 	CSize sizeTotal;
