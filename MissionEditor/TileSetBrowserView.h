@@ -81,6 +81,7 @@ protected:
 
 	PlaceMode m_CurrentMode{ PlaceMode::None };
 	int m_tilecount{ 0 };
+	int m_curItemCount{ 0 };
 	int m_tile_height{ 1 };
 	int m_tile_width{ 1 };
 	int m_currentTileSet{ -1 };

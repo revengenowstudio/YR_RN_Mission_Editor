@@ -359,13 +359,13 @@ DWORD CTileSetBrowserView::GetTileID(DWORD dwTileSet, DWORD dwType)
 
 void CTileSetBrowserView::RecalcBottomNeeded()
 {
-	RECT r;
-	GetClientRect(&r);
-	int col_count = r.right / m_tile_width;
+	RECT rect;
+	GetClientRect(&rect);
+	int col_count = rect.right / m_tile_width;
 	if (col_count <= 0) {
 		col_count = 1;
 	}
-	m_bottom_needed = m_tile_height * (1 + m_tilecount / col_count);
+	m_bottom_needed = m_tile_height * (1 + m_curItemCount / col_count);
 }
 
 void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
@@ -442,6 +442,7 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 		m_lpDDS[i] = RenderTile(dwStartID + i);
 	}
 
+	m_curItemCount = max;
 	GetParentFrame()->RecalcLayout(TRUE);
 
 	RedrawWindow();
@@ -872,13 +873,7 @@ void CTileSetBrowserView::SetOverlay(DWORD dwID)
 	m_tile_width = need_width + 6;
 	m_tile_height = need_height + 6;
 
-	RECT r;
-	GetClientRect(&r);
-	int max_r = r.right / m_tile_width;
-	if (max_r <= 0) {
-		max_r = 1;
-	}
-	m_bottom_needed = m_tile_height * (1 + (iovrlcount) / max_r);
+	m_curItemCount = iovrlcount;
 	GetParentFrame()->RecalcLayout(TRUE);
 	RedrawWindow();
 
