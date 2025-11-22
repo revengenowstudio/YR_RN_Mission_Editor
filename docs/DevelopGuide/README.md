@@ -81,8 +81,8 @@ vcpkg x-update-baseline
 - MissionEditor\data\shared：FS/FA2 共用数据
 - MissionEditor\data\FinalAlert2：FA2 专有数据
 - MissionEditor\data\FinalSun：FS 专有数据
-- MissionEditor\PropertySheets：公共属性表，方便管理多配置
-- dist：最终输出，含 exe、依赖 DLL 与 data，由 common.props 自动拷贝
+- MissionEditor\PropertySheets：公共清单
+- dist：最终输出，含 exe、依赖 DLL 与 data，参见common.props内的脚本化定义
 
 
 ## 常见问题
@@ -91,7 +91,7 @@ vcpkg x-update-baseline
 ![1763702692707](image/README/1763702692707.png)
 ![1763702697427](image/README/1763702697427.png)
 
-若编译时遇到上述图片中的报错信息，则一般认为是**vcpkg拉取第三方库源码失败**引起的，根本原因是无法直接访问Github。如果**所在网络环境实在无法直接访问Github**，则需要准备一些**特殊网络工具**来解决这个问题，最好使用支持`TUN模式`的特殊网络工具让vcpkg可以顺利拉取第三方库源码
+若编译时遇到上述图片中的报错信息，则一般认为是**vcpkg拉取第三方库源码失败**引起的，根本原因是无法直接访问Github。请确保自己的网络环境可以顺利连接国际互联网，请自行解决。
 
 在处理好网络问题后，跟随以下流程让vcpkg重新开始拉取第三方库源码:
 1. 关闭`VS 2022`
