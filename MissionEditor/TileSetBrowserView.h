@@ -79,14 +79,14 @@ protected:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	DECLARE_MESSAGE_MAP()
 
-	PlaceMode m_CurrentMode;
-	int m_tilecount;
-	int m_tile_height;
-	int m_tile_width;
-	int m_currentTileSet;
-	int m_bottom_needed;
-	int m_currentOverlay;
-	LPDIRECTDRAWSURFACE7* m_lpDDS;
+	PlaceMode m_CurrentMode{ PlaceMode::None };
+	int m_tilecount{ 0 };
+	int m_tile_height{ 1 };
+	int m_tile_width{ 1 };
+	int m_currentTileSet{ -1 };
+	int m_bottom_needed{ 1000 };
+	int m_currentOverlay{ -1 };
+	LPDIRECTDRAWSURFACE7* m_lpDDS{ nullptr };
 };
 
 /////////////////////////////////////////////////////////////////////////////

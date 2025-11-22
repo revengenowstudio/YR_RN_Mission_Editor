@@ -98,6 +98,7 @@ void CTileSetBrowserFrame::RecalcLayout(BOOL bNotify)
 	m_bar.GetClientRect(&rect);
 
 	m_view.SetWindowPos(NULL, 0, rect.bottom, rm.right, rm.bottom - rect.bottom, SWP_NOZORDER);
+	m_view.RecalcBottomNeeded();
 
 	m_view.GetClientRect(&rect);
 	CSize sizeTotal;
@@ -112,7 +113,6 @@ void CTileSetBrowserFrame::OnSize(UINT nType, int cx, int cy)
 {
 	CFrameWnd::OnSize(nType, cx, cy);
 
-	m_view.RecalcBottomNeeded();
 	RecalcLayout();
 
 }

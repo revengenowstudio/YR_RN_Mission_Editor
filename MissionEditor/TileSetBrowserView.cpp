@@ -45,9 +45,6 @@ IMPLEMENT_DYNCREATE(CTileSetBrowserView, CScrollView)
 
 CTileSetBrowserView::CTileSetBrowserView()
 {
-	m_lpDDS = NULL;
-	m_bottom_needed = 1000;
-	m_CurrentMode = PlaceMode::None;
 }
 
 CTileSetBrowserView::~CTileSetBrowserView()
@@ -445,7 +442,6 @@ void CTileSetBrowserView::SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw)
 		m_lpDDS[i] = RenderTile(dwStartID + i);
 	}
 
-	RecalcBottomNeeded();
 	GetParentFrame()->RecalcLayout(TRUE);
 
 	RedrawWindow();
