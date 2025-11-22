@@ -542,7 +542,6 @@ BOOL CFinalSunApp::ProcessMessageFilter(int code, LPMSG lpMsg)
 
 			if (AD.mode == ACTIONMODE_SETTILE || AD.mode == ACTIONMODE_PASTE) {
 				CIsoView* v = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
-				//CTerrainDlg& tdlg = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_browser->m_bar;
 				WORD isox, isoy;
 				RECT r;
 				POINT p;
