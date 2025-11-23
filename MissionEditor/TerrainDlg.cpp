@@ -102,9 +102,16 @@ void CTerrainDlg::OnSelchangeTileset()
 
 
 
-BOOL CTerrainDlg::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
+BOOL CTerrainDlg::Create(
+	CWnd* pParentWnd, UINT nIDTemplate,
+	UINT nStyle, UINT nID)
 {
-	return CWnd::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
+	auto const result = CDialogBar::Create(pParentWnd, nIDTemplate, nStyle, nID);
+
+	GetDlgItem(IDC_TERRAINBAR_MANAGER)->EnableWindow(FALSE); // not yet ready, disable it
+	GetDlgItem(IDC_TERRAINBAR_GENERATOR)->EnableWindow(FALSE); // not yet ready, disable it
+
+	return result;
 }
 
 void CTerrainDlg::handleTiles()
