@@ -706,7 +706,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 				}
 
 				try {
-					pics[(LPCTSTR)ff.GetFileName()].pic = BitmapToSurface(((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd, *BitmapFromFile(ff.GetFilePath())).Detach();
+					pics[(LPCTSTR)ff.GetFileName()].pic = BitmapToSurface(theApp.MainWindow()->m_view.m_isoview->dd, *BitmapFromFile(ff.GetFilePath())).Detach();
 
 					DDSURFACEDESC2 desc;
 					::memset(&desc, 0, sizeof(DDSURFACEDESC2));
@@ -729,7 +729,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	DDSURFACEDESC2 desc;
 
 	try {
-		auto pPic = BitmapToSurface(((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd, *BitmapFromResource(IDB_SCROLLCURSOR)).Detach();
+		auto pPic = BitmapToSurface(theApp.MainWindow()->m_view.m_isoview->dd, *BitmapFromResource(IDB_SCROLLCURSOR)).Detach();
 		// This is really dangerous to store a dangling ComPtr
 		auto& scrollCursorSlot = pics["SCROLLCURSOR"];
 		auto pOldPic = std::exchange(scrollCursorSlot.pic, pPic);
@@ -752,7 +752,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	}
 
 	try {
-		auto pPic = BitmapToSurface(((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd, *BitmapFromResource(IDB_CELLTAG)).Detach();
+		auto pPic = BitmapToSurface(theApp.MainWindow()->m_view.m_isoview->dd, *BitmapFromResource(IDB_CELLTAG)).Detach();
 		auto& cellTagSlot = pics["CELLTAG"];
 		auto pOldPic = std::exchange(cellTagSlot.pic, pPic);
 		if (pOldPic) {
@@ -778,7 +778,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	}
 
 	try {
-		auto pPic = BitmapToSurface(((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd, *BitmapFromResource(IDB_FLAG)).Detach();
+		auto pPic = BitmapToSurface(theApp.MainWindow()->m_view.m_isoview->dd, *BitmapFromResource(IDB_FLAG)).Detach();
 		auto& flagSlot = pics["FLAG"];
 		auto pOldPic = std::exchange(flagSlot.pic, pPic);
 		if (pOldPic) {
@@ -810,7 +810,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 
 	LPDIRECTDRAWSURFACE7 srf = NULL;
 	//auto ddptr = 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->dd->CreateSurface(&ddsd, &srf, 0);
+	theApp.MainWindow()->m_view.m_isoview->dd->CreateSurface(&ddsd, &srf, 0);
 
 	auto& htileSlot = pics["HTILE"];
 	auto const pOldHtSurf = reinterpret_cast<LPDIRECTDRAWSURFACE7>(std::exchange(htileSlot.pic, srf));
@@ -3550,7 +3550,7 @@ void CLoading::CalcPicCount()
 
 BOOL CLoading::InitDirectDraw()
 {
-	return ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RecreateSurfaces();
+	return theApp.MainWindow()->m_view.m_isoview->RecreateSurfaces();
 }
 
 void CLoading::OnPaint()
@@ -3752,7 +3752,7 @@ void CLoading::FreeAll()
 
 
 	try {
-		CFinalSunDlg* dlg = ((CFinalSunDlg*)theApp.m_pMainWnd);
+		CFinalSunDlg* dlg = theApp.MainWindow();
 		if (dlg->m_view.m_isoview->lpds != NULL) {
 			dlg->m_view.m_isoview->lpds->Release();
 			dlg->m_view.m_isoview->lpds = NULL;
@@ -4169,7 +4169,7 @@ void CLoading::PrepareUnitGraphic(const CString& lpUnittype)
 		hPalette = m_palettes.m_hPalIsoUbn; 
 	}
 
-	CIsoView& v = *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
+	CIsoView& v = *theApp.MainWindow()->m_view.m_isoview;
 
 	_rules_image = rules.GetStringOr(lpUnittype, "Image", lpUnittype);
 

@@ -87,7 +87,7 @@ BOOL bDrawStats = TRUE;
 {
 	while(!bNoThreadDraw)
 	{
-		if(((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview!=NULL) ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->UpdateWindow();
+		if(theApp.MainWindow()->m_view.m_isoview!=NULL) theApp.MainWindow()->m_view.m_isoview->UpdateWindow();
 	}
 
 	return 0;   // Thread erfolgreich ausgeführt
@@ -477,7 +477,7 @@ DWORD WINAPI ChangeHeightThread(
 {
 	CHANGEHEIGHTDATA* p = (CHANGEHEIGHTDATA*)lpParameter;
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->ChangeTileHeight(p->pos, p->toHeight, p->bNonMorpheable);
+	theApp.MainWindow()->m_view.m_isoview->ChangeTileHeight(p->pos, p->toHeight, p->bNonMorpheable);
 
 	return 0;
 }
@@ -3583,7 +3583,7 @@ void CIsoView::ReInitializeDDraw()
 #ifdef NOSURFACES
 	while ((GetDeviceCaps(::GetDC(::GetDesktopWindow()), BITSPIXEL) <= 8)) {
 		if (MessageBox("You currently only have 8 bit color mode enabled. FinalAlert 2 does not work in 8 bit color mode. Please change the color mode and then click on OK. Click Cancel to quit (and save the map as backup.map).", "Error", MB_OKCANCEL) == IDCANCEL) {
-			((CFinalSunDlg*)theApp.m_pMainWnd)->SaveMap((u8AppDataPath + "\\backup.map").c_str());
+			theApp.MainWindow()->SaveMap((u8AppDataPath + "\\backup.map").c_str());
 			PostQuitMessage(0);
 			return;
 		}
@@ -3660,7 +3660,7 @@ void CIsoView::ReInitializeDDraw()
 
 		CommandLine=dlg.GetPathName();
 
-		((CFinalSunDlg*)theApp.m_pMainWnd)->SaveMap(dlg.GetPathName());
+		theApp.MainWindow()->SaveMap(dlg.GetPathName());
 	}
 
 	if(res==IDNO || res==IDYES)

@@ -106,7 +106,7 @@ void CCsfViewer::onReload()
 
     resetControls();
     // this is modal window, no need to update others
-    //((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+    //theApp.MainWindow()->UpdateDialogs(TRUE);
 }
 
 void CCsfViewer::SetSelectedString(CString str)

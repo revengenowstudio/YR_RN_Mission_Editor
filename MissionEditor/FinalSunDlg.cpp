@@ -3089,7 +3089,7 @@ LONG __stdcall ExceptionHandler(
 
 	std::string file = u8AppDataPath;
 	file += "\\fcrash_backup.map";
-	((CFinalSunDlg*)theApp.m_pMainWnd)->SaveMap(file.c_str());
+	theApp.MainWindow()->SaveMap(file.c_str());
 
 	theApp.m_loading->FreeAll();
 
