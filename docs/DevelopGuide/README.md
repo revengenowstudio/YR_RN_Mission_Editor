@@ -81,7 +81,7 @@ vcpkg x-update-baseline
 - MissionEditor\data\shared：FS/FA2 共用数据
 - MissionEditor\data\FinalAlert2：FA2 专有数据
 - MissionEditor\data\FinalSun：FS 专有数据
-- MissionEditor\PropertySheets：公共清单
+- MissionEditor\PropertySheets：VS工程清单数据定义
 - dist：最终输出，含 exe、依赖 DLL 与 data，参见common.props内的脚本化定义
 
 
