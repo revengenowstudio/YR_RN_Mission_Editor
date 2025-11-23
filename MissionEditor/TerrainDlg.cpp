@@ -64,6 +64,7 @@ BEGIN_MESSAGE_MAP(CTerrainDlg, CDialogBar)
 	ON_CBN_SELCHANGE(IDC_TILESET, OnSelchangeTileset)
 	ON_CBN_SELCHANGE(IDC_OVERLAY, OnSelchangeOverlay)
 	ON_CBN_SELCHANGE(IDC_TERRAINBAR_TGROUP, OnSelchangeTileSetGroup)
+	ON_BN_CLICKED(IDC_TERRAINBAR_MANAGER, OnClickTileSetManage)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -108,7 +109,6 @@ BOOL CTerrainDlg::Create(
 {
 	auto const result = CDialogBar::Create(pParentWnd, nIDTemplate, nStyle, nID);
 
-	GetDlgItem(IDC_TERRAINBAR_MANAGER)->EnableWindow(FALSE); // not yet ready, disable it
 	GetDlgItem(IDC_TERRAINBAR_GENERATOR)->EnableWindow(FALSE); // not yet ready, disable it
 
 	return result;
@@ -299,6 +299,15 @@ void CTerrainDlg::OnSelchangeTileSetGroup()
 		return;
 	}
 	handleTiles();
+}
+
+void CTerrainDlg::OnClickTileSetManage()
+{
+	CTerrainGroupManager mgrDlg(this);
+
+	if (mgrDlg.DoModal() == IDOK) {
+		handleTileGroups();
+	}
 }
 
 void CTerrainDlg::handleTileGroups()

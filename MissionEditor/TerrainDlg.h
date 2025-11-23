@@ -55,6 +55,7 @@ protected:
 	afx_msg void OnSelchangeTileset();
 	afx_msg void OnSelchangeOverlay();
 	afx_msg void OnSelchangeTileSetGroup();
+	afx_msg void OnClickTileSetManage();
 
 	DECLARE_MESSAGE_MAP()
 };
