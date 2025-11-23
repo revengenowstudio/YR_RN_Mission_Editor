@@ -101,12 +101,28 @@ IDD_TERRAINBAR DIALOGEX 0, 0, 363, 78
 STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    LTEXT           "Terrain / Ground:",IDD_TERRAINBAR_TG, 7, 7, 54, 10
-    COMBOBOX        IDC_TILESET, 63, 6, 191, 165, CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Overlay && Special:",IDD_TERRAINBAR_OS, 7, 29, 54, 10
-    COMBOBOX        IDC_OVERLAY, 63, 28, 191, 163, CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Tile Manager", IDC_TERRAINBAR_MANAGER, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 7, 46, 65, 17 
-    CONTROL         "Terrain Generator", IDC_TERRAINBAR_GENERATOR, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 167, 46, 65, 17
+    LTEXT           "Terrain / Ground:",IDD_TERRAINBAR_TG,7,7,54,10
+    COMBOBOX        IDC_TILESET,54,6,133,165,CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Overlay && Special:",IDD_TERRAINBAR_OS,7,29,54,10
+    COMBOBOX        IDC_OVERLAY,54,28,133,163,CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Tile Manager",IDC_TERRAINBAR_MANAGER,7,46,65,17
+    PUSHBUTTON      "Terrain Generator",IDC_TERRAINBAR_GENERATOR,122,46,65,17
+    LTEXT           "Group Filter",IDC_TERRAINBAR_TXT_TGROUP,197,4,41,8
+    COMBOBOX        IDC_TERRAINBAR_TGROUP,239,4,103,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_TERRAIN_MGR DIALOGEX 0, 0, 261, 387
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Tile Manager"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    LISTBOX         IDC_TERRAIN_MGR_GROUPS,3,5,101,193,WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_TERRAIN_MGR_TILES,111,5,146,193,WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "OK",IDOK,149,364,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,203,364,50,14
+    PUSHBUTTON      "Remove",IDC_TERRAIN_MGR_REMOVE,215,198,42,14
+    LISTBOX         IDC_TERRAIN_MGR_ALL,3,198,101,179,WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Add",IDC_TERRAIN_MGR_ADD,113,198,42,14
 END
 
 
@@ -120,12 +136,24 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_TERRAINBAR, DIALOG
     BEGIN
-        RIGHTMARGIN, 412
-        VERTGUIDE, 250
-        HORZGUIDE, 8
+        VERTGUIDE, 54
+        VERTGUIDE, 187
+        HORZGUIDE, 4
+        HORZGUIDE, 63
+    END
+
+    IDD_TERRAIN_MGR, DIALOG
+    BEGIN
+        RIGHTMARGIN, 260
+        VERTGUIDE, 3
+        VERTGUIDE, 257
+        BOTTOMMARGIN, 385
+        HORZGUIDE, 5
+        HORZGUIDE, 198
     END
 END
 #endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -137,13 +165,17 @@ BEGIN
     0
 END
 
-#endif    // English (United States) resources
-/////////////////////////////////////////////////////////////////////////////
+IDD_TERRAIN_MGR AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
 //
+
 IDR_TERRAINBAR          BITMAP                  "terrainb.bmp"
 
 
@@ -151,7 +183,6 @@ IDR_TERRAINBAR          BITMAP                  "terrainb.bmp"
 //
 // Toolbar
 //
-
 
 IDR_TERRAINBAR TOOLBAR 16, 15
 BEGIN
@@ -167,6 +198,11 @@ BEGIN
     SEPARATOR
     BUTTON      ID_MARBLEMADNESS
 END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
 
 #ifndef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

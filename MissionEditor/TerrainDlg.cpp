@@ -30,6 +30,7 @@
 #include "functions.h"
 #include "inlines.h"
 #include "GlobalObjectPool.h"
+#include "TerrainGroupMgr.h"
 #include <string>
 
 extern ACTIONDATA AD;
@@ -43,12 +44,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CTerrainDlg 
 
-
 CTerrainDlg::CTerrainDlg(CWnd* pParent /*=NULL*/)
 	: CDialogBar()
 {
-	//{{AFX_DATA_INIT(CTerrainDlg)
-	//}}AFX_DATA_INIT
+
 }
 
 
@@ -64,6 +63,7 @@ BEGIN_MESSAGE_MAP(CTerrainDlg, CDialogBar)
 	//{{AFX_MSG_MAP(CTerrainDlg)
 	ON_CBN_SELCHANGE(IDC_TILESET, OnSelchangeTileset)
 	ON_CBN_SELCHANGE(IDC_OVERLAY, OnSelchangeOverlay)
+	ON_CBN_SELCHANGE(IDC_TERRAINBAR_TGROUP, OnSelchangeTileSetGroup)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -82,12 +82,12 @@ void CTerrainDlg::TranslateUI()
 	TranslateDlgItem(*this, IDD_TERRAINBAR_OS, "TerrainDlgOverlaySpecial");
 	TranslateDlgItem(*this, IDC_TERRAINBAR_MANAGER, "TerrainDlgManagement");
 	TranslateDlgItem(*this, IDC_TERRAINBAR_GENERATOR, "TerrainDlgGenerator");
+	TranslateDlgItem(*this, IDC_TERRAINBAR_TXT_TGROUP, "TerrainDlgTGroup");
+	
 }
 
 void CTerrainDlg::OnSelchangeTileset()
 {
-	//while(m_Type.DeleteString(0)!=CB_ERR);
-
 	CString currentTileSet;
 	CComboBox* TileSet;
 	TileSet = (CComboBox*)GetDlgItem(IDC_TILESET);
@@ -193,6 +193,7 @@ void CTerrainDlg::Update()
 	if (tiles) {
 		handleTiles();
 	}
+	handleTileGroups();
 
 	CComboBox* Overlays;
 	Overlays = (CComboBox*)GetDlgItem(IDC_OVERLAY);
@@ -288,4 +289,55 @@ void CTerrainDlg::OnSelchangeOverlay()
 	auto const frame = reinterpret_cast<CTileSetBrowserFrame*>(GetParentFrame());
 	frame->m_view.SetOverlay(sel);
 	frame->RecalcLayout();
+}
+
+void CTerrainDlg::OnSelchangeTileSetGroup()
+{
+	auto cbTerrainGroup = reinterpret_cast<CComboBox*>(GetDlgItem(IDC_TERRAINBAR_TGROUP));
+	auto cbTiles = reinterpret_cast<CComboBox*>(GetDlgItem(IDC_TILESET));
+
+	if (cbTerrainGroup->GetCount() <= 0) {
+		return;
+	}
+	int groupSelected = cbTerrainGroup->GetCurSel();
+	if (groupSelected < 0) {
+		return;
+	}
+
+	auto const& TerrainSorts = CTerrainGroupManager::Groups();
+	if (TerrainSorts.empty()) {
+		return;
+	}
+	auto const& groupN = TerrainSorts.at(groupSelected);
+	auto const SubCount = groupN.Count();
+	if (SubCount <= 0) {
+		return;
+	}
+
+	cbTiles->ResetContent();
+
+	for (int idx = 0; idx < SubCount; ++idx) {
+		// add Tile IDs
+		cbTiles->AddString(groupN[idx].first);
+	}
+	cbTiles->SetCurSel(0);
+	
+	OnSelchangeTileset();
+}
+
+void CTerrainDlg::handleTileGroups()
+{
+	CTerrainGroupManager::LoadTerrainGroups(Map->GetTheater());
+	auto const& TerrainSorts = CTerrainGroupManager::Groups();
+	if (TerrainSorts.empty()) {
+		errstream << "Waring: terrain group data is empty" << endl;
+		return;
+	}
+
+	auto cbTerrainGroup = reinterpret_cast<CComboBox*>(GetDlgItem(IDC_TERRAINBAR_TGROUP));
+	cbTerrainGroup->ResetContent();
+
+	for (int idx = 0; idx < TerrainSorts.size(); ++idx) {
+		cbTerrainGroup->AddString(TerrainSorts[idx].Name());
+	}
 }

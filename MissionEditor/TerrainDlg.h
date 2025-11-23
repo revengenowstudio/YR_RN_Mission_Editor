@@ -51,9 +51,11 @@ protected:
 	virtual void PostNcDestroy() override;
 
 	void handleTiles();
+	void handleTileGroups();
 
 	afx_msg void OnSelchangeTileset();
 	afx_msg void OnSelchangeOverlay();
+	afx_msg void OnSelchangeTileSetGroup();
 
 	DECLARE_MESSAGE_MAP()
 };

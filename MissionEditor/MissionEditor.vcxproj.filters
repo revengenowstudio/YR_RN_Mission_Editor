@@ -306,6 +306,9 @@
     <ClCompile Include="IniContentEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TerrainGroupMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\VersionInfo.rc">
@@ -635,6 +638,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IniContentEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainGroupMgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
