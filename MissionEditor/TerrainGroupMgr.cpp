@@ -47,11 +47,12 @@ const TerrainGroups& CTerrainGroupManager::Groups()
 void CTerrainGroupManager::LoadTerrainGroups(CString Theater)
 {
     terrainGroupData.LoadFile(CTerrainGroupManager::GetControlDataPath());
-    if (terrainGroupData.Size() == 0) {
+    if (terrainGroupData.Size() == 0 || Theater.IsEmpty()) {
         return;
     }
 
     Theater.MakeLower();
+    Theater.SetAt(0, std::toupper(Theater[0])); // camelCase
     CString IniSectionName = "Terrain" + Theater;
 
     TerrainSorts.clear();
