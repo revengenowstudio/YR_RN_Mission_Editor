@@ -110,18 +110,26 @@ TerrainSort::TerrainSort() {
 }
 
 TerrainSort::TerrainSort(std::vector<CString>&& init) {
-    name = init[0];
+    name = init[0];//group name
     int count = atoi(init[1]);
-    Data.resize(count);
+    if (!count) {
+        return;
+    }
+
     for (auto i = 0ull; i < count; ++i) {
-        Data[i].first = init[i * 2 + 2];
-        Data[i].second = init[i * 2 + 3];
+        auto displayName = init[i * 2 + 2];
+        auto setId = init[i * 2 + 3];
+        displayName.Trim();
+        setId.Trim();
+        // displayName is more of debug use
+        Data.emplace(std::move(setId), std::move(displayName));
     }
     init.clear();
 }
 
 const CString TerrainSort::ToString() const
 {
+    // TODO, serialize
     return CString();
 }
 

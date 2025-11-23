@@ -1,25 +1,25 @@
 #pragma once
 #include <afxrich.h>
-#include <vector>
+#include <unordered_map>
+#include "IniFile.h"
 
-class TerrainSort {
+class TerrainSort 
+{
 public:
     TerrainSort();
     TerrainSort(std::vector<CString>&& init);
 
-    auto const& operator[](int index) const
-    {
-        return Data.at(index);
-    }
+    bool Contains(const CString& tileSetId) const { return Data.find(tileSetId) != Data.end();  }
+    auto Size() const { return Data.size(); }
 
     const CString ToString() const;
-    auto Count() const { return Data.size(); }
-    void Resize(size_t size) { Data.resize(size); }
+
     CString Name() const { return name; }
 
 private:
-    std::vector<std::pair<CString, CString>> Data;
-    CString name;
+    // tileset-Id : displayName
+    std::unordered_map<CString, CString, CStringHash> Data;
+    CString name; // group display name
 };
 using TerrainGroups = std::vector<TerrainSort>;
 
