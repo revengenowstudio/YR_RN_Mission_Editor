@@ -565,7 +565,7 @@ void CScriptTypes::insertScriptType(const CString& name, const std::vector<CStri
 		idStr.Format("%d", idx++);
 		sec.SetString(idStr, line);
 	}
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+	theApp.MainWindow()->UpdateDialogs(TRUE);
 	for (auto i = 0; i < m_ScriptType.GetCount(); i++) {
 		CString data;
 		m_ScriptType.GetLBText(i, data);
@@ -608,7 +608,7 @@ void CScriptTypes::OnDelete()
 	auto const& id = ini["ScriptTypes"].Nth(ini["ScriptTypes"].FindValue(Scripttype)).first;
 	ini.RemoveValueByKey("ScriptTypes", id);
 	//UpdateDialog();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+	theApp.MainWindow()->UpdateDialogs(TRUE);
 }
 
 

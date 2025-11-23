@@ -124,8 +124,8 @@ void CToolSettingsBar::OnSelchangeBrushsize()
 		break;
 	}
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = bx;
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = by;
+	theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = bx;
+	theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = by;
 }
 
 // never called

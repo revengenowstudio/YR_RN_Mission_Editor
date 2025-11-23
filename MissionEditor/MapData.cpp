@@ -687,7 +687,7 @@ void CMapData::LoadMap(const CString& file)
 
 	UpdateBuildingInfo();
 	UpdateTreeInfo();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->UpdateOverlayPictures();
+	theApp.MainWindow()->m_view.m_isoview->UpdateOverlayPictures();
 
 	auto const& theaterType = m_mapfile.GetString("Map", "Theater");
 	if (theaterType == THEATER0) {
@@ -1313,7 +1313,7 @@ void CMapData::Pack(BOOL bCreatePreview, BOOL bCompression)
 		BITMAPINFO biinfo;
 		BYTE* lpDibData;
 		int pitch;
-		((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_minimap->DrawMinimap(&lpDibData, biinfo, pitch);
+		theApp.MainWindow()->m_view.m_minimap->DrawMinimap(&lpDibData, biinfo, pitch);
 
 		m_mapfile.DeleteSection("PreviewPack");
 		m_mapfile.SetString("Preview", "Size", m_mapfile.GetString("Map", "Size"));
@@ -1663,7 +1663,7 @@ void CMapData::UpdateStructures(BOOL bSave)
 	for (auto const& [index, val] : m_mapfile.GetSection("Structures")) {
 		STRUCTUREPAINT sp;
 		const size_t indexNum = atoi(index);
-		sp.col = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->GetColor(GetParam(val, 0));
+		sp.col = theApp.MainWindow()->m_view.m_isoview->GetColor(GetParam(val, 0));
 		sp.strength = atoi(GetParam(val, 2));
 		sp.upgrade1 = GetParam(val, 12);
 		sp.upgrade2 = GetParam(val, 13);
@@ -2456,7 +2456,7 @@ BOOL CMapData::AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType, LPCTSTR lpHo
 		const size_t idNum = atoi(id);
 		if (auto fieldData = GetFielddataAt(x, y)) {
 			STRUCTUREPAINT sp;
-			sp.col = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->GetColor(structure.basic.house);
+			sp.col = theApp.MainWindow()->m_view.m_isoview->GetColor(structure.basic.house);
 			sp.strength = atoi(structure.basic.strength);
 			sp.upgrade1 = structure.upgrade1;
 			sp.upgrade2 = structure.upgrade2;
@@ -4035,7 +4035,7 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 		theApp.m_loading->InitMixFiles();
 
 		if (theApp.m_pMainWnd)
-			((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->UpdateOverlayPictures();
+			theApp.MainWindow()->m_view.m_isoview->UpdateOverlayPictures();
 
 		theApp.m_loading->InitPics();
 		auto const& theaterType = m_mapfile.GetString("Map", "Theater");

@@ -134,7 +134,7 @@ void CMapD::OnChangelocal()
 	ini.SetString("Map", "LocalSize", GetText(&m_LocalSize));
 
 	Map->CalcMapRect();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	theApp.MainWindow()->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
 void CMapD::OnChange()
@@ -147,7 +147,7 @@ void CMapD::OnChange()
 	height=atoi(m_Height);
 
 	Map->ResizeMap(width, height);
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	theApp.MainWindow()->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 	*/
 
 	CChangeSizeDlg dlg;
@@ -163,8 +163,8 @@ void CMapD::OnChange()
 	Map->ResizeMap(dlg.m_Left, dlg.m_Top, dlg.m_Width, dlg.m_Height);
 
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_minimap->UpdateView();
+	theApp.MainWindow()->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	theApp.MainWindow()->m_view.m_minimap->UpdateView();
 
 	char c[50];
 	itoa(dlg.m_Width, c, 10);

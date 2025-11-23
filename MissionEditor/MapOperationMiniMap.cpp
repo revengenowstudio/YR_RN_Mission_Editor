@@ -147,7 +147,7 @@ void CMapData::Mini_UpdatePos(const int i, const int e, bool isMultiplayer)
 			col.rgbtGreen=200;
 			col.rgbtBlue=200;
 		}*/
-		COLORREF c = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->GetColor(sod.house);
+		COLORREF c = theApp.MainWindow()->m_view.m_isoview->GetColor(sod.house);
 
 		col.rgbtRed = GetRValue(c);
 		col.rgbtBlue = GetBValue(c);

@@ -255,7 +255,7 @@ void Palettes::FetchPalettes()
     CreateConvTable(palUnit, iPalUnit);
     CreateConvTable(palTheater, iPalTheater);
 
-    CIsoView& v = *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
+    CIsoView& v = *theApp.MainWindow()->m_view.m_isoview;
 
     DDPIXELFORMAT pf;
     memset(&pf, 0, sizeof(DDPIXELFORMAT));
@@ -277,7 +277,7 @@ void Palettes::FetchPalettes()
 
 void Palettes::CreateConvTable(RGBTRIPLE* pal, int* iPal)
 {
-    CIsoView& v = *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview;
+    CIsoView& v = *theApp.MainWindow()->m_view.m_isoview;
 
     DDPIXELFORMAT pf;
     memset(&pf, 0, sizeof(DDPIXELFORMAT));

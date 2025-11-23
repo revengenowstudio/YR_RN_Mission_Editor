@@ -145,7 +145,7 @@ void CViewObjects::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 	if (val < 0) { // return;
 		if (val == -2) {
 			AD.reset();
-			((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+			theApp.MainWindow()->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		}
 		return;
 	}
@@ -228,31 +228,31 @@ void CViewObjects::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 		case 50:
 		{
 			AD.mode = ACTIONMODE_MAPTOOL;
-			AD.tool.reset(new AddTubeTool(*Map, *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview, true));
+			AD.tool.reset(new AddTubeTool(*Map, *theApp.MainWindow()->m_view.m_isoview, true));
 			break;
 		}
 		case 51:
 		{
 			AD.mode = ACTIONMODE_MAPTOOL;
-			AD.tool.reset(new ModifyTubeTool(*Map, *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview, true));
+			AD.tool.reset(new ModifyTubeTool(*Map, *theApp.MainWindow()->m_view.m_isoview, true));
 			break;
 		}
 		case 52:
 		{
 			AD.mode = ACTIONMODE_MAPTOOL;
-			AD.tool.reset(new AddTubeTool(*Map, *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview, false));
+			AD.tool.reset(new AddTubeTool(*Map, *theApp.MainWindow()->m_view.m_isoview, false));
 			break;
 		}
 		case 53:
 		{
 			AD.mode = ACTIONMODE_MAPTOOL;
-			AD.tool.reset(new ModifyTubeTool(*Map, *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview, false));
+			AD.tool.reset(new ModifyTubeTool(*Map, *theApp.MainWindow()->m_view.m_isoview, false));
 			break;
 		}
 		case 54:
 		{
 			AD.mode = ACTIONMODE_MAPTOOL;
-			AD.tool.reset(new RemoveTubeTool(*Map, *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview));
+			AD.tool.reset(new RemoveTubeTool(*Map, *theApp.MainWindow()->m_view.m_isoview));
 			break;
 		}
 
@@ -301,13 +301,13 @@ void CViewObjects::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 			for (i = 0; i < (*tiledata_count); i++)
 				if ((*tiledata)[i].wTileSet == waterset) break;
 
-			if (((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x < 2 ||
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y < 2) {
+			if (theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x < 2 ||
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y < 2) {
 
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = 1;
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = 2;
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = 2;
+				theApp.MainWindow()->m_settingsbar.m_BrushSize = 1;
+				theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = 2;
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = 2;
 			}
 
 			AD.type = i;
@@ -1305,10 +1305,10 @@ void CViewObjects::HandleBrushSize(int iTile)
 			int tset = tiles->GetInteger("General", n);
 			if (tset == (*tiledata)[iTile].wTileSet) {
 				int bs = atoi(val);
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = bs - 1;
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = bs;
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = bs;
+				theApp.MainWindow()->m_settingsbar.m_BrushSize = bs - 1;
+				theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = bs;
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = bs;
 			}
 		}
 	}

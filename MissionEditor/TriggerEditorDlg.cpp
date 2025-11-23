@@ -187,7 +187,7 @@ void CTriggerEditorDlg::OnNewtrigger()
 		ini.SetString("Tags", ID_TAG, "0,New tag," + ID_T);
 	}
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+	theApp.MainWindow()->UpdateDialogs(TRUE);
 
 	for (auto i = 0; i < m_Trigger.GetCount(); i++) {
 		if (m_Trigger.GetItemData(i) == ini["Triggers"].FindIndex(ID_T)) {
@@ -239,7 +239,7 @@ void CTriggerEditorDlg::OnDeletetrigger()
 	ASSERT(deleted);
 	(void)deleted;
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+	theApp.MainWindow()->UpdateDialogs(TRUE);
 
 }
 
@@ -362,7 +362,7 @@ void CTriggerEditorDlg::OnClone()
 	CString newTagId = GetFreeID();
 	ini.SetString("Tags", newTagId, "0," + GetParam(ini["Triggers"][newId], 2) + "," + newId);
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+	theApp.MainWindow()->UpdateDialogs(TRUE);
 
 	for (auto i = 0; i < m_Trigger.GetCount(); i++) {
 		if (m_Trigger.GetItemData(i) == ini["Triggers"].FindIndex(newId)) {

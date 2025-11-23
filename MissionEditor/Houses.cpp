@@ -373,7 +373,7 @@ void CHouses::OnPreparehouses()
 	m_houses.SetCurSel(0);
 
 	OnSelchangeHouses();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs();
+	theApp.MainWindow()->UpdateDialogs();
 }
 
 // This is a very tricky check, since rules defined country 
@@ -510,7 +510,7 @@ void CHouses::AddHouse(const CString& name, bool showCountryTemplateDlg)
 	if (showCountryTemplateDlg) {
 		int cusel = m_houses.GetCurSel();
 		UpdateDialog();
-		((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs();
+		theApp.MainWindow()->UpdateDialogs();
 		if (cusel != -1) {
 			m_houses.SetCurSel(cusel);
 		}
@@ -611,7 +611,7 @@ void CHouses::OnDeletehouse()
 		ini.DeleteSection(HOUSES);
 	}
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs();
+	theApp.MainWindow()->UpdateDialogs();
 	UpdateDialog();
 }
 
@@ -703,8 +703,8 @@ void CHouses::OnKillfocusColor()
 	Map->UpdateStructures(FALSE);
 	// and minimap
 	Map->RedrawMinimap();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_minimap->RedrawWindow();
+	theApp.MainWindow()->m_view.m_isoview->RedrawWindow();
+	theApp.MainWindow()->m_view.m_minimap->RedrawWindow();
 }
 
 void CHouses::OnKillfocusCredits()

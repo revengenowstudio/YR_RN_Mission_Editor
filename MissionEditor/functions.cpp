@@ -386,7 +386,7 @@ void ShowOptionsDialog(CIniFile& optIni)
 	CString oldLang = theApp.m_Options.LanguageName;
 	theApp.m_Options.LanguageName = opt.m_LanguageName;
 	if (oldLang != theApp.m_Options.LanguageName && theApp.m_pMainWnd != NULL && theApp.m_pMainWnd->m_hWnd != NULL) {
-		((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateStrings();
+		theApp.MainWindow()->UpdateStrings();
 	}
 	optIni.SaveFile(iniFile);
 }

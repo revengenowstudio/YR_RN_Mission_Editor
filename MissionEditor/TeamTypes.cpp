@@ -630,7 +630,7 @@ void CTeamTypes::OnDeleteteamtype()
 		}
 		ini.DeleteSection(str);
 	}
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+	theApp.MainWindow()->UpdateDialogs(TRUE);
 	//UpdateDialog();
 }
 
@@ -1241,7 +1241,7 @@ void CTeamTypes::addTeamtype(const TeamTypeParams& params)
 #endif
 
 	//UpdateDialog();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+	theApp.MainWindow()->UpdateDialogs(TRUE);
 
 	int i;
 	for (i = 0; i < m_TeamTypes.GetCount(); i++) {

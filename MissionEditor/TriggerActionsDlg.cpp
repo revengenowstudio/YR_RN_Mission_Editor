@@ -283,7 +283,7 @@ std::pair<CString, CString> CTriggerActionsDlg::popUpCSFViewerAndReturn(CComboBo
 	CString curValue;
 	cb.GetWindowText(curValue);
 
-	auto& csfDlg = ((CFinalSunDlg*)theApp.m_pMainWnd)->m_csfStrings;
+	auto& csfDlg = theApp.MainWindow()->m_csfStrings;
 
 	if (!curValue.IsEmpty() && curValue != "0") {
 		TruncSpace(curValue);
