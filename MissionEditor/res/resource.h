@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by TerrainBar.rc
+// Used by TriggerEditor.rc
 //
 #define PRODUCT_VERSION_REVISION        0
 #define PRODUCT_VERSION_MINOR           1
@@ -102,6 +102,7 @@
 #define IDC_EDITOR_ARROW                299
 #define IDD_CSF_VIEWER                  300
 #define IDD_TERRAIN_MGR                 301
+#define IDD_TRIGGER_ALL                 307
 #define IDD_INI_EDITOR                  329
 #define IDC_BULB                        1000
 #define IDC_STARTUP                     1001
