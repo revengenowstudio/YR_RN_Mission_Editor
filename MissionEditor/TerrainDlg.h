@@ -42,18 +42,19 @@ public:
 
 	void TranslateUI();
 
-	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, 
-		DWORD dwStyle, const RECT& rect, CWnd* pParentWnd,
-		UINT nID, CCreateContext* pContext = NULL) override;
+	virtual BOOL Create(CWnd* pParentWnd, UINT nIDTemplate,
+		UINT nStyle, UINT nID) override;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
 	virtual void PostNcDestroy() override;
 
 	void handleTiles();
+	void handleTileGroups();
 
 	afx_msg void OnSelchangeTileset();
 	afx_msg void OnSelchangeOverlay();
+	afx_msg void OnSelchangeTileSetGroup();
 
 	DECLARE_MESSAGE_MAP()
 };

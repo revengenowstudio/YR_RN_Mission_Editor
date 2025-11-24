@@ -576,6 +576,7 @@
     <ClCompile Include="TaskForce.cpp" />
     <ClCompile Include="TeamTypes.cpp" />
     <ClCompile Include="TerrainDlg.cpp" />
+    <ClCompile Include="TerrainGroupMgr.cpp" />
     <ClCompile Include="TerrainModifier.cpp" />
     <ClCompile Include="tests.cpp">
       <ExcludedFromBuild Condition="'$(IS_UNITTEST)'!='True'">true</ExcludedFromBuild>
@@ -689,6 +690,7 @@
     <ClInclude Include="TaskForce.h" />
     <ClInclude Include="TeamTypes.h" />
     <ClInclude Include="TerrainDlg.h" />
+    <ClInclude Include="TerrainGroupMgr.h" />
     <ClInclude Include="TerrainModifier.h" />
     <ClInclude Include="tests.h" />
     <ClInclude Include="TextDrawer.h" />

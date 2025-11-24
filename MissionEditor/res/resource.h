@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by IniEdit.rc
+// Used by TerrainBar.rc
 //
 #define PRODUCT_VERSION_REVISION        0
 #define PRODUCT_VERSION_MINOR           1
@@ -101,6 +101,7 @@
 #define IDD_COMBO_UINPUT                289
 #define IDC_EDITOR_ARROW                299
 #define IDD_CSF_VIEWER                  300
+#define IDD_TERRAIN_MGR                 301
 #define IDD_INI_EDITOR                  329
 #define IDC_BULB                        1000
 #define IDC_STARTUP                     1001
@@ -524,6 +525,7 @@
 #define IDC_REPORT                      1458
 #define IDC_CAPTION                     1459
 #define IDC_COMBO1                      1460
+#define IDC_TERRAINBAR_TGROUP           1460
 #define IDC_LICENSE_AND_COPYRIGHT       1461
 #define IDC_PREFER_LOCAL_THEATER_INI_FILES 1462
 #define IDC_PREFER_LOCAL_THEATER_FILES  1463
@@ -659,6 +661,13 @@
 #define IDC_INI_E_CUR_SEC               1570
 #define IDC_INI_E_DISABLE_VALIDATION    1571
 #define IDC_INI_E_SEARCH_CASED          1572
+#define IDC_TERRAINBAR_TXT_TGROUP       1573
+#define IDC_TERRAIN_MGR_GROUPS          1574
+#define IDC_TERRAIN_MGR_TILES           1575
+#define IDC_TERRAIN_MGR_ALL             1576
+#define IDC_TERRAIN_MGR_REMOVE          1578
+#define IDC_TERRAIN_MGR_REMOVE2         1579
+#define IDC_TERRAIN_MGR_ADD             1579
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -753,9 +762,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        331
+#define _APS_NEXT_RESOURCE_VALUE        332
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1573
+#define _APS_NEXT_CONTROL_VALUE         1579
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif
