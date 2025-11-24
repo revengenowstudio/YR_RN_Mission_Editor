@@ -1084,14 +1084,6 @@ void CViewObjects::UpdateDialog()
 
 	auto const& overlayTypeSec = rules["OverlayTypes"];
 	auto const sizeLimit = std::min<unsigned int>(overlayTypeSec.Size(), 255);
-	auto getOverlayDisplayName = [](const CString& id) -> CString {
-		auto const& uiName = rules.GetString(id, "UIName");
-		auto it = AllStrings.find(uiName);
-		if (it != AllStrings.end()) {
-			return it->second.cString;
-		}
-		return GetLanguageStringACP(id);
-	};
 
 	for (i = 0; i < sizeLimit; i++) {
 		bool allowedToList = false;
@@ -1121,7 +1113,7 @@ void CViewObjects::UpdateDialog()
 #endif
 		} while (0);
 
-		auto const& overlayName = getOverlayDisplayName(unitname);
+		auto const& overlayName = GetOverlayDisplayName(unitname);
 
 		if (allowedToList) {
 			tree.InsertItem(TVIF_PARAM | TVIF_TEXT, overlayName,

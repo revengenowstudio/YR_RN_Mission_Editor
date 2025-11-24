@@ -4114,7 +4114,8 @@ void CIsoView::UpdateStatusBar(int x, int y)
 {
 	CString statusbar;//=TranslateStringACP("Ready");
 
-	FIELDDATA m = *Map->GetFielddataAt(x + y * Map->GetIsoSize());
+	auto const positionId = x + y * Map->GetIsoSize();
+	FIELDDATA m = *Map->GetFielddataAt(positionId);
 	if (m.wGround == 0xFFFF) {
 		m.wGround = 0;
 	}
@@ -4132,21 +4133,20 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	}
 
 
-	if (Map->GetOverlayAt(x + y * Map->GetIsoSize()) != 0xFF) {
+	
+	if (auto const overlayTypeIdx = Map->GetOverlayAt(positionId); 
+		overlayTypeIdx != 0xFF) {
 		char ov[50];
-		itoa(Map->GetOverlayAt(x + y * Map->GetIsoSize()), ov, 16);
+		itoa(overlayTypeIdx, ov, 16);
 
-		int i;
 		CString name;
 		name = "0x";
 		name += ov;
-		for (i = 0; i < overlay_count; i++) {
-			if (overlay_number[i] == Map->GetOverlayAt(x + y * Map->GetIsoSize()))
-				name = overlay_name[i];
+
+		if (overlay_trail.contains(overlayTypeIdx)) {
+			name = GetOverlayDisplayName(overlayTypeIdx);
 		}
-
-
-		itoa(Map->GetOverlayDataAt(x + y * Map->GetIsoSize()), ov, 16);
+		itoa(Map->GetOverlayDataAt(positionId), ov, 16);
 
 		statusbar += GetLanguageStringACP("OvrlStatus");
 		statusbar += TranslateStringACP(name);
@@ -4158,26 +4158,26 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	TECHNODATA techno;
 
 	int objId = -1;
-	if (int n = Map->GetTopStructureAt(x + y * Map->GetIsoSize()); n >= 0) {
+	if (int n = Map->GetTopStructureAt(positionId); n >= 0) {
 		type = TechnoType::Building;
 		statusbar = GetLanguageStringACP("StructStatus");
 		objId = n;
 	}
 
-	if (int n = Map->GetUnitAt(x + y * Map->GetIsoSize()); n >= 0) {
+	if (int n = Map->GetUnitAt(positionId); n >= 0) {
 		type = TechnoType::Unit;
 		statusbar = GetLanguageStringACP("UnitStatus");
 		objId = n;
 
 	}
 
-	if (int n = Map->GetAirAt(x + y * Map->GetIsoSize()); n >= 0) {
+	if (int n = Map->GetAirAt(positionId); n >= 0) {
 		type = TechnoType::Aircraft;
 		statusbar = GetLanguageStringACP("AirStatus");
 		objId = n;
 	}
 
-	if (int n = Map->GetInfantryAt(x + y * Map->GetIsoSize()); n >= 0) {
+	if (int n = Map->GetInfantryAt(positionId); n >= 0) {
 		type = TechnoType::Infantry;
 		INFANTRY inf;
 		Map->GetInfantryData(n, &inf);
@@ -4250,7 +4250,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	itoa(td.bMapData2[0],c,10);
 	statusbar+=c;*/
 
-	if (int n = Map->GetCelltagAt(x + y * Map->GetIsoSize()); n >= 0) {
+	if (int n = Map->GetCelltagAt(positionId); n >= 0) {
 		CString type;
 		CString name;
 		DWORD pos;

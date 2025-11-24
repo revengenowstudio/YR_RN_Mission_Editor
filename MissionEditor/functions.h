@@ -156,6 +156,9 @@ CString TranslateStringACP(WCHAR* u16EnglishString);
 void TranslateDlgItem(CWnd& cwnd, int controlID, const CString& label);
 void TranslateWindowCaption(CWnd& cwnd, const CString& label);
 
+CString GetOverlayDisplayName(const int typeIndex);
+CString GetOverlayDisplayName(const CString& id);
+
 /****************************************
  sound functions [03/16/2001]
  ****************************************/
