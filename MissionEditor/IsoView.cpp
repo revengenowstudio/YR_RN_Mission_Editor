@@ -1508,7 +1508,17 @@ void CIsoView::OnMouseMove(UINT nFlags, CPoint point)
 			Map->Paste(x, y, AD.z_data);
 			RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 			Map->Undo();
-		} else if ((AD.mode == ACTIONMODE_PLACE || AD.mode == ACTIONMODE_RANDOMTERRAIN) && (nFlags & ~MK_CONTROL) == 0 && AD.type != 7 && (AD.type != 6 || (AD.type == 6 && ((AD.data >= 30 && AD.data <= 33) || AD.data == 2 || AD.data == 3)))) // everything placing but not overlay!
+		} else if ((AD.mode == ACTIONMODE_PLACE || AD.mode == ACTIONMODE_RANDOMTERRAIN) 
+			&& (nFlags & ~MK_CONTROL) == 0 
+			&& AD.type != 7 
+			&& (AD.type != 6 
+				|| (AD.type == 6 
+					&& ((AD.data >= 30 && AD.data <= 33) 
+						|| AD.data == 2 
+						|| AD.data == 3)
+					)
+				)
+			) // everything placing but not overlay!
 		{
 			FIELDDATA oldData[32][32];
 			//INFANTRY infData[SUBPOS_COUNT][32][32];
@@ -3747,19 +3757,30 @@ void CIsoView::SetError(const char* text)
 int CIsoView::GetOverlayDirection(int x, int y)
 {
 	DWORD dwIsoSize = Map->GetIsoSize();
-	int p = -1;
 	int type = Map->GetOverlayAt(x + y * dwIsoSize);
 
-	BOOL isTrail = FALSE;
-	int i;
-	for (i = 0; i < overlay_count; i++)
-		if (overlay_number[i] == type)
-			if (overlay_trail[i]) isTrail = TRUE;
+	auto const isTrail = overlay_trail.contains(type);
 
-	if (isTrack(type)) // handling a train track
-	{
+	// handling something like a sandbag/wall
+	if (isTrail) {
+		int p = 0;
+		if (Map->GetOverlayAt(x - 1 + (y - 0) * dwIsoSize) == type) {
+			p |= 0x1;
+		}
+		if (Map->GetOverlayAt(x + (y + 1) * dwIsoSize) == type) {
+			p |= 0x2;
+		}
+		if (Map->GetOverlayAt(x + 1 + (y + 0) * dwIsoSize) == type) {
+			p |= 0x4;
+		}
+		if (Map->GetOverlayAt(x + (y - 1) * dwIsoSize) == type) {
+			p |= 0x8;
+		}
+		return p;
+	}
 
-
+	// handling a train track
+	if (isTrack(type)) {
 		if (isTrack(Map->GetOverlayAt((x - 1) + (y - 1) * dwIsoSize)) && isTrack(Map->GetOverlayAt((x + 1) + (y + 1) * dwIsoSize)))
 			return 0;
 		if (isTrack(Map->GetOverlayAt((x + 1) + (y - 1) * dwIsoSize)) && isTrack(Map->GetOverlayAt((x - 1) + (y + 1) * dwIsoSize)))
@@ -3802,17 +3823,9 @@ int CIsoView::GetOverlayDirection(int x, int y)
 			return 3;
 
 		return 0;
-	} else if (isTrail) // handling something like a sandbag
-	{
-		p = 0;
-		if (Map->GetOverlayAt(x - 1 + (y - 0) * dwIsoSize) == type) p |= 0x1;
-		if (Map->GetOverlayAt(x + (y + 1) * dwIsoSize) == type) p |= 0x2;
-		if (Map->GetOverlayAt(x + 1 + (y + 0) * dwIsoSize) == type) p |= 0x4;
-		if (Map->GetOverlayAt(x + (y - 1) * dwIsoSize) == type) p |= 0x8;
-	}
-
-	return p;
-
+	} 
+	
+	return -1;
 }
 
 void CIsoView::HandleTrail(int x, int y)
@@ -3820,28 +3833,28 @@ void CIsoView::HandleTrail(int x, int y)
 	int i, e;
 	int type = Map->GetOverlayAt(x + y * Map->GetIsoSize());
 
-	if (isTrack(type)) // is a track (overlay must be changed)
-	{
-
+	// is a track (overlay must be changed)
+	if (isTrack(type)) {
 		for (i = x - 2; i <= x + 2; i++) {
 			for (e = y - 1; e <= y + 1; e++) {
 				if (isTrack(Map->GetOverlayAt(i + e * Map->GetIsoSize())))
 					Map->SetOverlayAt(i + e * Map->GetIsoSize(), 0x27 + GetOverlayDirection(i, e));
 			}
 		}
-	} else // something like a sandbag (overlaydata must be changed)
-	{
+		return;
+	}
 
-		for (i = x - 2; i <= x + 2; i++) {
-			for (e = y - 1; e <= y + 1; e++) {
-				if (Map->GetOverlayAt(i + e * Map->GetIsoSize()) == type) {
-					int dir = GetOverlayDirection(i, e);
-					if (dir >= 0)	Map->SetOverlayDataAt(i + e * Map->GetIsoSize(), dir);
+	// something like a sandbag (overlaydata must be changed)
+	for (i = x - 2; i <= x + 2; i++) {
+		for (e = y - 1; e <= y + 1; e++) {
+			if (Map->GetOverlayAt(i + e * Map->GetIsoSize()) == type) {
+				int dir = GetOverlayDirection(i, e);
+				if (dir >= 0) {
+					Map->SetOverlayDataAt(i + e * Map->GetIsoSize(), dir);
 				}
 			}
 		}
 	}
-
 }
 
 
@@ -4869,7 +4882,7 @@ void CIsoView::handleMouseActionManageOverlays(int x, int y)
 		int i;
 		for (i = 0; i < overlay_count; i++) {
 			if (overlay_number[i] == AD.data2) {
-				if (overlay_trail[i]) {
+				if (overlay_trail.contains(i)) {
 					// handle trail stuff!
 					HandleTrail(x, y);
 				}

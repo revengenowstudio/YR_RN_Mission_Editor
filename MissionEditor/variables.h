@@ -156,7 +156,7 @@ static constexpr const char* overlay_name[] = {
 	"Tracks" 
 };
 #endif
-extern BOOL overlay_trail[]; // is it handled as trail?
+extern std::unordered_set<int> overlay_trail; // is it handled as trail?
 extern BOOL yr_only[];
 
 

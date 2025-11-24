@@ -67,7 +67,6 @@ BEGIN_MESSAGE_MAP(CViewObjects, CTreeView)
 END_MESSAGE_MAP()
 
 extern BOOL overlay_visible[];
-extern BOOL overlay_trail[];
 
 
 extern int overlay_count;
@@ -257,7 +256,9 @@ void CViewObjects::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 		}
 
 		case 61:
-			if (!tiledata_count) break;
+			if (!tiledata_count) {
+				break;
+			}
 			AD.type = 0;
 			AD.mode = ACTIONMODE_SETTILE;
 			AD.data = 0;
@@ -1097,6 +1098,7 @@ void CViewObjects::UpdateDialog()
 		auto const& unitname = overlayTypeSec.Nth(i).second;
 		if (rules.GetBool(unitname, "Wall") && rules.GetBool(unitname, "Wall.HasConnection", true)) {
 			allowedToList = true;
+			overlay_trail.insert(i);
 		}
 
 		do {
