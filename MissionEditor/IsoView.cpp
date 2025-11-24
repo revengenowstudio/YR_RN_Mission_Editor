@@ -3837,8 +3837,9 @@ void CIsoView::HandleTrail(int x, int y)
 	if (isTrack(type)) {
 		for (i = x - 2; i <= x + 2; i++) {
 			for (e = y - 1; e <= y + 1; e++) {
-				if (isTrack(Map->GetOverlayAt(i + e * Map->GetIsoSize())))
+				if (isTrack(Map->GetOverlayAt(i + e * Map->GetIsoSize()))) {
 					Map->SetOverlayAt(i + e * Map->GetIsoSize(), 0x27 + GetOverlayDirection(i, e));
+				}
 			}
 		}
 		return;
@@ -4879,14 +4880,9 @@ void CIsoView::handleMouseActionManageOverlays(int x, int y)
 	{
 		Map->SetOverlayAt(dwPos, AD.data2);
 		Map->SetOverlayDataAt(dwPos, 0);
-		int i;
-		for (i = 0; i < overlay_count; i++) {
-			if (overlay_number[i] == AD.data2) {
-				if (overlay_trail.contains(i)) {
-					// handle trail stuff!
-					HandleTrail(x, y);
-				}
-			}
+		if (overlay_trail.contains(AD.data2)) {
+			// handle trail stuff!
+			HandleTrail(x, y);
 		}
 	}
 	else if (AD.data == 33) {
