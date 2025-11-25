@@ -82,6 +82,7 @@ BOOL CSaveMapOptionsDlg::OnInitDialog()
 		GetDlgItem(IDC_PREVIEWMODE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_NOPREVIEW)->EnableWindow(FALSE);
 		GetDlgItem(IDC_EXISTINGPREVIEW)->EnableWindow(FALSE);
+		GetDlgItem(IDC_SAVE_OPT_M_PLAYERS)->EnableWindow(FALSE);
 #ifndef TS_MODE
 		m_modeList.EnableWindow(FALSE);
 #endif
@@ -153,5 +154,6 @@ void CSaveMapOptionsDlg::OnOK()
 		}
 	}
 
+	UpdateData(TRUE);
 	EndDialog(IDOK);
 }
