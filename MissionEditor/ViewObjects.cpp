@@ -67,7 +67,6 @@ BEGIN_MESSAGE_MAP(CViewObjects, CTreeView)
 END_MESSAGE_MAP()
 
 extern BOOL overlay_visible[];
-extern BOOL overlay_trail[];
 
 
 extern int overlay_count;
@@ -257,7 +256,9 @@ void CViewObjects::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 		}
 
 		case 61:
-			if (!tiledata_count) break;
+			if (!tiledata_count) {
+				break;
+			}
 			AD.type = 0;
 			AD.mode = ACTIONMODE_SETTILE;
 			AD.data = 0;
@@ -1083,20 +1084,13 @@ void CViewObjects::UpdateDialog()
 
 	auto const& overlayTypeSec = rules["OverlayTypes"];
 	auto const sizeLimit = std::min<unsigned int>(overlayTypeSec.Size(), 255);
-	auto getOverlayDisplayName = [](const CString& id) -> CString {
-		auto const& uiName = rules.GetString(id, "UIName");
-		auto it = AllStrings.find(uiName);
-		if (it != AllStrings.end()) {
-			return it->second.cString;
-		}
-		return GetLanguageStringACP(id);
-	};
 
 	for (i = 0; i < sizeLimit; i++) {
 		bool allowedToList = false;
 		auto const& unitname = overlayTypeSec.Nth(i).second;
 		if (rules.GetBool(unitname, "Wall") && rules.GetBool(unitname, "Wall.HasConnection", true)) {
 			allowedToList = true;
+			overlay_trail.insert(i);
 		}
 
 		do {
@@ -1119,7 +1113,7 @@ void CViewObjects::UpdateDialog()
 #endif
 		} while (0);
 
-		auto const& overlayName = getOverlayDisplayName(unitname);
+		auto const& overlayName = GetOverlayDisplayName(unitname);
 
 		if (allowedToList) {
 			tree.InsertItem(TVIF_PARAM | TVIF_TEXT, overlayName,

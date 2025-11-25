@@ -521,6 +521,25 @@ void TranslateWindowCaption(CWnd& cwnd, const CString& label)
 	}
 }
 
+CString GetOverlayDisplayName(const int typeIndex)
+{
+	if (typeIndex < 0) {
+		return {};
+	}
+	auto const& overlayTypeSec = rules["OverlayTypes"];
+	return GetOverlayDisplayName(overlayTypeSec.Nth(typeIndex).second);
+}
+
+CString GetOverlayDisplayName(const CString& id)
+{
+	auto const& uiName = rules.GetString(id, "UIName");
+	auto it = AllStrings.find(uiName);
+	if (it != AllStrings.end()) {
+		return it->second.cString;
+	}
+	return GetLanguageStringACP(id);
+}
+
 void TruncSpace(string& str)
 {
 	CString cstr = str.data();

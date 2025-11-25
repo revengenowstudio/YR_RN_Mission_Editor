@@ -132,7 +132,6 @@ extern bool bAllowAccessBehindCliffs;
 extern int overlay_count; // number of overlay ids that have additional information
 #if defined(RA2_MODE)
 static constexpr BOOL overlay_trdebug[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE };
-static constexpr int overlay_number[] = { 0x0,0x2, 0x1a, 0xcb, 0xf1, 0xcc,0xf3,0xf0, 0x27 };
 static constexpr const char* overlay_name[] = {
 	"Sandbags",
 	"Allied Wall",
@@ -146,7 +145,6 @@ static constexpr const char* overlay_name[] = {
 };
 #else
 static constexpr BOOL overlay_trdebug[] = { FALSE,FALSE,FALSE,FALSE,FALSE, FALSE };
-static constexpr int overlay_number[] = { 0x0,0x2, 0x1a, 0x7e, 0xa7, 0x27 };
 static constexpr const char* overlay_name[] = {
 	"Sandbags",
 	"GDI Wall", 
@@ -156,7 +154,7 @@ static constexpr const char* overlay_name[] = {
 	"Tracks" 
 };
 #endif
-extern BOOL overlay_trail[]; // is it handled as trail?
+extern std::unordered_set<int> overlay_trail; // is it handled as trail?
 extern BOOL yr_only[];
 
 

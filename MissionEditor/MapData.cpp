@@ -1401,7 +1401,9 @@ void CMapData::SetOverlayAt(DWORD dwPos, BYTE bValue)
 	int y = dwPos / m_IsoSize;
 	int x = dwPos % m_IsoSize;
 
-	if (y + x * 512 > overlayDataCapacity || dwPos > m_IsoSize * m_IsoSize) return;
+	if (y + x * 512 > overlayDataCapacity || dwPos > m_IsoSize * m_IsoSize) {
+		return;
+	}
 
 	BYTE& ovrl = m_Overlay[y + x * 512];
 	BYTE& ovrld = m_OverlayData[y + x * 512];
@@ -1420,16 +1422,13 @@ void CMapData::SetOverlayAt(DWORD dwPos, BYTE bValue)
 	AddOvrlMoney(ovrl2, ovrld2);
 
 	int i, e;
-	for (i = -1; i < 2; i++)
-		for (e = -1; e < 2; e++)
-			if (i + x > 0 && i + x < m_IsoSize && y + e >= 0 && y + e < m_IsoSize)
+	for (i = -1; i < 2; i++) {
+		for (e = -1; e < 2; e++) {
+			if (i + x > 0 && i + x < m_IsoSize && y + e >= 0 && y + e < m_IsoSize) {
 				SmoothTiberium(dwPos + i + e * m_IsoSize);
-
-
-
-
-
-
+			}
+		}
+	}
 
 	Mini_UpdatePos(x, y, IsMultiplayer());
 

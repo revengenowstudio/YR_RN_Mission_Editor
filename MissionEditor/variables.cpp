@@ -110,15 +110,14 @@ map<CString, BOOL> missingimages;
 vector<CString> rndterrainsrc;
 
 /* Overlay tile data */
+std::unordered_set<int> overlay_trail;
 #ifndef RA2_MODE
 BOOL overlay_visible[] = { TRUE,TRUE,TRUE,FALSE,FALSE, TRUE };
-BOOL overlay_trail[] = { TRUE,TRUE,TRUE,FALSE,FALSE, TRUE };
 BOOL yr_only[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 int overlay_count = 6;
 const std::string editor_name = "FinalSun";
 #else
 BOOL overlay_visible[] = { TRUE,TRUE,TRUE,TRUE,TRUE,TRUE, TRUE, TRUE, TRUE };
-BOOL overlay_trail[] = { TRUE,TRUE,TRUE,TRUE,TRUE,TRUE, TRUE, TRUE, TRUE };
 BOOL yr_only[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE };
 int overlay_count = 9;
 const std::string editor_name = "FinalAlert 2";
