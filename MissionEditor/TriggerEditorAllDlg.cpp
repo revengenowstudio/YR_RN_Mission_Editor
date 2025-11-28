@@ -62,7 +62,36 @@ BOOL CTriggerEditorAllDlg::OnInitDialog()
 
     translateUI();
 
+    GetDlgItem(IDD_TRGR_SEARCH_REFERENCE)->EnableWindow(FALSE); // not yet ready
+
     return TRUE;
+}
+
+void CTriggerEditorAllDlg::DoDataExchange(CDataExchange* pDX)
+{
+    CDialog::DoDataExchange(pDX);
+
+    DDX_Control(pDX, IDD_TRGR_SELECTED_TRIGGER, m_selectedTrigger);
+    DDX_Control(pDX, IDD_TRGR_NAME, m_triggerName);
+    DDX_Control(pDX, IDD_TRGR_HOUSE, m_house);
+    DDX_Control(pDX, IDD_TRGR_TYPE, m_persistence);
+    DDX_Control(pDX, IDD_TRGR_ATTACHED_TRIGGER, m_nextTrigger);
+
+    DDX_Control(pDX, IDD_TRGR_EVENT_TYPE, m_eventTypes);
+    DDX_Control(pDX, IDD_TRGR_EVENT_LIST, m_eventList);
+    DDX_Control(pDX, IDD_TRGR_EVENT_PARAMETER_1, m_eventParam1);
+    DDX_Control(pDX, IDD_TRGR_EVENT_PARAMETER_2, m_eventParam2);
+    DDX_Control(pDX, IDD_TRGR_EVENT_DESCRIPTION, m_eventDescription);
+
+    DDX_Control(pDX, IDD_TRGR_ACTION_TYPE, m_actionTypes);
+    DDX_Control(pDX, IDD_TRGR_ACTION_LIST, m_actionList);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_1, m_eventParam[0]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_2, m_eventParam[1]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_3, m_eventParam[2]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_4, m_eventParam[3]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_5, m_eventParam[4]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_6, m_eventParam[5]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_DESCRIPTION, m_actionDescription);
 }
 
 void CTriggerEditorAllDlg::translateUI()
@@ -105,7 +134,16 @@ void CTriggerEditorAllDlg::translateUI()
     TranslateDlgItem(*this, IDD_TRGR_SEARCH_REFERENCE, "SearchReferenceTitle");
 }
 
-void CTriggerEditorAllDlg::UpdateDialog()
+void CTriggerEditorAllDlg::clear()
 {
 
 }
+
+void CTriggerEditorAllDlg::UpdateDialog()
+{
+    clear();
+
+
+}
+
+
