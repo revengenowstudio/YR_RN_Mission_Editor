@@ -63,10 +63,10 @@ END
 // Dialog
 //
 
-IDD_TRIGGER_ALL DIALOG 0, 0, 445, 363
+IDD_TRIGGER_ALL DIALOGEX 0, 0, 445, 363
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Trigger Editor"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Trigger options",IDD_TRGR_TRIGGER_OPTIONS,6,4,433,80
     GROUPBOX        "Action options",IDD_TRGR_ACTION_OPTIONS,6,214,433,144
@@ -83,7 +83,7 @@ BEGIN
     EDITTEXT        IDD_TRGR_NAME,69,33,234,12,ES_AUTOHSCROLL
     LTEXT           "House:",IDD_TRGR_HOUSE_TXT,13,49,38,10
     COMBOBOX        IDD_TRGR_HOUSE,69,49,90,105,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Attached trigger:",IDD_TRGR_ATTACHED_TRIGGER_TXT,13,65,58,8
+    LTEXT           "Trigger attached:",IDD_TRGR_ATTACHED_TRIGGER_TXT,13,65,58,8
     COMBOBOX        IDD_TRGR_ATTACHED_TRIGGER,69,65,234,127,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Disabled",IDD_TRGR_DISABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,394,49,40,13
     CONTROL         "Easy",IDD_TRGR_EASY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,308,65,35,13
@@ -138,6 +138,17 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_TRIGGER_ALL AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
 
 #endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
