@@ -29,7 +29,6 @@ enum Controls {
     EventParameter2 = 50933,
     Actionoptions = 50934,
     Actiontype = 50940,
-    Actionframe = 50934,
     NewAction = 50937,
     DeleteAction = 50938,
     CloneAction = 50939,
@@ -68,42 +67,42 @@ BOOL CTriggerEditorAllDlg::OnInitDialog()
 
 void CTriggerEditorAllDlg::translateUI()
 {
-    TranslateDlgItem(*this, 50901, "TriggerTriggeroptions");
-    TranslateDlgItem(*this, 50902, "TriggerSelectedTrigger");
-    TranslateDlgItem(*this, NewTrigger, "TriggerNew");
-    TranslateDlgItem(*this, CloneTrigger, "TriggerClone");
-    TranslateDlgItem(*this, DeleteTrigger, "TriggerDelete");
-    TranslateDlgItem(*this, PlaceOnMap, "TriggerPlaceOnMap");
-    TranslateDlgItem(*this, 50908, "TriggerType");
-    TranslateDlgItem(*this, 50910, "TriggerName");
-    TranslateDlgItem(*this, 50912, "TriggerHouse");
-    TranslateDlgItem(*this, 50914, "TriggerAttachedtrigger");
-    TranslateDlgItem(*this, 50915, "TriggerCannotbeitselforformsaloop");
-    TranslateDlgItem(*this, Disabled, "TriggerDisabled");
-    TranslateDlgItem(*this, Easy, "TriggerEasy");
-    TranslateDlgItem(*this, Medium, "TriggerMedium");
-    TranslateDlgItem(*this, Hard, "TriggerHard");
-    TranslateDlgItem(*this, 50921, "TriggerEventoptions");
-    TranslateDlgItem(*this, 50922, "TriggerEventtype");
-    TranslateDlgItem(*this, NewEvent, "TriggerAdd");
-    TranslateDlgItem(*this, CloneEvent, "TriggerClone");
-    TranslateDlgItem(*this, DeleteEvent, "TriggerDelete");
-    TranslateDlgItem(*this, 50928, "TriggerEventList");
-    TranslateDlgItem(*this, EventParameter1Desc, "TriggerParameter#1value");
-    TranslateDlgItem(*this, EventParameter2Desc, "TriggerParameter#2value");
-    TranslateDlgItem(*this, Actionoptions, "TriggerActionoptions");
-    TranslateDlgItem(*this, 50935, "TriggerActiontype");
-    TranslateDlgItem(*this, NewAction, "TriggerAdd");
-    TranslateDlgItem(*this, DeleteAction, "TriggerDelete");
-    TranslateDlgItem(*this, CloneAction, "TriggerClone");
-    TranslateDlgItem(*this, 50941, "TriggerActionList");
-    TranslateDlgItem(*this, ActionParameter1Desc, "TriggerParameter#1value");
-    TranslateDlgItem(*this, ActionParameter2Desc, "TriggerParameter#2value");
-    TranslateDlgItem(*this, ActionParameter3Desc, "TriggerParameter#3value");
-    TranslateDlgItem(*this, ActionParameter4Desc, "TriggerParameter#4value");
-    TranslateDlgItem(*this, ActionParameter5Desc, "TriggerParameter#5value");
-    TranslateDlgItem(*this, ActionParameter6Desc, "TriggerParameter#6value");
-    TranslateDlgItem(*this, SearchReference, "SearchReferenceTitle");
+    TranslateDlgItem(*this, IDD_TRGR_TRIGGER_OPTIONS, "TriggerTriggeroptions");
+    TranslateDlgItem(*this, IDD_TRGR_SELECT_TRIGGER_TXT, "TriggerSelectedTrigger");
+    TranslateDlgItem(*this, IDD_TRGR_NEW_TRIGGER, "TriggerNew");
+    TranslateDlgItem(*this, IDD_TRGR_CLONE_TRIGGER, "TriggerClone");
+    TranslateDlgItem(*this, IDD_TRGR_DELETE_TRIGGER, "TriggerDelete");
+    TranslateDlgItem(*this, IDD_TRGR_PLACE_ON_MAP, "TriggerPlaceOnMap");
+    TranslateDlgItem(*this, IDD_TRGR_TYPE_TXT, "TriggerType");
+    TranslateDlgItem(*this, IDD_TRGR_NAME_TXT, "TriggerName");
+    TranslateDlgItem(*this, IDD_TRGR_HOUSE_TXT, "TriggerHouse");
+    TranslateDlgItem(*this, IDD_TRGR_ATTACHED_TRIGGER_TXT, "TriggerAttachedtrigger");
+    TranslateDlgItem(*this, IDD_TRGR_ATTACHED_TRIGGER, "TriggerCannotbeitselforformsaloop");
+    TranslateDlgItem(*this, IDD_TRGR_DISABLED, "TriggerDisabled");
+    TranslateDlgItem(*this, IDD_TRGR_EASY, "TriggerEasy");
+    TranslateDlgItem(*this, IDD_TRGR_MEDIUM, "TriggerMedium");
+    TranslateDlgItem(*this, IDD_TRGR_HARD, "TriggerHard");
+    TranslateDlgItem(*this, IDD_TRGR_EVENT_OPTIONS, "TriggerEventoptions");
+    TranslateDlgItem(*this, IDD_TRGR_EVENT_TYPE_TXT, "TriggerEventtype");
+    TranslateDlgItem(*this, IDD_TRGR_NEW_EVENT, "TriggerAdd");
+    TranslateDlgItem(*this, IDD_TRGR_CLONE_EVENT, "TriggerClone");
+    TranslateDlgItem(*this, IDD_TRGR_DELETE_EVENT, "TriggerDelete");
+    TranslateDlgItem(*this, IDD_TRGR_EVENT_LIST_TXT, "TriggerEventList");
+    TranslateDlgItem(*this, IDD_TRGR_EVENT_P1_TXT, "TriggerParameter#1value");
+    TranslateDlgItem(*this, IDD_TRGR_EVENT_P2_TXT, "TriggerParameter#2value");
+    TranslateDlgItem(*this, IDD_TRGR_ACTION_OPTIONS, "TriggerActionoptions");
+    TranslateDlgItem(*this, IDD_TRGR_ACTION_TYPE_TXT, "TriggerActiontype");
+    TranslateDlgItem(*this, IDD_TRGR_NEW_ACTION, "TriggerAdd");
+    TranslateDlgItem(*this, IDD_TRGR_DELETE_ACTION, "TriggerDelete");
+    TranslateDlgItem(*this, IDD_TRGR_CLONE_ACTION, "TriggerClone");
+    TranslateDlgItem(*this, IDD_TRGR_ACTION_LIST_TXT, "TriggerActionList");
+    TranslateDlgItem(*this, IDD_TRGR_ACTION_P1_TXT, "TriggerParameter#1value");
+    TranslateDlgItem(*this, IDD_TRGR_ACTION_P2_TXT, "TriggerParameter#2value");
+    TranslateDlgItem(*this, IDD_TRGR_ACTION_P3_TXT, "TriggerParameter#3value");
+    TranslateDlgItem(*this, IDD_TRGR_ACTION_P4_TXT, "TriggerParameter#4value");
+    TranslateDlgItem(*this, IDD_TRGR_ACTION_P5_TXT, "TriggerParameter#5value");
+    TranslateDlgItem(*this, IDD_TRGR_ACTION_P6_TXT, "TriggerParameter#6value");
+    TranslateDlgItem(*this, IDD_TRGR_SEARCH_REFERENCE, "SearchReferenceTitle");
 }
 
 void CTriggerEditorAllDlg::UpdateDialog()
