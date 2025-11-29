@@ -12,6 +12,7 @@ struct ParamType
 {
     CString paramName;
     int listType{ 0 };
+    int slotCount{ 0 }; // usually 0. Seems 2 is specially meaningful
 };
 
 struct TriggerEventType

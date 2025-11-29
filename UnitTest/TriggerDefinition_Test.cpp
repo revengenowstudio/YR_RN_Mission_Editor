@@ -13,6 +13,7 @@ R"(
 0=Nothing,0
 1=Unknown,0
 2=House,1
+48=Value,0,2
 
 [EventsRA2]
 0=-No Event-,0,0,0,0,This is an empty event.,0,1,0
@@ -44,12 +45,14 @@ R"(
     EXPECT_EQ(mgr.Events().at(2).obsolete, true);
     EXPECT_EQ(mgr.Events().at(8).description, "When use it alone, take effect immediately");
 
-    EXPECT_EQ(mgr.Params().size(), 4);
+    EXPECT_EQ(mgr.Params().size(), 5);
     EXPECT_EQ(mgr.Params().at(-1).paramName, "Unused");
     EXPECT_EQ(mgr.Params().at(0).paramName, "Nothing");
     EXPECT_EQ(mgr.Params().at(1).paramName, "Unknown");
     EXPECT_EQ(mgr.Params().at(2).paramName, "House");
     EXPECT_EQ(mgr.Params().at(2).listType, 1);
+    EXPECT_EQ(mgr.Params().at(48).listType, 0);
+    EXPECT_EQ(mgr.Params().at(48).slotCount, 2);
 }
 
 TEST(TriggerEventTest, EventsSerde)

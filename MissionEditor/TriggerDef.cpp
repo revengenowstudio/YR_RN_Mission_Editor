@@ -28,6 +28,10 @@ void TriggerDefinitionManager::loadParamTypes(const CIniFile& ini, std::ostream&
         if (!inserted) {
             err << "Error: duplicated param type definition index " << id << endl;
         }
+        // some params will have 3rd control value
+        if (params.size() >= 3) {
+            it->second.slotCount = atoi(params[2]);
+        }
     }
 }
 
