@@ -181,7 +181,7 @@ void CTriggerEventsDlg::OnDeleteevent()
 	if (sel2 < 0) {
 		return;
 	}
-	int curev = m_Event.GetItemData(sel2);
+	int eventIdx = m_Event.GetItemData(sel2);
 	auto const title = TranslateStringACP("Delete event");
 	auto const content = TranslateStringACP("Do you really want to delete this event?");
 	if (MessageBox(content, title, MB_YESNO) == IDNO) {
@@ -191,14 +191,13 @@ void CTriggerEventsDlg::OnDeleteevent()
 	auto  const& orig_data = ini["Events"][m_currentTrigger];
 	CString data = orig_data;
 
-	int v = atoi(GetParam(data, 0));
-	char c[50];
-	v--;
-	itoa(v, c, 10);
-	data = SetParam(data, 0, c);
+	int newEventCount = atoi(GetParam(data, 0)) - 1;
+	CString eventCountStr;
+	eventCountStr.Format("%d", newEventCount);
+	data = SetParam(data, 0, eventCountStr);
 
-	int pos = GetEventParamStart(orig_data, curev);//1+curev*3;
-	//int posc=GetEventParamStart(orig_data, v);//1+v*3;
+	int pos = GetEventParamStart(orig_data, eventIdx);//1+curev*3;
+	//int posc=GetEventParamStart(orig_data, eventCount);//1+eventCount*3;
 
 	// MW 07/23/01:
 	// NEW DELETE EVENT CODE...
@@ -224,24 +223,6 @@ void CTriggerEventsDlg::OnDeleteevent()
 
 	}
 	data.Delete(del_start, del_end - del_start);
-
-	/*
-	old delete event code, that used replacement. Not possible anymore because of 4 values/event sometimes now
-
-	int i;
-	for(i=0;i<3;i++)
-		data=SetParam(data,pos+i, GetParam(data,posc+i));
-
-	char* cupos=(char*)(LPCTSTR)data;
-	for(i=0;i<posc;i++)
-	{
-		cupos=strchr(cupos+1, ',');
-		if(i==posc-1)
-		{
-			cupos[0]=0;
-			break;
-		}
-	}*/
 
 	ini.SetString("Events", m_currentTrigger, data);
 	UpdateDialog();
@@ -583,7 +564,7 @@ void CTriggerEventsDlg::UpdateDialog()
 #endif
 			m_EventType.AddString(text);
 		}
-		}
+	}
 
 
 
