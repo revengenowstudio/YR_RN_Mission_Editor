@@ -120,29 +120,6 @@ void TriggerDefinitionManager::loadActionTypes(const CIniFile& ini, std::ostream
     }
 }
 
-int GetEventParamStart(const CString& EventData, int param)
-{
-    int count = atoi(GetParam(EventData, 0));
-    if (param >= count) {
-        return -1;
-    }
-
-    int pos = 1;
-    int i;
-    for (i = 0; i < param; i++) {
-        pos += 1; // jump to first eventtype param
-        int paramSlots = atoi(GetParam(EventData, pos));
-
-        pos += 2; // jump to next usual eventtype
-        // if needs of last eventtype is 2, we need to add 1
-        if (paramSlots == 2) {
-            pos += 1;
-        }
-    }
-
-    return pos;
-}
-
 TriggerEvents::TriggerEvents(const CString& fullData)
 {
     if (fullData.IsEmpty()) {
