@@ -19,7 +19,7 @@ struct TriggerEventType
 {
     CString brief;                  // brief name shows what it is         
     CString description;            // desc about usage
-    std::array<int, 2> paramTypes;
+    std::array<int, 2> paramTypes; // 0 means this slot not used
     bool tagNeeded{ false };
     bool obsolete{ false };
     bool tsAllowed{ true };

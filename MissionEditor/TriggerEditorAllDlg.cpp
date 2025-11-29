@@ -17,7 +17,8 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_BN_CLICKED(IDC_TRGR_HARD, OnHard)
     ON_CBN_EDITCHANGE(IDC_TRGR_SELECTED_TRIGGER, onEditChangeTriggerType)
     ON_CBN_SELCHANGE(IDC_TRGR_SELECTED_TRIGGER, onSelChangeTrigger)
-    ON_CBN_SELCHANGE(IDC_TRGR_EVENT_TYPE, onSelChangeEvent)
+    ON_CBN_SELCHANGE(IDC_TRGR_EVENT_TYPE, onEditChangeEventType)
+    ON_LBN_SELCHANGE(IDC_TRGR_EVENT_LIST, onSelChangeEvent)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -137,6 +138,7 @@ void CTriggerEditorAllDlg::oneTimeInit()
     for (auto& paramCb : m_actionParam) {
         paramCb.EnableWindow(FALSE);
     }
+    GetDlgItem(IDC_TRGR_ACTION_P6_TXT)->ShowWindow(FALSE);
 }
 
 void listTriggers(CComboBox& cb)
@@ -569,11 +571,11 @@ void CTriggerEditorAllDlg::onSelChangeEvent()
         return;
     }
 
-    int eventTypeSel = m_eventTypes.GetCurSel();
+    int eventTypeSel = m_eventList.GetCurSel();
     if (eventTypeSel < 0) {
         return;
     }
-    int eventIdx = m_eventTypes.GetItemData(eventTypeSel);
+    int eventIdx = m_eventList.GetItemData(eventTypeSel);
 
     TriggerEvents events(ini.GetString("Events", m_currentTrigger));
 
@@ -593,6 +595,7 @@ void CTriggerEditorAllDlg::onSelChangeEvent()
     onEditChangeEventType();
 }
 
+// TODO: support filter
 void CTriggerEditorAllDlg::onEditChangeEventType()
 {
     CIniFile& ini = Map->GetIniFile();
@@ -646,6 +649,17 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
     HandleParamList(m_eventParam2, paramType2.listType);
     GetDlgItem(IDC_TRGR_EVENT_P1_TXT)->SetWindowTextA(paramType1.paramName);
     GetDlgItem(IDC_TRGR_EVENT_P2_TXT)->SetWindowTextA(paramType2.paramName);
+
+    m_eventParam1.SetWindowText(eventData.param1);
+
+    if (eventData.param2.has_value()) {
+        m_eventParam2.SetWindowText(eventData.param2.value());
+    }
+
+    m_eventParam1.EnableWindow(eventDef.paramTypes[0] > 0);
+    m_eventParam2.EnableWindow(eventDef.paramTypes[1] > 0);
+
+
 }
 
 void CTriggerEditorAllDlg::onSelChangeAction()

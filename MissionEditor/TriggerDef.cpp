@@ -59,11 +59,11 @@ void TriggerDefinitionManager::loadEventTypes(const CIniFile& ini, std::ostream&
         }
 
         auto& item = it->second;
-        item.brief.Format("%s-%s", id, params[0]);
+        item.brief.Format("%s -%s", id, params[0]);
         item.brief.Replace("%1", ",");
-
-        item.paramTypes[0] = atoi(params[1]);
-        item.paramTypes[1] = atoi(params[2]);
+        // attention: it really sucks here, P1 P2 actually reversed
+        item.paramTypes[0] = atoi(params[2]);
+        item.paramTypes[1] = atoi(params[1]);
         item.tagNeeded = atoi(params[3]);
         item.obsolete = atoi(params[4]);
 
@@ -104,7 +104,7 @@ void TriggerDefinitionManager::loadActionTypes(const CIniFile& ini, std::ostream
 
         auto& item = it->second;
         item.actionType = actionTypeId;
-        item.brief.Format("%s-%s", id, params[0]);
+        item.brief.Format("%s -%s", id, params[0]);
         item.description = params[10];
         item.description.Replace("%1", ",");
 
