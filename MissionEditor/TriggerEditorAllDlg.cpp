@@ -123,6 +123,7 @@ void CTriggerEditorAllDlg::translateUI()
 void CTriggerEditorAllDlg::clear()
 {
     while (m_triggerType.DeleteString(0) != CB_ERR);
+    while (m_eventList.DeleteString(0) != CB_ERR);
     while (m_house.DeleteString(0) != CB_ERR);
     while (m_nextTrigger.DeleteString(0) != CB_ERR);
 
@@ -138,7 +139,28 @@ void CTriggerEditorAllDlg::oneTimeInit()
     for (auto& paramCb : m_actionParam) {
         paramCb.EnableWindow(FALSE);
     }
+    GetDlgItem(IDC_TRGR_ACTION_P5_TXT)->ShowWindow(FALSE);
     GetDlgItem(IDC_TRGR_ACTION_P6_TXT)->ShowWindow(FALSE);
+
+    // event type never changes, right ?
+    while (m_eventTypes.DeleteString(0) != CB_ERR);
+
+    auto& defMgr = TriggerDefinitionManager::Instance();
+    for (auto const& [eventid, eventdata] : defMgr.Events()) {
+#ifdef RA2_MODE
+        if (!eventdata.ra2Allowed) {
+            continue;
+        }
+        if (yuri_mode && eventdata.yrOnly) {
+            continue;
+        }
+#else
+        if (!eventdata.tsAllowed) {
+            continue;
+        }
+#endif
+        m_eventTypes.AddString(eventdata.brief);
+    }
 }
 
 void listTriggers(CComboBox& cb)
@@ -177,25 +199,6 @@ void CTriggerEditorAllDlg::updateTriggerEvents()
         return;
     }
 
-    while (m_eventTypes.DeleteString(0) != CB_ERR);
-
-    auto& defMgr = TriggerDefinitionManager::Instance();
-    for (auto const& [eventid, eventdata] : defMgr.Events()) {
-#ifdef RA2_MODE
-        if (!eventdata.ra2Allowed) {
-            continue;
-        }
-        if (yuri_mode && eventdata.yrOnly) {
-            continue;
-        }
-#else
-        if (!eventdata.tsAllowed) {
-            continue;
-        }
-#endif
-        m_eventTypes.AddString(eventdata.brief);
-    }
-
     int cur_sel = m_eventList.GetCurSel();
     while (m_eventList.DeleteString(0) != CB_ERR);
 
@@ -204,6 +207,7 @@ void CTriggerEditorAllDlg::updateTriggerEvents()
     TriggerEvents events(data);
     auto const eventCount = events.Size();
 
+    auto& defMgr = TriggerDefinitionManager::Instance();
     CString eventDesc;
     for (auto i = 0; i < eventCount; i++) {
         auto const eventIdx = events.Nth(i).eventType;
@@ -346,8 +350,8 @@ void CTriggerEditorAllDlg::onSelChangeTrigger()
     }
 #endif
     onSelChangeOption();
-    onSelChangeEvent();
-    onSelChangeAction();
+    updateTriggerEvents();
+    onSelChangeAction(); // update, would you?
 }
 
 void CTriggerEditorAllDlg::onChangeTriggerName()
