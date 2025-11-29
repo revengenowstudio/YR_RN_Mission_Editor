@@ -268,8 +268,9 @@ void CTriggerEditorAllDlg::onNewTrigger()
 
     theApp.MainWindow()->UpdateDialogs(TRUE);
 
+    auto const& triggerSec = ini["Triggers"];
     for (auto i = 0; i < m_triggerType.GetCount(); i++) {
-        if (m_triggerType.GetItemData(i) == ini["Triggers"].FindIndex(newId)) {
+        if (m_triggerType.GetItemData(i) == triggerSec.FindIndex(newId)) {
             m_triggerType.SetCurSel(i);
         }
     }
