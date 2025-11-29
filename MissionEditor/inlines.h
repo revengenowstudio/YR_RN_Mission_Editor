@@ -112,7 +112,7 @@ inline CString GetParam(const CString& data, const int param)
 
 inline std::string GetParam(const std::string& data, const int param)
 {
-	int paramStrPos = 0;
+	size_t paramStrPos = 0;
 	int curParam = param;
 
 	while (curParam--) {
@@ -164,7 +164,7 @@ inline CString Join(const CString& join, const std::vector<CString>& strings)
 	for (auto& s : strings)
 		len += s.GetLength() + join.GetLength();
 	res.Preallocate(len + 1);
-	int remaining = strings.size();
+	size_t remaining = strings.size();
 	for (auto& s : strings) {
 		res += s;
 		if (--remaining)
