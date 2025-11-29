@@ -12,6 +12,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_BN_CLICKED(IDD_TRGR_MEDIUM, OnMedium)
     ON_BN_CLICKED(IDD_TRGR_HARD, OnHard)
     ON_CBN_EDITCHANGE(IDD_TRGR_SELECTED_TRIGGER, onEditChangeTriggerType)
+    ON_CBN_SELCHANGE(IDD_TRGR_SELECTED_TRIGGER, onSelChangeTrigger)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -57,12 +58,12 @@ void CTriggerEditorAllDlg::DoDataExchange(CDataExchange* pDX)
 
     DDX_Control(pDX, IDD_TRGR_ACTION_TYPE, m_actionTypes);
     DDX_Control(pDX, IDD_TRGR_ACTION_LIST, m_actionList);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_1, m_eventParam[0]);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_2, m_eventParam[1]);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_3, m_eventParam[2]);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_4, m_eventParam[3]);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_5, m_eventParam[4]);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_6, m_eventParam[5]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_1, m_actionParam[0]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_2, m_actionParam[1]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_3, m_actionParam[2]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_4, m_actionParam[3]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_5, m_actionParam[4]);
+    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_6, m_actionParam[5]);
     DDX_Control(pDX, IDD_TRGR_ACTION_DESCRIPTION, m_actionDescription);
 }
 
@@ -115,6 +116,9 @@ void CTriggerEditorAllDlg::translateUI()
 
 void CTriggerEditorAllDlg::clear()
 {
+    while (m_triggerType.DeleteString(0) != CB_ERR);
+    while (m_house.DeleteString(0) != CB_ERR);
+    while (m_nextTrigger.DeleteString(0) != CB_ERR);
 
 }
 
@@ -123,54 +127,193 @@ void CTriggerEditorAllDlg::oneTimeInit()
     m_persistence.InsertString(0, TranslateStringACP("0 - Standard"));
     m_persistence.InsertString(1, TranslateStringACP("1 - All Attached"));
     m_persistence.InsertString(2, TranslateStringACP("2 - Repeating"));
+
+    // default disable, until enabled by action
+    for (auto& paramCb : m_actionParam) {
+        paramCb.EnableWindow(FALSE);
+    }
+}
+
+void listTriggers(CComboBox& cb)
+{
+    CIniFile& ini = Map->GetIniFile();
+
+    while (cb.DeleteString(0) != CB_ERR);
+    auto const& triggersSec = ini["Triggers"];
+
+    CString triggerDisplay;
+    for (auto idx = 0; idx < triggersSec.Size(); idx++) {
+        auto const& [type, params] = triggersSec.Nth(idx);
+        if (params.IsEmpty()) {
+            continue;
+        }
+        triggerDisplay.Format("%s (%s)", type, GetParam(params, 2));
+        int id = cb.AddString(triggerDisplay);
+        cb.SetItemData(id, idx);
+    }
+}
+
+void CTriggerEditorAllDlg::updateTriggerOptions()
+{
+    ListHouses(m_house, FALSE, TRUE, FALSE);
+    listTriggers(m_nextTrigger);
+    m_nextTrigger.InsertString(0, "<none>");
+
+    onSelChangeOption();
+}
+
+void CTriggerEditorAllDlg::updateTriggerEvents()
+{
+    if (m_currentTrigger.GetLength() == 0) {
+        while (m_eventList.DeleteString(0) != CB_ERR);
+        return;
+    }
+
+    while (m_eventTypes.DeleteString(0) != CB_ERR);
+
+    auto& defMgr = TriggerDefinitionManager::Instance();
+    for (auto const& [eventid, eventdata] : defMgr.Events()) {
+#ifdef RA2_MODE
+        if (!eventdata.ra2Allowed) {
+            continue;
+        }
+        if (yuri_mode && eventdata.yrOnly) {
+            continue;
+        }
+#else
+        if (!eventdata.tsAllowed) {
+            continue;
+        }
+#endif
+        m_eventTypes.AddString(eventdata.brief);
+    }
+
+    int cur_sel = m_eventList.GetCurSel();
+    while (m_eventList.DeleteString(0) != CB_ERR);
+
+    CIniFile& ini = Map->GetIniFile();
+    auto const& data = ini["Events"][m_currentTrigger];
+    TriggerEvents events(data);
+    auto const eventCount = events.Size();
+
+    CString eventDesc;
+    for (auto i = 0; i < eventCount; i++) {
+        auto const eventIdx = events.Nth(i).eventType;
+        auto const& brief = defMgr.Events().at(eventIdx).brief;
+        eventDesc.Format("%d %s", i, brief);
+
+        m_eventList.SetItemData(m_eventList.AddString(eventDesc), i);
+    }
+    if (cur_sel < 0) {
+        cur_sel = 0;
+    }
+    if (cur_sel >= eventCount) {
+        cur_sel = eventCount - 1;
+    }
+
+    m_eventList.SetCurSel(cur_sel);
+
+    onSelChangeEvent();
+}
+
+void CTriggerEditorAllDlg::updateTriggerActions()
+{
 }
 
 void CTriggerEditorAllDlg::UpdateDialog()
 {
     clear();
 
+#if 0
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
+#endif
+
+    // means first time open, try load trigger types
+    if (m_triggerType.GetCount() <= 0) {
+        CIniFile& ini = Map->GetIniFile();
+
+        listTriggers(m_triggerType);
+
+        if (m_triggerType.GetCount() > 0) {
+            m_triggerType.SetCurSel(0);
+            CString firstTypeId;
+            m_triggerType.GetWindowText(firstTypeId);
+            TruncSpace(firstTypeId);
+            m_currentTrigger = firstTypeId;
+        }
+    }
+
+    updateTriggerOptions();
+    updateTriggerEvents();
+    updateTriggerActions();
+}
+
+void CTriggerEditorAllDlg::onNewTrigger()
+{
     CIniFile& ini = Map->GetIniFile();
+
+    CString ID_T = GetFreeID();
+    ini.SetString("Triggers", ID_T, Map->GetHouseID(0, TRUE) + ",<none>,New trigger,0,1,1,1,0");
+    ini.SetString("Events", ID_T, "0");
+    ini.SetString("Actions", ID_T, "0");
+
+    //if(MessageBox("Trigger created. If you want to create a simple tag now, press Yes. The tag will be called ""New tag"", you should name it like the trigger (after you have set up the trigger).","Trigger created",MB_YESNO))
+    {
+        CString ID_TAG = GetFreeID();
+        ini.SetString("Tags", ID_TAG, "0,New tag," + ID_T);
+    }
+
+    theApp.MainWindow()->UpdateDialogs(TRUE);
+
+    for (auto i = 0; i < m_triggerType.GetCount(); i++) {
+        if (m_triggerType.GetItemData(i) == ini["Triggers"].FindIndex(ID_T)) {
+            m_triggerType.SetCurSel(i);
+        }
+    }
+    onSelChangeTrigger();
+
+}
+
+void CTriggerEditorAllDlg::onSelChangeTrigger()
+{
+    int curSel = m_triggerType.GetCurSel();
+    if (curSel < 0) {
+        clear();
+        return;
+    }
+    int curInd = m_triggerType.GetItemData(curSel);
+    CIniFile& ini = Map->GetIniFile();
+    m_currentTrigger = ini["Triggers"].Nth(curInd).first;
+
     if (m_currentTrigger.IsEmpty()) {
         return;
     }
 
-    ListHouses(m_house, FALSE, TRUE, FALSE);
-    ListTriggers(m_nextTrigger);
-    m_nextTrigger.InsertString(0, "<none>");
-
-    auto triggerCopy = ini["Triggers"][m_currentTrigger];
-    if (RepairTrigger(triggerCopy)) {
-        ini.SetString("Triggers", m_currentTrigger, triggerCopy);
-    }
-
-    auto const triggerParams = SplitParams<7>(triggerCopy);
-
-    m_triggerName.SetWindowText(triggerParams[2]);
-    m_house.SetWindowText(TranslateHouse(triggerParams[0], TRUE));
-    CString attachedTrigger = triggerParams[1];
-    m_nextTrigger.SetWindowText(attachedTrigger);
-
-    m_disabled.SetCheck((atoi(triggerParams[3])));
-    m_easy.SetCheck((atoi(triggerParams[4])));
-    m_medium.SetCheck((atoi(triggerParams[5])));
-    m_hard.SetCheck((atoi(triggerParams[6])));
-
-    for (auto i = 0; i < m_nextTrigger.GetCount(); i++) {
-        CString tmp;
-        m_nextTrigger.GetLBText(i, tmp);
-        TruncSpace(tmp);
-        if (tmp == attachedTrigger) {
-            m_nextTrigger.SetCurSel(i);
-        }
-    }
-
+    // update persistence value, necessary here ?
+    // why don't only handle for m_persistence events ?
+#if 0
+    CString newType;
+    m_triggerType.GetWindowText(newType);
+    TruncSpace(newType);
     for (auto const& [type, def] : ini["Tags"]) {
-        CString attTrigg = GetParam(def, 2);
-        if (attTrigg == m_currentTrigger) {
-            m_triggerType.SetWindowText(GetParam(def, 0));
-            break;
+        if (GetParam(def, 2) == m_currentTrigger) {
+            ini.SetString("Tags", type, SetParam(ini["Tags"][type], 0, newType));
         }
     }
+#endif
+
+    // really ? should not be needed at all
+#if 0
+    auto trigger = ini["Triggers"][m_currentTrigger];
+    if (RepairTrigger(trigger)) {
+        ini.SetString("Triggers", m_currentTrigger, trigger);
+    }
+#endif
+    onSelChangeOption();
+    onSelChangeEvent();
+    onSelChangeAction();
 }
 
 void CTriggerEditorAllDlg::onChangeTriggerName()
@@ -296,34 +439,10 @@ void CTriggerEditorAllDlg::OnShowWindow(BOOL bShow, UINT nStatus)
     CDialog::OnShowWindow(bShow, nStatus);
 }
 
+// this function will work as filter
 void CTriggerEditorAllDlg::onEditChangeTriggerType()
 {
-    if (m_currentTrigger.IsEmpty()) {
-        return;
-    }
-
-    CIniFile& ini = Map->GetIniFile();
-
-    if (!ini["Triggers"].Exists(m_currentTrigger)) {
-        return;
-    }
-
-    CString newType;
-    m_triggerType.GetWindowText(newType);
-    TruncSpace(newType);
-
-    int i;
-    for (auto const& [type, def] : ini["Tags"]) {
-        CString attTrigg = GetParam(def, 2);
-        if (attTrigg == m_currentTrigger) {
-            ini.SetString("Tags", type, SetParam(ini["Tags"][type], 0, newType));
-        }
-    }
-
-    auto trigger = ini["Triggers"][m_currentTrigger];
-    if (RepairTrigger(trigger)) {
-        ini.SetString("Triggers", m_currentTrigger, trigger);
-    }
+    
 }
 
 void CTriggerEditorAllDlg::onOptionCheckChanged(const CButton& checkBtn, const int paramPos)
@@ -366,6 +485,58 @@ void CTriggerEditorAllDlg::OnMedium()
 void CTriggerEditorAllDlg::OnHard()
 {
     onOptionCheckChanged(m_hard, 6);
+}
+
+void CTriggerEditorAllDlg::onSelChangeOption()
+{
+    CIniFile& ini = Map->GetIniFile();
+
+    auto triggerCopy = ini["Triggers"][m_currentTrigger];
+    // considering remove it
+#if 0
+    if (RepairTrigger(triggerCopy)) {
+        ini.SetString("Triggers", m_currentTrigger, triggerCopy);
+    }
+#endif
+    auto const triggerParams = SplitParams<7>(triggerCopy);
+
+    m_triggerName.SetWindowText(triggerParams[2]);
+    m_house.SetWindowText(TranslateHouse(triggerParams[0], TRUE));
+    CString attachedTrigger = triggerParams[1];
+    m_nextTrigger.SetWindowText(attachedTrigger);
+
+    m_disabled.SetCheck((atoi(triggerParams[3])));
+    m_easy.SetCheck((atoi(triggerParams[4])));
+    m_medium.SetCheck((atoi(triggerParams[5])));
+    m_hard.SetCheck((atoi(triggerParams[6])));
+
+    for (auto i = 0; i < m_nextTrigger.GetCount(); i++) {
+        CString tmp;
+        m_nextTrigger.GetLBText(i, tmp);
+        TruncSpace(tmp);
+        if (tmp == attachedTrigger) {
+            m_nextTrigger.SetCurSel(i);
+        }
+    }
+
+    for (auto const& [type, def] : ini["Tags"]) {
+        CString attTrigg = GetParam(def, 2);
+        if (attTrigg == m_currentTrigger) {
+            // update persistence
+            m_persistence.SetWindowText(GetParam(def, 0));
+            break;
+        }
+    }
+}
+
+void CTriggerEditorAllDlg::onSelChangeEvent()
+{
+
+}
+
+void CTriggerEditorAllDlg::onSelChangeAction()
+{
+
 }
 
 void CTriggerEditorAllDlg::OnBnClickedTrgrCloneTrigger()

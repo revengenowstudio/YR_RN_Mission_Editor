@@ -18,6 +18,8 @@ protected:
     virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
     afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+    afx_msg void onNewTrigger();
+    afx_msg void onSelChangeTrigger();
     afx_msg void onChangeTriggerName();
     afx_msg void onEditChangeHouse();
     afx_msg void onEditChangeNextTrigger();
@@ -29,11 +31,19 @@ protected:
     afx_msg void OnMedium();
     afx_msg void OnHard();
 
+    afx_msg void onSelChangeOption(); // trigger selection changed, update option data only (not reset)
+    afx_msg void onSelChangeEvent();
+    afx_msg void onSelChangeAction();
+
     void translateUI();
     void clear();
     void oneTimeInit();
     void onOptionCheckChanged(const CButton& checkBtn, const int paramPos);
     void parseTriggerDefinitions();
+
+    void updateTriggerOptions();
+    void updateTriggerEvents();
+    void updateTriggerActions();
 
     CString m_currentTrigger;
     // trigger options
@@ -42,7 +52,7 @@ protected:
     CEdit m_triggerName;
     CMyComboBox m_house;
     CMyComboBox m_persistence;
-    CMyComboBox m_nextTrigger; // sub trigger, sharing my tag
+    CComboBox m_nextTrigger; // sub trigger, sharing my tag
     CButton	m_medium;
     CButton	m_hard;
     CButton	m_easy;
@@ -56,7 +66,7 @@ protected:
     // action options
     CMyComboBox m_actionTypes;
     CListBox m_actionList;
-    CMyComboBox m_eventParam[6]; // 0-5
+    CMyComboBox m_actionParam[6]; // 0-5
     CEdit m_actionDescription;
 public:
     DECLARE_MESSAGE_MAP()
