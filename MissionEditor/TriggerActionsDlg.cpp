@@ -145,22 +145,26 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	if (m_currentTrigger.GetLength() == 0) return;
+	if (m_currentTrigger.GetLength() == 0) {
+		return;
+	}
 	int selev = m_Action.GetCurSel();
-	if (selev < 0) return;
-	int curev = m_Action.GetItemData(selev);
+	if (selev < 0) {
+		return;
+	}
+	int curActionIdx = m_Action.GetItemData(selev);
 
 	CString e1, e2;
 	while (m_Parameter.DeleteString(0) != CB_ERR);
 
 
-	CString eventtype, eventdata;
-	m_ActionType.GetWindowText(eventtype);
-	TruncSpace(eventtype);
+	CString actionType, actionData;
+	m_ActionType.GetWindowText(actionType);
+	TruncSpace(actionType);
 
-	if (eventtype.GetLength() == 0) {
-		eventtype = "0";
-		m_ActionType.SetWindowText(eventtype);
+	if (actionType.GetLength() == 0) {
+		actionType = "0";
+		m_ActionType.SetWindowText(actionType);
 	}
 
 
@@ -170,36 +174,37 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 #endif
 
 
-	int pos = 1 + 8 * curev;
+	int pos = 1 + 8 * curActionIdx;
 
-	ini.SetString("Actions", m_currentTrigger, SetParam(ini.GetString("Actions", m_currentTrigger), pos, (LPCTSTR)eventtype));
+	ini.SetString("Actions", m_currentTrigger, SetParam(ini.GetString("Actions", m_currentTrigger), pos, actionType));
 
-	auto const& eventDef = g_data[acsec][eventtype];
-	if (eventDef.IsEmpty()) {
+	auto const& actionDef = g_data[acsec][actionType];
+	if (actionDef.IsEmpty()) {
 		return;
 	}
 
-	eventdata = eventDef;
+	actionData = actionDef;
 
 #ifdef RA2_MODE
-	auto const& ra2Def = g_data["ActionsRA2"][eventtype];
+	auto const& ra2Def = g_data["ActionsRA2"][actionType];
 	if (!ra2Def.IsEmpty()) {
-		eventdata = ra2Def;
+		actionData = ra2Def;
 	}
 #endif
 
-	CString desc = GetParam(eventdata, 10);
+	CString desc = GetParam(actionData, 10);
 	desc.Replace("%1", ",");
 	m_ActionDescription.SetWindowText(desc);
 
 	CString ptype[6];
-	ptype[0] = GetParam(eventdata, 1);
-	ptype[1] = GetParam(eventdata, 2);
-	ptype[2] = GetParam(eventdata, 3);
-	ptype[3] = GetParam(eventdata, 4);
-	ptype[4] = GetParam(eventdata, 5);
-	ptype[5] = GetParam(eventdata, 6);
+	ptype[0] = GetParam(actionData, 1);
+	ptype[1] = GetParam(actionData, 2);
+	ptype[2] = GetParam(actionData, 3);
+	ptype[3] = GetParam(actionData, 4);
+	ptype[4] = GetParam(actionData, 5);
+	ptype[5] = GetParam(actionData, 6);
 
+#if 0
 	int pListType[6];
 	memset(pListType, 0, 6 * sizeof(int));
 
@@ -221,6 +226,7 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 	if (atoi(ptype[5]) >= 0) {
 		pListType[5] = atoi(GetParam(g_data.GetString("ParamTypes", ptype[5]), 1));
 	}
+#endif
 
 	for (auto i = 0; i < 6; i++) {
 		if (atoi(ptype[i]) > 0) {
@@ -263,7 +269,7 @@ void CTriggerActionsDlg::OnEditchangeActiontype()
 	};
 
 
-	if (atoi(GetParam(eventdata, 7)) == 1) {
+	if (atoi(GetParam(actionData, 7)) == 1) {
 		if (bNoWP) {
 			m_Parameter.SetItemData(m_Parameter.AddString(TranslateStringACP("Number")), -1);
 		} else {
@@ -634,23 +640,23 @@ void CTriggerActionsDlg::UpdateDialog()
 #endif
 
 	while (m_ActionType.DeleteString(0) != CB_ERR);
-	for (auto const& [eventid, eventdata] : g_data[sec]) {
+	for (auto const& [actionId, actionData] : g_data[sec]) {
 		//GetParam(*g_data.sections["Actions"].GetValue(i),13);
 /*#ifdef RA2_MODE
-		if(g_data.sections["ActionsRA2"].FindIndex(eventid)>=0)
-			eventdata=g_data.sections["ActionsRA2"].values[eventid];
+		if(g_data.sections["ActionsRA2"].FindIndex(actionId)>=0)
+			actionData=g_data.sections["ActionsRA2"].values[actionId];
 #endif*/
-		CString text = eventid + " " + GetParam(eventdata, 0);
+		CString text = actionId + " " + GetParam(actionData, 0);
 		text.Replace("%1", ",");
 
 #ifdef RA2_MODE
-		if (GetParam(eventdata, 12) == "1" && (yuri_mode || !isTrue(GetParam(eventdata, 14)))) {
+		if (GetParam(actionData, 12) == "1" && (yuri_mode || !isTrue(GetParam(actionData, 14)))) {
 #else
-		if (GetParam(eventdata, 11) == "1") {
+		if (GetParam(actionData, 11) == "1") {
 #endif
 			m_ActionType.AddString(text);
 		}
-		}
+	}
 
 	int cur_sel = m_Action.GetCurSel();
 	while (m_Action.DeleteString(0) != CB_ERR);
