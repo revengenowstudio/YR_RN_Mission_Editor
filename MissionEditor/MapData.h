@@ -213,11 +213,10 @@ public:
 			replacement = rand() * (1 + (*tiledata)[dwID].bReplacementCount) / RAND_MAX;
 		}
 
-		fielddata[dwPos].wGround = dwID;
-		fielddata[dwPos].bSubTile = dwTile;
+		fielddata[dwPos].wGround = static_cast<WORD>(dwID);
+		fielddata[dwPos].bSubTile = static_cast<BYTE>(dwTile);
 		fielddata[dwPos].bRNDImage = replacement;
 
-		int e;
 		fielddata[dwPos].bRedrawTerrain = FALSE;
 		int xx, yy;
 		for (xx = -2; xx < 0; xx++) {
@@ -485,11 +484,11 @@ public:
 	WORD GetHousesCount(BOOL bCountries = FALSE);
 	WORD GetHeight() const
 	{
-		return m_maprect.bottom;
+		return static_cast<WORD>(m_maprect.bottom);
 	};
 	WORD GetWidth() const
 	{
-		return m_maprect.right;
+		return static_cast<WORD>(m_maprect.right);
 	};
 	BOOL IsRulesSection(LPCTSTR lpSection);
 
@@ -730,11 +729,15 @@ inline bool CMapData::IsCoordInMap(int X, int Y) const
 
 inline bool CMapData::isInside(MapCoords xy) const
 {
-	return xy.x >= 0 && xy.y >= 0 && xy.x < m_IsoSize&& xy.y < m_IsoSize;
+	return xy.x >= 0 && xy.y >= 0 
+		&& xy.x < static_cast<int>(m_IsoSize) 
+		&& xy.y < static_cast<int>(m_IsoSize);
 }
 inline bool CMapData::isInside(int x, int y) const
 {
-	return x >= 0 && y >= 0 && x < m_IsoSize&& y < m_IsoSize;
+	return x >= 0 && y >= 0 
+		&& x < static_cast<int>(m_IsoSize)
+		&& y < static_cast<int>(m_IsoSize);
 }
 
 inline MapCoords CMapData::ToMapCoords(ProjectedCoords xy) const
@@ -747,8 +750,8 @@ inline MapCoords CMapData::ToMapCoords3d(ProjectedCoords xy, int mapZ) const
 	auto const cx = static_cast<float>(xy.x);
 	auto const cy = static_cast<float>(xy.y + mapZ * f_y / 2);
 	return MapCoords(
-		cy / (float)f_y - cx / (float)f_x + (float)(m_IsoSize - 2) / 2 + (float)0.5,
-		cy / (float)f_y + cx / (float)f_x - (float)(m_IsoSize - 2) / 2.0f - (float)0.5
+		static_cast<int16_t>(cy / (float)f_y - cx / (float)f_x + (float)(m_IsoSize - 2) / 2 + (float)0.5),
+		static_cast<int16_t>(cy / (float)f_y + cx / (float)f_x - (float)(m_IsoSize - 2) / 2.0f - (float)0.5)
 	);
 }
 
