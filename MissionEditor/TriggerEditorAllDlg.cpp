@@ -143,15 +143,17 @@ void CTriggerEditorAllDlg::UpdateDialog()
         ini.SetString("Triggers", m_currentTrigger, triggerCopy);
     }
 
-    m_triggerName.SetWindowText(GetParam(triggerCopy, 2));
-    m_house.SetWindowText(TranslateHouse(GetParam(triggerCopy, 0), TRUE));
-    CString attachedTrigger = GetParam(triggerCopy, 1);
+    auto const triggerParams = SplitParams<7>(triggerCopy);
+
+    m_triggerName.SetWindowText(triggerParams[2]);
+    m_house.SetWindowText(TranslateHouse(triggerParams[0], TRUE));
+    CString attachedTrigger = triggerParams[1];
     m_nextTrigger.SetWindowText(attachedTrigger);
 
-    m_disabled.SetCheck((atoi(GetParam(triggerCopy, 3))));
-    m_easy.SetCheck((atoi(GetParam(triggerCopy, 4))));
-    m_medium.SetCheck((atoi(GetParam(triggerCopy, 5))));
-    m_hard.SetCheck((atoi(GetParam(triggerCopy, 6))));
+    m_disabled.SetCheck((atoi(triggerParams[3])));
+    m_easy.SetCheck((atoi(triggerParams[4])));
+    m_medium.SetCheck((atoi(triggerParams[5])));
+    m_hard.SetCheck((atoi(triggerParams[6])));
 
     for (auto i = 0; i < m_nextTrigger.GetCount(); i++) {
         CString tmp;
@@ -170,8 +172,6 @@ void CTriggerEditorAllDlg::UpdateDialog()
         }
     }
 }
-
-
 
 void CTriggerEditorAllDlg::onChangeTriggerName()
 {

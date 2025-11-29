@@ -156,6 +156,29 @@ inline std::vector<CString> SplitParams(const CString& data)
 	return Split(data, ',');
 }
 
+template<size_t slots>
+inline std::array<CString, slots> SplitParams(const CString& data, char separator = ',')
+{
+	int nextComma = -1;
+	int lastComma = -1;
+	const auto len = data.GetLength();
+	std::array<CString, slots> res;
+	auto it = res.begin();
+	while (lastComma < len) {
+		nextComma = data.Find(separator, lastComma + 1);
+		if (nextComma < 0) {
+			*it = data.Mid(lastComma + 1);
+			break;
+		}
+		if (it == res.end()) {
+			throw std::logic_error("insufficient array size");
+		}
+		*it = data.Mid(lastComma + 1, (nextComma - lastComma - 1));
+		++it;
+		lastComma = nextComma;
+	}
+	return res; // RVO
+}
 
 inline CString Join(const CString& join, const std::vector<CString>& strings)
 {
