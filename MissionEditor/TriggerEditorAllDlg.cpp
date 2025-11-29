@@ -6,14 +6,14 @@
 
 BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_WM_SHOWWINDOW()
-    ON_BN_CLICKED(IDD_TRGR_NEW_TRIGGER, onNewTrigger)
-    ON_BN_CLICKED(IDD_TRGR_CLONE_TRIGGER, &CTriggerEditorAllDlg::OnBnClickedTrgrCloneTrigger)
-    ON_BN_CLICKED(IDD_TRGR_DISABLED, OnDisabled)
-    ON_BN_CLICKED(IDD_TRGR_EASY, OnEasy)
-    ON_BN_CLICKED(IDD_TRGR_MEDIUM, OnMedium)
-    ON_BN_CLICKED(IDD_TRGR_HARD, OnHard)
-    ON_CBN_EDITCHANGE(IDD_TRGR_SELECTED_TRIGGER, onEditChangeTriggerType)
-    ON_CBN_SELCHANGE(IDD_TRGR_SELECTED_TRIGGER, onSelChangeTrigger)
+    ON_BN_CLICKED(IDC_TRGR_NEW_TRIGGER, onNewTrigger)
+    ON_BN_CLICKED(IDC_TRGR_CLONE_TRIGGER, &CTriggerEditorAllDlg::OnBnClickedTrgrCloneTrigger)
+    ON_BN_CLICKED(IDC_TRGR_DISABLED, OnDisabled)
+    ON_BN_CLICKED(IDC_TRGR_EASY, OnEasy)
+    ON_BN_CLICKED(IDC_TRGR_MEDIUM, OnMedium)
+    ON_BN_CLICKED(IDC_TRGR_HARD, OnHard)
+    ON_CBN_EDITCHANGE(IDC_TRGR_SELECTED_TRIGGER, onEditChangeTriggerType)
+    ON_CBN_SELCHANGE(IDC_TRGR_SELECTED_TRIGGER, onSelChangeTrigger)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -29,7 +29,7 @@ BOOL CTriggerEditorAllDlg::OnInitDialog()
 
     translateUI();
 
-    GetDlgItem(IDD_TRGR_SEARCH_REFERENCE)->EnableWindow(FALSE); // not yet ready
+    GetDlgItem(IDC_TRGR_SEARCH_REFERENCE)->EnableWindow(FALSE); // not yet ready
 
     parseTriggerDefinitions();
     oneTimeInit();
@@ -41,31 +41,31 @@ void CTriggerEditorAllDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialog::DoDataExchange(pDX);
 
-    DDX_Control(pDX, IDD_TRGR_SELECTED_TRIGGER, m_triggerType);
-    DDX_Control(pDX, IDD_TRGR_NAME, m_triggerName);
-    DDX_Control(pDX, IDD_TRGR_HOUSE, m_house);
-    DDX_Control(pDX, IDD_TRGR_TYPE, m_persistence);
-    DDX_Control(pDX, IDD_TRGR_ATTACHED_TRIGGER, m_nextTrigger);
-    DDX_Control(pDX, IDD_TRGR_MEDIUM, m_medium);
-    DDX_Control(pDX, IDD_TRGR_HARD, m_hard);
-    DDX_Control(pDX, IDD_TRGR_EASY, m_easy);
-    DDX_Control(pDX, IDD_TRGR_DISABLED, m_disabled);
+    DDX_Control(pDX, IDC_TRGR_SELECTED_TRIGGER, m_triggerType);
+    DDX_Control(pDX, IDC_TRGR_NAME, m_triggerName);
+    DDX_Control(pDX, IDC_TRGR_HOUSE, m_house);
+    DDX_Control(pDX, IDC_TRGR_TYPE, m_persistence);
+    DDX_Control(pDX, IDC_TRGR_ATTACHED_TRIGGER, m_nextTrigger);
+    DDX_Control(pDX, IDC_TRGR_MEDIUM, m_medium);
+    DDX_Control(pDX, IDC_TRGR_HARD, m_hard);
+    DDX_Control(pDX, IDC_TRGR_EASY, m_easy);
+    DDX_Control(pDX, IDC_TRGR_DISABLED, m_disabled);
 
-    DDX_Control(pDX, IDD_TRGR_EVENT_TYPE, m_eventTypes);
-    DDX_Control(pDX, IDD_TRGR_EVENT_LIST, m_eventList);
-    DDX_Control(pDX, IDD_TRGR_EVENT_PARAMETER_1, m_eventParam1);
-    DDX_Control(pDX, IDD_TRGR_EVENT_PARAMETER_2, m_eventParam2);
-    DDX_Control(pDX, IDD_TRGR_EVENT_DESCRIPTION, m_eventDescription);
+    DDX_Control(pDX, IDC_TRGR_EVENT_TYPE, m_eventTypes);
+    DDX_Control(pDX, IDC_TRGR_EVENT_LIST, m_eventList);
+    DDX_Control(pDX, IDC_TRGR_EVENT_PARAMETER_1, m_eventParam1);
+    DDX_Control(pDX, IDC_TRGR_EVENT_PARAMETER_2, m_eventParam2);
+    DDX_Control(pDX, IDC_TRGR_EVENT_DESCRIPTION, m_eventDescription);
 
-    DDX_Control(pDX, IDD_TRGR_ACTION_TYPE, m_actionTypes);
-    DDX_Control(pDX, IDD_TRGR_ACTION_LIST, m_actionList);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_1, m_actionParam[0]);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_2, m_actionParam[1]);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_3, m_actionParam[2]);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_4, m_actionParam[3]);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_5, m_actionParam[4]);
-    DDX_Control(pDX, IDD_TRGR_ACTION_PARAMETER_6, m_actionParam[5]);
-    DDX_Control(pDX, IDD_TRGR_ACTION_DESCRIPTION, m_actionDescription);
+    DDX_Control(pDX, IDC_TRGR_ACTION_TYPE, m_actionTypes);
+    DDX_Control(pDX, IDC_TRGR_ACTION_LIST, m_actionList);
+    DDX_Control(pDX, IDC_TRGR_ACTION_PARAMETER_1, m_actionParam[0]);
+    DDX_Control(pDX, IDC_TRGR_ACTION_PARAMETER_2, m_actionParam[1]);
+    DDX_Control(pDX, IDC_TRGR_ACTION_PARAMETER_3, m_actionParam[2]);
+    DDX_Control(pDX, IDC_TRGR_ACTION_PARAMETER_4, m_actionParam[3]);
+    DDX_Control(pDX, IDC_TRGR_ACTION_PARAMETER_5, m_actionParam[4]);
+    DDX_Control(pDX, IDC_TRGR_ACTION_PARAMETER_6, m_actionParam[5]);
+    DDX_Control(pDX, IDC_TRGR_ACTION_DESCRIPTION, m_actionDescription);
 }
 
 BOOL CTriggerEditorAllDlg::PreTranslateMessage(MSG* pMsg)
@@ -77,42 +77,42 @@ void CTriggerEditorAllDlg::translateUI()
 {
     TranslateWindowCaption(*this, "TriggerCaption");
 
-    TranslateDlgItem(*this, IDD_TRGR_TRIGGER_OPTIONS, "TriggerOptions");
-    TranslateDlgItem(*this, IDD_TRGR_SELECT_TRIGGER_TXT, "TriggerDesc");
-    TranslateDlgItem(*this, IDD_TRGR_NEW_TRIGGER, "TriggerNew");
-    TranslateDlgItem(*this, IDD_TRGR_CLONE_TRIGGER, "TriggerClone");
-    TranslateDlgItem(*this, IDD_TRGR_DELETE_TRIGGER, "TriggerDelete");
-    TranslateDlgItem(*this, IDD_TRGR_PLACE_ON_MAP, "TriggerPlaceOnMap");
-    TranslateDlgItem(*this, IDD_TRGR_TYPE_TXT, "TriggerOptionType");
-    TranslateDlgItem(*this, IDD_TRGR_NAME_TXT, "TriggerName");
-    TranslateDlgItem(*this, IDD_TRGR_HOUSE_TXT, "TriggerOptionHouse");
-    TranslateDlgItem(*this, IDD_TRGR_ATTACHED_TRIGGER_TXT, "TriggerOptionAttachedTrigger");
-    TranslateDlgItem(*this, IDD_TRGR_ATTACHED_TRIGGER, "TriggerCannotbeitselforformsaloop");
-    TranslateDlgItem(*this, IDD_TRGR_DISABLED, "TriggerOptionDisabled");
-    TranslateDlgItem(*this, IDD_TRGR_EASY, "TriggerOptionEasy");
-    TranslateDlgItem(*this, IDD_TRGR_MEDIUM, "TriggerOptionMedium");
-    TranslateDlgItem(*this, IDD_TRGR_HARD, "TriggerOptionHard");
-    TranslateDlgItem(*this, IDD_TRGR_EVENT_OPTIONS, "TriggerEventoptions");
-    TranslateDlgItem(*this, IDD_TRGR_EVENT_TYPE_TXT, "TriggerEventtype");
-    TranslateDlgItem(*this, IDD_TRGR_NEW_EVENT, "TriggerAdd");
-    TranslateDlgItem(*this, IDD_TRGR_CLONE_EVENT, "TriggerClone");
-    TranslateDlgItem(*this, IDD_TRGR_DELETE_EVENT, "TriggerDelete");
-    TranslateDlgItem(*this, IDD_TRGR_EVENT_LIST_TXT, "TriggerEventList");
-    TranslateDlgItem(*this, IDD_TRGR_EVENT_P1_TXT, "TriggerParameter#1value");
-    TranslateDlgItem(*this, IDD_TRGR_EVENT_P2_TXT, "TriggerParameter#2value");
-    TranslateDlgItem(*this, IDD_TRGR_ACTION_OPTIONS, "TriggerActionoptions");
-    TranslateDlgItem(*this, IDD_TRGR_ACTION_TYPE_TXT, "TriggerActiontype");
-    TranslateDlgItem(*this, IDD_TRGR_NEW_ACTION, "TriggerAdd");
-    TranslateDlgItem(*this, IDD_TRGR_DELETE_ACTION, "TriggerDelete");
-    TranslateDlgItem(*this, IDD_TRGR_CLONE_ACTION, "TriggerClone");
-    TranslateDlgItem(*this, IDD_TRGR_ACTION_LIST_TXT, "TriggerActionList");
-    TranslateDlgItem(*this, IDD_TRGR_ACTION_P1_TXT, "TriggerParameter#1value");
-    TranslateDlgItem(*this, IDD_TRGR_ACTION_P2_TXT, "TriggerParameter#2value");
-    TranslateDlgItem(*this, IDD_TRGR_ACTION_P3_TXT, "TriggerParameter#3value");
-    TranslateDlgItem(*this, IDD_TRGR_ACTION_P4_TXT, "TriggerParameter#4value");
-    TranslateDlgItem(*this, IDD_TRGR_ACTION_P5_TXT, "TriggerParameter#5value");
-    TranslateDlgItem(*this, IDD_TRGR_ACTION_P6_TXT, "TriggerParameter#6value");
-    TranslateDlgItem(*this, IDD_TRGR_SEARCH_REFERENCE, "SearchReferenceTitle");
+    TranslateDlgItem(*this, IDC_TRGR_TRIGGER_OPTIONS, "TriggerOptions");
+    TranslateDlgItem(*this, IDC_TRGR_SELECT_TRIGGER_TXT, "TriggerDesc");
+    TranslateDlgItem(*this, IDC_TRGR_NEW_TRIGGER, "TriggerNew");
+    TranslateDlgItem(*this, IDC_TRGR_CLONE_TRIGGER, "TriggerClone");
+    TranslateDlgItem(*this, IDC_TRGR_DELETE_TRIGGER, "TriggerDelete");
+    TranslateDlgItem(*this, IDC_TRGR_PLACE_ON_MAP, "TriggerPlaceOnMap");
+    TranslateDlgItem(*this, IDC_TRGR_TYPE_TXT, "TriggerOptionType");
+    TranslateDlgItem(*this, IDC_TRGR_NAME_TXT, "TriggerName");
+    TranslateDlgItem(*this, IDC_TRGR_HOUSE_TXT, "TriggerOptionHouse");
+    TranslateDlgItem(*this, IDC_TRGR_ATTACHED_TRIGGER_TXT, "TriggerOptionAttachedTrigger");
+    TranslateDlgItem(*this, IDC_TRGR_ATTACHED_TRIGGER, "TriggerCannotbeitselforformsaloop");
+    TranslateDlgItem(*this, IDC_TRGR_DISABLED, "TriggerOptionDisabled");
+    TranslateDlgItem(*this, IDC_TRGR_EASY, "TriggerOptionEasy");
+    TranslateDlgItem(*this, IDC_TRGR_MEDIUM, "TriggerOptionMedium");
+    TranslateDlgItem(*this, IDC_TRGR_HARD, "TriggerOptionHard");
+    TranslateDlgItem(*this, IDC_TRGR_EVENT_OPTIONS, "TriggerEventoptions");
+    TranslateDlgItem(*this, IDC_TRGR_EVENT_TYPE_TXT, "TriggerEventtype");
+    TranslateDlgItem(*this, IDC_TRGR_NEW_EVENT, "TriggerAdd");
+    TranslateDlgItem(*this, IDC_TRGR_CLONE_EVENT, "TriggerClone");
+    TranslateDlgItem(*this, IDC_TRGR_DELETE_EVENT, "TriggerDelete");
+    TranslateDlgItem(*this, IDC_TRGR_EVENT_LIST_TXT, "TriggerEventList");
+    TranslateDlgItem(*this, IDC_TRGR_EVENT_P1_TXT, "TriggerParameter#1value");
+    TranslateDlgItem(*this, IDC_TRGR_EVENT_P2_TXT, "TriggerParameter#2value");
+    TranslateDlgItem(*this, IDC_TRGR_ACTION_OPTIONS, "TriggerActionoptions");
+    TranslateDlgItem(*this, IDC_TRGR_ACTION_TYPE_TXT, "TriggerActiontype");
+    TranslateDlgItem(*this, IDC_TRGR_NEW_ACTION, "TriggerAdd");
+    TranslateDlgItem(*this, IDC_TRGR_DELETE_ACTION, "TriggerDelete");
+    TranslateDlgItem(*this, IDC_TRGR_CLONE_ACTION, "TriggerClone");
+    TranslateDlgItem(*this, IDC_TRGR_ACTION_LIST_TXT, "TriggerActionList");
+    TranslateDlgItem(*this, IDC_TRGR_ACTION_P1_TXT, "TriggerParameter#1value");
+    TranslateDlgItem(*this, IDC_TRGR_ACTION_P2_TXT, "TriggerParameter#2value");
+    TranslateDlgItem(*this, IDC_TRGR_ACTION_P3_TXT, "TriggerParameter#3value");
+    TranslateDlgItem(*this, IDC_TRGR_ACTION_P4_TXT, "TriggerParameter#4value");
+    TranslateDlgItem(*this, IDC_TRGR_ACTION_P5_TXT, "TriggerParameter#5value");
+    TranslateDlgItem(*this, IDC_TRGR_ACTION_P6_TXT, "TriggerParameter#6value");
+    TranslateDlgItem(*this, IDC_TRGR_SEARCH_REFERENCE, "SearchReferenceTitle");
 }
 
 void CTriggerEditorAllDlg::clear()
@@ -429,7 +429,7 @@ void CTriggerEditorAllDlg::OnShowWindow(BOOL bShow, UINT nStatus)
         if (auto pOldFocus = GetFocus()) {
             switch (pOldFocus->GetDlgCtrlID())
             {
-            case IDD_TRGR_NAME: {
+            case IDC_TRGR_NAME: {
                 this->onChangeTriggerName();
             } break;
             default:
