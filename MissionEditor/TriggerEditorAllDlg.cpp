@@ -77,18 +77,18 @@ void CTriggerEditorAllDlg::translateUI()
 {
     TranslateWindowCaption(*this, "TriggerCaption");
 
-    TranslateDlgItem(*this, IDD_TRGR_TRIGGER_OPTIONS, "TriggerOptionType");
-    TranslateDlgItem(*this, IDD_TRGR_SELECT_TRIGGER_TXT, "TriggerSelectedTrigger");
+    TranslateDlgItem(*this, IDD_TRGR_TRIGGER_OPTIONS, "TriggerOptions");
+    TranslateDlgItem(*this, IDD_TRGR_SELECT_TRIGGER_TXT, "TriggerDesc");
     TranslateDlgItem(*this, IDD_TRGR_NEW_TRIGGER, "TriggerNew");
     TranslateDlgItem(*this, IDD_TRGR_CLONE_TRIGGER, "TriggerClone");
     TranslateDlgItem(*this, IDD_TRGR_DELETE_TRIGGER, "TriggerDelete");
     TranslateDlgItem(*this, IDD_TRGR_PLACE_ON_MAP, "TriggerPlaceOnMap");
-    TranslateDlgItem(*this, IDD_TRGR_TYPE_TXT, "TriggerType");
+    TranslateDlgItem(*this, IDD_TRGR_TYPE_TXT, "TriggerOptionType");
     TranslateDlgItem(*this, IDD_TRGR_NAME_TXT, "TriggerName");
-    TranslateDlgItem(*this, IDD_TRGR_HOUSE_TXT, "TriggerHouse");
+    TranslateDlgItem(*this, IDD_TRGR_HOUSE_TXT, "TriggerOptionHouse");
     TranslateDlgItem(*this, IDD_TRGR_ATTACHED_TRIGGER_TXT, "TriggerOptionAttachedTrigger");
     TranslateDlgItem(*this, IDD_TRGR_ATTACHED_TRIGGER, "TriggerCannotbeitselforformsaloop");
-    TranslateDlgItem(*this, IDD_TRGR_DISABLED, "TriggerDisabled");
+    TranslateDlgItem(*this, IDD_TRGR_DISABLED, "TriggerOptionDisabled");
     TranslateDlgItem(*this, IDD_TRGR_EASY, "TriggerOptionEasy");
     TranslateDlgItem(*this, IDD_TRGR_MEDIUM, "TriggerOptionMedium");
     TranslateDlgItem(*this, IDD_TRGR_HARD, "TriggerOptionHard");
