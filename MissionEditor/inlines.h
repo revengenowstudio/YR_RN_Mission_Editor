@@ -165,13 +165,13 @@ inline std::array<CString, slots> SplitParams(const CString& data, char separato
 	std::array<CString, slots> res;
 	auto it = res.begin();
 	while (lastComma < len) {
+		if (it == res.end()) {
+			break;
+		}
 		nextComma = data.Find(separator, lastComma + 1);
 		if (nextComma < 0) {
 			*it = data.Mid(lastComma + 1);
 			break;
-		}
-		if (it == res.end()) {
-			throw std::logic_error("insufficient array size");
 		}
 		*it = data.Mid(lastComma + 1, (nextComma - lastComma - 1));
 		++it;
