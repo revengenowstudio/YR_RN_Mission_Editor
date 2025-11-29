@@ -40,23 +40,23 @@ protected:
     // TODO: add a filter edit
     CComboBox m_triggerType;
     CEdit m_triggerName;
-    CComboBox m_house;
-    CComboBox m_persistence;
-    CComboBox m_nextTrigger; // sub trigger, sharing my tag
+    CMyComboBox m_house;
+    CMyComboBox m_persistence;
+    CMyComboBox m_nextTrigger; // sub trigger, sharing my tag
     CButton	m_medium;
     CButton	m_hard;
     CButton	m_easy;
     CButton	m_disabled;
     // event options
-    CComboBox m_eventTypes;
+    CMyComboBox m_eventTypes;
     CListBox m_eventList;
-    CComboBox m_eventParam1;
-    CComboBox m_eventParam2;
+    CMyComboBox m_eventParam1;
+    CMyComboBox m_eventParam2;
     CEdit m_eventDescription;
     // action options
-    CComboBox m_actionTypes;
+    CMyComboBox m_actionTypes;
     CListBox m_actionList;
-    CComboBox m_eventParam[6]; // 0-5
+    CMyComboBox m_eventParam[6]; // 0-5
     CEdit m_actionDescription;
 public:
     DECLARE_MESSAGE_MAP()
