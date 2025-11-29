@@ -17,6 +17,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_BN_CLICKED(IDC_TRGR_HARD, OnHard)
     ON_CBN_EDITCHANGE(IDC_TRGR_SELECTED_TRIGGER, onEditChangeTriggerType)
     ON_CBN_SELCHANGE(IDC_TRGR_SELECTED_TRIGGER, onSelChangeTrigger)
+    ON_CBN_SELCHANGE(IDC_TRGR_EVENT_TYPE, onSelChangeEvent)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -168,7 +169,8 @@ void CTriggerEditorAllDlg::updateTriggerOptions()
 
 void CTriggerEditorAllDlg::updateTriggerEvents()
 {
-    if (m_currentTrigger.GetLength() == 0) {
+    // actually only happens if no trigger at all
+    if (m_currentTrigger.IsEmpty()) {
         while (m_eventList.DeleteString(0) != CB_ERR);
         return;
     }
@@ -561,7 +563,89 @@ void CTriggerEditorAllDlg::onSelChangeOption()
 
 void CTriggerEditorAllDlg::onSelChangeEvent()
 {
+    CIniFile& ini = Map->GetIniFile();
 
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
+
+    int eventTypeSel = m_eventTypes.GetCurSel();
+    if (eventTypeSel < 0) {
+        return;
+    }
+    int eventIdx = m_eventTypes.GetItemData(eventTypeSel);
+
+    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
+
+    auto const& eventData = events.Nth(eventIdx);
+    CString eventTypeStr;
+    eventTypeStr.Format("%d", eventData.eventType);
+
+    CString tmp;
+    for (auto i = 0; i < m_eventTypes.GetCount(); i++) {
+        m_eventTypes.GetLBText(i, tmp);
+        TruncSpace(tmp);
+        if (tmp == eventTypeStr) {
+            m_eventTypes.SetCurSel(i);
+        }
+    }
+
+    onEditChangeEventType();
+}
+
+void CTriggerEditorAllDlg::onEditChangeEventType()
+{
+    CIniFile& ini = Map->GetIniFile();
+
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
+    int eventTypeSel = m_eventList.GetCurSel();
+    if (eventTypeSel < 0) {
+        return;
+    }
+
+    int eventIdx = m_eventList.GetItemData(eventTypeSel);
+    CString eventtype;
+    m_eventTypes.GetWindowText(eventtype);
+    TruncSpace(eventtype);
+
+    // not sure necessary, maybe for new event
+    if (eventtype.IsEmpty()) {
+        eventtype = "0";
+        m_eventTypes.SetWindowText(eventtype);
+    }
+
+    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
+    auto& eventData = events.Nth(eventIdx);
+
+    bool is4SlotEvent = false; // keep it for now, may not be necessary any more, we have safer serde
+    if (eventData.param2.has_value()) {
+        is4SlotEvent = true;
+    }
+    eventData.eventType = atoi(eventtype); // apply new event type Idx
+
+    auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
+    auto const& eventDef = triggerDefMgr.Events().at(eventData.eventType);
+    auto const& paramType1 = triggerDefMgr.Params().at(eventDef.paramTypes[0]);
+    auto const& paramType2 = triggerDefMgr.Params().at(eventDef.paramTypes[1]);
+    
+    if (paramType2.slotCount < 2) {// clear this slot if switching to 1 slot param
+        eventData.param2.reset();
+    } else if (!eventData.param2.has_value()) {// if there was no such value, give it a '0' value
+        eventData.param2.emplace("0");
+    }
+    // otherwise, keep its value, no change
+
+    // keep it for now. Since event type changes, param type will change accordingly 
+    ini.SetString("Events", m_currentTrigger, events.Serialize());
+
+    m_eventDescription.SetWindowText(eventDef.description);
+
+    HandleParamList(m_eventParam1, paramType1.listType);
+    HandleParamList(m_eventParam2, paramType2.listType);
+    GetDlgItem(IDC_TRGR_EVENT_P1_TXT)->SetWindowTextA(paramType1.paramName);
+    GetDlgItem(IDC_TRGR_EVENT_P2_TXT)->SetWindowTextA(paramType2.paramName);
 }
 
 void CTriggerEditorAllDlg::onSelChangeAction()

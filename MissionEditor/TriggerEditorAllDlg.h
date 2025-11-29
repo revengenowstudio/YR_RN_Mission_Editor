@@ -33,8 +33,9 @@ protected:
     afx_msg void OnHard();
 
     afx_msg void onSelChangeOption(); // trigger selection changed, update option data only (not reset)
-    afx_msg void onSelChangeEvent();
+    afx_msg void onSelChangeEvent(); // eventType cb sel change
     afx_msg void onSelChangeAction();
+    afx_msg void onEditChangeEventType(); // event list sel change
 
     void translateUI();
     void clear();
