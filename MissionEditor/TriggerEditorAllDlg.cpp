@@ -6,6 +6,7 @@
 
 BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_WM_SHOWWINDOW()
+    ON_BN_CLICKED(IDD_TRGR_NEW_TRIGGER, onNewTrigger)
     ON_BN_CLICKED(IDD_TRGR_CLONE_TRIGGER, &CTriggerEditorAllDlg::OnBnClickedTrgrCloneTrigger)
     ON_BN_CLICKED(IDD_TRGR_DISABLED, OnDisabled)
     ON_BN_CLICKED(IDD_TRGR_EASY, OnEasy)
@@ -254,26 +255,25 @@ void CTriggerEditorAllDlg::onNewTrigger()
 {
     CIniFile& ini = Map->GetIniFile();
 
-    CString ID_T = GetFreeID();
-    ini.SetString("Triggers", ID_T, Map->GetHouseID(0, TRUE) + ",<none>,New trigger,0,1,1,1,0");
-    ini.SetString("Events", ID_T, "0");
-    ini.SetString("Actions", ID_T, "0");
+    CString newId = GetFreeID();
+    ini.SetString("Triggers", newId, Map->GetHouseID(0, TRUE) + ",<none>,New trigger,0,1,1,1,0");
+    ini.SetString("Events", newId, "0");
+    ini.SetString("Actions", newId, "0");
 
     //if(MessageBox("Trigger created. If you want to create a simple tag now, press Yes. The tag will be called ""New tag"", you should name it like the trigger (after you have set up the trigger).","Trigger created",MB_YESNO))
     {
-        CString ID_TAG = GetFreeID();
-        ini.SetString("Tags", ID_TAG, "0,New tag," + ID_T);
+        CString tagId = GetFreeID();
+        ini.SetString("Tags", tagId, "0,New tag," + newId);
     }
 
     theApp.MainWindow()->UpdateDialogs(TRUE);
 
     for (auto i = 0; i < m_triggerType.GetCount(); i++) {
-        if (m_triggerType.GetItemData(i) == ini["Triggers"].FindIndex(ID_T)) {
+        if (m_triggerType.GetItemData(i) == ini["Triggers"].FindIndex(newId)) {
             m_triggerType.SetCurSel(i);
         }
     }
     onSelChangeTrigger();
-
 }
 
 void CTriggerEditorAllDlg::onSelChangeTrigger()
