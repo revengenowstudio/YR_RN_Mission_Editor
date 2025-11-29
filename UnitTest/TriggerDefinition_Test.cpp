@@ -14,6 +14,14 @@ R"(
 1=Unknown,0
 2=House,1
 
+[EventsRA2]
+0=-No Event-,0,0,0,0,This is an empty event.,0,1,0
+1=Enter...,0,2,0,0,Ground unit enters,0,1,1
+2=Discover starts(Unused),0,0,0,1,When a spy enters,0,0,2
+3=Stolen by(Unused),0,2,0,1,When money stolen by a thief,0,0,3
+8=Anything,0,0,0,0,When use it alone%1 take effect immediately,0,1,8
+9=Destroyed%1 Units%1 All...,0,2,0,0,When all techno units get destroyed,0,1,9
+
 [ActionsRA2]
 0=-Nothing-,0,0,0,0,0,0,0,0,0,This is an empty action. It means doing nothing.,0,1,0
 1=Claim Winner...,0,2,0,0,0,0,0,0,0,The winner must be a specific side, and the game will end immediately. For example, in %1, the players on a specific side are defined. In a multiplayer task, this action will lead to the failure of all players.,0,1,1
@@ -28,6 +36,13 @@ R"(
 
     EXPECT_EQ(mgr.Actions().size(), 3);
     EXPECT_EQ(mgr.Actions().at(0).description, "This is an empty action. It means doing nothing.");
+    EXPECT_EQ(mgr.Actions().at(1).paramTypes[0], 0);
+    EXPECT_EQ(mgr.Actions().at(1).paramTypes[1], 2);
+
+    EXPECT_EQ(mgr.Events().size(), 6);
+    EXPECT_EQ(mgr.Events().at(0).description, "This is an empty event.");
+    EXPECT_EQ(mgr.Events().at(2).obsolete, true);
+    EXPECT_EQ(mgr.Events().at(8).description, "When use it alone, take effect immediately");
 
     EXPECT_EQ(mgr.Params().size(), 4);
     EXPECT_EQ(mgr.Params().at(-1).paramName, "Unused");
