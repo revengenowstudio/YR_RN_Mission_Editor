@@ -4,10 +4,13 @@
 #include "functions.h"
 #include "inlines.h"
 
+extern ACTIONDATA AD; // very ugly implementation, will be refactored
+
 BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_WM_SHOWWINDOW()
     ON_BN_CLICKED(IDC_TRGR_NEW_TRIGGER, onNewTrigger)
     ON_BN_CLICKED(IDC_TRGR_CLONE_TRIGGER, &CTriggerEditorAllDlg::OnBnClickedTrgrCloneTrigger)
+    ON_BN_CLICKED(IDC_TRGR_PLACE_ON_MAP, onPlaceOnMap)
     ON_BN_CLICKED(IDC_TRGR_DISABLED, OnDisabled)
     ON_BN_CLICKED(IDC_TRGR_EASY, OnEasy)
     ON_BN_CLICKED(IDC_TRGR_MEDIUM, OnMedium)
@@ -275,6 +278,32 @@ void CTriggerEditorAllDlg::onNewTrigger()
         }
     }
     onSelChangeTrigger();
+}
+
+void CTriggerEditorAllDlg::onPlaceOnMap()
+{
+    CIniFile& ini = Map->GetIniFile();
+
+    int sel = m_triggerType.GetCurSel();
+    if (sel < 0) {
+        return;
+    }
+
+    int curtrig = m_triggerType.GetItemData(sel);
+    auto const triggerId = ini["Triggers"].Nth(curtrig).first;
+    CString tag;
+
+    for (auto const& [type, def] : ini["Tags"]) {
+        CString attTrigg = GetParam(def, 2);
+        if (triggerId == attTrigg) {
+            tag = type;
+            break;
+        }
+    }
+
+    AD.mode = ACTIONMODE_CELLTAG;
+    AD.type = 4;
+    AD.data_s = tag;
 }
 
 void CTriggerEditorAllDlg::onSelChangeTrigger()

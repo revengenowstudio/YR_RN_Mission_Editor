@@ -19,6 +19,7 @@ protected:
 
     afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
     afx_msg void onNewTrigger();
+    afx_msg void onPlaceOnMap();
     afx_msg void onSelChangeTrigger();
     afx_msg void onChangeTriggerName();
     afx_msg void onEditChangeHouse();
