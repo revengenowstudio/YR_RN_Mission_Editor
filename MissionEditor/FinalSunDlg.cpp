@@ -2795,7 +2795,7 @@ void CFinalSunDlg::OnEditTriggereditor()
 
 
 	if (m_triggereditor.m_hWnd == NULL) {
-		if (!m_triggereditor.Create(CTriggerEditorDlg::IDD, NULL)) {
+		if (!m_triggereditor.Create(CTriggerEditorAllDlg::IDD, NULL)) {
 			MessageBox(GetLanguageStringACP("Err_CreateErr"), "Error");
 		}
 	}

@@ -45,6 +45,7 @@
 #include "TileSetBrowserFrame.h"	// Hinzugefügt von der Klassenansicht
 #include "ToolSettingsBar.h"
 #include "TriggerEditorDlg.h"
+#include "TriggerEditorAllDlg.h"
 #include "CsfViewer.h"
 
 #if _MSC_VER > 1000
@@ -81,7 +82,7 @@ public:
 	void SaveMap(CString FileName);
 	void SetReady();
 	CScriptTypes m_Scripttypes;
-	CTriggerEditorDlg m_triggereditor;
+	CTriggerEditorAllDlg m_triggereditor;
 	CTags m_tags;
 	CTaskForce m_taskforces;
 	CTeamTypes m_teamtypes;
