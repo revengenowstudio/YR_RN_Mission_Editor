@@ -126,6 +126,14 @@ WORD CIniFile::InsertFile(const std::string& filename, const char* pSectionSpeci
 		return 2;
 	}
 
+	auto const ret = InsertStream(file, pSectionSpecified, bNoSpaces);
+	file.close();
+
+	return ret;
+}
+
+WORD CIniFile::InsertStream(std::istream& input, const char* pSectionSpecified, bool bNoSpaces)
+{
 	//char cSec[256];
 	//char cLine[4096];
 
@@ -141,8 +149,8 @@ WORD CIniFile::InsertFile(const std::string& filename, const char* pSectionSpeci
 #endif
 	std::set<CString> registryValues;
 
-	while (!file.eof()) {
-		std::getline(file, curLineParsed);
+	while (!input.eof()) {
+		std::getline(input, curLineParsed);
 
 		// strip to left side of newline or comment
 		curLineParsed.erase(std::find_if(curLineParsed.begin(), curLineParsed.end(), [](const char c) { return c == '\r' || c == '\n' || c == ';'; }), curLineParsed.end());
@@ -209,10 +217,6 @@ WORD CIniFile::InsertFile(const std::string& filename, const char* pSectionSpeci
 		}
 	}
 #endif
-
-
-	file.close();
-
 	return 0;
 }
 
