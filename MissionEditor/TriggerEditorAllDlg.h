@@ -1,5 +1,6 @@
 #pragma once
 #include <afxrich.h>
+#include "TriggerDef.h"
 
 class CTriggerEditorAllDlg : public CDialog
 {
@@ -30,7 +31,9 @@ protected:
 
     void translateUI();
     void clear();
+    void oneTimeInit();
     void onOptionCheckChanged(const CButton& checkBtn, const int paramPos);
+    void parseTriggerDefinitions();
 
     CString m_currentTrigger;
     // trigger options

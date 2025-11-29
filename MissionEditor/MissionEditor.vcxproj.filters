@@ -312,6 +312,9 @@
     <ClCompile Include="TriggerEditorAllDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TriggerDef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\VersionInfo.rc">
@@ -650,6 +653,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TriggerEditorAllDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TriggerDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -14,7 +14,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_CBN_EDITCHANGE(IDD_TRGR_SELECTED_TRIGGER, onEditChangeTriggerType)
 END_MESSAGE_MAP()
 
-CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) : 
+CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
     CDialog(IDD, pParent)
 {
 }
@@ -28,6 +28,9 @@ BOOL CTriggerEditorAllDlg::OnInitDialog()
     translateUI();
 
     GetDlgItem(IDD_TRGR_SEARCH_REFERENCE)->EnableWindow(FALSE); // not yet ready
+
+    parseTriggerDefinitions();
+    oneTimeInit();
 
     return TRUE;
 }
@@ -70,7 +73,9 @@ BOOL CTriggerEditorAllDlg::PreTranslateMessage(MSG* pMsg)
 
 void CTriggerEditorAllDlg::translateUI()
 {
-    TranslateDlgItem(*this, IDD_TRGR_TRIGGER_OPTIONS, "TriggerTriggeroptions");
+    TranslateWindowCaption(*this, "TriggerCaption");
+
+    TranslateDlgItem(*this, IDD_TRGR_TRIGGER_OPTIONS, "TriggerOptionType");
     TranslateDlgItem(*this, IDD_TRGR_SELECT_TRIGGER_TXT, "TriggerSelectedTrigger");
     TranslateDlgItem(*this, IDD_TRGR_NEW_TRIGGER, "TriggerNew");
     TranslateDlgItem(*this, IDD_TRGR_CLONE_TRIGGER, "TriggerClone");
@@ -79,12 +84,12 @@ void CTriggerEditorAllDlg::translateUI()
     TranslateDlgItem(*this, IDD_TRGR_TYPE_TXT, "TriggerType");
     TranslateDlgItem(*this, IDD_TRGR_NAME_TXT, "TriggerName");
     TranslateDlgItem(*this, IDD_TRGR_HOUSE_TXT, "TriggerHouse");
-    TranslateDlgItem(*this, IDD_TRGR_ATTACHED_TRIGGER_TXT, "TriggerAttachedtrigger");
+    TranslateDlgItem(*this, IDD_TRGR_ATTACHED_TRIGGER_TXT, "TriggerOptionAttachedTrigger");
     TranslateDlgItem(*this, IDD_TRGR_ATTACHED_TRIGGER, "TriggerCannotbeitselforformsaloop");
     TranslateDlgItem(*this, IDD_TRGR_DISABLED, "TriggerDisabled");
-    TranslateDlgItem(*this, IDD_TRGR_EASY, "TriggerEasy");
-    TranslateDlgItem(*this, IDD_TRGR_MEDIUM, "TriggerMedium");
-    TranslateDlgItem(*this, IDD_TRGR_HARD, "TriggerHard");
+    TranslateDlgItem(*this, IDD_TRGR_EASY, "TriggerOptionEasy");
+    TranslateDlgItem(*this, IDD_TRGR_MEDIUM, "TriggerOptionMedium");
+    TranslateDlgItem(*this, IDD_TRGR_HARD, "TriggerOptionHard");
     TranslateDlgItem(*this, IDD_TRGR_EVENT_OPTIONS, "TriggerEventoptions");
     TranslateDlgItem(*this, IDD_TRGR_EVENT_TYPE_TXT, "TriggerEventtype");
     TranslateDlgItem(*this, IDD_TRGR_NEW_EVENT, "TriggerAdd");
@@ -111,6 +116,13 @@ void CTriggerEditorAllDlg::translateUI()
 void CTriggerEditorAllDlg::clear()
 {
 
+}
+
+void CTriggerEditorAllDlg::oneTimeInit()
+{
+    m_persistence.InsertString(0, TranslateStringACP("0 - Standard"));
+    m_persistence.InsertString(1, TranslateStringACP("1 - All Attached"));
+    m_persistence.InsertString(2, TranslateStringACP("2 - Repeating"));
 }
 
 void CTriggerEditorAllDlg::UpdateDialog()
@@ -329,6 +341,11 @@ void CTriggerEditorAllDlg::onOptionCheckChanged(const CButton& checkBtn, const i
     auto const param = checked ? "1" : "0";
     auto const newVal = SetParam(triggersSec[m_currentTrigger], paramPos, param);
     ini.SetString("Triggers", m_currentTrigger, newVal);
+}
+
+void CTriggerEditorAllDlg::parseTriggerDefinitions()
+{
+    TriggerDefinitionManager::Instance().LoadFrom(g_data, errstream);
 }
 
 void CTriggerEditorAllDlg::OnDisabled()
