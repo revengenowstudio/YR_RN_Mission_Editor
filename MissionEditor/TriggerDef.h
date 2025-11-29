@@ -1,10 +1,12 @@
 #pragma once
 
-#include <unordered_map>
+#include <map>
 #include <array>
 #include <ostream>
+#include <optional>
 
 class CIniFile;
+class TriggerEvents;
 
 struct ParamType 
 {
@@ -38,6 +40,31 @@ struct TriggerActionType
     bool yrOnly{ false };
 };
 
+struct TriggerEvent
+{
+    int eventType{ 0 };
+    CString param1;
+    std::optional<CString> param2;
+};
+
+class TriggerEvents
+{
+public:
+    TriggerEvents(const CString& fullData);
+
+    auto Size() const { return events.size(); }
+
+    TriggerEvent& Nth(size_t idx) { return events.at(idx); }
+    void DeleteAt(size_t idx) { events.erase(events.begin() + idx); }
+
+    TriggerEvent& Append();
+
+    CString Serialize();
+
+private:
+    std::vector<TriggerEvent> events;
+};
+
 class TriggerDefinitionManager
 {
 public:
@@ -54,7 +81,8 @@ private:
     void loadEventTypes(const CIniFile& ini, std::ostream& err);
     void loadActionTypes(const CIniFile& ini, std::ostream& err);
 
-    std::unordered_map<int, ParamType> m_paramTypes;
-    std::unordered_map<int, TriggerEventType> m_eventTypes;
-    std::unordered_map<int, TriggerActionType> m_actionTypes;
+    // we need asc order of ids
+    std::map<int, ParamType> m_paramTypes;
+    std::map<int, TriggerEventType> m_eventTypes;
+    std::map<int, TriggerActionType> m_actionTypes;
 };

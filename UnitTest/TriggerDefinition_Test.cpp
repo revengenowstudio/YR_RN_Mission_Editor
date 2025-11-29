@@ -51,3 +51,64 @@ R"(
     EXPECT_EQ(mgr.Params().at(2).paramName, "House");
     EXPECT_EQ(mgr.Params().at(2).listType, 1);
 }
+
+TEST(TriggerEventTest, EventsSerde)
+{
+    // single event
+    {
+        const CString data = "1,13,0,10";
+        TriggerEvents events(data);
+
+        EXPECT_EQ(events.Size(), 1);
+        EXPECT_EQ(events.Nth(0).eventType, 13);
+        EXPECT_EQ(events.Nth(0).param1, "10");
+        EXPECT_EQ(events.Nth(0).param2, std::nullopt);
+
+        EXPECT_EQ(events.Serialize(), data);
+    }
+    // 2 simple events
+    {
+        const CString data = "2,36,0,4,13,0,5";
+        TriggerEvents events(data);
+
+        EXPECT_EQ(events.Size(), 2);
+        EXPECT_EQ(events.Nth(0).eventType, 36);
+        EXPECT_EQ(events.Nth(0).param1, "4");
+        EXPECT_EQ(events.Nth(0).param2, std::nullopt);
+        EXPECT_EQ(events.Nth(1).eventType, 13);
+        EXPECT_EQ(events.Nth(1).param1, "5");
+        EXPECT_EQ(events.Nth(1).param2, std::nullopt);
+
+        EXPECT_EQ(events.Serialize(), data);
+    }
+    // 1 event with double params
+    {
+        const CString data = "1,61,2,1,GAPOWR";
+        TriggerEvents events(data);
+
+        EXPECT_EQ(events.Size(), 1);
+        EXPECT_EQ(events.Nth(0).eventType, 61);
+        EXPECT_EQ(events.Nth(0).param1, "1");
+        EXPECT_EQ(events.Nth(0).param2, "GAPOWR");
+
+        EXPECT_EQ(events.Serialize(), data);
+    }
+    // 3 events with double params in one event
+    {
+        const CString data = "3,61,2,1,GAPOWR,37,0,8,37,0,9";
+        TriggerEvents events(data);
+
+        EXPECT_EQ(events.Size(), 3);
+        EXPECT_EQ(events.Nth(0).eventType, 61);
+        EXPECT_EQ(events.Nth(0).param1, "1");
+        EXPECT_EQ(events.Nth(0).param2, "GAPOWR");
+        EXPECT_EQ(events.Nth(1).eventType, 37);
+        EXPECT_EQ(events.Nth(1).param1, "8");
+        EXPECT_EQ(events.Nth(1).param2, std::nullopt);
+        EXPECT_EQ(events.Nth(2).eventType, 37);
+        EXPECT_EQ(events.Nth(2).param1, "9");
+        EXPECT_EQ(events.Nth(2).param2, std::nullopt);
+
+        EXPECT_EQ(events.Serialize(), data);
+    }
+}

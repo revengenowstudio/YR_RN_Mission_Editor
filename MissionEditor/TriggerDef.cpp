@@ -119,3 +119,88 @@ void TriggerDefinitionManager::loadActionTypes(const CIniFile& ini, std::ostream
         }
     }
 }
+
+int GetEventParamStart(const CString& EventData, int param)
+{
+    int count = atoi(GetParam(EventData, 0));
+    if (param >= count) {
+        return -1;
+    }
+
+    int pos = 1;
+    int i;
+    for (i = 0; i < param; i++) {
+        pos += 1; // jump to first eventtype param
+        int paramSlots = atoi(GetParam(EventData, pos));
+
+        pos += 2; // jump to next usual eventtype
+        // if needs of last eventtype is 2, we need to add 1
+        if (paramSlots == 2) {
+            pos += 1;
+        }
+    }
+
+    return pos;
+}
+
+TriggerEvents::TriggerEvents(const CString& fullData)
+{
+    if (fullData.IsEmpty()) {
+        return;
+    }
+    // deserialize events
+    size_t idx = 0;
+    auto const params = SplitParams(fullData);
+    size_t eventCount = atoi(params[idx++]); // first param means event count
+    events.reserve(eventCount);
+
+    for (;;) {
+        if (idx >= params.size()) {
+            break;
+        }
+        auto eventType = atoi(params[idx++]);
+        auto const slots = atoi(params[idx++]);
+        auto p1 = params[idx++];
+        p1.Trim();
+        auto&& p2 = slots == 2 ? params[idx++] : decltype(TriggerEvent::param2)(std::nullopt);
+        if (p2.has_value()) {
+            p2->Trim();
+        }
+        events.emplace_back(
+            eventType,
+            p1,
+            p2
+           );
+    }
+}
+
+TriggerEvent& TriggerEvents::Append()
+{
+    return events.emplace_back();
+}
+
+CString TriggerEvents::Serialize()
+{
+    constexpr int perEventDataBufferSize = 32;
+
+    CString ret;
+    ret.GetBuffer(static_cast<int>(events.size()) * perEventDataBufferSize);
+    ret.Format("%d,", events.size());
+    ret.ReleaseBuffer();
+
+    CString typeStr;
+    for (auto const& event : events) {
+        typeStr.Format("%d,", event.eventType);
+        ret += typeStr;
+        ret += event.param2.has_value() ? '2' : '0';
+        ret += ',';
+        ret += event.param1;
+        ret += ',';
+        if (event.param2.has_value()) {
+            ret += event.param2.value();
+            ret += ',';
+        }
+    }
+    ret.TrimRight(',');
+    return ret;
+}
