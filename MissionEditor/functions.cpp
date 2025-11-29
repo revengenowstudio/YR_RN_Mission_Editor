@@ -831,13 +831,10 @@ void ListTriggers(CComboBox& cb)
 	while (cb.DeleteString(0) != CB_ERR);
 	CIniFile& ini = Map->GetIniFile();
 
-	for (auto const& kvPair : ini.GetSection("Triggers")) {
-		auto s = kvPair.first;
-		s += " (";
-		s += GetParam(kvPair.second, 2);
-		s += ")";
-
-		cb.AddString(s);
+	CString item; // holder buffer
+	for (auto const& [id, content] : ini.GetSection("Triggers")) {
+		item.Format("%s (%s)", id, GetParam(content, 2));
+		cb.AddString(item);
 	}
 
 }
