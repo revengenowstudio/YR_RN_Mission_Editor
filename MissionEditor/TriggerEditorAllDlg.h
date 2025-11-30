@@ -54,6 +54,9 @@ protected:
     afx_msg void onEditChangeActionValue3();
     afx_msg void onEditChangeActionValue4();
     afx_msg void onDropDownActionValue1();
+    afx_msg void onNewAction();
+    afx_msg void onCloneAction();
+    afx_msg void onDeleteAction();
 
     afx_msg BOOL onMessageKeyDown(MSG* pMsg);
 
@@ -63,6 +66,7 @@ protected:
     void onOptionCheckChanged(const CButton& checkBtn, const int paramPos);
     void parseTriggerDefinitions();
     void onAddEvent(TriggerEvent&& event, int slot);
+    void onAddAction(TriggerAction&& action, int slot);
 
     void updateTriggerOptions();
     void updateTriggerEvents();

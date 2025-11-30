@@ -19,6 +19,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_EN_KILLFOCUS(IDC_TRGR_NAME, onChangeTriggerName)
     ON_CBN_EDITCHANGE(IDC_TRGR_SELECTED_TRIGGER, onEditChangeTriggerType)
     ON_CBN_SELCHANGE(IDC_TRGR_SELECTED_TRIGGER, onSelChangeTrigger)
+    // events
     ON_LBN_SELCHANGE(IDC_TRGR_EVENT_LIST, onSelChangeEvent)
     ON_CBN_EDITCHANGE(IDC_TRGR_EVENT_TYPE, onEditChangeEventType)
     ON_CBN_EDITCHANGE(IDC_TRGR_EVENT_PARAMETER_1, onEditChangeEventValue1)
@@ -34,6 +35,9 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_CBN_EDITCHANGE(IDC_TRGR_ACTION_PARAMETER_3, onEditChangeActionValue3)
     ON_CBN_EDITCHANGE(IDC_TRGR_ACTION_PARAMETER_4, onEditChangeActionValue4)
     ON_CBN_DROPDOWN(IDC_TRGR_ACTION_PARAMETER_1, onDropDownActionValue1)
+    ON_BN_CLICKED(IDC_TRGR_NEW_ACTION, onNewAction)
+    ON_BN_CLICKED(IDC_TRGR_DELETE_ACTION, onDeleteAction)
+    ON_BN_CLICKED(IDC_TRGR_CLONE_ACTION, onCloneAction)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -1214,4 +1218,44 @@ void CTriggerEditorAllDlg::onDropDownActionValue1()
     if (onEditChangeActionValueN(0, true)) {
         ::PostMessage(m_actionParam[0], CB_SHOWDROPDOWN, FALSE, 0);
     }
+}
+
+void CTriggerEditorAllDlg::onAddAction(TriggerAction&& action, int slot)
+{
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
+
+    // TODO: verify
+    CIniFile& ini = Map->GetIniFile();
+    auto& sec = ini.AddSection("Actions");
+
+    TriggerActions actions(sec.GetString(m_currentTrigger), triggerWpFilterFunc);
+    actions.Insert(slot, std::move(action));
+
+    sec.SetString(m_currentTrigger, actions.Serialize());
+
+    UpdateDialog();
+
+    m_actionList.SetCurSel(slot);
+    onSelChangeAction();
+}
+
+void CTriggerEditorAllDlg::onNewAction()
+{
+    onAddAction(TriggerAction{
+        .actionType = 0,
+        .actionCode = 0,
+        .params = {
+            '0', '0', '0', '0', '0',
+        }
+    }, m_actionList.GetCount());
+}
+
+void CTriggerEditorAllDlg::onCloneAction()
+{
+}
+
+void CTriggerEditorAllDlg::onDeleteAction()
+{
 }
