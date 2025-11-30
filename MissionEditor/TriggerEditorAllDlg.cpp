@@ -126,8 +126,8 @@ void CTriggerEditorAllDlg::translateUI()
     TranslateDlgItem(*this, IDC_TRGR_EASY, "TriggerOptionEasy");
     TranslateDlgItem(*this, IDC_TRGR_MEDIUM, "TriggerOptionMedium");
     TranslateDlgItem(*this, IDC_TRGR_HARD, "TriggerOptionHard");
-    TranslateDlgItem(*this, IDC_TRGR_EVENT_OPTIONS, "TriggerEventoptions");
-    TranslateDlgItem(*this, IDC_TRGR_EVENT_TYPE_TXT, "TriggerEventtype");
+    TranslateDlgItem(*this, IDC_TRGR_EVENT_OPTIONS, "TriggerEventOptions");
+    TranslateDlgItem(*this, IDC_TRGR_EVENT_TYPE_TXT, "TriggerEventType");
     TranslateDlgItem(*this, IDC_TRGR_NEW_EVENT, "TriggerNew");
     TranslateDlgItem(*this, IDC_TRGR_CLONE_EVENT, "TriggerClone");
     TranslateDlgItem(*this, IDC_TRGR_DELETE_EVENT, "TriggerDelete");
