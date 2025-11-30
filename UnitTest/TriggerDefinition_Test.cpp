@@ -131,8 +131,8 @@ TEST(TriggerActionTest, ActionSerde)
 
     auto filterFunc = [&wpFilterIni](const CString& id) {
         return wpFilterIni["DontSaveAsWP"].HasValue(id);
-        };
-
+    };
+    // 2 events
     {
         const CString data = "2,11,4,mission:usa01_07,0,0,0,0,A,53,2,01000020,0,0,0,0,A";
         TriggerActions actions(data, filterFunc);
@@ -148,7 +148,23 @@ TEST(TriggerActionTest, ActionSerde)
 
         EXPECT_EQ(actions.Serialize(), data);
     }
+    // 7 events
+    {
+        const CString data = "7,3,0,9,0,0,0,0,A,13,0,9,0,0,0,0,A,74,0,9,0,0,0,0,A,53,2,01000413,0,0,0,0,A,53,2,01000424,0,0,0,0,A,76,0,50,0,0,0,0,A,53,2,01000553,0,0,0,0,A";
+        TriggerActions actions(data, filterFunc);
 
+        EXPECT_EQ(actions.Size(), 7);
+        EXPECT_EQ(actions.Nth(0).actionType, 3);
+        EXPECT_EQ(actions.Nth(1).actionType, 13);
+        EXPECT_EQ(actions.Nth(2).actionType, 74);
+        EXPECT_EQ(actions.Nth(3).actionType, 53);
+        EXPECT_EQ(actions.Nth(4).actionType, 53);
+        EXPECT_EQ(actions.Nth(5).actionType, 76);
+        EXPECT_EQ(actions.Nth(6).params[0], "01000553");
+        EXPECT_EQ(actions.Nth(6).actionType, 53);
+
+        EXPECT_EQ(actions.Serialize(), data);
+    }
 
 
 }
