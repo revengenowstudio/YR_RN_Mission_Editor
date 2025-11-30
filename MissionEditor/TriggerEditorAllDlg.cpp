@@ -10,7 +10,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_WM_SHOWWINDOW()
     ON_BN_CLICKED(IDC_TRGR_NEW_TRIGGER, onNewTrigger)
     ON_BN_CLICKED(IDC_TRGR_DELETE_TRIGGER, onDeleteTrigger)
-    ON_BN_CLICKED(IDC_TRGR_CLONE_TRIGGER, &CTriggerEditorAllDlg::OnBnClickedTrgrCloneTrigger)
+    ON_BN_CLICKED(IDC_TRGR_CLONE_TRIGGER, onCloneTrigger)
     ON_BN_CLICKED(IDC_TRGR_PLACE_ON_MAP, onPlaceOnMap)
     ON_BN_CLICKED(IDC_TRGR_DISABLED, OnDisabled)
     ON_BN_CLICKED(IDC_TRGR_EASY, OnEasy)
@@ -316,6 +316,38 @@ void CTriggerEditorAllDlg::onNewTrigger()
     auto const& triggerSec = ini["Triggers"];
     for (auto i = 0; i < m_triggerType.GetCount(); i++) {
         if (m_triggerType.GetItemData(i) == triggerSec.FindIndex(newId)) {
+            m_triggerType.SetCurSel(i);
+        }
+    }
+    onSelChangeTrigger();
+}
+
+void CTriggerEditorAllDlg::onCloneTrigger()
+{
+    CIniFile& ini = Map->GetIniFile();
+
+    int sel = m_triggerType.GetCurSel();
+    if (sel < 0) {
+        return;
+    }
+    int curtrig = m_triggerType.GetItemData(sel);
+
+    auto const triggerId = ini["Triggers"].Nth(curtrig).first;
+
+    CString newId = GetFreeID();
+    ini.SetString("Triggers", newId, ini["Triggers"][triggerId]);
+    ini.SetString("Events", newId, ini["Events"][triggerId]);
+    ini.SetString("Actions", newId, ini["Actions"][triggerId]);
+
+    ini.SetString("Triggers", newId, SetParam(ini["Triggers"][newId], 2, GetParam(ini["Triggers"][newId], 2) + " Clone"));
+
+    CString newTagId = GetFreeID();
+    ini.SetString("Tags", newTagId, "0," + GetParam(ini["Triggers"][newId], 2) + "," + newId);
+
+    theApp.MainWindow()->UpdateDialogs(TRUE);
+
+    for (auto i = 0; i < m_triggerType.GetCount(); i++) {
+        if (m_triggerType.GetItemData(i) == ini["Triggers"].FindIndex(newId)) {
             m_triggerType.SetCurSel(i);
         }
     }
@@ -880,9 +912,4 @@ void CTriggerEditorAllDlg::onDeleteEvent()
 void CTriggerEditorAllDlg::onSelChangeAction()
 {
 
-}
-
-void CTriggerEditorAllDlg::OnBnClickedTrgrCloneTrigger()
-{
-    // TODO: Add your control notification handler code here
 }

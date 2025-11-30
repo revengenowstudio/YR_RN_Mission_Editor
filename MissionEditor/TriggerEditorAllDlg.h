@@ -82,5 +82,5 @@ protected:
     CEdit m_actionDescription;
 public:
     DECLARE_MESSAGE_MAP()
-    afx_msg void OnBnClickedTrgrCloneTrigger();
+    afx_msg void onCloneTrigger();
 };
