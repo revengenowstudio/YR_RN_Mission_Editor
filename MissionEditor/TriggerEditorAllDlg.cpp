@@ -18,7 +18,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_EN_KILLFOCUS(IDC_TRGR_NAME, onChangeTriggerName)
     ON_CBN_EDITCHANGE(IDC_TRGR_SELECTED_TRIGGER, onEditChangeTriggerType)
     ON_CBN_SELCHANGE(IDC_TRGR_SELECTED_TRIGGER, onSelChangeTrigger)
-    ON_CBN_SELCHANGE(IDC_TRGR_EVENT_TYPE, onEditChangeEventType)
+    ON_CBN_EDITCHANGE(IDC_TRGR_EVENT_TYPE, onEditChangeEventType)
     ON_LBN_SELCHANGE(IDC_TRGR_EVENT_LIST, onSelChangeEvent)
     ON_CBN_EDITCHANGE(IDC_TRGR_EVENT_PARAMETER_1, onEditChangeEventValue1)
     ON_CBN_EDITCHANGE(IDC_TRGR_EVENT_PARAMETER_2, onEditChangeEventValue2)
@@ -124,7 +124,7 @@ void CTriggerEditorAllDlg::translateUI()
     TranslateDlgItem(*this, IDC_TRGR_HARD, "TriggerOptionHard");
     TranslateDlgItem(*this, IDC_TRGR_EVENT_OPTIONS, "TriggerEventoptions");
     TranslateDlgItem(*this, IDC_TRGR_EVENT_TYPE_TXT, "TriggerEventtype");
-    TranslateDlgItem(*this, IDC_TRGR_NEW_EVENT, "TriggerAdd");
+    TranslateDlgItem(*this, IDC_TRGR_NEW_EVENT, "TriggerNew");
     TranslateDlgItem(*this, IDC_TRGR_CLONE_EVENT, "TriggerClone");
     TranslateDlgItem(*this, IDC_TRGR_DELETE_EVENT, "TriggerDelete");
     TranslateDlgItem(*this, IDC_TRGR_EVENT_LIST_TXT, "TriggerEventList");
@@ -132,7 +132,7 @@ void CTriggerEditorAllDlg::translateUI()
     TranslateDlgItem(*this, IDC_TRGR_EVENT_P2_TXT, "TriggerParameter#2value");
     TranslateDlgItem(*this, IDC_TRGR_ACTION_OPTIONS, "TriggerActionoptions");
     TranslateDlgItem(*this, IDC_TRGR_ACTION_TYPE_TXT, "TriggerActiontype");
-    TranslateDlgItem(*this, IDC_TRGR_NEW_ACTION, "TriggerAdd");
+    TranslateDlgItem(*this, IDC_TRGR_NEW_ACTION, "TriggerNew");
     TranslateDlgItem(*this, IDC_TRGR_DELETE_ACTION, "TriggerDelete");
     TranslateDlgItem(*this, IDC_TRGR_CLONE_ACTION, "TriggerClone");
     TranslateDlgItem(*this, IDC_TRGR_ACTION_LIST_TXT, "TriggerActionList");
@@ -176,7 +176,7 @@ void CTriggerEditorAllDlg::oneTimeInit()
         if (!eventdata.ra2Allowed) {
             continue;
         }
-        if (yuri_mode && eventdata.yrOnly) {
+        if (!yuri_mode && eventdata.yrOnly) {
             continue;
         }
 #else
@@ -216,6 +216,13 @@ void CTriggerEditorAllDlg::updateTriggerOptions()
     onSelChangeOption();
 }
 
+CString makeEventShortDesc(int idx, const CString& brief)
+{
+    CString eventDesc;
+    eventDesc.Format("%d %s", idx, brief);
+    return eventDesc;
+}
+
 void CTriggerEditorAllDlg::updateTriggerEvents()
 {
     // actually only happens if no trigger at all
@@ -233,13 +240,11 @@ void CTriggerEditorAllDlg::updateTriggerEvents()
     auto const eventCount = events.Size();
 
     auto& defMgr = TriggerDefinitionManager::Instance();
-    CString eventDesc;
     for (auto i = 0; i < eventCount; i++) {
         auto const eventIdx = events.Nth(i).eventType;
         auto const& brief = defMgr.Events().at(eventIdx).brief;
-        eventDesc.Format("%d %s", i, brief);
-
-        m_eventList.SetItemData(m_eventList.AddString(eventDesc), i);
+        auto const id = m_eventList.AddString(makeEventShortDesc(i, brief));
+        m_eventList.SetItemData(id, i);
     }
     if (cur_sel < 0) {
         cur_sel = 0;
@@ -660,7 +665,16 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
     auto const& eventDef = triggerDefMgr.Events().at(eventData.eventType);
     auto const& paramType1 = triggerDefMgr.Params().at(eventDef.paramTypes[0]);
     auto const& paramType2 = triggerDefMgr.Params().at(eventDef.paramTypes[1]);
-    
+
+    { // replace line in the list:
+        m_eventList.DeleteString(eventTypeSel);
+        auto const id = m_eventList.InsertString(
+            eventTypeSel,
+            makeEventShortDesc(eventTypeSel, eventDef.brief));
+        m_eventList.SetItemData(id, eventTypeSel);
+        m_eventList.SetCurSel(eventTypeSel);
+    }
+
     if (paramType2.slotCount < 2) {// clear this slot if switching to 1 slot param
         eventData.param2.reset();
     } else if (!eventData.param2.has_value()) {// if there was no such value, give it a '0' value
