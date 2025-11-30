@@ -24,6 +24,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_CBN_EDITCHANGE(IDC_TRGR_EVENT_PARAMETER_2, onEditChangeEventValue2)
     ON_BN_CLICKED(IDC_TRGR_NEW_EVENT, onNewEvent)
     ON_BN_CLICKED(IDC_TRGR_DELETE_EVENT, onDeleteEvent)
+    ON_BN_CLICKED(IDC_TRGR_CLONE_EVENT, onCloneEvent)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -710,8 +711,7 @@ void CTriggerEditorAllDlg::onEditChangeEventValue(CMyComboBox& paramCB, size_t s
         return;
     }
 
-    int curselparam = paramCB.GetCurSel();
-    if (curselparam < 0) {
+    if (paramCB.GetCount() > 0 && paramCB.GetCurSel() < 0) {
         paramCB.SetWindowText("");
         return;
     }
@@ -759,27 +759,50 @@ void CTriggerEditorAllDlg::onEditChangeEventValue2()
     onEditChangeEventValue(m_eventParam2, 1);
 }
 
-void CTriggerEditorAllDlg::onNewEvent()
+void CTriggerEditorAllDlg::onAddEvent(TriggerEvent&& event, int slot)
 {
-    CIniFile& ini = Map->GetIniFile();
-
     if (m_currentTrigger.IsEmpty()) {
         return;
     }
 
+    CIniFile& ini = Map->GetIniFile();
     CIniFileSection& sec = ini.AddSection("Events");
+    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
 
-    int eventCount = atoi(GetParam(sec.GetString(m_currentTrigger), 0));
-    CString newIdx;
-    newIdx.Format("%d", eventCount + 1);
-
-    auto&& defParam = SetParam(sec[m_currentTrigger], 0, newIdx) + ",0,0,0";
-    sec.SetString(m_currentTrigger, std::move(defParam));
+    events.Insert(slot, std::move(event));
+    sec.SetString(m_currentTrigger, events.Serialize());
 
     UpdateDialog();
 
-    m_eventList.SetCurSel(eventCount);
+    m_eventList.SetCurSel(slot);
     onSelChangeEvent();
+}
+
+void CTriggerEditorAllDlg::onNewEvent()
+{
+    onAddEvent({
+        .eventType = 0,
+        .param1 = '0',
+    }, 
+    m_eventList.GetCount());
+}
+
+void CTriggerEditorAllDlg::onCloneEvent()
+{
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
+
+    int curEvent = m_eventList.GetCurSel();
+    if (curEvent < 0) {
+        return;
+    }
+    int eventIdx = m_eventList.GetItemData(curEvent);
+
+    CIniFile& ini = Map->GetIniFile();
+    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
+
+    onAddEvent(TriggerEvent(events.Nth(eventIdx)), curEvent + 1);
 }
 
 void CTriggerEditorAllDlg::onDeleteEvent()
@@ -804,7 +827,10 @@ void CTriggerEditorAllDlg::onDeleteEvent()
     events.DeleteAt(eventIdx);
     ini.SetString("Events", m_currentTrigger, events.Serialize());
 
-    UpdateDialog();
+    updateTriggerEvents();
+    if (m_eventList.GetCount() > 0) {
+        m_eventList.SetCurSel(curEvent - 1);
+    }
 }
 
 void CTriggerEditorAllDlg::onSelChangeAction()

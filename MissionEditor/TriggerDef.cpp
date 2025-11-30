@@ -155,9 +155,9 @@ TriggerEvents::TriggerEvents(const CString& fullData)
     }
 }
 
-TriggerEvent& TriggerEvents::Append()
+TriggerEvent& TriggerEvents::Insert(size_t slot, TriggerEvent&& event)
 {
-    return events.emplace_back();
+    return *events.emplace(events.begin() + slot, std::move(event));
 }
 
 CString TriggerEvents::Serialize()

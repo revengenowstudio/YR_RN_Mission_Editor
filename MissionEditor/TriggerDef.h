@@ -58,7 +58,7 @@ public:
     TriggerEvent& Nth(size_t idx) { return events.at(idx); }
     void DeleteAt(size_t idx) { events.erase(events.begin() + idx); }
 
-    TriggerEvent& Append();
+    TriggerEvent& Insert(size_t slot, TriggerEvent&& event = {});
 
     CString Serialize();
 
