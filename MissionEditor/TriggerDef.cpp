@@ -108,8 +108,9 @@ void TriggerDefinitionManager::loadActionTypes(const CIniFile& ini, std::ostream
         item.description = params[10];
         item.description.Replace("%1", ",");
 
-        for (auto idx = 0; idx < 6; ++idx) {
-            item.paramTypes[idx] = atoi(params[idx + 1]);
+        item.controlCode = atoi(params[1]);
+        for (auto idx = 0; idx < 5; ++idx) {
+            item.paramTypes[idx] = atoi(params[idx + 2]);
         }
         item.useWaypoint = atoi(params[7]);
         item.useTag = atoi(params[8]);

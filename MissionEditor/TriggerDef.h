@@ -33,7 +33,8 @@ struct TriggerActionType
     int actionType;                 // same as enumeration defined in game, maybe unnecessary, can be optimized out when feature done
     CString brief;                  // brief name shows what it is         
     CString description;            // desc about usage
-    std::array<int, 6> paramTypes;
+    int controlCode;                // negative value, should turn back
+    std::array<int, 5> paramTypes;
     bool useWaypoint{ false };
     bool useTag{ false };
     bool obsolete{ false };

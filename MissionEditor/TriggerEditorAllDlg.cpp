@@ -28,6 +28,12 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_BN_CLICKED(IDC_TRGR_CLONE_EVENT, onCloneEvent)
     // actions
     ON_CBN_SELCHANGE(IDC_TRGR_ACTION_LIST, onSelChangeAction)
+    ON_CBN_SELCHANGE(IDC_TRGR_ACTION_TYPE, onEditChangeActionType)
+    ON_CBN_EDITCHANGE(IDC_TRGR_ACTION_PARAMETER_1, onEditChangeActionValue1)
+    ON_CBN_EDITCHANGE(IDC_TRGR_ACTION_PARAMETER_2, onEditChangeActionValue2)
+    ON_CBN_EDITCHANGE(IDC_TRGR_ACTION_PARAMETER_3, onEditChangeActionValue3)
+    ON_CBN_EDITCHANGE(IDC_TRGR_ACTION_PARAMETER_4, onEditChangeActionValue4)
+    ON_CBN_DROPDOWN(IDC_TRGR_ACTION_PARAMETER_1, onDropDownActionValue1)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -170,8 +176,16 @@ void CTriggerEditorAllDlg::oneTimeInit()
     for (auto& paramCb : m_actionParam) {
         paramCb.EnableWindow(FALSE);
     }
-    GetDlgItem(IDC_TRGR_ACTION_P5_TXT)->ShowWindow(FALSE);
-    GetDlgItem(IDC_TRGR_ACTION_P6_TXT)->ShowWindow(FALSE);
+
+    m_actionParamTexts[0] = GetDlgItem(IDC_TRGR_ACTION_P1_TXT);
+    m_actionParamTexts[1] = GetDlgItem(IDC_TRGR_ACTION_P2_TXT);
+    m_actionParamTexts[2] = GetDlgItem(IDC_TRGR_ACTION_P3_TXT);
+    m_actionParamTexts[3] = GetDlgItem(IDC_TRGR_ACTION_P4_TXT);
+    m_actionParamTexts[4] = GetDlgItem(IDC_TRGR_ACTION_P5_TXT);
+    m_actionParamTexts[5] = GetDlgItem(IDC_TRGR_ACTION_P6_TXT);
+    // disable, not used
+    m_actionParamTexts[4]->ShowWindow(FALSE);
+    m_actionParamTexts[5]->ShowWindow(FALSE);
 
     // event type never changes, right ?
     while (m_eventTypes.DeleteString(0) != CB_ERR);
@@ -248,6 +262,15 @@ CString makeEventShortDesc(int idx, const CString& brief)
     CString eventDesc;
     eventDesc.Format("%d %s", idx, brief);
     return eventDesc;
+}
+
+bool IsWaypointFormat(CString s)
+{
+    if (s.IsEmpty()) {
+        return true;
+    }
+
+    return s[0] >= 'A' && s[0] <= 'Z';
 }
 
 void CTriggerEditorAllDlg::updateTriggerEvents()
@@ -518,7 +541,7 @@ void CTriggerEditorAllDlg::onSelChangeTrigger()
 #endif
     onSelChangeOption();
     updateTriggerEvents();
-    onSelChangeAction(); // update, would you?
+    updateTriggerActions(); // update, would you?
 }
 
 void CTriggerEditorAllDlg::onChangeTriggerName()
@@ -1011,4 +1034,175 @@ void CTriggerEditorAllDlg::onSelChangeAction()
 
 void CTriggerEditorAllDlg::onEditChangeActionType()
 {
+    if (m_currentTrigger.GetLength() == 0) {
+        return;
+    }
+    int curAction = m_actionList.GetCurSel();
+    if (curAction < 0) {
+        return;
+    }
+    int curActionIdx = m_actionList.GetItemData(curAction);
+
+    CString actionType, actionData;
+    m_actionTypes.GetWindowText(actionType);
+    TruncSpace(actionType);
+
+    if (actionType.GetLength() == 0) {
+        actionType = "0";
+        m_actionTypes.SetWindowText(actionType);
+    }
+
+    bool actionChanged = false;
+    CIniFile& ini = Map->GetIniFile();
+    TriggerActions actions(ini.GetString("Actions", m_currentTrigger), triggerWpFilterFunc);
+    auto& actionN = actions.Nth(curActionIdx);
+
+    auto const newActionTypeIdx = atoi(actionType);
+    if (newActionTypeIdx != actionN.actionType) {// only update if changes
+        actionN.actionType = newActionTypeIdx;
+        actionChanged = true;
+    }
+
+    auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
+    auto const& actionDef = triggerDefMgr.Actions().at(actionN.actionType);
+    auto const& paramDefs = triggerDefMgr.Params();
+
+    m_actionDescription.SetWindowText(actionDef.description);
+
+    // handle control code:
+    auto const newControlCode = std::abs(actionDef.controlCode);
+    if (newControlCode != actionN.actionCode) {
+        actionN.actionCode = newControlCode;
+        actionChanged = true;
+    }
+
+    // param setup
+    for (auto i = 0; i < 5; i++) {
+        if (auto paramType = actionDef.paramTypes[i]; paramType > 0) {
+            auto const& paramDef = paramDefs.at(paramType);
+            m_actionParamTexts[i]->SetWindowText(paramDef.paramName);
+            HandleParamList(m_actionParam[i], paramDef.listType);
+            m_actionParam[i].SetWindowText(actionN.params[i]);
+            m_actionParam[i].EnableWindow(TRUE);
+            continue;
+        }
+        CString translationLabel;
+        translationLabel.Format("TriggerParameter#%dvalue", i + 1);
+        m_actionParamTexts[i]->SetWindowText(TranslateStringACP(translationLabel));
+        HandleParamList(m_actionParam[i], PARAMTYPE_NOTHING);
+        m_actionParam[i].EnableWindow(FALSE);
+    }
+
+    auto const isWaypointFormat = IsWaypointFormat(actionN.waypoint);
+    if (isWaypointFormat && !actionDef.useWaypoint) {
+        actionN.waypoint.Format("%d", StringToWaypoint(actionN.waypoint));
+        actionChanged = true;
+    } else if (!isWaypointFormat) {
+        actionN.waypoint = WaypointToString(atoi(actionN.waypoint));
+        actionChanged = true;
+    }
+
+    // write back action at one time
+    if (actionChanged) {
+        ini.SetString("Actions", m_currentTrigger, actions.Serialize());
+    }
+}
+
+std::pair<CString, CString> CTriggerEditorAllDlg::popUpCSFViewerAndReturn(CComboBox& cb)
+{
+    CString curValue;
+    cb.GetWindowText(curValue);
+
+    auto& csfDlg = theApp.MainWindow()->m_csfStrings;
+
+    if (!curValue.IsEmpty() && curValue != "0") {
+        TruncSpace(curValue);
+        csfDlg.SetSelectedString(curValue);
+    } else {
+        csfDlg.SetSelectedString("");
+    }
+
+    CString label = csfDlg.DoModal() == IDCANCEL
+        ? curValue : csfDlg.CSFLabelSelected();
+
+    auto content = csfDlg.CSFContentSelected();
+    auto const countCorrected = utf8ByteCount(content);
+
+    return { label, content.Left(countCorrected) };
+}
+
+bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropDown)
+{
+    if (m_currentTrigger.GetLength() == 0) {
+        return false;
+    }
+    int curAction = m_actionList.GetCurSel();
+    if (curAction < 0) {
+        return false;
+    }
+    int curActionIdx = m_actionList.GetItemData(curAction);
+    bool actionChanged = false;
+    CIniFile& ini = Map->GetIniFile();
+    TriggerActions actions(ini.GetString("Actions", m_currentTrigger), triggerWpFilterFunc);
+    auto& actionN = actions.Nth(curActionIdx);
+    auto& actionParamCB = m_actionParam[nth];
+
+    auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
+    auto const& actionDef = triggerDefMgr.Actions().at(actionN.actionType);
+    auto const& paramDefN = triggerDefMgr.Params().at(actionDef.paramTypes[nth]);
+
+    bool popUpHandled = false;
+    CString newValue;
+    if (paramDefN.listType == PARAMTYPE_TUTORIALTEXTS) {
+        if (isFromDropDown) {
+            auto [label, content] = popUpCSFViewerAndReturn(actionParamCB);
+            auto txt = label;
+            if (!content.IsEmpty()) {
+                txt += ' ';
+                txt += content;
+            }
+            newValue = label;
+            popUpHandled = true;
+        }
+    } else {
+        actionParamCB.GetWindowText(newValue);
+        TruncSpace(newValue);
+    }
+
+    if (newValue != actionN.params[nth]) {
+        actionN.params[nth] = newValue;
+        actionChanged = true;
+    }
+
+    if (actionChanged) {
+        ini.SetString("Actions", m_currentTrigger, actions.Serialize());
+    }
+    return popUpHandled;
+}
+
+void CTriggerEditorAllDlg::onEditChangeActionValue1()
+{
+    onEditChangeActionValueN(0);
+}
+
+void CTriggerEditorAllDlg::onEditChangeActionValue2()
+{
+    onEditChangeActionValueN(1);
+}
+
+void CTriggerEditorAllDlg::onEditChangeActionValue3()
+{
+    onEditChangeActionValueN(2);
+}
+
+void CTriggerEditorAllDlg::onEditChangeActionValue4()
+{
+    onEditChangeActionValueN(3);
+}
+
+void CTriggerEditorAllDlg::onDropDownActionValue1()
+{
+    if (onEditChangeActionValueN(0, true)) {
+        ::PostMessage(m_actionParam[0], CB_SHOWDROPDOWN, FALSE, 0);
+    }
 }

@@ -18,6 +18,7 @@ protected:
     virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
     static bool triggerWpFilterFunc(const CString& triggerCode);
+    static std::pair<CString, CString> popUpCSFViewerAndReturn(CComboBox& cb);
 
     afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
     afx_msg void onNewTrigger();
@@ -47,6 +48,12 @@ protected:
     afx_msg void onDeleteEvent();
 
     afx_msg void onEditChangeActionType();
+    bool onEditChangeActionValueN(size_t nth, bool isFromDropDown = false);
+    afx_msg void onEditChangeActionValue1();
+    afx_msg void onEditChangeActionValue2();
+    afx_msg void onEditChangeActionValue3();
+    afx_msg void onEditChangeActionValue4();
+    afx_msg void onDropDownActionValue1();
 
     afx_msg BOOL onMessageKeyDown(MSG* pMsg);
 
@@ -60,6 +67,8 @@ protected:
     void updateTriggerOptions();
     void updateTriggerEvents();
     void updateTriggerActions();
+
+
 
     CString m_currentTrigger;
     // trigger options
@@ -80,8 +89,9 @@ protected:
     CMyComboBox m_eventParam2;
     CEdit m_eventDescription;
     // action options
-    CMyComboBox m_actionTypes;
+    CComboBox m_actionTypes;
     CListBox m_actionList;
+    CWnd* m_actionParamTexts[6];
     CMyComboBox m_actionParam[6]; // 0-5
     CEdit m_actionDescription;
 public:
