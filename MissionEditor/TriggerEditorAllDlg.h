@@ -89,7 +89,7 @@ protected:
     CMyComboBox m_eventParam2;
     CEdit m_eventDescription;
     // action options
-    CComboBox m_actionTypes;
+    CMyComboBox m_actionTypes;
     CListBox m_actionList;
     CWnd* m_actionParamTexts[6];
     CMyComboBox m_actionParam[6]; // 0-5
