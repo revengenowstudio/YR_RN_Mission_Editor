@@ -15,10 +15,13 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_BN_CLICKED(IDC_TRGR_EASY, OnEasy)
     ON_BN_CLICKED(IDC_TRGR_MEDIUM, OnMedium)
     ON_BN_CLICKED(IDC_TRGR_HARD, OnHard)
+    ON_EN_KILLFOCUS(IDC_TRGR_NAME, onChangeTriggerName)
     ON_CBN_EDITCHANGE(IDC_TRGR_SELECTED_TRIGGER, onEditChangeTriggerType)
     ON_CBN_SELCHANGE(IDC_TRGR_SELECTED_TRIGGER, onSelChangeTrigger)
     ON_CBN_SELCHANGE(IDC_TRGR_EVENT_TYPE, onEditChangeEventType)
     ON_LBN_SELCHANGE(IDC_TRGR_EVENT_LIST, onSelChangeEvent)
+    ON_CBN_EDITCHANGE(IDC_TRGR_EVENT_PARAMETER_1, onEditChangeEventValue1)
+    ON_CBN_EDITCHANGE(IDC_TRGR_EVENT_PARAMETER_2, onEditChangeEventValue2)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -75,7 +78,29 @@ void CTriggerEditorAllDlg::DoDataExchange(CDataExchange* pDX)
 
 BOOL CTriggerEditorAllDlg::PreTranslateMessage(MSG* pMsg)
 {
-    return CDialog::PreTranslateMessage(pMsg);
+    int ret = -1;
+    if (pMsg->message == WM_KEYDOWN) {
+        ret = onMessageKeyDown(pMsg);
+    }
+    return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
+
+BOOL CTriggerEditorAllDlg::onMessageKeyDown(MSG* pMsg)
+{
+    switch (pMsg->wParam) {
+        default:
+            return -1;
+        case VK_RETURN:
+        {
+            switch (::GetDlgCtrlID(pMsg->hwnd)) {
+            default:
+                break;// never exist window (default -1) even nothing did
+            case IDC_TRGR_NAME: this->onChangeTriggerName();
+                break;
+            }
+        }
+    }
+    return TRUE;
 }
 
 void CTriggerEditorAllDlg::translateUI()
@@ -369,7 +394,7 @@ void CTriggerEditorAllDlg::onChangeTriggerName()
     CString newName;
     m_triggerName.GetWindowText(newName);
 
-    if (newName.GetLength() == 0) {
+    if (newName.IsEmpty()) {
         newName = " ";
     }
 
@@ -394,7 +419,7 @@ void CTriggerEditorAllDlg::onChangeTriggerName()
             ini.SetString("Tags", type, SetParam(ini.GetString("Tags", type), 1, newVal));
         }
     }
-    //MessageBox(ini.sections["Triggers"].values[m_currentTrigger],newName);
+
     auto triggerCopy = ini["Triggers"][m_currentTrigger];
     if (RepairTrigger(triggerCopy)) {
         ini.SetString("Triggers", m_currentTrigger, triggerCopy);
@@ -602,8 +627,6 @@ void CTriggerEditorAllDlg::onSelChangeEvent()
 // TODO: support filter
 void CTriggerEditorAllDlg::onEditChangeEventType()
 {
-    CIniFile& ini = Map->GetIniFile();
-
     if (m_currentTrigger.IsEmpty()) {
         return;
     }
@@ -623,6 +646,7 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
         m_eventTypes.SetWindowText(eventtype);
     }
 
+    CIniFile& ini = Map->GetIniFile();
     TriggerEvents events(ini.GetString("Events", m_currentTrigger));
     auto& eventData = events.Nth(eventIdx);
 
@@ -662,8 +686,61 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
 
     m_eventParam1.EnableWindow(eventDef.paramTypes[0] > 0);
     m_eventParam2.EnableWindow(eventDef.paramTypes[1] > 0);
+}
 
+void CTriggerEditorAllDlg::onEditChangeEventValue(CMyComboBox& paramCB, size_t slot)
+{
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
 
+    int curselparam = paramCB.GetCurSel();
+    if (curselparam < 0) {
+        paramCB.SetWindowText("");
+        return;
+    }
+
+    int eventTypeSel = m_eventList.GetCurSel();
+    if (eventTypeSel < 0) {
+        return;
+    }
+
+    int eventIdx = m_eventList.GetItemData(eventTypeSel);
+
+    CIniFile& ini = Map->GetIniFile();
+    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
+    auto& eventData = events.Nth(eventIdx);
+
+    auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
+    auto const& eventDef = triggerDefMgr.Events().at(eventData.eventType);
+    auto const& paramType = triggerDefMgr.Params().at(eventDef.paramTypes[slot]);
+
+    CString newVal;
+    paramCB.GetWindowText(newVal);
+    TruncSpace(newVal);
+    newVal.TrimLeft();
+
+    if (newVal.Find(",", 0) >= 0) {
+        newVal.SetAt(newVal.Find(",", 0), 0);
+    }
+
+    if (slot == 0) {
+        eventData.param1 = newVal;
+    } else {
+        eventData.param2 = newVal;
+    }
+
+    ini.SetString("Events", m_currentTrigger, events.Serialize());
+}
+
+void CTriggerEditorAllDlg::onEditChangeEventValue1()
+{
+    onEditChangeEventValue(m_eventParam1, 0);
+}
+
+void CTriggerEditorAllDlg::onEditChangeEventValue2()
+{
+    onEditChangeEventValue(m_eventParam2, 1);
 }
 
 void CTriggerEditorAllDlg::onSelChangeAction()

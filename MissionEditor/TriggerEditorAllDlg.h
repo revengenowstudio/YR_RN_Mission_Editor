@@ -36,6 +36,11 @@ protected:
     afx_msg void onSelChangeEvent(); // eventType cb sel change
     afx_msg void onSelChangeAction();
     afx_msg void onEditChangeEventType(); // event list sel change
+    afx_msg void onEditChangeEventValue(CMyComboBox& paramCB, size_t slot);
+    afx_msg void onEditChangeEventValue1();
+    afx_msg void onEditChangeEventValue2();
+
+    afx_msg BOOL onMessageKeyDown(MSG* pMsg);
 
     void translateUI();
     void clear();
