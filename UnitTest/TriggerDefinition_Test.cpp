@@ -26,8 +26,9 @@ R"(
 
 [ActionsRA2]
 0=-Nothing-,0,0,0,0,0,0,0,0,0,This is an empty action. It means doing nothing.,0,1,0
-1=Claim Winner...,0,2,0,0,0,0,0,0,0,The winner must be a specific side, and the game will end immediately. For example, in %1, the players on a specific side are defined. In a multiplayer task, this action will lead to the failure of all players.,0,1,1
-2=Claim Loser...,0,2,0,0,0,0,0,0,0,The loser must be a specific side, and the game will end immediately. When a specific side is designated as the loser, the game ends right away. For example, in %1, the players on a specific side are defined. If a non-player country is set as the loser, it can result in a mission victory; a typical example is a modified mod that changes the order of countries. In a multiplayer campaign, this action will lead to the failure of all players.,0,1,2
+1=Claim Winner...,0,2,0,0,0,0,0,0,0,The winner must be a specific side%1 and the game will end immediately. For example%1 the players on a specific side are defined. In a multiplayer task%1 this action will lead to the failure of all players.,0,1,1
+2=Claim Loser...,0,2,0,0,0,0,0,0,0,The loser must be a specific side%1 and the game will end immediately. When a specific side is designated as the loser%1 the game ends right away. For example%1 the players on a specific side are defined. If a non-player country is set as the loser%1 it can result in a mission victory. a typical example is a modified mod that changes the order of countries. In a multiplayer campaign%1 this action will lead to the failure of all players.,0,1,2
+130=Restore Initial Buildings...,0,2,0,0,0,0,0,0,0,All buildings of selected house's will be rebuilt,0,1,130,1
 )";
 
     CIniFile ini;
@@ -36,10 +37,15 @@ R"(
     auto& mgr = TriggerDefinitionManager::Instance();
     mgr.LoadFrom(ini, std::cerr);
 
-    EXPECT_EQ(mgr.Actions().size(), 3);
+    EXPECT_EQ(mgr.Actions().size(), 4);
     EXPECT_EQ(mgr.Actions().at(0).description, "This is an empty action. It means doing nothing.");
     EXPECT_EQ(mgr.Actions().at(1).paramTypes[0], 0);
     EXPECT_EQ(mgr.Actions().at(1).paramTypes[1], 2);
+    EXPECT_EQ(mgr.Actions().at(1).actionType, 1);
+    EXPECT_EQ(mgr.Actions().at(1).ra2Allowed, true);
+    EXPECT_EQ(mgr.Actions().at(1).yrOnly, false);
+    EXPECT_EQ(mgr.Actions().at(130).ra2Allowed, true);
+    EXPECT_EQ(mgr.Actions().at(130).yrOnly, true);
 
     EXPECT_EQ(mgr.Events().size(), 7);
     EXPECT_EQ(mgr.Events().at(0).description, "This is an empty event.");

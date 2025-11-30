@@ -90,7 +90,7 @@ void TriggerDefinitionManager::loadActionTypes(const CIniFile& ini, std::ostream
 
     for (auto const& [id, def] : ini.GetSection(ACTION_DEF_SEC)) {
         auto const params = SplitParams(def);
-        if (params.size() < 12) {
+        if (params.size() < 14) {
             err << "Error: trigger action segment error, should be 6 segments, index: " << id << endl;
             continue;
         }
@@ -111,15 +111,19 @@ void TriggerDefinitionManager::loadActionTypes(const CIniFile& ini, std::ostream
         for (auto idx = 0; idx < 6; ++idx) {
             item.paramTypes[idx] = atoi(params[idx + 1]);
         }
-        item.useWaypoint = atoi(params[6]);
-        item.useTag = atoi(params[7]);
-        item.obsolete = atoi(params[8]);
-        item.tsAllowed = atoi(params[9]);
-        item.ra2Allowed = atoi(params[10]);
-        // 11th is duplication of action type index again, we skip it
-        // 13th is optional, to check whether allowed in YR
-        if (params.size() == 13) {
-            item.yrOnly = atoi(params[12]);
+        item.useWaypoint = atoi(params[7]);
+        item.useTag = atoi(params[8]);
+        item.obsolete = atoi(params[9]);
+        item.tsAllowed = atoi(params[11]);
+        item.ra2Allowed = atoi(params[12]);
+        // 14th is duplication of action type index again, we verify this value to ensure the definition is not corrupted
+        if (atoi(params[13]) != actionTypeId) {
+            err << "Error: trigger action definiton corrupted, index: " << id << endl;
+            throw std::logic_error("action definition is corrupted");
+        }
+        // 15th is optional, to check whether allowed in YR
+        if (params.size() == 15) {
+            item.yrOnly = atoi(params[14]);
         }
     }
 }
