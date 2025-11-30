@@ -188,7 +188,27 @@ void CTriggerEditorAllDlg::oneTimeInit()
             continue;
         }
 #endif
+        // TODO: use insert string and setItem data to speed up querying
         m_eventTypes.AddString(eventdata.brief);
+    }
+
+    // now handles for actionTypes
+    while (m_actionTypes.DeleteString(0) != CB_ERR);
+    for (auto const& [actionId, actionDef] : defMgr.Actions()) {
+#ifdef RA2_MODE
+        if (!actionDef.ra2Allowed) {
+            continue;
+        }
+        if (!yuri_mode && actionDef.yrOnly) {
+            continue;
+        }
+#else
+        if (!actionDef.tsAllowed) {
+            continue;
+        }
+#endif
+        // TODO: use insert string and setItem data to speed up querying
+        m_actionTypes.AddString(actionDef.brief);
     }
 }
 
@@ -220,6 +240,7 @@ void CTriggerEditorAllDlg::updateTriggerOptions()
     onSelChangeOption();
 }
 
+// TODO: change name to make it adaptive for both event and action
 CString makeEventShortDesc(int idx, const CString& brief)
 {
     CString eventDesc;
@@ -247,6 +268,8 @@ void CTriggerEditorAllDlg::updateTriggerEvents()
     for (auto i = 0; i < eventCount; i++) {
         auto const eventIdx = events.Nth(i).eventType;
         auto const& brief = defMgr.Events().at(eventIdx).brief;
+        // NOTE: maybe this event list can be simplified to use add string only
+        // since events are consistent
         auto const id = m_eventList.AddString(makeEventShortDesc(i, brief));
         m_eventList.SetItemData(id, i);
     }
@@ -264,6 +287,7 @@ void CTriggerEditorAllDlg::updateTriggerEvents()
 
 void CTriggerEditorAllDlg::updateTriggerActions()
 {
+
 }
 
 void CTriggerEditorAllDlg::UpdateDialog()
@@ -676,6 +700,7 @@ void CTriggerEditorAllDlg::onSelChangeOption()
     }
 }
 
+// ========================== Trigger Events ==========================
 void CTriggerEditorAllDlg::onSelChangeEvent()
 {
     CIniFile& ini = Map->GetIniFile();
@@ -909,7 +934,47 @@ void CTriggerEditorAllDlg::onDeleteEvent()
     }
 }
 
+// ========================== Trigger Actions ==========================
+bool triggerWpFilterFunc(const CString& triggerCode)
+{
+    return g_data["DontSaveAsWP"].HasValue(triggerCode);
+}
+
 void CTriggerEditorAllDlg::onSelChangeAction()
 {
+    CIniFile& ini = Map->GetIniFile();
 
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
+    int curAction = m_actionList.GetCurSel();
+    if (curAction < 0) {
+        return;
+    }
+    int actionIdx = m_actionList.GetItemData(curAction);
+
+    TriggerActions actions(ini.GetString("Actions", m_currentTrigger), triggerWpFilterFunc);
+    auto const& actionN = actions.Nth(actionIdx);
+
+    auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
+    auto const& actionDef = triggerDefMgr.Actions().at(actionN.actionType);
+
+    CString actionTypeStr;
+    actionTypeStr.Format("%d", actionIdx);
+    //m_actionTypes.SetWindowText(makeEventShortDesc(actionN.actionType, actionDef.brief));
+
+    for (auto idx = 0; idx < m_actionTypes.GetCount(); idx++) {
+        CString actionShortDesc;
+        m_actionTypes.GetLBText(idx, actionShortDesc);
+        TruncSpace(actionShortDesc);
+        if (actionShortDesc == actionTypeStr) {
+            m_actionTypes.SetCurSel(idx);
+        }
+    }
+
+    onEditChangeActionType();
+}
+
+void CTriggerEditorAllDlg::onEditChangeActionType()
+{
 }

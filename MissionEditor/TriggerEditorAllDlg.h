@@ -44,6 +44,8 @@ protected:
     afx_msg void onCloneEvent();
     afx_msg void onDeleteEvent();
 
+    afx_msg void onEditChangeActionType();
+
     afx_msg BOOL onMessageKeyDown(MSG* pMsg);
 
     void translateUI();
