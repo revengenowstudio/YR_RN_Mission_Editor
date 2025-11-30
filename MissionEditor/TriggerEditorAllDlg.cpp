@@ -9,6 +9,7 @@ extern ACTIONDATA AD; // very ugly implementation, will be refactored
 BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_WM_SHOWWINDOW()
     ON_BN_CLICKED(IDC_TRGR_NEW_TRIGGER, onNewTrigger)
+    ON_BN_CLICKED(IDC_TRGR_DELETE_TRIGGER, onDeleteTrigger)
     ON_BN_CLICKED(IDC_TRGR_CLONE_TRIGGER, &CTriggerEditorAllDlg::OnBnClickedTrgrCloneTrigger)
     ON_BN_CLICKED(IDC_TRGR_PLACE_ON_MAP, onPlaceOnMap)
     ON_BN_CLICKED(IDC_TRGR_DISABLED, OnDisabled)
@@ -319,6 +320,49 @@ void CTriggerEditorAllDlg::onNewTrigger()
         }
     }
     onSelChangeTrigger();
+}
+
+void CTriggerEditorAllDlg::onDeleteTrigger()
+{
+    int sel = m_triggerType.GetCurSel();
+    if (sel < 0) {
+        return;
+    }
+    int curTrigger = m_triggerType.GetItemData(sel);
+    auto const title = TranslateStringACP("Delete trigger");
+    auto const content = EscapeString(TranslateStringACP("TriggerDeleteTip"));
+    int res = MessageBox(content, title, MB_YESNOCANCEL);
+    if (res == IDCANCEL) {
+        return;
+    }
+
+    CIniFile& ini = Map->GetIniFile();
+    auto const triggerId = ini["Triggers"].Nth(curTrigger).first;
+
+    // YES means clean tags, otherwise ignore
+    if (res == IDYES) {
+        std::vector<CString> keysToDelete;
+        for (auto const& [type, def] : ini["Tags"]) {
+            auto const attTrigg = GetParam(def, 2);
+            if (triggerId == attTrigg) {
+                keysToDelete.push_back(type);
+            }
+        }
+        for (auto const& keyToDelete : keysToDelete) {
+            ini.RemoveValueByKey("Tags", keyToDelete);
+        }
+    }
+
+    bool deleted = false;
+    deleted = ini.RemoveValueByKey("Triggers", triggerId);
+    ASSERT(deleted);
+    deleted = ini.RemoveValueByKey("Events", triggerId);
+    ASSERT(deleted);
+    deleted = ini.RemoveValueByKey("Actions", triggerId);
+    ASSERT(deleted);
+    (void)deleted;
+
+    theApp.MainWindow()->UpdateDialogs(TRUE);
 }
 
 void CTriggerEditorAllDlg::onPlaceOnMap()
