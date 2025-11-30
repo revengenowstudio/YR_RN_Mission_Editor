@@ -1180,6 +1180,9 @@ bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropD
     } else {
         actionParamCB.GetWindowText(newValue);
         TruncSpace(newValue);
+        if (actionDef.useWaypoint) {
+            newValue = WaypointToString(atoi(newValue));
+        }
     }
 
     if (newValue != actionN.params[nth]) {
