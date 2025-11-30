@@ -155,11 +155,6 @@ TriggerEvents::TriggerEvents(const CString& fullData)
     }
 }
 
-TriggerEvent& TriggerEvents::Insert(size_t slot, TriggerEvent&& event)
-{
-    return *events.emplace(events.begin() + slot, std::move(event));
-}
-
 CString TriggerEvents::Serialize()
 {
     constexpr int perEventDataBufferSize = 32;
@@ -181,6 +176,65 @@ CString TriggerEvents::Serialize()
             ret += event.param2.value();
             ret += ',';
         }
+    }
+    ret.TrimRight(',');
+    return ret;
+}
+
+TriggerActions::TriggerActions(const CString& fullData, const WpFilterFunc& filter)
+{
+    if (fullData.IsEmpty()) {
+        return;
+    }
+
+    size_t idx = 0;
+    auto const params = SplitParams(fullData);
+    size_t actionCount = atoi(params[idx++]); // first param means event count
+    actions.reserve(actionCount);
+
+    // each action contains 8 segments
+    if (params.size() != actionCount * 8 + 1) {
+        throw std::invalid_argument("action data corrupted");
+    }
+
+    for (;;) {
+        if (idx >= params.size()) {
+            break;
+        }
+
+        auto& action = actions.emplace_back();
+
+        action.actionType = atoi(params[idx++]);
+        auto actionCodeStr = params[idx++];
+        for (auto& param : action.params) {
+            param = params[idx++];
+        }
+        action.waypoint = params[idx++];
+        action.lastParamIsWaypoint = filter(actionCodeStr);
+        action.actionCode = atoi(actionCodeStr);
+    } 
+}
+
+CString TriggerActions::Serialize()
+{
+    constexpr int perEventDataBufferSize = 32;
+
+    CString ret;
+    ret.GetBuffer(static_cast<int>(actions.size()) * perEventDataBufferSize);
+    ret.Format("%d,", actions.size());
+    ret.ReleaseBuffer();
+
+    CString typeStr;
+    for (auto const& action : actions) {
+        typeStr.Format("%d,%d,", action.actionType, action.actionCode);
+        ret += typeStr;
+        for (auto const& item : action.params) {
+            ret += item;
+            ret += ',';
+        }
+        // TODO: adjust according to lastParamIsWaypoint
+        ret += action.waypoint;
+        ret += ',';
     }
     ret.TrimRight(',');
     return ret;

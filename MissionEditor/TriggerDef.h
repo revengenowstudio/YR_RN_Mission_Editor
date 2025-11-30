@@ -4,6 +4,7 @@
 #include <array>
 #include <ostream>
 #include <optional>
+#include <functional>
 
 class CIniFile;
 class TriggerEvents;
@@ -58,12 +59,46 @@ public:
     TriggerEvent& Nth(size_t idx) { return events.at(idx); }
     void DeleteAt(size_t idx) { events.erase(events.begin() + idx); }
 
-    TriggerEvent& Insert(size_t slot, TriggerEvent&& event = {});
+    TriggerEvent& Insert(size_t slot, TriggerEvent&& event = {}) {
+        return *events.emplace(events.begin() + slot, std::move(event));
+    }
 
     CString Serialize();
 
 private:
     std::vector<TriggerEvent> events;
+};
+
+struct TriggerAction
+{
+    int actionType{ 0 };
+    int actionCode{ 0 }; // no idea yet, implies how param slots are used
+    std::array<CString, 5> params;
+    CString waypoint{ 'A' }; // here 'A' means 0
+    bool lastParamIsWaypoint{ true };
+};
+
+// TODO: refine TriggerEvents and TriggerActions from same template
+class TriggerActions
+{
+public:
+    // return true means is waypoint
+    using WpFilterFunc = std::function<bool(const CString& actionType)>;
+
+    TriggerActions(const CString& fullData, const WpFilterFunc& filter);
+
+    auto Size() const { return actions.size(); }
+    TriggerAction& Nth(size_t idx) { return actions.at(idx); }
+    void DeleteAt(size_t idx) { actions.erase(actions.begin() + idx); }
+
+    TriggerAction& Insert(size_t slot, TriggerAction&& event = {}) {
+        return *actions.emplace(actions.begin() + slot, std::move(event));
+    }
+
+    CString Serialize();
+
+private:
+    std::vector<TriggerAction> actions;
 };
 
 class TriggerDefinitionManager

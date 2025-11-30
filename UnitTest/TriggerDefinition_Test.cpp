@@ -56,6 +56,7 @@ R"(
     EXPECT_EQ(mgr.Params().at(2).listType, 1);
     EXPECT_EQ(mgr.Params().at(48).listType, 0);
     EXPECT_EQ(mgr.Params().at(48).slotCount, 2);
+
 }
 
 TEST(TriggerEventTest, EventsSerde)
@@ -117,4 +118,37 @@ TEST(TriggerEventTest, EventsSerde)
 
         EXPECT_EQ(events.Serialize(), data);
     }
+}
+
+TEST(TriggerActionTest, ActionSerde)
+{
+
+    CIniFile wpFilterIni;
+    auto& filterSec = wpFilterIni.AddSection("DontSaveAsWP");
+    filterSec.SetString("0", "5");
+    filterSec.SetString("1", "9");
+    filterSec.SetString("3", "11");
+
+    auto filterFunc = [&wpFilterIni](const CString& id) {
+        return wpFilterIni["DontSaveAsWP"].HasValue(id);
+        };
+
+    {
+        const CString data = "2,11,4,mission:usa01_07,0,0,0,0,A,53,2,01000020,0,0,0,0,A";
+        TriggerActions actions(data, filterFunc);
+
+
+        EXPECT_EQ(actions.Size(), 2);
+        EXPECT_EQ(actions.Nth(0).actionType, 11);
+        EXPECT_EQ(actions.Nth(0).actionCode, 4);
+        EXPECT_EQ(actions.Nth(0).params[0], "mission:usa01_07");
+        EXPECT_EQ(actions.Nth(1).actionType, 53);
+        EXPECT_EQ(actions.Nth(1).actionCode, 2);
+        EXPECT_EQ(actions.Nth(1).params[0], "01000020");
+
+        EXPECT_EQ(actions.Serialize(), data);
+    }
+
+
+
 }
