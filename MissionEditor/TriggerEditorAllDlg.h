@@ -39,6 +39,8 @@ protected:
     afx_msg void onEditChangeEventValue(CMyComboBox& paramCB, size_t slot);
     afx_msg void onEditChangeEventValue1();
     afx_msg void onEditChangeEventValue2();
+    afx_msg void onNewEvent();
+    afx_msg void onDeleteEvent();
 
     afx_msg BOOL onMessageKeyDown(MSG* pMsg);
 

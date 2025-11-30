@@ -22,6 +22,8 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_LBN_SELCHANGE(IDC_TRGR_EVENT_LIST, onSelChangeEvent)
     ON_CBN_EDITCHANGE(IDC_TRGR_EVENT_PARAMETER_1, onEditChangeEventValue1)
     ON_CBN_EDITCHANGE(IDC_TRGR_EVENT_PARAMETER_2, onEditChangeEventValue2)
+    ON_BN_CLICKED(IDC_TRGR_NEW_EVENT, onNewEvent)
+    ON_BN_CLICKED(IDC_TRGR_DELETE_EVENT, onDeleteEvent)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -755,6 +757,54 @@ void CTriggerEditorAllDlg::onEditChangeEventValue1()
 void CTriggerEditorAllDlg::onEditChangeEventValue2()
 {
     onEditChangeEventValue(m_eventParam2, 1);
+}
+
+void CTriggerEditorAllDlg::onNewEvent()
+{
+    CIniFile& ini = Map->GetIniFile();
+
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
+
+    CIniFileSection& sec = ini.AddSection("Events");
+
+    int eventCount = atoi(GetParam(sec.GetString(m_currentTrigger), 0));
+    CString newIdx;
+    newIdx.Format("%d", eventCount + 1);
+
+    auto&& defParam = SetParam(sec[m_currentTrigger], 0, newIdx) + ",0,0,0";
+    sec.SetString(m_currentTrigger, std::move(defParam));
+
+    UpdateDialog();
+
+    m_eventList.SetCurSel(eventCount);
+    onSelChangeEvent();
+}
+
+void CTriggerEditorAllDlg::onDeleteEvent()
+{
+    auto const title = TranslateStringACP("Delete event");
+    auto const content = TranslateStringACP("Do you really want to delete this event?");
+    if (MessageBox(content, title, MB_YESNO) == IDNO) {
+        return;
+    }
+
+    CIniFile& ini = Map->GetIniFile();
+    if (m_currentTrigger.GetLength() == 0) {
+        return;
+    }
+
+    int curEvent = m_eventList.GetCurSel();
+    if (curEvent < 0) {
+        return;
+    }
+    int eventIdx = m_eventList.GetItemData(curEvent);
+    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
+    events.DeleteAt(eventIdx);
+    ini.SetString("Events", m_currentTrigger, events.Serialize());
+
+    UpdateDialog();
 }
 
 void CTriggerEditorAllDlg::onSelChangeAction()
