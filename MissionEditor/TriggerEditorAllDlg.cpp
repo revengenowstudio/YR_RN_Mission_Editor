@@ -26,6 +26,8 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_BN_CLICKED(IDC_TRGR_NEW_EVENT, onNewEvent)
     ON_BN_CLICKED(IDC_TRGR_DELETE_EVENT, onDeleteEvent)
     ON_BN_CLICKED(IDC_TRGR_CLONE_EVENT, onCloneEvent)
+    // actions
+    ON_CBN_SELCHANGE(IDC_TRGR_ACTION_LIST, onSelChangeAction)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -287,7 +289,39 @@ void CTriggerEditorAllDlg::updateTriggerEvents()
 
 void CTriggerEditorAllDlg::updateTriggerActions()
 {
+    // actually only happens if no trigger at all
+    if (m_currentTrigger.IsEmpty()) {
+        while (m_actionList.DeleteString(0) != CB_ERR);
+        return;
+    }
 
+    int cur_sel = m_actionList.GetCurSel();
+    while (m_actionList.DeleteString(0) != CB_ERR);
+
+    CIniFile& ini = Map->GetIniFile();
+    auto const& data = ini["Actions"][m_currentTrigger];
+    TriggerActions actions(data, triggerWpFilterFunc);
+    auto const actionCount = actions.Size();
+
+    auto& defMgr = TriggerDefinitionManager::Instance();
+    for (auto i = 0; i < actionCount; i++) {
+        auto const actionIdx = actions.Nth(i).actionType;
+        auto const& brief = defMgr.Actions().at(actionIdx).brief;
+        // NOTE: maybe this action list can be simplified to use add string only
+        // since action are consistent
+        auto const id = m_actionList.AddString(makeEventShortDesc(i, brief));
+        m_actionList.SetItemData(id, i);
+    }
+    if (cur_sel < 0) {
+        cur_sel = 0;
+    }
+    if (cur_sel >= actionCount) {
+        cur_sel = actionCount - 1;
+    }
+
+    m_actionList.SetCurSel(cur_sel);
+
+    onSelChangeAction();
 }
 
 void CTriggerEditorAllDlg::UpdateDialog()
@@ -935,7 +969,7 @@ void CTriggerEditorAllDlg::onDeleteEvent()
 }
 
 // ========================== Trigger Actions ==========================
-bool triggerWpFilterFunc(const CString& triggerCode)
+bool CTriggerEditorAllDlg::triggerWpFilterFunc(const CString& triggerCode)
 {
     return g_data["DontSaveAsWP"].HasValue(triggerCode);
 }
@@ -960,7 +994,7 @@ void CTriggerEditorAllDlg::onSelChangeAction()
     auto const& actionDef = triggerDefMgr.Actions().at(actionN.actionType);
 
     CString actionTypeStr;
-    actionTypeStr.Format("%d", actionIdx);
+    actionTypeStr.Format("%d", actionN.actionType);
     //m_actionTypes.SetWindowText(makeEventShortDesc(actionN.actionType, actionDef.brief));
 
     for (auto idx = 0; idx < m_actionTypes.GetCount(); idx++) {

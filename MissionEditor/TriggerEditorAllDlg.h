@@ -17,6 +17,8 @@ protected:
     virtual void DoDataExchange(CDataExchange* pDX) override;
     virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
+    static bool triggerWpFilterFunc(const CString& triggerCode);
+
     afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
     afx_msg void onNewTrigger();
     afx_msg void onDeleteTrigger();
