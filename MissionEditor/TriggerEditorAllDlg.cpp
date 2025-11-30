@@ -1076,6 +1076,15 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
         actionChanged = true;
     }
 
+    { // replace line in the list:
+        m_actionList.DeleteString(curAction);
+        auto const id = m_actionList.InsertString(
+            curAction,
+            makeEventShortDesc(curAction, actionDef.brief));
+        m_actionList.SetItemData(id, curAction);
+        m_actionList.SetCurSel(curAction);
+    }
+
     // param setup
     for (auto i = 0; i < 5; i++) {
         if (auto paramType = actionDef.paramTypes[i]; paramType > 0) {
