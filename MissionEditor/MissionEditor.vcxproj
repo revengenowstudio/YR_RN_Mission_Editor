@@ -587,6 +587,7 @@
     <ClCompile Include="TipDlg.cpp" />
     <ClCompile Include="ToolSettingsBar.cpp" />
     <ClCompile Include="TriggerActionsDlg.cpp" />
+    <ClCompile Include="TriggerDatabase.cpp" />
     <ClCompile Include="TriggerDef.cpp" />
     <ClCompile Include="TriggerEditorAllDlg.cpp" />
     <ClCompile Include="TriggerEditorDlg.cpp" />
@@ -702,6 +703,7 @@
     <ClInclude Include="TipDlg.h" />
     <ClInclude Include="ToolSettingsBar.h" />
     <ClInclude Include="TriggerActionsDlg.h" />
+    <ClInclude Include="TriggerDatabase.h" />
     <ClInclude Include="TriggerDef.h" />
     <ClInclude Include="TriggerEditorAllDlg.h" />
     <ClInclude Include="TriggerEditorDlg.h" />

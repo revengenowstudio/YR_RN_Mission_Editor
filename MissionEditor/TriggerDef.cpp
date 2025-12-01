@@ -269,12 +269,6 @@ CString TriggerActions::Serialize()
     return ret;
 }
 
-TriggerDatabase& TriggerDatabase::Instance()
-{
-    static TriggerDatabase inst;
-    return inst;
-}
-
 bool TriggerAction::SetActionType(const int newType)
 {
     bool changed = false;

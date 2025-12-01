@@ -184,15 +184,3 @@ private:
     std::map<int, TriggerActionType> m_actionTypes;
     std::unordered_set<int> m_waypointEncodingExceptions;
 };
-
-class TriggerDatabase
-{
-public:
-    static TriggerDatabase& Instance();
-
-    TriggerDatabase() = default;
-    TriggerDatabase(const TriggerDatabase&) = delete;
-
-private:
-    std::map<CString, TriggerActions> items;
-};
