@@ -30,12 +30,14 @@ struct TriggerEventType
 
 struct TriggerActionType 
 {
+    static constexpr int WaypointSlot = 5;
+
     int actionType;                 // same as enumeration defined in game, maybe unnecessary, can be optimized out when feature done
     CString brief;                  // brief name shows what it is         
     CString description;            // desc about usage
     int controlCode;                // negative value, should turn back
-    std::array<int, 5> paramTypes;
-    bool useWaypoint{ false };
+    std::map<int, int> paramTypes; // position : paramType
+    bool useWaypointSlot{ false };     // 6th value not waypoint
     bool useTag{ false };
     bool obsolete{ false };
     bool tsAllowed{ true };

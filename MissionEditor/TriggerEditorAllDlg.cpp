@@ -1001,6 +1001,13 @@ bool CTriggerEditorAllDlg::triggerWpFilterFunc(const CString& triggerCode)
     return !g_data["DontSaveAsWP"].HasValue(triggerCode);
 }
 
+bool triggerWpFilterFunc(const int triggerCode)
+{
+    CString codeStr;
+    codeStr.Format("%d", triggerCode);
+    return CTriggerEditorAllDlg::triggerWpFilterFunc(codeStr);
+}
+
 void CTriggerEditorAllDlg::onSelChangeAction()
 {
     CIniFile& ini = Map->GetIniFile();
@@ -1047,7 +1054,7 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
     }
     int curActionIdx = m_actionList.GetItemData(curAction);
 
-    CString actionType, actionData;
+    CString actionType;
     m_actionTypes.GetWindowText(actionType);
     TruncSpace(actionType);
 
@@ -1077,6 +1084,7 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
     auto const newControlCode = std::abs(actionDef.controlCode);
     if (newControlCode != actionN.actionCode) {
         actionN.actionCode = newControlCode;
+        actionN.lastParamIsWaypoint = ::triggerWpFilterFunc(newControlCode);
         actionChanged = true;
     }
 
@@ -1089,16 +1097,8 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
         m_actionList.SetCurSel(curAction);
     }
 
-    // param setup
+    // reset first
     for (auto i = 0; i < 5; i++) {
-        if (auto paramType = actionDef.paramTypes[i]; paramType > 0) {
-            auto const& paramDef = paramDefs.at(paramType);
-            m_actionParamTexts[i]->SetWindowText(paramDef.paramName);
-            HandleParamList(m_actionParam[i], paramDef.listType);
-            m_actionParam[i].SetWindowText(actionN.params[i]);
-            m_actionParam[i].EnableWindow(TRUE);
-            continue;
-        }
         CString translationLabel;
         translationLabel.Format("TriggerParameter#%dvalue", i + 1);
         m_actionParamTexts[i]->SetWindowText(TranslateStringACP(translationLabel));
@@ -1106,8 +1106,40 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
         m_actionParam[i].EnableWindow(FALSE);
     }
 
+    int slot = 0;
+    for (auto const& [paramSlot, paramType] : actionDef.paramTypes) {
+        auto const& paramDef = paramDefs.at(paramType);
+        m_actionParamTexts[slot]->SetWindowText(paramDef.paramName);
+        HandleParamList(m_actionParam[slot], paramDef.listType);
+        m_actionParam[slot].SetWindowText(actionN.params[paramSlot]);
+        m_actionParam[slot].EnableWindow(TRUE);
+        slot++;
+    }
+
+    // continue use last slot
+    if (actionDef.useWaypointSlot) {
+        if (actionN.lastParamIsWaypoint) {
+            m_actionParamTexts[slot]->SetWindowText(TranslateStringACP("Waypoint"));
+            HandleParamList(m_actionParam[slot], PARAMTYPE_WAYPOINTS);
+            CString waypointStr;
+            waypointStr.Format("%d", StringToWaypoint(actionN.waypoint));
+            m_actionParam[slot].SetWindowText(waypointStr);
+        } else {
+            m_actionParamTexts[slot]->SetWindowText(TranslateStringACP("Number"));
+            HandleParamList(m_actionParam[slot], PARAMTYPE_NOTHING);
+            m_actionParam[slot].SetWindowText(actionN.waypoint);
+        }
+        m_actionParam[slot].EnableWindow(TRUE);
+        slot++;
+    }
+
+    // seems no action uses tag
+    if (actionDef.useTag) {
+
+    }
+
     auto const isWaypointFormat = IsWaypointFormat(actionN.waypoint);
-    if (isWaypointFormat && !actionDef.useWaypoint) {
+    if (isWaypointFormat && !actionDef.useWaypointSlot) {
         actionN.waypoint.Format("%d", StringToWaypoint(actionN.waypoint));
         actionChanged = true;
     } else if (!isWaypointFormat) {
@@ -1162,11 +1194,13 @@ bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropD
 
     auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
     auto const& actionDef = triggerDefMgr.Actions().at(actionN.actionType);
-    auto const& paramDefN = triggerDefMgr.Params().at(actionDef.paramTypes[nth]);
+    auto const listType = nth < actionDef.paramTypes.size() ? 
+        triggerDefMgr.Params().at(actionDef.paramTypes.at(nth)).listType
+        : PARAMTYPE_NOTHING;
 
     bool popUpHandled = false;
     CString newValue;
-    if (paramDefN.listType == PARAMTYPE_TUTORIALTEXTS) {
+    if (listType == PARAMTYPE_TUTORIALTEXTS) {
         if (isFromDropDown) {
             auto [label, content] = popUpCSFViewerAndReturn(actionParamCB);
             auto txt = label;
@@ -1180,12 +1214,15 @@ bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropD
     } else {
         actionParamCB.GetWindowText(newValue);
         TruncSpace(newValue);
-        if (actionDef.useWaypoint) {
-            newValue = WaypointToString(atoi(newValue));
-        }
     }
 
-    if (newValue != actionN.params[nth]) {
+    if (actionDef.useWaypointSlot) {
+        newValue = WaypointToString(atoi(newValue));
+        if (newValue != actionN.waypoint) {
+            actionN.waypoint = newValue;
+            actionChanged = true;
+        }
+    } else if (newValue != actionN.params[nth]) {
         actionN.params[nth] = newValue;
         actionChanged = true;
     }

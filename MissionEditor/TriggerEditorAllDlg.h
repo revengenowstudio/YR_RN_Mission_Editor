@@ -6,6 +6,7 @@ class CTriggerEditorAllDlg : public CDialog
 {
 public:
     enum { IDD = IDD_TRIGGER_ALL };
+    static bool triggerWpFilterFunc(const CString& triggerCode);
 
     CTriggerEditorAllDlg(CWnd* pParent = nullptr);
 
@@ -17,7 +18,6 @@ protected:
     virtual void DoDataExchange(CDataExchange* pDX) override;
     virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
-    static bool triggerWpFilterFunc(const CString& triggerCode);
     static std::pair<CString, CString> popUpCSFViewerAndReturn(CComboBox& cb);
 
     afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);

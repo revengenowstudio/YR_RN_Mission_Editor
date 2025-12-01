@@ -110,9 +110,11 @@ void TriggerDefinitionManager::loadActionTypes(const CIniFile& ini, std::ostream
 
         item.controlCode = atoi(params[1]);
         for (auto idx = 0; idx < 5; ++idx) {
-            item.paramTypes[idx] = atoi(params[idx + 2]);
+            if (auto paramType = atoi(params[idx + 2]); paramType != 0) {
+                item.paramTypes.emplace(idx, paramType);
+            }
         }
-        item.useWaypoint = atoi(params[7]);
+        item.useWaypointSlot = atoi(params[7]);
         item.useTag = atoi(params[8]);
         item.obsolete = atoi(params[9]);
         item.tsAllowed = atoi(params[11]);
