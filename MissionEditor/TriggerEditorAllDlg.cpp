@@ -208,8 +208,8 @@ void CTriggerEditorAllDlg::oneTimeInit()
             continue;
         }
 #endif
-        // TODO: use insert string and setItem data to speed up querying
-        m_eventTypes.AddString(eventdata.brief);
+        auto const id = m_eventTypes.AddString(eventdata.brief);
+        m_eventTypes.SetItemData(id, eventid);
     }
 
     // now handles for actionTypes
@@ -297,10 +297,7 @@ void CTriggerEditorAllDlg::updateTriggerEvents()
     for (auto i = 0; i < eventCount; i++) {
         auto const eventIdx = events.Nth(i).eventType;
         auto const& brief = defMgr.Events().at(eventIdx).brief;
-        // NOTE: maybe this event list can be simplified to use add string only
-        // since events are consistent
-        auto const id = m_eventList.AddString(makeEventShortDesc(i, brief));
-        m_eventList.SetItemData(id, i);
+        m_eventList.AddString(makeEventShortDesc(i, brief));
     }
     if (cur_sel < 0) {
         cur_sel = 0;
@@ -770,23 +767,18 @@ void CTriggerEditorAllDlg::onSelChangeEvent()
         return;
     }
 
-    int eventTypeSel = m_eventList.GetCurSel();
-    if (eventTypeSel < 0) {
+    int eventIdx = m_eventList.GetCurSel();
+    if (eventIdx < 0) {
         return;
     }
-    int eventIdx = m_eventList.GetItemData(eventTypeSel);
 
     TriggerEvents events(ini.GetString("Events", m_currentTrigger));
 
     auto const& eventData = events.Nth(eventIdx);
-    CString eventTypeStr;
-    eventTypeStr.Format("%d", eventData.eventType);
 
     CString tmp;
     for (auto i = 0; i < m_eventTypes.GetCount(); i++) {
-        m_eventTypes.GetLBText(i, tmp);
-        TruncSpace(tmp);
-        if (tmp == eventTypeStr) {
+        if (m_eventTypes.GetItemData(i) == eventData.eventType) {
             m_eventTypes.SetCurSel(i);
         }
     }
@@ -800,12 +792,11 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
     if (m_currentTrigger.IsEmpty()) {
         return;
     }
-    int eventTypeSel = m_eventList.GetCurSel();
-    if (eventTypeSel < 0) {
+
+    int eventIdx = m_eventList.GetCurSel();
+    if (eventIdx < 0) {
         return;
     }
-
-    int eventIdx = m_eventList.GetItemData(eventTypeSel);
     CString eventtype;
     m_eventTypes.GetWindowText(eventtype);
     TruncSpace(eventtype);
@@ -832,12 +823,11 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
     auto const& paramType2 = triggerDefMgr.Params().at(eventDef.paramTypes[1]);
 
     { // replace line in the list:
-        m_eventList.DeleteString(eventTypeSel);
-        auto const id = m_eventList.InsertString(
-            eventTypeSel,
-            makeEventShortDesc(eventTypeSel, eventDef.brief));
-        m_eventList.SetItemData(id, eventTypeSel);
-        m_eventList.SetCurSel(eventTypeSel);
+        m_eventList.DeleteString(eventIdx);
+        m_eventList.InsertString(
+            eventIdx,
+            makeEventShortDesc(eventIdx, eventDef.brief));
+        m_eventList.SetCurSel(eventIdx);
     }
 
     if (paramType2.slotCount < 2) {// clear this slot if switching to 1 slot param
@@ -878,12 +868,10 @@ void CTriggerEditorAllDlg::onEditChangeEventValue(CMyComboBox& paramCB, size_t s
         return;
     }
 
-    int eventTypeSel = m_eventList.GetCurSel();
-    if (eventTypeSel < 0) {
+    int eventIdx = m_eventList.GetCurSel();
+    if (eventIdx < 0) {
         return;
     }
-
-    int eventIdx = m_eventList.GetItemData(eventTypeSel);
 
     CIniFile& ini = Map->GetIniFile();
     TriggerEvents events(ini.GetString("Events", m_currentTrigger));
@@ -934,7 +922,12 @@ void CTriggerEditorAllDlg::onAddEvent(TriggerEvent&& event, int slot)
     events.Insert(slot, std::move(event));
     sec.SetString(m_currentTrigger, events.Serialize());
 
-    UpdateDialog();
+    //m_eventList.InsertString(
+    //    eventIdx,
+    //    makeEventShortDesc(eventIdx, eventDef.brief));
+    // use for loop to update following events after this insert index
+
+    UpdateDialog(); // TODO: optimize, only update eventList
 
     m_eventList.SetCurSel(slot);
     onSelChangeEvent();
@@ -955,16 +948,15 @@ void CTriggerEditorAllDlg::onCloneEvent()
         return;
     }
 
-    int curEvent = m_eventList.GetCurSel();
-    if (curEvent < 0) {
+    int eventIdx = m_eventList.GetCurSel();
+    if (eventIdx < 0) {
         return;
     }
-    int eventIdx = m_eventList.GetItemData(curEvent);
 
     CIniFile& ini = Map->GetIniFile();
     TriggerEvents events(ini.GetString("Events", m_currentTrigger));
 
-    onAddEvent(TriggerEvent(events.Nth(eventIdx)), curEvent + 1);
+    onAddEvent(TriggerEvent(events.Nth(eventIdx)), eventIdx + 1);
 }
 
 void CTriggerEditorAllDlg::onDeleteEvent()
@@ -980,18 +972,17 @@ void CTriggerEditorAllDlg::onDeleteEvent()
         return;
     }
 
-    int curEvent = m_eventList.GetCurSel();
-    if (curEvent < 0) {
+    int eventIdx = m_eventList.GetCurSel();
+    if (eventIdx < 0) {
         return;
     }
-    int eventIdx = m_eventList.GetItemData(curEvent);
     TriggerEvents events(ini.GetString("Events", m_currentTrigger));
     events.DeleteAt(eventIdx);
     ini.SetString("Events", m_currentTrigger, events.Serialize());
 
     updateTriggerEvents();
     if (m_eventList.GetCount() > 0) {
-        m_eventList.SetCurSel(curEvent - 1);
+        m_eventList.SetCurSel(eventIdx - 1);
     }
 }
 
