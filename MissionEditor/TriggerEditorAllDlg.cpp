@@ -331,12 +331,8 @@ void CTriggerEditorAllDlg::updateTriggerActions()
 
     auto& defMgr = TriggerDefinitionManager::Instance();
     for (auto i = 0; i < actionCount; i++) {
-        auto const actionIdx = actions.Nth(i).ActionType();
-        auto const& brief = defMgr.Actions().at(actionIdx).brief;
-        // NOTE: maybe this action list can be simplified to use add string only
-        // since action are consistent
-        auto const id = m_actionList.AddString(makeEventShortDesc(i, brief));
-        m_actionList.SetItemData(id, i);
+        auto const& brief = actions.Nth(i).Type().brief;
+        m_actionList.AddString(makeEventShortDesc(i, brief));
     }
     if (cur_sel < 0) {
         cur_sel = 0;
@@ -1029,12 +1025,10 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
     if (m_currentTrigger.GetLength() == 0) {
         return;
     }
-    int curAction = m_actionList.GetCurSel();
-    if (curAction < 0) {
+    int curActionIdx = m_actionList.GetCurSel();
+    if (curActionIdx < 0) {
         return;
     }
-    int curActionIdx = m_actionList.GetItemData(curAction);
-
     CString actionType;
     m_actionTypes.GetWindowText(actionType);
     TruncSpace(actionType);
@@ -1059,12 +1053,11 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
     m_actionDescription.SetWindowText(actionDef.description);
 
     { // replace line in the list:
-        m_actionList.DeleteString(curAction);
+        m_actionList.DeleteString(curActionIdx);
         auto const id = m_actionList.InsertString(
-            curAction,
-            makeEventShortDesc(curAction, actionDef.brief));
-        m_actionList.SetItemData(id, curAction);
-        m_actionList.SetCurSel(curAction);
+            curActionIdx,
+            makeEventShortDesc(curActionIdx, actionDef.brief));
+        m_actionList.SetCurSel(curActionIdx);
     }
 
     bool validSlots[5] = { false };
@@ -1147,11 +1140,10 @@ bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropD
     if (m_currentTrigger.GetLength() == 0) {
         return false;
     }
-    int curAction = m_actionList.GetCurSel();
-    if (curAction < 0) {
+    int curActionIdx = m_actionList.GetCurSel();
+    if (curActionIdx < 0) {
         return false;
     }
-    int curActionIdx = m_actionList.GetItemData(curAction);
     bool actionChanged = false;
     CIniFile& ini = Map->GetIniFile();
     TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
