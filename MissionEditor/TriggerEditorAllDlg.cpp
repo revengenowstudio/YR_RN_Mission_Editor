@@ -5,6 +5,8 @@
 #include "inlines.h"
 
 extern ACTIONDATA AD; // very ugly implementation, will be refactored
+static auto constexpr SEC_EVENTS = "Events";
+static auto constexpr SEC_ACTIONS = "Actions";
 
 BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_WM_SHOWWINDOW()
@@ -289,7 +291,7 @@ void CTriggerEditorAllDlg::updateTriggerEvents()
     while (m_eventList.DeleteString(0) != CB_ERR);
 
     CIniFile& ini = Map->GetIniFile();
-    auto const& data = ini["Events"][m_currentTrigger];
+    auto const& data = ini[SEC_EVENTS][m_currentTrigger];
     TriggerEvents events(data);
     auto const eventCount = events.Size();
 
@@ -323,7 +325,7 @@ void CTriggerEditorAllDlg::updateTriggerActions()
     while (m_actionList.DeleteString(0) != CB_ERR);
 
     CIniFile& ini = Map->GetIniFile();
-    auto const& data = ini["Actions"][m_currentTrigger];
+    auto const& data = ini[SEC_ACTIONS][m_currentTrigger];
     TriggerActions actions(data);
     auto const actionCount = actions.Size();
 
@@ -384,8 +386,8 @@ void CTriggerEditorAllDlg::onNewTrigger()
 
     CString newId = GetFreeID();
     ini.SetString("Triggers", newId, Map->GetHouseID(0, TRUE) + ",<none>,New trigger,0,1,1,1,0");
-    ini.SetString("Events", newId, "0");
-    ini.SetString("Actions", newId, "0");
+    ini.SetString(SEC_EVENTS, newId, "0");
+    ini.SetString(SEC_ACTIONS, newId, "0");
 
     //if(MessageBox("Trigger created. If you want to create a simple tag now, press Yes. The tag will be called ""New tag"", you should name it like the trigger (after you have set up the trigger).","Trigger created",MB_YESNO))
     {
@@ -418,8 +420,8 @@ void CTriggerEditorAllDlg::onCloneTrigger()
 
     CString newId = GetFreeID();
     ini.SetString("Triggers", newId, ini["Triggers"][triggerId]);
-    ini.SetString("Events", newId, ini["Events"][triggerId]);
-    ini.SetString("Actions", newId, ini["Actions"][triggerId]);
+    ini.SetString(SEC_EVENTS, newId, ini[SEC_EVENTS][triggerId]);
+    ini.SetString(SEC_ACTIONS, newId, ini[SEC_ACTIONS][triggerId]);
 
     ini.SetString("Triggers", newId, SetParam(ini["Triggers"][newId], 2, GetParam(ini["Triggers"][newId], 2) + " Clone"));
 
@@ -470,9 +472,9 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
     bool deleted = false;
     deleted = ini.RemoveValueByKey("Triggers", triggerId);
     ASSERT(deleted);
-    deleted = ini.RemoveValueByKey("Events", triggerId);
+    deleted = ini.RemoveValueByKey(SEC_EVENTS, triggerId);
     ASSERT(deleted);
-    deleted = ini.RemoveValueByKey("Actions", triggerId);
+    deleted = ini.RemoveValueByKey(SEC_ACTIONS, triggerId);
     ASSERT(deleted);
     (void)deleted;
 
@@ -772,7 +774,7 @@ void CTriggerEditorAllDlg::onSelChangeEvent()
         return;
     }
 
-    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
+    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
 
     auto const& eventData = events.Nth(eventIdx);
 
@@ -808,7 +810,7 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
     }
 
     CIniFile& ini = Map->GetIniFile();
-    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
+    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
     auto& eventData = events.Nth(eventIdx);
 
     bool is4SlotEvent = false; // keep it for now, may not be necessary any more, we have safer serde
@@ -838,7 +840,7 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
     // otherwise, keep its value, no change
 
     // keep it for now. Since event type changes, param type will change accordingly 
-    ini.SetString("Events", m_currentTrigger, events.Serialize());
+    ini.SetString(SEC_EVENTS, m_currentTrigger, events.Serialize());
 
     m_eventDescription.SetWindowText(eventDef.description);
 
@@ -874,7 +876,7 @@ void CTriggerEditorAllDlg::onEditChangeEventValue(CMyComboBox& paramCB, size_t s
     }
 
     CIniFile& ini = Map->GetIniFile();
-    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
+    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
     auto& eventData = events.Nth(eventIdx);
 
     auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
@@ -896,7 +898,7 @@ void CTriggerEditorAllDlg::onEditChangeEventValue(CMyComboBox& paramCB, size_t s
         eventData.param2 = newVal;
     }
 
-    ini.SetString("Events", m_currentTrigger, events.Serialize());
+    ini.SetString(SEC_EVENTS, m_currentTrigger, events.Serialize());
 }
 
 void CTriggerEditorAllDlg::onEditChangeEventValue1()
@@ -916,8 +918,8 @@ void CTriggerEditorAllDlg::onAddEvent(TriggerEvent&& event, int slot)
     }
 
     CIniFile& ini = Map->GetIniFile();
-    CIniFileSection& sec = ini.AddSection("Events");
-    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
+    CIniFileSection& sec = ini.AddSection(SEC_EVENTS);
+    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
 
     events.Insert(slot, std::move(event));
     sec.SetString(m_currentTrigger, events.Serialize());
@@ -954,7 +956,7 @@ void CTriggerEditorAllDlg::onCloneEvent()
     }
 
     CIniFile& ini = Map->GetIniFile();
-    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
+    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
 
     onAddEvent(TriggerEvent(events.Nth(eventIdx)), eventIdx + 1);
 }
@@ -976,9 +978,9 @@ void CTriggerEditorAllDlg::onDeleteEvent()
     if (eventIdx < 0) {
         return;
     }
-    TriggerEvents events(ini.GetString("Events", m_currentTrigger));
+    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
     events.DeleteAt(eventIdx);
-    ini.SetString("Events", m_currentTrigger, events.Serialize());
+    ini.SetString(SEC_EVENTS, m_currentTrigger, events.Serialize());
 
     updateTriggerEvents();
     if (m_eventList.GetCount() > 0) {
@@ -1000,7 +1002,7 @@ void CTriggerEditorAllDlg::onSelChangeAction()
     }
     int actionIdx = m_actionList.GetItemData(curAction);
 
-    TriggerActions actions(ini.GetString("Actions", m_currentTrigger));
+    TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
     auto const& actionN = actions.Nth(actionIdx);
 
     auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
@@ -1044,7 +1046,7 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
 
     bool actionChanged = false;
     CIniFile& ini = Map->GetIniFile();
-    TriggerActions actions(ini.GetString("Actions", m_currentTrigger));
+    TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
     auto& actionN = actions.Nth(curActionIdx);
 
     auto const newActionTypeIdx = atoi(actionType);
@@ -1113,7 +1115,7 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
 
     // write back action at one time
     if (actionChanged) {
-        ini.SetString("Actions", m_currentTrigger, actions.Serialize());
+        ini.SetString(SEC_ACTIONS, m_currentTrigger, actions.Serialize());
     }
 }
 
@@ -1152,7 +1154,7 @@ bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropD
     int curActionIdx = m_actionList.GetItemData(curAction);
     bool actionChanged = false;
     CIniFile& ini = Map->GetIniFile();
-    TriggerActions actions(ini.GetString("Actions", m_currentTrigger));
+    TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
     auto& actionN = actions.Nth(curActionIdx);
     auto& actionParamCB = m_actionParam[nth];
 
@@ -1185,7 +1187,7 @@ bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropD
     }
 
     if (actionChanged) {
-        ini.SetString("Actions", m_currentTrigger, actions.Serialize());
+        ini.SetString(SEC_ACTIONS, m_currentTrigger, actions.Serialize());
     }
     return popUpHandled;
 }
@@ -1225,7 +1227,7 @@ void CTriggerEditorAllDlg::onAddAction(TriggerAction&& action, int slot)
 
     // TODO: verify
     CIniFile& ini = Map->GetIniFile();
-    auto& sec = ini.AddSection("Actions");
+    auto& sec = ini.AddSection(SEC_ACTIONS);
 
     TriggerActions actions(sec.GetString(m_currentTrigger));
     actions.Insert(slot, std::move(action));
@@ -1253,7 +1255,7 @@ void CTriggerEditorAllDlg::onCloneAction()
         return;
     }
     CIniFile& ini = Map->GetIniFile();
-    TriggerActions actions(ini.GetString("Actions", m_currentTrigger));
+    TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
 
     onAddAction(TriggerAction(actions.Nth(actionIdx)), actionIdx + 1);
 }
@@ -1273,12 +1275,12 @@ void CTriggerEditorAllDlg::onDeleteAction()
         return;
     }
     CIniFile& ini = Map->GetIniFile();
-    TriggerActions actions(ini.GetString("Actions", m_currentTrigger));
+    TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
     actions.DeleteAt(actionIdx);
-    ini.SetString("Events", m_currentTrigger, actions.Serialize());
+    ini.SetString(SEC_ACTIONS, m_currentTrigger, actions.Serialize());
 
-    updateTriggerEvents();
-    if (m_eventList.GetCount() > 0) {
-        m_eventList.SetCurSel(actionIdx - 1);
+    updateTriggerActions();
+    if (m_actionList.GetCount() > 0) {
+        m_actionList.SetCurSel(actionIdx - 1);
     }
 }
