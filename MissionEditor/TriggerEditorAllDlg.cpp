@@ -998,7 +998,7 @@ void CTriggerEditorAllDlg::onDeleteEvent()
 // ========================== Trigger Actions ==========================
 bool CTriggerEditorAllDlg::triggerWpFilterFunc(const CString& triggerCode)
 {
-    return g_data["DontSaveAsWP"].HasValue(triggerCode);
+    return !g_data["DontSaveAsWP"].HasValue(triggerCode);
 }
 
 void CTriggerEditorAllDlg::onSelChangeAction()

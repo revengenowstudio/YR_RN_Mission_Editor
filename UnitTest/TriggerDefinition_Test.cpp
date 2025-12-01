@@ -140,7 +140,7 @@ TEST(TriggerActionTest, ActionSerde)
     filterSec.SetString("3", "11");
 
     auto filterFunc = [&wpFilterIni](const CString& id) {
-        return wpFilterIni["DontSaveAsWP"].HasValue(id);
+        return !wpFilterIni["DontSaveAsWP"].HasValue(id);
     };
     // 2 events
     {
@@ -176,5 +176,14 @@ TEST(TriggerActionTest, ActionSerde)
         EXPECT_EQ(actions.Serialize(), data);
     }
 
+    // action 129
+    {
+        const CString data = "4,129,11,31,0,0,0,0,91,11,4,mission:usa01_21,0,0,0,0,A,19,7,WarningAlarm,0,0,0,0,A,53,2,01000042,0,0,0,0,A";
+        TriggerActions actions(data, filterFunc);
+
+        EXPECT_EQ(actions.Size(), 4);
+        EXPECT_EQ(actions.Nth(0).lastParamIsWaypoint, false);
+        EXPECT_EQ(actions.Nth(0).waypoint, "91");
+    }
 
 }
