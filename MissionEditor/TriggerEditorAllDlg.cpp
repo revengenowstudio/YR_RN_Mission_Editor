@@ -1065,14 +1065,7 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
         m_actionList.SetCurSel(curAction);
     }
 
-    // reset first
-    for (auto i = 0; i < 5; i++) {
-        CString translationLabel;
-        translationLabel.Format("TriggerParameter#%dvalue", i + 1);
-        m_actionParamTexts[i]->SetWindowText(TranslateStringACP(translationLabel));
-        HandleParamList(m_actionParam[i], PARAMTYPE_NOTHING);
-        m_actionParam[i].EnableWindow(FALSE);
-    }
+    bool validSlots[5] = { false };
 
     int slot = 0;
     for (auto const& [paramSlot, paramType] : actionDef.paramTypes) {
@@ -1081,6 +1074,7 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
         HandleParamList(m_actionParam[slot], paramDef.listType);
         m_actionParam[slot].SetWindowText(actionN.Params()[paramSlot]);
         m_actionParam[slot].EnableWindow(TRUE);
+        validSlots[slot] = true;
         slot++;
     }
 
@@ -1095,7 +1089,21 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
         }
         m_actionParam[slot].SetWindowText(actionN.WaypointString());
         m_actionParam[slot].EnableWindow(TRUE);
+        validSlots[slot] = true;
         slot++;
+    }
+
+    // reset unused
+    for (auto i = 0; i < 5; i++) {
+        if (validSlots[i]) {
+            continue;
+        }
+        CString translationLabel;
+        translationLabel.Format("TriggerParameter#%dvalue", i + 1);
+        m_actionParamTexts[i]->SetWindowText(TranslateStringACP(translationLabel));
+        HandleParamList(m_actionParam[i], PARAMTYPE_NOTHING);
+        m_actionParam[i].SetWindowText("");
+        m_actionParam[i].EnableWindow(FALSE);
     }
 
     // seems no action uses tag
