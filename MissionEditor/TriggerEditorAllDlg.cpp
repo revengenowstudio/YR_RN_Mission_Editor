@@ -1224,7 +1224,7 @@ void CTriggerEditorAllDlg::onAddAction(TriggerAction&& action, int slot)
 
     sec.SetString(m_currentTrigger, actions.Serialize());
 
-    UpdateDialog();
+    UpdateDialog(); // TODO: optimize, only update actionList
 
     m_actionList.SetCurSel(slot);
     onSelChangeAction();
