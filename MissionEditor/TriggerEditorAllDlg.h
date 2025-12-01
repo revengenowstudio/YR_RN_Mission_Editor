@@ -6,7 +6,6 @@ class CTriggerEditorAllDlg : public CDialog
 {
 public:
     enum { IDD = IDD_TRIGGER_ALL };
-    static bool triggerWpFilterFunc(const CString& triggerCode);
 
     CTriggerEditorAllDlg(CWnd* pParent = nullptr);
 

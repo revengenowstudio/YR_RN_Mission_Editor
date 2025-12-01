@@ -208,7 +208,7 @@ CString TriggerEvents::Serialize()
     return ret;
 }
 
-TriggerActions::TriggerActions(const CString& fullData, const WpFilterFunc& filter)
+TriggerActions::TriggerActions(const CString& fullData)
 {
     if (fullData.IsEmpty()) {
         return;
@@ -238,8 +238,9 @@ TriggerActions::TriggerActions(const CString& fullData, const WpFilterFunc& filt
         }
         auto wpStr = params[idx++];
         action.waypoint = IsWaypointFormat(wpStr) ? StringToWaypoint(wpStr) : atoi(wpStr);
-        action.lastParamIsWaypoint = filter(actionCodeStr);
         action.actionCode = atoi(actionCodeStr);
+        action.lastParamIsWaypoint = TriggerDefinitionManager::Instance().
+            IsActionUsingWaypointEncoding(action.actionCode);
     }
 }
 

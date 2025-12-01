@@ -135,10 +135,7 @@ private:
 class TriggerActions
 {
 public:
-    // return true means is waypoint
-    using WpFilterFunc = std::function<bool(const CString& actionType)>;
-
-    TriggerActions(const CString& fullData, const WpFilterFunc& filter);
+    TriggerActions(const CString& fullData);
 
     auto Size() const { return actions.size(); }
     TriggerAction& Nth(size_t idx) { return actions.at(idx); }
@@ -165,10 +162,15 @@ public:
     auto const& Events() const { return m_eventTypes; }
     auto const& Params() const { return m_paramTypes; }
 
+    bool IsActionUsingWaypointEncoding(const int controlCode) const
+    {
+        return !m_waypointEncodingExceptions.contains(controlCode);
+    }
     bool IsActionUsingWaypointEncoding(const TriggerActionType& actionType) const
     {
-        return !m_waypointEncodingExceptions.contains(abs(actionType.controlCode));
+        return IsActionUsingWaypointEncoding(abs(actionType.controlCode));
     }
+
 
 private:
     void loadParamTypes(const CIniFile& ini, std::ostream& err);

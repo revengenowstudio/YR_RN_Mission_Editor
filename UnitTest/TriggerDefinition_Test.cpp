@@ -222,7 +222,7 @@ TEST(TriggerActionTest, ActionSerde)
     // 2 events
     {
         const CString data = "2,11,4,mission:usa01_07,0,0,0,0,A,53,2,01000020,0,0,0,0,A";
-        TriggerActions actions(data, filterFunc);
+        TriggerActions actions(data);
 
 
         EXPECT_EQ(actions.Size(), 2);
@@ -238,7 +238,7 @@ TEST(TriggerActionTest, ActionSerde)
     // 7 events
     {
         const CString data = "7,3,0,9,0,0,0,0,A,13,0,9,0,0,0,0,A,74,0,9,0,0,0,0,A,53,2,01000413,0,0,0,0,A,53,2,01000424,0,0,0,0,A,76,0,50,0,0,0,0,A,53,2,01000553,0,0,0,0,A";
-        TriggerActions actions(data, filterFunc);
+        TriggerActions actions(data);
 
         EXPECT_EQ(actions.Size(), 7);
         EXPECT_EQ(actions.Nth(0).ActionType(), 3);
@@ -256,7 +256,7 @@ TEST(TriggerActionTest, ActionSerde)
     // action 129
     {
         const CString data = "4,129,11,31,0,0,0,0,91,11,4,mission:usa01_21,0,0,0,0,A,19,7,WarningAlarm,0,0,0,0,A,53,2,01000042,0,0,0,0,A";
-        TriggerActions actions(data, filterFunc);
+        TriggerActions actions(data);
 
         EXPECT_EQ(actions.Size(), 4);
         EXPECT_EQ(actions.Nth(0).IsUsingWaypointEncoding(), false);

@@ -327,7 +327,7 @@ void CTriggerEditorAllDlg::updateTriggerActions()
 
     CIniFile& ini = Map->GetIniFile();
     auto const& data = ini["Actions"][m_currentTrigger];
-    TriggerActions actions(data, triggerWpFilterFunc);
+    TriggerActions actions(data);
     auto const actionCount = actions.Size();
 
     auto& defMgr = TriggerDefinitionManager::Instance();
@@ -996,18 +996,6 @@ void CTriggerEditorAllDlg::onDeleteEvent()
 }
 
 // ========================== Trigger Actions ==========================
-bool CTriggerEditorAllDlg::triggerWpFilterFunc(const CString& triggerCode)
-{
-    return !g_data["DontSaveAsWP"].HasValue(triggerCode);
-}
-
-bool triggerWpFilterFunc(const int triggerCode)
-{
-    CString codeStr;
-    codeStr.Format("%d", triggerCode);
-    return CTriggerEditorAllDlg::triggerWpFilterFunc(codeStr);
-}
-
 void CTriggerEditorAllDlg::onSelChangeAction()
 {
     CIniFile& ini = Map->GetIniFile();
@@ -1021,7 +1009,7 @@ void CTriggerEditorAllDlg::onSelChangeAction()
     }
     int actionIdx = m_actionList.GetItemData(curAction);
 
-    TriggerActions actions(ini.GetString("Actions", m_currentTrigger), triggerWpFilterFunc);
+    TriggerActions actions(ini.GetString("Actions", m_currentTrigger));
     auto const& actionN = actions.Nth(actionIdx);
 
     auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
@@ -1065,7 +1053,7 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
 
     bool actionChanged = false;
     CIniFile& ini = Map->GetIniFile();
-    TriggerActions actions(ini.GetString("Actions", m_currentTrigger), triggerWpFilterFunc);
+    TriggerActions actions(ini.GetString("Actions", m_currentTrigger));
     auto& actionN = actions.Nth(curActionIdx);
 
     auto const newActionTypeIdx = atoi(actionType);
@@ -1165,7 +1153,7 @@ bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropD
     int curActionIdx = m_actionList.GetItemData(curAction);
     bool actionChanged = false;
     CIniFile& ini = Map->GetIniFile();
-    TriggerActions actions(ini.GetString("Actions", m_currentTrigger), triggerWpFilterFunc);
+    TriggerActions actions(ini.GetString("Actions", m_currentTrigger));
     auto& actionN = actions.Nth(curActionIdx);
     auto& actionParamCB = m_actionParam[nth];
 
@@ -1240,7 +1228,7 @@ void CTriggerEditorAllDlg::onAddAction(TriggerAction&& action, int slot)
     CIniFile& ini = Map->GetIniFile();
     auto& sec = ini.AddSection("Actions");
 
-    TriggerActions actions(sec.GetString(m_currentTrigger), triggerWpFilterFunc);
+    TriggerActions actions(sec.GetString(m_currentTrigger));
     actions.Insert(slot, std::move(action));
 
     sec.SetString(m_currentTrigger, actions.Serialize());
