@@ -929,7 +929,7 @@ void CTriggerEditorAllDlg::onAddEvent(TriggerEvent&& event, int slot)
     //    makeEventShortDesc(eventIdx, eventDef.brief));
     // use for loop to update following events after this insert index
 
-    UpdateDialog(); // TODO: optimize, only update eventList
+    updateTriggerEvents(); // TODO: optimize, only update eventList
 
     m_eventList.SetCurSel(slot);
     onSelChangeEvent();
@@ -1234,7 +1234,7 @@ void CTriggerEditorAllDlg::onAddAction(TriggerAction&& action, int slot)
 
     sec.SetString(m_currentTrigger, actions.Serialize());
 
-    UpdateDialog(); // TODO: optimize, only update actionList
+    updateTriggerActions(); // TODO: optimize, only update actionList
 
     m_actionList.SetCurSel(slot);
     onSelChangeAction();
