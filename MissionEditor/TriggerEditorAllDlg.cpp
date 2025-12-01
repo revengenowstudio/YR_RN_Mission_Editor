@@ -229,8 +229,8 @@ void CTriggerEditorAllDlg::oneTimeInit()
             continue;
         }
 #endif
-        // TODO: use insert string and setItem data to speed up querying
-        m_actionTypes.AddString(actionDef.brief);
+        auto const id = m_actionTypes.AddString(actionDef.brief);
+        m_actionTypes.SetItemData(id, actionId);
     }
 }
 
@@ -1001,18 +1001,10 @@ void CTriggerEditorAllDlg::onSelChangeAction()
     TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
     auto const& actionN = actions.Nth(actionIdx);
 
-    auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
-    auto const& actionDef = triggerDefMgr.Actions().at(actionN.ActionType());
-
-    CString actionTypeStr;
-    actionTypeStr.Format("%d", actionN.ActionType());
     //m_actionTypes.SetWindowText(makeEventShortDesc(actionN.actionType, actionDef.brief));
 
     for (auto idx = 0; idx < m_actionTypes.GetCount(); idx++) {
-        CString actionShortDesc;
-        m_actionTypes.GetLBText(idx, actionShortDesc);
-        TruncSpace(actionShortDesc);
-        if (actionShortDesc == actionTypeStr) {
+        if (m_actionTypes.GetItemData(idx) == actionN.ActionType()) {
             m_actionTypes.SetCurSel(idx);
         }
     }
