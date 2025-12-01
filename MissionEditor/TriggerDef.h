@@ -5,14 +5,18 @@
 #include <ostream>
 #include <optional>
 #include <functional>
+#include <unordered_set>
 
 class CIniFile;
 class TriggerEvents;
+class TriggerActions;
 
 struct ParamType 
 {
+    static const ParamType Default;
+
     CString paramName;
-    int listType{ 0 };
+    int listType{ 0 }; // PARAMTYPE_NOTHING
     int slotCount{ 0 }; // usually 0. Seems 2 is specially meaningful
 };
 
@@ -72,12 +76,58 @@ private:
     std::vector<TriggerEvent> events;
 };
 
-struct TriggerAction
+// TODO: change to class, use methods to access member and trigger def info
+class TriggerAction
 {
+public:
+    class ParamOperator
+    {
+    public:
+        const CString& Brief() const;
+        const CString& Description() const;
+        int ListType() const;
+
+        ParamOperator(TriggerAction& action, int nth);
+
+        bool Assign(const CString& val);
+
+    private:
+        static const ParamType& lookUpParamType(TriggerAction& action, int nth);
+
+        TriggerAction& action;
+        const ParamType& type;
+        const int nth;
+    };
+
+    TriggerAction() :
+        actionType(0),
+        actionCode(0),
+        params {
+            '0', '0', '0', '0', '0',
+        }
+    {}
+
+    bool SetActionType(const int newType);
+    bool SetActionCode(const int newCode);
+    bool SetWaypoint(const int id);
+    ParamOperator ParamNth(int nth);
+
+    auto const ActionType() const { return actionType; } // TODO: rename to TypeIndex
+    auto const ActionCode() const { return actionCode; }
+    const int Waypoint() const { return waypoint; }
+    CString WaypointString() const;
+    auto const& Params() const { return params; }
+    auto const IsUsingWaypointEncoding() const { return lastParamIsWaypoint; }
+
+    const TriggerActionType& Type() const;
+
+private:
+    friend class TriggerActions;
+
     int actionType{ 0 };
     int actionCode{ 0 }; // no idea yet, implies how param slots are used
     std::array<CString, 5> params;
-    CString waypoint{ 'A' }; // here 'A' means 0
+    int waypoint{ 0 }; // use WaypointString to get correctly encoded data
     bool lastParamIsWaypoint{ true };
 };
 
@@ -115,13 +165,32 @@ public:
     auto const& Events() const { return m_eventTypes; }
     auto const& Params() const { return m_paramTypes; }
 
+    bool IsActionUsingWaypointEncoding(const TriggerActionType& actionType) const
+    {
+        return !m_waypointEncodingExceptions.contains(abs(actionType.controlCode));
+    }
+
 private:
     void loadParamTypes(const CIniFile& ini, std::ostream& err);
     void loadEventTypes(const CIniFile& ini, std::ostream& err);
     void loadActionTypes(const CIniFile& ini, std::ostream& err);
+    void loadWaypointExceptions(const CIniFile& ini);
 
     // we need asc order of ids
     std::map<int, ParamType> m_paramTypes;
     std::map<int, TriggerEventType> m_eventTypes;
     std::map<int, TriggerActionType> m_actionTypes;
+    std::unordered_set<int> m_waypointEncodingExceptions;
+};
+
+class TriggerDatabase
+{
+public:
+    static TriggerDatabase& Instance();
+
+    TriggerDatabase() = default;
+    TriggerDatabase(const TriggerDatabase&) = delete;
+
+private:
+    std::map<CString, TriggerActions> items;
 };

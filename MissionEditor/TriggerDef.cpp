@@ -1,6 +1,10 @@
 #include "StdAfx.h"
 #include "TriggerDef.h"
 #include "inlines.h"
+#include "Helpers.h"
+#include <format>
+
+const ParamType ParamType::Default;
 
 TriggerDefinitionManager& TriggerDefinitionManager::Instance()
 {
@@ -13,6 +17,15 @@ void TriggerDefinitionManager::LoadFrom(const CIniFile& ini, std::ostream& err)
     loadParamTypes(ini, err);
     loadEventTypes(ini, err);
     loadActionTypes(ini, err);
+    loadWaypointExceptions(ini);
+}
+
+static bool IsWaypointFormat(const CString& s)
+{
+    if (s.IsEmpty()) {
+        return true;
+    }
+    return s[0] >= 'A' && s[0] <= 'Z';
 }
 
 void TriggerDefinitionManager::loadParamTypes(const CIniFile& ini, std::ostream& err)
@@ -131,6 +144,13 @@ void TriggerDefinitionManager::loadActionTypes(const CIniFile& ini, std::ostream
     }
 }
 
+void TriggerDefinitionManager::loadWaypointExceptions(const CIniFile& ini)
+{
+    for (auto const [_, actionCode] : ini["DontSaveAsWP"]) {
+        m_waypointEncodingExceptions.emplace(atoi(actionCode));
+    }
+}
+
 TriggerEvents::TriggerEvents(const CString& fullData)
 {
     if (fullData.IsEmpty()) {
@@ -158,7 +178,7 @@ TriggerEvents::TriggerEvents(const CString& fullData)
             eventType,
             p1,
             p2
-           );
+        );
     }
 }
 
@@ -216,10 +236,11 @@ TriggerActions::TriggerActions(const CString& fullData, const WpFilterFunc& filt
         for (auto& param : action.params) {
             param = params[idx++];
         }
-        action.waypoint = params[idx++];
+        auto wpStr = params[idx++];
+        action.waypoint = IsWaypointFormat(wpStr) ? StringToWaypoint(wpStr) : atoi(wpStr);
         action.lastParamIsWaypoint = filter(actionCodeStr);
         action.actionCode = atoi(actionCodeStr);
-    } 
+    }
 }
 
 CString TriggerActions::Serialize()
@@ -233,16 +254,125 @@ CString TriggerActions::Serialize()
 
     CString typeStr;
     for (auto const& action : actions) {
-        typeStr.Format("%d,%d,", action.actionType, action.actionCode);
+        typeStr.Format("%d,%d,", action.ActionType(), action.ActionCode());
         ret += typeStr;
-        for (auto const& item : action.params) {
+        for (auto const& item : action.Params()) {
             ret += item;
             ret += ',';
         }
         // TODO: adjust according to lastParamIsWaypoint
-        ret += action.waypoint;
+        ret += action.WaypointString();
         ret += ',';
     }
     ret.TrimRight(',');
     return ret;
+}
+
+TriggerDatabase& TriggerDatabase::Instance()
+{
+    static TriggerDatabase inst;
+    return inst;
+}
+
+bool TriggerAction::SetActionType(const int newType)
+{
+    bool changed = false;
+    if (newType != this->actionType) {
+        this->actionType = newType;
+        changed = true;
+    }
+    // this type would have new code
+    changed |= SetActionCode(abs(Type().controlCode));
+    return changed;
+}
+
+bool TriggerAction::SetActionCode(const int newCode)
+{
+    if (this->actionCode == newCode) {
+        return false;
+    }
+    auto const useWpEncoding = TriggerDefinitionManager::Instance().
+        IsActionUsingWaypointEncoding(Type());
+    this->actionCode = newCode;
+    this->lastParamIsWaypoint = useWpEncoding;
+    return true;
+}
+
+bool TriggerAction::SetWaypoint(const int id)
+{
+    if (id != waypoint) {
+        waypoint = id;
+        return true;
+    }
+    return false;
+}
+
+TriggerAction::ParamOperator TriggerAction::ParamNth(int nth)
+{
+    return ParamOperator(*this, nth);
+}
+
+CString TriggerAction::WaypointString() const
+{
+    auto const& type = Type();
+    auto const useWpEncoding = TriggerDefinitionManager::Instance().
+        IsActionUsingWaypointEncoding(type);
+
+    if (useWpEncoding) {
+        return WaypointToString(waypoint);
+    }
+    CString ret;
+    ret.Format("%d", waypoint);
+    return ret;
+}
+
+const TriggerActionType& TriggerAction::Type() const
+{
+    try {
+        return TriggerDefinitionManager::Instance().Actions().at(actionType);
+    } catch (...) {
+        throw std::runtime_error(std::format("action type {} is not registered", actionType));
+    }
+}
+
+const CString& TriggerAction::ParamOperator::Brief() const
+{
+    return action.Type().brief;
+}
+
+const CString& TriggerAction::ParamOperator::Description() const
+{
+    return action.Type().description;
+}
+
+int TriggerAction::ParamOperator::ListType() const
+{
+    return type.listType;
+}
+
+TriggerAction::ParamOperator::ParamOperator(TriggerAction& action, int nth) :
+    action(action),
+    type(lookUpParamType(action, nth)),
+    nth(nth)
+{
+}
+
+bool TriggerAction::ParamOperator::Assign(const CString& val)
+{
+    if (val != action.params[nth]) {
+        action.params[nth] = val;
+        return true;
+    }
+    return false;
+}
+
+const ParamType& TriggerAction::ParamOperator::lookUpParamType(TriggerAction& action, int nth)
+{
+    auto const& paramTypes = action.Type().paramTypes;
+    if (nth < paramTypes.size()) {
+        auto const paramTypeIdx = paramTypes.at(nth);
+       return TriggerDefinitionManager::Instance().Params().at(paramTypeIdx);
+
+    }
+    return ParamType::Default;
 }

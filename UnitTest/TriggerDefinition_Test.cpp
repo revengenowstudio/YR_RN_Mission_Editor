@@ -137,14 +137,87 @@ TEST(TriggerEventTest, EventsSerde)
 TEST(TriggerActionTest, ActionSerde)
 {
 
-    CIniFile wpFilterIni;
-    auto& filterSec = wpFilterIni.AddSection("DontSaveAsWP");
-    filterSec.SetString("0", "5");
-    filterSec.SetString("1", "9");
-    filterSec.SetString("3", "11");
+    std::stringstream testIniContent;
+    testIniContent <<
+        R"(
+[DontSaveAsWP]
+0=5
+1=9
+;2=10
+3=11
 
-    auto filterFunc = [&wpFilterIni](const CString& id) {
-        return !wpFilterIni["DontSaveAsWP"].HasValue(id);
+[ParamTypes]
+-1=Unused,0,1;not listed in FA2
+0=Nothing,0
+1=Unknown,0
+2=Affiliated Side,1
+3=Local Variable,20
+4=Time,0
+5=Score,0
+6=Value,0
+7=Squad Type,2
+8=Building,6
+9=Aircraft,5
+10=Infantry,4
+11=Unit,3
+12=Movie,7
+13=Text,8
+14=Trigger,9
+15=Allowed,10
+16=Sound,11
+17=Music,12
+18=Voice,13
+19=Step,0
+20=Super Weapon,14
+21=Left,0
+22=Top,0
+23=Width,0
+24=Height,0
+25=Animation,15
+26=Particle,16
+27=Duration,0
+28=Speed,0
+29=Voxel Fragment ID,29
+30=Way Point,17
+31=Wooden Crate Type,18
+32=Voice Prompt Box,19
+33=Character,21
+34=Action,9
+35=Global Variable,27
+36=Specific Weapon,14
+37=Activated,10
+38=Trigger Tag,22
+39=Technology Type,0
+40=Source,0
+41=Weapon,24
+42=Glow Behavior,25
+43=Event,9
+44=Rain,26
+45=Float Value,0
+46=Technology Type,29
+47=Building,28
+48=Value,0,2
+49=Pixel Animation,23
+50=Film,7
+
+[ActionsRA2]
+3=Begin production...,0,2,0,0,0,0,0,0,0,AI begin production,0,1,3
+11=CSF Text...,-4,13,2,6,0,0,0,0,0,You know the usage,0,1,11
+13=(Unused)Auto create starts...,0,2,0,0,0,0,0,0,0,AI starts auto create,0,1,13
+53=Enable trigger,-2,14,0,0,0,0,0,0,0,Enable a trigger,0,1,53
+74=AI Trigger begins...,0,2,0,0,0,0,0,0,0,Enable house AI,0,1,74
+76=AI team rating...,0,6,0,0,0,0,0,0,0,AI global trigger preference rate,0,1,76
+129=Set SW Charge Percentage,-11,20,0,0,0,0,1,0,0,This will set owner's Superweapon percentage,0,1,129
+)";
+
+    CIniFile ini;
+    EXPECT_EQ(ini.InsertStream(testIniContent), 0);
+
+    auto& mgr = TriggerDefinitionManager::Instance();
+    mgr.LoadFrom(ini, std::cerr);
+
+    auto filterFunc = [&ini](const CString& id) {
+        return !ini["DontSaveAsWP"].HasValue(id);
     };
     // 2 events
     {
@@ -153,12 +226,12 @@ TEST(TriggerActionTest, ActionSerde)
 
 
         EXPECT_EQ(actions.Size(), 2);
-        EXPECT_EQ(actions.Nth(0).actionType, 11);
-        EXPECT_EQ(actions.Nth(0).actionCode, 4);
-        EXPECT_EQ(actions.Nth(0).params[0], "mission:usa01_07");
-        EXPECT_EQ(actions.Nth(1).actionType, 53);
-        EXPECT_EQ(actions.Nth(1).actionCode, 2);
-        EXPECT_EQ(actions.Nth(1).params[0], "01000020");
+        EXPECT_EQ(actions.Nth(0).ActionType(), 11);
+        EXPECT_EQ(actions.Nth(0).ActionCode(), 4);
+        EXPECT_EQ(actions.Nth(0).Params()[0], "mission:usa01_07");
+        EXPECT_EQ(actions.Nth(1).ActionType(), 53);
+        EXPECT_EQ(actions.Nth(1).ActionCode(), 2);
+        EXPECT_EQ(actions.Nth(1).Params()[0], "01000020");
 
         EXPECT_EQ(actions.Serialize(), data);
     }
@@ -168,14 +241,14 @@ TEST(TriggerActionTest, ActionSerde)
         TriggerActions actions(data, filterFunc);
 
         EXPECT_EQ(actions.Size(), 7);
-        EXPECT_EQ(actions.Nth(0).actionType, 3);
-        EXPECT_EQ(actions.Nth(1).actionType, 13);
-        EXPECT_EQ(actions.Nth(2).actionType, 74);
-        EXPECT_EQ(actions.Nth(3).actionType, 53);
-        EXPECT_EQ(actions.Nth(4).actionType, 53);
-        EXPECT_EQ(actions.Nth(5).actionType, 76);
-        EXPECT_EQ(actions.Nth(6).params[0], "01000553");
-        EXPECT_EQ(actions.Nth(6).actionType, 53);
+        EXPECT_EQ(actions.Nth(0).ActionType(), 3);
+        EXPECT_EQ(actions.Nth(1).ActionType(), 13);
+        EXPECT_EQ(actions.Nth(2).ActionType(), 74);
+        EXPECT_EQ(actions.Nth(3).ActionType(), 53);
+        EXPECT_EQ(actions.Nth(4).ActionType(), 53);
+        EXPECT_EQ(actions.Nth(5).ActionType(), 76);
+        EXPECT_EQ(actions.Nth(6).Params()[0], "01000553");
+        EXPECT_EQ(actions.Nth(6).ActionType(), 53);
 
         EXPECT_EQ(actions.Serialize(), data);
     }
@@ -186,8 +259,8 @@ TEST(TriggerActionTest, ActionSerde)
         TriggerActions actions(data, filterFunc);
 
         EXPECT_EQ(actions.Size(), 4);
-        EXPECT_EQ(actions.Nth(0).lastParamIsWaypoint, false);
-        EXPECT_EQ(actions.Nth(0).waypoint, "91");
+        EXPECT_EQ(actions.Nth(0).IsUsingWaypointEncoding(), false);
+        EXPECT_EQ(actions.Nth(0).WaypointString(), "91");
     }
 
 }
