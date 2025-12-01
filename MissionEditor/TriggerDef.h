@@ -70,7 +70,7 @@ public:
         return *events.emplace(events.begin() + slot, std::move(event));
     }
 
-    CString Serialize();
+    CString Serialize() const;
 
 private:
     std::vector<TriggerEvent> events;
@@ -145,7 +145,7 @@ public:
         return *actions.emplace(actions.begin() + slot, std::move(event));
     }
 
-    CString Serialize();
+    CString Serialize() const;
 
 private:
     std::vector<TriggerAction> actions;

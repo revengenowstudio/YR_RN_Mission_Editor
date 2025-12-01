@@ -34,6 +34,7 @@
 #include "Tube.h"
 #include "IniMega.h"
 #include "Helpers.h"
+#include "TriggerDatabase.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -913,7 +914,7 @@ void CMapData::LoadMap(const CString& file)
 
 
 	UpdateIniFile(MAPDATA_UPDATE_FROM_INI);
-
+	TriggerDatabase::Instance().LoadFrom(m_mapfile, errstream);
 }
 
 
@@ -921,8 +922,9 @@ void CMapData::LoadMap(const CString& file)
 
 void CMapData::Unpack()
 {
-	if (!isInitialized) return;
-
+	if (!isInitialized) {
+		return;
+	}
 	CMapLoadingDlg d;
 	d.ShowWindow(SW_SHOW);
 	d.UpdateWindow();

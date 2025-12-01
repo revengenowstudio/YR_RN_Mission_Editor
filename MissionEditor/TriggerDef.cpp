@@ -3,6 +3,7 @@
 #include "inlines.h"
 #include "Helpers.h"
 #include <format>
+#include "TriggerDatabase.h"
 
 const ParamType ParamType::Default;
 
@@ -182,7 +183,7 @@ TriggerEvents::TriggerEvents(const CString& fullData)
     }
 }
 
-CString TriggerEvents::Serialize()
+CString TriggerEvents::Serialize() const
 {
     constexpr int perEventDataBufferSize = 32;
 
@@ -244,7 +245,7 @@ TriggerActions::TriggerActions(const CString& fullData)
     }
 }
 
-CString TriggerActions::Serialize()
+CString TriggerActions::Serialize() const
 {
     constexpr int perEventDataBufferSize = 32;
 

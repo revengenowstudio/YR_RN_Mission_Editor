@@ -1,4 +1,5 @@
 #pragma once
+#include "TriggerDef.h"
 #include "IniFile.h"
 
 class TagInstance
@@ -11,6 +12,8 @@ private:
 class TriggerOptions
 {
 public:
+    CString Serialize() const;
+
 
 private:
 };
@@ -18,11 +21,17 @@ private:
 class TriggerInstance
 {
 public:
-    TriggerInstance(const CIniFile& ini, std::ostream& err);
+    TriggerInstance(const CString& id);
+    TriggerInstance(const CString& id, const CIniFile& ini);
 
-    CString Serialize();
+    const CString& ID() const { return id; }
+
+    auto& Options() { return options; }
+    auto& Events() { return events; }
+    auto& Actions() { return actions; }
 
 private:
+    CString id;
     TriggerOptions options;
     TriggerEvents events;
     TriggerActions actions;
@@ -33,10 +42,17 @@ class TriggerDatabase
 public:
     static TriggerDatabase& Instance();
 
+    std::optional<TriggerInstance&> Lookup(const CString& id);
+    TriggerInstance& InsertAt(size_t slot, CString&& id = {});
+
+    void LoadFrom(const CIniFile& ini, std::ostream& err);
+    void SaveInto(CIniFile& ini, std::ostream& err);
+
     TriggerDatabase() = default;
     TriggerDatabase(const TriggerDatabase&) = delete;
 
 private:
     std::vector<TriggerInstance> items;
-    std::unordered_map<CString, size_t, CStringHash> lookupTable; // ID - index of items
+    std::map<CString, size_t> lookupTable; // ID - index of items
+    // TODO: consider tags
 };

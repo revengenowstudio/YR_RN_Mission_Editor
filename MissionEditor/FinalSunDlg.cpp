@@ -53,7 +53,7 @@
 #include "MapCode.h"
 #include "SearchWaypointDlg.h"
 #include "userscriptsdlg.h"
-
+#include "TriggerDatabase.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -915,11 +915,12 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 	// MW Apr 17th, 2002: Added Teamgame!
 	BOOL teamgame;
 
-	if (CoreName.ReverseFind('\\') >= 0) CoreName = CoreName.Right(CoreName.GetLength() - CoreName.ReverseFind('\\') - 1);
-	if (CoreName.Find(".") >= 0) CoreName = CoreName.Left(CoreName.Find("."));
-
-
-
+	if (CoreName.ReverseFind('\\') >= 0) {
+		CoreName = CoreName.Right(CoreName.GetLength() - CoreName.ReverseFind('\\') - 1);
+	}
+	if (CoreName.Find(".") >= 0) {
+		CoreName = CoreName.Left(CoreName.Find("."));
+	}
 
 #ifdef RA2_MODE
 	if (Map->IsMultiplayer()) {
@@ -1144,9 +1145,9 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 	dlg.UpdateWindow();
 	Map->UpdateIniFile(dwFlags);
 
-
-
 	CIniFile& ini = Map->GetIniFile();
+
+	TriggerDatabase::Instance().SaveInto(ini, errstream);
 
 	// delete invalid ini sections
 	for (auto it = ini.begin(); it != ini.end();) {
@@ -3786,7 +3787,7 @@ void CFinalSunDlg::OpenMap(const CString lpFilename)
 
 
 
-	Map->LoadMap((char*)(LPCTSTR)fileToOpen);
+	Map->LoadMap(fileToOpen);
 
 
 	BOOL bNoMapFile = FALSE;
