@@ -1237,8 +1237,40 @@ void CTriggerEditorAllDlg::onNewAction()
 
 void CTriggerEditorAllDlg::onCloneAction()
 {
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
+    int actionIdx = m_actionList.GetCurSel();
+    if (actionIdx < 0) {
+        return;
+    }
+    CIniFile& ini = Map->GetIniFile();
+    TriggerActions actions(ini.GetString("Actions", m_currentTrigger));
+
+    onAddAction(TriggerAction(actions.Nth(actionIdx)), actionIdx + 1);
 }
 
 void CTriggerEditorAllDlg::onDeleteAction()
 {
+    auto const title = TranslateStringACP("Delete action");
+    auto const content = TranslateStringACP("Do you really want to delete this action?");
+    if (MessageBox(content, title, MB_YESNO) == IDNO) {
+        return;
+    }
+    if (m_currentTrigger.GetLength() == 0) {
+        return;
+    }
+    int actionIdx = m_actionList.GetCurSel();
+    if (actionIdx < 0) {
+        return;
+    }
+    CIniFile& ini = Map->GetIniFile();
+    TriggerActions actions(ini.GetString("Actions", m_currentTrigger));
+    actions.DeleteAt(actionIdx);
+    ini.SetString("Events", m_currentTrigger, actions.Serialize());
+
+    updateTriggerEvents();
+    if (m_eventList.GetCount() > 0) {
+        m_eventList.SetCurSel(actionIdx - 1);
+    }
 }
