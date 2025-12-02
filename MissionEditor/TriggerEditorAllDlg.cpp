@@ -1074,7 +1074,9 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
             m_actionParamTexts[slot]->SetWindowText(TranslateStringACP("Number"));
             HandleParamList(m_actionParam[slot], PARAMTYPE_NOTHING);
         }
-        m_actionParam[slot].SetWindowText(actionN.WaypointString());
+        CString numStr;
+        numStr.Format("%d", actionN.Waypoint());
+        m_actionParam[slot].SetWindowText(numStr);
         m_actionParam[slot].EnableWindow(TRUE);
         validSlots[slot] = true;
         slot++;
