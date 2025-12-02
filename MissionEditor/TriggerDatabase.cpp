@@ -10,13 +10,13 @@ TriggerDatabase& TriggerDatabase::Instance()
     return inst;
 }
 
-std::optional<TriggerInstance&> TriggerDatabase::Lookup(const CString& id)
+TriggerInstance& TriggerDatabase::Lookup(const CString& id)
 {
     auto const it = lookupTable.find(id);
     if (it != lookupTable.end()) {
         return items.at(it->second);
     }
-    return std::nullopt;
+    throw std::runtime_error("no such trigger");
 }
 
 TriggerInstance& TriggerDatabase::InsertAt(size_t idx, CString&& key)
@@ -30,6 +30,7 @@ TriggerInstance& TriggerDatabase::InsertAt(size_t idx, CString&& key)
     for (auto it = lookupTable.upper_bound(key); it != lookupTable.end(); ++it) {
         it->second++;
     }
+    return items.at(idx);
 }
 
 void TriggerDatabase::LoadFrom(const CIniFile& ini, std::ostream& err)
@@ -70,3 +71,10 @@ TriggerInstance::TriggerInstance(const CString& id, const CIniFile& ini) :
     actions(ini.GetString(SEC_ACTIONS, id))
 {
 }
+
+CString TriggerOptions::Serialize() const
+{
+    // TODO: implement
+    return {};
+}
+

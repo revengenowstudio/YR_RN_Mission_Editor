@@ -30,6 +30,10 @@ public:
     auto& Events() { return events; }
     auto& Actions() { return actions; }
 
+    auto& Options() const { return options; }
+    auto& Events() const { return events; }
+    auto& Actions() const { return actions; }
+
 private:
     CString id;
     TriggerOptions options;
@@ -42,7 +46,7 @@ class TriggerDatabase
 public:
     static TriggerDatabase& Instance();
 
-    std::optional<TriggerInstance&> Lookup(const CString& id);
+    TriggerInstance& Lookup(const CString& id);
     TriggerInstance& InsertAt(size_t slot, CString&& id = {});
 
     void LoadFrom(const CIniFile& ini, std::ostream& err);
