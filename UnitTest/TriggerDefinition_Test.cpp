@@ -205,6 +205,7 @@ TEST(TriggerActionTest, ActionSerde)
 11=CSF Text...,-4,13,2,6,0,0,0,0,0,You know the usage,0,1,11
 13=(Unused)Auto create starts...,0,2,0,0,0,0,0,0,0,AI starts auto create,0,1,13
 53=Enable trigger,-2,14,0,0,0,0,0,0,0,Enable a trigger,0,1,53
+55=Create radar event,0,43,2,0,0,0,1,0,0,Create radar event at waypoint,0,1,55
 74=AI Trigger begins...,0,2,0,0,0,0,0,0,0,Enable house AI,0,1,74
 76=AI team rating...,0,6,0,0,0,0,0,0,0,AI global trigger preference rate,0,1,76
 129=Set SW Charge Percentage,-11,20,0,0,0,0,1,0,0,This will set owner's Superweapon percentage,0,1,129
@@ -221,14 +222,14 @@ TEST(TriggerActionTest, ActionSerde)
     };
     // 2 events
     {
-        const CString data = "2,11,4,mission:usa01_07,0,0,0,0,A,53,2,01000020,0,0,0,0,A";
+        const CString data = "2,11,4,mission:all01_07,0,0,0,0,A,53,2,01000020,0,0,0,0,A";
         TriggerActions actions(data);
 
 
         EXPECT_EQ(actions.Size(), 2);
         EXPECT_EQ(actions.Nth(0).ActionType(), 11);
         EXPECT_EQ(actions.Nth(0).ActionCode(), 4);
-        EXPECT_EQ(actions.Nth(0).Params()[0], "mission:usa01_07");
+        EXPECT_EQ(actions.Nth(0).Params()[0], "mission:all01_07");
         EXPECT_EQ(actions.Nth(1).ActionType(), 53);
         EXPECT_EQ(actions.Nth(1).ActionCode(), 2);
         EXPECT_EQ(actions.Nth(1).Params()[0], "01000020");
@@ -255,7 +256,7 @@ TEST(TriggerActionTest, ActionSerde)
 
     // action 129
     {
-        const CString data = "4,129,11,31,0,0,0,0,91,11,4,mission:usa01_21,0,0,0,0,A,19,7,WarningAlarm,0,0,0,0,A,53,2,01000042,0,0,0,0,A";
+        const CString data = "4,129,11,31,0,0,0,0,91,11,4,mission:all01_21,0,0,0,0,A,19,7,WarningAlarm,0,0,0,0,A,53,2,01000042,0,0,0,0,A";
         TriggerActions actions(data);
 
         EXPECT_EQ(actions.Size(), 4);
@@ -263,4 +264,14 @@ TEST(TriggerActionTest, ActionSerde)
         EXPECT_EQ(actions.Nth(0).WaypointString(), "91");
     }
 
+    // action 55
+    {
+        const CString data = "3,19,7,WarningAlarm,0,0,0,0,A,11,4,mission:all01_13,0,0,0,0,A,55,0,0,0,0,0,0,J";
+        TriggerActions actions(data);
+
+        EXPECT_EQ(actions.Size(), 3);
+        EXPECT_EQ(actions.Nth(2).IsUsingWaypointEncoding(), true);
+        EXPECT_EQ(actions.Nth(2).Waypoint(), 9);
+        EXPECT_EQ(actions.Nth(2).WaypointString(), "J");
+    }
 }
