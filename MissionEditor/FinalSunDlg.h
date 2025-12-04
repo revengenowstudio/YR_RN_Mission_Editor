@@ -44,7 +44,6 @@
 #include "loading.h"
 #include "TileSetBrowserFrame.h"	// Hinzugefügt von der Klassenansicht
 #include "ToolSettingsBar.h"
-#include "TriggerEditorDlg.h"
 #include "TriggerEditorAllDlg.h"
 #include "CsfViewer.h"
 

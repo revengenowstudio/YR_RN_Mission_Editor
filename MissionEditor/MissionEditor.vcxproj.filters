@@ -228,18 +228,6 @@
     <ClCompile Include="ToolSettingsBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TriggerActionsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriggerEditorDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriggerEventsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriggerOptionsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TSOptions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -560,18 +548,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ToolSettingsBar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriggerActionsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriggerEditorDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriggerEventsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriggerOptionsDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TSOptions.h">
