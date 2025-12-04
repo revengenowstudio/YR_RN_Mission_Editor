@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "TriggerDatabase.h"
 
+static auto constexpr SEC_TRIGGERS = "Triggers";
 static auto constexpr SEC_EVENTS = "Events";
 static auto constexpr SEC_ACTIONS = "Actions";
 
@@ -35,7 +36,7 @@ TriggerInstance& TriggerDatabase::InsertAt(size_t idx, CString&& key)
 
 void TriggerDatabase::LoadFrom(const CIniFile& ini, std::ostream& err)
 {
-    auto const& triggerSec = ini["Triggers"];
+    auto const& triggerSec = ini[SEC_TRIGGERS];
     items.reserve(triggerSec.Size());
 
     for (auto const& [id, opts] : triggerSec) {
@@ -46,7 +47,7 @@ void TriggerDatabase::LoadFrom(const CIniFile& ini, std::ostream& err)
 
 void TriggerDatabase::SaveInto(CIniFile& ini, std::ostream& err)
 {
-    auto& triggerSec = ini.AddSection("Triggers");
+    auto& triggerSec = ini.AddSection(SEC_TRIGGERS);
     auto& eventsSec = ini.AddSection(SEC_EVENTS);
     auto& actionsSec = ini.AddSection(SEC_ACTIONS);
     triggerSec.Clear();
@@ -60,21 +61,14 @@ void TriggerDatabase::SaveInto(CIniFile& ini, std::ostream& err)
 
 TriggerInstance::TriggerInstance(const CString& id) :
     id(id),
-    options(),
+    options({}),
     events({}),
     actions({})
 { }
 
 TriggerInstance::TriggerInstance(const CString& id, const CIniFile& ini) :
-    options(),
+    options(ini.GetString(SEC_TRIGGERS, id)),
     events(ini.GetString(SEC_EVENTS, id)),
     actions(ini.GetString(SEC_ACTIONS, id))
 {
 }
-
-CString TriggerOptions::Serialize() const
-{
-    // TODO: implement
-    return {};
-}
-

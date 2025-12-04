@@ -49,6 +49,33 @@ struct TriggerActionType
     bool yrOnly{ false };
 };
 
+struct TriggerOptions
+{
+    enum {
+        Disable,
+        Easy,
+        Medium,
+        Hard,
+        __unused,
+        __ControlCount,
+    };
+
+    TriggerOptions(const CString& fullData);
+
+    CString Serialize() const;
+
+    CString house;
+    CString nextTrigger{ "<none>" };
+    CString name;
+    bool controls[__ControlCount] {
+        false,
+        true,
+        true,
+        true,
+        false,
+    };
+};
+
 struct TriggerEvent
 {
     int eventType{ 0 };

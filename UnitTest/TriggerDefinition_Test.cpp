@@ -73,6 +73,90 @@ R"(
 
 }
 
+TEST(TriggerTest, OptionsSerde)
+{
+    {
+        const CString data = "Americans,<none>,[Ob2]Reinforcements-Enable,1,1,1,1,0";
+        TriggerOptions options(data);
+
+        EXPECT_EQ("Americans", options.house);
+        EXPECT_EQ("<none>", options.nextTrigger);
+        EXPECT_EQ("[Ob2]Reinforcements-Enable", options.name);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Disable]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Easy]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Medium]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Hard]);
+
+        EXPECT_EQ(options.Serialize(), data);
+    }
+    {
+        const CString data = "Americans,<none>,[Ob2]Reinforcements-Delay 1:30,1,1,1,1,0";
+        TriggerOptions options(data);
+
+        EXPECT_EQ("Americans", options.house);
+        EXPECT_EQ("<none>", options.nextTrigger);
+        EXPECT_EQ("[Ob2]Reinforcements-Delay 1:30", options.name);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Disable]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Easy]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Medium]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Hard]);
+
+        EXPECT_EQ(options.Serialize(), data);
+    }
+    {
+        const CString data = "Americans,<none>,[Global]Player Has No forces,0,1,1,1,0";
+        TriggerOptions options(data);
+
+        EXPECT_EQ("Americans", options.house);
+        EXPECT_EQ("<none>", options.nextTrigger);
+        EXPECT_EQ("[Global]Player Has No forces", options.name);
+        EXPECT_EQ(false, options.controls[TriggerOptions::Disable]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Easy]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Medium]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Hard]);
+
+        EXPECT_EQ(options.Serialize(), data);
+    }
+    {
+        const CString data = "Player,01001748,[MISC]DestroyBridge-Enable-Case2-2,0,1,1,1,0";
+        TriggerOptions options(data);
+
+        EXPECT_EQ("Player", options.house);
+        EXPECT_EQ("01001748", options.nextTrigger);
+        EXPECT_EQ("[MISC]DestroyBridge-Enable-Case2-2", options.name);
+        EXPECT_EQ(false, options.controls[TriggerOptions::Disable]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Easy]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Medium]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Hard]);
+
+        EXPECT_EQ(options.Serialize(), data);
+    }
+    {
+        const CString data = "Americans,<none>,[Ob3]Timer - Easy,1,1,0,0,0";
+        TriggerOptions options(data);
+
+        EXPECT_EQ("[Ob3]Timer - Easy", options.name);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Disable]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Easy]);
+        EXPECT_EQ(false, options.controls[TriggerOptions::Medium]);
+        EXPECT_EQ(false, options.controls[TriggerOptions::Hard]);
+
+        EXPECT_EQ(options.Serialize(), data);
+    }
+    {
+        const CString data = "Americans,<none>,[Ob3]Timer - Hard,1,0,0,1,0";
+        TriggerOptions options(data);
+
+        EXPECT_EQ("[Ob3]Timer - Hard", options.name);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Disable]);
+        EXPECT_EQ(false, options.controls[TriggerOptions::Easy]);
+        EXPECT_EQ(false, options.controls[TriggerOptions::Medium]);
+        EXPECT_EQ(true, options.controls[TriggerOptions::Hard]);
+
+        EXPECT_EQ(options.Serialize(), data);
+    }
+}
+
 TEST(TriggerEventTest, EventsSerde)
 {
     // single event

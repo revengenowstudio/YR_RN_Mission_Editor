@@ -183,6 +183,40 @@ TriggerEvents::TriggerEvents(const CString& fullData)
     }
 }
 
+
+TriggerOptions::TriggerOptions(const CString& fullData)
+{
+    if (fullData.IsEmpty()) {
+        return;
+    }
+
+    auto const params = SplitParams<7>(fullData);
+
+    house = params[0];
+    nextTrigger = params[1];
+    name = params[2];
+    controls[Disable] = static_cast<bool>(atoi(params[3]));
+    controls[Easy] = static_cast<bool>(atoi(params[4]));
+    controls[Medium] = static_cast<bool>(atoi(params[5]));
+    controls[Hard] = static_cast<bool>(atoi(params[6]));
+}
+
+CString TriggerOptions::Serialize() const
+{
+    CString ret;
+    ret.Format("%s,%s,%s,%d,%d,%d,%d,%d",
+        house,
+        nextTrigger,
+        name,
+        static_cast<int>(controls[Disable]),
+        static_cast<int>(controls[Easy]),
+        static_cast<int>(controls[Medium]),
+        static_cast<int>(controls[Hard]),
+        static_cast<int>(controls[__unused])
+    );
+    return ret;
+}
+
 CString TriggerEvents::Serialize() const
 {
     constexpr int perEventDataBufferSize = 32;

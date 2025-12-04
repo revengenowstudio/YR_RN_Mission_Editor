@@ -9,15 +9,6 @@ public:
 private:
 };
 
-class TriggerOptions
-{
-public:
-    CString Serialize() const;
-
-
-private:
-};
-
 class TriggerInstance
 {
 public:
