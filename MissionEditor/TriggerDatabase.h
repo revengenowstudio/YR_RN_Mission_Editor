@@ -12,10 +12,14 @@ private:
 class TriggerInstance
 {
 public:
+    static const TriggerInstance Default;
+
     TriggerInstance(const CString& id);
     TriggerInstance(const CString& id, const CIniFile& ini);
+    TriggerInstance(CString&& id, CString&& name, CString&& house);
 
     const CString& ID() const { return id; }
+    void SetID(const CString& id) { this->id = id; }
 
     auto& Options() { return options; }
     auto& Events() { return events; }
@@ -37,14 +41,53 @@ class TriggerDatabase
 public:
     static TriggerDatabase& Instance();
 
+    auto const Size() const { return items.size(); }
+    auto& Nth(size_t slot) {
+        return items.at(slot);
+    }
+    auto const& Nth(size_t slot) const {
+        return items.at(slot);
+    }
     TriggerInstance& Lookup(const CString& id);
     TriggerInstance& InsertAt(size_t slot, CString&& id = {});
+    void Append(TriggerInstance&& inst);
+    TriggerInstance& Append(const CString& id, CString&& name);
+    void DeleteAt(size_t slot);
 
     void LoadFrom(const CIniFile& ini, std::ostream& err);
     void SaveInto(CIniFile& ini, std::ostream& err);
 
     TriggerDatabase() = default;
     TriggerDatabase(const TriggerDatabase&) = delete;
+
+    int64_t FindIndex(const CString& key) const noexcept
+    {
+        auto const it = this->lookupTable.find(key);
+        if (it != this->lookupTable.end()) {
+            return it->second;
+        }
+        return -1;
+    }
+
+    auto begin() noexcept
+    {
+        return items.begin();
+    }
+
+    auto begin() const noexcept
+    {
+        return items.begin();
+    }
+
+    auto end() noexcept
+    {
+        return items.end();
+    }
+
+    auto end() const noexcept
+    {
+        return items.end();
+    }
 
 private:
     std::vector<TriggerInstance> items;

@@ -51,7 +51,7 @@ struct TriggerActionType
 
 struct TriggerOptions
 {
-    enum {
+    enum Controls {
         Disable,
         Easy,
         Medium,

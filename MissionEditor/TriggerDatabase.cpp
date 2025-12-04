@@ -5,6 +5,10 @@ static auto constexpr SEC_TRIGGERS = "Triggers";
 static auto constexpr SEC_EVENTS = "Events";
 static auto constexpr SEC_ACTIONS = "Actions";
 
+const TriggerInstance TriggerInstance::Default {
+    "0"
+};
+
 TriggerDatabase& TriggerDatabase::Instance()
 {
     static TriggerDatabase inst;
@@ -32,6 +36,38 @@ TriggerInstance& TriggerDatabase::InsertAt(size_t idx, CString&& key)
         it->second++;
     }
     return items.at(idx);
+}
+
+void TriggerDatabase::Append(TriggerInstance&& inst)
+{
+    lookupTable.insert_or_assign(inst.ID(), items.size());
+    items.emplace_back(std::move(inst));
+}
+
+TriggerInstance& TriggerDatabase::Append(const CString& id, CString&& name)
+{
+    lookupTable.insert_or_assign(id, items.size());
+    auto& ret = items.emplace_back(id);
+    ret.Options().name = std::move(name);
+    return ret;
+}
+
+void TriggerDatabase::DeleteAt(size_t idx)
+{
+    auto const it = items.erase(items.begin() + idx);
+    ASSERT(idx < items.size());
+    // delete from record first;
+    auto const& trigger = items.at(idx);
+    auto const eraseCount = lookupTable.erase(trigger.ID());
+    ASSERT(eraseCount == 1);
+    items.erase(items.begin() + idx);
+    // now update all key-pos indexing, dec 1
+    for (auto affectedIdx = idx; affectedIdx < items.size(); ++affectedIdx) {
+        auto const& triggerN = items[affectedIdx];
+        auto const it = lookupTable.find(triggerN.ID());
+        ASSERT(it != lookupTable.end());
+        it->second--;
+    }
 }
 
 void TriggerDatabase::LoadFrom(const CIniFile& ini, std::ostream& err)
@@ -64,11 +100,19 @@ TriggerInstance::TriggerInstance(const CString& id) :
     options({}),
     events({}),
     actions({})
-{ }
+{
+}
 
 TriggerInstance::TriggerInstance(const CString& id, const CIniFile& ini) :
     options(ini.GetString(SEC_TRIGGERS, id)),
     events(ini.GetString(SEC_EVENTS, id)),
     actions(ini.GetString(SEC_ACTIONS, id))
 {
+}
+
+TriggerInstance::TriggerInstance(CString&& id, CString&& name, CString&& house) :
+    TriggerInstance(id)
+{
+    this->Options().name = std::move(name);
+    this->Options().house = std::move(house);
 }

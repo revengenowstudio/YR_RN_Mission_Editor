@@ -3,10 +3,9 @@
 #include "variables.h"
 #include "functions.h"
 #include "inlines.h"
+#include "TriggerDatabase.h"
 
 extern ACTIONDATA AD; // very ugly implementation, will be refactored
-static auto constexpr SEC_EVENTS = "Events";
-static auto constexpr SEC_ACTIONS = "Actions";
 
 BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_WM_SHOWWINDOW()
@@ -239,15 +238,12 @@ void listTriggers(CComboBox& cb)
     CIniFile& ini = Map->GetIniFile();
 
     while (cb.DeleteString(0) != CB_ERR);
-    auto const& triggersSec = ini["Triggers"];
+    auto const& triggersSec = TriggerDatabase::Instance();
 
     CString triggerDisplay;
     for (auto idx = 0; idx < triggersSec.Size(); idx++) {
-        auto const& [type, params] = triggersSec.Nth(idx);
-        if (params.IsEmpty()) {
-            continue;
-        }
-        triggerDisplay.Format("%s (%s)", type, GetParam(params, 2));
+        auto const& inst = triggersSec.Nth(idx);
+        triggerDisplay.Format("%s (%s)", inst.ID(), inst.Options().name);
         int id = cb.AddString(triggerDisplay);
         cb.SetItemData(id, idx);
     }
@@ -290,9 +286,8 @@ void CTriggerEditorAllDlg::updateTriggerEvents()
     int cur_sel = m_eventList.GetCurSel();
     while (m_eventList.DeleteString(0) != CB_ERR);
 
-    CIniFile& ini = Map->GetIniFile();
-    auto const& data = ini[SEC_EVENTS][m_currentTrigger];
-    TriggerEvents events(data);
+    TriggerEvents& events = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Events();
     auto const eventCount = events.Size();
 
     auto& defMgr = TriggerDefinitionManager::Instance();
@@ -324,9 +319,8 @@ void CTriggerEditorAllDlg::updateTriggerActions()
     int cur_sel = m_actionList.GetCurSel();
     while (m_actionList.DeleteString(0) != CB_ERR);
 
-    CIniFile& ini = Map->GetIniFile();
-    auto const& data = ini[SEC_ACTIONS][m_currentTrigger];
-    TriggerActions actions(data);
+    TriggerActions& actions = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Actions();
     auto const actionCount = actions.Size();
 
     auto& defMgr = TriggerDefinitionManager::Instance();
@@ -376,30 +370,36 @@ void CTriggerEditorAllDlg::UpdateDialog()
     updateTriggerActions();
 }
 
-void CTriggerEditorAllDlg::onNewTrigger()
+void CTriggerEditorAllDlg::onAddTrigger(TriggerInstance&& trigger)
 {
-    CIniFile& ini = Map->GetIniFile();
+    auto const id = trigger.ID();
+    auto const name = trigger.Options().name;
+    TriggerDatabase::Instance().
+        Append(std::move(trigger));
 
-    CString newId = GetFreeID();
-    ini.SetString("Triggers", newId, Map->GetHouseID(0, TRUE) + ",<none>,New trigger,0,1,1,1,0");
-    ini.SetString(SEC_EVENTS, newId, "0");
-    ini.SetString(SEC_ACTIONS, newId, "0");
-
-    //if(MessageBox("Trigger created. If you want to create a simple tag now, press Yes. The tag will be called ""New tag"", you should name it like the trigger (after you have set up the trigger).","Trigger created",MB_YESNO))
+    // add tag, TODO: make Tag as object
     {
+        CIniFile& ini = Map->GetIniFile();
         CString tagId = GetFreeID();
-        ini.SetString("Tags", tagId, "0,New tag," + newId);
+        CString content;
+        content.Format("0,%s tag,%s", name, id);
+        ini.SetString("Tags", tagId, content);
     }
 
     theApp.MainWindow()->UpdateDialogs(TRUE);
 
-    auto const& triggerSec = ini["Triggers"];
     for (auto i = 0; i < m_triggerType.GetCount(); i++) {
-        if (m_triggerType.GetItemData(i) == triggerSec.FindIndex(newId)) {
+        if (m_triggerType.GetItemData(i) == TriggerDatabase::Instance().FindIndex(id)) {
             m_triggerType.SetCurSel(i);
         }
     }
     onSelChangeTrigger();
+}
+
+void CTriggerEditorAllDlg::onNewTrigger()
+{
+    TriggerInstance inst(GetFreeID(), "New trigger", Map->GetHouseID(0, TRUE));
+    onAddTrigger(std::move(inst));
 }
 
 void CTriggerEditorAllDlg::onCloneTrigger()
@@ -410,28 +410,12 @@ void CTriggerEditorAllDlg::onCloneTrigger()
     if (sel < 0) {
         return;
     }
-    int curtrig = m_triggerType.GetItemData(sel);
+    int triggerIdx = m_triggerType.GetItemData(sel);
 
-    auto const triggerId = ini["Triggers"].Nth(curtrig).first;
-
-    CString newId = GetFreeID();
-    ini.SetString("Triggers", newId, ini["Triggers"][triggerId]);
-    ini.SetString(SEC_EVENTS, newId, ini[SEC_EVENTS][triggerId]);
-    ini.SetString(SEC_ACTIONS, newId, ini[SEC_ACTIONS][triggerId]);
-
-    ini.SetString("Triggers", newId, SetParam(ini["Triggers"][newId], 2, GetParam(ini["Triggers"][newId], 2) + " Clone"));
-
-    CString newTagId = GetFreeID();
-    ini.SetString("Tags", newTagId, "0," + GetParam(ini["Triggers"][newId], 2) + "," + newId);
-
-    theApp.MainWindow()->UpdateDialogs(TRUE);
-
-    for (auto i = 0; i < m_triggerType.GetCount(); i++) {
-        if (m_triggerType.GetItemData(i) == ini["Triggers"].FindIndex(newId)) {
-            m_triggerType.SetCurSel(i);
-        }
-    }
-    onSelChangeTrigger();
+    auto trigger = TriggerDatabase::Instance().Nth(triggerIdx);
+    trigger.Options().name += " Clone";
+    trigger.SetID(GetFreeID());
+    onAddTrigger(std::move(trigger));
 }
 
 void CTriggerEditorAllDlg::onDeleteTrigger()
@@ -448,9 +432,9 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
         return;
     }
 
-    CIniFile& ini = Map->GetIniFile();
-    auto const triggerId = ini["Triggers"].Nth(curTrigger).first;
+    auto const triggerId = TriggerDatabase::Instance().Nth(curTrigger).ID();
 
+    CIniFile& ini = Map->GetIniFile();
     // YES means clean tags, otherwise ignore
     if (res == IDYES) {
         std::vector<CString> keysToDelete;
@@ -465,14 +449,7 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
         }
     }
 
-    bool deleted = false;
-    deleted = ini.RemoveValueByKey("Triggers", triggerId);
-    ASSERT(deleted);
-    deleted = ini.RemoveValueByKey(SEC_EVENTS, triggerId);
-    ASSERT(deleted);
-    deleted = ini.RemoveValueByKey(SEC_ACTIONS, triggerId);
-    ASSERT(deleted);
-    (void)deleted;
+    TriggerDatabase::Instance().DeleteAt(curTrigger);
 
     theApp.MainWindow()->UpdateDialogs(TRUE);
 }
@@ -487,7 +464,7 @@ void CTriggerEditorAllDlg::onPlaceOnMap()
     }
 
     int curtrig = m_triggerType.GetItemData(sel);
-    auto const triggerId = ini["Triggers"].Nth(curtrig).first;
+    auto const triggerId = TriggerDatabase::Instance().Nth(curtrig).ID();
     CString tag;
 
     for (auto const& [type, def] : ini["Tags"]) {
@@ -498,6 +475,9 @@ void CTriggerEditorAllDlg::onPlaceOnMap()
         }
     }
 
+    if (tag.IsEmpty()) {
+        return;
+    }
     AD.mode = ACTIONMODE_CELLTAG;
     AD.type = 4;
     AD.data_s = tag;
@@ -511,8 +491,7 @@ void CTriggerEditorAllDlg::onSelChangeTrigger()
         return;
     }
     int curInd = m_triggerType.GetItemData(curSel);
-    CIniFile& ini = Map->GetIniFile();
-    m_currentTrigger = ini["Triggers"].Nth(curInd).first;
+    m_currentTrigger = TriggerDatabase::Instance().Nth(curInd).ID();
 
     if (m_currentTrigger.IsEmpty()) {
         return;
@@ -530,14 +509,6 @@ void CTriggerEditorAllDlg::onSelChangeTrigger()
         }
     }
 #endif
-
-    // really ? should not be needed at all
-#if 0
-    auto trigger = ini["Triggers"][m_currentTrigger];
-    if (RepairTrigger(trigger)) {
-        ini.SetString("Triggers", m_currentTrigger, trigger);
-    }
-#endif
     onSelChangeOption();
     updateTriggerEvents();
     updateTriggerActions(); // update, would you?
@@ -546,12 +517,6 @@ void CTriggerEditorAllDlg::onSelChangeTrigger()
 void CTriggerEditorAllDlg::onChangeTriggerName()
 {
     if (m_currentTrigger.IsEmpty()) {
-        return;
-    }
-
-    CIniFile& ini = Map->GetIniFile();
-
-    if (!ini["Triggers"].Exists(m_currentTrigger)) {
         return;
     }
 
@@ -568,10 +533,13 @@ void CTriggerEditorAllDlg::onChangeTriggerName()
         m_triggerName.SetWindowText(newName);
     }
 
-    ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 2, newName));
+    auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
+    trigger.Options().name = newName;
 
     int i;
     int p = 0;
+    auto& ini = Map->GetIniFile();
+    // update tag name
     for (auto const& [type, def] : ini["Tags"]) {
         CString attTrigg = GetParam(def, 2);
         if (attTrigg == m_currentTrigger) {
@@ -584,10 +552,6 @@ void CTriggerEditorAllDlg::onChangeTriggerName()
         }
     }
 
-    auto triggerCopy = ini["Triggers"][m_currentTrigger];
-    if (RepairTrigger(triggerCopy)) {
-        ini.SetString("Triggers", m_currentTrigger, triggerCopy);
-    }
     onKillFocusName();
 }
 
@@ -595,7 +559,7 @@ void CTriggerEditorAllDlg::onEditChangeHouse()
 {
     CIniFile& ini = Map->GetIniFile();
 
-    if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
+    if (m_currentTrigger.IsEmpty()) {
         return;
     }
 
@@ -609,20 +573,15 @@ void CTriggerEditorAllDlg::onEditChangeHouse()
     if (newHouse.Find(",", 0) >= 0) {
         newHouse.SetAt(newHouse.Find(",", 0), 0);
     }
-
-    ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 0, newHouse));
-
-    auto triggerCopy = ini["Triggers"][m_currentTrigger];
-    if (RepairTrigger(triggerCopy)) {
-        ini.SetString("Triggers", m_currentTrigger, triggerCopy);
-    }
+    auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
+    trigger.Options().house = newHouse;
 }
 
 void CTriggerEditorAllDlg::onEditChangeNextTrigger()
 {
     CIniFile& ini = Map->GetIniFile();
 
-    if (!ini["Triggers"].Exists(m_currentTrigger) || m_currentTrigger.IsEmpty()) {
+    if (m_currentTrigger.IsEmpty()) {
         return;
     }
 
@@ -635,7 +594,8 @@ void CTriggerEditorAllDlg::onEditChangeNextTrigger()
         newTrigger.SetAt(newTrigger.Find(",", 0), 0);
     }
 
-    ini.SetString("Triggers", m_currentTrigger, SetParam(ini["Triggers"][m_currentTrigger], 1, newTrigger));
+    auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
+    trigger.Options().nextTrigger = newTrigger;
 }
 
 void CTriggerEditorAllDlg::onKillFocusName()
@@ -672,21 +632,17 @@ void CTriggerEditorAllDlg::onEditChangeTriggerType()
     
 }
 
-void CTriggerEditorAllDlg::onOptionCheckChanged(const CButton& checkBtn, const int paramPos)
+void CTriggerEditorAllDlg::onOptionCheckChanged(
+    const CButton& checkBtn, 
+    const TriggerOptions::Controls control
+)
 {
     if (m_currentTrigger.IsEmpty()) {
         return;
     }
-    auto& ini = Map->GetIniFile();
-    auto const& triggersSec = ini["Triggers"];
-
-    if (!triggersSec.Exists(m_currentTrigger)) {
-        return;
-    }
     auto const checked = checkBtn.GetCheck() != 0;
-    auto const param = checked ? "1" : "0";
-    auto const newVal = SetParam(triggersSec[m_currentTrigger], paramPos, param);
-    ini.SetString("Triggers", m_currentTrigger, newVal);
+    auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
+    trigger.Options().controls[control] = checked;
 }
 
 void CTriggerEditorAllDlg::parseTriggerDefinitions()
@@ -696,46 +652,38 @@ void CTriggerEditorAllDlg::parseTriggerDefinitions()
 
 void CTriggerEditorAllDlg::OnDisabled()
 {
-    onOptionCheckChanged(m_disabled, 3);
+    onOptionCheckChanged(m_disabled, TriggerOptions::Disable);
 }
 
 void CTriggerEditorAllDlg::OnEasy()
 {
-    onOptionCheckChanged(m_easy, 4);
+    onOptionCheckChanged(m_easy, TriggerOptions::Easy);
 }
 
 void CTriggerEditorAllDlg::OnMedium()
 {
-    onOptionCheckChanged(m_medium, 5);
+    onOptionCheckChanged(m_medium, TriggerOptions::Medium);
 }
 
 void CTriggerEditorAllDlg::OnHard()
 {
-    onOptionCheckChanged(m_hard, 6);
+    onOptionCheckChanged(m_hard, TriggerOptions::Hard);
 }
 
 void CTriggerEditorAllDlg::onSelChangeOption()
 {
-    CIniFile& ini = Map->GetIniFile();
+    auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
+    auto& options = trigger.Options();
 
-    auto triggerCopy = ini["Triggers"][m_currentTrigger];
-    // considering remove it
-#if 0
-    if (RepairTrigger(triggerCopy)) {
-        ini.SetString("Triggers", m_currentTrigger, triggerCopy);
-    }
-#endif
-    auto const triggerParams = SplitParams<7>(triggerCopy);
-
-    m_triggerName.SetWindowText(triggerParams[2]);
-    m_house.SetWindowText(TranslateHouse(triggerParams[0], TRUE));
-    CString attachedTrigger = triggerParams[1];
+    m_triggerName.SetWindowText(options.name);
+    m_house.SetWindowText(TranslateHouse(options.house, TRUE));
+    CString attachedTrigger = options.nextTrigger;
     m_nextTrigger.SetWindowText(attachedTrigger);
 
-    m_disabled.SetCheck((atoi(triggerParams[3])));
-    m_easy.SetCheck((atoi(triggerParams[4])));
-    m_medium.SetCheck((atoi(triggerParams[5])));
-    m_hard.SetCheck((atoi(triggerParams[6])));
+    m_disabled.SetCheck(options.controls[TriggerOptions::Disable]);
+    m_easy.SetCheck(options.controls[TriggerOptions::Easy]);
+    m_medium.SetCheck(options.controls[TriggerOptions::Medium]);
+    m_hard.SetCheck(options.controls[TriggerOptions::Hard]);
 
     for (auto i = 0; i < m_nextTrigger.GetCount(); i++) {
         CString tmp;
@@ -746,6 +694,7 @@ void CTriggerEditorAllDlg::onSelChangeOption()
         }
     }
 
+    auto const& ini = Map->GetIniFile();
     for (auto const& [type, def] : ini["Tags"]) {
         CString attTrigg = GetParam(def, 2);
         if (attTrigg == m_currentTrigger) {
@@ -759,8 +708,6 @@ void CTriggerEditorAllDlg::onSelChangeOption()
 // ========================== Trigger Events ==========================
 void CTriggerEditorAllDlg::onSelChangeEvent()
 {
-    CIniFile& ini = Map->GetIniFile();
-
     if (m_currentTrigger.IsEmpty()) {
         return;
     }
@@ -770,7 +717,8 @@ void CTriggerEditorAllDlg::onSelChangeEvent()
         return;
     }
 
-    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
+    TriggerEvents& events = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Events();
 
     auto const& eventData = events.Nth(eventIdx);
 
@@ -805,8 +753,8 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
         m_eventTypes.SetWindowText(eventtype);
     }
 
-    CIniFile& ini = Map->GetIniFile();
-    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
+    TriggerEvents& events = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Events();
     auto& eventData = events.Nth(eventIdx);
 
     bool is4SlotEvent = false; // keep it for now, may not be necessary any more, we have safer serde
@@ -834,9 +782,6 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
         eventData.param2.emplace("0");
     }
     // otherwise, keep its value, no change
-
-    // keep it for now. Since event type changes, param type will change accordingly 
-    ini.SetString(SEC_EVENTS, m_currentTrigger, events.Serialize());
 
     m_eventDescription.SetWindowText(eventDef.description);
 
@@ -871,8 +816,8 @@ void CTriggerEditorAllDlg::onEditChangeEventValue(CMyComboBox& paramCB, size_t s
         return;
     }
 
-    CIniFile& ini = Map->GetIniFile();
-    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
+    TriggerEvents& events = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Events();
     auto& eventData = events.Nth(eventIdx);
 
     auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
@@ -893,8 +838,6 @@ void CTriggerEditorAllDlg::onEditChangeEventValue(CMyComboBox& paramCB, size_t s
     } else {
         eventData.param2 = newVal;
     }
-
-    ini.SetString(SEC_EVENTS, m_currentTrigger, events.Serialize());
 }
 
 void CTriggerEditorAllDlg::onEditChangeEventValue1()
@@ -913,12 +856,10 @@ void CTriggerEditorAllDlg::onAddEvent(TriggerEvent&& event, int slot)
         return;
     }
 
-    CIniFile& ini = Map->GetIniFile();
-    CIniFileSection& sec = ini.AddSection(SEC_EVENTS);
-    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
+    TriggerEvents& events = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Events();
 
     events.Insert(slot, std::move(event));
-    sec.SetString(m_currentTrigger, events.Serialize());
 
     //m_eventList.InsertString(
     //    eventIdx,
@@ -951,8 +892,8 @@ void CTriggerEditorAllDlg::onCloneEvent()
         return;
     }
 
-    CIniFile& ini = Map->GetIniFile();
-    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
+    TriggerEvents& events = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Events();
 
     onAddEvent(TriggerEvent(events.Nth(eventIdx)), eventIdx + 1);
 }
@@ -965,7 +906,6 @@ void CTriggerEditorAllDlg::onDeleteEvent()
         return;
     }
 
-    CIniFile& ini = Map->GetIniFile();
     if (m_currentTrigger.GetLength() == 0) {
         return;
     }
@@ -974,9 +914,10 @@ void CTriggerEditorAllDlg::onDeleteEvent()
     if (eventIdx < 0) {
         return;
     }
-    TriggerEvents events(ini.GetString(SEC_EVENTS, m_currentTrigger));
+
+    TriggerEvents& events = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Events();
     events.DeleteAt(eventIdx);
-    ini.SetString(SEC_EVENTS, m_currentTrigger, events.Serialize());
 
     updateTriggerEvents();
     if (m_eventList.GetCount() > 0) {
@@ -987,8 +928,6 @@ void CTriggerEditorAllDlg::onDeleteEvent()
 // ========================== Trigger Actions ==========================
 void CTriggerEditorAllDlg::onSelChangeAction()
 {
-    CIniFile& ini = Map->GetIniFile();
-
     if (m_currentTrigger.IsEmpty()) {
         return;
     }
@@ -998,7 +937,8 @@ void CTriggerEditorAllDlg::onSelChangeAction()
     }
     int actionIdx = m_actionList.GetItemData(curAction);
 
-    TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
+    TriggerActions& actions = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Actions();
     auto const& actionN = actions.Nth(actionIdx);
 
     //m_actionTypes.SetWindowText(makeEventShortDesc(actionN.actionType, actionDef.brief));
@@ -1031,8 +971,8 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
     }
 
     bool actionChanged = false;
-    CIniFile& ini = Map->GetIniFile();
-    TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
+    TriggerActions& actions = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Actions();
     auto& actionN = actions.Nth(curActionIdx);
 
     auto const newActionTypeIdx = atoi(actionType);
@@ -1099,11 +1039,6 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
     if (actionDef.useTag) {
 
     }
-
-    // write back action at one time
-    if (actionChanged) {
-        ini.SetString(SEC_ACTIONS, m_currentTrigger, actions.Serialize());
-    }
 }
 
 std::pair<CString, CString> CTriggerEditorAllDlg::popUpCSFViewerAndReturn(CComboBox& cb)
@@ -1139,8 +1074,8 @@ bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropD
         return false;
     }
     bool actionChanged = false;
-    CIniFile& ini = Map->GetIniFile();
-    TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
+    TriggerActions& actions = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Actions();
     auto& actionN = actions.Nth(curActionIdx);
     auto& actionParamCB = m_actionParam[nth];
 
@@ -1172,9 +1107,6 @@ bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropD
         actionChanged |= actionN.ParamNth(nth).Assign(newValue);
     }
 
-    if (actionChanged) {
-        ini.SetString(SEC_ACTIONS, m_currentTrigger, actions.Serialize());
-    }
     return popUpHandled;
 }
 
@@ -1211,14 +1143,9 @@ void CTriggerEditorAllDlg::onAddAction(TriggerAction&& action, int slot)
         return;
     }
 
-    // TODO: verify
-    CIniFile& ini = Map->GetIniFile();
-    auto& sec = ini.AddSection(SEC_ACTIONS);
-
-    TriggerActions actions(sec.GetString(m_currentTrigger));
+    TriggerActions& actions = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Actions();
     actions.Insert(slot, std::move(action));
-
-    sec.SetString(m_currentTrigger, actions.Serialize());
 
     updateTriggerActions(); // TODO: optimize, only update actionList
 
@@ -1240,8 +1167,8 @@ void CTriggerEditorAllDlg::onCloneAction()
     if (actionIdx < 0) {
         return;
     }
-    CIniFile& ini = Map->GetIniFile();
-    TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
+    TriggerActions& actions = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Actions();
 
     onAddAction(TriggerAction(actions.Nth(actionIdx)), actionIdx + 1);
 }
@@ -1260,10 +1187,9 @@ void CTriggerEditorAllDlg::onDeleteAction()
     if (actionIdx < 0) {
         return;
     }
-    CIniFile& ini = Map->GetIniFile();
-    TriggerActions actions(ini.GetString(SEC_ACTIONS, m_currentTrigger));
+    TriggerActions& actions = TriggerDatabase::Instance().
+        Lookup(m_currentTrigger).Actions();
     actions.DeleteAt(actionIdx);
-    ini.SetString(SEC_ACTIONS, m_currentTrigger, actions.Serialize());
 
     updateTriggerActions();
     if (m_actionList.GetCount() > 0) {

@@ -2,6 +2,8 @@
 #include <afxrich.h>
 #include "TriggerDef.h"
 
+class TriggerInstance;
+
 class CTriggerEditorAllDlg : public CDialog
 {
 public:
@@ -62,8 +64,9 @@ protected:
     void translateUI();
     void clear();
     void oneTimeInit();
-    void onOptionCheckChanged(const CButton& checkBtn, const int paramPos);
+    void onOptionCheckChanged(const CButton& checkBtn, const TriggerOptions::Controls control);
     void parseTriggerDefinitions();
+    void onAddTrigger(TriggerInstance&& trigger);
     void onAddEvent(TriggerEvent&& event, int slot);
     void onAddAction(TriggerAction&& action, int slot);
 
