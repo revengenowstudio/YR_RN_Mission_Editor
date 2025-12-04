@@ -104,6 +104,7 @@ TriggerInstance::TriggerInstance(const CString& id) :
 }
 
 TriggerInstance::TriggerInstance(const CString& id, const CIniFile& ini) :
+    id(id),
     options(ini.GetString(SEC_TRIGGERS, id)),
     events(ini.GetString(SEC_EVENTS, id)),
     actions(ini.GetString(SEC_ACTIONS, id))
