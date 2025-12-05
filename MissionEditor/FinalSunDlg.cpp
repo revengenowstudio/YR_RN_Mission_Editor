@@ -1904,10 +1904,8 @@ void CFinalSunDlg::OnFileNew()
 
 					// now, if the user wants to, check if this house is a passive or active house
 					if (!rules.GetBool(house, "MultiplayPassive") && bAutoProd) {
-						TriggerInstance newTrigger(
-							GetFreeID(),
-							"AI Auto Production " + TranslateHouse(country, TRUE),
-							CString(country)
+						auto& newTrigger = triggerDb.Append(
+							GetFreeID(), "AI Auto Production " + TranslateHouse(country, TRUE)
 						);
 
 						newTrigger.Events().Insert(0, TriggerEvent{
@@ -1940,7 +1938,6 @@ void CFinalSunDlg::OnFileNew()
 
 							ini.SetString("Tags", ID_TAG, tagContent);
 						}
-						triggerDb.Append(std::move(newTrigger));
 					}
 
 				} else {
