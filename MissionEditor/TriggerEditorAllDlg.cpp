@@ -935,12 +935,10 @@ void CTriggerEditorAllDlg::onSelChangeAction()
     if (m_currentTrigger.IsEmpty()) {
         return;
     }
-    int curAction = m_actionList.GetCurSel();
-    if (curAction < 0) {
+    int actionIdx = m_actionList.GetCurSel();
+    if (actionIdx < 0) {
         return;
     }
-    int actionIdx = m_actionList.GetItemData(curAction);
-
     TriggerActions& actions = TriggerDatabase::Instance().
         Lookup(m_currentTrigger).Actions();
     auto const& actionN = actions.Nth(actionIdx);
