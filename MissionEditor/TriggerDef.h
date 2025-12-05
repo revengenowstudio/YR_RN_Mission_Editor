@@ -99,6 +99,26 @@ public:
 
     CString Serialize() const;
 
+    auto begin() noexcept
+    {
+        return events.begin();
+    }
+
+    auto begin() const noexcept
+    {
+        return events.begin();
+    }
+
+    auto end() noexcept
+    {
+        return events.end();
+    }
+
+    auto end() const noexcept
+    {
+        return events.end();
+    }
+
 private:
     std::vector<TriggerEvent> events;
 };
@@ -173,6 +193,26 @@ public:
     }
 
     CString Serialize() const;
+
+    auto begin() noexcept
+    {
+        return actions.begin();
+    }
+
+    auto begin() const noexcept
+    {
+        return actions.begin();
+    }
+
+    auto end() noexcept
+    {
+        return actions.end();
+    }
+
+    auto end() const noexcept
+    {
+        return actions.end();
+    }
 
 private:
     std::vector<TriggerAction> actions;

@@ -1880,6 +1880,7 @@ void CFinalSunDlg::OnFileNew()
 			ini.SetString("Basic", "Player", plhouse);
 
 			auto const& rulesHouseSec = rules[HOUSES];
+			auto& triggerDb = TriggerDatabase::Instance();
 			for (auto idx = 0; idx < rulesHouseSec.Size(); idx++) {
 #ifdef RA2_MODE
 				auto const& country = rulesHouseSec.Nth(idx).second;
@@ -1903,39 +1904,43 @@ void CFinalSunDlg::OnFileNew()
 
 					// now, if the user wants to, check if this house is a passive or active house
 					if (!rules.GetBool(house, "MultiplayPassive") && bAutoProd) {
-						CString id = GetFreeID();
+						TriggerInstance newTrigger(
+							GetFreeID(),
+							"AI Auto Production " + TranslateHouse(country, TRUE),
+							CString(country)
+						);
 
+						newTrigger.Events().Insert(0, TriggerEvent{
+							.eventType = 13, // time elapsed
+							.param1 = "10",
+						});
 
-#ifdef RA2_MODE
-						//k=i+rules.sections[HOUSES].values.size();
-						//itoa(k,c,10);
-#endif
-						CString triggerContent = country;
-						triggerContent += ",<none>,AI Auto Production ";
-						triggerContent += TranslateHouse(country, TRUE);
-						triggerContent += ",0,1,1,1,0";
-						ini.SetString("Triggers", id, triggerContent);
+						// TODO: let it control in FAData
+						auto& actions = newTrigger.Actions();
+						TriggerAction action1, action2, action3;
 
-						ini.SetString("Events", id, "1,13,0,10"); // after 10 secs, start prod.
+						action1.SetActionType(3); // begin prod
+						action1.ParamNth(0).Assign(idxStr);
 
-						CString actionContent = "3,3,0,";
-						actionContent += idxStr;
-						actionContent += ",0,0,0,0,A,13,0,";
-						actionContent += idxStr;
-						actionContent += ",0,0,0,0,A,74,0,";
-						actionContent += idxStr;
-						actionContent += ",0,0,0,0,A";
+						action2.SetActionType(13); // begin autocreate
+						action2.ParamNth(0).Assign(idxStr);
 
-						ini.SetString("Actions", id, actionContent);
+						action3.SetActionType(74);// start AI trigger
+						action3.ParamNth(0).Assign(idxStr);
 
+						actions.Insert(actions.Size(), std::move(action1));
+						actions.Insert(actions.Size(), std::move(action2));
+						actions.Insert(actions.Size(), std::move(action3));
+						{
+							CString ID_TAG = GetFreeID();
+							CString tagContent = "0,AI Auto Production ";
+							tagContent += TranslateHouse(house, TRUE);
+							tagContent += ",";
+							tagContent += newTrigger.ID();
 
-						CString ID_TAG = GetFreeID();
-						CString tagContent = "0,AI Auto Production ";
-						tagContent += TranslateHouse(house, TRUE);
-						tagContent += ",";
-						tagContent += id;
-
-						ini.SetString("Tags", ID_TAG, tagContent);
+							ini.SetString("Tags", ID_TAG, tagContent);
+						}
+						triggerDb.Append(std::move(newTrigger));
 					}
 
 				} else {

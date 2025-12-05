@@ -30,6 +30,7 @@
 #include "inlines.h"
 #include <algorithm>
 #include <string>
+#include "TriggerDatabase.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -195,22 +196,16 @@ BOOL CMapValidator::CheckMap()
 			}
 		}
 
-		if (auto pTriggerSec = ini.TryGetSection("Triggers")) {
-			for (auto& [id, def] : *pTriggerSec) {
-				auto defCopy = def;
-				if (RepairTrigger(defCopy)) {
-					pTriggerSec->SetString(id, defCopy);
-				}
-				// check linked trigger
-				auto const trigger = GetParam(defCopy, 1);
-				if (!pTriggerSec->Exists(trigger) && trigger != "<none>") {
-					CString error;
-					error = GetLanguageStringACP("MV_TriggerMissing");
-					error = TranslateStringVariables(1, error, trigger);
-					error = TranslateStringVariables(2, error, "Trigger");
-					error = TranslateStringVariables(3, error, id);
-					AddItemWithNewLine(m_MapProblemList, error, 1);
-				}
+		auto const& triggerDb = TriggerDatabase::Instance();
+		for (auto const& trigger : triggerDb) {
+			if (trigger.Options().nextTrigger != "<none>" 
+				&& !triggerDb.Exists(trigger.Options().nextTrigger)) {
+				CString error;
+				error = GetLanguageStringACP("MV_TriggerMissing");
+				error = TranslateStringVariables(1, error, trigger.ID());
+				error = TranslateStringVariables(2, error, "Trigger");
+				error = TranslateStringVariables(3, error, trigger.Options().nextTrigger);
+				AddItemWithNewLine(m_MapProblemList, error, 1);
 			}
 		}
 

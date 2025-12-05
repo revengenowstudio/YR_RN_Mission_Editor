@@ -69,6 +69,11 @@ public:
         return -1;
     }
 
+    bool Exists(const CString& key) const noexcept
+    {
+        return FindIndex(key) >= 0;
+    }
+
     auto begin() noexcept
     {
         return items.begin();
