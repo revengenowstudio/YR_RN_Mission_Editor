@@ -95,6 +95,13 @@ public:
     }
 
 private:
+
+    void clear()
+    {
+        items.clear();
+        lookupTable.clear();
+    }
+
     std::vector<TriggerInstance> items;
     std::map<CString, size_t> lookupTable; // ID - index of items
     // TODO: consider tags
