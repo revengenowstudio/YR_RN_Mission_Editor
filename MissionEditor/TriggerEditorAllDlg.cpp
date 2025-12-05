@@ -168,6 +168,7 @@ void CTriggerEditorAllDlg::clear()
     while (m_eventList.DeleteString(0) != CB_ERR);
     while (m_house.DeleteString(0) != CB_ERR);
     while (m_nextTrigger.DeleteString(0) != CB_ERR);
+    m_currentTrigger.Empty();
 
 }
 
@@ -672,6 +673,9 @@ void CTriggerEditorAllDlg::OnHard()
 
 void CTriggerEditorAllDlg::onSelChangeOption()
 {
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
     auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
     auto& options = trigger.Options();
 
