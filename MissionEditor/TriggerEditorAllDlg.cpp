@@ -147,8 +147,8 @@ void CTriggerEditorAllDlg::translateUI()
     TranslateDlgItem(*this, IDC_TRGR_EVENT_LIST_TXT, "TriggerEventList");
     TranslateDlgItem(*this, IDC_TRGR_EVENT_P1_TXT, "TriggerParameter#1value");
     TranslateDlgItem(*this, IDC_TRGR_EVENT_P2_TXT, "TriggerParameter#2value");
-    TranslateDlgItem(*this, IDC_TRGR_ACTION_OPTIONS, "TriggerActionoptions");
-    TranslateDlgItem(*this, IDC_TRGR_ACTION_TYPE_TXT, "TriggerActiontype");
+    TranslateDlgItem(*this, IDC_TRGR_ACTION_OPTIONS, "TriggerActionOptions");
+    TranslateDlgItem(*this, IDC_TRGR_ACTION_TYPE_TXT, "TriggerActionType");
     TranslateDlgItem(*this, IDC_TRGR_NEW_ACTION, "TriggerNew");
     TranslateDlgItem(*this, IDC_TRGR_DELETE_ACTION, "TriggerDelete");
     TranslateDlgItem(*this, IDC_TRGR_CLONE_ACTION, "TriggerClone");
