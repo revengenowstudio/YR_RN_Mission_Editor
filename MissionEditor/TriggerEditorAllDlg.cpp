@@ -451,6 +451,10 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
     }
 
     TriggerDatabase::Instance().DeleteAt(curTrigger);
+    if (TriggerDatabase::Instance().Size() == 0) {
+        m_triggerType.SetWindowText("");
+        m_triggerType.SetCurSel(-1);
+    }
 
     theApp.MainWindow()->UpdateDialogs(TRUE);
 }

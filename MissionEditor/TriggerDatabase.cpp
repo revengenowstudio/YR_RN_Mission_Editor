@@ -54,7 +54,6 @@ TriggerInstance& TriggerDatabase::Append(const CString& id, CString&& name)
 
 void TriggerDatabase::DeleteAt(size_t idx)
 {
-    auto const it = items.erase(items.begin() + idx);
     ASSERT(idx < items.size());
     // delete from record first;
     auto const& trigger = items.at(idx);
