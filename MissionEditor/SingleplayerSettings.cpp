@@ -160,7 +160,7 @@ void CSingleplayerSettings::UpdateDialog()
 	ListMovies(m_Action, TRUE);
 	ListMovies(m_PostScore, TRUE);
 	ListMovies(m_PreMapSelect, TRUE);
-
+	// TODO: use CListCtrl to support flexible items and can be defined in FAData.ini
 	ddxWithMap(IDC_PARTIMEEASY, rankingSec, "ParTimeEasy", DDX_ReadFromIni);
 	ddxWithMap(IDC_PARTIMEMEDIUM, rankingSec, "ParTimeMedium", DDX_ReadFromIni);
 	ddxWithMap(IDC_PARTIMEHARD, rankingSec, "ParTimeHard", DDX_ReadFromIni);
