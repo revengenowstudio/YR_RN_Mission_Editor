@@ -1120,7 +1120,6 @@ bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropD
     if (curActionIdx < 0) {
         return false;
     }
-    bool actionChanged = false;
     TriggerActions& actions = TriggerDatabase::Instance().
         Lookup(m_currentTrigger).Actions();
     auto& actionN = actions.Nth(curActionIdx);
@@ -1132,26 +1131,32 @@ bool CTriggerEditorAllDlg::onEditChangeActionValueN(size_t nth, bool isFromDropD
 
     bool popUpHandled = false;
     CString newValue;
-    if (listType == PARAMTYPE_TUTORIALTEXTS) {
-        if (isFromDropDown) {
-            auto [label, content] = popUpCSFViewerAndReturn(actionParamCB);
-            auto txt = label;
-            if (!content.IsEmpty()) {
-                txt += ' ';
-                txt += content;
-            }
-            newValue = label;
-            popUpHandled = true;
+    if (listType == PARAMTYPE_TUTORIALTEXTS && isFromDropDown) {
+        auto const [label, content] = popUpCSFViewerAndReturn(actionParamCB);
+        auto txt = label;
+        if (!content.IsEmpty()) {
+            txt += ' ';
+            txt += content;
         }
+        newValue = label;
+        popUpHandled = true;
+        actionParamCB.SetWindowText(label);
     } else {
         actionParamCB.GetWindowText(newValue);
         TruncSpace(newValue);
     }
 
+    auto const lenBeforeTrim = newValue.GetLength();
+    newValue.Trim(',');
+    if (newValue.GetLength() != lenBeforeTrim) {
+        actionParamCB.SetWindowText(newValue);
+    }
+
     if (listType == PARAMTYPE_WAYPOINTS && actionDef.useWaypointSlot) {
-        actionChanged |= actionN.SetWaypoint(atoi(newValue));
-    } else {
-        actionChanged |= actionN.ParamNth(nth).Assign(newValue);
+        actionN.SetWaypoint(atoi(newValue));
+    }
+    else {
+        actionN.ParamNth(nth).Assign(newValue);
     }
 
     return popUpHandled;
