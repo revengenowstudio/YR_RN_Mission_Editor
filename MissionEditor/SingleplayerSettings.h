@@ -38,39 +38,21 @@ class CSingleplayerSettings : public CDialog
 
 	// construction
 public:
-	void UpdateStrings();
 	void UpdateDialog();
 	CSingleplayerSettings();
 	~CSingleplayerSettings();
 
-	// dialog field data
-		//{{AFX_DATA(CSingleplayerSettings)
 	enum { IDD = IDD_SINGLEPLAYER };
-	CMyComboBox	m_TimerInherit;
-	CMyComboBox	m_StartingDropships;
-	CMyComboBox	m_FillSilos;
-	CFloatEdit	m_CarryOverMoney;
-	CMyComboBox	m_Win;
-	CMyComboBox	m_PreMapSelect;
-	CMyComboBox	m_PostScore;
-	CMyComboBox	m_Lose;
-	CMyComboBox	m_Intro;
-	CMyComboBox	m_Brief;
-	CMyComboBox	m_Action;
-	//}}AFX_DATA
 
-
-// overwriteables
-	//{{AFX_VIRTUAL(CSingleplayerSettings)
 protected:
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // ddx/ddv support
 	virtual void PostNcDestroy();
-	//}}AFX_VIRTUAL
+	virtual BOOL OnInitDialog() override;
+
+	void translateUI();
 
 // implementation
-protected:
-	// generated message maps
-	//{{AFX_MSG(CSingleplayerSettings)
 	afx_msg void OnEditchangeIntro();
 	afx_msg void OnEditchangeBrief();
 	afx_msg void OnEditchangeWin();
@@ -82,9 +64,21 @@ protected:
 	afx_msg void OnChangeCarryovermoney();
 	afx_msg void OnEditchangeTimerinherit();
 	afx_msg void OnEditchangeFillsilos();
-	//}}AFX_MSG
+	afx_msg void OnBnClickedSave();
+
 	DECLARE_MESSAGE_MAP()
 
+	CMyComboBox	m_TimerInherit;
+	CMyComboBox	m_StartingDropships;
+	CMyComboBox	m_FillSilos;
+	CFloatEdit	m_CarryOverMoney;
+	CMyComboBox	m_Win;
+	CMyComboBox	m_PreMapSelect;
+	CMyComboBox	m_PostScore;
+	CMyComboBox	m_Lose;
+	CMyComboBox	m_Intro;
+	CMyComboBox	m_Brief;
+	CMyComboBox	m_Action;
 };
 
 //{{AFX_INSERT_LOCATION}}

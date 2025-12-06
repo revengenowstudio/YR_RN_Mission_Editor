@@ -50,6 +50,17 @@ CSingleplayerSettings::~CSingleplayerSettings()
 {
 }
 
+BOOL CSingleplayerSettings::OnInitDialog()
+{
+	if (!CDialog::OnInitDialog()) {
+		return FALSE;
+	}
+
+	translateUI();
+
+	return true;
+}
+
 void CSingleplayerSettings::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
@@ -83,6 +94,7 @@ BEGIN_MESSAGE_MAP(CSingleplayerSettings, CDialog)
 	ON_CBN_EDITCHANGE(IDC_TIMERINHERIT, OnEditchangeTimerinherit)
 	ON_CBN_EDITCHANGE(IDC_FILLSILOS, OnEditchangeFillsilos)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_SAVE, OnBnClickedSave)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -120,9 +132,6 @@ void CSingleplayerSettings::UpdateDialog()
 	ListMovies(m_Action, TRUE);
 	ListMovies(m_PostScore, TRUE);
 	ListMovies(m_PreMapSelect, TRUE);
-
-
-	UpdateStrings();
 }
 
 void CSingleplayerSettings::OnEditchangeIntro()
@@ -191,23 +200,40 @@ void CSingleplayerSettings::OnEditchangeFillsilos()
 	ini.SetString("Basic", "FillSilos", GetText(&m_FillSilos));
 }
 
-void CSingleplayerSettings::UpdateStrings()
+void CSingleplayerSettings::translateUI()
 {
-	SetDlgItemText(IDC_LSTARTINGDROPSHIPS, GetLanguageStringACP("SingleplayerStartingDropships"));
-	SetDlgItemText(IDC_LCARRYOVERMONEY, GetLanguageStringACP("SingleplayerCarryOverMoney"));
-	SetDlgItemText(IDC_LINHERITTIMER, GetLanguageStringACP("SingleplayerTimerInherit"));
-	SetDlgItemText(IDC_LFILLSILOS, GetLanguageStringACP("SingleplayerFillSilos"));
-	SetDlgItemText(IDC_LMOVIES, GetLanguageStringACP("SingleplayerMovies"));
-	SetDlgItemText(IDC_LINTRO, GetLanguageStringACP("SingleplayerIntro"));
-	SetDlgItemText(IDC_LBRIEF, GetLanguageStringACP("SingleplayerBrief"));
-	SetDlgItemText(IDC_LWIN, GetLanguageStringACP("SingleplayerWin"));
-	SetDlgItemText(IDC_LLOSE, GetLanguageStringACP("SingleplayerLose"));
-	SetDlgItemText(IDC_LACTION, GetLanguageStringACP("SingleplayerAction"));
-	SetDlgItemText(IDC_LPOSTSCORE, GetLanguageStringACP("SingleplayerPostScore"));
-	SetDlgItemText(IDC_LPREMAPSELECT, GetLanguageStringACP("SingleplayerPreMapSelect"));
-	SetDlgItemText(IDC_DESC, GetLanguageStringACP("SingleplayerDesc"));
+	TranslateDlgItem(*this, IDC_LSTARTINGDROPSHIPS, "SingleplayerStartingDropships");
+	TranslateDlgItem(*this, IDC_LCARRYOVERMONEY, "SingleplayerCarryOverMoney");
+	TranslateDlgItem(*this, IDC_LINHERITTIMER, "SingleplayerTimerInherit");
+	TranslateDlgItem(*this, IDC_LFILLSILOS, "SingleplayerFillSilos");
+	TranslateDlgItem(*this, IDC_LMOVIES, "SingleplayerMovies");
+	TranslateDlgItem(*this, IDC_LINTRO, "SingleplayerIntro");
+	TranslateDlgItem(*this, IDC_LBRIEF, "SingleplayerBrief");
+	TranslateDlgItem(*this, IDC_LWIN, "SingleplayerWin");
+	TranslateDlgItem(*this, IDC_LLOSE, "SingleplayerLose");
+	TranslateDlgItem(*this, IDC_LACTION, "SingleplayerAction");
+	TranslateDlgItem(*this, IDC_LPOSTSCORE, "SingleplayerPostScore");
+	TranslateDlgItem(*this, IDC_LPREMAPSELECT, "SingleplayerPreMapSelect");
+	TranslateDlgItem(*this, IDC_DESC, "SingleplayerDesc");
 
-	SetWindowText(TranslateStringACP("Singleplayer settings"));
+	TranslateWindowCaption(*this, "Singleplayer settings");
+
+	TranslateDlgItem(*this, IDC_LPARTIMEEASY, "SingleplayerParTimeEasy");
+	TranslateDlgItem(*this, IDC_LPARTIMEMEDIUM, "SingleplayerParTimeMedium");
+	TranslateDlgItem(*this, IDC_LPARTIMEHARD, "SingleplayerParTimeHard");
+	TranslateDlgItem(*this, IDC_LOVERPARTITLE, "SingleplayerOverParTitle");
+	TranslateDlgItem(*this, IDC_LOVERPARMESSAGE, "SingleplayerOverParMessage");
+	TranslateDlgItem(*this, IDC_LUNDERPARTITLE, "SingleplayerUnderParTitle");
+	TranslateDlgItem(*this, IDC_LUNDERPARMESSAGE, "SingleplayerUnderParMessage");
+	TranslateDlgItem(*this, IDC_RANKINGGROUP, "SingleplayerRanking");
+	TranslateDlgItem(*this, IDC_GENERALGROUP, "SingleplayerGeneral");
+	TranslateDlgItem(*this, IDC_CAMPAIGNMONEYDELTAEASY, "SingleplayerCampaignMoneyDeltaEasy");
+	TranslateDlgItem(*this, IDC_CAMPAIGNMONEYDELTAHARD, "SingleplayerCampaignMoneyDeltaHard");
+	TranslateDlgItem(*this, IDC_SPYMONEYSTEALPERCENT, "SingleplayerSpyMoneyStealPercent");
+	TranslateDlgItem(*this, IDC_TEAMDELAYS, "SingleplayerTeamDelays");
+	TranslateDlgItem(*this, IDC_PRISMSUPPORTMODIFIER, "SingleplayerPrismSupportModifier");
+	TranslateDlgItem(*this, IDC_DEFAULTMIRAGEDISGUISES, "SingleplayerDefaultMirageDisguises");
+	TranslateDlgItem(*this, IDC_SAVE, "SingleplayerSave");
 
 #ifdef RA2_MODE
 	GetDlgItem(IDC_LSTARTINGDROPSHIPS)->ShowWindow(SW_HIDE);
@@ -219,4 +245,9 @@ void CSingleplayerSettings::PostNcDestroy()
 {
 	// do not call CDialog::PostNcDestroy();	
 	// CDialog::PostNcDestroy();
+}
+
+void CSingleplayerSettings::OnBnClickedSave()
+{
+	// TODO: Add your control notification handler code here
 }

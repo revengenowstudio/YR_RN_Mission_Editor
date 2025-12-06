@@ -2182,9 +2182,6 @@ void CFinalSunDlg::UpdateStrings()
 	if (m_map.m_hWnd) {
 		m_map.UpdateStrings();
 	}
-	if (m_singleplayersettings.m_hWnd) {
-		m_singleplayersettings.UpdateStrings();
-	}
 
 	// we need to check SimpleView if using easy view
 	if (theApp.m_Options.bEasy) {
@@ -2355,7 +2352,6 @@ void CFinalSunDlg::OnEditSingleplayersettings()
 	}
 
 	if (m_singleplayersettings.m_hWnd != NULL) {
-		m_singleplayersettings.UpdateStrings();
 		m_singleplayersettings.UpdateDialog();
 		m_singleplayersettings.ShowWindow(SW_SHOW);
 		Sound(SOUND_POSITIVE);
