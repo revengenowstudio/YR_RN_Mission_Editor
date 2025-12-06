@@ -184,9 +184,10 @@ BOOL CMapValidator::CheckMap()
 
 		}
 
+		auto const& triggerDb = TriggerDatabase::Instance();
 		for (auto const& [id, def] : ini["Tags"]) {
 			CString trigger = GetParam(def, 2);
-			if (!ini["Triggers"].Exists(trigger)) {
+			if (!triggerDb.Exists(trigger)) {
 				CString error;
 				error = GetLanguageStringACP("MV_TriggerMissing");
 				error = TranslateStringVariables(1, error, trigger);
@@ -196,7 +197,6 @@ BOOL CMapValidator::CheckMap()
 			}
 		}
 
-		auto const& triggerDb = TriggerDatabase::Instance();
 		for (auto const& trigger : triggerDb) {
 			if (trigger.Options().nextTrigger != "<none>" 
 				&& !triggerDb.Exists(trigger.Options().nextTrigger)) {

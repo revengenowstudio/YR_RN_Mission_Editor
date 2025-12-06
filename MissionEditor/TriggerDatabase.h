@@ -49,6 +49,11 @@ public:
         return items.at(slot);
     }
     TriggerInstance& Lookup(const CString& id);
+    const TriggerInstance& Lookup(const CString& id) const {
+        using BaseType = std::remove_pointer_t<decltype(this)>;
+        using NonConstType = std::remove_const_t<BaseType>;
+        return const_cast<NonConstType*>(this)->Lookup(id);
+    }
     TriggerInstance& InsertAt(size_t slot, CString&& id = {});
     void Append(TriggerInstance&& inst);
     TriggerInstance& Append(const CString& id, CString&& name);
@@ -56,6 +61,11 @@ public:
 
     void LoadFrom(const CIniFile& ini, std::ostream& err);
     void SaveInto(CIniFile& ini, std::ostream& err);
+    void Clear()
+    {
+        items.clear();
+        lookupTable.clear();
+    }
 
     TriggerDatabase() = default;
     TriggerDatabase(const TriggerDatabase&) = delete;
@@ -95,13 +105,6 @@ public:
     }
 
 private:
-
-    void clear()
-    {
-        items.clear();
-        lookupTable.clear();
-    }
-
     std::vector<TriggerInstance> items;
     std::map<CString, size_t> lookupTable; // ID - index of items
     // TODO: consider tags

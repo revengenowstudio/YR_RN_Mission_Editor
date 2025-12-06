@@ -157,16 +157,11 @@ void CTags::OnSelchangeTag()
 	CString triggerId = GetParam(data, 2);
 	CString desc = triggerId;
 
-	desc += " (";
-	auto const& def = ini.GetString("Triggers", triggerId);
-	if (!def.IsEmpty()) {
-		desc += GetParam(def, 2);
-	}
-	desc += ")";
+	auto const& triggerDb = TriggerDatabase::Instance();
+
+	desc.Format("%s (%s)", triggerId, triggerDb.Lookup(triggerId).Options().name);
 
 	m_Trigger.SetWindowText(desc);
-
-
 	m_Repeat.SetWindowText(GetParam(data, 0));
 
 
@@ -351,16 +346,16 @@ void CTags::OnAdd()
 
 	CString newTagID = GetFreeID();
 
-	if (ini["Triggers"].Size() < 1) {
+	auto const& triggerDb = TriggerDatabase::Instance();
+	if (triggerDb.Size() <= 0) {
 		MessageBox("Before creating tags, you need at least one trigger.", "Error");
 		return;
 	};
 
 	CString data;
 	data = "0,New Tag,";
-	data += ini["Triggers"].Nth(0).first;
+	data += triggerDb.Nth(0).ID();
 	ini.SetString("Tags", newTagID, data);
-
 
 	UpdateDialog();
 

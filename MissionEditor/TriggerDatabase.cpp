@@ -71,7 +71,7 @@ void TriggerDatabase::DeleteAt(size_t idx)
 
 void TriggerDatabase::LoadFrom(const CIniFile& ini, std::ostream& err)
 {
-    clear();
+    Clear();
     auto const& triggerSec = ini[SEC_TRIGGERS];
     items.reserve(triggerSec.Size());
 

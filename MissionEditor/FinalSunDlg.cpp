@@ -1820,6 +1820,7 @@ void CFinalSunDlg::OnFileNew()
 				ini.DeleteSection("CellTags");
 				// ini.sections.erase("AITriggerTypesEnable");
 				// ini.sections.erase("AITriggerTypes");
+				TriggerDatabase::Instance().Clear();
 			}
 		}
 
