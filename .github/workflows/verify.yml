@@ -2,9 +2,8 @@ name: Basic verify
 
 on:
   pull_request:
-    branches: 
-      - "main"
-      - "RN"
+    branches:
+      - "*"
     types:
       - opened
       - synchronize
