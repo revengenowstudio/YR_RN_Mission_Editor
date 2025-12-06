@@ -66,7 +66,6 @@ void CTriggerEditorAllDlg::DoDataExchange(CDataExchange* pDX)
     CDialog::DoDataExchange(pDX);
 
     DDX_Control(pDX, IDC_TRGR_SELECTED_TRIGGER, m_triggerType);
-    DDX_Control(pDX, IDC_TRGR_NAME, m_triggerName);
     DDX_Control(pDX, IDC_TRGR_HOUSE, m_house);
     DDX_Control(pDX, IDC_TRGR_TYPE, m_persistence);
     DDX_Control(pDX, IDC_TRGR_ATTACHED_TRIGGER, m_nextTrigger);
@@ -525,7 +524,7 @@ void CTriggerEditorAllDlg::onChangeTriggerName()
     }
 
     CString newName;
-    m_triggerName.GetWindowText(newName);
+    GetDlgItem(IDC_TRGR_NAME)->GetWindowText(newName);
 
     if (newName.IsEmpty()) {
         newName = " ";
@@ -533,7 +532,7 @@ void CTriggerEditorAllDlg::onChangeTriggerName()
 
     if (newName.Find(',', 0) >= 0) {
         newName.Trim(',');
-        m_triggerName.SetWindowText(newName);
+        GetDlgItem(IDC_TRGR_NAME)->SetWindowText(newName);
     }
 
     auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
@@ -679,7 +678,7 @@ void CTriggerEditorAllDlg::onSelChangeOption()
     auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
     auto& options = trigger.Options();
 
-    m_triggerName.SetWindowText(options.name);
+    GetDlgItem(IDC_TRGR_NAME)->SetWindowText(options.name);
     m_house.SetWindowText(TranslateHouse(options.house, TRUE));
     CString attachedTrigger = options.nextTrigger;
     m_nextTrigger.SetWindowText(attachedTrigger);

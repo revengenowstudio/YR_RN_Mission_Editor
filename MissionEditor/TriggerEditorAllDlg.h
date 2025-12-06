@@ -80,7 +80,6 @@ protected:
     // trigger options
     // TODO: add a filter edit
     CComboBox m_triggerType;
-    CEdit m_triggerName;
     CMyComboBox m_house;
     CMyComboBox m_persistence;
     CComboBox m_nextTrigger; // sub trigger, sharing my tag
