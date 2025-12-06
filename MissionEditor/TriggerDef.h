@@ -219,6 +219,20 @@ private:
     std::vector<TriggerAction> actions;
 };
 
+class TagInstance
+{
+public:
+    TagInstance(const CString& id, const CString& fullData);
+
+    CString Serialize() const;
+
+    // simple class, no need to hide member
+    CString id;
+    CString name;
+    CString triggerId;
+    int persistence{ 0 };
+};
+
 class TriggerDefinitionManager
 {
 public:

@@ -427,3 +427,19 @@ const ParamType& TriggerAction::ParamOperator::lookUpParamType(TriggerAction& ac
     }
     return ParamType::Default;
 }
+
+TagInstance::TagInstance(const CString& id, const CString& fullData) :
+    id(id)
+{
+    auto const params = SplitParams<3>(fullData);
+    persistence = atoi(params[0]);
+    name = params[1];
+    triggerId= params[2];
+}
+
+CString TagInstance::Serialize() const
+{
+    CString ret;
+    ret.Format("%d,%s,%s", persistence, name, triggerId);
+    return ret;
+}

@@ -2,13 +2,6 @@
 #include "TriggerDef.h"
 #include "IniFile.h"
 
-class TagInstance
-{
-public:
-
-private:
-};
-
 class TriggerInstance
 {
 public:
