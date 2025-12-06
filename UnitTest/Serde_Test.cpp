@@ -24,7 +24,7 @@ void printBin(const std::span<BYTE> input, const char* fileName)
 		if (count % 16 == 0) {
 			file << line_stream.str() << std::endl;
 			line_stream.str(""); // clear stream
-			line_stream.clear(); // reset stream
+			line_stream.Clear(); // reset stream
 		}
 	}
 

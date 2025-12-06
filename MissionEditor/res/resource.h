@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by TerrainBar.rc
+// Used by TriggerEditor.rc
 //
 #define PRODUCT_VERSION_REVISION        0
 #define PRODUCT_VERSION_MINOR           1
@@ -102,6 +102,7 @@
 #define IDC_EDITOR_ARROW                299
 #define IDD_CSF_VIEWER                  300
 #define IDD_TERRAIN_MGR                 301
+#define IDD_TRIGGER_ALL                 307
 #define IDD_INI_EDITOR                  329
 #define IDC_BULB                        1000
 #define IDC_STARTUP                     1001
@@ -668,6 +669,60 @@
 #define IDC_TERRAIN_MGR_REMOVE          1578
 #define IDC_TERRAIN_MGR_REMOVE2         1579
 #define IDC_TERRAIN_MGR_ADD             1579
+#define IDC_TRGR_TRIGGER_OPTIONS        1601
+#define IDC_TRGR_SELECT_TRIGGER_TXT     1602
+#define IDC_TRGR_SELECTED_TRIGGER       1603
+#define IDC_TRGR_NEW_TRIGGER            1604
+#define IDC_TRGR_CLONE_TRIGGER          1605
+#define IDC_TRGR_DELETE_TRIGGER         1606
+#define IDC_TRGR_PLACE_ON_MAP           1607
+#define IDC_TRGR_TYPE_TXT               1608
+#define IDC_TRGR_TYPE                   1609
+#define IDC_TRGR_NAME_TXT               1610
+#define IDC_TRGR_NAME                   1611
+#define IDC_TRGR_HOUSE_TXT              1612
+#define IDC_TRGR_HOUSE                  1613
+#define IDC_TRGR_ATTACHED_TRIGGER_TXT   1614
+#define IDC_TRGR_ATTACHED_TRIGGER       1616
+#define IDC_TRGR_DISABLED               1617
+#define IDC_TRGR_EASY                   1618
+#define IDC_TRGR_MEDIUM                 1619
+#define IDC_TRGR_HARD                   1620
+#define IDC_TRGR_EVENT_OPTIONS          1621
+#define IDC_TRGR_EVENT_TYPE_TXT         1622
+#define IDC_TRGR_EVENT_TYPE             1623
+#define IDC_TRGR_NEW_EVENT              1624
+#define IDC_TRGR_CLONE_EVENT            1625
+#define IDC_TRGR_DELETE_EVENT           1626
+#define IDC_TRGR_EVENT_DESCRIPTION      1627
+#define IDC_TRGR_EVENT_LIST_TXT         1628
+#define IDC_TRGR_EVENT_LIST             1629
+#define IDC_TRGR_EVENT_P1_TXT           1630
+#define IDC_TRGR_EVENT_PARAMETER_1      1631
+#define IDC_TRGR_EVENT_P2_TXT           1632
+#define IDC_TRGR_EVENT_PARAMETER_2      1633
+#define IDC_TRGR_ACTION_OPTIONS         1634
+#define IDC_TRGR_ACTION_TYPE_TXT        1635
+#define IDC_TRGR_ACTION_DESCRIPTION     1636
+#define IDC_TRGR_NEW_ACTION             1637
+#define IDC_TRGR_DELETE_ACTION          1638
+#define IDC_TRGR_CLONE_ACTION           1639
+#define IDC_TRGR_ACTION_TYPE            1640
+#define IDC_TRGR_ACTION_LIST_TXT        1641
+#define IDC_TRGR_ACTION_LIST            1642
+#define IDC_TRGR_ACTION_P1_TXT          1643
+#define IDC_TRGR_ACTION_PARAMETER_1     1644
+#define IDC_TRGR_ACTION_P2_TXT          1645
+#define IDC_TRGR_ACTION_PARAMETER_2     1646
+#define IDC_TRGR_ACTION_P3_TXT          1647
+#define IDC_TRGR_ACTION_PARAMETER_3     1648
+#define IDC_TRGR_ACTION_P4_TXT          1649
+#define IDC_TRGR_ACTION_PARAMETER_4     1650
+#define IDC_TRGR_ACTION_P5_TXT          1651
+#define IDC_TRGR_ACTION_PARAMETER_5     1652
+#define IDC_TRGR_ACTION_P6_TXT          1653
+#define IDC_TRGR_ACTION_PARAMETER_6     1654
+#define IDC_TRGR_SEARCH_REFERENCE       1655
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -762,7 +817,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        332
+#define _APS_NEXT_RESOURCE_VALUE        333
 #define _APS_NEXT_COMMAND_VALUE         40144
 #define _APS_NEXT_CONTROL_VALUE         1579
 #define _APS_NEXT_SYMED_VALUE           111

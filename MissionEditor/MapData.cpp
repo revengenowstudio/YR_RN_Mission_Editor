@@ -34,6 +34,7 @@
 #include "Tube.h"
 #include "IniMega.h"
 #include "Helpers.h"
+#include "TriggerDatabase.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -913,7 +914,7 @@ void CMapData::LoadMap(const CString& file)
 
 
 	UpdateIniFile(MAPDATA_UPDATE_FROM_INI);
-
+	TriggerDatabase::Instance().LoadFrom(m_mapfile, errstream);
 }
 
 
@@ -921,8 +922,9 @@ void CMapData::LoadMap(const CString& file)
 
 void CMapData::Unpack()
 {
-	if (!isInitialized) return;
-
+	if (!isInitialized) {
+		return;
+	}
 	CMapLoadingDlg d;
 	d.ShowWindow(SW_SHOW);
 	d.UpdateWindow();
@@ -6509,31 +6511,21 @@ BOOL CMapData::IsYRMap()
 			}
 		}
 
-		for (auto const& [id, val] : m_mapfile["Triggers"]) {
-			auto const& eventParams = m_mapfile.GetString("Events", id);
-			auto const& actionParams = m_mapfile.GetString("Actions", id);
+		auto const& triggerDb = TriggerDatabase::Instance();
+		auto const& eventDefs = TriggerDefinitionManager::Instance().Events();
+		for (auto const& trigger : triggerDb) {
+			auto const& actionParams = trigger.Actions();
 
-			int eventcount, actioncount;
-			eventcount = atoi(GetParam(eventParams, 0));
-			actioncount = atoi(GetParam(actionParams, 0));
-
-			for (auto e = 0; e < eventcount; e++) {
-				CString type = GetParam(eventParams, GetEventParamStart(eventParams, e));
-				auto const& eventDetail = g_data.GetString("EventsRA2", type);
-				if (!eventDetail.IsEmpty()) {
-					if (isTrue(GetParam(eventDetail, 9))) {
-						return TRUE;
-					}
+			for (auto const& event : trigger.Events()) {
+				auto const& eventType = eventDefs.at(event.eventType);
+				if (eventType.yrOnly) {
+					return TRUE;
 				}
 			}
 
-			for (auto e = 0; e < actioncount; e++) {
-				CString type = GetParam(actionParams, 1 + e * 8);
-				auto const& actionDetail = g_data.GetString("ActionsRA2", type);
-				if (!actionDetail.IsEmpty()) {
-					if (isTrue(GetParam(actionDetail, 14))) {
-						return TRUE;
-					}
+			for (auto const& action : trigger.Actions()) {
+				if (action.Type().yrOnly) {
+					return TRUE;
 				}
 			}
 		}

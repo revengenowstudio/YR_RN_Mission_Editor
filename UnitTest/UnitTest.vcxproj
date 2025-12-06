@@ -139,15 +139,18 @@
   <ItemGroup>
     <ClCompile Include="..\MissionEditor\IniFile.cpp" />
     <ClCompile Include="..\MissionEditor\INIMeta.cpp" />
+    <ClCompile Include="..\MissionEditor\TriggerDef.cpp" />
     <ClCompile Include="CIni_Meta_Test.cpp" />
     <ClCompile Include="CIni_Test.cpp" />
     <ClCompile Include="Serde_Test.cpp" />
+    <ClCompile Include="TriggerDefinition_Test.cpp" />
     <ClCompile Include="UnitTest.cpp" />
     <ClCompile Include="Waypoint_Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\MissionEditor\IniFile.h" />
     <ClInclude Include="..\MissionEditor\INIMeta.h" />
+    <ClInclude Include="..\MissionEditor\TriggerDef.h" />
     <ClInclude Include="CIni_Test.h" />
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>

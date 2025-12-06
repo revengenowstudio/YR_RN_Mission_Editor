@@ -28,6 +28,7 @@
 #include "inlines.h"
 #include "mmsystem.h"
 #include "IniMega.h"
+#include "TriggerDatabase.h"
 
 #include <algorithm>
 
@@ -829,14 +830,13 @@ void ListTutorial(CComboBox& cb)
 void ListTriggers(CComboBox& cb)
 {
 	while (cb.DeleteString(0) != CB_ERR);
-	CIniFile& ini = Map->GetIniFile();
 
 	CString item; // holder buffer
-	for (auto const& [id, content] : ini.GetSection("Triggers")) {
-		item.Format("%s (%s)", id, GetParam(content, 2));
+	auto const& triggerDb = TriggerDatabase::Instance();
+	for (auto const& trigger : triggerDb) {
+		item.Format("%s (%s)", trigger.ID(), trigger.Options().name);
 		cb.AddString(item);
 	}
-
 }
 
 void ListYesNo(CComboBox& cb)

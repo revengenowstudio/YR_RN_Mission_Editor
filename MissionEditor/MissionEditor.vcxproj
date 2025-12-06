@@ -586,10 +586,9 @@
     <ClCompile Include="TileSetBrowserView.cpp" />
     <ClCompile Include="TipDlg.cpp" />
     <ClCompile Include="ToolSettingsBar.cpp" />
-    <ClCompile Include="TriggerActionsDlg.cpp" />
-    <ClCompile Include="TriggerEditorDlg.cpp" />
-    <ClCompile Include="TriggerEventsDlg.cpp" />
-    <ClCompile Include="TriggerOptionsDlg.cpp" />
+    <ClCompile Include="TriggerDatabase.cpp" />
+    <ClCompile Include="TriggerDef.cpp" />
+    <ClCompile Include="TriggerEditorAllDlg.cpp" />
     <ClCompile Include="TSOptions.cpp" />
     <ClCompile Include="Tube.cpp" />
     <ClCompile Include="TubeTool.cpp" />
@@ -607,6 +606,7 @@
     <ResourceCompile Include="res\MissionEditor.rc" />
     <ResourceCompile Include="res\SaveOptions.rc" />
     <ResourceCompile Include="res\TerrainBar.rc" />
+    <ResourceCompile Include="res\TriggerEditor.rc" />
     <ResourceCompile Include="res\VersionInfo.rc" />
   </ItemGroup>
   <ItemGroup>
@@ -698,10 +698,9 @@
     <ClInclude Include="TileSetBrowserView.h" />
     <ClInclude Include="TipDlg.h" />
     <ClInclude Include="ToolSettingsBar.h" />
-    <ClInclude Include="TriggerActionsDlg.h" />
-    <ClInclude Include="TriggerEditorDlg.h" />
-    <ClInclude Include="TriggerEventsDlg.h" />
-    <ClInclude Include="TriggerOptionsDlg.h" />
+    <ClInclude Include="TriggerDatabase.h" />
+    <ClInclude Include="TriggerDef.h" />
+    <ClInclude Include="TriggerEditorAllDlg.h" />
     <ClInclude Include="TSOptions.h" />
     <ClInclude Include="Tube.h" />
     <ClInclude Include="TubeTool.h" />

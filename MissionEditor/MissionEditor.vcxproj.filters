@@ -228,18 +228,6 @@
     <ClCompile Include="ToolSettingsBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TriggerActionsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriggerEditorDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriggerEventsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriggerOptionsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TSOptions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -309,6 +297,15 @@
     <ClCompile Include="TerrainGroupMgr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TriggerEditorAllDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TriggerDef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TriggerDatabase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\VersionInfo.rc">
@@ -327,6 +324,9 @@
       <Filter>Source Files</Filter>
     </ResourceCompile>
     <ResourceCompile Include="res\IniEdit.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\TriggerEditor.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -550,18 +550,6 @@
     <ClInclude Include="ToolSettingsBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TriggerActionsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriggerEditorDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriggerEventsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriggerOptionsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TSOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -641,6 +629,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TerrainGroupMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TriggerEditorAllDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TriggerDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TriggerDatabase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
