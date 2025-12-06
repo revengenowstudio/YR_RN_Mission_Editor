@@ -532,9 +532,8 @@ void CTriggerEditorAllDlg::onChangeTriggerName()
         newName = " ";
     }
 
-    if (newName.Find(",", 0) >= 0) {//newName.SetAt(newName.Find(",",0), 0);
-        newName = newName.Left(newName.Find(",", 0));
-
+    if (newName.Find(',', 0) >= 0) {
+        newName.Trim(',');
         m_triggerName.SetWindowText(newName);
     }
 
@@ -575,9 +574,7 @@ void CTriggerEditorAllDlg::onEditChangeHouse()
 
     newHouse.TrimLeft();
     TruncSpace(newHouse);
-    if (newHouse.Find(",", 0) >= 0) {
-        newHouse.SetAt(newHouse.Find(",", 0), 0);
-    }
+    newHouse.Trim(',');
     auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
     trigger.Options().house = newHouse;
 }
@@ -843,10 +840,7 @@ void CTriggerEditorAllDlg::onEditChangeEventValue(CMyComboBox& paramCB, size_t s
     paramCB.GetWindowText(newVal);
     TruncSpace(newVal);
     newVal.Trim();
-
-    if (newVal.Find(",", 0) >= 0) {
-        newVal.SetAt(newVal.Find(",", 0), 0);
-    }
+    newVal.Trim(',');
 
     // validate if item matches anything in
 #if 0 // disabled because incomplete typing would cause this too
