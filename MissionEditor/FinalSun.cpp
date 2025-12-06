@@ -344,6 +344,7 @@ BOOL CFinalSunApp::InitInstance()
 		exit(1);
 	}
 	g_data.LoadFile(datafile);
+	CTriggerEditorAllDlg::ParseTriggerDefinitions();
 
 	auto const& appSec = optini[app];
 	opts.bPreferLocalTheaterFiles = appSec.GetBool("PreferLocalTheaterFiles", opts.bPreferLocalTheaterFiles);

@@ -13,6 +13,7 @@ public:
 
     // used to update this dialog when other dialog has linked item changed
     void UpdateDialog();
+    static void ParseTriggerDefinitions();
 
 protected:
     virtual BOOL OnInitDialog() override;
@@ -65,7 +66,6 @@ protected:
     void clear();
     void oneTimeInit();
     void onOptionCheckChanged(const CButton& checkBtn, const TriggerOptions::Controls control);
-    void parseTriggerDefinitions();
     void onAddTrigger(TriggerInstance&& trigger);
     void onAddEvent(TriggerEvent&& event, int slot);
     void onAddAction(TriggerAction&& action, int slot);

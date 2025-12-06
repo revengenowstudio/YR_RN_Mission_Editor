@@ -56,7 +56,6 @@ BOOL CTriggerEditorAllDlg::OnInitDialog()
 
     GetDlgItem(IDC_TRGR_SEARCH_REFERENCE)->EnableWindow(FALSE); // not yet ready
 
-    parseTriggerDefinitions();
     oneTimeInit();
 
     return TRUE;
@@ -647,7 +646,7 @@ void CTriggerEditorAllDlg::onOptionCheckChanged(
     trigger.Options().controls[control] = checked;
 }
 
-void CTriggerEditorAllDlg::parseTriggerDefinitions()
+void CTriggerEditorAllDlg::ParseTriggerDefinitions()
 {
     TriggerDefinitionManager::Instance().LoadFrom(g_data, errstream);
 }
