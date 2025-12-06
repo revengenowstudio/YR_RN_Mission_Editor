@@ -3,7 +3,7 @@ name: Basic verify
 on:
   pull_request:
     branches:
-      - "*"
+      - "**"
     types:
       - opened
       - synchronize
