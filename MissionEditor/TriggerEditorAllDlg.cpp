@@ -630,11 +630,11 @@ void CTriggerEditorAllDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 // this function will work as filter
 void CTriggerEditorAllDlg::onEditChangeTriggerType()
 {
-    
+
 }
 
 void CTriggerEditorAllDlg::onOptionCheckChanged(
-    const CButton& checkBtn, 
+    const CButton& checkBtn,
     const TriggerOptions::Controls control
 )
 {
