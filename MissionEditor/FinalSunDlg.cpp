@@ -524,14 +524,13 @@ void CFinalSunDlg::OnOptionsTiberiansunoptions()
 
 void CFinalSunDlg::OnFileOpenmap()
 {
-	//CMapOpenDialog dlg(TRUE, NULL, NULL,  OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, "TS maps|*.mpr;*.map|TS multi maps|*.mpr|TS single maps|*.map|");
 	CString fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES");
 	if (yuri_mode) {
 		fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES_YR");
 	}
 	fileSearchString = TranslateStringVariables(8, fileSearchString, ";");
 
-	if (!yuri_mode) {
+	if (g_data.GetBool("Customizations", "SaveMapExtensionOverride") && !yuri_mode) {
 		fileSearchString.Replace(".yrm", ".mpr");
 	}
 
@@ -764,10 +763,8 @@ void CFinalSunDlg::OnFileSaveas()
 	}
 	r = TranslateStringVariables(8, r, ";");
 
-	auto const ext = ".map";
-	auto const fname = "noname.map";
-
-	CFileDialog dlg(FALSE, ext, /*fname*/ NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, r);
+	auto const& ext = g_data.GetStringOr("Customizations", "SaveMapExtensionDefault", ".map");
+	CFileDialog dlg(FALSE, ext, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, r);
 	char cuPath[MAX_PATH];
 
 	GetCurrentDirectory(MAX_PATH, cuPath);
@@ -924,12 +921,15 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 
 #ifdef RA2_MODE
 	if (Map->IsMultiplayer()) {
-		if (FileName_.Find(".mmx") >= 0) bSaveAsMMX = TRUE; else bSaveAsMMX = FALSE;
-
+		bSaveAsMMX = FALSE;
+		if (FileName_.Find(".mmx") >= 0) {
+			bSaveAsMMX = TRUE;
+		}
 		// MW 07/27/01: Check for YRM
-		if (FileName_.Find(".mpr") >= 0 && Map->IsYRMap()) FileName_.Replace(".mpr", ".yrm");
-
-
+		if (g_data.GetBool("Customizations", "SaveMapExtensionOverride")
+			&& FileName_.Find(".mpr") >= 0 && Map->IsYRMap()) {
+			FileName_.Replace(".mpr", ".yrm");
+		}
 		// MW 07/28/01: Create [Header]
 		int i;
 		int wp_count = 0;
@@ -980,42 +980,10 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 		CString left = GetParam(localSizeStr, 0);
 		CString top = GetParam(localSizeStr, 1);
 
-		//startx=1;//Map->GetHeight()/2;//atoi(left);//Map->GetIsoSize()/2-Map->GetWidth()/2;//198/2-50;//Map->GetIsoSize()/2-Map->GetHeight()/2;//Map->GetWidth()/2-50;
-		//starty=Map->GetWidth();//Map->GetIsoSize()/2-Map->GetWidth()/2;//198/2-50;//Map->GetIsoSize()/2-Map->GetWidth()/2;//Map->GetHeight()/2-50;
 		itoa(startx, c, 10);
 		sec.SetInteger("StartX", startx);
 		sec.SetInteger("StartY", starty);
 
-		/*CMultiSaveOptionsDlg mso;
-
-		if(FileName.Find(".mmx")>=0) mso.m_mmx=0; else mso.m_mmx=1;
-
-		if(mso.DoModal()==IDCANCEL) return;
-
-		if(mso.m_mmx==0)
-		{
-			FileName.Replace(".mpr", ".map");
-			//FileName.Replace(" ", "");
-			if(CoreName.GetLength()>8)
-			{
-				CoreName=CoreName.Left(8);
-				FileName=CoreName+".map";
-
-				CString s="The maximum filename length for MMX files is 8 chars, do you want to save the map as ";
-				s+=CoreName;
-				s+=".mmx?";
-				int res=MessageBox(s,"Error", MB_YESNO);
-				if(res!=IDYES) return;
-			}
-
-			bSaveAsMMX=TRUE;
-
-		}
-		else
-		{
-			FileName.Replace(".mmx", ".mpr");
-			bSaveAsMMX=FALSE;
-		}*/
 	}
 #endif
 
