@@ -822,11 +822,6 @@ void CTriggerEditorAllDlg::onEditChangeEventValue(CMyComboBox& paramCB, size_t s
         return;
     }
 
-    if (paramCB.GetCount() > 0 && paramCB.GetCurSel() < 0) {
-        paramCB.SetWindowText("");
-        return;
-    }
-
     int eventIdx = m_eventList.GetCurSel();
     if (eventIdx < 0) {
         return;
@@ -843,17 +838,40 @@ void CTriggerEditorAllDlg::onEditChangeEventValue(CMyComboBox& paramCB, size_t s
     CString newVal;
     paramCB.GetWindowText(newVal);
     TruncSpace(newVal);
-    newVal.TrimLeft();
+    newVal.Trim();
 
     if (newVal.Find(",", 0) >= 0) {
         newVal.SetAt(newVal.Find(",", 0), 0);
     }
 
-    if (slot == 0) {
-        eventData.param1 = newVal;
-    } else {
-        eventData.param2 = newVal;
+    // validate if item matches anything in
+#if 0 // disabled because incomplete typing would cause this too
+    auto const itemCount = paramCB.GetCount();
+    CString itemData;
+    bool newValValid = itemCount == 0;
+    for (auto idx = 0; idx < itemCount; ++idx) {
+        paramCB.GetLBText(idx, itemData);
+        TruncSpace(itemData);
+        if (newVal == itemData) {
+            newValValid = true;
+            break;
+        }
     }
+
+    if (!newValValid) {
+        auto const choice = MessageBox(TranslateStringACP("TriggerEventParamNotInSet"),
+            TranslateStringACP("Error"), MB_YESNO);
+        if (choice != IDYES) {
+            newVal = slot == 0 ?
+                eventData.param1 : eventData.param2.value_or("");
+            paramCB.SetWindowText(newVal);
+            return;
+        }
+    }
+#endif
+
+    slot == 0 ? eventData.param1 = newVal
+        : eventData.param2 = newVal;
 }
 
 void CTriggerEditorAllDlg::onEditChangeEventValue1()
