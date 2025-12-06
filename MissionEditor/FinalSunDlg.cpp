@@ -2187,10 +2187,12 @@ void CFinalSunDlg::UpdateStrings()
 	}
 
 	// we need to check SimpleView if using easy view
-	if (theApp.m_Options.bEasy) GetMenu()->CheckMenuItem(ID_OPTIONS_SIMPLEVIEW, MF_BYCOMMAND | MF_CHECKED);
-	if (!theApp.m_Options.bNoSounds) GetMenu()->CheckMenuItem(ID_OPTIONS_SOUNDS, MF_BYCOMMAND | MF_CHECKED);
-
-
+	if (theApp.m_Options.bEasy) {
+		GetMenu()->CheckMenuItem(ID_OPTIONS_SIMPLEVIEW, MF_BYCOMMAND | MF_CHECKED);
+	}
+	if (!theApp.m_Options.bNoSounds) {
+		GetMenu()->CheckMenuItem(ID_OPTIONS_SOUNDS, MF_BYCOMMAND | MF_CHECKED);
+	}
 
 	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
 }
@@ -2363,8 +2365,6 @@ void CFinalSunDlg::OnEditSingleplayersettings()
 void CFinalSunDlg::OnSizing(UINT fwSide, LPRECT pRect)
 {
 	CDialog::OnSizing(fwSide, pRect);
-
-
 }
 
 void CFinalSunDlg::OnSize(UINT nType, int cx, int cy)
@@ -2372,9 +2372,13 @@ void CFinalSunDlg::OnSize(UINT nType, int cx, int cy)
 	CDialog::OnSize(nType, cx, cy);
 
 	if (nType == SIZE_MINIMIZED) {
-		if (!bMiniMapClosedByUser) m_view.m_minimap->ShowWindow(SW_MINIMIZE);
+		if (!bMiniMapClosedByUser) {
+			m_view.m_minimap->ShowWindow(SW_MINIMIZE);
+		}
 	} else if (nType == SIZE_MAXIMIZED) {
-		if (!bMiniMapClosedByUser) m_view.m_minimap->ShowWindow(SW_RESTORE);
+		if (!bMiniMapClosedByUser) {
+			m_view.m_minimap->ShowWindow(SW_RESTORE);
+		}
 	}
 
 	RecalcLayout();
