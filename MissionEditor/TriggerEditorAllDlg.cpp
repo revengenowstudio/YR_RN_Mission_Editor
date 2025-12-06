@@ -736,7 +736,7 @@ void CTriggerEditorAllDlg::onSelChangeEvent()
     onEditChangeEventType();
 }
 
-// TODO: support filter
+// TODO: support filter, split out edit change and select change
 void CTriggerEditorAllDlg::onEditChangeEventType()
 {
     if (m_currentTrigger.IsEmpty()) {
@@ -757,17 +757,29 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
         m_eventTypes.SetWindowText(eventtype);
     }
 
+    auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
     TriggerEvents& events = TriggerDatabase::Instance().
         Lookup(m_currentTrigger).Events();
     auto& eventData = events.Nth(eventIdx);
+
+    // validate eventType to be int
+    // this validation will be changed once filter applied
+    auto const eventTypeIdx = atoi(eventtype);
+    if (eventTypeIdx < 0
+        || !triggerDefMgr.Events().contains(eventTypeIdx)
+        || !IsNumeric(eventtype)) {
+        eventtype.Format("%d", eventData.eventType);
+        m_eventTypes.SetWindowText(eventtype); // set back old value
+        MessageBox(TranslateStringACP("TriggerEventInvalidType"), TranslateStringACP("Error"));
+        return;
+    }
 
     bool is4SlotEvent = false; // keep it for now, may not be necessary any more, we have safer serde
     if (eventData.param2.has_value()) {
         is4SlotEvent = true;
     }
-    eventData.eventType = atoi(eventtype); // apply new event type Idx
+    eventData.eventType = eventTypeIdx; // apply new event type Idx
 
-    auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
     auto const& eventDef = triggerDefMgr.Events().at(eventData.eventType);
     auto const& paramType1 = triggerDefMgr.Params().at(eventDef.paramTypes[0]);
     auto const& paramType2 = triggerDefMgr.Params().at(eventDef.paramTypes[1]);
@@ -972,15 +984,26 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
         m_actionTypes.SetWindowText(actionType);
     }
 
-    bool actionChanged = false;
+    auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
     TriggerActions& actions = TriggerDatabase::Instance().
         Lookup(m_currentTrigger).Actions();
     auto& actionN = actions.Nth(curActionIdx);
 
-    auto const newActionTypeIdx = atoi(actionType);
-    actionChanged |= actionN.SetActionType(newActionTypeIdx);// only update if changes
+    // validate eventType to be int
+// this validation will be changed once filter applied
+    auto const actionTypeIdx = atoi(actionType);
+    if (actionTypeIdx < 0
+        || !triggerDefMgr.Actions().contains(actionTypeIdx)
+        || !IsNumeric(actionType)) {
+        actionType.Format("%d", actionN.ActionType());
+        m_actionTypes.SetWindowText(actionType); // set back old value
+        MessageBox(TranslateStringACP("TriggerActionInvalidType"), TranslateStringACP("Error"));
+        return;
+    }
 
-    auto const& triggerDefMgr = TriggerDefinitionManager::Instance();
+    auto const newActionTypeIdx = actionTypeIdx;
+    actionN.SetActionType(newActionTypeIdx);// only update if changes
+
     auto const& actionDef = actionN.Type();
     auto const& paramDefs = triggerDefMgr.Params();
 
