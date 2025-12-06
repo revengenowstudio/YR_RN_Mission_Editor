@@ -43,14 +43,18 @@ public:
 	~CSingleplayerSettings();
 
 	enum { IDD = IDD_SINGLEPLAYER };
+	enum DdxMode {
+		DDX_ReadFromIni,
+		DDX_WriteToIni,
+	};
 
 protected:
-
 	virtual void DoDataExchange(CDataExchange* pDX);    // ddx/ddv support
 	virtual void PostNcDestroy();
 	virtual BOOL OnInitDialog() override;
 
 	void translateUI();
+	void ddxWithMap(const int controlID, const CString& section, const CString& key, const DdxMode mode);
 
 // implementation
 	afx_msg void OnEditchangeIntro();

@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by TriggerEditor.rc
+// Used by SinglePlayerOptions.rc
 //
 #define PRODUCT_VERSION_REVISION        0
 #define PRODUCT_VERSION_MINOR           1
@@ -461,16 +461,16 @@
 #define IDC_LOVERPARMESSAGE             1353
 #define IDC_LUNDERPARTITLE              1354
 #define IDC_LUNDERPARMESSAGE            1355
-#define IDC_LPARTIMEEASY_TXT            1356
+#define IDC_PARTIMEEASY            1356
 #define IDC_MAPPROBLEMS                 1357
-#define IDC_LPARTIMEMEDIUM_TXT          1357
+#define IDC_PARTIMEMEDIUM          1357
 #define IDC_LPROBLEMSFOUND              1358
-#define IDC_LPARTIMEHARD_TXT            1358
-#define IDC_LOVERPARTITLE_TXT           1359
+#define IDC_PARTIMEHARD            1358
+#define IDC_OVERPARTITLE           1359
 #define IDC_RULESLIKETS                 1360
-#define IDC_LOVERPARMESSAGE_TXT         1360
-#define IDC_LUNDERPARTITLE_TXT          1361
-#define IDC_LUNDERPARMESSAGE_TXT        1362
+#define IDC_OVERPARMESSAGE           1360
+#define IDC_UNDERPARTITLE           1361
+#define IDC_UNDERPARMESSAGE         1362
 #define IDC_RANKINGGROUP                1363
 #define IDC_GENERALGROUP                1364
 #define IDC_ONLYORIGINAL                1364
