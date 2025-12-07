@@ -770,24 +770,21 @@ void CFinalSunDlg::OnFileSaveas()
 	GetCurrentDirectory(MAX_PATH, cuPath);
 	dlg.m_ofn.lpstrInitialDir = cuPath;
 
-
-
-	if (theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir = (char*)(LPCTSTR)theApp.m_Options.TSExe;
+	if (theApp.m_Options.TSExe.GetLength()) {
+		dlg.m_ofn.lpstrInitialDir = theApp.m_Options.TSExe;
+	}
 
 	if (dlg.DoModal() != IDCANCEL) {
 		currentMapFile = dlg.GetPathName();
 
 		CString str = GetLanguageStringACP("MainDialogCaption");
 		str += " (";
-		str += (char*)(LPCTSTR)dlg.GetPathName();
+		str += currentMapFile;
 		str += ")";
 
 		this->SetWindowText(str);
-
-		SaveMap(dlg.GetPathName());
+		SaveMap(currentMapFile);
 	}
-
-
 
 	SetCursor(m_hArrowCursor);
 
