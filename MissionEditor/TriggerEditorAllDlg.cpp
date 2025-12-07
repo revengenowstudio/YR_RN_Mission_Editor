@@ -806,8 +806,8 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
 
     HandleParamList(m_eventParam1, paramType1.listType);
     HandleParamList(m_eventParam2, paramType2.listType);
-    GetDlgItem(IDC_TRGR_EVENT_P1_TXT)->SetWindowTextA(paramType1.paramName);
-    GetDlgItem(IDC_TRGR_EVENT_P2_TXT)->SetWindowTextA(paramType2.paramName);
+    GetDlgItem(IDC_TRGR_EVENT_P1_TXT)->SetWindowText(paramType1.paramName);
+    GetDlgItem(IDC_TRGR_EVENT_P2_TXT)->SetWindowText(paramType2.paramName);
 
     m_eventParam1.SetWindowText(eventData.param1);
 
