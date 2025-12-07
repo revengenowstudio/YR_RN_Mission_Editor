@@ -18,6 +18,7 @@ struct ParamType
     CString paramName;
     int listType{ 0 }; // PARAMTYPE_NOTHING
     int slotCount{ 0 }; // usually 0. Seems 2 is specially meaningful
+    std::vector<CString> sequencedValues;
 };
 
 struct TriggerEventType
