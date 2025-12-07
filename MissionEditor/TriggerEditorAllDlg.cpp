@@ -980,6 +980,19 @@ void CTriggerEditorAllDlg::onSelChangeAction()
     onEditChangeActionType();
 }
 
+void handleParamList(CComboBox& cb, const ParamType& paramType)
+{
+    // legacy way
+    if (paramType.sequencedValues.empty()) {
+        HandleParamList(cb, paramType.listType);
+    }
+    // customized values
+    while (cb.DeleteString(0) != CB_ERR);
+    for (auto const& item : paramType.sequencedValues) {
+        cb.AddString(item);
+    }
+}
+
 void CTriggerEditorAllDlg::onEditChangeActionType()
 {
     if (m_currentTrigger.GetLength() == 0) {
@@ -1037,7 +1050,7 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
     for (auto const& [paramSlot, paramType] : actionDef.paramTypes) {
         auto const& paramDef = paramDefs.at(paramType);
         m_actionParamTexts[slot]->SetWindowText(paramDef.paramName);
-        HandleParamList(m_actionParam[slot], paramDef.listType);
+        handleParamList(m_actionParam[slot], paramDef);
         m_actionParam[slot].SetWindowText(actionN.Params()[paramSlot]);
         m_actionParam[slot].EnableWindow(TRUE);
         validSlots[slot] = true;

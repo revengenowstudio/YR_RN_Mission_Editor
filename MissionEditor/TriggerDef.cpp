@@ -29,15 +29,33 @@ static bool IsWaypointFormat(const CString& s)
     return s[0] >= 'A' && s[0] <= 'Z';
 }
 
+void parseParamList(ParamType& type, const CIniFile& ini, const CString& sec)
+{
+    auto const& section = ini.GetSection(sec);
+    auto const valCount = section.GetInteger("FixedValueCount");
+    CString idxStr;
+    type.sequencedValues.reserve(valCount);
+    for (auto idx = 0; idx < valCount; ++idx) {
+        idxStr.Format("%d", idx);
+        type.sequencedValues.emplace_back(section.GetString(idxStr));
+    }
+}
+
 void TriggerDefinitionManager::loadParamTypes(const CIniFile& ini, std::ostream& err)
 {
     for (auto const& [id, def] : ini.GetSection("ParamTypes")) {
         auto const paramTypeId = atoi(id);
         auto const params = SplitParams(def);
+        int listType = 0;
+        bool shouldParseList = true;
+        if (IsNumeric(params[1])) {
+            listType = atoi(params[1]);
+            shouldParseList = false;
+        }
         auto const [it, inserted] = m_paramTypes.try_emplace(paramTypeId,
             ParamType{
                 .paramName = params[0],
-                .listType = atoi(params[1]),
+                .listType = listType,
             });
         if (!inserted) {
             err << "Error: duplicated param type definition index " << id << endl;
@@ -45,6 +63,9 @@ void TriggerDefinitionManager::loadParamTypes(const CIniFile& ini, std::ostream&
         // some params will have 3rd control value
         if (params.size() >= 3) {
             it->second.slotCount = atoi(params[2]);
+        }
+        if (shouldParseList) {
+            parseParamList(it->second, ini, params[1]);
         }
     }
 }
