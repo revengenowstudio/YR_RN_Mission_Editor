@@ -95,7 +95,6 @@ void CTSOptions::OnOK()
 {
 	this->GetDlgItem(IDC_EDIT1)->GetWindowText(m_TSEXE);
 	m_LanguageName = getLanguageSelected();
-
 	CDialog::OnOK();
 }
 
@@ -139,7 +138,6 @@ BOOL CTSOptions::OnInitDialog()
 
 void CTSOptions::OnCbnSelchangeLanguage()
 {
-	theApp.m_Options.LanguageName = getLanguageSelected();
 	translateUI();
 }
 
