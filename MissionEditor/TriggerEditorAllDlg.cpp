@@ -984,6 +984,7 @@ void handleParamList(CComboBox& cb, const ParamType& paramType)
     // legacy way
     if (paramType.sequencedValues.empty()) {
         HandleParamList(cb, paramType.listType);
+        return;
     }
     // customized values
     while (cb.DeleteString(0) != CB_ERR);
