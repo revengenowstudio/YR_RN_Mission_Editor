@@ -34,6 +34,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+static const CString SEC_LIGTNINGS = "Lighting";
+
 /////////////////////////////////////////////////////////////////////////////
 // Eigenschaftenseite CLighting 
 
@@ -52,26 +54,11 @@ CLighting::~CLighting()
 void CLighting::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CLighting)
-	DDX_Control(pDX, IDC_RED2, m_Red2);
-	DDX_Control(pDX, IDC_RED, m_Red);
-	DDX_Control(pDX, IDC_LEVEL2, m_Level2);
-	DDX_Control(pDX, IDC_LEVEL, m_Level);
-	DDX_Control(pDX, IDC_GREEN2, m_Green2);
-	DDX_Control(pDX, IDC_GREEN, m_Green);
-	DDX_Control(pDX, IDC_BLUE2, m_Blue2);
-	DDX_Control(pDX, IDC_BLUE, m_Blue);
-	DDX_Control(pDX, IDC_AMBIENT2, m_Ambient2);
-	DDX_Control(pDX, IDC_AMBIENT, m_Ambient);
-	//}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(CLighting, CDialog)
-	//{{AFX_MSG_MAP(CLighting)
 	ON_EN_CHANGE(IDC_AMBIENT, OnChangeAmbient)
 	ON_EN_CHANGE(IDC_LEVEL, OnChangeLevel)
-	ON_EN_KILLFOCUS(IDC_AMBIENT, OnKillfocusAmbient)
 	ON_EN_CHANGE(IDC_RED, OnChangeRed)
 	ON_EN_CHANGE(IDC_GREEN, OnChangeGreen)
 	ON_EN_CHANGE(IDC_BLUE, OnChangeBlue)
@@ -80,7 +67,13 @@ BEGIN_MESSAGE_MAP(CLighting, CDialog)
 	ON_EN_CHANGE(IDC_RED2, OnChangeRed2)
 	ON_EN_CHANGE(IDC_GREEN2, OnChangeGreen2)
 	ON_EN_CHANGE(IDC_BLUE2, OnChangeBlue2)
-	//}}AFX_MSG_MAP
+	ON_EN_CHANGE(IDC_AMBIENT3, OnChangeAmbient3)
+	ON_EN_CHANGE(IDC_LEVEL3, OnChangeLevel3)
+	ON_EN_CHANGE(IDC_RED3, OnChangeRed3)
+	ON_EN_CHANGE(IDC_GREEN3, OnChangeGreen3)
+	ON_EN_CHANGE(IDC_BLUE3, OnChangeBlue3)
+	ON_EN_CHANGE(IDC_AMBIENTDOMINATOR, OnChangeAmbientDominator)
+	ON_EN_CHANGE(IDC_AMBIENTNUKE, OnChangeAmbientNuke)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -90,41 +83,69 @@ void CLighting::UpdateDialog()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	m_Ambient.SetWindowText(ini.GetString("Lighting", "Ambient"));
-	m_Ambient2.SetWindowText(ini.GetString("Lighting", "IonAmbient"));
-	m_Level.SetWindowText(ini.GetString("Lighting", "Level"));
-	m_Level2.SetWindowText(ini.GetString("Lighting", "IonLevel"));
-	m_Red.SetWindowText(ini.GetString("Lighting", "Red"));
-	m_Red2.SetWindowText(ini.GetString("Lighting", "IonRed"));
-	m_Green.SetWindowText(ini.GetString("Lighting", "Green"));
-	m_Green2.SetWindowText(ini.GetString("Lighting", "IonGreen"));
-	m_Blue.SetWindowText(ini.GetString("Lighting", "Blue"));
-	m_Blue2.SetWindowText(ini.GetString("Lighting", "IonBlue"));
-	//MessageBox(ini.GetString("Lightning", "Ambient"));
+	ddxReadFromMap(IDC_AMBIENT, "Ambient");
+	ddxReadFromMap(IDC_LEVEL, "Level");
+	ddxReadFromMap(IDC_RED, "Red");
+	ddxReadFromMap(IDC_GREEN, "Green");
+	ddxReadFromMap(IDC_BLUE, "Blue");
+	ddxReadFromMap(IDC_GROUND, "Ground");
+
+	ddxReadFromMap(IDC_AMBIENT2, "IonAmbient");
+	ddxReadFromMap(IDC_LEVEL2, "IonLevel");
+	ddxReadFromMap(IDC_RED2, "IonRed");
+	ddxReadFromMap(IDC_GREEN2, "IonGreen");
+	ddxReadFromMap(IDC_BLUE2, "IonBlue");
+	ddxReadFromMap(IDC_GROUND2, "IonGround");
+
+	ddxReadFromMap(IDC_AMBIENT3, "DominatorAmbient");
+	ddxReadFromMap(IDC_LEVEL3, "DominatorLevel");
+	ddxReadFromMap(IDC_RED3, "DominatorRed");
+	ddxReadFromMap(IDC_GREEN3, "DominatorGreen");
+	ddxReadFromMap(IDC_BLUE3, "DominatorBlue");
+	ddxReadFromMap(IDC_GROUND3, "DominatorGround");
+	ddxReadFromMap(IDC_AMBIENTDOMINATOR, "DominatorAmbientChangeRate");
+	ddxReadFromMap(IDC_AMBIENTNUKE, "NukeAmbientChangeRate");
 }
 
 void CLighting::translateUI()
 {
-	TranslateDlgItem(*this, IDC_TASKFORCE_T_TYPE, "TaskforcesType");
 	TranslateWindowCaption(*this, "Lighting");
+
+	TranslateDlgItem(*this, IDC_TASKFORCE_T_TYPE, "TaskforcesType");
 	TranslateDlgItem(*this, IDD_LIGHTING, "Lighting");
 	TranslateDlgItem(*this, IDC_DESC, "LightingDesc");
 	TranslateDlgItem(*this, IDC_LNORMAL, "LightingNormal");
-	TranslateDlgItem(*this, IDC_LAMBIENT1, "LightingNormalAmbient");
-	TranslateDlgItem(*this, IDC_LLEVEL1, "LightingNormalLevel");
-	TranslateDlgItem(*this, IDC_LRED1, "LightingNormalRed");
-	TranslateDlgItem(*this, IDC_LGREEN1, "LightingNormalGreen");
-	TranslateDlgItem(*this, IDC_LBLUE1, "LightingNormalBlue");
-	TranslateDlgItem(*this, IDC_LIONSTORM, "LightingIonStorm");
-	TranslateDlgItem(*this, IDC_LAMBIENT2, "LightingWeatherStormAmbient");
-	TranslateDlgItem(*this, IDC_LLEVEL2, "LightingWeatherStormLevel");
-	TranslateDlgItem(*this, IDC_LRED2, "LightingWeatherStormRed");
-	TranslateDlgItem(*this, IDC_LGREEN2, "LightingWeatherStormGreen");
-	TranslateDlgItem(*this, IDC_LBLUE2, "LightingWeatherStormBlue");
+	TranslateDlgItem(*this, IDC_LDOMINATOR, "LightingDominator");
+	// Others
+	TranslateDlgItem(*this, IDC_LAMBIENTNUKE, "LightingNukeAmbientChangeRate");
+	TranslateDlgItem(*this, IDC_LAMBIENTDOMINATOR, "LightingDominatorAmbientChangeRate");
 
+	TranslateDlgItem(*this, IDC_LAMBIENT1, "LightingAmbient");
+	TranslateDlgItem(*this, IDC_LGREEN1, "LightingGreen");
+	TranslateDlgItem(*this, IDC_LRED1, "LightingRed");
+	TranslateDlgItem(*this, IDC_LBLUE1, "LightingBlue");
+	TranslateDlgItem(*this, IDC_LLEVEL1, "LightingLevel");
+	TranslateDlgItem(*this, IDC_LGROUND1, "LightingGround");
+	// IonStorm
 #ifdef RA2_MODE
 	TranslateDlgItem(*this, IDC_LIONSTORM, "LightingWeatherStorm");
+#else
+	TranslateDlgItem(*this, IDC_LIONSTORM, "LightingIonStorm");
 #endif
+	TranslateDlgItem(*this, IDC_LAMBIENT2, "LightingAmbient");
+	TranslateDlgItem(*this, IDC_LGREEN2, "LightingGreen");
+	TranslateDlgItem(*this, IDC_LRED2, "LightingRed");
+	TranslateDlgItem(*this, IDC_LBLUE2, "LightingBlue");
+	TranslateDlgItem(*this, IDC_LLEVEL2, "LightingLevel");
+	TranslateDlgItem(*this, IDC_LGROUND2, "LightingGround");
+
+	// Dominator
+	TranslateDlgItem(*this, IDC_LAMBIENT3, "LightingAmbient");
+	TranslateDlgItem(*this, IDC_LGREEN3, "LightingGreen");
+	TranslateDlgItem(*this, IDC_LRED3, "LightingRed");
+	TranslateDlgItem(*this, IDC_LBLUE3, "LightingBlue");
+	TranslateDlgItem(*this, IDC_LLEVEL3, "LightingLevel");
+	TranslateDlgItem(*this, IDC_LGROUND3, "LightingGround");
 }
 
 BOOL CLighting::OnInitDialog()
@@ -134,107 +155,86 @@ BOOL CLighting::OnInitDialog()
 	return ret;
 }
 
+void CLighting::ddxWithMap(const int controlID, const CString& key, const DdxMode mode)
+{
+	::ddxWithMap(*GetDlgItem(controlID), SEC_LIGTNINGS, key, mode);
+}
+void CLighting::ddxReadFromMap(const int controlID, const CString& key)
+{
+	ddxWithMap(controlID, key, DDX_ReadFromIni);
+}
+void CLighting::ddxWriteIntoMap(const int controlID, const CString& key)
+{
+	ddxWithMap(controlID, key, DDX_WriteToIni);
+}
+// Normal Lighting
 void CLighting::OnChangeAmbient()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString ctext;
-	m_Ambient.GetWindowText(ctext);
-	CString text = (char*)(LPCTSTR)ctext;
-	ini.SetString("Lighting", "Ambient", text);
+	ddxWriteIntoMap(IDC_AMBIENT, "Ambient");
 }
-
 void CLighting::OnChangeLevel()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString ctext;
-	m_Level.GetWindowText(ctext);
-	CString text = (char*)(LPCTSTR)ctext;
-	ini.SetString("Lighting", "Level", text);
+	ddxWriteIntoMap(IDC_LEVEL, "Level");
 }
-
-void CLighting::OnKillfocusAmbient()
-{
-
-}
-
 void CLighting::OnChangeRed()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString ctext;
-	m_Red.GetWindowText(ctext);
-	CString text = (char*)(LPCTSTR)ctext;
-	ini.SetString("Lighting", "Red", text);
+	ddxWriteIntoMap(IDC_RED, "Red");
 }
-
 void CLighting::OnChangeGreen()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString ctext;
-	m_Green.GetWindowText(ctext);
-	CString text = (char*)(LPCTSTR)ctext;
-	ini.SetString("Lighting", "Green", text);
+	ddxWriteIntoMap(IDC_GREEN, "Green");
 }
-
 void CLighting::OnChangeBlue()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString ctext;
-	m_Blue.GetWindowText(ctext);
-	CString text = (char*)(LPCTSTR)ctext;
-	ini.SetString("Lighting", "Blue", text);
+	ddxWriteIntoMap(IDC_BLUE, "Blue");
 }
-
+// IonStorm Lighting
 void CLighting::OnChangeAmbient2()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString ctext;
-	m_Ambient2.GetWindowText(ctext);
-	CString text = (char*)(LPCTSTR)ctext;
-	ini.SetString("Lighting", "IonAmbient", text);
+	ddxWriteIntoMap(IDC_AMBIENT2, "IonAmbient");
 }
-
 void CLighting::OnChangeLevel2()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString ctext;
-	m_Level2.GetWindowText(ctext);
-	CString text = (char*)(LPCTSTR)ctext;
-	ini.SetString("Lighting", "IonLevel", text);
+	ddxWriteIntoMap(IDC_LEVEL2, "IonLevel");
 }
-
 void CLighting::OnChangeRed2()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString ctext;
-	m_Red2.GetWindowText(ctext);
-	CString text = (char*)(LPCTSTR)ctext;
-	ini.SetString("Lighting", "IonRed", text);
+	ddxWriteIntoMap(IDC_RED2, "IonRed");
 }
-
 void CLighting::OnChangeGreen2()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString ctext;
-	m_Green2.GetWindowText(ctext);
-	CString text = (char*)(LPCTSTR)ctext;
-	ini.SetString("Lighting", "IonGreen", text);
+	ddxWriteIntoMap(IDC_GREEN2, "IonGreen");
 }
-
 void CLighting::OnChangeBlue2()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString ctext;
-	m_Blue2.GetWindowText(ctext);
-	CString text = (char*)(LPCTSTR)ctext;
-	ini.SetString("Lighting", "IonBlue", text);
+	ddxWriteIntoMap(IDC_BLUE2, "IonBlue");
+}
+// Dominator Lighting
+void CLighting::OnChangeAmbient3()
+{
+	ddxWriteIntoMap(IDC_AMBIENT3, "DominatorAmbient");
+}
+void CLighting::OnChangeLevel3()
+{
+	ddxWriteIntoMap(IDC_LEVEL3, "DominatorLevel");
+}
+void CLighting::OnChangeRed3()
+{
+	ddxWriteIntoMap(IDC_RED3, "DominatorRed");
+}
+void CLighting::OnChangeGreen3()
+{
+	ddxWriteIntoMap(IDC_GREEN3, "DominatorGreen");
+}
+void CLighting::OnChangeBlue3()
+{
+	ddxWriteIntoMap(IDC_BLUE3, "DominatorBlue");
+}
+void CLighting::OnChangeAmbientDominator()
+{
+	ddxWriteIntoMap(IDC_AMBIENTDOMINATOR, "DominatorAmbientChangeRate");
+}
+void CLighting::OnChangeAmbientNuke()
+{
+	ddxWriteIntoMap(IDC_AMBIENTNUKE, "NukeAmbientChangeRate");
 }
