@@ -332,6 +332,9 @@
     <ResourceCompile Include="res\SinglePlayerOptions.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
+    <ResourceCompile Include="res\Lighting.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Aircraft.h">
