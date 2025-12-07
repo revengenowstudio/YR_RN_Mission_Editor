@@ -9,67 +9,15 @@ const TriggerInstance TriggerInstance::Default {
     "0"
 };
 
-TriggerDatabase& TriggerDatabase::Instance()
+template<>
+ObjectDatabase<TriggerInstance>& ObjectDatabase<TriggerInstance>::Instance()
 {
-    static TriggerDatabase inst;
+    static ObjectDatabase inst;
     return inst;
 }
 
-TriggerInstance& TriggerDatabase::Lookup(const CString& id)
-{
-    auto const it = lookupTable.find(id);
-    if (it != lookupTable.end()) {
-        return items.at(it->second);
-    }
-    throw std::runtime_error("no such trigger");
-}
-
-TriggerInstance& TriggerDatabase::InsertAt(size_t idx, CString&& key)
-{
-    if (idx > items.size()) {
-        idx = items.size() - 1;
-    }
-    items.insert(items.begin() + idx, { key });
-    lookupTable.insert_or_assign(key, idx);
-    // fix all indexes
-    for (auto it = lookupTable.upper_bound(key); it != lookupTable.end(); ++it) {
-        it->second++;
-    }
-    return items.at(idx);
-}
-
-void TriggerDatabase::Append(TriggerInstance&& inst)
-{
-    lookupTable.insert_or_assign(inst.ID(), items.size());
-    items.emplace_back(std::move(inst));
-}
-
-TriggerInstance& TriggerDatabase::Append(const CString& id, CString&& name)
-{
-    lookupTable.insert_or_assign(id, items.size());
-    auto& ret = items.emplace_back(id);
-    ret.Options().name = std::move(name);
-    return ret;
-}
-
-void TriggerDatabase::DeleteAt(size_t idx)
-{
-    ASSERT(idx < items.size());
-    // delete from record first;
-    auto const& trigger = items.at(idx);
-    auto const eraseCount = lookupTable.erase(trigger.ID());
-    ASSERT(eraseCount == 1);
-    items.erase(items.begin() + idx);
-    // now update all key-pos indexing, dec 1
-    for (auto affectedIdx = idx; affectedIdx < items.size(); ++affectedIdx) {
-        auto const& triggerN = items[affectedIdx];
-        auto const it = lookupTable.find(triggerN.ID());
-        ASSERT(it != lookupTable.end());
-        it->second--;
-    }
-}
-
-void TriggerDatabase::LoadFrom(const CIniFile& ini, std::ostream& err)
+template<>
+void ObjectDatabase<TriggerInstance>::LoadFrom(const CIniFile& ini, std::ostream& err)
 {
     Clear();
     auto const& triggerSec = ini[SEC_TRIGGERS];
@@ -81,7 +29,8 @@ void TriggerDatabase::LoadFrom(const CIniFile& ini, std::ostream& err)
     }
 }
 
-void TriggerDatabase::SaveInto(CIniFile& ini, std::ostream& err)
+template<>
+void ObjectDatabase<TriggerInstance>::SaveInto(CIniFile& ini, std::ostream& err)
 {
     auto& triggerSec = ini.AddSection(SEC_TRIGGERS);
     auto& eventsSec = ini.AddSection(SEC_EVENTS);

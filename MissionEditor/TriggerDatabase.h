@@ -29,10 +29,11 @@ private:
     TriggerActions actions;
 };
 
-class TriggerDatabase
+template<typename TObject>
+class ObjectDatabase
 {
 public:
-    static TriggerDatabase& Instance();
+    static ObjectDatabase& Instance();
 
     auto const Size() const { return items.size(); }
     auto& Nth(size_t slot) {
@@ -41,15 +42,15 @@ public:
     auto const& Nth(size_t slot) const {
         return items.at(slot);
     }
-    TriggerInstance& Lookup(const CString& id);
-    const TriggerInstance& Lookup(const CString& id) const {
+    TObject& Lookup(const CString& id);
+    const TObject& Lookup(const CString& id) const {
         using BaseType = std::remove_pointer_t<decltype(this)>;
         using NonConstType = std::remove_const_t<BaseType>;
         return const_cast<NonConstType*>(this)->Lookup(id);
     }
-    TriggerInstance& InsertAt(size_t slot, CString&& id = {});
-    void Append(TriggerInstance&& inst);
-    TriggerInstance& Append(const CString& id, CString&& name);
+    TObject& InsertAt(size_t slot, CString&& id = {});
+    void Append(TObject&& inst);
+    TObject& Append(const CString& id, CString&& name);
     void DeleteAt(size_t slot);
 
     void LoadFrom(const CIniFile& ini, std::ostream& err);
@@ -60,8 +61,8 @@ public:
         lookupTable.clear();
     }
 
-    TriggerDatabase() = default;
-    TriggerDatabase(const TriggerDatabase&) = delete;
+    ObjectDatabase() = default;
+    ObjectDatabase(const ObjectDatabase&) = delete;
 
     int64_t FindIndex(const CString& key) const noexcept
     {
@@ -98,7 +99,70 @@ public:
     }
 
 private:
-    std::vector<TriggerInstance> items;
+    std::vector<TObject> items;
     std::map<CString, size_t> lookupTable; // ID - index of items
-    // TODO: consider tags
+};
+
+template<typename TObject>
+TObject& ObjectDatabase<TObject>::Lookup(const CString& id)
+{
+    auto const it = lookupTable.find(id);
+    if (it != lookupTable.end()) {
+        return items.at(it->second);
+    }
+    throw std::runtime_error("no such trigger");
+}
+
+template<typename TObject>
+TObject& ObjectDatabase<TObject>::InsertAt(size_t idx, CString&& key)
+{
+    if (idx > items.size()) {
+        idx = items.size() - 1;
+    }
+    items.insert(items.begin() + idx, { key });
+    lookupTable.insert_or_assign(key, idx);
+    // fix all indexes
+    for (auto it = lookupTable.upper_bound(key); it != lookupTable.end(); ++it) {
+        it->second++;
+    }
+    return items.at(idx);
+}
+
+template<typename TObject>
+void ObjectDatabase<TObject>::Append(TObject&& inst)
+{
+    lookupTable.insert_or_assign(inst.ID(), items.size());
+    items.emplace_back(std::move(inst));
+}
+
+template<typename TObject>
+TObject& ObjectDatabase<TObject>::Append(const CString& id, CString&& name)
+{
+    lookupTable.insert_or_assign(id, items.size());
+    auto& ret = items.emplace_back(id);
+    ret.Options().name = std::move(name);
+    return ret;
+}
+
+template<typename TObject>
+void ObjectDatabase<TObject>::DeleteAt(size_t idx)
+{
+    ASSERT(idx < items.size());
+    // delete from record first;
+    auto const& trigger = items.at(idx);
+    auto const eraseCount = lookupTable.erase(trigger.ID());
+    ASSERT(eraseCount == 1);
+    items.erase(items.begin() + idx);
+    // now update all key-pos indexing, dec 1
+    for (auto affectedIdx = idx; affectedIdx < items.size(); ++affectedIdx) {
+        auto const& triggerN = items[affectedIdx];
+        auto const it = lookupTable.find(triggerN.ID());
+        ASSERT(it != lookupTable.end());
+        it->second--;
+    }
+}
+
+class TriggerDatabase : public ObjectDatabase<TriggerInstance>
+{
+
 };
