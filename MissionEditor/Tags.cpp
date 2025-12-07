@@ -311,7 +311,7 @@ void CTags::OnAdd()
 {
 	auto const& triggerDb = TriggerDatabase::Instance();
 	if (triggerDb.Size() <= 0) {
-		MessageBox("Before creating tags, you need at least one trigger.", "Error");
+		MessageBox(TranslateStringACP("TagCreateWarning"), TranslateStringACP("Error"));
 		return;
 	};
 
