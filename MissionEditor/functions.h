@@ -24,6 +24,7 @@
 #include <afx.h>
 #include <memory>
 #include <array>
+#include <functional>
 #include "Helpers.h"
 
 class CIniFile;
@@ -35,8 +36,11 @@ enum DdxMode {
 	DDX_WriteToIni,
 };
 
+using WinTextValidator = std::function<bool(CWnd&, CString&)>;
+
 inline void ddxWithIni(CWnd& wnd, CIniFile& ini, const CString& section,
-	const CString& key, const DdxMode mode)
+	const CString& key, const DdxMode mode, 
+	const WinTextValidator& checkOrModify)
 {
 	if (mode == DDX_ReadFromIni) {
 		wnd.SetWindowText(ini.GetString(section, key));
@@ -45,11 +49,18 @@ inline void ddxWithIni(CWnd& wnd, CIniFile& ini, const CString& section,
 	CString newVal;
 	wnd.GetWindowText(newVal);
 	if (!newVal.IsEmpty()) {
-		ini.SetString(section, key, newVal);
+		if (!checkOrModify || checkOrModify(wnd, newVal)) {
+			ini.SetString(section, key, newVal);		
+			wnd.SetWindowText(newVal);
+			return;
+		}
+		// restore value
+		wnd.SetWindowText(ini.GetString(section, key));
 	}
 }
 
-void ddxWithMap(CWnd& wnd, const CString& section, const CString& key, const DdxMode mode);
+void ddxWithMap(CWnd& wnd, const CString& section, const CString& key, const DdxMode mode,
+	const WinTextValidator& checkOrModify = {});
 
 bool deleteFile(const std::string& u8FilePath);
 

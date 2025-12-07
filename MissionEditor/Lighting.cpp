@@ -57,23 +57,23 @@ void CLighting::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CLighting, CDialog)
-	ON_EN_CHANGE(IDC_AMBIENT, OnChangeAmbient)
-	ON_EN_CHANGE(IDC_LEVEL, OnChangeLevel)
-	ON_EN_CHANGE(IDC_RED, OnChangeRed)
-	ON_EN_CHANGE(IDC_GREEN, OnChangeGreen)
-	ON_EN_CHANGE(IDC_BLUE, OnChangeBlue)
-	ON_EN_CHANGE(IDC_AMBIENT2, OnChangeAmbient2)
-	ON_EN_CHANGE(IDC_LEVEL2, OnChangeLevel2)
-	ON_EN_CHANGE(IDC_RED2, OnChangeRed2)
-	ON_EN_CHANGE(IDC_GREEN2, OnChangeGreen2)
-	ON_EN_CHANGE(IDC_BLUE2, OnChangeBlue2)
-	ON_EN_CHANGE(IDC_AMBIENT3, OnChangeAmbient3)
-	ON_EN_CHANGE(IDC_LEVEL3, OnChangeLevel3)
-	ON_EN_CHANGE(IDC_RED3, OnChangeRed3)
-	ON_EN_CHANGE(IDC_GREEN3, OnChangeGreen3)
-	ON_EN_CHANGE(IDC_BLUE3, OnChangeBlue3)
-	ON_EN_CHANGE(IDC_AMBIENTDOMINATOR, OnChangeAmbientDominator)
-	ON_EN_CHANGE(IDC_AMBIENTNUKE, OnChangeAmbientNuke)
+	ON_EN_KILLFOCUS(IDC_AMBIENT, OnChangeAmbient)
+	ON_EN_KILLFOCUS(IDC_LEVEL, OnChangeLevel)
+	ON_EN_KILLFOCUS(IDC_RED, OnChangeRed)
+	ON_EN_KILLFOCUS(IDC_GREEN, OnChangeGreen)
+	ON_EN_KILLFOCUS(IDC_BLUE, OnChangeBlue)
+	ON_EN_KILLFOCUS(IDC_AMBIENT2, OnChangeAmbient2)
+	ON_EN_KILLFOCUS(IDC_LEVEL2, OnChangeLevel2)
+	ON_EN_KILLFOCUS(IDC_RED2, OnChangeRed2)
+	ON_EN_KILLFOCUS(IDC_GREEN2, OnChangeGreen2)
+	ON_EN_KILLFOCUS(IDC_BLUE2, OnChangeBlue2)
+	ON_EN_KILLFOCUS(IDC_AMBIENT3, OnChangeAmbient3)
+	ON_EN_KILLFOCUS(IDC_LEVEL3, OnChangeLevel3)
+	ON_EN_KILLFOCUS(IDC_RED3, OnChangeRed3)
+	ON_EN_KILLFOCUS(IDC_GREEN3, OnChangeGreen3)
+	ON_EN_KILLFOCUS(IDC_BLUE3, OnChangeBlue3)
+	ON_EN_KILLFOCUS(IDC_AMBIENTDOMINATOR, OnChangeAmbientDominator)
+	ON_EN_KILLFOCUS(IDC_AMBIENTNUKE, OnChangeAmbientNuke)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -155,9 +155,23 @@ BOOL CLighting::OnInitDialog()
 	return ret;
 }
 
+bool validateDoubleInput(CWnd& wnd, CString& val)
+{
+	val.Trim();
+
+	double valueLf;
+	if (sscanf_s(val, "%lf", &valueLf) != 1) {
+		wnd.MessageBox(TranslateStringACP("LightingValueInvalid"), TranslateStringACP("Error"));
+		return false;
+	}
+
+	val.Format("%.6f", valueLf);
+	return true;
+}
+
 void CLighting::ddxWithMap(const int controlID, const CString& key, const DdxMode mode)
 {
-	::ddxWithMap(*GetDlgItem(controlID), SEC_LIGTNINGS, key, mode);
+	::ddxWithMap(*GetDlgItem(controlID), SEC_LIGTNINGS, key, mode, validateDoubleInput);
 }
 void CLighting::ddxReadFromMap(const int controlID, const CString& key)
 {
