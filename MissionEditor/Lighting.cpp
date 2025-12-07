@@ -56,28 +56,57 @@ void CLighting::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 }
 
+BOOL CLighting::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
+
 BEGIN_MESSAGE_MAP(CLighting, CDialog)
 	ON_EN_KILLFOCUS(IDC_AMBIENT, OnChangeAmbient)
 	ON_EN_KILLFOCUS(IDC_LEVEL, OnChangeLevel)
 	ON_EN_KILLFOCUS(IDC_RED, OnChangeRed)
 	ON_EN_KILLFOCUS(IDC_GREEN, OnChangeGreen)
 	ON_EN_KILLFOCUS(IDC_BLUE, OnChangeBlue)
+	ON_EN_KILLFOCUS(IDC_GROUND, OnChangeGround)
 	ON_EN_KILLFOCUS(IDC_AMBIENT2, OnChangeAmbient2)
 	ON_EN_KILLFOCUS(IDC_LEVEL2, OnChangeLevel2)
 	ON_EN_KILLFOCUS(IDC_RED2, OnChangeRed2)
 	ON_EN_KILLFOCUS(IDC_GREEN2, OnChangeGreen2)
 	ON_EN_KILLFOCUS(IDC_BLUE2, OnChangeBlue2)
+	ON_EN_KILLFOCUS(IDC_GROUND2, OnChangeGround2)
 	ON_EN_KILLFOCUS(IDC_AMBIENT3, OnChangeAmbient3)
 	ON_EN_KILLFOCUS(IDC_LEVEL3, OnChangeLevel3)
 	ON_EN_KILLFOCUS(IDC_RED3, OnChangeRed3)
 	ON_EN_KILLFOCUS(IDC_GREEN3, OnChangeGreen3)
 	ON_EN_KILLFOCUS(IDC_BLUE3, OnChangeBlue3)
+	ON_EN_KILLFOCUS(IDC_GROUND3, OnChangeGround3)
 	ON_EN_KILLFOCUS(IDC_AMBIENTDOMINATOR, OnChangeAmbientDominator)
 	ON_EN_KILLFOCUS(IDC_AMBIENTNUKE, OnChangeAmbientNuke)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CLighting 
+
+BOOL CLighting::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+		case VK_RETURN: {
+			switch (::GetDlgCtrlID(pMsg->hwnd)) {
+			default:
+				::SendMessage(pMsg->hwnd, WM_KILLFOCUS, 0, 0);
+				break;// never exist window (default -1) even nothing did
+			}
+		}
+	}
+	return TRUE;
+}
 
 void CLighting::UpdateDialog()
 {
@@ -202,6 +231,10 @@ void CLighting::OnChangeBlue()
 {
 	ddxWriteIntoMap(IDC_BLUE, "Blue");
 }
+void CLighting::OnChangeGround()
+{
+	ddxWriteIntoMap(IDC_GROUND, "Ground");
+}
 // IonStorm Lighting
 void CLighting::OnChangeAmbient2()
 {
@@ -223,6 +256,10 @@ void CLighting::OnChangeBlue2()
 {
 	ddxWriteIntoMap(IDC_BLUE2, "IonBlue");
 }
+void CLighting::OnChangeGround2()
+{
+	ddxWriteIntoMap(IDC_GROUND2, "IonGround");
+}
 // Dominator Lighting
 void CLighting::OnChangeAmbient3()
 {
@@ -243,6 +280,10 @@ void CLighting::OnChangeGreen3()
 void CLighting::OnChangeBlue3()
 {
 	ddxWriteIntoMap(IDC_BLUE3, "DominatorBlue");
+}
+void CLighting::OnChangeGround3()
+{
+	ddxWriteIntoMap(IDC_GROUND3, "DominatorGround");
 }
 void CLighting::OnChangeAmbientDominator()
 {

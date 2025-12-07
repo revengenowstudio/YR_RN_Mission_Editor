@@ -47,34 +47,39 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 // Implementierung
-protected:
 	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CLighting)
 	virtual BOOL OnInitDialog();
 	void ddxWithMap(const int controlID, const CString& key, const DdxMode mode);
 	void ddxReadFromMap(const int controlID, const CString& key);
 	void ddxWriteIntoMap(const int controlID, const CString& key);
 	void translateUI();
+	BOOL onMessageKeyDown(MSG* pMsg);
+
 	afx_msg void OnChangeAmbient();
 	afx_msg void OnChangeLevel();
 	afx_msg void OnChangeRed();
 	afx_msg void OnChangeGreen();
 	afx_msg void OnChangeBlue();
+	afx_msg void OnChangeGround();
 	afx_msg void OnChangeAmbient2();
 	afx_msg void OnChangeLevel2();
 	afx_msg void OnChangeRed2();
 	afx_msg void OnChangeGreen2();
 	afx_msg void OnChangeBlue2();
+	afx_msg void OnChangeGround2();
 	afx_msg void OnChangeAmbient3();
 	afx_msg void OnChangeLevel3();
 	afx_msg void OnChangeRed3();
 	afx_msg void OnChangeGreen3();
 	afx_msg void OnChangeBlue3();
+	afx_msg void OnChangeGround3();
 	afx_msg void OnChangeAmbientDominator();
 	afx_msg void OnChangeAmbientNuke();
-	//}}AFX_MSG
+
+
 	DECLARE_MESSAGE_MAP()
 
 };
