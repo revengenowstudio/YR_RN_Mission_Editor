@@ -34,6 +34,9 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+const CString rankingSec = "Ranking";
+const CString generalSec = "General";
+
 /////////////////////////////////////////////////////////////////////////////
 // property page CSingleplayerSettings 
 
@@ -48,6 +51,17 @@ CSingleplayerSettings::CSingleplayerSettings() : CDialog(IDD)
 
 CSingleplayerSettings::~CSingleplayerSettings()
 {
+}
+
+BOOL CSingleplayerSettings::OnInitDialog()
+{
+	if (!CDialog::OnInitDialog()) {
+		return FALSE;
+	}
+
+	translateUI();
+
+	return true;
 }
 
 void CSingleplayerSettings::DoDataExchange(CDataExchange* pDX)
@@ -83,7 +97,33 @@ BEGIN_MESSAGE_MAP(CSingleplayerSettings, CDialog)
 	ON_CBN_EDITCHANGE(IDC_TIMERINHERIT, OnEditchangeTimerinherit)
 	ON_CBN_EDITCHANGE(IDC_FILLSILOS, OnEditchangeFillsilos)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_SAVE, OnBnClickedSave)
 END_MESSAGE_MAP()
+
+void ddxWithIni(CWnd& wnd, CIniFile& ini, const CString& section, const CString& key, 
+	const CSingleplayerSettings::DdxMode mode)
+{
+	if (mode == CSingleplayerSettings::DDX_ReadFromIni) {
+		wnd.SetWindowText(ini.GetString(section, key));
+		return;
+	}
+	CString newVal;
+	wnd.GetWindowText(newVal);
+	if (!newVal.IsEmpty()) {
+		ini.SetString(section, key, newVal);
+	}
+}
+
+void ddxWithMap(CWnd& wnd, const CString& section, const CString& key, const CSingleplayerSettings::DdxMode mode)
+{
+	CIniFile& ini = Map->GetIniFile();
+	ddxWithIni(wnd, ini, section, key, mode);
+}
+
+void CSingleplayerSettings::ddxWithMap(const int controlID, const CString& section, const CString& key, const DdxMode mode)
+{
+	::ddxWithMap(*GetDlgItem(controlID), section, key, mode);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // message handlers
@@ -120,9 +160,20 @@ void CSingleplayerSettings::UpdateDialog()
 	ListMovies(m_Action, TRUE);
 	ListMovies(m_PostScore, TRUE);
 	ListMovies(m_PreMapSelect, TRUE);
-
-
-	UpdateStrings();
+	// TODO: use CListCtrl to support flexible items and can be defined in FAData.ini
+	ddxWithMap(IDC_PARTIMEEASY, rankingSec, "ParTimeEasy", DDX_ReadFromIni);
+	ddxWithMap(IDC_PARTIMEMEDIUM, rankingSec, "ParTimeMedium", DDX_ReadFromIni);
+	ddxWithMap(IDC_PARTIMEHARD, rankingSec, "ParTimeHard", DDX_ReadFromIni);
+	ddxWithMap(IDC_OVERPARTITLE, rankingSec, "OverParTitle", DDX_ReadFromIni);
+	ddxWithMap(IDC_OVERPARMESSAGE, rankingSec, "OverParMessage", DDX_ReadFromIni);
+	ddxWithMap(IDC_UNDERPARTITLE, rankingSec, "UnderParTitle", DDX_ReadFromIni);
+	ddxWithMap(IDC_UNDERPARMESSAGE, rankingSec, "UnderParMessage", DDX_ReadFromIni);
+	ddxWithMap(IDC_CAMPAIGNMONEYDELTAEASY_TXT, generalSec, "CampaignMoneyDeltaEasy", DDX_ReadFromIni);
+	ddxWithMap(IDC_CAMPAIGNMONEYDELTAHARD_TXT, generalSec, "CampaignMoneyDeltaHard", DDX_ReadFromIni);
+	ddxWithMap(IDC_SPYMONEYSTEALPERCENT_TXT, generalSec, "SpyMoneyStealPercent", DDX_ReadFromIni);
+	ddxWithMap(IDC_TEAMDELAYS_TXT, generalSec, "TeamDelays", DDX_ReadFromIni);
+	ddxWithMap(IDC_PRISMSUPPORTMODIFIER_TXT, generalSec, "PrismSupportModifier", DDX_ReadFromIni);
+	ddxWithMap(IDC_DEFAULTMIRAGEDISGUISES, generalSec, "DefaultMirageDisguises", DDX_ReadFromIni);
 }
 
 void CSingleplayerSettings::OnEditchangeIntro()
@@ -191,23 +242,40 @@ void CSingleplayerSettings::OnEditchangeFillsilos()
 	ini.SetString("Basic", "FillSilos", GetText(&m_FillSilos));
 }
 
-void CSingleplayerSettings::UpdateStrings()
+void CSingleplayerSettings::translateUI()
 {
-	SetDlgItemText(IDC_LSTARTINGDROPSHIPS, GetLanguageStringACP("SingleplayerStartingDropships"));
-	SetDlgItemText(IDC_LCARRYOVERMONEY, GetLanguageStringACP("SingleplayerCarryOverMoney"));
-	SetDlgItemText(IDC_LINHERITTIMER, GetLanguageStringACP("SingleplayerTimerInherit"));
-	SetDlgItemText(IDC_LFILLSILOS, GetLanguageStringACP("SingleplayerFillSilos"));
-	SetDlgItemText(IDC_LMOVIES, GetLanguageStringACP("SingleplayerMovies"));
-	SetDlgItemText(IDC_LINTRO, GetLanguageStringACP("SingleplayerIntro"));
-	SetDlgItemText(IDC_LBRIEF, GetLanguageStringACP("SingleplayerBrief"));
-	SetDlgItemText(IDC_LWIN, GetLanguageStringACP("SingleplayerWin"));
-	SetDlgItemText(IDC_LLOSE, GetLanguageStringACP("SingleplayerLose"));
-	SetDlgItemText(IDC_LACTION, GetLanguageStringACP("SingleplayerAction"));
-	SetDlgItemText(IDC_LPOSTSCORE, GetLanguageStringACP("SingleplayerPostScore"));
-	SetDlgItemText(IDC_LPREMAPSELECT, GetLanguageStringACP("SingleplayerPreMapSelect"));
-	SetDlgItemText(IDC_DESC, GetLanguageStringACP("SingleplayerDesc"));
+	TranslateWindowCaption(*this, "Singleplayer settings");
 
-	SetWindowText(TranslateStringACP("Singleplayer settings"));
+	TranslateDlgItem(*this, IDC_LSTARTINGDROPSHIPS, "SingleplayerStartingDropships");
+	TranslateDlgItem(*this, IDC_LCARRYOVERMONEY, "SingleplayerCarryOverMoney");
+	TranslateDlgItem(*this, IDC_LINHERITTIMER, "SingleplayerTimerInherit");
+	TranslateDlgItem(*this, IDC_LFILLSILOS, "SingleplayerFillSilos");
+	TranslateDlgItem(*this, IDC_LMOVIES, "SingleplayerMovies");
+	TranslateDlgItem(*this, IDC_LINTRO, "SingleplayerIntro");
+	TranslateDlgItem(*this, IDC_LBRIEF, "SingleplayerBrief");
+	TranslateDlgItem(*this, IDC_LWIN, "SingleplayerWin");
+	TranslateDlgItem(*this, IDC_LLOSE, "SingleplayerLose");
+	TranslateDlgItem(*this, IDC_LACTION, "SingleplayerAction");
+	TranslateDlgItem(*this, IDC_LPOSTSCORE, "SingleplayerPostScore");
+	TranslateDlgItem(*this, IDC_LPREMAPSELECT, "SingleplayerPreMapSelect");
+	TranslateDlgItem(*this, IDC_DESC, "SingleplayerDesc");
+
+	TranslateDlgItem(*this, IDC_LPARTIMEEASY, "SingleplayerParTimeEasy");
+	TranslateDlgItem(*this, IDC_LPARTIMEMEDIUM, "SingleplayerParTimeMedium");
+	TranslateDlgItem(*this, IDC_LPARTIMEHARD, "SingleplayerParTimeHard");
+	TranslateDlgItem(*this, IDC_LOVERPARTITLE, "SingleplayerOverParTitle");
+	TranslateDlgItem(*this, IDC_LOVERPARMESSAGE, "SingleplayerOverParMessage");
+	TranslateDlgItem(*this, IDC_LUNDERPARTITLE, "SingleplayerUnderParTitle");
+	TranslateDlgItem(*this, IDC_LUNDERPARMESSAGE, "SingleplayerUnderParMessage");
+	TranslateDlgItem(*this, IDC_RANKINGGROUP, "SingleplayerRanking");
+	TranslateDlgItem(*this, IDC_GENERALGROUP, "SingleplayerGeneral");
+	TranslateDlgItem(*this, IDC_CAMPAIGNMONEYDELTAEASY, "SingleplayerCampaignMoneyDeltaEasy");
+	TranslateDlgItem(*this, IDC_CAMPAIGNMONEYDELTAHARD, "SingleplayerCampaignMoneyDeltaHard");
+	TranslateDlgItem(*this, IDC_SPYMONEYSTEALPERCENT, "SingleplayerSpyMoneyStealPercent");
+	TranslateDlgItem(*this, IDC_TEAMDELAYS, "SingleplayerTeamDelays");
+	TranslateDlgItem(*this, IDC_PRISMSUPPORTMODIFIER, "SingleplayerPrismSupportModifier");
+	TranslateDlgItem(*this, IDC_LDEFAULTMIRAGEDISGUISES, "SingleplayerDefaultMirageDisguises");
+	TranslateDlgItem(*this, IDC_SAVE, "SingleplayerSave");
 
 #ifdef RA2_MODE
 	GetDlgItem(IDC_LSTARTINGDROPSHIPS)->ShowWindow(SW_HIDE);
@@ -219,4 +287,21 @@ void CSingleplayerSettings::PostNcDestroy()
 {
 	// do not call CDialog::PostNcDestroy();	
 	// CDialog::PostNcDestroy();
+}
+
+void CSingleplayerSettings::OnBnClickedSave()
+{
+	ddxWithMap(IDC_PARTIMEEASY, rankingSec, "ParTimeEasy", DDX_WriteToIni);
+	ddxWithMap(IDC_PARTIMEMEDIUM, rankingSec, "ParTimeMedium", DDX_WriteToIni);
+	ddxWithMap(IDC_PARTIMEHARD, rankingSec, "ParTimeHard", DDX_WriteToIni);
+	ddxWithMap(IDC_OVERPARTITLE, rankingSec, "OverParTitle", DDX_WriteToIni);
+	ddxWithMap(IDC_OVERPARMESSAGE, rankingSec, "OverParMessage", DDX_WriteToIni);
+	ddxWithMap(IDC_UNDERPARTITLE, rankingSec, "UnderParTitle", DDX_WriteToIni);
+	ddxWithMap(IDC_UNDERPARMESSAGE, rankingSec, "UnderParMessage", DDX_WriteToIni);
+	ddxWithMap(IDC_CAMPAIGNMONEYDELTAEASY_TXT, generalSec, "CampaignMoneyDeltaEasy", DDX_WriteToIni);
+	ddxWithMap(IDC_CAMPAIGNMONEYDELTAHARD_TXT, generalSec, "CampaignMoneyDeltaHard", DDX_WriteToIni);
+	ddxWithMap(IDC_SPYMONEYSTEALPERCENT_TXT, generalSec, "SpyMoneyStealPercent", DDX_WriteToIni);
+	ddxWithMap(IDC_TEAMDELAYS_TXT, generalSec, "TeamDelays", DDX_WriteToIni);
+	ddxWithMap(IDC_PRISMSUPPORTMODIFIER_TXT, generalSec, "PrismSupportModifier", DDX_WriteToIni);
+	ddxWithMap(IDC_DEFAULTMIRAGEDISGUISES, generalSec, "DefaultMirageDisguises", DDX_WriteToIni);
 }

@@ -605,6 +605,7 @@
     <ResourceCompile Include="res\IniEdit.rc" />
     <ResourceCompile Include="res\MissionEditor.rc" />
     <ResourceCompile Include="res\SaveOptions.rc" />
+    <ResourceCompile Include="res\SinglePlayerOptions.rc" />
     <ResourceCompile Include="res\TerrainBar.rc" />
     <ResourceCompile Include="res\TriggerEditor.rc" />
     <ResourceCompile Include="res\VersionInfo.rc" />
