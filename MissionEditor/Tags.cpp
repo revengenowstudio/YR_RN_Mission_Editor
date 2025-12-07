@@ -91,7 +91,7 @@ void CTags::UpdateDialog()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	int sel = m_Tag.GetCurSel();
+	int initialSel = m_Tag.GetCurSel();
 
 	while (m_Tag.DeleteString(0) != CB_ERR);
 	while (m_Trigger.DeleteString(0) != CB_ERR);
@@ -111,11 +111,12 @@ void CTags::UpdateDialog()
 		m_Trigger.AddString(s);
 	}
 
-	if (m_Tag.SetCurSel(0) != CB_ERR)
+	if (m_Tag.SetCurSel(0) != CB_ERR) {
 		OnSelchangeTag();
+	}
 
-	if (sel != -1) {
-		if (m_Tag.SetCurSel(sel) != CB_ERR) {
+	if (initialSel != CB_ERR) {
+		if (m_Tag.SetCurSel(initialSel) != CB_ERR) {
 			OnSelchangeTag();
 		}
 	}
@@ -331,4 +332,5 @@ void CTags::OnAdd()
 			break;
 		}
 	}
+	OnSelchangeTag();
 }
