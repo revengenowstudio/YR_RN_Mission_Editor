@@ -950,7 +950,7 @@ void CTriggerEditorAllDlg::onDeleteEvent()
 
     updateTriggerEvents();
     if (m_eventList.GetCount() > 0) {
-        m_eventList.SetCurSel(eventIdx - 1);
+        m_eventList.SetCurSel(std::max(eventIdx - 1, 0));
     }
 }
 
@@ -1249,6 +1249,6 @@ void CTriggerEditorAllDlg::onDeleteAction()
 
     updateTriggerActions();
     if (m_actionList.GetCount() > 0) {
-        m_actionList.SetCurSel(actionIdx - 1);
+        m_actionList.SetCurSel(std::max(actionIdx - 1, 0));
     }
 }
