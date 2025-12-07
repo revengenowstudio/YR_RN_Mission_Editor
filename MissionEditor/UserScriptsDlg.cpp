@@ -1486,18 +1486,21 @@ void CUserScriptsDlg::OnOK()
 				}
 			}
 
-			if (!bAddAllowed) goto nextline;
+			if (!bAddAllowed) {
+				goto nextline;
+			}
 
 			CString ID_T = GetFreeID();
 
 			if (params[0].GetLength() > 0) {
 				variables[params[0]] = ID_T;
 			}
+			TagInstance newTag(ID_T, params[1]);
+			auto const tagName = newTag.name;
+			TagDatabase::Instance().
+				Append(std::move(newTag));
 
-			CString ID_TAG = ID_T; //GetFreeID();
-			ini.SetString("Tags", ID_TAG, params[1]);
-
-			report += "Tag " + GetParam(params[1], 1) + " added\r\n";
+			report += "Tag " + tagName + " added\r\n";
 
 			bUpdate = TRUE;
 		} else if (name == ID_RESIZE) {
@@ -1510,7 +1513,9 @@ void CUserScriptsDlg::OnOK()
 			// check bool
 			if (paramcount > 4) {
 				if (params[4].GetLength() > 0) {
-					if (!IsValSet(params[4])) goto nextline;
+					if (!IsValSet(params[4])) {
+						goto nextline;
+					}
 				}
 			}
 
