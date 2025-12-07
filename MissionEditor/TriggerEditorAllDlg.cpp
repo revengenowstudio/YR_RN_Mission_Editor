@@ -600,7 +600,12 @@ void CTriggerEditorAllDlg::onEditChangeNextTrigger()
 
 void CTriggerEditorAllDlg::onKillFocusName()
 {
+    auto const selected = m_triggerType.GetCurSel();
     UpdateDialog();
+    if (selected != CB_ERR) {
+        m_triggerType.SetCurSel(selected);
+        onSelChangeTrigger();
+    }
 }
 
 void CTriggerEditorAllDlg::onKillFocus(CWnd* pNewWnd)
