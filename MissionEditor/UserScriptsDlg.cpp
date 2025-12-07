@@ -32,6 +32,7 @@
 #include "functions.h"
 #include "inlines.h"
 #include "combouinputdlg.h"
+#include "TriggerDatabase.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -963,11 +964,15 @@ void CUserScriptsDlg::OnOK()
 			// check bool
 			if (paramcount > 5) {
 				if (params[5].GetLength() > 0) {
-					if (!IsValSet(params[5])) goto nextline;
+					if (!IsValSet(params[5])) {
+						goto nextline;
+					}
 				}
 			}
 
-			if (!bAddAllowed) goto nextline;
+			if (!bAddAllowed) {
+				goto nextline;
+			}
 
 
 			CString ID_T = GetFreeID();
@@ -976,23 +981,25 @@ void CUserScriptsDlg::OnOK()
 				variables[params[0]] = ID_T;
 			}
 
-			ini.SetString("Triggers", ID_T, params[1]);
-			ini.SetString("Events", ID_T, params[2]);
-			ini.SetString("Actions", ID_T, params[3]);
+			TriggerOptions options(params[1]);
+			TriggerEvents events(params[2]);
+			TriggerActions actions(params[3]);
 
-			BOOL tag = TRUE;
+			auto&& newTrigger = TriggerInstance(ID_T);
+			newTrigger.Options() = std::move(options);
+			newTrigger.Events() = std::move(events);
+			newTrigger.Actions() = std::move(actions);
+
 			params[4].MakeLower();
-			if (params[4] == "false" || params[4] == "no") tag = FALSE;
+			auto const handleTag = params[4] != "false" && params[4] != "no";
 
-			if (tag) {
-				auto const ID_TAG = GetFreeID();
-				CString def = "0,";
-				def += GetParam(params[1], 2);;
-				def += ",";
-				def += ID_T;
-				ini.SetString("Tags", ID_TAG, def);
+			if (handleTag) {
+				auto& newTag = TagDatabase::Instance().
+					Append(GetFreeID(), CString(newTrigger.Options().name));
+				newTag.triggerId = ID_T;
 			}
 
+			TriggerDatabase::Instance().Append(std::move(newTrigger));
 			report += "Trigger " + GetParam(params[1], 2) + " added\r\n";
 
 			bUpdate = TRUE;
@@ -1473,7 +1480,9 @@ void CUserScriptsDlg::OnOK()
 			// check bool
 			if (paramcount > 2) {
 				if (params[2].GetLength() > 0) {
-					if (!IsValSet(params[2])) goto nextline;
+					if (!IsValSet(params[2])) {
+						goto nextline;
+					}
 				}
 			}
 

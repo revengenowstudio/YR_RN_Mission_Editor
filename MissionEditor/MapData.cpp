@@ -915,6 +915,7 @@ void CMapData::LoadMap(const CString& file)
 
 	UpdateIniFile(MAPDATA_UPDATE_FROM_INI);
 	TriggerDatabase::Instance().LoadFrom(m_mapfile, errstream);
+	TagDatabase::Instance().LoadFrom(m_mapfile, errstream);
 }
 
 

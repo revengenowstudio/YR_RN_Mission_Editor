@@ -22,6 +22,10 @@ public:
     auto& Events() const { return events; }
     auto& Actions() const { return actions; }
 
+    void SetName(CString&& name) {
+        Options().name = std::move(name);
+    }
+
 private:
     CString id;
     TriggerOptions options;
@@ -52,6 +56,7 @@ public:
     void Append(TObject&& inst);
     TObject& Append(const CString& id, CString&& name);
     void DeleteAt(size_t slot);
+    bool DeleteByID(const CString& id);
 
     void LoadFrom(const CIniFile& ini, std::ostream& err);
     void SaveInto(CIniFile& ini, std::ostream& err);
@@ -140,7 +145,7 @@ TObject& ObjectDatabase<TObject>::Append(const CString& id, CString&& name)
 {
     lookupTable.insert_or_assign(id, items.size());
     auto& ret = items.emplace_back(id);
-    ret.Options().name = std::move(name);
+    ret.SetName(std::move(name));
     return ret;
 }
 
@@ -162,7 +167,23 @@ void ObjectDatabase<TObject>::DeleteAt(size_t idx)
     }
 }
 
+template<typename TObject>
+inline bool ObjectDatabase<TObject>::DeleteByID(const CString& id)
+{
+    auto const idx = this->FindIndex(id);
+    if (idx >= 0) {
+        DeleteAt(idx);
+        return true;
+    }
+    return false;
+}
+
 class TriggerDatabase : public ObjectDatabase<TriggerInstance>
+{
+
+};
+
+class TagDatabase : public ObjectDatabase<TagInstance>
 {
 
 };

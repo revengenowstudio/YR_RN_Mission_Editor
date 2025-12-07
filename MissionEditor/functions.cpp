@@ -961,10 +961,10 @@ void ListTags(CComboBox& cb, BOOL bListNone)
 	if (bListNone) {
 		cb.AddString("None");
 	}
-	for (auto const& kvPair : ini.GetSection("Tags")) {
-		CString s = kvPair.first;
-		s += " ";
-		s += GetParam(kvPair.second, 1);
+	auto const& tagDb = TagDatabase::Instance();
+	for (auto const& tag : tagDb) {
+		CString s ;
+		s.Format("%s %s", tag.id, tag.name);
 		cb.AddString(s);
 	}
 

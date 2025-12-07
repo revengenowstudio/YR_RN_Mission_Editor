@@ -222,9 +222,20 @@ private:
 class TagInstance
 {
 public:
-    TagInstance(const CString& id, const CString& fullData);
+    TagInstance(const CString& id, const CString& fullData = {});
 
     CString Serialize() const;
+
+    void SetName(CString&& name) {
+        name = std::move(name);
+    }
+    auto const& ID() const { return id; }
+
+    CString PersistenceString() const {
+        CString ret;
+        ret.Format("%d", persistence);
+        return ret;
+    }
 
     // simple class, no need to hide member
     CString id;

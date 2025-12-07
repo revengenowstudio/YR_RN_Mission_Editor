@@ -30,6 +30,7 @@
 #include "functions.h"
 #include "inlines.h"
 #include "Helpers.h"
+#include "TriggerDatabase.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -535,14 +536,11 @@ void CTeamTypes::OnSelchangeTeamtypes()
 	m_Suicide = sec.GetBool("Suicide");
 
 	auto const& tagId = sec.GetString("Tag");
+	auto& tagDb = TagDatabase::Instance();
 	if (!tagId.IsEmpty()) {
 		m_Tag = tagId;
-		auto const& tagDef = ini.GetString("Tags", tagId);
-		if (!tagDef.IsEmpty()) {
-			CString tag = m_Tag;
-			m_Tag += " ";
-			m_Tag += GetParam(tagDef, 1);
-		}
+		auto const& tagData = tagDb.Lookup( tagId);
+		m_Tag.Format("%s %s", tagId, tagData.name);
 	} else {
 		m_Tag = GetLanguageStringACP("None");
 	}
