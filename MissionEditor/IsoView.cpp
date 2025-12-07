@@ -3588,8 +3588,6 @@ void CIsoView::ReInitializeDDraw()
 	KillTimer(11);
 	// rscroll=FALSE;
 
-
-
 #ifdef NOSURFACES
 	while ((GetDeviceCaps(::GetDC(::GetDesktopWindow()), BITSPIXEL) <= 8)) {
 		if (MessageBox("You currently only have 8 bit color mode enabled. FinalAlert 2 does not work in 8 bit color mode. Please change the color mode and then click on OK. Click Cancel to quit (and save the map as backup.map).", "Error", MB_OKCANCEL) == IDCANCEL) {
@@ -3599,7 +3597,6 @@ void CIsoView::ReInitializeDDraw()
 		}
 	}
 #endif
-
 
 	CDynamicGraphDlg dlg;
 
@@ -3612,7 +3609,6 @@ void CIsoView::ReInitializeDDraw()
 	}
 
 	updateFontScaled();
-
 
 	missingimages.clear();
 
@@ -3629,90 +3625,13 @@ void CIsoView::ReInitializeDDraw()
 #ifdef SMUDGE_SUPP
 	Map->UpdateSmudgeInfo();
 #endif
-
-
-
 	b_IsLoading = FALSE;
 
 	//Sleep(2500);
 
-
-
 	dlg.DestroyWindow();
 
-
-
-
-
 	RedrawWindow();
-
-
-
-	/*
-
-	CString CommandLine;
-
-	if(res==IDYES)
-	{
-		CFileDialog dlg(FALSE, ".mpr", "noname.mpr", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, "TS maps|*.mpr;*.map|TS multi maps|*.mpr|TS single maps|*.map|");
-		do
-		{
-
-
-			char cuPath[MAX_PATH];
-
-			GetCurrentDirectory(MAX_PATH, cuPath);
-			dlg.m_ofn.lpstrInitialDir=cuPath;
-
-			if(theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir=(char*)(LPCTSTR)theApp.m_Options.TSExe;
-
-		}while(dlg.DoModal()==IDCANCEL) ;
-
-		CommandLine=dlg.GetPathName();
-
-		theApp.MainWindow()->SaveMap(dlg.GetPathName());
-	}
-
-	if(res==IDNO || res==IDYES)
-	{
-		PROCESS_INFORMATION pi;
-		STARTUPINFO si;
-		memset(&si, 0, sizeof(STARTUPINFO));
-		si.cb=sizeof(STARTUPINFO);
-
-		char myExe[MAX_PATH];
-		GetModuleFileName(NULL, myExe, MAX_PATH);
-
-		BOOL success=CreateProcess(myExe,
-			(LPTSTR)(LPCTSTR)CommandLine,
-			NULL,
-			NULL,
-			FALSE,
-			NORMAL_PRIORITY_CLASS,
-			NULL,
-			AppPath,
-			&si,
-			&pi);
-	}
-
-	theApp.m_pMainWnd->DestroyWindow();*/
-
-
-
-
-
-	/*CLoading load;
-	load.InitDirectDraw();
-	load.InitMixFiles();
-	load.InitPics();
-
-
-
-	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-
-	b_IsLoading=FALSE;*/
-
-
 }
 
 void CIsoView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
