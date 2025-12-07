@@ -331,7 +331,7 @@ void CTags::OnDelete()
 	m_Tag.GetLBText(index, type);
 	TruncSpace(type);
 
-	int res = MessageBox("Are you sure to delete the selected tag? This may cause the attached trigger to don´t work anymore, if no other tag has the trigger attached.", "Delete tag", MB_YESNO);
+	int res = MessageBox(TranslateStringACP("TagDeleteConfirm"), TranslateStringACP("TagDeletion"), MB_YESNO);
 	if (res == IDNO) {
 		return;
 	}
