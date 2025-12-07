@@ -4,8 +4,10 @@
 #include "Helpers.h"
 #include <format>
 #include "TriggerDatabase.h"
+#include "Defines.h"
 
 const ParamType ParamType::Default;
+const ParamType ParamType::WaypointSpecial { "Waypoint", PARAMTYPE_WAYPOINTS };
 
 TriggerDefinitionManager& TriggerDefinitionManager::Instance()
 {
@@ -425,7 +427,7 @@ const ParamType& TriggerAction::ParamOperator::lookUpParamType(TriggerAction& ac
         return TriggerDefinitionManager::Instance().Params().at(paramTypeIdx);
 
     }
-    return ParamType::Default;
+    return action.IsUsingWaypointEncoding() ? ParamType::WaypointSpecial : ParamType::Default;
 }
 
 TagInstance::TagInstance(const CString& id, const CString& fullData) :

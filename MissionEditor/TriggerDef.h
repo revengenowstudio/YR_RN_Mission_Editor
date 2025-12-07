@@ -14,6 +14,7 @@ class TriggerActions;
 struct ParamType 
 {
     static const ParamType Default;
+    static const ParamType WaypointSpecial;
 
     CString paramName;
     int listType{ 0 }; // PARAMTYPE_NOTHING
