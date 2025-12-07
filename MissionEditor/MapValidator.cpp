@@ -185,14 +185,15 @@ BOOL CMapValidator::CheckMap()
 		}
 
 		auto const& triggerDb = TriggerDatabase::Instance();
-		for (auto const& [id, def] : ini["Tags"]) {
-			CString trigger = GetParam(def, 2);
+		auto const& tagDb = TagDatabase::Instance();
+		for (auto const& tag : tagDb) {
+			auto const& trigger = tag.triggerId;
 			if (!triggerDb.Exists(trigger)) {
 				CString error;
 				error = GetLanguageStringACP("MV_TriggerMissing");
 				error = TranslateStringVariables(1, error, trigger);
 				error = TranslateStringVariables(2, error, "Tag");
-				error = TranslateStringVariables(3, error, id);
+				error = TranslateStringVariables(3, error, tag.id);
 				AddItemWithNewLine(m_MapProblemList, error, 1);
 			}
 		}
@@ -231,15 +232,13 @@ BOOL CMapValidator::CheckMap()
 			}
 			// check tag
 			auto const& tag = sec.GetString("Tag");
-			if (!tag.IsEmpty()) {
-				if (!ini["Tags"].Exists(tag)) {
-					CString error;
-					error = GetLanguageStringACP("MV_TagMissing");
-					error = TranslateStringVariables(1, error, tag);
-					error = TranslateStringVariables(2, error, "Teamtype");
-					error = TranslateStringVariables(3, error, id);
-					AddItemWithNewLine(m_MapProblemList, error, 1);
-				}
+			if (!tag.IsEmpty() && !tagDb.Exists(tag)) {
+				CString error;
+				error = GetLanguageStringACP("MV_TagMissing");
+				error = TranslateStringVariables(1, error, tag);
+				error = TranslateStringVariables(2, error, "Teamtype");
+				error = TranslateStringVariables(3, error, id);
+				AddItemWithNewLine(m_MapProblemList, error, 1);
 			}
 		}
 
@@ -256,7 +255,7 @@ BOOL CMapValidator::CheckMap()
 			CString p = cx;
 			p += "/";
 			p += cy;
-			if (!ini["Tags"].Exists(tag)) {
+			if (!tagDb.Exists(tag)) {
 				CString error;
 				error = GetLanguageStringACP("MV_TagMissing");
 				error = TranslateStringVariables(1, error, tag);

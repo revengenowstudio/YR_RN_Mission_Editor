@@ -28,6 +28,7 @@ protected:
     afx_msg void onPlaceOnMap();
     afx_msg void onSelChangeTrigger();
     afx_msg void onChangeTriggerName();
+    afx_msg void onChangePersistence();
     afx_msg void onEditChangeHouse();
     afx_msg void onEditChangeNextTrigger();
     afx_msg void onKillFocusName();

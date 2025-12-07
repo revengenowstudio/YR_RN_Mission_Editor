@@ -961,10 +961,10 @@ void ListTags(CComboBox& cb, BOOL bListNone)
 	if (bListNone) {
 		cb.AddString("None");
 	}
-	for (auto const& kvPair : ini.GetSection("Tags")) {
-		CString s = kvPair.first;
-		s += " ";
-		s += GetParam(kvPair.second, 1);
+	auto const& tagDb = TagDatabase::Instance();
+	for (auto const& tag : tagDb) {
+		CString s ;
+		s.Format("%s %s", tag.id, tag.name);
 		cb.AddString(s);
 	}
 
@@ -1314,12 +1314,19 @@ CString GetFreeID()
 		// ID1=SOME_DEFINITION1
 		// ID2=SOME_DEFINITION2
 		static const CString itemLists[] = {
-			"Triggers",
-			"Events",
-			"Tags",
-			"Actions",
 			"AITriggerTypes",
 		};
+		// trigger and tag:
+		for (auto const& trigger : TriggerDatabase::Instance()) {
+			if (trigger.ID() == input) {
+				return true;
+			}
+		}
+		for (auto const& tag : TagDatabase::Instance()) {
+			if (tag.ID() == input) {
+				return true;
+			}
+		}
 		// 0=GAPOWR ...
 		for (auto const& id : typeLists) {
 			if (ini[id].HasValue(input)) {

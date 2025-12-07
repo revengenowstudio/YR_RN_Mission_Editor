@@ -18,6 +18,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_BN_CLICKED(IDC_TRGR_MEDIUM, OnMedium)
     ON_BN_CLICKED(IDC_TRGR_HARD, OnHard)
     ON_EN_KILLFOCUS(IDC_TRGR_NAME, onChangeTriggerName)
+    ON_CBN_EDITCHANGE(IDC_TRGR_TYPE, onChangePersistence)
     ON_CBN_EDITCHANGE(IDC_TRGR_SELECTED_TRIGGER, onEditChangeTriggerType)
     ON_CBN_SELCHANGE(IDC_TRGR_SELECTED_TRIGGER, onSelChangeTrigger)
     // events
@@ -376,14 +377,8 @@ void CTriggerEditorAllDlg::onAddTrigger(TriggerInstance&& trigger)
     TriggerDatabase::Instance().
         Append(std::move(trigger));
 
-    // add tag, TODO: make Tag as object
-    {
-        CIniFile& ini = Map->GetIniFile();
-        CString tagId = GetFreeID();
-        CString content;
-        content.Format("0,%s tag,%s", name, id);
-        ini.SetString("Tags", tagId, content);
-    }
+    auto& tag = TagDatabase::Instance().Append(GetFreeID(), name + " Tag");
+    tag.triggerId = id;
 
     theApp.MainWindow()->UpdateDialogs(TRUE);
 
@@ -437,14 +432,14 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
     // YES means clean tags, otherwise ignore
     if (res == IDYES) {
         std::vector<CString> keysToDelete;
-        for (auto const& [type, def] : ini["Tags"]) {
-            auto const attTrigg = GetParam(def, 2);
-            if (triggerId == attTrigg) {
-                keysToDelete.push_back(type);
+        auto& tagDb = TagDatabase::Instance();
+        for (auto const& tag : tagDb) {
+            if (triggerId == tag.triggerId) {
+                keysToDelete.push_back(tag.id);
             }
         }
         for (auto const& keyToDelete : keysToDelete) {
-            ini.RemoveValueByKey("Tags", keyToDelete);
+            tagDb.DeleteByID(keyToDelete);
         }
     }
 
@@ -470,10 +465,10 @@ void CTriggerEditorAllDlg::onPlaceOnMap()
     auto const triggerId = TriggerDatabase::Instance().Nth(curtrig).ID();
     CString tag;
 
-    for (auto const& [type, def] : ini["Tags"]) {
-        CString attTrigg = GetParam(def, 2);
-        if (triggerId == attTrigg) {
-            tag = type;
+    auto const& tagDb = TagDatabase::Instance();
+    for (auto const& tagN : tagDb) {
+        if (triggerId == tagN.triggerId) {
+            tag = tagN.id;
             break;
         }
     }
@@ -500,18 +495,6 @@ void CTriggerEditorAllDlg::onSelChangeTrigger()
         return;
     }
 
-    // update persistence value, necessary here ?
-    // why don't only handle for m_persistence events ?
-#if 0
-    CString newType;
-    m_triggerType.GetWindowText(newType);
-    TruncSpace(newType);
-    for (auto const& [type, def] : ini["Tags"]) {
-        if (GetParam(def, 2) == m_currentTrigger) {
-            ini.SetString("Tags", type, SetParam(ini["Tags"][type], 0, newType));
-        }
-    }
-#endif
     onSelChangeOption();
     updateTriggerEvents();
     updateTriggerActions(); // update, would you?
@@ -540,21 +523,38 @@ void CTriggerEditorAllDlg::onChangeTriggerName()
 
     int i;
     int p = 0;
-    auto& ini = Map->GetIniFile();
     // update tag name
-    for (auto const& [type, def] : ini["Tags"]) {
-        CString attTrigg = GetParam(def, 2);
-        if (attTrigg == m_currentTrigger) {
-            p++;
-            char c[50];
-            itoa(p, c, 10);
-            CString newVal = newName + " ";
-            newVal += c;
-            ini.SetString("Tags", type, SetParam(ini.GetString("Tags", type), 1, newVal));
+    auto& tagDb = TagDatabase::Instance();
+    for (auto& tag: tagDb) {
+        if (tag.triggerId == m_currentTrigger) {
+            tag.name = newName; 
+            tag.name =+" 1";
+            break; // will there be multiple tags point to the same trigger?
         }
     }
 
     onKillFocusName();
+}
+
+void CTriggerEditorAllDlg::onChangePersistence()
+{
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
+
+    CString persistenceStr;
+    m_persistence.GetWindowText(persistenceStr);
+    persistenceStr.Trim();
+
+    auto& tagDb = TagDatabase::Instance();
+    // locate that tag and update its value
+    for (auto& tag : tagDb) {
+        if (tag.triggerId == m_currentTrigger) {
+            tag.persistence = atoi(persistenceStr);
+            break;
+        }
+    }
+
 }
 
 void CTriggerEditorAllDlg::onEditChangeHouse()
@@ -697,12 +697,11 @@ void CTriggerEditorAllDlg::onSelChangeOption()
         }
     }
 
-    auto const& ini = Map->GetIniFile();
-    for (auto const& [type, def] : ini["Tags"]) {
-        CString attTrigg = GetParam(def, 2);
-        if (attTrigg == m_currentTrigger) {
+    auto const& tagDb = TagDatabase::Instance();
+    for (auto const& tag: tagDb) {
+        if (tag.triggerId == m_currentTrigger) {
             // update persistence
-            m_persistence.SetWindowText(GetParam(def, 0));
+            m_persistence.SetWindowText(tag.PersistenceString());
             break;
         }
     }

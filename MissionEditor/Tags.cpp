@@ -91,17 +91,16 @@ void CTags::UpdateDialog()
 {
 	CIniFile& ini = Map->GetIniFile();
 
-	int sel = m_Tag.GetCurSel();
+	int initialSel = m_Tag.GetCurSel();
 
 	while (m_Tag.DeleteString(0) != CB_ERR);
 	while (m_Trigger.DeleteString(0) != CB_ERR);
 
 	int i;
-	for (auto const& [type, def] : ini["Tags"]) {
-		CString s = type;
-		s += " (";
-		s += GetParam(def, 1);
-		s += ")";
+	auto const& tagDb = TagDatabase::Instance();
+	for (auto const& tag : tagDb) {
+		CString s;
+		s.Format("%s (%s)", tag.id, tag.name);
 		m_Tag.AddString(s);
 	}
 
@@ -112,11 +111,12 @@ void CTags::UpdateDialog()
 		m_Trigger.AddString(s);
 	}
 
-	if (m_Tag.SetCurSel(0) != CB_ERR)
+	if (m_Tag.SetCurSel(0) != CB_ERR) {
 		OnSelchangeTag();
+	}
 
-	if (sel != -1) {
-		if (m_Tag.SetCurSel(sel) != CB_ERR) {
+	if (initialSel != CB_ERR) {
+		if (m_Tag.SetCurSel(initialSel) != CB_ERR) {
 			OnSelchangeTag();
 		}
 	}
@@ -152,9 +152,10 @@ void CTags::OnSelchangeTag()
 	m_Tag.GetLBText(index, type);
 	TruncSpace(type);
 
-	auto const& data = ini.GetString("Tags", type);
-	m_Name = GetParam(data, 1);
-	CString triggerId = GetParam(data, 2);
+	auto const& tagDb = TagDatabase::Instance();
+	auto const& data = tagDb.Lookup(type);
+	m_Name = data.name;
+	auto const& triggerId = data.triggerId;
 	CString desc = triggerId;
 
 	auto const& triggerDb = TriggerDatabase::Instance();
@@ -162,9 +163,7 @@ void CTags::OnSelchangeTag()
 	desc.Format("%s (%s)", triggerId, triggerDb.Lookup(triggerId).Options().name);
 
 	m_Trigger.SetWindowText(desc);
-	m_Repeat.SetWindowText(GetParam(data, 0));
-
-
+	m_Repeat.SetWindowText(data.PersistenceString());
 
 	UpdateData(FALSE);
 }
@@ -186,13 +185,8 @@ void CTags::OnChangeName()
 	m_Tag.GetLBText(index, type);
 	TruncSpace(type);
 
-	auto const& data = ini.GetString("Tags", type);
-
-	CString tag, repeat;
-	tag = GetParam(data, 2);
-	repeat = GetParam(data, 0);
-	auto const& constructed = repeat + "," + m_Name + "," + tag;
-	ini.SetString("Tags", type, constructed);
+	auto& data = TagDatabase::Instance().Lookup(type);
+	data.name = m_Name;
 
 	UpdateDialog();
 	name.SetSel(sel2);
@@ -209,19 +203,14 @@ void CTags::OnEditchangeRepeat()
 
 	CString str;
 	m_Repeat.GetWindowText(str);
+	str.Trim();
 
 	CString type;
 	m_Tag.GetLBText(index, type);
 	TruncSpace(type);
 
-	auto const data = ini.GetString("Tags", type);
-
-	CString trigger, name;
-	trigger = GetParam(data, 2);
-	name = GetParam(data, 1);
-	auto const constructed = str + "," + name + "," + trigger;
-	ini.SetString("Tags", type, constructed);
-
+	auto& data = TagDatabase::Instance().Lookup(type);
+	data.persistence = atoi(str); // TODO: validate str
 
 	UpdateDialog();
 
@@ -232,14 +221,13 @@ void CTags::OnSelchangeRepeat()
 	CIniFile& ini = Map->GetIniFile();
 
 	int index = m_Tag.GetCurSel();
-	if (index < 0) return;
-
+	if (index < 0) {
+		return;
+	}
 	int v = m_Repeat.GetCurSel();
 	CString str;
 
-
 	m_Repeat.GetLBText(v, str);
-
 
 	CString type;
 	m_Tag.GetLBText(index, type);
@@ -247,14 +235,8 @@ void CTags::OnSelchangeRepeat()
 
 	TruncSpace(str);
 
-	auto const data = ini.GetString("Tags", type);
-
-	CString trigger, name;
-	trigger = GetParam(data, 2);
-	name = GetParam(data, 1);
-	auto const constructed = str + "," + name + "," + trigger;
-	ini.SetString("Tags", type, constructed);
-
+	auto& data = TagDatabase::Instance().Lookup(type);
+	data.persistence = atoi(str); // TODO: validate str
 
 	UpdateDialog();
 }
@@ -274,17 +256,10 @@ void CTags::OnEditchangeTrigger()
 	m_Tag.GetLBText(index, type);
 	TruncSpace(type);
 
-	auto const data = ini.GetString("Tags", type);
-
-	CString repeat, name;
-	repeat = GetParam(data, 0);
-	name = GetParam(data, 1);
-	auto const constructed = repeat + "," + name + "," + (LPCTSTR)str;
-	ini.SetString("Tags", type, constructed);
-
-
+	auto& data = TagDatabase::Instance().Lookup(type);
+	data.triggerId = str; // TODO: validate str
+	
 	//UpdateDialog();
-
 }
 
 void CTags::OnSelchangeTrigger()
@@ -307,13 +282,8 @@ void CTags::OnSelchangeTrigger()
 	m_Tag.GetLBText(index, type);
 	TruncSpace(type);
 
-	auto const data = ini.GetString("Tags", type);
-
-	CString repeat, name;
-	repeat = GetParam(data, 0);
-	name = GetParam(data, 1);
-	auto const constructed = repeat + "," + name + "," + (LPCTSTR)str;
-	ini.SetString("Tags", type, constructed);
+	auto& data = TagDatabase::Instance().Lookup(type);
+	data.triggerId = str; // TODO: validate str
 
 	//UpdateDialog();
 }
@@ -327,35 +297,27 @@ void CTags::OnDelete()
 		return;
 	}
 
-	CString type;
-	m_Tag.GetLBText(index, type);
-	TruncSpace(type);
-
-	int res = MessageBox("Are you sure to delete the selected tag? This may cause the attached trigger to don´t work anymore, if no other tag has the trigger attached.", "Delete tag", MB_YESNO);
+	int res = MessageBox(TranslateStringACP("TagDeleteConfirm"), TranslateStringACP("TagDeletion"), MB_YESNO);
 	if (res == IDNO) {
 		return;
 	}
 
-	ini.RemoveValueByKey("Tags", type);
+	TagDatabase::Instance().DeleteAt(index);
+
 	UpdateDialog();
 }
 
 void CTags::OnAdd()
 {
-	CIniFile& ini = Map->GetIniFile();
-
-	CString newTagID = GetFreeID();
-
 	auto const& triggerDb = TriggerDatabase::Instance();
 	if (triggerDb.Size() <= 0) {
-		MessageBox("Before creating tags, you need at least one trigger.", "Error");
+		MessageBox(TranslateStringACP("TagCreateWarning"), TranslateStringACP("Error"));
 		return;
 	};
 
-	CString data;
-	data = "0,New Tag,";
-	data += triggerDb.Nth(0).ID();
-	ini.SetString("Tags", newTagID, data);
+	auto& tag = TagDatabase::Instance().
+		Append(GetFreeID(), "New Tag");
+	tag.triggerId = triggerDb.Nth(0).ID();
 
 	UpdateDialog();
 
@@ -365,9 +327,10 @@ void CTags::OnAdd()
 		m_Tag.GetLBText(i, tagID);
 		TruncSpace(tagID);
 
-		if (tagID == newTagID) {
+		if (tagID == tag.id) {
 			m_Tag.SetCurSel(i);
 			break;
 		}
 	}
+	OnSelchangeTag();
 }
