@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by TriggerEditor.rc
+// Used by SinglePlayerOptions.rc
 //
 #define PRODUCT_VERSION_REVISION        0
 #define PRODUCT_VERSION_MINOR           1
@@ -450,20 +450,48 @@
 #define IDC_LPOSTSCORE                  1347
 #define IDC_LPREMAPSELECT               1348
 #define IDC_SIZEFRAME                   1349
+#define IDC_LPARTIMEEASY                1349
 #define IDC_LSIZE                       1350
+#define IDC_LPARTIMEMEDIUM              1350
 #define IDC_USEABLEFRAME                1351
+#define IDC_LPARTIMEHARD                1351
 #define IDC_LUSEABLE                    1352
+#define IDC_LOVERPARTITLE               1352
 #define IDC_LTHEATER                    1353
+#define IDC_LOVERPARMESSAGE             1353
+#define IDC_LUNDERPARTITLE              1354
+#define IDC_LUNDERPARMESSAGE            1355
+#define IDC_PARTIMEEASY                 1356
 #define IDC_MAPPROBLEMS                 1357
+#define IDC_PARTIMEMEDIUM               1357
 #define IDC_LPROBLEMSFOUND              1358
+#define IDC_PARTIMEHARD                 1358
+#define IDC_OVERPARTITLE                1359
 #define IDC_RULESLIKETS                 1360
+#define IDC_OVERPARMESSAGE              1360
+#define IDC_UNDERPARTITLE               1361
+#define IDC_UNDERPARMESSAGE             1362
+#define IDC_RANKINGGROUP                1363
+#define IDC_GENERALGROUP                1364
 #define IDC_ONLYORIGINAL                1364
+#define IDC_CAMPAIGNMONEYDELTAEASY      1365
 #define IDC_LADDONNEEDED                1365
+#define IDC_CAMPAIGNMONEYDELTAEASY_TXT  1366
 #define IDC_TILESET                     1366
+#define IDC_CAMPAIGNMONEYDELTAHARD      1367
 #define IDC_OVERLAY                     1367
+#define IDC_CAMPAIGNMONEYDELTAHARD_TXT  1368
+#define IDC_SPYMONEYSTEALPERCENT        1369
+#define IDC_SPYMONEYSTEALPERCENT_TXT    1370
 #define IDC_IMPORT                      1370
+#define IDC_TEAMDELAYS                  1371
+#define IDC_TEAMDELAYS_TXT              1372
+#define IDC_PRISMSUPPORTMODIFIER        1373
 #define IDC_WIDTH                       1373
+#define IDC_PRISMSUPPORTMODIFIER_TXT    1374
 #define IDC_HEIGHT                      1374
+#define IDC_DEFAULTMIRAGEDISGUISES      1375
+#define IDC_LDEFAULTMIRAGEDISGUISES     1376
 #define IDC_BRUSHSIZE                   1377
 #define IDC_SAVEOFTEN                   1378
 #define IDC_NEWTRIGGER                  1383
@@ -471,6 +499,7 @@
 #define IDC_TRIGGERTYPE                 1394
 #define IDC_NEWEVENT                    1396
 #define IDC_EVENTDESCRIPTION            1399
+#define IDC_SAVE                        1400
 #define IDC_PARAMETER                   1401
 #define IDC_PARAMVALUE                  1402
 #define IDC_NEWACTION                   1403
