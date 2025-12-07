@@ -521,7 +521,14 @@ bool checkProjectPathAndRelaunch(CString filePath, bool forceRelaunch = false)
 void CFinalSunDlg::OnOptionsTiberiansunoptions()
 {
 	CIniFile optini;
-	if (ShowOptionsDialog(optini)) {
+	auto restartRequired = ShowOptionsDialog(optini);
+
+	if (restartRequired) {
+		restartRequired &= MessageBox(TranslateStringACP("OptionsLanguageChangeRestartTip"),
+			TranslateStringACP("OptionChangeRestart"), MB_OKCANCEL) == IDOK;
+	}
+
+	if (restartRequired) {
 		checkProjectPathAndRelaunch(currentMapFile, true);
 	}
 }
