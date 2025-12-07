@@ -27,6 +27,7 @@
 #include "mapdata.h"
 #include "variables.h"
 #include "functions.h"
+#include "TriggerDatabase.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -70,11 +71,9 @@ BOOL CCellTag::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	CIniFile& ini = Map->GetIniFile();
-
 	CComboBox& m_Tag = *((CComboBox*)GetDlgItem(IDC_TAG));
 
-	if (!ini.TryGetSection("Tags")) {
+	if (!TagDatabase::Instance().Size()) {
 		MessageBox("No tags are specified.");
 		OnCancel();
 	} else {

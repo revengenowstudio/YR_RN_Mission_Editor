@@ -57,6 +57,7 @@ static char THIS_FILE[] = __FILE__;
 #include <algorithm>
 #include "TextDrawer.h"
 #include "GlobalObjectPool.h"
+#include "TriggerDatabase.h"
 
 /* -------- */
 
@@ -2870,16 +2871,13 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 
 			Map->GetCelltagData(n, &tag, &dwPos);
 
-
-
 			CCellTag dlg(this);
+			auto const& tagData = TagDatabase::Instance().Lookup(tag);
+			dlg.m_tag.Format("%s (%s)", tagData.id, tagData.name);
 
-			dlg.m_tag = tag;
-			dlg.m_tag += " (";
-			dlg.m_tag += GetParam(Map->GetIniFile().GetString("Tags", tag), 1);
-			dlg.m_tag += ")";
-
-			if (dlg.DoModal() == IDCANCEL) return;
+			if (dlg.DoModal() == IDCANCEL) {
+				return;
+			}
 
 			Map->DeleteCelltag(n);
 
@@ -4140,7 +4138,8 @@ void CIsoView::UpdateStatusBar(int x, int y)
 			statusbar += ", Tag: ";
 			statusbar += techno.tag;
 			statusbar += ' ';
-			statusbar += GetParam(Map->GetIniFile().GetString("Tags", techno.tag), 1);
+			auto const& tagData = TagDatabase::Instance().Lookup(techno.tag);
+			statusbar += tagData.name;
 		}
 	}
 
@@ -4170,20 +4169,20 @@ void CIsoView::UpdateStatusBar(int x, int y)
 	statusbar+=c;*/
 
 	if (int n = Map->GetCelltagAt(positionId); n >= 0) {
-		CString type;
+		CString tagId;
 		CString name;
 		DWORD pos;
-		Map->GetCelltagData(n, &type, &pos);
-		CIniFile& ini = Map->GetIniFile();
-		auto const tagStr = ini.GetString("Tags", type);
-		if (!tagStr.IsEmpty()) {
-			name = GetParam(tagStr, 1);
+		Map->GetCelltagData(n, &tagId, &pos);
+
+		if (tagId != "None" && !tagId.IsEmpty()) {
+			auto const& tagData = TagDatabase::Instance().Lookup(tagId);
+			name = tagData.name;
 		}
 
 		statusbar += GetLanguageStringACP("CellTagStatus");
 		statusbar += name;
 		statusbar += " (";
-		statusbar += type;
+		statusbar += tagId;
 		statusbar += ")";
 	}
 

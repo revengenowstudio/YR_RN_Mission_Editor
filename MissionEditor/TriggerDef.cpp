@@ -422,8 +422,27 @@ const ParamType& TriggerAction::ParamOperator::lookUpParamType(TriggerAction& ac
     auto const& paramTypes = action.Type().paramTypes;
     if (nth < paramTypes.size()) {
         auto const paramTypeIdx = paramTypes.at(nth);
-       return TriggerDefinitionManager::Instance().Params().at(paramTypeIdx);
+        return TriggerDefinitionManager::Instance().Params().at(paramTypeIdx);
 
     }
     return ParamType::Default;
+}
+
+TagInstance::TagInstance(const CString& id, const CString& fullData) :
+    id(id)
+{
+    if (fullData.IsEmpty()) {
+        return;
+    }
+    auto const params = SplitParams<3>(fullData);
+    persistence = atoi(params[0]);
+    name = params[1];
+    triggerId = params[2];
+}
+
+CString TagInstance::Serialize() const
+{
+    CString ret;
+    ret.Format("%d,%s,%s", persistence, name, triggerId);
+    return ret;
 }

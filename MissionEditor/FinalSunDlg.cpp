@@ -1113,6 +1113,7 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 	CIniFile& ini = Map->GetIniFile();
 
 	TriggerDatabase::Instance().SaveInto(ini, errstream);
+	TagDatabase::Instance().SaveInto(ini, errstream);
 
 	// delete invalid ini sections
 	for (auto it = ini.begin(); it != ini.end();) {
@@ -1786,6 +1787,7 @@ void CFinalSunDlg::OnFileNew()
 				// ini.sections.erase("AITriggerTypesEnable");
 				// ini.sections.erase("AITriggerTypes");
 				TriggerDatabase::Instance().Clear();
+				TagDatabase::Instance().Clear();
 			}
 		}
 
@@ -1847,6 +1849,8 @@ void CFinalSunDlg::OnFileNew()
 
 			auto const& rulesHouseSec = rules[HOUSES];
 			auto& triggerDb = TriggerDatabase::Instance();
+			auto& tagDb = TagDatabase::Instance();
+			
 			for (auto idx = 0; idx < rulesHouseSec.Size(); idx++) {
 #ifdef RA2_MODE
 				auto const& country = rulesHouseSec.Nth(idx).second;
@@ -1895,15 +1899,9 @@ void CFinalSunDlg::OnFileNew()
 						actions.Insert(actions.Size(), std::move(action1));
 						actions.Insert(actions.Size(), std::move(action2));
 						actions.Insert(actions.Size(), std::move(action3));
-						{
-							CString ID_TAG = GetFreeID();
-							CString tagContent = "0,AI Auto Production ";
-							tagContent += TranslateHouse(house, TRUE);
-							tagContent += ",";
-							tagContent += newTrigger.ID();
 
-							ini.SetString("Tags", ID_TAG, tagContent);
-						}
+						auto& tag = tagDb.Append(GetFreeID(), "AI Auto Production " + TranslateHouse(house, TRUE));
+						tag.triggerId = newTrigger.ID();
 					}
 
 				} else {

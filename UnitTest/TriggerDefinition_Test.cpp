@@ -359,3 +359,32 @@ TEST(TriggerActionTest, ActionSerde)
         EXPECT_EQ(actions.Nth(2).WaypointString(), "J");
     }
 }
+
+TEST(TriggerTagTest, TagSerde)
+{
+    // persistent tag
+    {
+        const CString id = "01000005";
+        const CString data = "2,Play Anim @0 1,01000004";
+        TagInstance tag(id, data);
+
+        EXPECT_EQ(tag.id, id);
+        EXPECT_EQ(tag.name,"Play Anim @0 1");
+        EXPECT_EQ(tag.triggerId, "01000004");
+        EXPECT_EQ(tag.persistence, 2);
+
+        EXPECT_EQ(tag.Serialize(), data);
+    }
+    // non-persistent tag
+    {
+        const CString id = "01000001";
+        const CString data = "0,AI Auto Production Korea-Allies 1,01000000";
+        TagInstance tag(id, data);
+
+        EXPECT_EQ(tag.id, id);
+        EXPECT_EQ(tag.name, "AI Auto Production Korea-Allies 1");
+        EXPECT_EQ(tag.triggerId, "01000000");
+        EXPECT_EQ(tag.persistence, 0);
+        EXPECT_EQ(tag.Serialize(), data);
+    }
+}
