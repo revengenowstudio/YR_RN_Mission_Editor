@@ -189,8 +189,8 @@ public:
     TriggerAction& Nth(size_t idx) { return actions.at(idx); }
     void DeleteAt(size_t idx) { actions.erase(actions.begin() + idx); }
 
-    TriggerAction& Insert(size_t slot, TriggerAction&& event = {}) {
-        return *actions.emplace(actions.begin() + slot, std::move(event));
+    TriggerAction& Insert(size_t slot, TriggerAction&& action = {}) {
+        return *actions.emplace(actions.begin() + slot, std::move(action));
     }
 
     CString Serialize() const;
