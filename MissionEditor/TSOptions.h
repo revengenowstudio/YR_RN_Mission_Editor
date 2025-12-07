@@ -65,7 +65,7 @@ protected:
 	afx_msg void OnChoose();
 	afx_msg void OnCbnSelchangeLanguage();
 
-	void updateUI();
+	void translateUI();
 	CString getLanguageSelected();
 };
 
