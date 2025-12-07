@@ -227,7 +227,7 @@ public:
     CString Serialize() const;
 
     void SetName(CString&& name) {
-        name = std::move(name);
+        this->name = std::move(name);
     }
     auto const& ID() const { return id; }
 
