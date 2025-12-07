@@ -30,6 +30,27 @@ class CIniFile;
 class CSliderCtrl;
 using std::string;
 
+enum DdxMode {
+	DDX_ReadFromIni,
+	DDX_WriteToIni,
+};
+
+inline void ddxWithIni(CWnd& wnd, CIniFile& ini, const CString& section,
+	const CString& key, const DdxMode mode)
+{
+	if (mode == DDX_ReadFromIni) {
+		wnd.SetWindowText(ini.GetString(section, key));
+		return;
+	}
+	CString newVal;
+	wnd.GetWindowText(newVal);
+	if (!newVal.IsEmpty()) {
+		ini.SetString(section, key, newVal);
+	}
+}
+
+void ddxWithMap(CWnd& wnd, const CString& section, const CString& key, const DdxMode mode);
+
 bool deleteFile(const std::string& u8FilePath);
 
 // set the status bar text in the main dialog

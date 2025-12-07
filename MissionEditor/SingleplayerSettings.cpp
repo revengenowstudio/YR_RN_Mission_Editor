@@ -100,26 +100,6 @@ BEGIN_MESSAGE_MAP(CSingleplayerSettings, CDialog)
 	ON_BN_CLICKED(IDC_SAVE, OnBnClickedSave)
 END_MESSAGE_MAP()
 
-void ddxWithIni(CWnd& wnd, CIniFile& ini, const CString& section, const CString& key, 
-	const CSingleplayerSettings::DdxMode mode)
-{
-	if (mode == CSingleplayerSettings::DDX_ReadFromIni) {
-		wnd.SetWindowText(ini.GetString(section, key));
-		return;
-	}
-	CString newVal;
-	wnd.GetWindowText(newVal);
-	if (!newVal.IsEmpty()) {
-		ini.SetString(section, key, newVal);
-	}
-}
-
-void ddxWithMap(CWnd& wnd, const CString& section, const CString& key, const CSingleplayerSettings::DdxMode mode)
-{
-	CIniFile& ini = Map->GetIniFile();
-	ddxWithIni(wnd, ini, section, key, mode);
-}
-
 void CSingleplayerSettings::ddxWithMap(const int controlID, const CString& section, const CString& key, const DdxMode mode)
 {
 	::ddxWithMap(*GetDlgItem(controlID), section, key, mode);
