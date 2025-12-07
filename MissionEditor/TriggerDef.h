@@ -83,6 +83,8 @@ struct TriggerEvent
     int eventType{ 0 };
     CString param1;
     std::optional<CString> param2;
+
+    const TriggerEventType& Type() const;
 };
 
 class TriggerEvents

@@ -248,6 +248,7 @@ void HandleParamList(CComboBox& cb, int type)
 	cb.GetWindowText(oldText);
 
 	switch (type) {
+		default:
 		case PARAMTYPE_NOTHING:
 		{
 			while (cb.DeleteString(0) != CB_ERR);

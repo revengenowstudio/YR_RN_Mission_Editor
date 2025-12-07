@@ -240,6 +240,26 @@ CString TriggerOptions::Serialize() const
     return ret;
 }
 
+char getEventControlCode(const TriggerEvent& event)
+{
+    auto const paramTypeIdx = event.Type().paramTypes[1];
+    auto const controlCode = TriggerDefinitionManager::Instance().
+        Params().at(paramTypeIdx).slotCount;
+    char buffer[4];
+    _itoa_s(controlCode, buffer, 10);
+    return buffer[0]; // usually this will only be 1 or 2, for TeamType. But mods might expand this value
+}
+
+const TriggerEventType& TriggerEvent::Type() const
+{
+    try {
+        return TriggerDefinitionManager::Instance().Events().at(eventType);
+    }
+    catch (...) {
+        throw std::runtime_error(std::format("event type {} is not registered", eventType));
+    }
+}
+
 CString TriggerEvents::Serialize() const
 {
     constexpr int perEventDataBufferSize = 32;
@@ -253,7 +273,7 @@ CString TriggerEvents::Serialize() const
     for (auto const& event : events) {
         typeStr.Format("%d,", event.eventType);
         ret += typeStr;
-        ret += event.param2.has_value() ? '2' : '0';
+        ret += getEventControlCode(event);
         ret += ',';
         ret += event.param1;
         ret += ',';
