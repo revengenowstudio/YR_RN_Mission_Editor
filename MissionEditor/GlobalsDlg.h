@@ -38,36 +38,31 @@ public:
 	CGlobalsDlg(CWnd* pParent = NULL);   // Standardkonstruktor
 
 // Dialogfelddaten
-	//{{AFX_DATA(CGlobalsDlg)
 	enum { IDD = IDD_GLOBALS };
-	CMyComboBox	m_Value;
-	CComboBox	m_Global;
-	CString	m_Description;
-	//}}AFX_DATA
-
-
 // Überschreibungen
 	// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
-	//{{AFX_VIRTUAL(CGlobalsDlg)
 protected:
 	virtual BOOL OnInitDialog() override;	
 	virtual void OnOK() override;
 	virtual void OnCancel() override;
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
-	//}}AFX_VIRTUAL
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 // Implementierung
-protected:
 	void translateUI();
+	BOOL onMessageKeyDown(MSG* pMsg);
 	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CGlobalsDlg)
 
 	afx_msg void OnChangeDescription();
 	afx_msg void OnSelchangeGlobal();
 	afx_msg void OnSelchangeValue();
 	afx_msg void OnEditchangeValue();
-	//}}AFX_MSG
+
 	DECLARE_MESSAGE_MAP()
+
+	CMyComboBox	m_Value;
+	CComboBox	m_Global;
+	CString	m_Description;
 };
 
 //{{AFX_INSERT_LOCATION}}
