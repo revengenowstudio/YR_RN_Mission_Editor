@@ -43,10 +43,6 @@ public:
 	~CSingleplayerSettings();
 
 	enum { IDD = IDD_SINGLEPLAYER };
-	enum DdxMode {
-		DDX_ReadFromIni,
-		DDX_WriteToIni,
-	};
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // ddx/ddv support

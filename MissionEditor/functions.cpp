@@ -175,6 +175,13 @@ CString TranslateHouse(CString original, BOOL bToUI)
 }
 
 
+void ddxWithMap(CWnd& wnd, const CString& section, const CString& key, const DdxMode mode,
+	const WinTextValidator& checkOrModify)
+{
+	CIniFile& ini = Map->GetIniFile();
+	ddxWithIni(wnd, ini, section, key, mode, checkOrModify);
+}
+
 bool deleteFile(const std::string& u8FilePath)
 {
 	return DeleteFileW(utf8ToUtf16(u8FilePath).c_str()) ? true : false;
