@@ -54,15 +54,18 @@ public:
 // Überschreibungen
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
+
+	BOOL onMessageKeyDown(MSG* pMsg);
 
 // Implementierung
-protected:
 	// Generierte Nachrichtenzuordnungsfunktionen
 	afx_msg void OnChangeUsesize();
 	afx_msg void OnEditchangeTheater();
 	afx_msg void OnChangelocal();
 	afx_msg void OnChange();
+
 	DECLARE_MESSAGE_MAP()
 
 };

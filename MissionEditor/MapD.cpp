@@ -60,6 +60,15 @@ void CMapD::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC__SIZEY, m_Height);
 }
 
+BOOL CMapD::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
 
 BEGIN_MESSAGE_MAP(CMapD, CDialog)
 	ON_EN_CHANGE(IDC_USESIZE, OnChangeUsesize)
@@ -87,6 +96,22 @@ void CMapD::UpdateDialog()
 	m_Height = c;
 
 	CDialog::UpdateData(FALSE);
+}
+
+BOOL CMapD::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+		case VK_RETURN:
+		{
+			switch (::GetDlgCtrlID(pMsg->hwnd)) {
+			default:
+				break;// never exist window (default -1) even nothing did
+			}
+		}
+	}
+	return TRUE;
 }
 
 void CMapD::OnChangeUsesize()
