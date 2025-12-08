@@ -37,7 +37,6 @@ class CMapD : public CDialog
 	// Konstruktion
 public:
 	void UpdateStrings();
-	void UpdateData();
 	void UpdateDialog();
 	CMapD();
 	~CMapD();
@@ -54,20 +53,16 @@ public:
 
 // Überschreibungen
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
-	//{{AFX_VIRTUAL(CMapD)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
-	//}}AFX_VIRTUAL
 
 // Implementierung
 protected:
 	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CMapD)
 	afx_msg void OnChangeUsesize();
 	afx_msg void OnEditchangeTheater();
 	afx_msg void OnChangelocal();
 	afx_msg void OnChange();
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 };

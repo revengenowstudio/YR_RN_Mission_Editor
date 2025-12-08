@@ -43,10 +43,8 @@ IMPLEMENT_DYNCREATE(CMapD, CDialog)
 
 CMapD::CMapD() : CDialog(CMapD::IDD)
 {
-	//{{AFX_DATA_INIT(CMapD)
 	m_Width = _T("");
 	m_Height = _T("");
-	//}}AFX_DATA_INIT
 }
 
 CMapD::~CMapD()
@@ -56,23 +54,19 @@ CMapD::~CMapD()
 void CMapD::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CMapD)
 	DDX_Control(pDX, IDC_USESIZE, m_LocalSize);
 	DDX_Control(pDX, IDC_THEATER, m_Theater);
 	DDX_Text(pDX, IDC__SIZEX, m_Width);
 	DDX_Text(pDX, IDC__SIZEY, m_Height);
-	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CMapD, CDialog)
-	//{{AFX_MSG_MAP(CMapD)
 	ON_EN_CHANGE(IDC_USESIZE, OnChangeUsesize)
 	ON_CBN_EDITCHANGE(IDC_THEATER, OnEditchangeTheater)
 	ON_BN_CLICKED(IDC_CHANGELOCAL, OnChangelocal)
 	ON_CBN_SELCHANGE(IDC_THEATER, OnEditchangeTheater)
 	ON_BN_CLICKED(IDC_CHANGE, OnChange)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -93,11 +87,6 @@ void CMapD::UpdateDialog()
 	m_Height = c;
 
 	CDialog::UpdateData(FALSE);
-}
-
-void CMapD::UpdateData()
-{
-	//MessageBox("This function ( UpdateData() ) should not be called, please contact the author.");
 }
 
 void CMapD::OnChangeUsesize()
@@ -139,17 +128,6 @@ void CMapD::OnChangelocal()
 
 void CMapD::OnChange()
 {
-	/*
-	CDialog::UpdateData(TRUE);
-
-	int width, height;
-	width=atoi(m_Width);
-	height=atoi(m_Height);
-
-	Map->ResizeMap(width, height);
-	theApp.MainWindow()->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	*/
-
 	CChangeSizeDlg dlg;
 	if (dlg.DoModal() == IDCANCEL) {
 		return;
