@@ -312,36 +312,6 @@ BEGIN
     EDITTEXT        IDC_VAL,2,46,280,12,ES_AUTOHSCROLL
 END
 
-IDD_LIGHTING DIALOG 0, 0, 303, 204
-STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "Lighting Settings"
-FONT 8, "Tahoma"
-BEGIN
-    LTEXT           "Lighting settings define the color of the terrain in the game, and you can specify a very dark or very bright map. Be careful, using wrong settings may cause the player to be unable to see his units.",IDC_DESC,6,5,290,25
-    GROUPBOX        "Normal",IDC_LNORMAL,6,35,290,65
-    GROUPBOX        "Ion storm settings",IDC_LIONSTORM,6,110,290,65
-    LTEXT           "Ambient:",IDC_LAMBIENT1,15,50,50,10
-    EDITTEXT        IDC_AMBIENT,65,50,75,12,ES_AUTOHSCROLL
-    LTEXT           "Green:",IDC_LGREEN1,160,65,50,10
-    EDITTEXT        IDC_GREEN,210,65,75,12,ES_AUTOHSCROLL
-    LTEXT           "Red:",IDC_LRED1,160,50,50,10
-    EDITTEXT        IDC_RED,210,50,75,12,ES_AUTOHSCROLL
-    LTEXT           "Blue:",IDC_LBLUE1,160,80,50,10
-    EDITTEXT        IDC_BLUE,210,80,75,12,ES_AUTOHSCROLL
-    LTEXT           "Level:",IDC_LLEVEL1,15,65,50,10
-    EDITTEXT        IDC_LEVEL,65,65,75,12,ES_AUTOHSCROLL
-    LTEXT           "Ambient:",IDC_LAMBIENT2,15,125,50,10
-    EDITTEXT        IDC_AMBIENT2,65,125,75,12,ES_AUTOHSCROLL
-    LTEXT           "Green:",IDC_LGREEN2,160,140,50,10
-    EDITTEXT        IDC_GREEN2,210,140,75,12,ES_AUTOHSCROLL
-    LTEXT           "Red:",IDC_LRED2,160,125,50,10
-    EDITTEXT        IDC_RED2,210,125,75,12,ES_AUTOHSCROLL
-    LTEXT           "Blue:",IDC_LBLUE2,160,155,50,10
-    EDITTEXT        IDC_BLUE2,210,155,75,12,ES_AUTOHSCROLL
-    LTEXT           "Level:",IDC_LLEVEL2,15,140,50,10
-    EDITTEXT        IDC_LEVEL2,65,140,75,12,ES_AUTOHSCROLL
-END
-
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
 #if defined(APSTUDIO_INVOKED)
 IDD_INFO$(TS_MODE) DIALOGEX 0, 0, 349, 250
@@ -1271,10 +1241,6 @@ BEGIN
     BEGIN
         RIGHTMARGIN, 285
         BOTTOMMARGIN, 60
-    END
-
-    IDD_LIGHTING, DIALOG
-    BEGIN
     END
 
     "IDD_INFO$(TS_MODE)", DIALOG
