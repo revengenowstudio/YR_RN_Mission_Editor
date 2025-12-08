@@ -111,11 +111,13 @@ public:
 
 // Überschreibungen
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
-	//{{AFX_VIRTUAL(CTeamTypes)
 protected:
 	virtual BOOL OnInitDialog() override;
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
-	//}}AFX_VIRTUAL
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
+
+	BOOL onMessageKeyDown(MSG* pMsg);
+
 	void addTeamtype(const TeamTypeParams& params);
 	void translateUI();
 	void initMCDecisionComboBox();
