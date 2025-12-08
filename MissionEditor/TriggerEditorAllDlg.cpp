@@ -600,7 +600,12 @@ void CTriggerEditorAllDlg::onEditChangeNextTrigger()
 
 void CTriggerEditorAllDlg::onKillFocusName()
 {
+    auto const selected = m_triggerType.GetCurSel();
     UpdateDialog();
+    if (selected != CB_ERR) {
+        m_triggerType.SetCurSel(selected);
+        onSelChangeTrigger();
+    }
 }
 
 void CTriggerEditorAllDlg::onKillFocus(CWnd* pNewWnd)
@@ -801,8 +806,8 @@ void CTriggerEditorAllDlg::onEditChangeEventType()
 
     HandleParamList(m_eventParam1, paramType1.listType);
     HandleParamList(m_eventParam2, paramType2.listType);
-    GetDlgItem(IDC_TRGR_EVENT_P1_TXT)->SetWindowTextA(paramType1.paramName);
-    GetDlgItem(IDC_TRGR_EVENT_P2_TXT)->SetWindowTextA(paramType2.paramName);
+    GetDlgItem(IDC_TRGR_EVENT_P1_TXT)->SetWindowText(paramType1.paramName);
+    GetDlgItem(IDC_TRGR_EVENT_P2_TXT)->SetWindowText(paramType2.paramName);
 
     m_eventParam1.SetWindowText(eventData.param1);
 
@@ -950,7 +955,7 @@ void CTriggerEditorAllDlg::onDeleteEvent()
 
     updateTriggerEvents();
     if (m_eventList.GetCount() > 0) {
-        m_eventList.SetCurSel(eventIdx - 1);
+        m_eventList.SetCurSel(std::max(eventIdx - 1, 0));
     }
 }
 
@@ -984,6 +989,7 @@ void handleParamList(CComboBox& cb, const ParamType& paramType)
     // legacy way
     if (paramType.sequencedValues.empty()) {
         HandleParamList(cb, paramType.listType);
+        return;
     }
     // customized values
     while (cb.DeleteString(0) != CB_ERR);
@@ -1249,6 +1255,6 @@ void CTriggerEditorAllDlg::onDeleteAction()
 
     updateTriggerActions();
     if (m_actionList.GetCount() > 0) {
-        m_actionList.SetCurSel(actionIdx - 1);
+        m_actionList.SetCurSel(std::max(actionIdx - 1, 0));
     }
 }

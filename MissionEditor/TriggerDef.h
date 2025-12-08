@@ -14,6 +14,7 @@ class TriggerActions;
 struct ParamType 
 {
     static const ParamType Default;
+    static const ParamType WaypointSpecial;
 
     CString paramName;
     int listType{ 0 }; // PARAMTYPE_NOTHING
@@ -82,6 +83,8 @@ struct TriggerEvent
     int eventType{ 0 };
     CString param1;
     std::optional<CString> param2;
+
+    const TriggerEventType& Type() const;
 };
 
 class TriggerEvents
@@ -189,8 +192,8 @@ public:
     TriggerAction& Nth(size_t idx) { return actions.at(idx); }
     void DeleteAt(size_t idx) { actions.erase(actions.begin() + idx); }
 
-    TriggerAction& Insert(size_t slot, TriggerAction&& event = {}) {
-        return *actions.emplace(actions.begin() + slot, std::move(event));
+    TriggerAction& Insert(size_t slot, TriggerAction&& action = {}) {
+        return *actions.emplace(actions.begin() + slot, std::move(action));
     }
 
     CString Serialize() const;

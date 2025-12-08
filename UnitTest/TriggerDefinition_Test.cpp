@@ -22,6 +22,7 @@ R"(
 3=Stolen by(Unused),0,2,0,1,When money stolen by a thief,0,0,3
 8=Anything,0,0,0,0,When use it alone%1 take effect immediately,0,1,8
 9=Destroyed%1 Units%1 All...,0,2,0,0,When all techno units get destroyed,0,1,9
+23=Team leaves map...,-1,7,0,0,If all members of the team leaves map,0,1,23
 60=Techno Exists,48,46,0,0,So many techno type exists on map,0,1,60,1
 
 [ActionsRA2]
@@ -55,10 +56,12 @@ R"(
     EXPECT_EQ(mgr.Actions().at(130).ra2Allowed, true);
     EXPECT_EQ(mgr.Actions().at(130).yrOnly, true);
 
-    EXPECT_EQ(mgr.Events().size(), 7);
+    EXPECT_EQ(mgr.Events().size(), 8);
     EXPECT_EQ(mgr.Events().at(0).description, "This is an empty event.");
     EXPECT_EQ(mgr.Events().at(2).obsolete, true);
     EXPECT_EQ(mgr.Events().at(8).description, "When use it alone, take effect immediately");
+    EXPECT_EQ(mgr.Events().at(23).paramTypes[0], 7); // attention, ohhhhhh
+    EXPECT_EQ(mgr.Events().at(23).paramTypes[1], -1); // attention, ohhhhhh
     EXPECT_EQ(mgr.Events().at(60).paramTypes[0], 46); // attention, ohhhhhh
     EXPECT_EQ(mgr.Events().at(60).paramTypes[1], 48); // attention, ohhhhhh
 
@@ -159,6 +162,91 @@ TEST(TriggerTest, OptionsSerde)
 
 TEST(TriggerEventTest, EventsSerde)
 {
+
+    std::stringstream testIniContent;
+    testIniContent <<
+        R"(
+[DontSaveAsWP]
+0=5
+1=9
+;2=10
+3=11
+
+[ParamTypes]
+-1=Unused,0,1;not listed in FA2
+0=Nothing,0
+1=Unknown,0
+2=Affiliated Side,1
+3=Local Variable,20
+4=Time,0
+5=Score,0
+6=Value,0
+7=Squad Type,2
+8=Building,6
+9=Aircraft,5
+10=Infantry,4
+11=Unit,3
+12=Movie,7
+13=Text,8
+14=Trigger,9
+15=Allowed,10
+16=Sound,11
+17=Music,12
+18=Voice,13
+19=Step,0
+20=Super Weapon,14
+21=Left,0
+22=Top,0
+23=Width,0
+24=Height,0
+25=Animation,15
+26=Particle,16
+27=Duration,0
+28=Speed,0
+29=Voxel Fragment ID,29
+30=Way Point,17
+31=Wooden Crate Type,18
+32=Voice Prompt Box,19
+33=Character,21
+34=Action,9
+35=Global Variable,27
+36=Specific Weapon,14
+37=Activated,10
+38=Trigger Tag,22
+39=Technology Type,0
+40=Source,0
+41=Weapon,24
+42=Glow Behavior,25
+43=Event,9
+44=Rain,26
+45=Float Value,0
+46=Technology Type,29
+47=Building,28
+48=Value,0,2
+49=Pixel Animation,23
+50=Film,7
+
+[EventsRA2]
+0=-No Event-,0,0,0,0,This is an empty event.,0,1,0
+1=Enter...,0,2,0,0,Ground unit enters,0,1,1
+2=Discover starts(Unused),0,0,0,1,When a spy enters,0,0,2
+3=Stolen by(Unused),0,2,0,1,When money stolen by a thief,0,0,3
+8=Anything,0,0,0,0,When use it alone%1 take effect immediately,0,1,8
+9=Destroyed%1 Units%1 All...,0,2,0,0,When all techno units get destroyed,0,1,9
+13=Time Elapse...,0,6,0,0,Time elapse in seconds and reset,0,1,13
+23=Team leaves map...,-1,7,0,0,If all members of the team leaves map,0,1,23
+36=Local variable on...,0,3,0,0,If local variable is true,0,1,36
+37=Local variable off...,0,3,0,0,If local variable is false,0,1,37
+60=Techno Exists,48,46,0,0,So many techno type exists on map,0,1,60,1
+61=Techno Not Exists,48,46,0,0,Techno type no longer exists on map,0,1,61,1
+)";
+
+    CIniFile ini;
+    EXPECT_EQ(ini.InsertStream(testIniContent), 0);
+
+    auto& mgr = TriggerDefinitionManager::Instance();
+    mgr.LoadFrom(ini, std::cerr);
+
     // single event
     {
         const CString data = "1,13,0,10";
@@ -213,6 +301,17 @@ TEST(TriggerEventTest, EventsSerde)
         EXPECT_EQ(events.Nth(2).eventType, 37);
         EXPECT_EQ(events.Nth(2).param1, "9");
         EXPECT_EQ(events.Nth(2).param2, std::nullopt);
+
+        EXPECT_EQ(events.Serialize(), data);
+    }
+    {
+        const CString data = "1,23,1,01000023";
+        TriggerEvents events(data);
+
+        EXPECT_EQ(events.Size(), 1);
+        EXPECT_EQ(events.Nth(0).eventType, 23);
+        EXPECT_EQ(events.Nth(0).param1, "01000023");
+        EXPECT_EQ(events.Nth(0).param2, std::nullopt);
 
         EXPECT_EQ(events.Serialize(), data);
     }
