@@ -722,6 +722,7 @@
     <Image Include="res\clifftoo.bmp" />
     <Image Include="res\FinalAlert2.ico" />
     <Image Include="res\FinalAlert2YR.ico" />
+    <Image Include="res\FinalRevenge.ico" />
     <Image Include="res\FinalSun.ico" />
     <Image Include="res\ico00003.ico" />
     <Image Include="res\idr_main.ico" />

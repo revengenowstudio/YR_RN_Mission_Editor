@@ -480,7 +480,7 @@ CString GetLanguageStringACP(const CString name)
 #ifndef RA2_MODE
 	auto const pStrToInsert = "FinalSun";
 #elif YR_MODE
-	auto const pStrToInsert = "FinalAlert 2: Yuri's Revenge";
+	auto const pStrToInsert = "Final Revenge";
 #else
 	auto const pStrToInsert = "FinalAlert 2";
 #endif
