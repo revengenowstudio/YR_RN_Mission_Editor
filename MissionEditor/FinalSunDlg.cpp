@@ -530,6 +530,7 @@ void CFinalSunDlg::OnOptionsTiberiansunoptions()
 
 	if (restartRequired) {
 		checkProjectPathAndRelaunch(currentMapFile, true);
+		reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->UnloadAll(false);
 	}
 }
 
