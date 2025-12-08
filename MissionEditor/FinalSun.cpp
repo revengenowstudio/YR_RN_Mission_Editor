@@ -299,7 +299,7 @@ BOOL CFinalSunApp::InitInstance()
 	if (showFirstTimeOption) {
 		opts.bSearchLikeTS = TRUE;
 		bOptionsStartup = TRUE;
-		ShowOptionsDialog(optini);
+		ShowOptionsDialog(optini, true);
 		bOptionsStartup = FALSE;
 	} else {
 		opts.LanguageName = optini[app].GetString("Language");

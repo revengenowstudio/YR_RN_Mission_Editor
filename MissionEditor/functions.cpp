@@ -340,7 +340,7 @@ void HandleParamList(CComboBox& cb, int type)
 	}
 }
 
-void ShowOptionsDialog(CIniFile& optIni)
+bool ShowOptionsDialog(CIniFile& optIni, bool isFirstTimeOption)
 {
 	// show the options dialog, and save the options.
 
@@ -363,7 +363,7 @@ void ShowOptionsDialog(CIniFile& optIni)
 	CTSOptions opt;
 	opt.m_TSEXE = theApp.m_Options.TSExe;
 	if (opt.DoModal() == IDCANCEL) {
-		return;
+		return false;
 	}
 	theApp.m_Options.TSExe = opt.m_TSEXE;
 	optIni.SetString(game, "Exe", theApp.m_Options.TSExe);
@@ -394,10 +394,12 @@ void ShowOptionsDialog(CIniFile& optIni)
 
 	CString oldLang = theApp.m_Options.LanguageName;
 	theApp.m_Options.LanguageName = opt.m_LanguageName;
-	if (oldLang != theApp.m_Options.LanguageName && theApp.m_pMainWnd != NULL && theApp.m_pMainWnd->m_hWnd != NULL) {
+	auto const languageChanged = oldLang != theApp.m_Options.LanguageName;
+	if (languageChanged && theApp.m_pMainWnd != NULL && theApp.m_pMainWnd->m_hWnd != NULL) {
 		theApp.MainWindow()->UpdateStrings();
 	}
 	optIni.SaveFile(iniFile);
+	return !isFirstTimeOption && languageChanged;
 }
 
 

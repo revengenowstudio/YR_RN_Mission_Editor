@@ -253,33 +253,6 @@ BEGIN
     LTEXT           "As FinalAlert was dialog based in earlier versions, we need to have this.",IDC_STATIC,7,156,26,26
 END
 
-#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_TSOPTIONS$(RA2_MODE) DIALOGEX 0, 0, 197, 183
-#else
-IDD_TSOPTIONS DIALOGEX 0, 0, 197, 183
-#endif
-STYLE DS_SETFONT | DS_MODALFRAME | DS_NOFAILCREATE | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Options"
-FONT 8, "Tahoma", 0, 0, 0x0
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,140,159,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,85,159,50,14
-    LTEXT           "Red Alert 2 EXE (make sure its in the correct path)",IDC_DESC,5,5,184,20
-    EDITTEXT        IDC_EDIT1,5,25,130,15,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_CHOOSE,140,25,50,15
-    LTEXT           "Language / Sprache:",IDC_OPTIONS_LAN_TXT,7,51,128,11
-    COMBOBOX        IDC_LANGUAGE,7,63,183,94,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Support settings",IDC_OPTIONS_SUPPORT_TXT,7,81,183,71
-    CONTROL         "Support mission disks and mods (recommended)",IDC_RULESLIKETS,
-                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP,14,92,170,16
-    CONTROL         "Only support original Red Alert 2",IDC_ONLYORIGINAL,
-                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE,14,108,168,16
-    CONTROL         "Prefer FinalAlert 2 theater INI files",IDC_PREFER_LOCAL_THEATER_FILES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,131,164,12
-END
-#endif
-
 IDD_MAP DIALOG 0, 0, 303, 204
 STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "Map Properties"
@@ -848,33 +821,6 @@ BEGIN
     COMBOBOX        IDC_VALUE,57,59,122,55,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
 END
 
-#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_TSOPTIONS$(TS_MODE) DIALOGEX 0, 0, 197, 183
-#else
-IDD_TSOPTIONS DIALOGEX 0, 0, 197, 183
-#endif
-STYLE DS_SETFONT | DS_MODALFRAME | DS_NOFAILCREATE | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Options"
-FONT 8, "Tahoma", 0, 0, 0x0
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,140,160,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,85,160,50,14
-    LTEXT           "Tiberian Sun EXE (make sure its in the correct path)",IDC_STATIC,5,5,130,20
-    EDITTEXT        IDC_EDIT1,5,25,130,15,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_CHOOSE,140,25,50,15
-    LTEXT           "Language / Sprache:",IDC_STATIC,7,51,128,11
-    COMBOBOX        IDC_LANGUAGE,7,63,183,94,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Rules, Art && AI ini files",IDC_STATIC,7,81,183,71
-    CONTROL         "Act like Tiberian Sun when searching for files (recommended)",IDC_RULESLIKETS,
-                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP,14,92,170,16
-    CONTROL         "Only use the files inside tibsun.mix (do not use Firestorm or any mods)",IDC_ONLYORIGINAL,
-                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE,14,110,168,16
-    CONTROL         "Prefer FinalSun theater INI files",IDC_PREFER_LOCAL_THEATER_FILES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,131,164,12
-END
-#endif
-
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
 IDD_INFO$(RA2_MODE) DIALOGEX 0, 0, 349, 250
@@ -1228,11 +1174,6 @@ BEGIN
     BEGIN
     END
 
-    "IDD_TSOPTIONS$(RA2_MODE)", DIALOG
-    BEGIN
-        BOTTOMMARGIN, 165
-    END
-
     IDD_MAP, DIALOG
     BEGIN
     END
@@ -1366,11 +1307,6 @@ BEGIN
 
     IDD_GLOBALS, DIALOG
     BEGIN
-    END
-
-    "IDD_TSOPTIONS$(TS_MODE)", DIALOG
-    BEGIN
-        BOTTOMMARGIN, 165
     END
 
     "IDD_INFO$(RA2_MODE)", DIALOG
@@ -2634,28 +2570,6 @@ IDD_TIP AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
-
-#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_TSOPTIONS$(TS_MODE) AFX_DIALOG_LAYOUT
-#else
-IDD_TSOPTIONS AFX_DIALOG_LAYOUT
-#endif
-BEGIN
-    0
-END
-#endif
-
-#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_TSOPTIONS$(RA2_MODE) AFX_DIALOG_LAYOUT
-#else
-IDD_TSOPTIONS AFX_DIALOG_LAYOUT
-#endif
-BEGIN
-    0
-END
-#endif
 
 IDD_MAPVALIDATOR AFX_DIALOG_LAYOUT
 BEGIN
