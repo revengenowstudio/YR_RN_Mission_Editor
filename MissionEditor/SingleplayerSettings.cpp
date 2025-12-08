@@ -82,9 +82,33 @@ void CSingleplayerSettings::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
+BOOL CSingleplayerSettings::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
+
+BOOL CSingleplayerSettings::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+		case VK_RETURN:
+		{
+			switch (::GetDlgCtrlID(pMsg->hwnd)) {
+			default:
+				break;// never exist window (default -1) even nothing did
+			}
+		}
+	}
+	return TRUE;
+}
 
 BEGIN_MESSAGE_MAP(CSingleplayerSettings, CDialog)
-	//{{AFX_MSG_MAP(CSingleplayerSettings)
 	ON_CBN_EDITCHANGE(IDC_INTRO, OnEditchangeIntro)
 	ON_CBN_EDITCHANGE(IDC_BRIEF, OnEditchangeBrief)
 	ON_CBN_EDITCHANGE(IDC_WIN, OnEditchangeWin)
@@ -96,7 +120,6 @@ BEGIN_MESSAGE_MAP(CSingleplayerSettings, CDialog)
 	ON_EN_CHANGE(IDC_CARRYOVERMONEY, OnChangeCarryovermoney)
 	ON_CBN_EDITCHANGE(IDC_TIMERINHERIT, OnEditchangeTimerinherit)
 	ON_CBN_EDITCHANGE(IDC_FILLSILOS, OnEditchangeFillsilos)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_SAVE, OnBnClickedSave)
 END_MESSAGE_MAP()
 
