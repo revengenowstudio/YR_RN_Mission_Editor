@@ -95,7 +95,6 @@ void CTSOptions::OnOK()
 {
 	this->GetDlgItem(IDC_EDIT1)->GetWindowText(m_TSEXE);
 	m_LanguageName = getLanguageSelected();
-
 	CDialog::OnOK();
 }
 
@@ -129,7 +128,7 @@ BOOL CTSOptions::OnInitDialog()
 	}
 	m_Language.SetCurSel(selectedLanIdx);
 
-	updateUI();
+	translateUI();
 	UpdateData(FALSE);
 
 
@@ -139,11 +138,10 @@ BOOL CTSOptions::OnInitDialog()
 
 void CTSOptions::OnCbnSelchangeLanguage()
 {
-	theApp.m_Options.LanguageName = getLanguageSelected();
-	updateUI();
+	translateUI();
 }
 
-void CTSOptions::updateUI()
+void CTSOptions::translateUI()
 {
 	TranslateWindowCaption(*this, "OptionsCaption");
 
@@ -154,6 +152,9 @@ void CTSOptions::updateUI()
 	TranslateDlgItem(*this, IDC_RULESLIKETS, "OptionsSupportMissionsAndMods");
 	TranslateDlgItem(*this, IDC_ONLYORIGINAL, "OptionsSupportOriginalRA2Only");
 	TranslateDlgItem(*this, IDC_PREFER_LOCAL_THEATER_FILES, "OptionsPreferFA2TheaterSettings");
+
+	TranslateDlgItem(*this, IDOK, "OK");
+	TranslateDlgItem(*this, IDCANCEL, "Cancel");
 }
 
 CString CTSOptions::getLanguageSelected()

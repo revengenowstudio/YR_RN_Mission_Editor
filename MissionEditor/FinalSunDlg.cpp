@@ -482,7 +482,7 @@ void CFinalSunDlg::OnCancel()
 	// stub
 }
 
-bool checkProjectPathAndRelaunch(CString filePath)
+bool checkProjectPathAndRelaunch(CString filePath, bool forceRelaunch = false)
 { // check whether there is a project file in the map folder
 	auto const folderPath = filePath.Left(filePath.ReverseFind('\\'));
 	auto const projectFile = folderPath + "\\FinalAlertProject.ini";
@@ -490,36 +490,48 @@ bool checkProjectPathAndRelaunch(CString filePath)
 	// 1. Currently now project file vs incoming project file
 	// 2. Current project file differs from incoming one
 	// 3. Current using project file vs incoming none
-	if (projectFile != theApp.ProjectFilePath()) {
-		const bool targetProjectExists = DoesFileExist(projectFile);
-		// prevent no project mode always restart editor
-		if (!targetProjectExists && theApp.ProjectFilePath().IsEmpty()) {
-			return false;
-		}
-
-		TCHAR exePath[MAX_PATH];
-		GetModuleFileName(NULL, exePath, MAX_PATH);
-
-		CString cmdLine;
-		cmdLine.Format(_T("\"%s\" --file \"%s\""), exePath, filePath);
-
-		// only append project parameter if incoming project exists
-		if (targetProjectExists) {
-			CString projectParam;
-			projectParam.Format(" --project \"%s\"", projectFile);
-			cmdLine += projectParam;
-		}
-
-		ShellExecute(NULL, NULL, exePath, cmdLine, NULL, SW_SHOWNORMAL);
-		return true;
+	if (projectFile == theApp.ProjectFilePath() && !forceRelaunch) {
+		return false;
 	}
-	return false;
+
+	const bool targetProjectExists = DoesFileExist(projectFile);
+	// prevent no project mode always restart editor
+	if (!targetProjectExists && theApp.ProjectFilePath().IsEmpty() && !forceRelaunch) {
+		return false;
+	}
+
+	TCHAR exePath[MAX_PATH];
+	GetModuleFileName(NULL, exePath, MAX_PATH);
+
+	CString cmdLine;
+	cmdLine.Format(_T("\"%s\" --file \"%s\""), exePath, filePath);
+
+	// only append project parameter if incoming project exists
+	if (targetProjectExists) {
+		CString projectParam;
+		projectParam.Format(" --project \"%s\"", projectFile);
+		cmdLine += projectParam;
+	}
+
+	ShellExecute(NULL, NULL, exePath, cmdLine, NULL, SW_SHOWNORMAL);
+	return true;
+
 }
 
 void CFinalSunDlg::OnOptionsTiberiansunoptions()
 {
 	CIniFile optini;
-	ShowOptionsDialog(optini);
+	auto restartRequired = ShowOptionsDialog(optini);
+
+	if (restartRequired) {
+		restartRequired &= MessageBox(TranslateStringACP("OptionsLanguageChangeRestartTip"),
+			TranslateStringACP("OptionChangeRestart"), MB_OKCANCEL) == IDOK;
+	}
+
+	if (restartRequired) {
+		checkProjectPathAndRelaunch(currentMapFile, true);
+		reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->UnloadAll(false);
+	}
 }
 
 void CFinalSunDlg::OnFileOpenmap()

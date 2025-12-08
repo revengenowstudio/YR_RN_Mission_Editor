@@ -75,8 +75,11 @@ CString TranslateStringVariables(int n, const char* originaltext, const char* in
 // Alliance->Korea etc...
 CString TranslateHouse(CString original, BOOL bToUI = FALSE);
 
-// show options dialog
-void ShowOptionsDialog(CIniFile& optIni);
+/**
+* @brief Show options dialog
+* @return true means a program restart is required
+*/
+bool ShowOptionsDialog(CIniFile& optIni, bool isFirstTimeOption = false);
 
 // repairs a trigger (sets flags correctly)
 bool RepairTrigger(CString& triggerdata);
