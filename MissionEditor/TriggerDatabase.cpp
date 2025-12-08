@@ -43,6 +43,8 @@ void ObjectDatabase<TriggerInstance>::SaveInto(CIniFile& ini, std::ostream& err)
     auto& eventsSec = ini.AddSection(SEC_EVENTS);
     auto& actionsSec = ini.AddSection(SEC_ACTIONS);
     triggerSec.Clear();
+    eventsSec.Clear();
+    actionsSec.Clear();
 
     for (auto const& trigger : items) {
         triggerSec.SetString(trigger.ID(), trigger.Options().Serialize());
