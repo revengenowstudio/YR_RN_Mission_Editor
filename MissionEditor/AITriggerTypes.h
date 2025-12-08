@@ -45,49 +45,19 @@ public:
 	~CAITriggerTypes();
 
 	// dialog field data
-		//{{AFX_DATA(CAITriggerTypes)
 	enum { IDD = IDD_AITRIGGERTYPES };
-	CMyComboBox	m_TeamType1;
-	CMyComboBox	m_UnitType;
-	CMyComboBox	m_TeamType2;
-	CMyComboBox	m_conditionType;
-	CMyComboBox	m_technoLevel;
-	CMyComboBox	m_Data;
-	CMyComboBox	m_Owner;
-	CFloatEdit	m_Float3;
-	CFloatEdit	m_Float2;
-	CFloatEdit	m_Float1;
-	CMyComboBox	m_AITriggerType;
-	CString	m_Flag3;
-	CString	m_Flag4;
-	CString	m_Name;
-	CString	m_Flag6;
-	CString	m_Flag7;
-	CString	m_Flag8;
-	CString	m_Flag9;
-	BOOL	m_Enabled;
-	CComboBox		m_operator;
-	int		m_Number;
-	BOOL	m_Easy;
-	BOOL	m_Medium;
-	BOOL	m_Hard;
-	BOOL	m_BaseDefense;
-	BOOL	m_Skirmish;
-	CString	m_Flag5;
-	CComboBox	m_MultiSide;
-	//}}AFX_DATA
 
 
 // overwriteables
 	// generated virtual overwriteables
-	//{{AFX_VIRTUAL(CAITriggerTypes)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 	virtual BOOL OnInitDialog() override;
-	//}}AFX_VIRTUAL
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 // implementation
 	void translateUI();
+	BOOL onMessageKeyDown(MSG* pMsg);
 	void initCondtionTypeComboBox();
 	void initMultisideComboBox();
 	void initConditionOpComboBox();
@@ -133,6 +103,34 @@ protected:
 	afx_msg void OnSelchangeMultiside();
 	//}}AFX_MSG
 
+	CMyComboBox	m_TeamType1;
+	CMyComboBox	m_UnitType;
+	CMyComboBox	m_TeamType2;
+	CMyComboBox	m_conditionType;
+	CMyComboBox	m_technoLevel;
+	CMyComboBox	m_Data;
+	CMyComboBox	m_Owner;
+	CFloatEdit	m_Float3;
+	CFloatEdit	m_Float2;
+	CFloatEdit	m_Float1;
+	CMyComboBox	m_AITriggerType;
+	CString	m_Flag3;
+	CString	m_Flag4;
+	CString	m_Name;
+	CString	m_Flag6;
+	CString	m_Flag7;
+	CString	m_Flag8;
+	CString	m_Flag9;
+	BOOL	m_Enabled;
+	CComboBox		m_operator;
+	int		m_Number;
+	BOOL	m_Easy;
+	BOOL	m_Medium;
+	BOOL	m_Hard;
+	BOOL	m_BaseDefense;
+	BOOL	m_Skirmish;
+	CString	m_Flag5;
+	CComboBox	m_MultiSide;
 };
 
 //{{AFX_INSERT_LOCATION}}
