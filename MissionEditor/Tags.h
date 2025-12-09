@@ -36,33 +36,25 @@ class CTags : public CDialog
 
 	// Konstruktion
 public:
+	enum { IDD = IDD_TAGS };
+
 	void UpdateDialog();
 	CTags();
 	~CTags();
 
-	// Dialogfelddaten
-		//{{AFX_DATA(CTags)
-	enum { IDD = IDD_TAGS };
-	CComboBox	m_Repeat;
-	CComboBox	m_Tag;
-	CComboBox	m_Trigger;
-	CString	m_Name;
-	//}}AFX_DATA
-
-
 // Überschreibungen
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
-	//{{AFX_VIRTUAL(CTags)
 protected:
 	virtual BOOL OnInitDialog() override;
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
-	//}}AFX_VIRTUAL
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
+
 
 // Implementierung
 protected:
 	void translateUI();
+	BOOL onMessageKeyDown(MSG* pMsg);
 	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CTags)
 	afx_msg void OnSelchangeTag();
 	afx_msg void OnChangeName();
 	afx_msg void OnEditchangeRepeat();
@@ -71,9 +63,13 @@ protected:
 	afx_msg void OnSelchangeTrigger();
 	afx_msg void OnDelete();
 	afx_msg void OnAdd();
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
+	// Dialogfelddaten
+	CComboBox	m_Repeat;
+	CComboBox	m_Tag;
+	CComboBox	m_Trigger;
+	CString	m_Name;
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -196,9 +196,33 @@ void CAITriggerTypes::translateUI()
 	TranslateDlgItem(*this, IDC_AITRIGGER_T_UNITTYPE, "AITriggerUnitType");
 }
 
+BOOL CAITriggerTypes::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
+
+BOOL CAITriggerTypes::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+		case VK_RETURN:
+		{
+			switch (::GetDlgCtrlID(pMsg->hwnd)) {
+			default:
+				break;// never exist window (default -1) even nothing did
+			}
+		}
+	}
+	return TRUE;
+}
 
 BEGIN_MESSAGE_MAP(CAITriggerTypes, CDialog)
-	//{{AFX_MSG_MAP(CAITriggerTypes)
 	ON_CBN_SELCHANGE(IDC_AITRIGGERTYPE, OnSelchangeAitriggertype)
 	ON_EN_KILLFOCUS(IDC_NAME, OnChangeName)
 	ON_CBN_EDITCHANGE(IDC_OWNER, OnEditchangeOwner)
@@ -226,8 +250,7 @@ BEGIN_MESSAGE_MAP(CAITriggerTypes, CDialog)
 	ON_BN_CLICKED(IDC_SKIRMISH, OnSkirmish)
 	ON_CBN_EDITCHANGE(IDC_MULTISIDE, OnEditchangeMultiside)
 	ON_CBN_SELCHANGE(IDC_MULTISIDE, OnSelchangeMultiside)
-	//}}AFX_MSG_MAP
-	ON_BN_CLICKED(IDC_AITRIGGER_COPY, &CAITriggerTypes::OnBnClickedAitriggerCopy)
+	ON_BN_CLICKED(IDC_AITRIGGER_COPY, OnBnClickedAitriggerCopy)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

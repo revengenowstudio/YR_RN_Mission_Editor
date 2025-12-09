@@ -57,6 +57,31 @@ void CGlobalsDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
+BOOL CGlobalsDlg::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
+
+BOOL CGlobalsDlg::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+		case VK_RETURN:
+		{
+			switch (::GetDlgCtrlID(pMsg->hwnd)) {
+			default:
+				break;// never exist window (default -1) even nothing did
+			}
+		}
+	}
+	return TRUE;
+}
 
 BEGIN_MESSAGE_MAP(CGlobalsDlg, CDialog)
 	//{{AFX_MSG_MAP(CGlobalsDlg)

@@ -50,7 +50,6 @@ CSpecialFlags::CSpecialFlags(CWnd* pParent /*=NULL*/)
 void CSpecialFlags::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CSpecialFlags)
 	DDX_Control(pDX, IDC_VISCEROIDS, m_Visceroids);
 	DDX_Control(pDX, IDC_TIBERIUMSPREADS, m_TiberiumSpreads);
 	DDX_Control(pDX, IDC_TIBERIUMGROWS, m_TiberiumGrows);
@@ -64,12 +63,19 @@ void CSpecialFlags::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_FOGOFWAR, m_FogOfWar);
 	DDX_Control(pDX, IDC_FIXEDALLIANCE, m_FixedAlliance);
 	DDX_Control(pDX, IDC_DESTROYABLEBRIDGES, m_DestroyableBridges);
-	//}}AFX_DATA_MAP
 }
 
+BOOL CSpecialFlags::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
 
 BEGIN_MESSAGE_MAP(CSpecialFlags, CDialog)
-	//{{AFX_MSG_MAP(CSpecialFlags)
 	ON_CBN_EDITCHANGE(IDC_TIBERIUMGROWS, OnEditchangeTiberiumgrows)
 	ON_CBN_EDITCHANGE(IDC_TIBERIUMSPREADS, OnEditchangeTiberiumspreads)
 	ON_CBN_EDITCHANGE(IDC_TIBERIUMEXPLOSIVE, OnEditchangeTiberiumexplosive)
@@ -97,7 +103,6 @@ BEGIN_MESSAGE_MAP(CSpecialFlags, CDialog)
 	ON_CBN_SELCHANGE(IDC_IONSTORMS, OnEditchangeIonstorms)
 	ON_CBN_SELCHANGE(IDC_METEORITES, OnEditchangeMeteorites)
 	ON_CBN_SELCHANGE(IDC_VISCEROIDS, OnEditchangeVisceroids)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
@@ -167,6 +172,22 @@ void CSpecialFlags::TranslateUI()
 	TranslateDlgItem(*this, IDC_LIONSTORMS, "SpecialFlagsIonStoms");
 	TranslateDlgItem(*this, IDC_LMETEORITES, "SpecialFlagsMeteorites");
 	TranslateDlgItem(*this, IDC_LVISCEROIDS, "SpecialFlagsVisceroids");
+}
+
+BOOL CSpecialFlags::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+		case VK_RETURN:
+		{
+			switch (::GetDlgCtrlID(pMsg->hwnd)) {
+			default:
+				break;// never exist window (default -1) even nothing did
+			}
+		}
+	}
+	return TRUE;
 }
 
 void CSpecialFlags::OnEditchangeTiberiumgrows()

@@ -45,12 +45,14 @@ public:
 	enum { IDD = IDD_SINGLEPLAYER };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // ddx/ddv support
-	virtual void PostNcDestroy();
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // ddx/ddv support
+	virtual void PostNcDestroy() override;
 	virtual BOOL OnInitDialog() override;
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 	void translateUI();
 	void ddxWithMap(const int controlID, const CString& section, const CString& key, const DdxMode mode);
+	BOOL onMessageKeyDown(MSG* pMsg);
 
 // implementation
 	afx_msg void OnEditchangeIntro();
