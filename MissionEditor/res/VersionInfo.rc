@@ -73,15 +73,15 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "FinalAlert 2: Yuri's Revenge Mission Editor"
+            VALUE "Comments", "FinalRevenge 2 Mission Editor"
             VALUE "CompanyName", "Electronic Arts, Inc."
-            VALUE "FileDescription", "FinalAlert 2: Yuri's Revenge"
+            VALUE "FileDescription", "FinalRevenge 2"
             VALUE "FileVersion", "2.1.0"
-            VALUE "InternalName", "FinalAlert 2: Yuri's Revenge Mission Editor"
+            VALUE "InternalName", "FinalRevenge 2 Mission Editor"
             VALUE "LegalCopyright", "Copyright (C) 1999-2024 Electronic Arts, Inc."
-            VALUE "LegalTrademarks", "FinalAlert 2: Yuri's Revenge"
+            VALUE "LegalTrademarks", "FinalRevenge 2"
             VALUE "OriginalFilename", "FinalAlert2YR.EXE"
-            VALUE "ProductName", "FinalAlert 2: Yuri's Revenge"
+            VALUE "ProductName", "FinalRevenge 2"
             VALUE "ProductVersion", "2.1.0"
         END
     END
@@ -114,16 +114,16 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "FinalSun Mission Editor"
-            VALUE "CompanyName", "Electronic Arts, Inc."
-            VALUE "FileDescription", "FinalSun"
-            VALUE "FileVersion", "2.1.0"
-            VALUE "InternalName", "FinalSun Mission Editor"
+            VALUE "Comments", "FinalRevenge Mission Editor"
+            VALUE "CompanyName", "RN Studio"
+            VALUE "FileDescription", "FinalRevenge"
+            VALUE "FileVersion", PRODUCT_VERSION_STRING
+            VALUE "InternalName", "FinalRevenge Mission Editor"
             VALUE "LegalCopyright", "Copyright (C) 1999-2024 Electronic Arts, Inc."
-            VALUE "LegalTrademarks", "FinalSun"
+            VALUE "LegalTrademarks", "FinalRevenge"
             VALUE "OriginalFilename", "FinalSun.EXE"
-            VALUE "ProductName", "FinalSun"
-            VALUE "ProductVersion", "2.1.0"
+            VALUE "ProductName", "FinalRevenge"
+            VALUE "ProductVersion", PRODUCT_VERSION_STRING
         END
     END
     BLOCK "VarFileInfo"
