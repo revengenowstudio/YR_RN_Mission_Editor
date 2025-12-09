@@ -83,7 +83,7 @@ protected:
     CComboBox m_triggerType;
     CMyComboBox m_house;
     CMyComboBox m_persistence;
-    CComboBox m_nextTrigger; // sub trigger, sharing my tag
+    CMyComboBox m_nextTrigger; // sub trigger, sharing my tag
     CButton	m_medium;
     CButton	m_hard;
     CButton	m_easy;
@@ -103,4 +103,5 @@ protected:
 public:
     DECLARE_MESSAGE_MAP()
     afx_msg void onCloneTrigger();
+    afx_msg void onEditAttachedTrigger();
 };

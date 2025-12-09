@@ -40,6 +40,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_BN_CLICKED(IDC_TRGR_NEW_ACTION, onNewAction)
     ON_BN_CLICKED(IDC_TRGR_DELETE_ACTION, onDeleteAction)
     ON_BN_CLICKED(IDC_TRGR_CLONE_ACTION, onCloneAction)
+    ON_CBN_EDITCHANGE(IDC_TRGR_ATTACHED_TRIGGER, onEditAttachedTrigger)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -1257,4 +1258,26 @@ void CTriggerEditorAllDlg::onDeleteAction()
     if (m_actionList.GetCount() > 0) {
         m_actionList.SetCurSel(std::max(actionIdx - 1, 0));
     }
+}
+
+void CTriggerEditorAllDlg::onEditAttachedTrigger()
+{
+    if (m_currentTrigger.IsEmpty()) {
+        return;
+    }
+    auto const curSel = m_nextTrigger.GetCurSel();
+    if (curSel < 0) {
+        return;
+    }
+
+    CString triggerId;
+    m_nextTrigger.GetWindowText(triggerId);
+    TruncSpace(triggerId);
+
+    auto& db = TriggerDatabase::Instance();
+    if (triggerId != "<none>" && !db.Exists(triggerId)) {
+        MessageBox(TranslateStringACP("TriggerOptionInvalidID"), TranslateStringACP("Error"));
+        return;
+    }
+    db.Lookup(m_currentTrigger).Options().nextTrigger = triggerId;
 }
