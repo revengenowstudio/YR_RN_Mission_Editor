@@ -47,7 +47,7 @@ jobs:
       run: |
         revNum=$((${{ github.run_number }} - ${{ env.VERSION_REV_OFFSET }}))
         versionNum=${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.$revNum
-        pkgName=RN-Mission-Editor-v$versionNum.zip
+        pkgName=FinalRevenge-v$versionNum.zip
         ./scripts/update_product_version.ps1 -major ${{ env.VERSION_MAJOR }} -minor ${{ env.VERSION_MINOR }} -revision $revNum
         echo "RELEASE_VER=$versionNum" >> $GITHUB_ENV
         echo "PACKAGE_NAME=$pkgName" >> $GITHUB_ENV
@@ -94,7 +94,7 @@ jobs:
     - name: Pack up
       shell: pwsh
       run: |
-        cd dist/FinalAlert2YR
+        cd dist/FinalRevenge
         Compress-Archive -Path ./* -DestinationPath ../${{ env.PACKAGE_NAME }}
     - name: Release - ${{ env.RELEASE_VER }}
       uses: softprops/action-gh-release@v2
