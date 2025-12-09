@@ -347,3 +347,29 @@ void CBasic::PostNcDestroy()
 	// do not call PostNcDestroy as this is a member of FinalSunDlg	
 	//CPropertyPage::PostNcDestroy();
 }
+
+BOOL CBasic::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
+
+BOOL CBasic::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+	case VK_RETURN:
+	{
+		switch (::GetDlgCtrlID(pMsg->hwnd)) {
+		default:
+			break;// never exist window (default -1) even nothing did
+		}
+	}
+	}
+	return TRUE;
+}

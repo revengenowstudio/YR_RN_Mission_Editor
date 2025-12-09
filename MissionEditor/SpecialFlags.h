@@ -38,38 +38,20 @@ public:
 	CSpecialFlags(CWnd* pParent = NULL);   // Standardkonstruktor
 
 	// Dialogfelddaten
-		//{{AFX_DATA(CSpecialFlags)
 	enum { IDD = IDD_SPECIALFLAGS };
-	CMyComboBox	m_Visceroids;
-	CMyComboBox	m_TiberiumSpreads;
-	CMyComboBox	m_TiberiumGrows;
-	CMyComboBox	m_TiberiumExplosive;
-	CMyComboBox	m_Meteorites;
-	CMyComboBox	m_MCVDeploy;
-	CMyComboBox	m_IonStorms;
-	CMyComboBox	m_InitialVeteran;
-	CMyComboBox	m_Inert;
-	CMyComboBox	m_HarvesterImmune;
-	CMyComboBox	m_FogOfWar;
-	CMyComboBox	m_FixedAlliance;
-	CMyComboBox	m_DestroyableBridges;
-	//}}AFX_DATA
-
 
 // Überschreibungen
 	// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
-	//{{AFX_VIRTUAL(CSpecialFlags)
 protected:
 	virtual BOOL OnInitDialog() override;
 	virtual void DoDataExchange(CDataExchange* pDX)override;    // DDX/DDV-Unterstützung
-	//}}AFX_VIRTUAL
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 // Implementierung
-protected:
 	void TranslateUI();
+	BOOL onMessageKeyDown(MSG* pMsg);
 
 	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CSpecialFlags)
 	afx_msg void OnEditchangeTiberiumgrows();
 	afx_msg void OnEditchangeTiberiumspreads();
 	afx_msg void OnEditchangeTiberiumexplosive();
@@ -83,8 +65,22 @@ protected:
 	afx_msg void OnEditchangeIonstorms();
 	afx_msg void OnEditchangeMeteorites();
 	afx_msg void OnEditchangeVisceroids();
-	//}}AFX_MSG
+
 	DECLARE_MESSAGE_MAP()
+
+	CMyComboBox	m_Visceroids;
+	CMyComboBox	m_TiberiumSpreads;
+	CMyComboBox	m_TiberiumGrows;
+	CMyComboBox	m_TiberiumExplosive;
+	CMyComboBox	m_Meteorites;
+	CMyComboBox	m_MCVDeploy;
+	CMyComboBox	m_IonStorms;
+	CMyComboBox	m_InitialVeteran;
+	CMyComboBox	m_Inert;
+	CMyComboBox	m_HarvesterImmune;
+	CMyComboBox	m_FogOfWar;
+	CMyComboBox	m_FixedAlliance;
+	CMyComboBox	m_DestroyableBridges;
 };
 
 //{{AFX_INSERT_LOCATION}}
