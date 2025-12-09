@@ -40,7 +40,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_BN_CLICKED(IDC_TRGR_NEW_ACTION, onNewAction)
     ON_BN_CLICKED(IDC_TRGR_DELETE_ACTION, onDeleteAction)
     ON_BN_CLICKED(IDC_TRGR_CLONE_ACTION, onCloneAction)
-    ON_CBN_SELCHANGE(IDC_TRGR_ATTACHED_TRIGGER, OnCbnSelchangeTrgrAttachedTrigger)
+    ON_CBN_EDITCHANGE(IDC_TRGR_ATTACHED_TRIGGER, onEditAttachedTrigger)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
@@ -1260,7 +1260,7 @@ void CTriggerEditorAllDlg::onDeleteAction()
     }
 }
 
-void CTriggerEditorAllDlg::OnCbnSelchangeTrgrAttachedTrigger()
+void CTriggerEditorAllDlg::onEditAttachedTrigger()
 {
     if (m_currentTrigger.IsEmpty()) {
         return;
@@ -1270,16 +1270,12 @@ void CTriggerEditorAllDlg::OnCbnSelchangeTrgrAttachedTrigger()
         return;
     }
 
-    CString lastId, triggerId;
-    m_nextTrigger.GetWindowText(lastId);
-    TruncSpace(lastId);
-
-    m_nextTrigger.GetLBText(curSel, triggerId);
+    CString triggerId;
+    m_nextTrigger.GetWindowText(triggerId);
     TruncSpace(triggerId);
 
     auto& db = TriggerDatabase::Instance();
     if (triggerId != "<none>" && !db.Exists(triggerId)) {
-        m_nextTrigger.SetWindowText(lastId);
         MessageBox(TranslateStringACP("TriggerOptionInvalidID"), TranslateStringACP("Error"));
         return;
     }
