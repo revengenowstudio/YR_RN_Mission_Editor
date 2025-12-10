@@ -2030,29 +2030,6 @@ void CLoading::SetImageData(unsigned char* pBuffer, PICDATA& pData, const int Fu
 	pData.bHouseColor = true;
 }
 
-void CLoading::LoadBuildingSubGraphic(const CString& subkey, const CIniFileSection& artSection, BOOL bAlwaysSetChar, char theat, HMIXFILE hShpMix, SHPHEADER& shp_h, BYTE*& shp)
-{
-	CString subname = artSection.GetString(subkey);
-	if (subname.GetLength() > 0) {
-		auto res = FindUnitShp(subname, theat, artSection);
-		/*CString subfilename = subname + ".shp";
-
-		if (isTrue(artSection.GetValueByName("NewTheater")) || bAlwaysSetChar || subfilename.GetAt(0) == 'G' || subfilename.GetAt(0) == 'N' || subfilename.GetAt(0) == 'Y' || subfilename.GetAt(0) == 'C')
-		{
-			auto subfilename_theat = subfilename;
-			subfilename_theat.SetAt(1, theat);
-			if (FSunPackLib::XCC_DoesFileExist(subfilename_theat, hShpMix))
-				subfilename = subfilename_theat;
-		}*/
-
-		if (res && FSunPackLib::XCC_DoesFileExist(res->filename, res->mixfile)) {
-			FSunPackLib::SetCurrentSHP(res->filename, res->mixfile);
-			FSunPackLib::XCC_GetSHPHeader(&shp_h);
-			FSunPackLib::LoadSHPImage(0, 1, &shp);
-
-		}
-	}
-}
 #endif
 
 
