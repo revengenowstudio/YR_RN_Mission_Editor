@@ -1691,13 +1691,13 @@ void CLoading::LoadInfantry(const CString& ID)
 	int nMix = this->FindFileInMix(FileName);
 	if (FSunPackLib::XCC_DoesFileExist(FileName, nMix)) {
 		SHPHEADER header;
-		unsigned char* FramesBuffers = nullptr;
 		FSunPackLib::SetCurrentSHP(FileName, nMix);
 		FSunPackLib::XCC_GetSHPHeader(&header);
 		for (int i = 0; i < 8; ++i) {
 			if (i >= header.c_images) {
 				continue;
 			}
+			unsigned char* FramesBuffers = nullptr;
 			FSunPackLib::LoadSHPImage(framesToRead[i], 1, &FramesBuffers);
 			CString DictName;
 			DictName.Format("%s%d", ImageID, i);
@@ -1763,7 +1763,6 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 		int nMix = this->FindFileInMix(FileName);
 		if (FSunPackLib::XCC_DoesFileExist(FileName, nMix)) {
 			SHPHEADER header;
-			unsigned char* FramesBuffers[2] = { nullptr };
 			FSunPackLib::SetCurrentSHP(FileName, nMix);
 			FSunPackLib::XCC_GetSHPHeader(&header);
 
@@ -1771,6 +1770,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 			const int nWalkFrames = art.GetInteger(ArtID, "WalkFrames", 1);
 
 			for (int i = 0; i < 8; ++i) {
+				unsigned char* FramesBuffers[2] = { nullptr };
 				if (!FSunPackLib::LoadSHPImage(framesToRead[i], 1, &FramesBuffers[0])) {
 					break;
 				}
@@ -3294,8 +3294,7 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, const int iOvrlNum
 
 
 			// create an array of pointers to directdraw surfaces
-			lpT = new(BYTE * [maxPics]);
-			memset(lpT, 0, sizeof(BYTE) * maxPics);
+			std::vector<BYTE*> lpT(maxPics);
 
 			// if tiberium, change color
 			BOOL bIsBlueTib = FALSE;
@@ -3336,7 +3335,7 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, const int iOvrlNum
 			}
 #endif
 
-			FSunPackLib::LoadSHPImage(0, maxPics, lpT);
+			FSunPackLib::LoadSHPImage(0, maxPics, lpT.data());
 
 #ifndef RA2_MODE
 			if (istiberium)
@@ -3415,9 +3414,6 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, const int iOvrlNum
 					picData = p;
 				}
 			}
-
-
-			delete[] lpT;
 		}
 
 	}
