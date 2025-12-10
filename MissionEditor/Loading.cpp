@@ -1716,10 +1716,10 @@ void CLoading::LoadTerrainOrSmudge(const CString& ID)
 	int nMix = this->FindFileInMix(FileName);
 	if (FSunPackLib::XCC_DoesFileExist(FileName, nMix)) {
 		SHPHEADER header;
-		unsigned char* FramesBuffers[1];
+		unsigned char* FramesBuffers = nullptr;
 		FSunPackLib::SetCurrentSHP(FileName, nMix);
 		FSunPackLib::XCC_GetSHPHeader(&header);
-		FSunPackLib::LoadSHPImage(0, 1, &FramesBuffers[0]);
+		FSunPackLib::LoadSHPImage(0, 1, &FramesBuffers);
 		CString DictName;
 		DictName.Format("%s%d", ImageID.operator LPCSTR(), 0);
 		CString PaletteName;
@@ -1730,7 +1730,7 @@ void CLoading::LoadTerrainOrSmudge(const CString& ID)
 			PaletteName = art.GetStringOr(ArtID, "Palette", "iso");
 			GetFullPaletteName(PaletteName, cur_theat);
 		}
-		SetImageData(FramesBuffers[0], DictName, header.cx, header.cy, m_palettes.LoadPalette(PaletteName));
+		SetImageData(FramesBuffers, DictName, header.cx, header.cy, m_palettes.LoadPalette(PaletteName));
 	}
 }
 
@@ -1763,7 +1763,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 		int nMix = this->FindFileInMix(FileName);
 		if (FSunPackLib::XCC_DoesFileExist(FileName, nMix)) {
 			SHPHEADER header;
-			unsigned char* FramesBuffers[2];
+			unsigned char* FramesBuffers[2] = { nullptr };
 			FSunPackLib::SetCurrentSHP(FileName, nMix);
 			FSunPackLib::XCC_GetSHPHeader(&header);
 
