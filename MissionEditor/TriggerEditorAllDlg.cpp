@@ -449,12 +449,10 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
     }
 
     TriggerDatabase::Instance().DeleteAt(curTrigger);
-    if (TriggerDatabase::Instance().Size() == 0) {
-        m_triggerType.SetWindowText("");
-        m_triggerType.SetCurSel(-1);
-    }
+    m_triggerType.DeleteString(sel);
+    m_triggerType.SetCurSel(sel - 1); // 0 will be -1, means no selection
 
-    theApp.MainWindow()->UpdateDialogs(TRUE);
+    onSelChangeTrigger();
 }
 
 void CTriggerEditorAllDlg::onPlaceOnMap()
