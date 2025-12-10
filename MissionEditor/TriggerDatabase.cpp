@@ -11,19 +11,6 @@ const TriggerInstance TriggerInstance::Default {
 };
 
 template<>
-ObjectDatabase<TriggerInstance>& ObjectDatabase<TriggerInstance>::Instance()
-{
-    static ObjectDatabase inst;
-    return inst;
-}
-template<>
-ObjectDatabase<TagInstance>& ObjectDatabase<TagInstance>::Instance()
-{
-    static ObjectDatabase inst;
-    return inst;
-}
-
-template<>
 void ObjectDatabase<TriggerInstance>::LoadFrom(const CIniFile& ini, std::ostream& err)
 {
     Clear();
@@ -33,6 +20,13 @@ void ObjectDatabase<TriggerInstance>::LoadFrom(const CIniFile& ini, std::ostream
     for (auto const& [id, opts] : triggerSec) {
         items.emplace_back(id, ini);
         lookupTable.try_emplace(id, items.size() - 1);
+    }
+
+    if (indexUpdateHandler) {
+        for (auto const& item : items) {
+            auto const& id = item.ID();
+            indexUpdateHandler(GetIndexByKey(id), id, DBOp::Add);
+        }
     }
 }
 
@@ -77,6 +71,14 @@ TriggerInstance::TriggerInstance(CString&& id, CString&& name, CString&& house) 
     this->Options().house = std::move(house);
 }
 
+void TriggerInstance::SetName(const CString& name)
+{
+    auto& innerName = Options().name;
+    DB::Triggers.OnUpdateIndex(innerName, id, DBOp::Delete);
+    Options().name = name;
+    DB::Triggers.OnUpdateIndex(name, id, DBOp::Add);
+}
+
 // ---------------------------- TagDatabase --------------------------
 template<>
 void ObjectDatabase<TagInstance>::LoadFrom(const CIniFile& ini, std::ostream& err)
@@ -99,5 +101,29 @@ void ObjectDatabase<TagInstance>::SaveInto(CIniFile& ini, std::ostream& err)
 
     for (auto const& tag : items) {
         tagSec.SetString(tag.id, tag.Serialize());
+    }
+}
+
+// This is a name - id reverse mapping
+// e.g.
+// - Print String (0000000004)
+// - Print String (0000000005)
+// - Team A Ready To Move (0000000006)
+// - Team B Ready To Move (0000000002)
+// so the Idx here is Trigger's name, while ID is the primK
+void TriggerDatabase::OnUpdateIndex(const CString& idx, const CString& primK, const DBOp op)
+{
+    if (op == DBOp::Add) {
+        customIndexTable.emplace(idx, primK);
+        return;
+    }
+    // delete
+    auto [it, last] = customIndexTable.equal_range(idx);
+    for (; it != last;) {
+        if (it->second == primK) {
+            it = customIndexTable.erase(it);
+            break; // no duplicated elements allowed right ?
+        }
+        ++it;
     }
 }

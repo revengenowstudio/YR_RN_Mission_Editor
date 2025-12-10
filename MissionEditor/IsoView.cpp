@@ -2872,7 +2872,7 @@ void CIsoView::OnLButtonDown(UINT nFlags, CPoint point)
 			Map->GetCelltagData(n, &tag, &dwPos);
 
 			CCellTag dlg(this);
-			auto const& tagData = TagDatabase::Instance().Lookup(tag);
+			auto const& tagData = DB::Tags.Lookup(tag);
 			dlg.m_tag.Format("%s (%s)", tagData.id, tagData.name);
 
 			if (dlg.DoModal() == IDCANCEL) {
@@ -4124,7 +4124,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 			statusbar += ", Tag: ";
 			statusbar += techno.tag;
 			statusbar += ' ';
-			auto const& tagData = TagDatabase::Instance().Lookup(techno.tag);
+			auto const& tagData = DB::Tags.Lookup(techno.tag);
 			statusbar += tagData.name;
 		}
 	}
@@ -4161,7 +4161,7 @@ void CIsoView::UpdateStatusBar(int x, int y)
 		Map->GetCelltagData(n, &tagId, &pos);
 
 		if (tagId != "None" && !tagId.IsEmpty()) {
-			auto const& tagData = TagDatabase::Instance().Lookup(tagId);
+			auto const& tagData = DB::Tags.Lookup(tagId);
 			name = tagData.name;
 		}
 

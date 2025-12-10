@@ -573,7 +573,7 @@ void CTeamTypes::OnSelchangeTeamtypes()
 	m_Suicide = sec.GetBool("Suicide");
 
 	auto const& tagId = sec.GetString("Tag");
-	auto& tagDb = TagDatabase::Instance();
+	auto& tagDb = DB::Tags;
 	if (!tagId.IsEmpty()) {
 		m_Tag = tagId;
 		auto const& tagData = tagDb.Lookup( tagId);

@@ -994,12 +994,12 @@ void CUserScriptsDlg::OnOK()
 			auto const handleTag = params[4] != "false" && params[4] != "no";
 
 			if (handleTag) {
-				auto& newTag = TagDatabase::Instance().
-					Append(GetFreeID(), CString(newTrigger.Options().name));
+				auto& newTag = DB::Tags.
+					Append(GetFreeID(), CString(newTrigger.Options().Name()));
 				newTag.triggerId = ID_T;
 			}
 
-			TriggerDatabase::Instance().Append(std::move(newTrigger));
+			DB::Triggers.Append(std::move(newTrigger));
 			report += "Trigger " + GetParam(params[1], 2) + " added\r\n";
 
 			bUpdate = TRUE;
@@ -1497,7 +1497,7 @@ void CUserScriptsDlg::OnOK()
 			}
 			TagInstance newTag(ID_T, params[1]);
 			auto const tagName = newTag.name;
-			TagDatabase::Instance().
+			DB::Tags.
 				Append(std::move(newTag));
 
 			report += "Tag " + tagName + " added\r\n";

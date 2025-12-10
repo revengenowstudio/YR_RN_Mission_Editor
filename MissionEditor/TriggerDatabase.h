@@ -1,4 +1,6 @@
 #pragma once
+#include <concepts>
+#include <type_traits>
 #include "TriggerDef.h"
 #include "IniFile.h"
 
@@ -22,9 +24,7 @@ public:
     auto& Events() const { return events; }
     auto& Actions() const { return actions; }
 
-    void SetName(CString&& name) {
-        Options().name = std::move(name);
-    }
+    void SetName(const CString& name);
 
 private:
     CString id;
@@ -33,11 +33,21 @@ private:
     TriggerActions actions;
 };
 
+enum class DBOp
+{
+    Add,
+    Delete,
+};
+
+// primK points to unique primary key
+// while idx is the current focusing index
+using OnIndexUpdate = std::function<void(const CString& idx, const CString& primK, const DBOp op)>;
+
 template<typename TObject>
 class ObjectDatabase
 {
 public:
-    static ObjectDatabase& Instance();
+    using ObjectType = TObject;
 
     auto const Size() const { return items.size(); }
     auto& Nth(size_t slot) {
@@ -64,6 +74,17 @@ public:
     {
         items.clear();
         lookupTable.clear();
+    }
+
+    void SetIndexUpdateHandler(OnIndexUpdate&& handler)
+    {
+        indexUpdateHandler = std::move(handler);
+    }
+    virtual const CString GetIndexByKey(const CString& key) const
+    {
+        char buffer[0x40];
+        sprintf_s(buffer, "%s GetIndexByKey not implemented", typeid(this).name());
+        throw std::runtime_error(buffer);
     }
 
     ObjectDatabase() = default;
@@ -103,7 +124,8 @@ public:
         return items.end();
     }
 
-private:
+protected:
+    OnIndexUpdate indexUpdateHandler;
     std::vector<TObject> items;
     std::map<CString, size_t> lookupTable; // ID - index of items
 };
@@ -130,22 +152,31 @@ TObject& ObjectDatabase<TObject>::InsertAt(size_t idx, CString&& key)
     for (auto it = lookupTable.upper_bound(key); it != lookupTable.end(); ++it) {
         it->second++;
     }
+    if (indexUpdateHandler) {
+        indexUpdateHandler(this->GetIndexByKey(key), key, DBOp::Add);
+    }
     return items.at(idx);
 }
 
 template<typename TObject>
 void ObjectDatabase<TObject>::Append(TObject&& inst)
 {
-    lookupTable.insert_or_assign(inst.ID(), items.size());
+    auto const [it, _ ] = lookupTable.insert_or_assign(inst.ID(), items.size());
     items.emplace_back(std::move(inst));
+    if (indexUpdateHandler) {
+        indexUpdateHandler(this->GetIndexByKey(it->first), it->first, DBOp::Add);
+    }
 }
 
 template<typename TObject>
 TObject& ObjectDatabase<TObject>::Append(const CString& id, CString&& name)
 {
-    lookupTable.insert_or_assign(id, items.size());
+    auto const [it, _] = lookupTable.insert_or_assign(id, items.size());
     auto& ret = items.emplace_back(id);
-    ret.SetName(std::move(name));
+    ret.SetName(std::move(name)); // index update happens inside
+    //if (indexUpdateHandler) {
+    //    indexUpdateHandler(this->GetIndexByKey(it->first), it->first, DBOp::Add);
+    //}
     return ret;
 }
 
@@ -155,6 +186,9 @@ void ObjectDatabase<TObject>::DeleteAt(size_t idx)
     ASSERT(idx < items.size());
     // delete from record first;
     auto const& trigger = items.at(idx);
+    if (indexUpdateHandler) {
+        indexUpdateHandler(this->GetIndexByKey(trigger.ID()), trigger.ID(), DBOp::Delete);
+    }
     auto const eraseCount = lookupTable.erase(trigger.ID());
     ASSERT(eraseCount == 1);
     items.erase(items.begin() + idx);
@@ -180,10 +214,53 @@ inline bool ObjectDatabase<TObject>::DeleteByID(const CString& id)
 
 class TriggerDatabase : public ObjectDatabase<TriggerInstance>
 {
+    using NameIndexMap = std::multimap<CString, CString>;
+public:
+    TriggerDatabase() : ObjectDatabase<TriggerInstance>()
+    { 
+        this->SetIndexUpdateHandler([this](const CString& idx, const CString& primK, const DBOp op) {
+            this->OnUpdateIndex(idx, primK, op);
+        });
+    }
 
+    const NameIndexMap& CustomIndex() const
+    {
+        return customIndexTable;
+    }
+    virtual const CString GetIndexByKey(const CString& key) const override
+    {
+        return this->Lookup(key).Options().Name();
+    }
+
+    void OnUpdateIndex(const CString& idx, const CString& primK, const DBOp op);
+private:
+
+    NameIndexMap customIndexTable; // anything mapping to ID. 
+    // Will consider refactor to several slots vector, for multiple customized index tables
 };
 
 class TagDatabase : public ObjectDatabase<TagInstance>
 {
 
 };
+
+template<typename T>
+concept is_database_type = requires {
+    typename T::ObjectType;
+} && std::derived_from<T, ObjectDatabase<typename T::ObjectType>>;
+
+
+class DatabaseManager {
+public:
+    template<typename T>
+        requires is_database_type<T>
+    static inline T& Instance = []() -> T& {
+        static T instance;
+        return instance;
+    }();
+};
+
+namespace DB {
+    inline auto& Triggers = DatabaseManager::Instance<TriggerDatabase>;
+    inline auto& Tags = DatabaseManager::Instance<TagDatabase>;
+}
