@@ -387,8 +387,10 @@ void CTriggerEditorAllDlg::onAddTrigger(TriggerInstance&& trigger)
     // means first time open, try load trigger types
     resetTriggerTypeList();
 
+    auto const triggerIdx = TriggerDatabase::Instance().FindIndex(id);
+    // m_triggerType gets reordered all the time, so we need to locate correct DB index
     for (auto i = 0; i < m_triggerType.GetCount(); i++) {
-        if (m_triggerType.GetItemData(i) == TriggerDatabase::Instance().FindIndex(id)) {
+        if (m_triggerType.GetItemData(i) == triggerIdx) {
             m_triggerType.SetCurSel(i);
             break;
         }
