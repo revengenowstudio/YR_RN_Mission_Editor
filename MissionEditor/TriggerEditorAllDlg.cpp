@@ -386,8 +386,13 @@ void CTriggerEditorAllDlg::onAddTrigger(TriggerInstance&& trigger)
     for (auto i = 0; i < m_triggerType.GetCount(); i++) {
         if (m_triggerType.GetItemData(i) == TriggerDatabase::Instance().FindIndex(id)) {
             m_triggerType.SetCurSel(i);
+            break;
         }
     }
+    m_eventTypes.SetCurSel(CB_ERR);
+    m_actionTypes.SetCurSel(CB_ERR);
+    m_eventTypes.SetWindowText("");
+    m_actionTypes.SetWindowText("");
     onSelChangeTrigger();
 }
 
