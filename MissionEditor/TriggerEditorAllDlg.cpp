@@ -386,6 +386,7 @@ void CTriggerEditorAllDlg::onAddTrigger(TriggerInstance&& trigger)
     clear();
     // means first time open, try load trigger types
     resetTriggerTypeList();
+    updateTriggerOptions();
 
     auto const triggerIdx = TriggerDatabase::Instance().FindIndex(id);
     // m_triggerType gets reordered all the time, so we need to locate correct DB index
@@ -609,7 +610,7 @@ void CTriggerEditorAllDlg::onEditChangeNextTrigger()
     if (newTrigger.Find(",", 0) >= 0) {
         newTrigger.SetAt(newTrigger.Find(",", 0), 0);
     }
-
+    // TODO: validate newTrigger, to avoid loop
     auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
     trigger.Options().nextTrigger = newTrigger;
 }
