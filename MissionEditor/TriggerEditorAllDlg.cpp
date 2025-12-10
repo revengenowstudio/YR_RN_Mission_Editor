@@ -449,7 +449,10 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
     }
 
     TriggerDatabase::Instance().DeleteAt(curTrigger);
-    m_triggerType.DeleteString(sel);
+    
+    clear();
+    resetTriggerTypeList();
+
     int nextSel = sel - 1; // 0 will be -1, means no selection
     if (nextSel < 0 && m_triggerType.GetCount() > 0) { // still having item left, choose first
         nextSel = 0;
@@ -495,8 +498,11 @@ void CTriggerEditorAllDlg::onSelChangeTrigger()
         clear();
         return;
     }
-    int curInd = m_triggerType.GetItemData(curSel);
-    m_currentTrigger = TriggerDatabase::Instance().Nth(curInd).ID();
+    CString triggerId;
+    m_triggerType.GetLBText(curSel, triggerId);
+    TruncSpace(triggerId);
+    m_currentTrigger = triggerId;
+    //errstream << "onSelChangeTrigger - triggerId: " << triggerId;
 
     if (m_currentTrigger.IsEmpty()) {
         return;
