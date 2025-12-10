@@ -59,8 +59,6 @@ extern BOOL bOptionsStartup;
 // the current file beeing edited.
 extern CString currentMapFile;
 
-// all the pictures shown in the mapview
-extern map<CString, PICDATA> pics;
 extern TILEDATA* t_tiledata;
 extern TILEDATA* s_tiledata;
 extern TILEDATA* u_tiledata;

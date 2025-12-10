@@ -124,7 +124,7 @@ public:
 	void VXL_Reset();
 	BOOL LoadUnitGraphic(const CString& lpUnittype);
 	void LoadBuildingSubGraphic(const CString& subkey, const CIniFileSection& artSection, BOOL bAlwaysSetChar, char theat, HMIXFILE hShpMix, SHPHEADER& shp_h, BYTE*& shp);
-	void LoadOverlayGraphic(const CString& lpOvrlName, int iOvrlNum);
+	void LoadOverlayGraphic(const CString& lpOvrlName, const int iOvrlNum);
 	void InitVoxelNormalTables();
 	std::optional<FindShpResult> FindUnitShp(const CString& image, char preferred_theat, const CIniFileSection& artSection);
 	char cur_theat;

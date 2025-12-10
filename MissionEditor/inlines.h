@@ -26,6 +26,7 @@
 #include "mapdata.h"
 #include "variables.h"
 #include "ovrlinline.h"
+#include "GlobalObjectPool.h"
 #include <string>
 #include <vector>
 #include <ranges>
@@ -59,8 +60,10 @@ inline CString GetUnitPictureFilename(const CString& artSectionId, DWORD dwPicIn
 
 	// store differently for each type even they shares same image,
 	// because they can have different components, e.g. turret image
-	if (pics.find(artSectionId + n) != pics.end()) {
-		return artSectionId + n;
+	auto& images = GlobalObjectPool::Instance().Images();
+	auto existingId = artSectionId + n;
+	if (images.Read(existingId)) {
+		return existingId;
 	}
 	auto artname = artSectionId;
 	auto const& shapeName = art.GetString(artSectionId, "Image");
@@ -76,13 +79,13 @@ inline CString GetUnitPictureFilename(const CString& artSectionId, DWORD dwPicIn
 	if (art.GetBool(artname, "NewTheater") && !art.GetBool(artname, "DemandLoad")) {
 		filename.SetAt(1, 'T');
 	}
-
-	if (pics.find(artname + n) != pics.end()) {
-		return artname + n;
+	existingId = artname + n;
+	if (images.Read(existingId)) {
+		return existingId;
 	}
-
-	if (pics.find(artname + ".bmp") != pics.end()) { // since June, 15th (Matze): Only use BMP if no SHP/VXL exists
-		return artname + ".bmp";
+	existingId = artname + ".bmp";
+	if (images.Read(existingId)) { // since June, 15th (Matze): Only use BMP if no SHP/VXL exists
+		return existingId;
 	}
 
 	return {};

@@ -263,7 +263,7 @@ building infos
 */
 struct BUILDING_INFO
 {
-	PICDATA pic[8];
+	PICDATA pic[8]; // pic data are read only reference
 	int pic_count;
 	BYTE w;
 	BYTE h;
