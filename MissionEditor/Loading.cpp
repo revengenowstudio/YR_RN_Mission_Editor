@@ -706,20 +706,24 @@ void CLoading::InitPics(CProgressCtrl* prog)
 				}
 
 				try {
-					pics[(LPCTSTR)ff.GetFileName()].pic = BitmapToSurface(theApp.MainWindow()->m_view.m_isoview->dd, *BitmapFromFile(ff.GetFilePath())).Detach();
-
+					auto pNewPic = BitmapToSurface(theApp.MainWindow()->m_view.m_isoview->dd, *BitmapFromFile(ff.GetFilePath())).Detach();
+					auto& picData = pics[ff.GetFileName()];
+					auto pOldPic = std::exchange(picData.pic, pNewPic);
+					if (pOldPic) {
+						reinterpret_cast<IDirectDrawSurface7*>(pOldPic)->Release();
+					}
 					DDSURFACEDESC2 desc;
 					::memset(&desc, 0, sizeof(DDSURFACEDESC2));
 					desc.dwSize = sizeof(DDSURFACEDESC2);
 					desc.dwFlags = DDSD_HEIGHT | DDSD_WIDTH;
-					((LPDIRECTDRAWSURFACE7)pics[(LPCTSTR)ff.GetFileName()].pic)->GetSurfaceDesc(&desc);
-					pics[(LPCTSTR)ff.GetFileName()].wHeight = desc.dwHeight;
-					pics[(LPCTSTR)ff.GetFileName()].wWidth = desc.dwWidth;
-					pics[(LPCTSTR)ff.GetFileName()].wMaxWidth = desc.dwWidth;
-					pics[(LPCTSTR)ff.GetFileName()].wMaxHeight = desc.dwHeight;
-					pics[(LPCTSTR)ff.GetFileName()].bType = PICDATA_TYPE_BMP;
+					reinterpret_cast<LPDIRECTDRAWSURFACE7>(picData.pic)->GetSurfaceDesc(&desc);
+					picData.wHeight = desc.dwHeight;
+					picData.wWidth = desc.dwWidth;
+					picData.wMaxWidth = desc.dwWidth;
+					picData.wMaxHeight = desc.dwHeight;
+					picData.bType = PICDATA_TYPE_BMP;
 
-					FSunPackLib::SetColorKey(((LPDIRECTDRAWSURFACE7)(pics[(LPCTSTR)ff.GetFileName()].pic)), -1);
+					FSunPackLib::SetColorKey(reinterpret_cast<LPDIRECTDRAWSURFACE7>(pics[ff.GetFileName()].pic), -1);
 				} catch (const BitmapNotFound&) {
 				}
 			}
@@ -1966,10 +1970,10 @@ void CLoading::SetImageData(unsigned char* pBuffer, const CString& NameInDict, i
 void CLoading::SetImageData(unsigned char* pBuffer, PICDATA& pData, const int FullWidth, const int FullHeight, Palette* pPal, bool forceNoRemap)
 {
 	if (auto pPic = std::exchange(pData.pic, nullptr)) {
-		delete[](pPic);
+		delete(pPic);
 	}
 	if (auto pBorder = std::exchange(pData.vborder, nullptr)) {
-		delete[](pBorder);
+		delete(pBorder);
 	}
 
 	// Get available area
@@ -3596,8 +3600,12 @@ void CLoading::FreeTileSet()
 			for (e = 0; e < rept.wTileCount; e++) {
 #ifdef NOSURFACES
 				BYTE* curSur = rept.tiles[e].pic;
-				if (curSur) delete[] curSur;
-				if (rept.tiles[e].vborder) delete[] rept.tiles[e].vborder;
+				if (curSur) {
+					delete[] curSur;
+				}
+				if (rept.tiles[e].vborder) {
+					delete[] rept.tiles[e].vborder;
+				}
 #else
 				LPDIRECTDRAWSURFACE7 curSur = rept.tiles[e].pic;
 				if (curSur) curSur->Release();
@@ -3615,8 +3623,12 @@ void CLoading::FreeTileSet()
 		for (e = 0; e < (*tiledata)[i].wTileCount; e++) {
 #ifdef NOSURFACES
 			BYTE* curSur = (*tiledata)[i].tiles[e].pic;
-			if (curSur) delete[] curSur;
-			if ((*tiledata)[i].tiles[e].vborder) delete[](*tiledata)[i].tiles[e].vborder;
+			if (curSur) {
+				delete[] curSur;
+			}
+			if ((*tiledata)[i].tiles[e].vborder) {
+				delete[](*tiledata)[i].tiles[e].vborder;
+			}
 #else
 			LPDIRECTDRAWSURFACE7 curSur = (*tiledata)[i].tiles[e].pic;
 			if (curSur) curSur->Release();
@@ -3627,10 +3639,14 @@ void CLoading::FreeTileSet()
 		(*tiledata)[i].tiles = NULL;
 		(*tiledata)[i].wTileCount = 0;
 		(*tiledata)[i].bReplacementCount = 0;
-		if ((*tiledata)[i].lpReplacements) delete[](*tiledata)[i].lpReplacements;
+		if ((*tiledata)[i].lpReplacements) {
+			delete[](*tiledata)[i].lpReplacements;
+		}
 		(*tiledata)[i].lpReplacements = NULL;
 	}
-	if (*tiledata) delete[](*tiledata);
+	if (*tiledata) {
+		delete[](*tiledata);
+	}
 	(*tiledata) = NULL;
 	(*tiledata_count) = 0;
 }
@@ -3718,8 +3734,8 @@ void CLoading::FreeAll()
 		try {
 #ifdef NOSURFACES_OBJECTS			
 			if (i->second.bType == PICDATA_TYPE_BMP) {
-				if (i->second.pic != NULL) {
-					((LPDIRECTDRAWSURFACE7)i->second.pic)->Release();
+				if (auto pPic = std::exchange(i->second.pic, nullptr)) {
+					((LPDIRECTDRAWSURFACE7)pPic)->Release();
 				}
 			} else {
 				if (auto pPic = std::exchange(i->second.pic, nullptr)) {
@@ -4235,10 +4251,11 @@ void CLoading::PrepareUnitGraphic(const CString& lpUnittype)
 			p.bType = PICDATA_TYPE_SHP;
 			p.bTerrain = limited_to_theater;
 
-			auto const oldPicData = std::exchange(pics[image + ic], p);
-			if (oldPicData.pic) {
-				delete oldPicData.pic;
+			auto& picData = pics[image + ic];
+			if (picData.pic) {
+				delete picData.pic;
 			}
+			picData = p;
 		}
 	}
 	catch (...) {

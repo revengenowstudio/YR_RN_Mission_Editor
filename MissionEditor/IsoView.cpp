@@ -6178,7 +6178,7 @@ void CIsoView::DrawMap()
 #ifdef NOSURFACES
 				lpdsBack->Unlock(NULL);
 #endif
-				Blit((LPDIRECTDRAWSURFACE7)pics["CELLTAG"].pic, drawCoords.x - 1, drawCoords.y - 1);
+				Blit(reinterpret_cast<LPDIRECTDRAWSURFACE7>(pics["CELLTAG"].pic), drawCoords.x - 1, drawCoords.y - 1);
 
 #ifdef NOSURFACES				
 				ddsd = getDDDescBasic(false);
@@ -6239,7 +6239,7 @@ void CIsoView::DrawMap()
 
 	// delayed waypoint rendering
 	for (const auto& wp : m_waypoints_to_render) {
-		Blit((LPDIRECTDRAWSURFACE7)pics["FLAG"].pic, wp.drawx, wp.drawy);
+		Blit(reinterpret_cast<LPDIRECTDRAWSURFACE7>(pics["FLAG"].pic), wp.drawx, wp.drawy);
 	}
 
 	// map tool rendering
@@ -6271,7 +6271,8 @@ void CIsoView::DrawMap()
 
 	if (rscroll) {
 		const auto& sc = pics["SCROLLCURSOR"];
-		Blit((LPDIRECTDRAWSURFACE7)sc.pic, rclick_x * m_viewScale.x + r.left - sc.wWidth / 2, rclick_y * m_viewScale.y + r.top - sc.wHeight / 2);
+		Blit(reinterpret_cast<LPDIRECTDRAWSURFACE7>(sc.pic), 
+			rclick_x * m_viewScale.x + r.left - sc.wWidth / 2, rclick_y * m_viewScale.y + r.top - sc.wHeight / 2);
 	}
 
 	BlitBackbufferToHighRes(); // lpdsBackHighRes contains the same graphic, but scaled to the whole window

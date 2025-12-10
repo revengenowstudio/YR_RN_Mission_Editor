@@ -650,8 +650,8 @@ void CMapData::LoadMap(const CString& file)
 		try {
 #ifdef NOSURFACES_OBJECTS			
 			if (it->second.bType == PICDATA_TYPE_BMP) {
-				if (it->second.pic != NULL) {
-					((LPDIRECTDRAWSURFACE4)it->second.pic)->Release();
+				if (auto pPic = std::exchange(it->second.pic, nullptr)) {
+					((LPDIRECTDRAWSURFACE4)pPic)->Release();
 				}
 			} else {
 				if (auto pPic = std::exchange(it->second.pic, nullptr)) {
@@ -3988,8 +3988,8 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 		try {
 #ifdef NOSURFACES_OBJECTS			
 			if (it->second.bType == PICDATA_TYPE_BMP) {
-				if (it->second.pic != NULL) {
-					((LPDIRECTDRAWSURFACE4)it->second.pic)->Release();
+				if (auto pPic = std::exchange(it->second.pic, nullptr)) {
+					((LPDIRECTDRAWSURFACE4)pPic)->Release();
 				}
 			} else {
 				if (auto pPic = std::exchange(it->second.pic, nullptr)) {
