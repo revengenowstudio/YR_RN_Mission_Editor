@@ -419,7 +419,7 @@ void CTriggerEditorAllDlg::onCloneTrigger()
 
 void CTriggerEditorAllDlg::onDeleteTrigger()
 {
-    int sel = m_triggerType.GetCurSel();
+    const int sel = m_triggerType.GetCurSel();
     if (sel < 0) {
         return;
     }
@@ -450,7 +450,11 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
 
     TriggerDatabase::Instance().DeleteAt(curTrigger);
     m_triggerType.DeleteString(sel);
-    m_triggerType.SetCurSel(sel - 1); // 0 will be -1, means no selection
+    int nextSel = sel - 1; // 0 will be -1, means no selection
+    if (nextSel < 0 && m_triggerType.GetCount() > 0) { // still having item left, choose first
+        nextSel = 0;
+    }
+    m_triggerType.SetCurSel(nextSel);
 
     onSelChangeTrigger();
 }
