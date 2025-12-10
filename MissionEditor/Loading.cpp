@@ -1691,10 +1691,13 @@ void CLoading::LoadInfantry(const CString& ID)
 	int nMix = this->FindFileInMix(FileName);
 	if (FSunPackLib::XCC_DoesFileExist(FileName, nMix)) {
 		SHPHEADER header;
-		unsigned char* FramesBuffers;
+		unsigned char* FramesBuffers = nullptr;
 		FSunPackLib::SetCurrentSHP(FileName, nMix);
 		FSunPackLib::XCC_GetSHPHeader(&header);
 		for (int i = 0; i < 8; ++i) {
+			if (i >= header.c_images) {
+				continue;
+			}
 			FSunPackLib::LoadSHPImage(framesToRead[i], 1, &FramesBuffers);
 			CString DictName;
 			DictName.Format("%s%d", ImageID, i);
