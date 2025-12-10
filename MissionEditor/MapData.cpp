@@ -4637,13 +4637,17 @@ or if loading maps made with modified tilesets
 */
 BOOL CMapData::CheckMapPackData()
 {
-	int i;
-	for (i = 0; i < fielddata.size(); i++) {
+	for (int i = 0; i < fielddata.size(); i++) {
 		int gr = fielddata[i].wGround;
-		if (gr != 0xFFFF && gr >= (*tiledata_count))
+		if (gr != 0xFFFF && gr >= (*tiledata_count)) {
 			return FALSE;
-		if (gr == 0xFFFF) gr = 0;
-		if ((*tiledata)[gr].wTileCount <= fielddata[i].bSubTile) return FALSE;
+		}
+		if (gr == 0xFFFF) {
+			gr = 0;
+		}
+		if ((*tiledata)[gr].wTileCount <= fielddata[i].bSubTile) {
+			return FALSE;
+		}
 	}
 
 	return TRUE;

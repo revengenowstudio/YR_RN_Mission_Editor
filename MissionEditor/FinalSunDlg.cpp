@@ -634,37 +634,42 @@ void CFinalSunDlg::OnFileOpenmap()
 
 
 	BOOL bNoMapFile = FALSE;
-	if (!Map->CheckMapPackData()) {
-		int res = MessageBox("This map seems to be corrupt. Do you want to try repairing it? If you click cancel, a empty map will be created, if you click no, it will load the map as it is", "Corrupt", MB_YESNOCANCEL);
+	do {
+		if (Map->CheckMapPackData()) {
+			break;
+		}
+
+		int res = MessageBox(TranslateStringACP("MainDialogMapCorrupt"), TranslateStringACP("Corrupt"), 
+			MB_YESNOCANCEL);
 		if (res == IDCANCEL) {
 			Map->CreateMap(32, 32, THEATER0, 0);
 			bNoMapFile = TRUE;
-		} else {
-			if (res == IDYES) // try repair
-			{
-				int fielddata_size = Map->GetIsoSize() * Map->GetIsoSize();
-
-				int i;
-				for (i = 0; i < fielddata_size; i++) {
-					int gr = Map->GetFielddataAt(i)->wGround;
-					if (gr == 0xFFFF) gr = 0;
-
-					if (gr >= (*tiledata_count)) {
-						Map->SetTileAt(i, 0, 0);
-					} else {
-						if ((*tiledata)[gr].wTileCount <= Map->GetFielddataAt(i)->bSubTile) {
-							Map->SetTileAt(i, 0, 0);
-						}
-					}
-				}
-
-			}
+			break;
 		}
-	}
+		if (res != IDYES) {
+			break;
+		}
+		// try repair
+		int fielddata_size = Map->GetIsoSize() * Map->GetIsoSize();
+			for (auto i = 0; i < fielddata_size; i++) {
+				int gr = Map->GetFielddataAt(i)->wGround;
+				if (gr == 0xFFFF) {
+					gr = 0;
+					continue;
+				}
+				if (gr >= (*tiledata_count)) {
+					Map->SetTileAt(i, 0, 0);
+					continue;
+				}
+				if ((*tiledata)[gr].wTileCount <= Map->GetFielddataAt(i)->bSubTile) {
+					Map->SetTileAt(i, 0, 0);
+				}
+			}
+
+	} while (0);
 
 	if (!bNoMapFile) {
 		if (bLoadedFromMMX) {
-			//currentMapFile[0]=0;
 			currentMapFile = dlg.GetPathName();
 		} else {
 			currentMapFile = fileToOpen;
