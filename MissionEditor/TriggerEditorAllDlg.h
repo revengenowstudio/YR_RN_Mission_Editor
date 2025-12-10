@@ -74,7 +74,7 @@ protected:
     void updateTriggerOptions();
     void updateTriggerEvents();
     void updateTriggerActions();
-
+    void resetTriggerTypeList();
 
 
     CString m_currentTrigger;

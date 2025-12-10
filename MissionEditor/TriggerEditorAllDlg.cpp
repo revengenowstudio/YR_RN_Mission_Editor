@@ -169,7 +169,10 @@ void CTriggerEditorAllDlg::clear()
     while (m_house.DeleteString(0) != CB_ERR);
     while (m_nextTrigger.DeleteString(0) != CB_ERR);
     m_currentTrigger.Empty();
-
+    m_eventTypes.SetCurSel(CB_ERR);
+    m_actionTypes.SetCurSel(CB_ERR);
+    m_eventTypes.SetWindowText("");
+    m_actionTypes.SetWindowText("");
 }
 
 void CTriggerEditorAllDlg::oneTimeInit()
@@ -341,17 +344,8 @@ void CTriggerEditorAllDlg::updateTriggerActions()
     onSelChangeAction();
 }
 
-void CTriggerEditorAllDlg::UpdateDialog()
+void CTriggerEditorAllDlg::resetTriggerTypeList()
 {
-    clear();
-
-#if 0
-    if (m_currentTrigger.IsEmpty()) {
-        return;
-    }
-#endif
-
-    // means first time open, try load trigger types
     if (m_triggerType.GetCount() <= 0) {
         CIniFile& ini = Map->GetIniFile();
 
@@ -365,6 +359,13 @@ void CTriggerEditorAllDlg::UpdateDialog()
             m_currentTrigger = firstTypeId;
         }
     }
+}
+
+void CTriggerEditorAllDlg::UpdateDialog()
+{
+    clear();
+    // means first time open, try load trigger types
+    resetTriggerTypeList();
 
     updateTriggerOptions();
     updateTriggerEvents();
@@ -381,7 +382,9 @@ void CTriggerEditorAllDlg::onAddTrigger(TriggerInstance&& trigger)
     auto& tag = TagDatabase::Instance().Append(GetFreeID(), name + " Tag");
     tag.triggerId = id;
 
-    theApp.MainWindow()->UpdateDialogs(TRUE);
+    clear();
+    // means first time open, try load trigger types
+    resetTriggerTypeList();
 
     for (auto i = 0; i < m_triggerType.GetCount(); i++) {
         if (m_triggerType.GetItemData(i) == TriggerDatabase::Instance().FindIndex(id)) {
@@ -389,10 +392,6 @@ void CTriggerEditorAllDlg::onAddTrigger(TriggerInstance&& trigger)
             break;
         }
     }
-    m_eventTypes.SetCurSel(CB_ERR);
-    m_actionTypes.SetCurSel(CB_ERR);
-    m_eventTypes.SetWindowText("");
-    m_actionTypes.SetWindowText("");
     onSelChangeTrigger();
 }
 
