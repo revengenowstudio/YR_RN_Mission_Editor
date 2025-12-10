@@ -166,10 +166,14 @@ void CTriggerEditorAllDlg::clear()
 {
     while (m_triggerType.DeleteString(0) != CB_ERR);
     while (m_eventList.DeleteString(0) != CB_ERR);
+    while (m_actionList.DeleteString(0) != CB_ERR);
     while (m_house.DeleteString(0) != CB_ERR);
     while (m_nextTrigger.DeleteString(0) != CB_ERR);
     m_currentTrigger.Empty();
-
+    m_eventTypes.SetCurSel(CB_ERR);
+    m_actionTypes.SetCurSel(CB_ERR);
+    m_eventTypes.SetWindowText("");
+    m_actionTypes.SetWindowText("");
 }
 
 void CTriggerEditorAllDlg::oneTimeInit()
@@ -341,17 +345,8 @@ void CTriggerEditorAllDlg::updateTriggerActions()
     onSelChangeAction();
 }
 
-void CTriggerEditorAllDlg::UpdateDialog()
+void CTriggerEditorAllDlg::resetTriggerTypeList()
 {
-    clear();
-
-#if 0
-    if (m_currentTrigger.IsEmpty()) {
-        return;
-    }
-#endif
-
-    // means first time open, try load trigger types
     if (m_triggerType.GetCount() <= 0) {
         CIniFile& ini = Map->GetIniFile();
 
@@ -365,6 +360,13 @@ void CTriggerEditorAllDlg::UpdateDialog()
             m_currentTrigger = firstTypeId;
         }
     }
+}
+
+void CTriggerEditorAllDlg::UpdateDialog()
+{
+    clear();
+    // means first time open, try load trigger types
+    resetTriggerTypeList();
 
     updateTriggerOptions();
     updateTriggerEvents();
@@ -381,11 +383,17 @@ void CTriggerEditorAllDlg::onAddTrigger(TriggerInstance&& trigger)
     auto& tag = TagDatabase::Instance().Append(GetFreeID(), name + " Tag");
     tag.triggerId = id;
 
-    theApp.MainWindow()->UpdateDialogs(TRUE);
+    clear();
+    // means first time open, try load trigger types
+    resetTriggerTypeList();
+    updateTriggerOptions();
 
+    auto const triggerIdx = TriggerDatabase::Instance().FindIndex(id);
+    // m_triggerType gets reordered all the time, so we need to locate correct DB index
     for (auto i = 0; i < m_triggerType.GetCount(); i++) {
-        if (m_triggerType.GetItemData(i) == TriggerDatabase::Instance().FindIndex(id)) {
+        if (m_triggerType.GetItemData(i) == triggerIdx) {
             m_triggerType.SetCurSel(i);
+            break;
         }
     }
     onSelChangeTrigger();
@@ -415,7 +423,7 @@ void CTriggerEditorAllDlg::onCloneTrigger()
 
 void CTriggerEditorAllDlg::onDeleteTrigger()
 {
-    int sel = m_triggerType.GetCurSel();
+    const int sel = m_triggerType.GetCurSel();
     if (sel < 0) {
         return;
     }
@@ -445,12 +453,17 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
     }
 
     TriggerDatabase::Instance().DeleteAt(curTrigger);
-    if (TriggerDatabase::Instance().Size() == 0) {
-        m_triggerType.SetWindowText("");
-        m_triggerType.SetCurSel(-1);
-    }
+    
+    clear();
+    resetTriggerTypeList();
 
-    theApp.MainWindow()->UpdateDialogs(TRUE);
+    int nextSel = sel - 1; // 0 will be -1, means no selection
+    if (nextSel < 0 && m_triggerType.GetCount() > 0) { // still having item left, choose first
+        nextSel = 0;
+    }
+    m_triggerType.SetCurSel(nextSel);
+
+    onSelChangeTrigger();
 }
 
 void CTriggerEditorAllDlg::onPlaceOnMap()
@@ -489,8 +502,11 @@ void CTriggerEditorAllDlg::onSelChangeTrigger()
         clear();
         return;
     }
-    int curInd = m_triggerType.GetItemData(curSel);
-    m_currentTrigger = TriggerDatabase::Instance().Nth(curInd).ID();
+    CString triggerId;
+    m_triggerType.GetLBText(curSel, triggerId);
+    TruncSpace(triggerId);
+    m_currentTrigger = triggerId;
+    //errstream << "onSelChangeTrigger - triggerId: " << triggerId;
 
     if (m_currentTrigger.IsEmpty()) {
         return;
@@ -594,7 +610,7 @@ void CTriggerEditorAllDlg::onEditChangeNextTrigger()
     if (newTrigger.Find(",", 0) >= 0) {
         newTrigger.SetAt(newTrigger.Find(",", 0), 0);
     }
-
+    // TODO: validate newTrigger, to avoid loop
     auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
     trigger.Options().nextTrigger = newTrigger;
 }
