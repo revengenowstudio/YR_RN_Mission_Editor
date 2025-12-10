@@ -166,6 +166,7 @@ void CTriggerEditorAllDlg::clear()
 {
     while (m_triggerType.DeleteString(0) != CB_ERR);
     while (m_eventList.DeleteString(0) != CB_ERR);
+    while (m_actionList.DeleteString(0) != CB_ERR);
     while (m_house.DeleteString(0) != CB_ERR);
     while (m_nextTrigger.DeleteString(0) != CB_ERR);
     m_currentTrigger.Empty();
