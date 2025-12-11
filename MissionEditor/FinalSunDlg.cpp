@@ -133,7 +133,6 @@ BEGIN_MESSAGE_MAP(CFinalSunDlg, CDialog)
 	ON_COMMAND(ID_DEBUG_EXPORTMAPPACKNOSECTIONS, OnDebugExportmappacknosections)
 	ON_COMMAND(ID_DEBUG_EXPORTMAPPACK, OnDebugExportmappack)
 	ON_COMMAND(ID_FILE_NEW, OnFileNew)
-	ON_COMMAND(ID_HELP_TIPOFTHEDAY, OnHelpTipoftheday)
 	ON_COMMAND(ID_OPTIONS_SIMPLEVIEW, OnOptionsSimpleview)
 	ON_COMMAND(ID_OPTIONS_SHOWMINIMAP, OnOptionsShowminimap)
 	ON_COMMAND(ID_FILE_VALIDATEMAP, OnFileValidatemap)
@@ -382,14 +381,8 @@ BOOL CFinalSunDlg::OnInitDialog()
 	ShowWindow(SW_SHOWMAXIMIZED);
 	CDialog::BringWindowToTop();
 
-	if (strlen(currentMapFile) == 0) // no map file specified
-	{
-		// ok, let the user choose a map!
-		// hmm... no, don´t let him. we already have our tips dialog.
-		// OnFileOpenmap();
 
-		theApp.ShowTipAtStartup();
-	} else // yah, map file specified
+	if (strlen(currentMapFile) != 0)// yah, map file specified
 	{
 		CString str = GetLanguageStringACP("MainDialogCaption");
 		str += " (";
@@ -2172,13 +2165,6 @@ void CFinalSunDlg::UpdateStrings()
 	}
 
 	RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
-}
-
-void CFinalSunDlg::OnHelpTipoftheday()
-{
-	CTipDlg tip;
-	tip.DoModal();
-
 }
 
 void CFinalSunDlg::UnloadAll(bool ask)

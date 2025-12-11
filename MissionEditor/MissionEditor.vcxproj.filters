@@ -222,9 +222,6 @@
     <ClCompile Include="TileSetBrowserView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TipDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ToolSettingsBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -551,9 +548,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TileSetBrowserView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TipDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ToolSettingsBar.h">

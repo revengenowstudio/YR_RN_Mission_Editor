@@ -119,8 +119,6 @@ public:
 	UINT m_cf;
 	HACCEL m_hAccel;
 	void ParseCommandLine();
-	void ShowTipAtStartup(void);
-	void ShowTipOfTheDay(void);
 
 	const CString ProjectFilePath() const { return m_projectFilePath; }
 
