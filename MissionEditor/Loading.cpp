@@ -41,6 +41,7 @@
 #include <format>
 #include "IniMega.h"
 #include "VoxelDrawer.h"
+#include "GlobalObjectPool.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -640,11 +641,8 @@ void CLoading::VXL_Reset()
 }
 
 bool IsImageLoaded(const CString& ID) {
-	auto const it = pics.find(ID);
-	if (it == pics.end()) {
-		return false;
-	}
-	return it->second.pic != nullptr;
+	auto const pData = GlobalObjectPool::Instance().Images().Read(ID);
+	return pData && pData->pic != nullptr;
 }
 
 void GetFullPaletteName(CString& PaletteName, char theater)
@@ -696,7 +694,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 		if (ff.FindFile(bmps)) {
 
 			BOOL lastFile = FALSE;
-
+			auto& images = GlobalObjectPool::Instance().Images();
 			for (k = 0; k < m_bmp_count + 1; k++) {
 
 				if (ff.FindNextFile() == 0) {
@@ -707,7 +705,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 
 				try {
 					auto pNewPic = BitmapToSurface(theApp.MainWindow()->m_view.m_isoview->dd, *BitmapFromFile(ff.GetFilePath())).Detach();
-					auto& picData = pics[ff.GetFileName()];
+					auto& picData = images.Acquire(ff.GetFileName());
 					auto pOldPic = std::exchange(picData.pic, pNewPic);
 					if (pOldPic) {
 						reinterpret_cast<IDirectDrawSurface7*>(pOldPic)->Release();
@@ -723,7 +721,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 					picData.wMaxHeight = desc.dwHeight;
 					picData.bType = PICDATA_TYPE_BMP;
 
-					FSunPackLib::SetColorKey(reinterpret_cast<LPDIRECTDRAWSURFACE7>(pics[ff.GetFileName()].pic), -1);
+					FSunPackLib::SetColorKey(reinterpret_cast<LPDIRECTDRAWSURFACE7>(picData.pic), -1);
 				} catch (const BitmapNotFound&) {
 				}
 			}
@@ -735,7 +733,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	try {
 		auto pPic = BitmapToSurface(theApp.MainWindow()->m_view.m_isoview->dd, *BitmapFromResource(IDB_SCROLLCURSOR)).Detach();
 		// This is really dangerous to store a dangling ComPtr
-		auto& scrollCursorSlot = pics["SCROLLCURSOR"];
+		auto& scrollCursorSlot = GlobalObjectPool::Instance().Images().Acquire("SCROLLCURSOR");
 		auto pOldPic = std::exchange(scrollCursorSlot.pic, pPic);
 		if (pOldPic) {
 			reinterpret_cast<IDirectDrawSurface7*>(pOldPic)->Release();
@@ -757,7 +755,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 
 	try {
 		auto pPic = BitmapToSurface(theApp.MainWindow()->m_view.m_isoview->dd, *BitmapFromResource(IDB_CELLTAG)).Detach();
-		auto& cellTagSlot = pics["CELLTAG"];
+		auto& cellTagSlot = GlobalObjectPool::Instance().Images().Acquire("CELLTAG");
 		auto pOldPic = std::exchange(cellTagSlot.pic, pPic);
 		if (pOldPic) {
 			reinterpret_cast<IDirectDrawSurface7*>(pOldPic)->Release();
@@ -783,7 +781,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 
 	try {
 		auto pPic = BitmapToSurface(theApp.MainWindow()->m_view.m_isoview->dd, *BitmapFromResource(IDB_FLAG)).Detach();
-		auto& flagSlot = pics["FLAG"];
+		auto& flagSlot = GlobalObjectPool::Instance().Images().Acquire("FLAG");
 		auto pOldPic = std::exchange(flagSlot.pic, pPic);
 		if (pOldPic) {
 			reinterpret_cast<IDirectDrawSurface7*>(pOldPic)->Release();
@@ -816,7 +814,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	//auto ddptr = 
 	theApp.MainWindow()->m_view.m_isoview->dd->CreateSurface(&ddsd, &srf, 0);
 
-	auto& htileSlot = pics["HTILE"];
+	auto& htileSlot = GlobalObjectPool::Instance().Images().Acquire("HTILE");
 	auto const pOldHtSurf = reinterpret_cast<LPDIRECTDRAWSURFACE7>(std::exchange(htileSlot.pic, srf));
 	if (pOldHtSurf) {
 		pOldHtSurf->Release();
@@ -866,7 +864,7 @@ void CLoading::InitPics(CProgressCtrl* prog)
 	GlobalMemoryStatusEx(&ms);
 	cs = ms.ullAvailPhys + ms.ullAvailPageFile;
 
-	int piccount = pics.size();
+	int piccount = GlobalObjectPool::Instance().Images().Size();
 
 	errstream << "InitPics() finished and loaded " << piccount << " pictures. Available memory: " << cs << endl;
 	errstream.flush();
@@ -1693,10 +1691,13 @@ void CLoading::LoadInfantry(const CString& ID)
 	int nMix = this->FindFileInMix(FileName);
 	if (FSunPackLib::XCC_DoesFileExist(FileName, nMix)) {
 		SHPHEADER header;
-		unsigned char* FramesBuffers;
 		FSunPackLib::SetCurrentSHP(FileName, nMix);
 		FSunPackLib::XCC_GetSHPHeader(&header);
 		for (int i = 0; i < 8; ++i) {
+			if (i >= header.c_images) {
+				continue;
+			}
+			unsigned char* FramesBuffers = nullptr;
 			FSunPackLib::LoadSHPImage(framesToRead[i], 1, &FramesBuffers);
 			CString DictName;
 			DictName.Format("%s%d", ImageID, i);
@@ -1715,10 +1716,10 @@ void CLoading::LoadTerrainOrSmudge(const CString& ID)
 	int nMix = this->FindFileInMix(FileName);
 	if (FSunPackLib::XCC_DoesFileExist(FileName, nMix)) {
 		SHPHEADER header;
-		unsigned char* FramesBuffers[1];
+		unsigned char* FramesBuffers = nullptr;
 		FSunPackLib::SetCurrentSHP(FileName, nMix);
 		FSunPackLib::XCC_GetSHPHeader(&header);
-		FSunPackLib::LoadSHPImage(0, 1, &FramesBuffers[0]);
+		FSunPackLib::LoadSHPImage(0, 1, &FramesBuffers);
 		CString DictName;
 		DictName.Format("%s%d", ImageID.operator LPCSTR(), 0);
 		CString PaletteName;
@@ -1729,7 +1730,7 @@ void CLoading::LoadTerrainOrSmudge(const CString& ID)
 			PaletteName = art.GetStringOr(ArtID, "Palette", "iso");
 			GetFullPaletteName(PaletteName, cur_theat);
 		}
-		SetImageData(FramesBuffers[0], DictName, header.cx, header.cy, m_palettes.LoadPalette(PaletteName));
+		SetImageData(FramesBuffers, DictName, header.cx, header.cy, m_palettes.LoadPalette(PaletteName));
 	}
 }
 
@@ -1762,7 +1763,6 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 		int nMix = this->FindFileInMix(FileName);
 		if (FSunPackLib::XCC_DoesFileExist(FileName, nMix)) {
 			SHPHEADER header;
-			unsigned char* FramesBuffers[2];
 			FSunPackLib::SetCurrentSHP(FileName, nMix);
 			FSunPackLib::XCC_GetSHPHeader(&header);
 
@@ -1770,6 +1770,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 			const int nWalkFrames = art.GetInteger(ArtID, "WalkFrames", 1);
 
 			for (int i = 0; i < 8; ++i) {
+				unsigned char* FramesBuffers[2] = { nullptr };
 				if (!FSunPackLib::LoadSHPImage(framesToRead[i], 1, &FramesBuffers[0])) {
 					break;
 				}
@@ -1962,7 +1963,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 void CLoading::SetImageData(unsigned char* pBuffer, const CString& NameInDict, int FullWidth, int FullHeight, Palette* pPal, bool forceNoRemap)
 {
 	ASSERT(!NameInDict.IsEmpty());
-	auto& data = pics[NameInDict];
+	auto& data = GlobalObjectPool::Instance().Images().Acquire(NameInDict);
 
 	SetImageData(pBuffer, data, FullWidth, FullHeight, pPal, forceNoRemap);
 }
@@ -2029,29 +2030,6 @@ void CLoading::SetImageData(unsigned char* pBuffer, PICDATA& pData, const int Fu
 	pData.bHouseColor = true;
 }
 
-void CLoading::LoadBuildingSubGraphic(const CString& subkey, const CIniFileSection& artSection, BOOL bAlwaysSetChar, char theat, HMIXFILE hShpMix, SHPHEADER& shp_h, BYTE*& shp)
-{
-	CString subname = artSection.GetString(subkey);
-	if (subname.GetLength() > 0) {
-		auto res = FindUnitShp(subname, theat, artSection);
-		/*CString subfilename = subname + ".shp";
-
-		if (isTrue(artSection.GetValueByName("NewTheater")) || bAlwaysSetChar || subfilename.GetAt(0) == 'G' || subfilename.GetAt(0) == 'N' || subfilename.GetAt(0) == 'Y' || subfilename.GetAt(0) == 'C')
-		{
-			auto subfilename_theat = subfilename;
-			subfilename_theat.SetAt(1, theat);
-			if (FSunPackLib::XCC_DoesFileExist(subfilename_theat, hShpMix))
-				subfilename = subfilename_theat;
-		}*/
-
-		if (res && FSunPackLib::XCC_DoesFileExist(res->filename, res->mixfile)) {
-			FSunPackLib::SetCurrentSHP(res->filename, res->mixfile);
-			FSunPackLib::XCC_GetSHPHeader(&shp_h);
-			FSunPackLib::LoadSHPImage(0, 1, &shp);
-
-		}
-	}
-}
 #endif
 
 
@@ -3114,16 +3092,13 @@ BOOL CLoading::LoadTile(LPCSTR lpFilename, HMIXFILE hOwner, HTSPALETTE hPalette,
 #endif
 
 #ifdef NOSURFACES_OBJECTS // palettized
-void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
+void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, const int iOvrlNum)
 {
 	last_succeeded_operation = 11;
 
 	SHPHEADER head;
 	char theat = cur_theat;
 	BYTE** lpT = NULL;
-
-	char OvrlID[50];
-	itoa(iOvrlNum, OvrlID, 10);
 
 	HTSPALETTE hPalette = m_palettes.m_hPalIsoTemp;
 	if (cur_theat == 'T') {
@@ -3319,8 +3294,7 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 
 
 			// create an array of pointers to directdraw surfaces
-			lpT = new(BYTE * [maxPics]);
-			memset(lpT, 0, sizeof(BYTE) * maxPics);
+			std::vector<BYTE*> lpT(maxPics);
 
 			// if tiberium, change color
 			BOOL bIsBlueTib = FALSE;
@@ -3361,14 +3335,14 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 			}
 #endif
 
-			FSunPackLib::LoadSHPImage(0, maxPics, lpT);
+			FSunPackLib::LoadSHPImage(0, maxPics, lpT.data());
 
 #ifndef RA2_MODE
 			if (istiberium)
 				for (i = 0; i < 16; i++)
 					FSunPackLib::SetTSPaletteEntry(hPalette, 0x10 + i, &rgbOld[i], NULL);
 #endif
-
+			CString overlayImageId;
 			for (i = 0; i < maxPics; i++) {
 				SHPIMAGEHEADER imghead;
 				FSunPackLib::XCC_GetSHPImageHeader(i, &imghead);
@@ -3432,25 +3406,24 @@ void CLoading::LoadOverlayGraphic(const CString& lpOvrlName_, int iOvrlNum)
 					p.wMaxHeight = head.cy;
 					p.bType = PICDATA_TYPE_SHP;
 
-
-					pics[(CString)"OVRL" + OvrlID + "_" + ic] = p;
+					overlayImageId.Format("OVRL%d_%d", iOvrlNum, i);
+					auto& picData = GlobalObjectPool::Instance().Images().Acquire(overlayImageId);
+					if (auto pPic = picData.pic) {
+						delete(pPic);
+					}
+					picData = p;
 				}
 			}
-
-
-			delete[] lpT;
 		}
 
 	}
 
-	int i;
-	for (i = 0; i < 0xFF; i++) {
-		char ic[50];
-		itoa(i, ic, 10);
-
-		pics[(CString)"OVRL" + OvrlID + "_" + ic].bTried = true;
+	CString overlayImageId;
+	for (auto i = 0; i < 0xFF; i++) {
+		overlayImageId.Format("OVRL%d_%d", iOvrlNum, i);
+		auto& picData = GlobalObjectPool::Instance().Images().Acquire(overlayImageId);
+		picData.bTried = true;
 	}
-
 
 }
 #endif
@@ -3729,43 +3702,7 @@ void CLoading::FreeAll()
 		tiledata_count = &d_tiledata_count;
 	}
 
-	map<CString, PICDATA>::iterator i = pics.begin();
-	for (int e = 0; e < pics.size(); e++) {
-		try {
-#ifdef NOSURFACES_OBJECTS			
-			if (i->second.bType == PICDATA_TYPE_BMP) {
-				if (auto pPic = std::exchange(i->second.pic, nullptr)) {
-					((LPDIRECTDRAWSURFACE7)pPic)->Release();
-				}
-			} else {
-				if (auto pPic = std::exchange(i->second.pic, nullptr)) {
-					delete[](pPic);
-				}
-				if (auto pBorder = std::exchange(i->second.vborder, nullptr)) {
-					delete[](pBorder);
-				}
-			}
-#else
-			if (i->second.pic != NULL) i->second.pic->Release();
-#endif
-
-			i->second.pic = NULL;
-		} catch (...) {
-			CString err;
-			err = "Access violation while trying to release surface ";
-			char c[6];
-			itoa(e, c, 10);
-			err += c;
-
-			err += "\n";
-			OutputDebugString(err);
-			continue;
-		}
-
-		i++;
-	}
-
-
+	GlobalObjectPool::Instance().Images().ResetAll();
 
 	try {
 		CFinalSunDlg* dlg = theApp.MainWindow();
@@ -4251,7 +4188,8 @@ void CLoading::PrepareUnitGraphic(const CString& lpUnittype)
 			p.bType = PICDATA_TYPE_SHP;
 			p.bTerrain = limited_to_theater;
 
-			auto& picData = pics[image + ic];
+			
+			auto& picData = GlobalObjectPool::Instance().Images().Acquire(image + ic);
 			if (picData.pic) {
 				delete picData.pic;
 			}

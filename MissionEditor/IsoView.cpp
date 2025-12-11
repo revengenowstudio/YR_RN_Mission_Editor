@@ -790,7 +790,7 @@ inline void CalculateHouseColorPalette(int house_pal[houseColorRelMax + 1], cons
 There is no need for newpal
 */
 __forceinline void BlitPic(void* dst, int x, int y, int dleft, int dtop, const DDBoundary& boundary, int dright, int dbottom,
-	PICDATA& pd, int* color = NULL, const int* newPal = NULL)//BYTE* src, int swidth, int sheight)
+	const PICDATA& pd, int* color = NULL, const int* newPal = NULL)//BYTE* src, int swidth, int sheight)
 {
 	ASSERT(pd.bType != PICDATA_TYPE_BMP);
 
@@ -3548,26 +3548,12 @@ First checks if a explicite bitmap exists for this tile, if not
 checks if it can be displayed by a standard bitmap.
 For bridges, it also needs the overlaydata.
 */
-inline PICDATA* GetOverlayPic(BYTE ovrl, BYTE ovrldata)
+inline const PICDATA* GetOverlayPic(BYTE ovrl, BYTE ovrldata)
 {
+	CString overlayImageId;
+	overlayImageId.Format("OVRL%d_%d", ovrl, ovrldata);
 
-	char c[50];
-	char d[50];
-	itoa(ovrl, c, 10);
-	itoa(ovrldata, d, 10);
-
-	CString fname = (CString)"OVRL" + c + "_" + d;
-
-	// MessageBox(0,fname,"",0);
-
-	if (pics.find(fname) != pics.end()) {
-		return &pics[fname];
-	}
-
-	//errstream << "pic " << (LPCSTR)fname << " not found" << endl;
-
-
-	return NULL;
+	return GlobalObjectPool::Instance().Images().Read(overlayImageId);
 }
 
 
@@ -5496,7 +5482,7 @@ void CIsoView::DrawMap()
 		}
 	}
 
-
+	auto& images = GlobalObjectPool::Instance().Images();
 	for (u = left; u < right; u++) {
 		for (v = top; v < bottom; v++) {
 			const MapCoords mapCoords(u, v);
@@ -5769,7 +5755,7 @@ void CIsoView::DrawMap()
 								continue;
 							}
 
-							PICDATA pic;
+							const PICDATA* pic = nullptr;
 							int dir = 0;
 							if (rules.GetBool(upg, "Turret")) {
 								dir = (7 - objp.direction / 32) % 8;
@@ -5777,10 +5763,10 @@ void CIsoView::DrawMap()
 							auto const picName = GetUnitPictureFilename(upg, dir);
 
 							if (!picName.IsEmpty()) {
-								pic = pics[picName];
+								pic = images.Read(picName);
 							}
 
-							if (pic.pic == NULL && !missingimages[upg]) {
+							if ((!pic || pic->pic == NULL) && !missingimages[upg]) {
 								SetError("Loading graphics");
 								theApp.m_loading->LoadUnitGraphic(upg);
 								::Map->UpdateBuildingInfo(&upg);
@@ -5789,24 +5775,30 @@ void CIsoView::DrawMap()
 									picNameAfterLoad = GetUnitPictureFilename(upg, 0);
 								}
 								if (!picNameAfterLoad.IsEmpty()) {
-									pic = pics[picNameAfterLoad];
+									pic = images.Read(picNameAfterLoad);
 								}
-								if (pic.pic == NULL) {
+								if (pic->pic == NULL) {
 									missingimages[upg] = TRUE;
 								}
 							}
 
-							if (pic.pic != NULL) {
+							if (pic && pic->pic != NULL) {
 								static const CString LocLookup[3][2] = { {"PowerUp1LocXX", "PowerUp1LocYY"}, {"PowerUp2LocXX", "PowerUp2LocYY"}, {"PowerUp3LocXX", "PowerUp3LocYY"} };
-								const auto drawCoordsPowerUp = drawCoordsBld + ProjectedVec(f_x / 2 - pic.wMaxWidth / 2, -pic.wMaxHeight / 2) + ProjectedVec(
-									atoi(art.GetString(objp.type, LocLookup[upgrade][0])),
-									atoi(art.GetString(objp.type, LocLookup[upgrade][1]))
+								const auto drawCoordsPowerUp = drawCoordsBld + 
+									ProjectedVec(
+										f_x / 2 - pic->wMaxWidth / 2, 
+										-pic->wMaxHeight / 2)
+									+  ProjectedVec(
+										atoi(art.GetString(objp.type, LocLookup[upgrade][0])),
+										atoi(art.GetString(objp.type, LocLookup[upgrade][1]))
 								);
 								// py-=atoi(art.sections[obj.type].values["PowerUp1LocZZ"]); 
 #ifndef NOSURFACES
 								Blit(pic.pic, drawCoordsPowerUp.x, drawCoordsPowerUp.y);
 #else
-								BlitPic(ddsd.lpSurface, drawCoordsPowerUp.x, drawCoordsPowerUp.y, r.left, r.top, DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch }, r.right, r.bottom, pic, &colorref_conv[objp.col]);
+								BlitPic(ddsd.lpSurface, drawCoordsPowerUp.x, drawCoordsPowerUp.y, r.left, r.top, 
+									DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch },
+									r.right, r.bottom, *pic, &colorref_conv[objp.col]);
 #endif
 
 							}
@@ -5909,22 +5901,22 @@ void CIsoView::DrawMap()
 #ifndef NOSURFACES
 				DrawCell(drawCoords.x, drawCoords.y, 1, 1, c);
 #endif
-				PICDATA p;
+				const PICDATA* p = nullptr;
 				if (!lpPicFile.IsEmpty()) {
-					p = pics[lpPicFile];
+					p = images.Read(lpPicFile);
 				}
 
-				if (p.pic == NULL || lpPicFile.GetLength() == 0) {
+				if (!p || p->pic == NULL || lpPicFile.IsEmpty()) {
 					if (!missingimages[obj.basic.type]) {
 						SetError("Loading graphics");
 						theApp.m_loading->LoadUnitGraphic(obj.basic.type);
 						lpPicFile = GetUnitPictureFilename(imageId, facing);
 						if (!lpPicFile.IsEmpty()) {
-							p = pics[lpPicFile];
+							p = images.Read(lpPicFile);
 						}
 					}
 
-					if (p.pic == NULL) {
+					if (!p || p->pic == NULL) {
 #ifndef NOSURFACES
 						Blit(pics["TANK"].pic, drawCoords.x, drawCoords.y);
 						// TextOut(drawx+f_x/4,drawy+f_y/4, obj.type,c);
@@ -5934,16 +5926,21 @@ void CIsoView::DrawMap()
 					}
 				}
 
-				if (p.pic)// we have a picture!
+				if (p && p->pic)// we have a picture!
 				{
-					const auto drawCoordsOffset = (p.bType == PICDATA_TYPE_BMP) ? ProjectedVec((f_y / 4) + p.x, (f_y - p.wHeight) + p.y) - p.drawOffset() :
-						(p.bType == PICDATA_TYPE_SHP) ? ProjectedVec(f_x / 2 - (p.wMaxWidth / 2), f_y / 2 - (p.wMaxHeight / 2)) : ProjectedVec(f_x / 2, f_y / 2) + p.drawOffset();
+					const auto drawCoordsOffset = (p->bType == PICDATA_TYPE_BMP) ? 
+						ProjectedVec((f_y / 4) + p->x, (f_y - p->wHeight) + p->y) - p->drawOffset() :
+						(p->bType == PICDATA_TYPE_SHP) ? 
+							ProjectedVec(f_x / 2 - (p->wMaxWidth / 2), f_y / 2 - (p->wMaxHeight / 2)) : 
+							ProjectedVec(f_x / 2, f_y / 2) + p->drawOffset();
 					auto drawCoordsUnit = drawCoords + drawCoordsOffset;
 
 #ifndef NOSURFACES
 					Blit(p.pic, drawCoordsUnit.x, drawCoordsUnit.y);
 #else
-					BlitPic(ddsd.lpSurface, drawCoordsUnit.x, drawCoordsUnit.y, r.left, r.top, DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch }, r.right, r.bottom, p, &colorref_conv[c]);
+					BlitPic(ddsd.lpSurface, drawCoordsUnit.x, drawCoordsUnit.y, r.left, r.top,
+						DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch },
+						r.right, r.bottom, *p, &colorref_conv[c]);
 #endif
 				}
 			}
@@ -5961,22 +5958,22 @@ void CIsoView::DrawMap()
 #ifndef NOSURFACES
 				DrawCell(drawCoords.x, drawCoords.y, 1, 1, c);
 #endif
-				PICDATA p;
+				const PICDATA* p = nullptr;
 				if (!lpPicFile.IsEmpty()) {
-					p = pics[lpPicFile];
+					p = images.Read(lpPicFile);
 				}
 
-				if (p.pic == NULL) {
+				if (!p && p->pic == NULL) {
 					if (!missingimages[obj.basic.type]) {
 						SetError("Loading graphics");
 						theApp.m_loading->LoadUnitGraphic(obj.basic.type);
 						lpPicFile = GetUnitPictureFilename(theApp.m_loading->GetArtID(obj.basic.type), facing);
 						if (!lpPicFile.IsEmpty()) {
-							p = pics[lpPicFile];
+							p = images.Read(lpPicFile);
 						}
 					}
 
-					if (p.pic == NULL) {
+					if (!p || p->pic == NULL) {
 #ifndef NOSURFACES
 						Blit(pics["TANK"].pic, drawCoords.x, drawCoords.y);
 						//TextOut(drawx+f_x/4,drawy+f_y/4, obj.type,c);
@@ -5986,16 +5983,20 @@ void CIsoView::DrawMap()
 					}
 				}
 
-				if (p.pic)// we have a picture!
+				if (p && p->pic)// we have a picture!
 				{
-					const auto drawCoordsOffset = (p.bType == PICDATA_TYPE_BMP) ? ProjectedVec(f_x / 2 - p.wWidth / 2, f_y - p.wHeight) - p.drawOffset() :
-						(p.bType == PICDATA_TYPE_SHP) ? ProjectedVec(f_x / 2 - (p.wMaxWidth / 2), f_y / 2 - (p.wMaxHeight / 2)) : ProjectedVec(f_x / 2, f_y / 2) + p.drawOffset();
+					const auto drawCoordsOffset = (p->bType == PICDATA_TYPE_BMP) ? 
+						ProjectedVec(f_x / 2 - p->wWidth / 2, f_y - p->wHeight) - p->drawOffset() :
+							(p->bType == PICDATA_TYPE_SHP) ? 
+								ProjectedVec(f_x / 2 - (p->wMaxWidth / 2), f_y / 2 - (p->wMaxHeight / 2)) : 
+								ProjectedVec(f_x / 2, f_y / 2) + p->drawOffset();
 					auto drawCoordsAir = drawCoords + drawCoordsOffset;
 
 #ifndef NOSURFACES
 					Blit(p.pic, drawCoordsAir.x, drawCoordsAir.y);
 #else
-					BlitPic(ddsd.lpSurface, drawCoordsAir.x, drawCoordsAir.y, r.left, r.top, DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch }, r.right, r.bottom, p, &colorref_conv[c]);
+					BlitPic(ddsd.lpSurface, drawCoordsAir.x, drawCoordsAir.y, r.left, r.top, 
+						DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch }, r.right, r.bottom, *p, &colorref_conv[c]);
 #endif
 				}
 			}
@@ -6033,23 +6034,22 @@ void CIsoView::DrawMap()
 					};
 					auto drawCoordsInf = drawCoords + subPosLookup[std::min(ic, 4)];
 
-					PICDATA p;
-
+					const PICDATA* p = nullptr;
 					if (!lpPicFile.IsEmpty()) {
-						p = pics[lpPicFile];
+						p = images.Read(lpPicFile);
 					}
 
-					if (p.pic == NULL) {
+					if (!p || p->pic == NULL) {
 						if (!missingimages[obj.basic.type]) {
 							SetError("Loading graphics");
 							theApp.m_loading->LoadUnitGraphic(obj.basic.type);
 							lpPicFile = GetUnitPictureFilename(imageId, dir);
 							if (!lpPicFile.IsEmpty()) {
-								p = pics[lpPicFile];
+								p = images.Read(lpPicFile);
 							}
 						}
 
-						if (p.pic == NULL) {
+						if (!p || p->pic == NULL) {
 #ifndef NOSURFACES
 							Blit(pics["MAN"].pic, drawCoordsInf.x, drawCoordsInf.y);
 							// TextOut(drawx+f_x/4,drawy+f_y/4, obj.type,c);
@@ -6061,16 +6061,16 @@ void CIsoView::DrawMap()
 
 
 
-					if (p.pic)// we have a picture!
+					if (p && p->pic)// we have a picture!
 					{
-						auto drawCoordsInfShp = drawCoordsInf + ProjectedVec(f_x / 2 - (p.wMaxWidth / 2), f_y / 2 - (p.wMaxHeight / 2));
+						auto drawCoordsInfShp = drawCoordsInf + ProjectedVec(f_x / 2 - (p->wMaxWidth / 2), f_y / 2 - (p->wMaxHeight / 2));
 
 #ifndef NOSURFACES
 						Blit(p.pic, drawCoordsInfShp.x, drawCoordsInfShp.y, p.wWidth, p.wHeight);
 #else
-						BlitPic(ddsd.lpSurface, drawCoordsInfShp.x, drawCoordsInfShp.y, r.left, r.top, DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch }, r.right, r.bottom, p, &colorref_conv[c]);
+						BlitPic(ddsd.lpSurface, drawCoordsInfShp.x, drawCoordsInfShp.y, r.left, r.top, 
+							DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch }, r.right, r.bottom, *p, &colorref_conv[c]);
 #endif
-
 					}
 
 				}
@@ -6081,16 +6081,16 @@ void CIsoView::DrawMap()
 
 				int id = m.terraintype;
 				int w = 1, h = 1;
-				PICDATA pic;
+				const PICDATA* pic = nullptr;
 				if (id > -1 && id < buildingInfoCapacity) {
 					w = treeinfo[id].w;
 					h = treeinfo[id].h;
-					pic = treeinfo[id].pic;
+					pic = &treeinfo[id].pic;
 				}
 
 				//CString lpPicFile=GetUnitPictureFilename(type, 0);				
 
-				if (pic.pic == NULL) {
+				if (!pic || pic->pic == NULL) {
 					CString type;
 					Map->GetTerrainData(m.terrain, &type);
 
@@ -6098,9 +6098,9 @@ void CIsoView::DrawMap()
 						SetError("Loading graphics");
 						theApp.m_loading->LoadUnitGraphic(type);
 						::Map->UpdateTreeInfo(&type);
-						pic = treeinfo[id].pic;
+						pic = &treeinfo[id].pic;
 					}
-					if (pic.pic == NULL) {
+					if (!pic || pic->pic == NULL) {
 #ifndef NOSURFACES
 						Blit(pics["TREE"].pic, drawCoords.x, drawCoords.y - 19);
 #endif
@@ -6108,14 +6108,15 @@ void CIsoView::DrawMap()
 					}
 				}
 
-				if (pic.pic) {
+				if (pic && pic->pic) {
 
-					auto drawCoordsTerrain = drawCoords + ProjectedVec(f_x / 2 - (pic.wMaxWidth / 2), f_y / 2 - 3 - (pic.wMaxHeight / 2));
+					auto drawCoordsTerrain = drawCoords + ProjectedVec(f_x / 2 - (pic->wMaxWidth / 2), f_y / 2 - 3 - (pic->wMaxHeight / 2));
 
 #ifndef NOSURFACES
 					Blit(pic.pic, drawCoordsTerrain.x, drawCoordsTerrain.y);
 #else
-					BlitPic(ddsd.lpSurface, drawCoordsTerrain.x, drawCoordsTerrain.y, r.left, r.top, DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch }, r.right, r.bottom, pic);
+					BlitPic(ddsd.lpSurface, drawCoordsTerrain.x, drawCoordsTerrain.y, r.left, r.top, 
+						DDBoundary{ ddsd.dwWidth, ddsd.dwHeight, ddsd.lPitch }, r.right, r.bottom, *pic);
 
 #endif
 
@@ -6178,7 +6179,8 @@ void CIsoView::DrawMap()
 #ifdef NOSURFACES
 				lpdsBack->Unlock(NULL);
 #endif
-				Blit(reinterpret_cast<LPDIRECTDRAWSURFACE7>(pics["CELLTAG"].pic), drawCoords.x - 1, drawCoords.y - 1);
+				auto picData = GlobalObjectPool::Instance().Images().Read("CELLTAG");
+				Blit(reinterpret_cast<LPDIRECTDRAWSURFACE7>(picData->pic), drawCoords.x - 1, drawCoords.y - 1);
 
 #ifdef NOSURFACES				
 				ddsd = getDDDescBasic(false);
@@ -6238,8 +6240,9 @@ void CIsoView::DrawMap()
 #endif
 
 	// delayed waypoint rendering
+	auto picData = images.Read("FLAG");
 	for (const auto& wp : m_waypoints_to_render) {
-		Blit(reinterpret_cast<LPDIRECTDRAWSURFACE7>(pics["FLAG"].pic), wp.drawx, wp.drawy);
+		Blit(reinterpret_cast<LPDIRECTDRAWSURFACE7>(picData->pic), wp.drawx, wp.drawy);
 	}
 
 	// map tool rendering
@@ -6270,9 +6273,9 @@ void CIsoView::DrawMap()
 	}
 
 	if (rscroll) {
-		const auto& sc = pics["SCROLLCURSOR"];
-		Blit(reinterpret_cast<LPDIRECTDRAWSURFACE7>(sc.pic), 
-			rclick_x * m_viewScale.x + r.left - sc.wWidth / 2, rclick_y * m_viewScale.y + r.top - sc.wHeight / 2);
+		 picData = images.Read("SCROLLCURSOR");
+		Blit(reinterpret_cast<LPDIRECTDRAWSURFACE7>(picData->pic),
+			rclick_x * m_viewScale.x + r.left - picData->wWidth / 2, rclick_y * m_viewScale.y + r.top - picData->wHeight / 2);
 	}
 
 	BlitBackbufferToHighRes(); // lpdsBackHighRes contains the same graphic, but scaled to the whole window

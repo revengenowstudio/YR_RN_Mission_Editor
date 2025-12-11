@@ -2,6 +2,13 @@
 #include <CString>
 #include <ctype.h>
 
+struct CStringHash {
+	auto operator()(const CString& sv) const noexcept {
+		std::string_view view(sv.GetString(), sv.GetLength());
+		return std::hash<decltype(view)>()(view);
+	}
+};
+
 class INIHelper
 {
 public:

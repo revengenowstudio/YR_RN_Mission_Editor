@@ -55,6 +55,7 @@ struct IUnknown;
 #include <regex>
 
 #include "VoxelNormals.h"
+#include <assert.h>
 
 size_t constexpr mixfileCachedCapacity = 2000;
 Cmix_file mixfiles[mixfileCachedCapacity];
@@ -958,9 +959,6 @@ namespace FSunPackLib
 		t_shp_ts_image_header imghead;
 		BYTE* image = NULL;
 
-
-
-
 		auto& head = cur_shp.header();
 		if (head.cx == 0 || head.cy == 0) {
 			return FALSE;
@@ -971,6 +969,7 @@ namespace FSunPackLib
 
 		std::vector<byte> decode_image_buffer;
 		for (auto frameIdx = 0; frameIdx < wantedNum; frameIdx++) {
+			assert(lpPics[frameIdx] == 0);
 			if (cur_shp.get_image_header(startIndex + frameIdx)) {
 				imghead = *(cur_shp.get_image_header(startIndex + frameIdx));
 				// if(imghead.offset!=0)
@@ -982,7 +981,6 @@ namespace FSunPackLib
 						decode3(cur_shp.get_image(startIndex + frameIdx), image, imghead.cx, imghead.cy);
 					} else
 						image = (unsigned char*)cur_shp.get_image(startIndex + frameIdx);
-
 
 					lpPics[frameIdx] = new(BYTE[head.cx * head.cy]);
 

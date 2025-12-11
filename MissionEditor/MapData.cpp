@@ -645,43 +645,8 @@ void CMapData::LoadMap(const CString& file)
 	theApp.m_loading->Unload();
 	theApp.m_loading->InitMixFiles();
 
-	map<CString, PICDATA>::iterator it = pics.begin();
-	for (int e = 0; e < pics.size(); e++) {
-		try {
-#ifdef NOSURFACES_OBJECTS			
-			if (it->second.bType == PICDATA_TYPE_BMP) {
-				if (auto pPic = std::exchange(it->second.pic, nullptr)) {
-					((LPDIRECTDRAWSURFACE4)pPic)->Release();
-				}
-			} else {
-				if (auto pPic = std::exchange(it->second.pic, nullptr)) {
-					delete[](pPic);
-				}
-				if (auto pBorder = std::exchange(it->second.vborder, nullptr)) {
-					delete[](pBorder);
-				}
-			}
-#else
-			if (it->second.pic != NULL) it->second.pic->Release();
-#endif
+	GlobalObjectPool::Instance().Images().ResetAll();
 
-			it->second.pic = NULL;
-		} catch (...) {
-			CString err;
-			err = "Access violation while trying to release surface ";
-			char c[6];
-			itoa(e, c, 10);
-			err += c;
-
-			err += "\n";
-			OutputDebugString(err);
-			continue;
-		}
-
-		it++;
-	}
-
-	pics.clear();
 	missingimages.clear();
 
 	theApp.m_loading->InitPics();
@@ -3685,10 +3650,10 @@ BuildingFoundation getBuildingFoundation(const CString& artId) {
 void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 {
 	auto const& rulesGroup = IniMegaFile::GetRules();
+	auto const& images = GlobalObjectPool::Instance().Images();
 
 	if (!lpUnitType) {
 		memset(buildinginfo, 0, buildingInfoCapacity * sizeof(BUILDING_INFO));
-
 		for (auto const& [seq, id] : rulesGroup.GetSection("BuildingTypes")) {
 			auto const& type = id;
 			auto artname = rulesGroup.GetStringOr(type, "Image", type);
@@ -3709,16 +3674,16 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 
 				CString lpPicFile = GetUnitPictureFilename(type, 0);
 
-				if (pics.find(lpPicFile) != pics.end()) {
-					if (pics[lpPicFile].bTerrain == TheaterChar::None) {
+				if (auto const pPicData = images.Read(lpPicFile)) {
+					if (pPicData->bTerrain == TheaterChar::None) {
 						buildinginfo[n].bSnow = TRUE;
 						buildinginfo[n].bTemp = TRUE;
 						buildinginfo[n].bUrban = TRUE;
-					} else if (pics[lpPicFile].bTerrain == TheaterChar::T) {
+					} else if (pPicData->bTerrain == TheaterChar::T) {
 						buildinginfo[n].bTemp = TRUE;
-					} else if (pics[lpPicFile].bTerrain == TheaterChar::A) {
+					} else if (pPicData->bTerrain == TheaterChar::A) {
 						buildinginfo[n].bSnow = TRUE;
-					} else if (pics[lpPicFile].bTerrain == TheaterChar::U) {
+					} else if (pPicData->bTerrain == TheaterChar::U) {
 						buildinginfo[n].bUrban = TRUE;
 					}
 				} else {
@@ -3731,8 +3696,8 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 				for (auto k = 0; k < 8; k++) {
 					lpPicFile = GetUnitPictureFilename(type, k);
 
-					if (pics.find(lpPicFile) != pics.end()) {
-						buildinginfo[n].pic[k] = pics[lpPicFile];
+					if (auto const pPicData = images.Read(lpPicFile)) {
+						buildinginfo[n].pic[k] = *pPicData; // seems kinda dangerous
 					} else {
 						buildinginfo[n].pic[k].pic = NULL;
 					}
@@ -3768,8 +3733,8 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 				for (k = 0; k < 8; k++) {
 					lpPicFile = GetUnitPictureFilename(type, k);
 
-					if (pics.find(lpPicFile) != pics.end()) {
-						buildinginfo[n].pic[k] = pics[lpPicFile];
+					if (auto const pPicData = images.Read(lpPicFile)) {
+						buildinginfo[n].pic[k] = *pPicData; // seems kinda dangerous
 					} else {
 						buildinginfo[n].pic[k].pic = NULL;
 					}
@@ -3800,8 +3765,8 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 		for (k = 0; k < 8; k++) {
 			lpPicFile = GetUnitPictureFilename(type, k);
 
-			if (pics.find(lpPicFile) != pics.end()) {
-				buildinginfo[n].pic[k] = pics[lpPicFile];
+			if (auto const pPicData = images.Read(lpPicFile)) {
+				buildinginfo[n].pic[k] = *pPicData; // seems kinda dangerous
 			} else {
 				buildinginfo[n].pic[k].pic = NULL;
 			}
@@ -3812,6 +3777,7 @@ void CMapData::UpdateBuildingInfo(const CString* lpUnitType)
 void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 {
 	CIniFile& ini = GetIniFile();
+	auto const& images = GlobalObjectPool::Instance().Images();
 
 	if (!lpTreeType) {
 		memset(treeinfo, 0, 0x0F00 * sizeof(TREE_INFO));
@@ -3832,9 +3798,8 @@ void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 
 				CString lpPicFile = GetUnitPictureFilename(type, 0);
 
-				if (pics.find(lpPicFile) != pics.end()) {
-
-					treeinfo[n].pic = pics[lpPicFile];
+				if (auto const pPicData = images.Read(lpPicFile)) {
+					treeinfo[n].pic = *pPicData; // seems kinda dangerous
 				} else
 					treeinfo[n].pic.pic = NULL;
 			}
@@ -3855,8 +3820,8 @@ void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 
 				CString lpPicFile = GetUnitPictureFilename(type, 0);
 
-				if (pics.find(lpPicFile) != pics.end()) {
-					treeinfo[n].pic = pics[lpPicFile];
+				if (auto const pPicData = images.Read(lpPicFile)) {
+					treeinfo[n].pic = *pPicData; // seems kinda dangerous
 				} else
 					treeinfo[n].pic.pic = NULL;
 			}
@@ -3878,8 +3843,8 @@ void CMapData::UpdateTreeInfo(const CString* lpTreeType)
 		treeinfo[n].h = foundation.Height;
 
 		CString lpPicFile = GetUnitPictureFilename(type, 0);
-		if (pics.find(lpPicFile) != pics.end()) {
-			treeinfo[n].pic = pics[lpPicFile];
+		if (auto const pPicData = images.Read(lpPicFile)) {
+			treeinfo[n].pic = *pPicData; // seems kinda dangerous
 		} else {
 			treeinfo[n].pic.pic = NULL;
 		}
@@ -3983,41 +3948,7 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 	m_mapfile.SetString("Map", "Theater", lpTerrainType);
 	m_mapfile.SetString("Map", "LocalSize", mapsize);
 
-	map<CString, PICDATA>::iterator it = pics.begin();
-	for (int e = 0; e < pics.size(); e++) {
-		try {
-#ifdef NOSURFACES_OBJECTS			
-			if (it->second.bType == PICDATA_TYPE_BMP) {
-				if (auto pPic = std::exchange(it->second.pic, nullptr)) {
-					((LPDIRECTDRAWSURFACE4)pPic)->Release();
-				}
-			} else {
-				if (auto pPic = std::exchange(it->second.pic, nullptr)) {
-					delete[](pPic);
-				}
-				if (auto pBorder = std::exchange(it->second.vborder, nullptr)) {
-					delete[](pBorder);
-				}
-			}
-#else
-			if (it->second.pic != NULL) it->second.pic->Release();
-#endif
-
-			it->second.pic = NULL;
-		} catch (...) {
-			CString err;
-			err = "Access violation while trying to release surface ";
-			char c[6];
-			itoa(e, c, 10);
-			err += c;
-
-			err += "\n";
-			OutputDebugString(err);
-			continue;
-		}
-
-		it++;
-	}
+	GlobalObjectPool::Instance().Images().ResetAll();
 
 	std::unique_ptr<CDynamicGraphDlg> dlg;
 	if (theApp.m_pMainWnd) {
@@ -4026,7 +3957,6 @@ void CMapData::CreateMap(DWORD dwWidth, DWORD dwHeight, LPCTSTR lpTerrainType, D
 		dlg->UpdateWindow();
 	}
 
-	pics.clear();
 	missingimages.clear();
 
 	UpdateBuildingInfo();
@@ -6682,6 +6612,7 @@ void CMapData::UpdateSmudges(BOOL bSave, int num)
 void CMapData::UpdateSmudgeInfo(LPCSTR lpSmudgeType)
 {
 	CIniFile& ini = GetIniFile();
+	auto const& images = GlobalObjectPool::Instance().Images();
 
 	if (!lpSmudgeType) {
 		memset(smudgeinfo, 0, 0x0F00 * sizeof(SMUDGE_INFO));
@@ -6693,8 +6624,8 @@ void CMapData::UpdateSmudgeInfo(LPCSTR lpSmudgeType)
 			if (n >= 0 && n < 0x0F00) {
 				CString lpPicFile = GetUnitPictureFilename(type, 0);
 
-				if (pics.find(lpPicFile) != pics.end()) {
-					smudgeinfo[n].pic = pics[lpPicFile];
+				if (auto const pPicData = images.Read(lpPicFile)) {
+					smudgeinfo[n].pic = *pPicData; // seems kinda dangerous
 				} else {
 					smudgeinfo[n].pic.pic = NULL;
 				}
@@ -6711,8 +6642,8 @@ void CMapData::UpdateSmudgeInfo(LPCSTR lpSmudgeType)
 
 				CString lpPicFile = GetUnitPictureFilename(type, 0);
 
-				if (pics.find(lpPicFile) != pics.end()) {
-					smudgeinfo[n].pic = pics[lpPicFile];
+				if (auto const pPicData = images.Read(lpPicFile)) {
+					smudgeinfo[n].pic = *pPicData; // seems kinda dangerous
 				} else {
 					smudgeinfo[n].pic.pic = NULL;
 				}
@@ -6729,9 +6660,8 @@ void CMapData::UpdateSmudgeInfo(LPCSTR lpSmudgeType)
 
 	if (n >= 0 && n < 0x0F00) {
 		CString lpPicFile = GetUnitPictureFilename(type, 0);
-		if (pics.find(lpPicFile) != pics.end()) {
-
-			smudgeinfo[n].pic = pics[lpPicFile];
+		if (auto const pPicData = images.Read(lpPicFile)) {
+			smudgeinfo[n].pic = *pPicData; // seems kinda dangerous
 		} else {
 			smudgeinfo[n].pic.pic = NULL;
 		}
