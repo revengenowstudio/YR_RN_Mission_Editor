@@ -497,22 +497,6 @@ void CFinalSunApp::ParseCommandLine()
 #endif
 }
 
-void CFinalSunApp::ShowTipAtStartup(void)
-{
-	CTipDlg dlg;
-	if (dlg.m_bStartup)
-		dlg.DoModal();
-
-
-}
-
-void CFinalSunApp::ShowTipOfTheDay(void)
-{
-	CTipDlg dlg;
-	dlg.DoModal();
-
-}
-
 int CFinalSunApp::Run()
 {
 	return CWinApp::Run();

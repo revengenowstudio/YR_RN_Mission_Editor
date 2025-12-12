@@ -142,7 +142,6 @@ protected:
 	afx_msg void OnDebugExportmappacknosections();
 	afx_msg void OnDebugExportmappack();
 	afx_msg void OnFileNew();
-	afx_msg void OnHelpTipoftheday();
 	afx_msg void OnOptionsSimpleview();
 	afx_msg void OnOptionsShowminimap();
 	afx_msg void OnFileValidatemap();

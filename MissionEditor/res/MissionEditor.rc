@@ -2356,7 +2356,6 @@ BEGIN
         MENUITEM "Manual\tF1",                  ID_HELP
         MENUITEM SEPARATOR
         MENUITEM "Info",                        ID_HELP_INFO
-        MENUITEM "Tip of the day",              ID_HELP_TIPOFTHEDAY
         MENUITEM SEPARATOR
         MENUITEM "Show logs",                   ID_HELP_SHOWLOGS
     END
@@ -2463,7 +2462,6 @@ BEGIN
         MENUITEM "Manual\tF1",                  ID_HELP
         MENUITEM SEPARATOR
         MENUITEM "Info",                        ID_HELP_INFO
-        MENUITEM "Tip of the day",              ID_HELP_TIPOFTHEDAY
         MENUITEM SEPARATOR
         MENUITEM "Show logs",                   ID_HELP_SHOWLOGS
     END
