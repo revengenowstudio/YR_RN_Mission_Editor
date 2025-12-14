@@ -461,6 +461,24 @@ TEST(TriggerActionTest, ActionSerde)
         EXPECT_EQ(actions.Nth(2).Waypoint(), 9);
         EXPECT_EQ(actions.Nth(2).WaypointString(), "J");
     }
+    // action 40
+    {
+        const CString data = "1,40,0,0,2,4,96,188,A";
+        TriggerActions actions(data);
+
+        EXPECT_EQ(actions.Size(), 1);
+        EXPECT_EQ(actions.Nth(0).IsUsingWaypointEncoding(), true);
+        EXPECT_EQ(actions.Nth(0).Type().paramStartOffset, 1);
+        EXPECT_EQ(actions.Nth(0).Params()[0], "0"); // first param is skipped
+        EXPECT_EQ(actions.Nth(0).Params()[1], "2");
+        EXPECT_EQ(actions.Nth(0).Params()[2], "4");
+        EXPECT_EQ(actions.Nth(0).Params()[3], "96");
+        EXPECT_EQ(actions.Nth(0).Params()[4], "188");
+        actions.Nth(0).ParamNth(3).Assign("100"); // ParamNth auto adaptive to paramStartOffset
+        EXPECT_EQ(actions.Nth(0).Params()[4], "100");
+        
+        EXPECT_EQ(actions.Serialize(), "1,40,0,0,2,4,96,100,A");
+    }
 }
 
 TEST(TriggerTagTest, TagSerde)
