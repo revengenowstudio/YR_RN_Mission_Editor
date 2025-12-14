@@ -286,7 +286,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertDebug YR|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>FinalAlert2YR_D</TargetName>
+    <TargetName>FinalRevenge_D</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tests FinalAlertDebug YR|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -318,7 +318,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertRelease YR|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>FinalAlert2YR</TargetName>
+    <TargetName>FinalRevenge</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='FinalSunDebug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -722,6 +722,7 @@
     <Image Include="res\clifftoo.bmp" />
     <Image Include="res\FinalAlert2.ico" />
     <Image Include="res\FinalAlert2YR.ico" />
+    <Image Include="res\FinalRevenge.ico" />
     <Image Include="res\FinalSun.ico" />
     <Image Include="res\ico00003.ico" />
     <Image Include="res\idr_main.ico" />

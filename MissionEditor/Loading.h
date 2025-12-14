@@ -105,7 +105,6 @@ public:
 	BOOL InitMixFiles();
 	void InitSHPs(CProgressCtrl* prog = NULL);
 	void LoadTSIni(LPCTSTR lpFilename, CIniFile* lpIniFile, BOOL bIsExpansion, BOOL bCheckEditorDir = FALSE);
-	void CreateINI();
 	CLoading(CWnd* pParent = NULL);   // Standardconstructor
 	void InitPics(CProgressCtrl* prog = NULL);
 	void Load();

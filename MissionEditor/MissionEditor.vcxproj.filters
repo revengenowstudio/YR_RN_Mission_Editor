@@ -696,6 +696,9 @@
     <Image Include="res\bmp00005.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\FinalRevenge.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Media Include="Res\uqeue.wav">

@@ -120,7 +120,6 @@ const std::string editor_name = "FinalSun";
 BOOL overlay_visible[] = { TRUE,TRUE,TRUE,TRUE,TRUE,TRUE, TRUE, TRUE, TRUE };
 BOOL yr_only[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE };
 int overlay_count = 9;
-const std::string editor_name = "FinalAlert 2";
 #endif
 
 static const std::string GetAppDataPath()
@@ -145,7 +144,7 @@ static const std::string GetAppDataPath()
 			int a = 0;
 			std::string AppFolder = utf16ToUtf8(std::wstring(local_app_data_folder));
 			//return CString(CW2A(CStringW(local_app_data_folder), CP_ACP)) + "\\" + editor_name + "\\";
-			return AppFolder + "\\" + editor_name + "\\";
+			return AppFolder + "\\" FA2_EDITOR_NAME "\\";
 		}
 	}
 

@@ -29,6 +29,17 @@
 #include "FinalSun.h"
 #include "MapData.h"
 
+#ifdef RA2_MODE
+#define FA2_OPTION_FILE "FinalRevenge.ini" // FinalAlert.ini
+#define FA2_OPTION_DEF_FILE "FinalRevengeDefaults.ini"
+#define FA2_PROJECT_FILE "FinalRevengeProject.ini"
+#define FA2_EDITOR_NAME "FinalRevenge" // "FinalAlert 2"
+#else
+#define FA2_OPTION_FILE "FinalSun.ini"
+#define FA2_OPTION_DEF_FILE "FinalSunDefaults.ini"
+#define FA2_EDITOR_NAME "FinalSun"
+#endif
+
 class CMapData;
 
 // the map

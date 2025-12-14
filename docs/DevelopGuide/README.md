@@ -32,11 +32,11 @@
     git switch RN
     ```
 2. 使用 VS2022 打开代码仓库中的 `MissionEditor.sln`
-3. 顶部`解决方案配置`(默认值为「Debug」)切换为「FinalAlertDebug YR」，输出自动指向 `FinalAlert2YR_D.exe`
+3. 顶部`解决方案配置`(默认值为「Debug」)切换为「FinalAlertDebug YR」，输出自动指向 `FinalRevenge_D.exe`
 4. F5 即可自动编译并调试运行，首次拉取代码时VS2022会自动通过vcpkg拉取第三方库源码，请耐心等待。
 
 > [!NOTE]
-> 如果选择「FinalAlertRelease YR」编译将获得最佳的性能体验，但会极大地削弱调试能力。此时输出文件为 `FinalAlert2YR.exe`。
+> 如果选择「FinalAlertRelease YR」编译将获得最佳的性能体验，但会极大地削弱调试能力。此时输出文件为 `FinalRevenge.exe`。
 
 > [!NOTE]
 > 若编译时VS编译失败，请参见下文 [常见问题](#常见问题)

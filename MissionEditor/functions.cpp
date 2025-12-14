@@ -354,11 +354,8 @@ bool ShowOptionsDialog(CIniFile& optIni, bool isFirstTimeOption)
 
 	std::string iniFile = "";
 	iniFile = u8AppDataPath;
-#ifndef RA2_MODE
-	iniFile += "\\FinalSun.ini";
-#else
-	iniFile += "\\FinalAlert.ini";
-#endif
+	iniFile += "\\" FA2_OPTION_FILE;
+
 	optIni.LoadFile(iniFile);
 	CTSOptions opt;
 	opt.m_TSEXE = theApp.m_Options.TSExe;
@@ -480,7 +477,7 @@ CString GetLanguageStringACP(const CString name)
 #ifndef RA2_MODE
 	auto const pStrToInsert = "FinalSun";
 #elif YR_MODE
-	auto const pStrToInsert = "FinalAlert 2: Yuri's Revenge";
+	auto const pStrToInsert = "Final Revenge";
 #else
 	auto const pStrToInsert = "FinalAlert 2";
 #endif

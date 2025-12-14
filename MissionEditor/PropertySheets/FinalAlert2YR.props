@@ -5,6 +5,6 @@
     <InstallData Include="$(MSBuildThisFileDirectory)\..\data\FinalAlert2\**\*" />
   </ItemGroup>
   <PropertyGroup>
-	<DistributionName>FinalAlert2YR</DistributionName>
+	<DistributionName>FinalRevenge</DistributionName>
   </PropertyGroup>
 </Project>

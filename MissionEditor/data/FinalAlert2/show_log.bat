@@ -1,1 +1,1 @@
-start notepad "%LOCALAPPDATA%/FinalAlert 2/finalalert2log.txt"
+start notepad "%LOCALAPPDATA%/FinalAlert 2/finalrevenge2log.txt"

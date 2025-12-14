@@ -116,7 +116,7 @@ CFinalSunApp::CFinalSunApp()
 #ifdef TS_MODE
 	log += "finalsunlog.txt";
 #else
-	log += "finalalert2log.txt";
+	log += "finalrevenge2log.txt";
 #endif
 	m_u8LogFileName = log;
 	errstream.open(m_u8LogFileName, std::ios_base::trunc);
@@ -125,7 +125,7 @@ CFinalSunApp::CFinalSunApp()
 #ifdef TS_MODE
 	errstream << "FinalSun log file" << std::endl << "----------------------" << std::endl << std::endl;
 #else
-	errstream << "FinalAlert 2 log file" << std::endl << "----------------------" << std::endl << std::endl;
+	errstream << "FinalRevenge 2 log file" << std::endl << "----------------------" << std::endl << std::endl;
 #endif
 	errstream << "CFinalSunApp::CFinalSunApp() called" << std::endl;
 
@@ -196,13 +196,8 @@ BOOL CFinalSunApp::InitInstance()
 		exit(0);
 	}
 
-#ifndef RA2_MODE
-	const std::string iniName = "FinalSun.ini";
-	const std::string defaultIniName = "FinalSunDefaults.ini";
-#else
-	const std::string iniName = "FinalAlert.ini";
-	const std::string defaultIniName = "FinalAlertDefaults.ini";
-#endif
+	const std::string iniName = FA2_OPTION_FILE;
+	const std::string defaultIniName = FA2_OPTION_DEF_FILE;
 
 	// ok lets get some options
 	CIniFile optini;

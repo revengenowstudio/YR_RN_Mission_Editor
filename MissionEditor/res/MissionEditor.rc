@@ -2210,10 +2210,10 @@ END
 // remains consistent on all systems.
 #if defined(APSTUDIO_INVOKED) || defined(YR_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDR_MAINFRAME$(YR_MODE) ICON                    "FinalAlert2YR.ico"
+IDR_MAINFRAME$(YR_MODE) ICON                    "FinalRevenge.ico"
 
 #else
-IDR_MAINFRAME           ICON                    "FinalAlert2YR.ico"
+IDR_MAINFRAME           ICON                    "FinalRevenge.ico"
 
 #endif
 #endif

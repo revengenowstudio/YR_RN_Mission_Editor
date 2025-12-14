@@ -14,13 +14,13 @@
 ## 下载和安装
 1. 访问本仓库[Releases页面](https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases/latest)即可获得最新发布版本
 2. 确保已经安装[VC++14 运行时库](https://learn.microsoft.com/zh-cn/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version)
-3. 解压从Release下载的zip压缩包，运行`FinalAlert2YR.exe`，首次运行需要指定游戏本体或者Mod资源文件夹的位置，运行程序后，在弹出的`基本选项`窗口中的`Language`选择`简体中文`，再点击`Red Alert 2 EXE`右侧的按钮，选择`ra2.mix`即可设置默认资源路径
+3. 解压从Release下载的zip压缩包，运行`FinalRevenge.exe`，首次运行需要指定游戏本体或者Mod资源文件夹的位置，运行程序后，在弹出的`基本选项`窗口中的`Language`选择`简体中文`，再点击`Red Alert 2 EXE`右侧的按钮，选择`ra2.mix`即可设置默认资源路径
 
   ![1763296772166](image/README/1763296772166.png)
 
 > [!NOTE]
-> 本编辑器的`FinalAlert.ini`用户个性化配置文件位于 `%LOCALAPPDATA%/FinalAlert 2/FinalAlert.ini` 可以通过文件资源管理器访问找到。
-> 现阶段本编辑器部分功能仍在完善中,但我们依然不推荐手动修改`FinalAlert.ini`用户个性化配置文件，未来本编辑器会提供独立的对话框供用户进行自定义。
+> 本编辑器的`FinalRevenge.ini`用户个性化配置文件位于 `%LOCALAPPDATA%/FinalRevenge/FinalRevenge.ini` 可以通过文件资源管理器访问找到。
+> 现阶段本编辑器部分功能仍在完善中,但我们依然不推荐手动修改`FinalRevenge.ini`用户个性化配置文件，未来本编辑器会提供独立的对话框供用户进行自定义。
 
 
 ## 本编辑器与其它FA2扩展版本的对比
