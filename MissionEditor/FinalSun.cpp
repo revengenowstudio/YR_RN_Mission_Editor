@@ -30,6 +30,7 @@
 #include "variables.h"
 #include "functions.h"
 #include "inlines.h"
+#include "Version.h"
 #include <ShlObj.h>
 
 
@@ -112,21 +113,14 @@ CFinalSunApp::CFinalSunApp()
 	m_Options.bSupportMarbleMadness = FALSE;
 	m_Options.bMarbleMadness = FALSE;
 
-	auto log = u8AppDataPath;
-#ifdef TS_MODE
-	log += "finalsunlog.txt";
-#else
-	log += "finalrevenge2log.txt";
-#endif
-	m_u8LogFileName = log;
+	m_u8LogFileName = u8AppDataPath;
+	m_u8LogFileName += FA2_LOG_FIL;
+
 	errstream.open(m_u8LogFileName, std::ios_base::trunc);
 	errstream << "\uFEFF"; // BOM
 
-#ifdef TS_MODE
-	errstream << "FinalSun log file" << std::endl << "----------------------" << std::endl << std::endl;
-#else
-	errstream << "FinalRevenge 2 log file" << std::endl << "----------------------" << std::endl << std::endl;
-#endif
+	errstream << FA2_EDITOR_NAME << PRODUCT_VERSION_STRING << " log file" <<
+		std::endl << "----------------------" << std::endl << std::endl;
 	errstream << "CFinalSunApp::CFinalSunApp() called" << std::endl;
 
 	errstream << "App Path: " << AppPath << std::endl;

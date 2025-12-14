@@ -239,6 +239,13 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CFinalSunDlg message handler
+static CString makeWindowTitle(const CString& mapName)
+{
+    CString title;
+    title.Format("%s %s (%s)",
+        GetLanguageStringACP("MainDialogCaption"), PRODUCT_VERSION_STRING, mapName);
+    return title;
+}
 
 BOOL CFinalSunDlg::OnInitDialog()
 {
@@ -256,14 +263,7 @@ BOOL CFinalSunDlg::OnInitDialog()
     SetIcon(m_hIcon, TRUE);			// use big symbol
     SetIcon(m_hIcon, FALSE);		// use small symbol
 
-    CString cap;
-    cap = GetLanguageStringACP(FA2_MAIN_DLG_CAP_LBL);
-
-    cap += " (";
-    cap += GetLanguageStringACP("NoMapLoaded");
-    cap += ")";
-    SetWindowText(cap);
-
+    SetWindowText(makeWindowTitle(GetLanguageStringACP("NoMapLoaded")));
 
     // Matze:
     // July 9th:
@@ -380,11 +380,7 @@ BOOL CFinalSunDlg::OnInitDialog()
 
     // yah, map file specified
     if (strlen(currentMapFile) != 0) {
-        CString title;
-        title.Format("%s %s (%s)",
-            GetLanguageStringACP("MainDialogCaption"), PRODUCT_VERSION_STRING, currentMapFile);
-
-        this->SetWindowText(title);
+        this->SetWindowText(makeWindowTitle(currentMapFile));
         SetCursor(LoadCursor(NULL, IDC_WAIT));
         Map->LoadMap(currentMapFile);
         SetCursor(m_hArrowCursor);
@@ -598,16 +594,12 @@ void CFinalSunDlg::OnFileOpenmap()
 
     bNoDraw = TRUE;
 
-    CString str;
-    str = GetLanguageStringACP("MainDialogCaption");
-    str += " (";
-    str += (char*)(LPCTSTR)dlg.GetPathName();
-    str += ")";
+    auto const& pathName = dlg.GetPathName();
 
     // MW 07/20/01: Update prev. files
-    InsertPrevFile(dlg.GetPathName());
+    InsertPrevFile(pathName);
 
-    this->SetWindowText(str);
+    this->SetWindowText(makeWindowTitle(pathName));
 
     SetCursor(LoadCursor(NULL, IDC_WAIT));
 
@@ -780,13 +772,7 @@ void CFinalSunDlg::OnFileSaveas()
 
     if (dlg.DoModal() != IDCANCEL) {
         currentMapFile = dlg.GetPathName();
-
-        CString str = GetLanguageStringACP("MainDialogCaption");
-        str += " (";
-        str += currentMapFile;
-        str += ")";
-
-        this->SetWindowText(str);
+        this->SetWindowText(makeWindowTitle(currentMapFile));
         SaveMap(currentMapFile);
     }
 
@@ -1727,9 +1713,7 @@ void CFinalSunDlg::OnFileNew()
 
     // set currentMapFile to nothing and update window caption
     currentMapFile.Empty();
-    CString cap;
-    cap.Format("%s (%s)", GetLanguageStringACP("MainDialogCaption"), GetLanguageStringACP("NewMap"));
-    SetWindowText(cap);
+    SetWindowText(makeWindowTitle(GetLanguageStringACP("NewMap")));
 
     // set cursor to wait
     SetCursor(LoadCursor(NULL, IDC_WAIT));
@@ -3704,23 +3688,15 @@ void CFinalSunDlg::OpenMap(const CString lpFilename)
 
     bNoDraw = TRUE;
 
-    CString str = GetLanguageStringACP("MainDialogCaption");
-    str += " (";
-    str += lpFilename;
-    str += ")";
-
     // MW 07/20/01: Update prev. files
     InsertPrevFile(lpFilename);
 
-    this->SetWindowText(str);
+    this->SetWindowText(makeWindowTitle(lpFilename));
 
     SetCursor(LoadCursor(NULL, IDC_WAIT));
 
     errstream << "Map->LoadMap() will be called" << endl;
     errstream.flush();
-
-
-
     Map->LoadMap(fileToOpen);
 
 
