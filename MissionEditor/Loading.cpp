@@ -170,10 +170,6 @@ void CLoading::Load()
 	// Load voxel normal tables
 	InitVoxelNormalTables();
 
-
-	// create a ini file containing some info XCC Mixer needs
-	CreateINI();
-
 	// rules.ini
 	m_cap.SetWindowText(GetLanguageStringACP("LoadLoadRules"));
 	m_progress.SetPos(30);
@@ -898,46 +894,6 @@ BOOL CLoading::OnInitDialog()
 
 	return TRUE;
 }
-
-// write a small ini file containing the FinalSun path and version (XCC needs this)
-// TODO: this was made for Win9x. It does not work anymore on modern operating systems if you don't run the editor as administrator (which you should not do)
-void CLoading::CreateINI()
-{
-
-
-	wchar_t iniFile_[MAX_PATH];
-	CIniFile path;
-	CString version;
-
-	GetWindowsDirectoryW(iniFile_, MAX_PATH);
-	std::string iniFile = utf16ToUtf8(iniFile_);
-#ifdef RA2_MODE
-	iniFile += "\\FinalAlert2.ini";
-#else
-	iniFile += "\\FinalSun.ini";
-#endif
-
-#ifdef RA2_MODE
-	CString app = "FinalAlert";
-#else
-	CString app = "FinalSun";
-#endif
-
-	version.LoadString(IDS_VERSION);
-	path.SetString(app, "Path", AppPath);
-	path.SetString(app, "Version", version);
-
-	path.SaveFile(iniFile);
-}
-
-
-
-
-
-
-
-
-
 
 void CLoading::LoadTSIni(LPCTSTR lpFilename, CIniFile* lpIniFile, BOOL bIsExpansion, BOOL bCheckEditorDir)
 {
