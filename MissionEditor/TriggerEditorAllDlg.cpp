@@ -576,7 +576,7 @@ void CTriggerEditorAllDlg::onChangePersistence()
     }
 
     auto& opt = TriggerDatabase::Instance().Lookup(m_currentTrigger).Options();
-    opt.controls[TriggerOptions::MustTransfer] = persistenceVal > 0;
+    opt.controls[TriggerOptions::MustTransfer] = hasTagLinked && persistenceVal > 0;
 }
 
 void CTriggerEditorAllDlg::onEditChangeHouse()
