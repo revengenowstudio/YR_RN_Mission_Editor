@@ -563,15 +563,20 @@ void CTriggerEditorAllDlg::onChangePersistence()
     m_persistence.GetWindowText(persistenceStr);
     persistenceStr.Trim();
 
+    bool hasTagLinked = false;
+    auto const persistenceVal = atoi(persistenceStr);
     auto& tagDb = TagDatabase::Instance();
     // locate that tag and update its value
     for (auto& tag : tagDb) {
         if (tag.triggerId == m_currentTrigger) {
-            tag.persistence = atoi(persistenceStr);
+            tag.persistence = persistenceVal;
+            hasTagLinked = true;
             break;
         }
     }
 
+    auto& opt = TriggerDatabase::Instance().Lookup(m_currentTrigger).Options();
+    opt.controls[TriggerOptions::MustTransfer] = persistenceVal > 0;
 }
 
 void CTriggerEditorAllDlg::onEditChangeHouse()
