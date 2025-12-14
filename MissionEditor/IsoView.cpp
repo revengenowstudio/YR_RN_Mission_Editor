@@ -5963,7 +5963,7 @@ void CIsoView::DrawMap()
 					p = images.Read(lpPicFile);
 				}
 
-				if (!p && p->pic == NULL) {
+				if (!p || p->pic == NULL) {
 					if (!missingimages[obj.basic.type]) {
 						SetError("Loading graphics");
 						theApp.m_loading->LoadUnitGraphic(obj.basic.type);
