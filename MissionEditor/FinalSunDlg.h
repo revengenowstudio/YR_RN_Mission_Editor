@@ -109,26 +109,25 @@ public:
 	// Vom Klassenassistenten generierte Überladungen virtueller Funktionen
 	//{{AFX_VIRTUAL(CFinalSunDlg)
 public:
-	virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pLResult);
-	virtual INT_PTR DoModal();
+	virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pLResult) override;
+	virtual INT_PTR DoModal() override;
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
-	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
-	//}}AFX_VIRTUAL
+	virtual void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV-Unterstützung
+	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
+	virtual BOOL OnInitDialog() override;	
+	virtual void OnOK() override;
+	virtual void OnCancel() override;
 
 // Implementierung
-protected:
 	HICON m_hIcon;
 
 	// Generierte Message-Map-Funktionen
 	//{{AFX_MSG(CFinalSunDlg)
-	virtual BOOL OnInitDialog();
+
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnFileQuit();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	virtual void OnOK();
-	virtual void OnCancel();
 	afx_msg void OnOptionsTiberiansunoptions();
 	afx_msg void OnFileOpenmap();
 	afx_msg void OnFileSaveas();

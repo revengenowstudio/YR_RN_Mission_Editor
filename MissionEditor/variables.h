@@ -34,10 +34,12 @@
 #define FA2_OPTION_DEF_FILE "FinalRevengeDefaults.ini"
 #define FA2_PROJECT_FILE "FinalRevengeProject.ini"
 #define FA2_EDITOR_NAME "FinalRevenge" // "FinalAlert 2"
+#define FA2_MAIN_DLG_CAP_LBL "MainDialogCaptionRA2"
 #else
 #define FA2_OPTION_FILE "FinalSun.ini"
 #define FA2_OPTION_DEF_FILE "FinalSunDefaults.ini"
 #define FA2_EDITOR_NAME "FinalSun"
+#define FA2_MAIN_DLG_CAP_LBL "MainDialogCaption"
 #endif
 
 class CMapData;
