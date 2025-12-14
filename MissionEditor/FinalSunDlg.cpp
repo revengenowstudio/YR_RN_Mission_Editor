@@ -793,25 +793,66 @@ void CFinalSunDlg::OnFileSaveas()
     }
     r = TranslateStringVariables(8, r, ";");
 
-    auto const& ext = g_data.GetStringOr("Customizations", "SaveMapExtensionDefault", ".map");
-    CFileDialog dlg(FALSE, ext, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, r);
-    char cuPath[MAX_PATH];
+	auto const& ext = g_data.GetStringOr("Customizations", "SaveMapExtensionDefault", ".map");
+	
+	char cuPath[MAX_PATH];
+	GetCurrentDirectory(MAX_PATH, cuPath);
 
-    GetCurrentDirectory(MAX_PATH, cuPath);
-    dlg.m_ofn.lpstrInitialDir = cuPath;
 
-    if (theApp.m_Options.TSExe.GetLength()) {
-        dlg.m_ofn.lpstrInitialDir = theApp.m_Options.TSExe;
-    }
+	CComPtr<IFileSaveDialog> pDlg;
+	if (FAILED(CoCreateInstance(CLSID_FileSaveDialog, nullptr,
+		CLSCTX_ALL, IID_PPV_ARGS(&pDlg))))
+		return;
 
-    if (dlg.DoModal() != IDCANCEL) {
-        currentMapFile = dlg.GetPathName();
-        this->SetWindowText(makeWindowTitle(currentMapFile));
-        SaveMap(currentMapFile);
-    }
+	const COMDLG_FILTERSPEC rgSpec[] =
+	{
+		{ L"map地图",L"*.map" },
+		{ L"yrm地图",L"*.yrm" },
+		{ L"mpr地图",L"*.mpr" },
+		{ L"mmx地图",L"*.mmx" },
+	};
+	pDlg->SetFileTypes(_countof(rgSpec), rgSpec);
+	pDlg->SetFileTypeIndex(1);
+	pDlg->SetDefaultExtension(L"map");
+	pDlg->SetTitle(L"保存地图");
+	pDlg->SetFileName(L"NewMap");
 
-    SetCursor(m_hArrowCursor);
 
+	CStringW srcFolder(theApp.m_Options.TSExe);
+	wchar_t  szInitFolder[MAX_PATH] = { 0 };
+	wcsncpy_s(szInitFolder, srcFolder.GetString(), _TRUNCATE);
+	CComPtr<IShellItem> pFolder;
+	if (SUCCEEDED(SHCreateItemFromParsingName(szInitFolder,
+		nullptr,
+		IID_PPV_ARGS(&pFolder))))
+		pDlg->SetFolder(pFolder);
+
+	if (FAILED(pDlg->Show(nullptr)))
+		return;
+
+	CComPtr<IShellItem> pItem;
+	if (FAILED(pDlg->GetResult(&pItem)))
+		return;
+
+	PWSTR pszPath = nullptr;
+	if (FAILED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszPath)))
+		return;
+	CString currentMapFile(pszPath);
+	CoTaskMemFree(pszPath);
+
+	if (currentMapFile.GetLength() >= MAX_PATH)
+		return;
+
+	CString str = GetLanguageStringACP("MainDialogCaption");
+	str += " (";
+	str += currentMapFile;
+	str += ")";
+
+	this->SetWindowText(str);
+	SaveMap(currentMapFile);
+	
+
+	SetCursor(m_hArrowCursor);
 }
 
 void CFinalSunDlg::OnOptionsExportrulesini()
