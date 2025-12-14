@@ -390,6 +390,7 @@ TEST(TriggerActionTest, ActionSerde)
 3=Begin production...,0,2,0,0,0,0,0,0,0,AI begin production,0,1,3
 11=CSF Text...,-4,13,2,6,0,0,0,0,0,You know the usage,0,1,11
 13=(Unused)Auto create starts...,0,2,0,0,0,0,0,0,0,AI starts auto create,0,1,13
+40=Adjust player view...,0,0,21,22,23,24,0,0,0,Resize player view using Width Height Left Right,0,1,40
 53=Enable trigger,-2,14,0,0,0,0,0,0,0,Enable a trigger,0,1,53
 55=Create radar event,0,43,2,0,0,0,1,0,0,Create radar event at waypoint,0,1,55
 74=AI Trigger begins...,0,2,0,0,0,0,0,0,0,Enable house AI,0,1,74
