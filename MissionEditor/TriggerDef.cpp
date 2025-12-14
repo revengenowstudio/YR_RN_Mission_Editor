@@ -442,11 +442,20 @@ bool TriggerAction::ParamOperator::Assign(const CString& val)
 const ParamType& TriggerAction::ParamOperator::lookUpParamType(TriggerAction& action, int nth)
 {
     auto const& paramTypes = action.Type().paramTypes;
-    if (nth < paramTypes.size()) {
-        auto const paramTypeIdx = paramTypes.at(nth);
-        return TriggerDefinitionManager::Instance().Params().at(paramTypeIdx);
 
-    }
+    do {
+        if (nth >= paramTypes.size()) {
+            break;
+        }
+        auto const paramTypIt = paramTypes.find(nth);
+        if (paramTypIt == paramTypes.end()) {
+            break;
+        }
+        return TriggerDefinitionManager::Instance().
+            Params().at(paramTypIt->second);
+
+    } while (0);
+
     return action.IsUsingWaypointEncoding() ? ParamType::WaypointSpecial : ParamType::Default;
 }
 
