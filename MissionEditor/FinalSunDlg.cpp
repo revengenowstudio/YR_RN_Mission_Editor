@@ -478,7 +478,7 @@ void CFinalSunDlg::OnCancel()
 bool checkProjectPathAndRelaunch(CString filePath, bool forceRelaunch = false)
 { // check whether there is a project file in the map folder
 	auto const folderPath = filePath.Left(filePath.ReverseFind('\\'));
-	auto const projectFile = folderPath + "\\FinalAlertProject.ini";
+	auto const projectFile = folderPath + "\\" FA2_PROJECT_FILE;
 	// There are several cases:
 	// 1. Currently now project file vs incoming project file
 	// 2. Current project file differs from incoming one
