@@ -88,6 +88,7 @@ protected:
     CButton	m_hard;
     CButton	m_easy;
     CButton	m_disabled;
+    //CButton	m_mustTransfer;
     // event options
     CMyComboBox m_eventTypes;
     CListBox m_eventList;
@@ -104,4 +105,5 @@ public:
     DECLARE_MESSAGE_MAP()
     afx_msg void onCloneTrigger();
     afx_msg void onEditAttachedTrigger();
+    afx_msg void OnBnClickedTrgrMustTransfer();
 };
