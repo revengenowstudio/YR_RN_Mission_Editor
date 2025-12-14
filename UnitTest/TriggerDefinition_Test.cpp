@@ -30,6 +30,7 @@ R"(
 1=Claim Winner...,0,2,0,0,0,0,0,0,0,The winner must be a specific side%1 and the game will end immediately. For example%1 the players on a specific side are defined. In a multiplayer task%1 this action will lead to the failure of all players.,0,1,1
 2=Claim Loser...,0,2,0,0,0,0,0,0,0,The loser must be a specific side%1 and the game will end immediately. When a specific side is designated as the loser%1 the game ends right away. For example%1 the players on a specific side are defined. If a non-player country is set as the loser%1 it can result in a mission victory. a typical example is a modified mod that changes the order of countries. In a multiplayer campaign%1 this action will lead to the failure of all players.,0,1,2
 4=Create Team...,-1,7,6,0,0,0,0,0,0,Create a New TeamType instance,0,1,4
+40=Adjust player view...,0,0,21,22,23,24,0,0,0,Resize player view using Width Height Left Right,0,1,40
 129=Set SW Charge Percentage,-11,20,0,0,0,0,1,0,0,This will set owner's Superweapon percentage,0,1,129
 130=Restore Initial Buildings...,0,2,0,0,0,0,0,0,0,All buildings of selected house's will be rebuilt,0,1,130,1
 )";
@@ -40,7 +41,7 @@ R"(
     auto& mgr = TriggerDefinitionManager::Instance();
     mgr.LoadFrom(ini, std::cerr);
 
-    EXPECT_EQ(mgr.Actions().size(), 6);
+    EXPECT_EQ(mgr.Actions().size(), 7);
     EXPECT_EQ(mgr.Actions().at(0).description, "This is an empty action. It means doing nothing.");
     EXPECT_EQ(mgr.Actions().at(1).controlCode, 0);
     EXPECT_EQ(mgr.Actions().at(1).paramTypes.at(0), 2);
@@ -50,6 +51,8 @@ R"(
     EXPECT_EQ(mgr.Actions().at(1).yrOnly, false);
     EXPECT_EQ(mgr.Actions().at(4).controlCode, -1);
     EXPECT_EQ(mgr.Actions().at(4).paramTypes.at(0), 7);
+    EXPECT_EQ(mgr.Actions().at(40).yrOnly, false);
+    EXPECT_EQ(mgr.Actions().at(40).paramStartOffset, 1);
     EXPECT_EQ(mgr.Actions().at(129).ra2Allowed, true);
     EXPECT_EQ(mgr.Actions().at(129).useWaypointSlot, true);
     EXPECT_EQ(mgr.Actions().at(129).yrOnly, false);

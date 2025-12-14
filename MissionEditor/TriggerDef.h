@@ -43,6 +43,7 @@ struct TriggerActionType
     CString description;            // desc about usage
     int controlCode;                // negative value, should turn back
     std::map<int, int> paramTypes; // position : paramType
+    int paramStartOffset{ 0 };
     bool useWaypointSlot{ false };     // 6th value not waypoint
     bool useTag{ false };
     bool obsolete{ false };
