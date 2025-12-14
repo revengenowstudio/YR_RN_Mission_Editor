@@ -29,6 +29,14 @@
 #include "FinalSun.h"
 #include "MapData.h"
 
+#ifdef RA2_MODE
+#define FA2_OPTION_FILE "FinalAlert.ini"
+#define FA2_OPTION_DEF_FILE "FinalAlertDefaults.ini"
+#else
+#define FA2_OPTION_FILE "FinalSun.ini"
+#define FA2_OPTION_DEF_FILE "FinalSunDefaults.ini"
+#endif
+
 class CMapData;
 
 // the map

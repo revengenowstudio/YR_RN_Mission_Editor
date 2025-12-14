@@ -2207,10 +2207,7 @@ void CFinalSunDlg::UnloadAll(bool ask)
 void CFinalSunDlg::OnOptionsSimpleview()
 {
 	CIniFile Options;
-	Options.LoadFile(u8AppDataPath + "\\FinalSun.ini");
-#ifdef RA2_MODE
-	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.LoadFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 
 	if (GetMenu()->GetMenuState(ID_OPTIONS_SIMPLEVIEW, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_SIMPLEVIEW, MF_BYCOMMAND | MF_UNCHECKED);
@@ -2227,11 +2224,7 @@ void CFinalSunDlg::OnOptionsSimpleview()
 
 	UpdateStrings();
 
-#ifndef RA2_MODE
-	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");
-#else
-	Options.SaveFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.SaveFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 
 	UpdateDialogs();
 }
@@ -3368,10 +3361,7 @@ void CFinalSunDlg::OnOptionsDisableautoshore()
 {
 
 	CIniFile Options;
-	Options.LoadFile(u8AppDataPath + "\\FinalSun.ini");
-#ifdef RA2_MODE
-	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.LoadFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 
 	if (GetMenu()->GetMenuState(ID_OPTIONS_DISABLEAUTOSHORE, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_DISABLEAUTOSHORE, MF_BYCOMMAND | MF_UNCHECKED);
@@ -3383,13 +3373,7 @@ void CFinalSunDlg::OnOptionsDisableautoshore()
 		Options.SetBool("UserInterface", "DisableAutoShore", true);
 	}
 
-
-#ifndef RA2_MODE
-	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");
-#else
-	Options.SaveFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
-
+	Options.SaveFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 }
 
 
@@ -3454,10 +3438,7 @@ void CFinalSunDlg::OnOptionsDisableautoshore()
 void CFinalSunDlg::OnOptionsDisableautolat()
 {
 	CIniFile Options;
-	Options.LoadFile(u8AppDataPath + "\\FinalSun.ini");
-#ifdef RA2_MODE
-	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.LoadFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 
 	if (GetMenu()->GetMenuState(ID_OPTIONS_DISABLEAUTOLAT, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_DISABLEAUTOLAT, MF_BYCOMMAND | MF_UNCHECKED);
@@ -3469,12 +3450,7 @@ void CFinalSunDlg::OnOptionsDisableautolat()
 		Options.SetBool("UserInterface", "DisableAutoLat", true);
 	}
 
-
-#ifndef RA2_MODE
-	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");
-#else
-	Options.SaveFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.SaveFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 }
 
 void CFinalSunDlg::OnEditPaste()
@@ -3544,10 +3520,7 @@ void CFinalSunDlg::CheckAvail(CCmdUI* pCmdUI)
 void CFinalSunDlg::OnOptionsSounds()
 {
 	CIniFile Options;
-	Options.LoadFile(u8AppDataPath + "\\FinalSun.ini");
-#ifdef RA2_MODE
-	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.LoadFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 
 	if (GetMenu()->GetMenuState(ID_OPTIONS_SOUNDS, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_SOUNDS, MF_BYCOMMAND | MF_UNCHECKED);
@@ -3559,12 +3532,7 @@ void CFinalSunDlg::OnOptionsSounds()
 		Options.SetBool("UserInterface", "Sounds", true);
 	}
 
-
-#ifndef RA2_MODE
-	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");
-#else
-	Options.SaveFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif	
+	Options.SaveFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 }
 
 void CFinalSunDlg::OnUpdateOptionsSounds(CCmdUI* pCmdUI)
@@ -3575,10 +3543,7 @@ void CFinalSunDlg::OnUpdateOptionsSounds(CCmdUI* pCmdUI)
 void CFinalSunDlg::OnOptionsDisableslopecorrection()
 {
 	CIniFile Options;
-	Options.LoadFile(u8AppDataPath + "\\FinalSun.ini");
-#ifdef RA2_MODE
-	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.LoadFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 
 	if (GetMenu()->GetMenuState(ID_OPTIONS_DISABLESLOPECORRECTION, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_DISABLESLOPECORRECTION, MF_BYCOMMAND | MF_UNCHECKED);
@@ -3590,11 +3555,7 @@ void CFinalSunDlg::OnOptionsDisableslopecorrection()
 		Options.SetBool("UserInterface", "DisableSlopeCorrection", true);
 	}
 
-#ifndef RA2_MODE
-	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");
-#else
-	Options.SaveFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif	
+	Options.SaveFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 }
 
 void CFinalSunDlg::OnOptionsShowbuildingoutline()
@@ -3604,7 +3565,7 @@ void CFinalSunDlg::OnOptionsShowbuildingoutline()
 	CIniFile Options;
 	Options.LoadFile(u8AppDataPath + "\\FinalSun.ini");
 #ifdef RA2_MODE
-	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
+	Options.LoadFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 #endif
 
 	if (GetMenu()->GetMenuState(ID_OPTIONS_SHOWBUILDINGOUTLINE, MF_BYCOMMAND) & MF_CHECKED) {
@@ -3619,11 +3580,7 @@ void CFinalSunDlg::OnOptionsShowbuildingoutline()
 
 	m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 
-#ifndef RA2_MODE
-	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");
-#else
-	Options.SaveFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif	
+	Options.SaveFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 }
 
 
@@ -3658,10 +3615,8 @@ void CFinalSunDlg::InsertPrevFile(CString lpFilename)
 	}
 
 	CIniFile Options;
-	Options.LoadFile(u8AppDataPath + "\\FinalSun.ini");
-#ifdef RA2_MODE
-	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.LoadFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
+
 	for (auto idx = RecentFilesSlots - 1; idx > 0; idx--) {
 		theApp.m_Options.prev_maps[idx] = theApp.m_Options.prev_maps[idx - 1];
 	}
@@ -3674,12 +3629,7 @@ void CFinalSunDlg::InsertPrevFile(CString lpFilename)
 		Options.SetString("Files", e, theApp.m_Options.prev_maps[idx]);
 	}
 
-
-#ifndef RA2_MODE
-	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");
-#else
-	Options.SaveFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif	
+	Options.SaveFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 
 	UpdateStrings();
 }
@@ -3846,10 +3796,7 @@ void CFinalSunDlg::OnHelpShowlogs()
 void CFinalSunDlg::OnOptionsSmoothzoom()
 {
 	CIniFile Options;
-	Options.LoadFile(u8AppDataPath + "\\FinalSun.ini");
-#ifdef RA2_MODE
-	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.LoadFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 
 	if (GetMenu()->GetMenuState(ID_OPTIONS_SMOOTHZOOM, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_SMOOTHZOOM, MF_BYCOMMAND | MF_UNCHECKED);
@@ -3861,11 +3808,7 @@ void CFinalSunDlg::OnOptionsSmoothzoom()
 
 	Options.SetBool("UserInterface", "ViewScaleUseSteps", theApp.m_Options.viewScaleUseSteps);
 
-#ifndef RA2_MODE
-	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");
-#else
-	Options.SaveFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.SaveFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 }
 
 
@@ -3881,10 +3824,7 @@ BOOL CFinalSunDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 void CFinalSunDlg::OnOptionsUsedefaultmousecursor()
 {
 	CIniFile Options;
-	Options.LoadFile(u8AppDataPath + "\\FinalSun.ini");
-#ifdef RA2_MODE
-	Options.LoadFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.LoadFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 
 	if (GetMenu()->GetMenuState(ID_OPTIONS_USEDEFAULTMOUSECURSOR, MF_BYCOMMAND) & MF_CHECKED) {
 		GetMenu()->CheckMenuItem(ID_OPTIONS_USEDEFAULTMOUSECURSOR, MF_BYCOMMAND | MF_UNCHECKED);
@@ -3898,9 +3838,5 @@ void CFinalSunDlg::OnOptionsUsedefaultmousecursor()
 
 	Options.SetBool("UserInterface", "UseDefaultMouseCursor", theApp.m_Options.useDefaultMouseCursor);
 
-#ifndef RA2_MODE
-	Options.SaveFile(u8AppDataPath + "\\FinalSun.ini");
-#else
-	Options.SaveFile(u8AppDataPath + "\\FinalAlert.ini");
-#endif
+	Options.SaveFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
 }

@@ -196,13 +196,8 @@ BOOL CFinalSunApp::InitInstance()
 		exit(0);
 	}
 
-#ifndef RA2_MODE
-	const std::string iniName = "FinalSun.ini";
-	const std::string defaultIniName = "FinalSunDefaults.ini";
-#else
-	const std::string iniName = "FinalAlert.ini";
-	const std::string defaultIniName = "FinalAlertDefaults.ini";
-#endif
+	const std::string iniName = FA2_OPTION_FILE;
+	const std::string defaultIniName = FA2_OPTION_DEF_FILE;
 
 	// ok lets get some options
 	CIniFile optini;
