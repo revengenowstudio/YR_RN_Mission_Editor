@@ -516,6 +516,17 @@ void CFinalSunDlg::OnOptionsTiberiansunoptions()
     }
 }
 
+inline LPCWSTR ToW(const CString& src)
+{
+#ifdef UNICODE
+	return src;               
+#else
+	static thread_local CStringW buf;
+	buf = CStringW(src);      // ANSI -> Unicode
+	return buf;
+#endif
+}
+
 void CFinalSunDlg::OnFileOpenmap()
 {
     CString fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES");
@@ -528,35 +539,54 @@ void CFinalSunDlg::OnFileOpenmap()
         fileSearchString.Replace(".yrm", ".mpr");
     }
 
-    CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, fileSearchString);
+	CComPtr<IFileOpenDialog> pDlg;
+	HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL,
+		IID_PPV_ARGS(&pDlg));
+	if (FAILED(hr))
+		return;
 
-    char cuPath[MAX_PATH];
-    GetCurrentDirectory(MAX_PATH, cuPath);
-    dlg.m_ofn.lpstrInitialDir = cuPath;
+	const COMDLG_FILTERSPEC rgSpec[] =
+	{
+		{ ToW(fileSearchString),L"*.map;*.yrm;*.mpr;*.mmx"},
+	};
+	pDlg->SetFileTypes(_countof(rgSpec), rgSpec);
+	pDlg->SetFileTypeIndex(1);
 
-    if (theApp.m_Options.TSExe.GetLength()) {
-        dlg.m_ofn.lpstrInitialDir = theApp.m_Options.TSExe.operator LPCTSTR();
-    }
+	DWORD dwFlags = 0;
+	pDlg->GetOptions(&dwFlags);
+	pDlg->SetOptions(dwFlags | FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST);
 
-    if (dlg.DoModal() == IDCANCEL) {
-        return;
-    }
+	hr = pDlg->Show(nullptr);
+	if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED))
+		return;
+	if (FAILED(hr))
+		return;
 
-    if (checkProjectPathAndRelaunch(dlg.GetPathName())) {
-        reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->UnloadAll(false);
-        return;
-    }
+	CComPtr<IShellItem> pItem;
+	if (FAILED(pDlg->GetResult(&pItem)))
+		return;
 
-    m_PKTHeader.Clear();
+	PWSTR pszPath = nullptr;
+	if (FAILED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszPath)))
+		return;
 
-    CString fileToOpen = dlg.GetPathName();
-    fileToOpen.MakeLower();
-    CString ext = dlg.GetFileExt();
-    ext.MakeLower();
-    BOOL bLoadedFromMMX = FALSE;
-    if (ext == "mmx") {
-        HMIXFILE hMix = FSunPackLib::XCC_OpenMix(fileToOpen, NULL);
-        fileToOpen.Replace(".mmx", ".map");
+	CString fileToOpen(pszPath);
+	CoTaskMemFree(pszPath);
+
+	CString fileName = fileToOpen.Mid(fileToOpen.ReverseFind(L'\\') + 1);
+	CString ext;
+	int dot = fileName.ReverseFind(L'.');
+	if (dot != -1)
+		ext = fileName.Mid(dot + 1);
+
+	ext.MakeLower();
+	fileToOpen.MakeLower();
+
+	ext.MakeLower();
+	BOOL bLoadedFromMMX = FALSE;
+	if (ext == "mmx") {
+		HMIXFILE hMix = FSunPackLib::XCC_OpenMix(fileToOpen, NULL);
+		fileToOpen.Replace(".mmx", ".map");
 
         if (fileToOpen.ReverseFind('\\') >= 0) {
             fileToOpen = fileToOpen.Right(fileToOpen.GetLength() - fileToOpen.ReverseFind('\\') - 1);
@@ -594,10 +624,14 @@ void CFinalSunDlg::OnFileOpenmap()
 
     bNoDraw = TRUE;
 
-    auto const& pathName = dlg.GetPathName();
+	CString str;
+	str = GetLanguageStringACP("MainDialogCaption");
+	str += " (";
+	str += (char*)(LPCTSTR)fileToOpen;
+	str += ")";
 
-    // MW 07/20/01: Update prev. files
-    InsertPrevFile(pathName);
+	// MW 07/20/01: Update prev. files
+	InsertPrevFile(fileToOpen);
 
     this->SetWindowText(makeWindowTitle(pathName));
 
@@ -617,43 +651,43 @@ void CFinalSunDlg::OnFileOpenmap()
             break;
         }
 
-        int res = MessageBox(TranslateStringACP("MainDialogMapCorrupt"), TranslateStringACP("Corrupt"),
-            MB_YESNOCANCEL);
-        if (res == IDCANCEL) {
-            Map->CreateMap(32, 32, THEATER0, 0);
-            bNoMapFile = TRUE;
-            break;
-        }
-        if (res != IDYES) {
-            break;
-        }
-        // try repair
-        int fielddata_size = Map->GetIsoSize() * Map->GetIsoSize();
-        for (auto i = 0; i < fielddata_size; i++) {
-            int gr = Map->GetFielddataAt(i)->wGround;
-            if (gr == 0xFFFF) {
-                gr = 0;
-                continue;
-            }
-            if (gr >= (*tiledata_count)) {
-                Map->SetTileAt(i, 0, 0);
-                continue;
-            }
-            if ((*tiledata)[gr].wTileCount <= Map->GetFielddataAt(i)->bSubTile) {
-                Map->SetTileAt(i, 0, 0);
-            }
-        }
+		int res = MessageBox(TranslateStringACP("MainDialogMapCorrupt"), TranslateStringACP("Corrupt"),
+			MB_YESNOCANCEL);
+		if (res == IDCANCEL) {
+			Map->CreateMap(32, 32, THEATER0, 0);
+			bNoMapFile = TRUE;
+			break;
+		}
+		if (res != IDYES) {
+			break;
+		}
+		// try repair
+		int fielddata_size = Map->GetIsoSize() * Map->GetIsoSize();
+		for (auto i = 0; i < fielddata_size; i++) {
+			int gr = Map->GetFielddataAt(i)->wGround;
+			if (gr == 0xFFFF) {
+				gr = 0;
+				continue;
+			}
+			if (gr >= (*tiledata_count)) {
+				Map->SetTileAt(i, 0, 0);
+				continue;
+			}
+			if ((*tiledata)[gr].wTileCount <= Map->GetFielddataAt(i)->bSubTile) {
+				Map->SetTileAt(i, 0, 0);
+			}
+		}
 
     } while (0);
 
-    if (!bNoMapFile) {
-        if (bLoadedFromMMX) {
-            currentMapFile = dlg.GetPathName();
-        }
-        else {
-            currentMapFile = fileToOpen;
-        }
-    }
+	if (!bNoMapFile) {
+		if (bLoadedFromMMX) {
+			currentMapFile = fileToOpen;
+		}
+		else {
+			currentMapFile = fileToOpen;
+		}
+	}
 
     Sleep(200);
 
