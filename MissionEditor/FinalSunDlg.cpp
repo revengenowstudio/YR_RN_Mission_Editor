@@ -3037,45 +3037,38 @@ static std::tuple<const char*, const char*, CString> translateException(const PE
 
 LONG __stdcall ExceptionHandler(_EXCEPTION_POINTERS* ExceptionInfo) 
 {
-    char adress[50];
-    char c[50];
-    itoa((std::ptrdiff_t)ExceptionInfo->ExceptionRecord->ExceptionAddress, adress, 16);
+    errstream << "Exception occured. Current data:" << endl;
+    errstream << "Last succeeded operation:" << last_succeeded_operation << endl;
+    errstream << "Last succeeded library operation:" << FSunPackLib::last_succeeded_operation << endl;
     
     auto const [exceptionTypeStr, exceptionDesc, exceptionAdditionalInfo] = translateException(ExceptionInfo->ExceptionRecord);
 
     CString exceptionReport;
+    exceptionReport.Format("INTERNAL APPLICATION ERROR\n\n" \
+        "Application will now try to free memory, save the current map as \"fcrash_backup.map\" in the %s directory and quit.\n\n\n" \
+        "Important: If this error has occured while loading graphics, it can very often be fixed by using another system color resolution (16, 24 or 32 bit)." \
+        "\n\nThe following information is available, please note every line below:\n\n" \
+        "Last succeeded operation: %d\n" \
+        "\nLast library operation: %d\n" \
+        "\nException data:\n%s\n" \
+        "%s\n" \
+        "\nAt address: %p\n"
+        "\n%s",
+        FA2_EDITOR_NAME,
+        last_succeeded_operation,
+        FSunPackLib::last_succeeded_operation,
+        exceptionTypeStr,
+        exceptionDesc,
+        ExceptionInfo->ExceptionRecord->ExceptionAddress,
+        exceptionAdditionalInfo
+    );
 
-    exceptionReport.Format("INTERNAL APPLICATION ERROR\n\n"
-        "Application will now try to free memory, save the current map as \"fcrash_backup.map\" in the %s directory and quit.\n\n\n", FA2_EDITOR_NAME);
-
-    exceptionReport += "Important: If this error has occured while loading graphics, it can very often be fixed by using another system color resolution (16, 24 or 32 bit).";
-
-    exceptionReport += "\n\nThe following information is available, please note every line below:\n\n";
-    exceptionReport += "Last succeeded operation: ";
-    itoa(last_succeeded_operation, c, 10);
-    exceptionReport += c;
-    exceptionReport += "";
-    exceptionReport += "\nLast library operation: ";
-    itoa(FSunPackLib::last_succeeded_operation, c, 10);
-    exceptionReport += c;
-    exceptionReport += "\n";
-    exceptionReport += "\nException data:\n";
-    exceptionReport += exceptionTypeStr;
-    exceptionReport += "\n";
-    exceptionReport += exceptionDesc;
-    exceptionReport += "\nAt address: ";
-    exceptionReport += adress;
-    exceptionReport += exceptionAdditionalInfo;
-
-    errstream << "Exception occured. Current data:" << endl;
-    errstream << "Last succeeded operation:" << last_succeeded_operation << endl;
-    errstream << "Last succeeded library operation:" << FSunPackLib::last_succeeded_operation << endl;
-    errstream << "Trying to save current map" << endl;
-    errstream.flush();
-
-    if (MessageBox(0, exceptionReport, "Fatal error", MB_OKCANCEL) == IDOK) {
+    if (MessageBox(0, exceptionReport, GetLanguageStringACP("Fatal error"), MB_OKCANCEL) == IDOK) {
         return EXCEPTION_CONTINUE_EXECUTION;
     }
+
+    errstream << "Trying to save current map" << endl;
+    errstream.flush();
 
     std::string file = u8AppDataPath;
     file += "\\fcrash_backup.map";
