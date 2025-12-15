@@ -3042,9 +3042,7 @@ LONG __stdcall ExceptionHandler(_EXCEPTION_POINTERS* ExceptionInfo)
     errstream << "Last succeeded library operation:" << FSunPackLib::last_succeeded_operation << endl;
     
     auto const [exceptionTypeStr, exceptionDesc, exceptionAdditionalInfo] = translateException(ExceptionInfo->ExceptionRecord);
-
-    CString exceptionReport;
-    exceptionReport.Format("INTERNAL APPLICATION ERROR\n\n" \
+    const char* pFormatterStr = "INTERNAL APPLICATION ERROR\n\n" \
         "Application will now try to free memory, save the current map as \"fcrash_backup.map\" in the %s directory and quit.\n\n\n" \
         "Important: If this error has occured while loading graphics, it can very often be fixed by using another system color resolution (16, 24 or 32 bit)." \
         "\n\nThe following information is available, please note every line below:\n\n" \
@@ -3053,7 +3051,23 @@ LONG __stdcall ExceptionHandler(_EXCEPTION_POINTERS* ExceptionInfo)
         "\nException data:\n%s\n" \
         "%s\n" \
         "\nAt address: %p\n"
-        "\n%s",
+        "\n%s";
+
+    if (theApp.m_Options.LanguageName == "Chinese") {
+        pFormatterStr = "地图编辑器程序错误\n\n" \
+            "本应用将尝试将地图保存至 %s 文件夹内的\"fcrash_backup.map\" 并且退出.\n\n\n" \
+            "当你看到这个窗口的时候，请截图并反馈给开发者" \
+            "\n\n下面为错误信息详情:\n\n" \
+            "上一次成功的操作ID: %d\n" \
+            "\n刚才执行中的操作ID: %d\n" \
+            "\n异常报告:\n%s\n" \
+            "%s\n" \
+            "\n内存地址: %p\n"
+            "\n%s";
+    }
+
+    CString exceptionReport;
+    exceptionReport.Format(pFormatterStr,
         FA2_EDITOR_NAME,
         last_succeeded_operation,
         FSunPackLib::last_succeeded_operation,

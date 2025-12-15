@@ -2,9 +2,6 @@
 // Microsoft Visual C++ generated include file.
 // Used by TriggerEditor.rc
 //
-#define PRODUCT_VERSION_REVISION        0
-#define PRODUCT_VERSION_MINOR           1
-#define PRODUCT_VERSION_MAJOR           2
 #define IDD_TIBERIANSUNMISSIONEDITOR_DIALOG 102
 #define IDD_FINALSUN_DIALOG             102
 #define IDB_LIGHTBULB                   103
