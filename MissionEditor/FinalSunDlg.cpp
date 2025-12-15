@@ -516,15 +516,44 @@ void CFinalSunDlg::OnOptionsTiberiansunoptions()
     }
 }
 
-inline LPCWSTR ToW(const CString& src)
+inline CStringW ToW(const CString& src)
 {
 #ifdef UNICODE
-	return src;               
+	return src;                  // 拷贝构造
 #else
-	static thread_local CStringW buf;
-	buf = CStringW(src);      // ANSI -> Unicode
-	return buf;
+	return CStringW(src);        // ANSI->Unicode
 #endif
+}
+
+inline std::pair<std::vector<CString>, std::vector<CString>>
+MakeFileTypeLists(const CString& src)
+{
+	std::vector<CString> names, filters;
+
+	if (src.IsEmpty())
+		return { names, filters };
+
+	std::vector<CString> segs;
+	int idx = 0;
+	CString token;
+	while (AfxExtractSubString(token, src, idx++, '|'))
+	{
+		if (token.IsEmpty())          // 末尾多 '|' 会切出空串，直接扔掉
+		{
+			continue;
+		}
+		segs.push_back(token);
+	}
+
+	if (segs.size() & 1)      
+		return { names, filters };
+
+	for (size_t i = 0; i < segs.size(); i += 2)
+	{
+		names.emplace_back(segs[i]);
+		filters.emplace_back(segs[i + 1]);
+	}
+	return { names, filters };
 }
 
 void CFinalSunDlg::OnFileOpenmap()
@@ -545,11 +574,20 @@ void CFinalSunDlg::OnFileOpenmap()
 	if (FAILED(hr))
 		return;
 
-	const COMDLG_FILTERSPEC rgSpec[] =
+	auto [displayNames, extFilters] = MakeFileTypeLists(fileSearchString);
+	std::vector<COMDLG_FILTERSPEC> specs;
+	std::vector<CStringW>        wnames, wfilters;
+	wnames.reserve(displayNames.size());
+	wfilters.reserve(extFilters.size());
+
+	for (size_t i = 0; i < displayNames.size(); ++i)
 	{
-		{ ToW(fileSearchString),L"*.map;*.yrm;*.mpr;*.mmx"},
-	};
-	pDlg->SetFileTypes(_countof(rgSpec), rgSpec);
+		wnames.push_back(ToW(displayNames[i]));
+		wfilters.push_back(ToW(extFilters[i]));
+		specs.push_back({ wnames[i], wfilters[i] });
+	}
+
+	pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
 	pDlg->SetFileTypeIndex(1);
 
 	DWORD dwFlags = 0;
