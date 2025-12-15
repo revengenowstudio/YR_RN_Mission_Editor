@@ -31,7 +31,7 @@ jobs:
       with:
         # Target architecture
         arch: x64
-    - name: Get Vcpkg Version Hash
+    - name: Get Vcpkg Version
       id: vcpkg-version
       shell: powershell
       run: |

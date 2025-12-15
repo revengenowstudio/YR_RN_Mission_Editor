@@ -51,6 +51,22 @@ jobs:
         ./scripts/update_product_version.ps1 -major ${{ env.VERSION_MAJOR }} -minor ${{ env.VERSION_MINOR }} -revision $revNum
         echo "RELEASE_VER=$versionNum" >> $GITHUB_ENV
         echo "PACKAGE_NAME=$pkgName" >> $GITHUB_ENV
+    - name: Get Vcpkg Version
+      id: vcpkg-version
+      shell: powershell
+      run: |
+        $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg\vcpkg.exe"
+        $output = & $vcpkgPath --version
+        echo "vcpkg --version output : $output"
+        $match = $output -split " "
+        if ($match) {
+            $key = $match[5].Trim()
+        } else {
+            $key = "unknown-vcpkg-version"
+        }
+        echo "vcpkg version : $key"
+        echo "vcpkg_key=$key" >> "$GITHUB_OUTPUT"
+        echo "vcpkg_key=$key" >> $env:GITHUB_OUTPUT
     - name: Cache or restore vcpkg
       uses: actions/cache/restore@v4
       with:
