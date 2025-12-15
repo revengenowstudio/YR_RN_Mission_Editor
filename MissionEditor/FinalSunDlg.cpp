@@ -2899,150 +2899,193 @@ void CFinalSunDlg::OnHelpManual()
     }
 }
 
-
-LONG __stdcall ExceptionHandler(
-    _EXCEPTION_POINTERS* ExceptionInfo   // address of 
-    // exception info
-)
+static std::tuple<const char*, const char*, CString> translateException(const PEXCEPTION_RECORD pRecord)
 {
-    CString s;
-    CString s2;
-    CString s_add;
-    char adress[50];
-    char c[50];
-    itoa((std::ptrdiff_t)ExceptionInfo->ExceptionRecord->ExceptionAddress, adress, 16);
-    s = "Unknown exception";
-    switch (ExceptionInfo->ExceptionRecord->ExceptionCode) {
-    case EXCEPTION_ACCESS_VIOLATION:
-        s = "EXCEPTION_ACCESS_VIOLATION";
-        s2 = "Thread did not have read or write access to the virtual address.";
-        if (ExceptionInfo->ExceptionRecord->ExceptionInformation[0]) {
-            s_add = "\nAdditional information: Write access to 0x";
+    switch (pRecord->ExceptionCode) {
+        default:
+            return { "Unknown exception", "", {} };
+        case EXCEPTION_ACCESS_VIOLATION:
+        {
+            CString additional;
+            auto const pPrefix = pRecord->ExceptionInformation[0] ?
+                "Write access to 0x" : "Read access from 0x";
+            additional.Format("\nAdditional information: %s%X", pPrefix, pRecord->ExceptionInformation[1]);
+            return {
+                "EXCEPTION_ACCESS_VIOLATION",
+                "Thread did not have read or write access to the virtual address.",
+                additional,
+            };
         }
-        else
-            s_add = "\nAdditional information: Read access from 0x";
-
-        itoa(ExceptionInfo->ExceptionRecord->ExceptionInformation[1], c, 16);
-
-        s_add += c;
-
         break;
-    case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
-        s = "EXCEPTION_ARRAY_BOUNDS_EXCEEDED";
-        s2 = "Thread tried to access an array out of bounds.";
-        break;
-    case EXCEPTION_BREAKPOINT:
-        s = "EXCEPTION_BREAKPOINT";
-        s2 = "Encountered breakpoint.";
-        break;
-    case EXCEPTION_DATATYPE_MISALIGNMENT:
-        s = "EXCEPTION_DATATYPE_MISALIGNMENT";
-        s2 = "Access to memory was misaligned for the given datatype.";
-        break;
-    case EXCEPTION_FLT_DENORMAL_OPERAND:
-        s = "EXCEPTION_FLT_DENORMAL_OPERAND";
-        s2 = "Denormal operand in floating point operation.";
-        break;
-    case EXCEPTION_FLT_DIVIDE_BY_ZERO:
-        s = "EXCEPTION_FLT_DIVIDE_BY_ZERO";
-        s2 = "Thread divided by zero in a floating point operation.";
-        break;
-    case EXCEPTION_FLT_INEXACT_RESULT:
-        s = "EXCEPTION_FLT_INEXACT_RESULT";
-        s2 = "Floating point operation result not representable with exact decimal fraction.";
-        break;
-    case EXCEPTION_FLT_INVALID_OPERATION:
-        s = "EXCEPTION_FLT_INVALID_OPERATION";
-        s2 = "Invalid floating point operation.";
-        break;
-    case EXCEPTION_FLT_OVERFLOW:
-        s = "EXCEPTION_FLT_OVERFLOW";
-        s2 = "Floating point overflow error.";
-        break;
-    case EXCEPTION_FLT_STACK_CHECK:
-        s = "EXCEPTION_FLT_STACK_CHECK";
-        s2 = "Floating point operation caused stack overflow or underflow.";
-        break;
-    case EXCEPTION_FLT_UNDERFLOW:
-        s = "EXCEPTION_FLT_UNDERFLOW";
-        s2 = "Floating point underflow error.";
-        break;
-    case EXCEPTION_ILLEGAL_INSTRUCTION:
-        s = "EXCEPTION_ILLEGAL_INSTRUCTION";
-        s2 = "Thread executed illegal instruction.";
-        break;
-    case EXCEPTION_IN_PAGE_ERROR:
-        s = "EXCEPTION_IN_PAGE_ERROR";
-        s2 = "Thread tried to access a page that could not be retrieved by the system.";
-        break;
-    case EXCEPTION_INT_DIVIDE_BY_ZERO:
-        s = "EXCEPTION_INT_DIVIDE_BY_ZERO";
-        s2 = "Thread divided by zero in an integer operation.";
-        break;
-    case EXCEPTION_INT_OVERFLOW:
-        s = "EXCEPTION_INT_OVERFLOW";
-        s2 = "Integer operation caused overflow.";
-        break;
-    case EXCEPTION_INVALID_DISPOSITION:
-        s = "EXCEPTION_INVALID_DISPOSITION";
-        s2 = "Exception handler returned invalid disposition.";
-        break;
-    case EXCEPTION_NONCONTINUABLE_EXCEPTION:
-        s = "EXCEPTION_NONCONTINUABLE_EXCEPTION";
-        s2 = "Cannot continue execution after a noncontinuable exception.";
-        break;
-    case EXCEPTION_PRIV_INSTRUCTION:
-        s = "EXCEPTION_PRIV_INSTRUCTION";
-        s2 = "Instruction not valid in the current machine mode.";
-        break;
-    case EXCEPTION_SINGLE_STEP:
-        s = "EXCEPTION_SINGLE_STEP";
-        s2 = "Instruction step has been executed.";
-        break;
-    case EXCEPTION_STACK_OVERFLOW:
-        s = "EXCEPTION_STACK_OVERFLOW";
-        s2 = "Stack overflow.";
+        case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
+            return {
+                "EXCEPTION_ARRAY_BOUNDS_EXCEEDED",
+                "Thread tried to access an array out of bounds.",
+                {}
+            };
+        case EXCEPTION_BREAKPOINT:
+            return {
+                "EXCEPTION_BREAKPOINT",
+                "Encountered breakpoint.",
+                {}
+            };
+        case EXCEPTION_DATATYPE_MISALIGNMENT:
+            return {
+                "EXCEPTION_DATATYPE_MISALIGNMENT",
+                "Access to memory was misaligned for the given datatype.",
+                {}
+            };
+        case EXCEPTION_FLT_DENORMAL_OPERAND:
+            return {
+                "EXCEPTION_FLT_DENORMAL_OPERAND",
+                "Denormal operand in floating point operation.",
+                {}
+            };
+        case EXCEPTION_FLT_DIVIDE_BY_ZERO:
+            return {
+                "EXCEPTION_FLT_DIVIDE_BY_ZERO",
+                "Thread divided by zero in a floating point operation.",
+                {}
+            };
+        case EXCEPTION_FLT_INEXACT_RESULT:
+            return {
+                "EXCEPTION_FLT_INEXACT_RESULT",
+                "Floating point operation result not representable with exact decimal fraction.",
+                {}
+            };
+        case EXCEPTION_FLT_INVALID_OPERATION:
+            return {
+                "EXCEPTION_FLT_INVALID_OPERATION",
+                "Invalid floating point operation.",
+                {}
+            };
+        case EXCEPTION_FLT_OVERFLOW:
+            return {
+                "EXCEPTION_FLT_OVERFLOW",
+                "Floating point overflow error.",
+                {}
+            };
+        case EXCEPTION_FLT_STACK_CHECK:
+            return {
+                "EXCEPTION_FLT_STACK_CHECK",
+                "Floating point operation caused stack overflow or underflow.",
+                {}
+            };
+        case EXCEPTION_FLT_UNDERFLOW:
+            return {
+                "EXCEPTION_FLT_UNDERFLOW",
+                "Floating point underflow error.",
+                {}
+            };
+        case EXCEPTION_ILLEGAL_INSTRUCTION:
+            return {
+                "EXCEPTION_ILLEGAL_INSTRUCTION",
+                "Thread executed illegal instruction.",
+                {}
+            };
+        case EXCEPTION_IN_PAGE_ERROR:
+            return {
+                "EXCEPTION_IN_PAGE_ERROR",
+                "Thread tried to access a page that could not be retrieved by the system.",
+                {}
+            };
+        case EXCEPTION_INT_DIVIDE_BY_ZERO:
+            return {
+                "EXCEPTION_INT_DIVIDE_BY_ZERO",
+                "Thread divided by zero in an integer operation.",
+                {}
+            };
+        case EXCEPTION_INT_OVERFLOW:
+            return {
+                "EXCEPTION_INT_OVERFLOW",
+                "Integer operation caused overflow.",
+                {}
+            };
+        case EXCEPTION_INVALID_DISPOSITION:
+            return {
+                "EXCEPTION_INVALID_DISPOSITION",
+                "Exception handler returned invalid disposition.",
+                {}
+            };
+        case EXCEPTION_NONCONTINUABLE_EXCEPTION:
+            return {
+                "EXCEPTION_NONCONTINUABLE_EXCEPTION",
+                "Cannot continue execution after a noncontinuable exception.",
+                {}
+            };
+        case EXCEPTION_PRIV_INSTRUCTION:
+            return {
+                "EXCEPTION_PRIV_INSTRUCTION",
+                "Instruction not valid in the current machine mode.",
+                {}
+            };
+        case EXCEPTION_SINGLE_STEP:
+            return {
+                "EXCEPTION_SINGLE_STEP",
+                "Instruction step has been executed.",
+                {}
+            };
+        case EXCEPTION_STACK_OVERFLOW:
+            return {
+                "EXCEPTION_STACK_OVERFLOW",
+                "Stack overflow.",
+                {}
+            };
 
     }
+}
 
-    CString s3;
-#ifdef TS_MODE
-    s3 = "INTERNAL APPLICATION ERROR\n\nApplication will now try to free memory, save the current map as \"fcrash_backup.map\" in the FinalSun directory and quit.\n\n\n";
-#else // RA2_MODE
-    s3 = "INTERNAL APPLICATION ERROR\n\nApplication will now try to free memory, save the current map as \"fcrash_backup.map\" in the FinalAlert 2 directory and quit.\n\n\n";
-#endif
-
-    s3 += "Important: If this error has occured while loading graphics, it can very often be fixed by using another system color resolution (16, 24 or 32 bit).";
-
-    s3 += "\n\nThe following information is available, please note every line below:\n\n";
-    s3 += "Last succeeded operation: ";
-    itoa(last_succeeded_operation, c, 10);
-    s3 += c;
-    s3 += "";
-    s3 += "\nLast library operation: ";
-    itoa(FSunPackLib::last_succeeded_operation, c, 10);
-    s3 += c;
-    s3 += "\n";
-    s3 += "\nException data:\n";
-    s3 += s;
-    s3 += "\n";
-    s3 += s2;
-    s3 += "\nAt address: ";
-    s3 += adress;
-    s3 += s_add;
-
-
+LONG __stdcall ExceptionHandler(_EXCEPTION_POINTERS* ExceptionInfo) 
+{
     errstream << "Exception occured. Current data:" << endl;
     errstream << "Last succeeded operation:" << last_succeeded_operation << endl;
     errstream << "Last succeeded library operation:" << FSunPackLib::last_succeeded_operation << endl;
-    errstream << "Trying to save current map" << endl;
-    errstream.flush();
+    
+    auto const [exceptionTypeStr, exceptionDesc, exceptionAdditionalInfo] = translateException(ExceptionInfo->ExceptionRecord);
+    errstream << "Exception type:" << exceptionTypeStr << " description: " << exceptionDesc << endl;
+    errstream << "Additional Info:" << exceptionAdditionalInfo << endl;
 
+    const char* pFormatterStr = "INTERNAL APPLICATION ERROR\n\n" \
+        "Application will now try to free memory, save the current map as \"fcrash_backup.map\" in the %s directory and quit.\n\n\n" \
+        "Important: If this error has occured while loading graphics, it can very often be fixed by using another system color resolution (16, 24 or 32 bit)." \
+        "\n\nThe following information is available, please note every line below:\n\n" \
+        "Last succeeded operation: %d\n" \
+        "\nLast library operation: %d\n" \
+        "\nException data:\n%s\n" \
+        "%s\n" \
+        "\nAt address: %p\n"
+        "\n%s";
 
+    if (theApp.m_Options.LanguageName == "Chinese") {
+        pFormatterStr = "地图编辑器程序错误\n\n" \
+            "本应用将尝试将地图保存至 %s 文件夹内的\"fcrash_backup.map\" 并且退出.\n\n\n" \
+            "当你看到这个窗口的时候，请截图并反馈给开发者" \
+            "\n\n下面为错误信息详情:\n\n" \
+            "上一次成功的操作ID: %d\n" \
+            "\n刚才执行中的操作ID: %d\n" \
+            "\n异常报告:\n%s\n" \
+            "%s\n" \
+            "\n内存地址: %p\n"
+            "\n%s";
+    }
 
-    if (MessageBox(0, s3, "Fatal error", MB_OKCANCEL) == IDOK) {
+    CString exceptionReport;
+    exceptionReport.Format(pFormatterStr,
+        FA2_EDITOR_NAME,
+        last_succeeded_operation,
+        FSunPackLib::last_succeeded_operation,
+        exceptionTypeStr,
+        exceptionDesc,
+        ExceptionInfo->ExceptionRecord->ExceptionAddress,
+        exceptionAdditionalInfo
+    );
+
+    if (MessageBox(0, exceptionReport, GetLanguageStringACP("Fatal error"), MB_OKCANCEL) == IDOK) {
         return EXCEPTION_CONTINUE_EXECUTION;
     }
+
+    errstream << "Trying to save current map" << endl;
+    errstream.flush();
 
     std::string file = u8AppDataPath;
     file += "\\fcrash_backup.map";
