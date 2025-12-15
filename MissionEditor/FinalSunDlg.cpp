@@ -631,7 +631,7 @@ void CFinalSunDlg::OnFileOpenmap()
     // MW 07/20/01: Update prev. files
     InsertPrevFile(fileToOpen);
 
-    this->SetWindowText(makeWindowTitle(pathName));
+    this->SetWindowText(makeWindowTitle(str));
 
     SetCursor(LoadCursor(NULL, IDC_WAIT));
 
