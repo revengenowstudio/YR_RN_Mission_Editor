@@ -1526,5 +1526,42 @@ CComPtr<IDirectDrawSurface7> BitmapToSurface(IDirectDraw7* pDD, const CBitmap& b
 	return pSurface;
 }
 
+CStringW ToWideString(const CString& src)
+{
+#ifdef UNICODE
+	return src;
+#else
+	return CStringW(src);        // ANSI->Unicode
+#endif
+}
 
+std::pair<std::vector<CString>, std::vector<CString>> SplitSavedlgFiletypes(const CString& src)
+{
+	std::vector<CString> names, filters;
+
+	if (src.IsEmpty())
+		return { names, filters };
+
+	std::vector<CString> segs;
+	int idx = 0;
+	CString token;
+	while (AfxExtractSubString(token, src, idx++, '|'))
+	{
+		if (token.IsEmpty())
+		{
+			continue;
+		}
+		segs.push_back(token);
+	}
+
+	if (segs.size() & 1)
+		return { names, filters };
+
+	for (size_t i = 0; i < segs.size(); i += 2)
+	{
+		names.emplace_back(segs[i]);
+		filters.emplace_back(segs[i + 1]);
+	}
+	return { names, filters };
+}
 

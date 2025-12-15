@@ -221,4 +221,7 @@ public:
 	static void ListBoolean(CComboBox& combobox);
 };
 
+CStringW ToWideString(const CString& src);
+std::pair<std::vector<CString>, std::vector<CString>> SplitSavedlgFiletypes(const CString& src);
+
 #endif
