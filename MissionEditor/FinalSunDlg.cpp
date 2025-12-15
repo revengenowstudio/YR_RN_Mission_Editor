@@ -528,63 +528,63 @@ void CFinalSunDlg::OnFileOpenmap()
         fileSearchString.Replace(".yrm", ".mpr");
     }
 
-	CComPtr<IFileOpenDialog> pDlg;
-	HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL,
-		IID_PPV_ARGS(&pDlg));
-	if (FAILED(hr))
-		return;
+    CComPtr<IFileOpenDialog> pDlg;
+    HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL,
+        IID_PPV_ARGS(&pDlg));
+    if (FAILED(hr))
+        return;
 
-	auto [displayNames, extFilters] = SplitSavedlgFiletypes(fileSearchString);
-	std::vector<COMDLG_FILTERSPEC> specs;
-	std::vector<CStringW>        wnames, wfilters;
-	wnames.reserve(displayNames.size());
-	wfilters.reserve(extFilters.size());
+    auto [displayNames, extFilters] = SplitSavedlgFiletypes(fileSearchString);
+    std::vector<COMDLG_FILTERSPEC> specs;
+    std::vector<CStringW>        wnames, wfilters;
+    wnames.reserve(displayNames.size());
+    wfilters.reserve(extFilters.size());
 
-	for (size_t i = 0; i < displayNames.size(); ++i)
-	{
-		wnames.push_back(ToWideString(displayNames[i]));
-		wfilters.push_back(ToWideString(extFilters[i]));
-		specs.push_back({ wnames[i], wfilters[i] });
-	}
+    for (size_t i = 0; i < displayNames.size(); ++i)
+    {
+        wnames.push_back(ToWideString(displayNames[i]));
+        wfilters.push_back(ToWideString(extFilters[i]));
+        specs.push_back({ wnames[i], wfilters[i] });
+    }
 
-	pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
-	pDlg->SetFileTypeIndex(1);
+    pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
+    pDlg->SetFileTypeIndex(1);
 
-	DWORD dwFlags = 0;
-	pDlg->GetOptions(&dwFlags);
-	pDlg->SetOptions(dwFlags | FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST);
+    DWORD dwFlags = 0;
+    pDlg->GetOptions(&dwFlags);
+    pDlg->SetOptions(dwFlags | FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST);
 
-	hr = pDlg->Show(nullptr);
-	if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED))
-		return;
-	if (FAILED(hr))
-		return;
+    hr = pDlg->Show(nullptr);
+    if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED))
+        return;
+    if (FAILED(hr))
+        return;
 
-	CComPtr<IShellItem> pItem;
-	if (FAILED(pDlg->GetResult(&pItem)))
-		return;
+    CComPtr<IShellItem> pItem;
+    if (FAILED(pDlg->GetResult(&pItem)))
+        return;
 
-	PWSTR pszPath = nullptr;
-	if (FAILED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszPath)))
-		return;
+    PWSTR pszPath = nullptr;
+    if (FAILED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszPath)))
+        return;
 
-	CString fileToOpen(pszPath);
-	CoTaskMemFree(pszPath);
+    CString fileToOpen(pszPath);
+    CoTaskMemFree(pszPath);
 
-	CString fileName = fileToOpen.Mid(fileToOpen.ReverseFind(L'\\') + 1);
-	CString ext;
-	int dot = fileName.ReverseFind(L'.');
-	if (dot != -1)
-		ext = fileName.Mid(dot + 1);
+    CString fileName = fileToOpen.Mid(fileToOpen.ReverseFind(L'\\') + 1);
+    CString ext;
+    int dot = fileName.ReverseFind(L'.');
+    if (dot != -1)
+        ext = fileName.Mid(dot + 1);
 
-	ext.MakeLower();
-	fileToOpen.MakeLower();
+    ext.MakeLower();
+    fileToOpen.MakeLower();
 
-	ext.MakeLower();
-	BOOL bLoadedFromMMX = FALSE;
-	if (ext == "mmx") {
-		HMIXFILE hMix = FSunPackLib::XCC_OpenMix(fileToOpen, NULL);
-		fileToOpen.Replace(".mmx", ".map");
+    ext.MakeLower();
+    BOOL bLoadedFromMMX = FALSE;
+    if (ext == "mmx") {
+        HMIXFILE hMix = FSunPackLib::XCC_OpenMix(fileToOpen, NULL);
+        fileToOpen.Replace(".mmx", ".map");
 
         if (fileToOpen.ReverseFind('\\') >= 0) {
             fileToOpen = fileToOpen.Right(fileToOpen.GetLength() - fileToOpen.ReverseFind('\\') - 1);
@@ -622,14 +622,14 @@ void CFinalSunDlg::OnFileOpenmap()
 
     bNoDraw = TRUE;
 
-	CString str;
-	str = GetLanguageStringACP("MainDialogCaption");
-	str += " (";
-	str += (char*)(LPCTSTR)fileToOpen;
-	str += ")";
+    CString str;
+    str = GetLanguageStringACP("MainDialogCaption");
+    str += " (";
+    str += (char*)(LPCTSTR)fileToOpen;
+    str += ")";
 
-	// MW 07/20/01: Update prev. files
-	InsertPrevFile(fileToOpen);
+    // MW 07/20/01: Update prev. files
+    InsertPrevFile(fileToOpen);
 
     this->SetWindowText(makeWindowTitle(pathName));
 
@@ -649,43 +649,43 @@ void CFinalSunDlg::OnFileOpenmap()
             break;
         }
 
-		int res = MessageBox(TranslateStringACP("MainDialogMapCorrupt"), TranslateStringACP("Corrupt"),
-			MB_YESNOCANCEL);
-		if (res == IDCANCEL) {
-			Map->CreateMap(32, 32, THEATER0, 0);
-			bNoMapFile = TRUE;
-			break;
-		}
-		if (res != IDYES) {
-			break;
-		}
-		// try repair
-		int fielddata_size = Map->GetIsoSize() * Map->GetIsoSize();
-		for (auto i = 0; i < fielddata_size; i++) {
-			int gr = Map->GetFielddataAt(i)->wGround;
-			if (gr == 0xFFFF) {
-				gr = 0;
-				continue;
-			}
-			if (gr >= (*tiledata_count)) {
-				Map->SetTileAt(i, 0, 0);
-				continue;
-			}
-			if ((*tiledata)[gr].wTileCount <= Map->GetFielddataAt(i)->bSubTile) {
-				Map->SetTileAt(i, 0, 0);
-			}
-		}
+        int res = MessageBox(TranslateStringACP("MainDialogMapCorrupt"), TranslateStringACP("Corrupt"),
+            MB_YESNOCANCEL);
+        if (res == IDCANCEL) {
+            Map->CreateMap(32, 32, THEATER0, 0);
+            bNoMapFile = TRUE;
+            break;
+        }
+        if (res != IDYES) {
+            break;
+        }
+        // try repair
+        int fielddata_size = Map->GetIsoSize() * Map->GetIsoSize();
+        for (auto i = 0; i < fielddata_size; i++) {
+            int gr = Map->GetFielddataAt(i)->wGround;
+            if (gr == 0xFFFF) {
+                gr = 0;
+                continue;
+            }
+            if (gr >= (*tiledata_count)) {
+                Map->SetTileAt(i, 0, 0);
+                continue;
+            }
+            if ((*tiledata)[gr].wTileCount <= Map->GetFielddataAt(i)->bSubTile) {
+                Map->SetTileAt(i, 0, 0);
+            }
+        }
 
     } while (0);
 
-	if (!bNoMapFile) {
-		if (bLoadedFromMMX) {
-			currentMapFile = fileToOpen;
-		}
-		else {
-			currentMapFile = fileToOpen;
-		}
-	}
+    if (!bNoMapFile) {
+        if (bLoadedFromMMX) {
+            currentMapFile = fileToOpen;
+        }
+        else {
+            currentMapFile = fileToOpen;
+        }
+    }
 
     Sleep(200);
 
@@ -782,80 +782,80 @@ void CFinalSunDlg::OnFileSaveas()
         return;
     }
 
-	CMapValidator validator;
-	int iCancel = validator.DoModal();
-	if (iCancel == IDCANCEL) return;
-	CString fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES");
-	if (yuri_mode) {
-		fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES_YR");
-	}
-	fileSearchString = TranslateStringVariables(8, fileSearchString, ";");
+    CMapValidator validator;
+    int iCancel = validator.DoModal();
+    if (iCancel == IDCANCEL) return;
+    CString fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES");
+    if (yuri_mode) {
+        fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES_YR");
+    }
+    fileSearchString = TranslateStringVariables(8, fileSearchString, ";");
 
-	auto const& ext = g_data.GetStringOr("Customizations", "SaveMapExtensionDefault", ".map");
-	
-	char cuPath[MAX_PATH];
-	GetCurrentDirectory(MAX_PATH, cuPath);
+    auto const& ext = g_data.GetStringOr("Customizations", "SaveMapExtensionDefault", ".map");
 
-
-	CComPtr<IFileSaveDialog> pDlg;
-	if (FAILED(CoCreateInstance(CLSID_FileSaveDialog, nullptr,
-		CLSCTX_ALL, IID_PPV_ARGS(&pDlg))))
-		return;
-
-	auto [displayNames, extFilters] = SplitSavedlgFiletypes(fileSearchString);
-	std::vector<COMDLG_FILTERSPEC> specs;
-	std::vector<CStringW>        wnames, wfilters;
-	wnames.reserve(displayNames.size());
-	wfilters.reserve(extFilters.size());
-
-	for (size_t i = 0; i < displayNames.size(); ++i)
-	{
-		wnames.push_back(ToWideString(displayNames[i]));
-		wfilters.push_back(ToWideString(extFilters[i]));
-		specs.push_back({ wnames[i], wfilters[i] });
-	}
-
-	pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
-	pDlg->SetFileTypeIndex(1);
-	pDlg->SetDefaultExtension(L"map");
-	pDlg->SetFileName(L"new_map");
+    char cuPath[MAX_PATH];
+    GetCurrentDirectory(MAX_PATH, cuPath);
 
 
-	CStringW srcFolder(theApp.m_Options.TSExe);
-	wchar_t  szInitFolder[MAX_PATH] = { 0 };
-	wcsncpy_s(szInitFolder, srcFolder.GetString(), _TRUNCATE);
-	CComPtr<IShellItem> pFolder;
-	if (SUCCEEDED(SHCreateItemFromParsingName(szInitFolder,
-		nullptr,
-		IID_PPV_ARGS(&pFolder))))
-		pDlg->SetFolder(pFolder);
+    CComPtr<IFileSaveDialog> pDlg;
+    if (FAILED(CoCreateInstance(CLSID_FileSaveDialog, nullptr,
+        CLSCTX_ALL, IID_PPV_ARGS(&pDlg))))
+        return;
 
-	if (FAILED(pDlg->Show(nullptr)))
-		return;
+    auto [displayNames, extFilters] = SplitSavedlgFiletypes(fileSearchString);
+    std::vector<COMDLG_FILTERSPEC> specs;
+    std::vector<CStringW>        wnames, wfilters;
+    wnames.reserve(displayNames.size());
+    wfilters.reserve(extFilters.size());
 
-	CComPtr<IShellItem> pItem;
-	if (FAILED(pDlg->GetResult(&pItem)))
-		return;
+    for (size_t i = 0; i < displayNames.size(); ++i)
+    {
+        wnames.push_back(ToWideString(displayNames[i]));
+        wfilters.push_back(ToWideString(extFilters[i]));
+        specs.push_back({ wnames[i], wfilters[i] });
+    }
 
-	PWSTR pszPath = nullptr;
-	if (FAILED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszPath)))
-		return;
-	CString currentMapFile(pszPath);
-	CoTaskMemFree(pszPath);
+    pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
+    pDlg->SetFileTypeIndex(1);
+    pDlg->SetDefaultExtension(L"map");
+    pDlg->SetFileName(L"new_map");
 
-	if (currentMapFile.GetLength() >= MAX_PATH)
-		return;
 
-	CString str = GetLanguageStringACP("MainDialogCaption");
-	str += " (";
-	str += currentMapFile;
-	str += ")";
+    CStringW srcFolder(theApp.m_Options.TSExe);
+    wchar_t  szInitFolder[MAX_PATH] = { 0 };
+    wcsncpy_s(szInitFolder, srcFolder.GetString(), _TRUNCATE);
+    CComPtr<IShellItem> pFolder;
+    if (SUCCEEDED(SHCreateItemFromParsingName(szInitFolder,
+        nullptr,
+        IID_PPV_ARGS(&pFolder))))
+        pDlg->SetFolder(pFolder);
 
-	this->SetWindowText(str);
-	SaveMap(currentMapFile);
-	
+    if (FAILED(pDlg->Show(nullptr)))
+        return;
 
-	SetCursor(m_hArrowCursor);
+    CComPtr<IShellItem> pItem;
+    if (FAILED(pDlg->GetResult(&pItem)))
+        return;
+
+    PWSTR pszPath = nullptr;
+    if (FAILED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszPath)))
+        return;
+    CString currentMapFile(pszPath);
+    CoTaskMemFree(pszPath);
+
+    if (currentMapFile.GetLength() >= MAX_PATH)
+        return;
+
+    CString str = GetLanguageStringACP("MainDialogCaption");
+    str += " (";
+    str += currentMapFile;
+    str += ")";
+
+    this->SetWindowText(str);
+    SaveMap(currentMapFile);
+
+
+    SetCursor(m_hArrowCursor);
 }
 
 void CFinalSunDlg::OnOptionsExportrulesini()
