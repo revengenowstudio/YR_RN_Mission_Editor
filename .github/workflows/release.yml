@@ -22,6 +22,7 @@ env:
   RELEASE_VER: ''
   PACKAGE_NAME: ''
   IS_PRERELEASE: false
+  VCPKG_TOOL_FOLDER : 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg'
 
 jobs:
   build-and-release:
@@ -55,8 +56,7 @@ jobs:
       id: vcpkg-version
       shell: powershell
       run: |
-        $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg\vcpkg.exe"
-        $output = & $vcpkgPath --version
+        $output = & "$env:VCPKG_TOOL_FOLDER\vcpkg.exe" --version
         echo "vcpkg --version output : $output"
         $match = $output -split " "
         if ($match) {
@@ -84,12 +84,11 @@ jobs:
         }
         $env:VCPKG_DOWNLOADS = $PWD
         $env:VCPKG_BINARY_SOURCES="files,$PWD\binary-cache,readwrite"
-        $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg"
-        # rm "$vcpkgPath\.vcpkg-root"
-        & "$vcpkgPath\vcpkg" install `
+        # rm "$env:VCPKG_TOOL_FOLDER\.vcpkg-root"
+        & "$env:VCPKG_TOOL_FOLDER\vcpkg" install `
           --x-wait-for-lock `
           --triplet "x64-windows" `
-          --vcpkg-root $vcpkgPath `
+          --vcpkg-root "$env:VCPKG_TOOL_FOLDER" `
           --x-manifest-root="$PWD\" `
           --x-install-root="$PWD\vcpkg_installed\x64-windows"
         ls
