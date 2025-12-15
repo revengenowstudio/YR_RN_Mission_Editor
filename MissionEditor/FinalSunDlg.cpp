@@ -3042,6 +3042,9 @@ LONG __stdcall ExceptionHandler(_EXCEPTION_POINTERS* ExceptionInfo)
     errstream << "Last succeeded library operation:" << FSunPackLib::last_succeeded_operation << endl;
     
     auto const [exceptionTypeStr, exceptionDesc, exceptionAdditionalInfo] = translateException(ExceptionInfo->ExceptionRecord);
+    errstream << "Exception type:" << exceptionTypeStr << " description: " << exceptionDesc << endl;
+    errstream << "Additional Info:" << exceptionAdditionalInfo << endl;
+
     const char* pFormatterStr = "INTERNAL APPLICATION ERROR\n\n" \
         "Application will now try to free memory, save the current map as \"fcrash_backup.map\" in the %s directory and quit.\n\n\n" \
         "Important: If this error has occured while loading graphics, it can very often be fixed by using another system color resolution (16, 24 or 32 bit)." \
