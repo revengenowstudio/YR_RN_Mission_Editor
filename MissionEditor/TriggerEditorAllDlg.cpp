@@ -1073,7 +1073,7 @@ void CTriggerEditorAllDlg::onEditChangeActionType()
         auto const& paramDef = paramDefs.at(paramType);
         m_actionParamTexts[slot]->SetWindowText(paramDef.paramName);
         handleParamList(m_actionParam[slot], paramDef);
-        m_actionParam[slot].SetWindowText(actionN.Params()[paramSlot]);
+        m_actionParam[slot].SetWindowText(actionN.Params()[paramSlot]); // NOTE: this slot can start from 1, not always 0
         m_actionParam[slot].EnableWindow(TRUE);
         validSlots[slot] = true;
         slot++;

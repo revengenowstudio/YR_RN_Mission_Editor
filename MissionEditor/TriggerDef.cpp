@@ -151,6 +151,9 @@ void TriggerDefinitionManager::loadActionTypes(const CIniFile& ini, std::ostream
                 item.paramTypes.emplace(idx, paramType);
             }
         }
+        if (!item.paramTypes.empty()) {
+            item.paramStartOffset = item.paramTypes.begin()->first; // some action starts from 2nd param
+        }
         item.useWaypointSlot = atoi(params[7]);
         item.useTag = atoi(params[8]);
         item.obsolete = atoi(params[9]);
@@ -426,7 +429,7 @@ int TriggerAction::ParamOperator::ListType() const
 TriggerAction::ParamOperator::ParamOperator(TriggerAction& action, int nth) :
     action(action),
     type(lookUpParamType(action, nth)),
-    nth(nth)
+    nth(nth + action.Type().paramStartOffset)
 {
 }
 
@@ -441,7 +444,10 @@ bool TriggerAction::ParamOperator::Assign(const CString& val)
 
 const ParamType& TriggerAction::ParamOperator::lookUpParamType(TriggerAction& action, int nth)
 {
-    auto const& paramTypes = action.Type().paramTypes;
+    auto const& type = action.Type();
+    auto const& paramTypes = type.paramTypes;
+    nth += type.paramStartOffset;
+
     if (nth < paramTypes.size()) {
         auto const paramTypeIdx = paramTypes.at(nth);
         return TriggerDefinitionManager::Instance().Params().at(paramTypeIdx);
