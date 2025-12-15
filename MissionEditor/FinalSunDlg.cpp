@@ -516,46 +516,6 @@ void CFinalSunDlg::OnOptionsTiberiansunoptions()
     }
 }
 
-inline CStringW ToW(const CString& src)
-{
-#ifdef UNICODE
-	return src;                  // 拷贝构造
-#else
-	return CStringW(src);        // ANSI->Unicode
-#endif
-}
-
-inline std::pair<std::vector<CString>, std::vector<CString>>
-MakeFileTypeLists(const CString& src)
-{
-	std::vector<CString> names, filters;
-
-	if (src.IsEmpty())
-		return { names, filters };
-
-	std::vector<CString> segs;
-	int idx = 0;
-	CString token;
-	while (AfxExtractSubString(token, src, idx++, '|'))
-	{
-		if (token.IsEmpty())          // 末尾多 '|' 会切出空串，直接扔掉
-		{
-			continue;
-		}
-		segs.push_back(token);
-	}
-
-	if (segs.size() & 1)      
-		return { names, filters };
-
-	for (size_t i = 0; i < segs.size(); i += 2)
-	{
-		names.emplace_back(segs[i]);
-		filters.emplace_back(segs[i + 1]);
-	}
-	return { names, filters };
-}
-
 void CFinalSunDlg::OnFileOpenmap()
 {
     CString fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES");
@@ -574,7 +534,7 @@ void CFinalSunDlg::OnFileOpenmap()
 	if (FAILED(hr))
 		return;
 
-	auto [displayNames, extFilters] = MakeFileTypeLists(fileSearchString);
+	auto [displayNames, extFilters] = SplitSavedlgFiletypes(fileSearchString);
 	std::vector<COMDLG_FILTERSPEC> specs;
 	std::vector<CStringW>        wnames, wfilters;
 	wnames.reserve(displayNames.size());
@@ -582,8 +542,8 @@ void CFinalSunDlg::OnFileOpenmap()
 
 	for (size_t i = 0; i < displayNames.size(); ++i)
 	{
-		wnames.push_back(ToW(displayNames[i]));
-		wfilters.push_back(ToW(extFilters[i]));
+		wnames.push_back(ToWideString(displayNames[i]));
+		wfilters.push_back(ToWideString(extFilters[i]));
 		specs.push_back({ wnames[i], wfilters[i] });
 	}
 
@@ -842,7 +802,7 @@ void CFinalSunDlg::OnFileSaveas()
 		CLSCTX_ALL, IID_PPV_ARGS(&pDlg))))
 		return;
 
-	auto [displayNames, extFilters] = MakeFileTypeLists(fileSearchString);
+	auto [displayNames, extFilters] = SplitSavedlgFiletypes(fileSearchString);
 	std::vector<COMDLG_FILTERSPEC> specs;
 	std::vector<CStringW>        wnames, wfilters;
 	wnames.reserve(displayNames.size());
@@ -850,8 +810,8 @@ void CFinalSunDlg::OnFileSaveas()
 
 	for (size_t i = 0; i < displayNames.size(); ++i)
 	{
-		wnames.push_back(ToW(displayNames[i]));
-		wfilters.push_back(ToW(extFilters[i]));
+		wnames.push_back(ToWideString(displayNames[i]));
+		wfilters.push_back(ToWideString(extFilters[i]));
 		specs.push_back({ wnames[i], wfilters[i] });
 	}
 
