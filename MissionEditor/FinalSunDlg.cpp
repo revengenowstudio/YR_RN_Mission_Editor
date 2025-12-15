@@ -822,14 +822,14 @@ void CFinalSunDlg::OnFileSaveas()
         return;
     }
 
-    CMapValidator validator;
-    int iCancel = validator.DoModal();
-    if (iCancel == IDCANCEL) return;
-    CString r = GetLanguageStringACP("SAVEDLG_FILETYPES");
-    if (yuri_mode) {
-        r = GetLanguageStringACP("SAVEDLG_FILETYPES_YR");
-    }
-    r = TranslateStringVariables(8, r, ";");
+	CMapValidator validator;
+	int iCancel = validator.DoModal();
+	if (iCancel == IDCANCEL) return;
+	CString fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES");
+	if (yuri_mode) {
+		fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES_YR");
+	}
+	fileSearchString = TranslateStringVariables(8, fileSearchString, ";");
 
 	auto const& ext = g_data.GetStringOr("Customizations", "SaveMapExtensionDefault", ".map");
 	
@@ -842,18 +842,23 @@ void CFinalSunDlg::OnFileSaveas()
 		CLSCTX_ALL, IID_PPV_ARGS(&pDlg))))
 		return;
 
-	const COMDLG_FILTERSPEC rgSpec[] =
+	auto [displayNames, extFilters] = MakeFileTypeLists(fileSearchString);
+	std::vector<COMDLG_FILTERSPEC> specs;
+	std::vector<CStringW>        wnames, wfilters;
+	wnames.reserve(displayNames.size());
+	wfilters.reserve(extFilters.size());
+
+	for (size_t i = 0; i < displayNames.size(); ++i)
 	{
-		{ L"map地图",L"*.map" },
-		{ L"yrm地图",L"*.yrm" },
-		{ L"mpr地图",L"*.mpr" },
-		{ L"mmx地图",L"*.mmx" },
-	};
-	pDlg->SetFileTypes(_countof(rgSpec), rgSpec);
+		wnames.push_back(ToW(displayNames[i]));
+		wfilters.push_back(ToW(extFilters[i]));
+		specs.push_back({ wnames[i], wfilters[i] });
+	}
+
+	pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
 	pDlg->SetFileTypeIndex(1);
 	pDlg->SetDefaultExtension(L"map");
-	pDlg->SetTitle(L"保存地图");
-	pDlg->SetFileName(L"NewMap");
+	pDlg->SetFileName(L"new_map");
 
 
 	CStringW srcFolder(theApp.m_Options.TSExe);
