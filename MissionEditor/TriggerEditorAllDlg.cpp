@@ -13,6 +13,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_BN_CLICKED(IDC_TRGR_DELETE_TRIGGER, onDeleteTrigger)
     ON_BN_CLICKED(IDC_TRGR_CLONE_TRIGGER, onCloneTrigger)
     ON_BN_CLICKED(IDC_TRGR_PLACE_ON_MAP, onPlaceOnMap)
+    ON_BN_CLICKED(IDC_TRGR_MUST_TRANSFER, OnBnClickedTrgrMustTransfer)
     ON_BN_CLICKED(IDC_TRGR_DISABLED, OnDisabled)
     ON_BN_CLICKED(IDC_TRGR_EASY, OnEasy)
     ON_BN_CLICKED(IDC_TRGR_MEDIUM, OnMedium)
@@ -139,6 +140,7 @@ void CTriggerEditorAllDlg::translateUI()
     TranslateDlgItem(*this, IDC_TRGR_EASY, "TriggerOptionEasy");
     TranslateDlgItem(*this, IDC_TRGR_MEDIUM, "TriggerOptionMedium");
     TranslateDlgItem(*this, IDC_TRGR_HARD, "TriggerOptionHard");
+    TranslateDlgItem(*this, IDC_TRGR_MUST_TRANSFER, "TriggerOptionMustTransfer");
     TranslateDlgItem(*this, IDC_TRGR_EVENT_OPTIONS, "TriggerEventOptions");
     TranslateDlgItem(*this, IDC_TRGR_EVENT_TYPE_TXT, "TriggerEventType");
     TranslateDlgItem(*this, IDC_TRGR_NEW_EVENT, "TriggerNew");
@@ -662,7 +664,7 @@ void CTriggerEditorAllDlg::onOptionCheckChanged(
     if (m_currentTrigger.IsEmpty()) {
         return;
     }
-    auto const checked = checkBtn.GetCheck() != 0;
+    auto const checked = checkBtn.GetCheck() == BST_CHECKED;
     auto& trigger = TriggerDatabase::Instance().Lookup(m_currentTrigger);
     trigger.Options().controls[control] = checked;
 }
@@ -670,6 +672,13 @@ void CTriggerEditorAllDlg::onOptionCheckChanged(
 void CTriggerEditorAllDlg::ParseTriggerDefinitions()
 {
     TriggerDefinitionManager::Instance().LoadFrom(g_data, errstream);
+}
+
+void CTriggerEditorAllDlg::OnBnClickedTrgrMustTransfer()
+{
+    // not using DDX binding because it causing Chinese character missing
+    auto& btn = *reinterpret_cast<CButton*>(GetDlgItem(IDC_TRGR_MUST_TRANSFER));
+    onOptionCheckChanged(btn, TriggerOptions::MustTransfer);
 }
 
 void CTriggerEditorAllDlg::OnDisabled()
@@ -705,6 +714,7 @@ void CTriggerEditorAllDlg::onSelChangeOption()
     CString attachedTrigger = options.nextTrigger;
     m_nextTrigger.SetWindowText(attachedTrigger);
 
+    reinterpret_cast<CButton*>(GetDlgItem(IDC_TRGR_MUST_TRANSFER))->SetCheck(options.controls[TriggerOptions::MustTransfer]);
     m_disabled.SetCheck(options.controls[TriggerOptions::Disable]);
     m_easy.SetCheck(options.controls[TriggerOptions::Easy]);
     m_medium.SetCheck(options.controls[TriggerOptions::Medium]);

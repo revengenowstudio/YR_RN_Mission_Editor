@@ -216,7 +216,7 @@ TriggerOptions::TriggerOptions(const CString& fullData)
         return;
     }
 
-    auto const params = SplitParams<7>(fullData);
+    auto const params = SplitParams<8>(fullData);
 
     house = params[0];
     nextTrigger = params[1];
@@ -225,6 +225,7 @@ TriggerOptions::TriggerOptions(const CString& fullData)
     controls[Easy] = static_cast<bool>(atoi(params[4]));
     controls[Medium] = static_cast<bool>(atoi(params[5]));
     controls[Hard] = static_cast<bool>(atoi(params[6]));
+    controls[MustTransfer] = static_cast<bool>(atoi(params[7]));
 }
 
 CString TriggerOptions::Serialize() const
@@ -238,7 +239,7 @@ CString TriggerOptions::Serialize() const
         static_cast<int>(controls[Easy]),
         static_cast<int>(controls[Medium]),
         static_cast<int>(controls[Hard]),
-        static_cast<int>(controls[__unused])
+        static_cast<int>(controls[MustTransfer])
     );
     return ret;
 }

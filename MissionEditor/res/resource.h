@@ -716,6 +716,7 @@
 #define IDC_TERRAIN_MGR_REMOVE          1578
 #define IDC_TERRAIN_MGR_REMOVE2         1579
 #define IDC_TERRAIN_MGR_ADD             1579
+#define IDC_TRGR_MUST_TRANSFER          1579
 #define IDC_TRGR_TRIGGER_OPTIONS        1601
 #define IDC_TRGR_SELECT_TRIGGER_TXT     1602
 #define IDC_TRGR_SELECTED_TRIGGER       1603
@@ -866,7 +867,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        333
 #define _APS_NEXT_COMMAND_VALUE         40144
-#define _APS_NEXT_CONTROL_VALUE         1579
+#define _APS_NEXT_CONTROL_VALUE         1580
 #define _APS_NEXT_SYMED_VALUE           111
 #endif
 #endif

@@ -81,10 +81,11 @@ BEGIN
     COMBOBOX        IDC_TRGR_TYPE,213,49,90,63,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Name",IDC_TRGR_NAME_TXT,13,33,36,10
     EDITTEXT        IDC_TRGR_NAME,69,33,234,12,ES_AUTOHSCROLL
-    LTEXT           "House:",IDC_TRGR_HOUSE_TXT,13,49,38,10
+    LTEXT           "House:",IDC_TRGR_HOUSE_TXT,13,52,38,10
     COMBOBOX        IDC_TRGR_HOUSE,69,49,90,105,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Trigger attached:",IDC_TRGR_ATTACHED_TRIGGER_TXT,13,65,58,8
     COMBOBOX        IDC_TRGR_ATTACHED_TRIGGER,69,65,234,127,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Must Transfer",IDC_TRGR_MUST_TRANSFER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,308,52,84,10
     CONTROL         "Disabled",IDC_TRGR_DISABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,394,49,40,13
     CONTROL         "Easy",IDC_TRGR_EASY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,308,65,35,13
     CONTROL         "Medium",IDC_TRGR_MEDIUM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,351,65,35,13
@@ -135,6 +136,7 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_TRIGGER_ALL, DIALOG
     BEGIN
+        HORZGUIDE, 62
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -208,70 +210,6 @@ BEGIN
     COMBOBOX        IDC_TRIGGER,61,131,236,135,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
     LTEXT           "For every trigger you create, you should create a tag to make the trigger work. A trigger consists of some general properties, an event and an action, which can all be defined in the ""trigger"" section.",IDC_TAGS_DESC_2,7,167,290,30
 END
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_TRIGGERS, DIALOG
-    BEGIN
-    END
-
-    IDD_TRIGGEREDITOR, DIALOG
-    BEGIN
-        RIGHTMARGIN, 384
-        VERTGUIDE, 228
-        BOTTOMMARGIN, 258
-    END
-
-    IDD_TRIGGEROPTIONS, DIALOG
-    BEGIN
-        VERTGUIDE, 4
-        VERTGUIDE, 356
-    END
-
-    IDD_TRIGGEREVENTS, DIALOG
-    BEGIN
-        RIGHTMARGIN, 361
-        VERTGUIDE, 6
-        VERTGUIDE, 14
-        VERTGUIDE, 72
-        VERTGUIDE, 173
-        VERTGUIDE, 185
-        VERTGUIDE, 222
-        VERTGUIDE, 233
-        VERTGUIDE, 294
-        VERTGUIDE, 300
-        VERTGUIDE, 354
-        HORZGUIDE, 6
-        HORZGUIDE, 79
-    END
-
-    IDD_TRIGGERACTIONS, DIALOG
-    BEGIN
-        RIGHTMARGIN, 360
-        VERTGUIDE, 6
-        VERTGUIDE, 14
-        VERTGUIDE, 72
-        VERTGUIDE, 110
-        VERTGUIDE, 174
-        VERTGUIDE, 186
-        VERTGUIDE, 221
-        VERTGUIDE, 233
-        VERTGUIDE, 293
-        VERTGUIDE, 301
-        VERTGUIDE, 354
-        BOTTOMMARGIN, 194
-        HORZGUIDE, 6
-        HORZGUIDE, 74
-        HORZGUIDE, 79
-    END
-END
-#endif    // APSTUDIO_INVOKED
 
 
 /////////////////////////////////////////////////////////////////////////////

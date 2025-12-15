@@ -59,7 +59,7 @@ struct TriggerOptions
         Easy,
         Medium,
         Hard,
-        __unused,
+        MustTransfer,
         __ControlCount,
     };
 
