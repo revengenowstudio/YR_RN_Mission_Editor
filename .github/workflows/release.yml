@@ -51,7 +51,7 @@ jobs:
         ./scripts/update_product_version.ps1 -major ${{ env.VERSION_MAJOR }} -minor ${{ env.VERSION_MINOR }} -revision $revNum
         echo "RELEASE_VER=$versionNum" >> $GITHUB_ENV
         echo "PACKAGE_NAME=$pkgName" >> $GITHUB_ENV
-    - name: Restore cache vcpkg
+    - name: Cache or restore vcpkg
       uses: actions/cache/restore@v4
       with:
         path: |
@@ -82,15 +82,6 @@ jobs:
     - name: build-msvc
       run: |
         MSBuild MissionEditor.sln /m /p:Configuration="${{ env.CONFIGURATION }}" /p:Platform=x64 /t:MissionEditor
-    - name: Cache vcpkg
-      uses: actions/cache/save@v4
-      with:
-        path: |
-          3rdParty/xcc/vcpkg_downloads
-          3rdParty/xcc/vcpkg_installed
-          3rdParty/xcc/binary-cache
-          C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: Pack up
       shell: pwsh
       run: |
