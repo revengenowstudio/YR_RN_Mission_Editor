@@ -45,6 +45,7 @@ jobs:
             $key = "unknown-vcpkg-version"
         }
         echo "vcpkg version : $key"
+        echo "vcpkg_key=$key" >> "$GITHUB_OUTPUT"
         echo "vcpkg_key=$key" >> $env:GITHUB_OUTPUT
     - name: Cache or restore vcpkg
       uses: actions/cache@v4
@@ -54,7 +55,7 @@ jobs:
           3rdParty/xcc/vcpkg_installed
           3rdParty/xcc/binary-cache
           C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_exe_hash }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: Vcpkg install
       run: |
         cd 3rdParty/xcc
