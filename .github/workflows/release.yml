@@ -42,24 +42,31 @@ jobs:
       with:
         # Target architecture
         arch: x64
-    - name: Handle version
-      shell: bash
+    - name: Get Vcpkg Version
+      id: vcpkg-version
+      shell: powershell
       run: |
-        revNum=$((${{ github.run_number }} - ${{ env.VERSION_REV_OFFSET }}))
-        versionNum=${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.$revNum
-        pkgName=FinalRevenge-v$versionNum.zip
-        ./scripts/update_product_version.ps1 -major ${{ env.VERSION_MAJOR }} -minor ${{ env.VERSION_MINOR }} -revision $revNum
-        echo "RELEASE_VER=$versionNum" >> $GITHUB_ENV
-        echo "PACKAGE_NAME=$pkgName" >> $GITHUB_ENV
+        $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg\vcpkg.exe"
+        $output = & $vcpkgPath --version
+        echo "vcpkg --version output : $output"
+        $match = $output -split " "
+        if ($match) {
+            $key = $match[5].Trim()
+        } else {
+            $key = "unknown-vcpkg-version"
+        }
+        echo "vcpkg version : $key"
+        echo "vcpkg_key=$key" >> "$GITHUB_OUTPUT"
+        echo "vcpkg_key=$key" >> $env:GITHUB_OUTPUT
     - name: Cache or restore vcpkg
-      uses: actions/cache/restore@v4
+      uses: actions/cache@v4
       with:
         path: |
           3rdParty/xcc/vcpkg_downloads
           3rdParty/xcc/vcpkg_installed
           3rdParty/xcc/binary-cache
           C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: Vcpkg install
       run: |
         cd 3rdParty/xcc
