@@ -542,8 +542,9 @@ void CFinalSunDlg::OnFileOpenmap()
 
     CString fileToOpen = fileOpenDlg.GetFilePath();
     CString ext = fileOpenDlg.GetFileExt();
-
+    fileToOpen.MakeLower();
     ext.MakeLower();
+
     BOOL bLoadedFromMMX = FALSE;
     if (ext == "mmx") {
         HMIXFILE hMix = FSunPackLib::XCC_OpenMix(fileToOpen, NULL);
