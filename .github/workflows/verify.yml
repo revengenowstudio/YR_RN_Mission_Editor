@@ -14,6 +14,9 @@ on:
       - '**/*.md'
   workflow_dispatch:
 
+env:
+  VCPKG_TOOL_FOLDER: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg'
+
 jobs:
   compile-check:
     runs-on: windows-2022
@@ -35,7 +38,7 @@ jobs:
       id: vcpkg-version
       shell: powershell
       run: |
-        $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg\vcpkg.exe"
+        $vcpkgPath = "${{ env.VCPKG_TOOL_FOLDER }}\vcpkg.exe"
         $output = & $vcpkgPath --version
         echo "vcpkg --version output : $output"
         $match = $output -split " "
@@ -64,7 +67,7 @@ jobs:
         }
         $env:VCPKG_DOWNLOADS = $PWD
         $env:VCPKG_BINARY_SOURCES="files,$PWD\binary-cache,readwrite"
-        $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg"
+        $vcpkgPath = "${{ env.VCPKG_TOOL_FOLDER }}"
         # rm "$vcpkgPath\.vcpkg-root"
         & "$vcpkgPath\vcpkg" install `
           --x-wait-for-lock `
