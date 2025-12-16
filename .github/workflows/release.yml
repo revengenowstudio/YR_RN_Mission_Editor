@@ -76,7 +76,7 @@ jobs:
           3rdParty/xcc/vcpkg_installed
           3rdParty/xcc/binary-cache
           C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: Vcpkg install
       run: |
         cd 3rdParty/xcc
