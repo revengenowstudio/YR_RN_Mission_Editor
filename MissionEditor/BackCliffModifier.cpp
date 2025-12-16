@@ -90,6 +90,5 @@ void CBackCliffModifier::ModifyStartPos(DWORD* dwPos, BOOL bSmall)
 
 CString CBackCliffModifier::GetDataSection()
 {
-	if (m_bAlternative) return ("CliffBackDataAlt");
-	return("CliffBackData");
+	return m_bAlternative ? "CliffBackDataAlt" : "CliffBackData";
 }

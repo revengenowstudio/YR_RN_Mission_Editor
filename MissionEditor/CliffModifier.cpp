@@ -92,7 +92,9 @@ BOOL CCliffModifier::PlaceCliff(DWORD dwXFrom, DWORD dwYFrom, DWORD dwXDest, DWO
 	m_dwFrom = dwXFrom + dwYFrom * Map->GetIsoSize();
 	m_dwTo = dwXDest + dwYDest * Map->GetIsoSize();
 
-	if (!x_diff && !y_diff) return FALSE;
+	if (!x_diff && !y_diff) {
+		return FALSE;
+	}
 
 	if (x_diff && y_diff) {
 		if ((x_diff > 0 && y_diff > 0)) {
@@ -154,9 +156,7 @@ BOOL CCliffModifier::PlaceCliff(DWORD dwXFrom, DWORD dwYFrom, DWORD dwXDest, DWO
 	DWORD dwCurPos = m_dwFrom;
 	int startheight = Map->GetHeightAt(dwCurPos);
 
-
-
-	DWORD dwLastTile = -1;
+	int dwLastTile = -1;
 
 	FIELDDATA* fd = Map->GetFielddataAt(dwCurPos);
 	int ground = fd->wGround;
@@ -168,10 +168,7 @@ BOOL CCliffModifier::PlaceCliff(DWORD dwXFrom, DWORD dwYFrom, DWORD dwXDest, DWO
 
 	BOOL bSmall = FALSE;
 	DWORD dwFirstStartPos = dwCurPos;
-	DWORD dwTile = GetTileToPlace(dwCurPos, &bSmall);
-
-
-
+	int dwTile = GetTileToPlace(dwCurPos, &bSmall);
 	BOOL bFirstPos = TRUE;
 
 	while (dwCurPos != m_dwTo) {
@@ -180,54 +177,57 @@ BOOL CCliffModifier::PlaceCliff(DWORD dwXFrom, DWORD dwYFrom, DWORD dwXDest, DWO
 		if (!bFirstPos) {
 			dwTile = GetTileToPlace(dwCurPos, &bSmall);
 			dwLastTile = dwTile;
-		} else
+		} else {
 			bFirstPos = FALSE;
-		if (dwTile == -1) break;
+		}
+		if (dwTile < 0) {
+			break;
+		}
 
 		TILEDATA* t = &(*tiledata)[dwTile];
 
-		if (m_addx < 0) dwCurPos += t->cx * m_addx;
-		if (m_addy < 0) dwCurPos += t->cy * m_addy * Map->GetIsoSize();
-
-
-		int o = 0;
-		DWORD dwTmpTile = dwTile;
-		while (dwFirstStartPos != dwCurPos && dwTile == dwLastTile) {
-			o++;
-			if (o == 10) break;
-			dwTmpTile = GetTileToPlace(dwCurPos, &bSmall);
-
-			if ((*tiledata)[dwTmpTile].cx == (*tiledata)[dwTile].cx && (*tiledata)[dwTile].cy == (*tiledata)[dwTmpTile].cy)
-				dwTile = dwTmpTile;
+		if (m_addx < 0) {
+			dwCurPos += t->cx * m_addx;
+		}
+		if (m_addy < 0) {
+			dwCurPos += t->cy * m_addy * Map->GetIsoSize();
 		}
 
-
+		int o = 0;
+		int dwTmpTile = dwTile;
+		while (dwFirstStartPos != dwCurPos && dwTile == dwLastTile) {
+			o++;
+			if (o == 10) {
+				break;
+			}
+			dwTmpTile = GetTileToPlace(dwCurPos, &bSmall);
+			if (dwTmpTile < 0) {
+				break;
+			}
+			if ((*tiledata)[dwTmpTile].cx == (*tiledata)[dwTile].cx && (*tiledata)[dwTile].cy == (*tiledata)[dwTmpTile].cy) {
+				dwTile = dwTmpTile;
+			}
+		}
 
 		t = &(*tiledata)[dwTile];
-
-
-
-
-
-
 
 		int p = 0;
 		for (i = 0; i < t->cx; i++) {
 			for (e = 0; e < t->cy; e++) {
-
 				if (t->tiles[p].pic != NULL) {
-
-
 					Map->SetHeightAt(dwCurPos + i + e * Map->GetIsoSize(), startheight + t->tiles[p].bZHeight);
 					Map->SetTileAt(dwCurPos + i + e * Map->GetIsoSize(), dwTile, p);
-
 				}
 				p++;
 			}
 		}
 
-		if (m_addx > 0) dwCurPos += t->cx * m_addx;
-		if (m_addy > 0) dwCurPos += t->cy * m_addy * Map->GetIsoSize();
+		if (m_addx > 0) {
+			dwCurPos += t->cx * m_addx;
+		}
+		if (m_addy > 0) {
+			dwCurPos += t->cy * m_addy * Map->GetIsoSize();
+		}
 
 		ModifyCurrentPos(&dwCurPos, FALSE, bSmall);
 
@@ -247,7 +247,7 @@ void CCliffModifier::ModifyCurrentPos(DWORD* dwPos, BOOL bBeforePlacing, BOOL bS
 
 }
 
-DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
+int CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 {
 	vector<DWORD> careables;
 	vector<DWORD> useables;
@@ -255,7 +255,6 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 
 	CString type;
 	int count = 0;
-
 
 	switch (m_direction) {
 	case cd_horiz_left:
@@ -276,31 +275,23 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 		break;
 	}
 
-
 	CString sec = GetDataSection();
 	CIniFile& ini = Map->GetIniFile();
-	auto const& theaterID = g_data.GetString("Map", "Theater");
-	if (!theaterID.IsEmpty()) {
+	auto const& theaterID = ini.GetString("Map", "Theater");
+	if (!theaterID.IsEmpty() && g_data.TryGetSection(sec + theaterID)) {
 		sec += theaterID;
 	}
 
 	count = g_data.GetInteger(sec, type + "c");
 
-
-
 	int i;
 	DWORD dwStartSet = 0;
-	/*for(i=0;i<(*tiledata_count);i++)
-	{
-		if( (!m_bAlternative && (*tiledata)[i].wTileSet==cliffset) || (m_bAlternative && (*tiledata)[i].wTileSet==cliff2set))
-		{
-			dwStartSet=i;
-			break;
-		}
-	}*/
-	// a bit faster:
-	if (m_bAlternative) dwStartSet = cliff2set_start;
-	else dwStartSet = cliffset_start;
+
+	if (m_bAlternative) {
+		dwStartSet = cliff2set_start;
+	} else {
+		dwStartSet = cliffset_start;
+	}
 
 	for (i = 0; i < count; i++) {
 		char c[50];
@@ -319,23 +310,36 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 		for (e = -1; e < 2; e++) {
 			FIELDDATA* fd = Map->GetFielddataAt(dwCurPos + i + e * isosize);
 			int ground = fd->wGround;
-			if (ground == 0xFFFF) ground = 0;
+			if (ground == 0xFFFF) {
+				ground = 0;
+			}
 
 			if ((*tiledata)[ground].wTileSet == cliffset && notusedascliff.find(ground) == notusedascliff.end()) {
-
-
-				if (i == 0 && e == -1) { corner_searched = "cornerleft_"; break; }
-				if (i == 0 && e == 1) { corner_searched = "cornerright_"; break; }
-				if (i == -1 && e == 0) { corner_searched = "cornertop_"; break; }
-				if (i == 1 && e == 0) { corner_searched = "cornerbottom_"; break; }
+				if (i == 0 && e == -1) { 
+					corner_searched = "cornerleft_"; 
+					break; 
+				}
+				if (i == 0 && e == 1) { 
+					corner_searched = "cornerright_"; 
+					break;
+				}
+				if (i == -1 && e == 0) {
+					corner_searched = "cornertop_";
+					break; 
+				}
+				if (i == 1 && e == 0) {
+					corner_searched = "cornerbottom_"; 
+					break; 
+				}
 				/*if(e==-1) {corner_searched="cornerleft_";break;}
 				if(e==1) {corner_searched="cornerright_";break;}
 				if(i==-1) {corner_searched="cornertop_";break;}
 				if(i==1) {corner_searched="cornerbottom_";break;}*/
 			}
-
 		}
-		if (corner_searched.GetLength() > 0) break;
+		if (corner_searched.GetLength() > 0) {
+			break;
+		}
 	}
 
 	BOOL bCornerFound = FALSE;;
@@ -345,10 +349,12 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 	}
 
 
-	if (!bCornerFound) corner_searched = "";
-
-	if (count == 0) return -1;
-
+	if (!bCornerFound) {
+		corner_searched = "";
+	}
+	if (count == 0) {
+		return -1;
+	}
 
 	DWORD dwX = dwPos % Map->GetIsoSize();
 	DWORD dwY = dwPos / Map->GetIsoSize();
@@ -365,17 +371,25 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 	for (i = 0; i < careables.size(); i++) {
 		TILEDATA& t = (*tiledata)[careables[i]];
 
-		if (m_addx > 0 && dwX + m_addx * t.cx > dwDX) continue;
-		if (m_addy > 0 && dwY + m_addy * t.cy > dwDY) continue;
-		if (m_addx < 0 && dwX + m_addx * t.cx < dwDX) continue;
-		if (m_addy < 0 && dwY + m_addy * t.cy < dwDY) continue;
+		if (m_addx > 0 && dwX + m_addx * t.cx > dwDX) {
+			continue;
+		}
+		if (m_addy > 0 && dwY + m_addy * t.cy > dwDY) {
+			continue;
+		}
+		if (m_addx < 0 && dwX + m_addx * t.cx < dwDX) {
+			continue;
+		}
+		if (m_addy < 0 && dwY + m_addy * t.cy < dwDY) {
+			continue;
+		}
 
 		useables.push_back(careables[i]);
 	}
 
-	if (useables.size() < 1) return -1;
-
-
+	if (useables.size() < 1) {
+		return -1;
+	}
 	*bSmall = FALSE;
 
 	int k;
@@ -384,7 +398,10 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 	TILEDATA& t1 = (*tiledata)[useables[k]];
 	for (i = 0; i < careables.size(); i++) {
 		TILEDATA& t = (*tiledata)[careables[i]];
-		if (t.cx > t1.cx || t.cy > t1.cy) { *bSmall = TRUE; break; }
+		if (t.cx > t1.cx || t.cy > t1.cy) { 
+			*bSmall = TRUE; 
+			break; 
+		}
 	}
 
 	// check for water
@@ -400,9 +417,10 @@ DWORD CCliffModifier::GetTileToPlace(DWORD dwPos, BOOL* bSmall)
 				break;
 			}
 		}
-		if (bWater) break;
+		if (bWater) {
+			break;
+		}
 	}
-
 
 	if (bWater && useables[k] - dwStartSet < 22) {
 		CString tset;
