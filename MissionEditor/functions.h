@@ -241,7 +241,6 @@ public:
 
 private:
 	INT_PTR DoModalOpen();
-	//void BuildFilterSpecs(std::vector<COMDLG_FILTERSPEC>& out);
 
 	BOOL m_bOpen;
 	CString m_defExt;

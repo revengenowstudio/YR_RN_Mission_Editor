@@ -1682,26 +1682,6 @@ INT_PTR CFileDialogClsid::DoModalOpen()
     return IDOK;
 }
 
-//void CFileDialogClsid::BuildFilterSpecs(std::vector<COMDLG_FILTERSPEC>& out)
-//{
-//    out.clear();
-//    if (m_filter.IsEmpty()) return;
-//
-//    std::vector<std::wstring> desc, spec;
-//    LPCTSTR p = m_filter;
-//    while (*p)
-//    {
-//        desc.emplace_back(p);
-//        p += desc.back().length() + 1;
-//        if (!*p) break;
-//        spec.emplace_back(p);
-//        p += spec.back().length() + 1;
-//    }
-//
-//    for (size_t i = 0; i < desc.size(); ++i)
-//        out.push_back({ desc[i].c_str(), spec[i].c_str() });
-//}
-
 std::vector<CString> SplitSavedlgFiletypes(const CString& src)
 {
 	std::vector<CString> result;
