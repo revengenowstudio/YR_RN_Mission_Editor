@@ -1565,3 +1565,169 @@ std::pair<std::vector<CString>, std::vector<CString>> SplitSavedlgFiletypes(cons
 	return { names, filters };
 }
 
+
+CFileDialogClsid::CFileDialogClsid(
+	bool bOpenFileDialog,
+	LPCTSTR lpszDefExt,
+	DWORD dwFlags,
+	LPCTSTR lpszFilter,
+	HWND hParentWnd)
+	: m_bOpen(bOpenFileDialog),
+	m_defExt(lpszDefExt ? lpszDefExt : ""),
+	m_filter(lpszFilter ? lpszFilter : ""),
+	m_parent(hParentWnd),
+	m_flags(dwFlags)
+{
+	m_path[0] = 0;
+	m_saveFileName = "";
+}
+
+INT_PTR CFileDialogClsid::DoModal()
+{
+    return DoModalOpen();
+}
+
+void CFileDialogClsid::SetSaveFileName(CString input) {
+    m_saveFileName = input;
+}
+
+CString CFileDialogClsid::GetFilePath() { return m_path; }
+
+CString CFileDialogClsid::GetFileName()
+{
+    CString full = m_path;
+    int pos = full.ReverseFind(L'\\');
+    return pos < 0 ? full : full.Mid(pos + 1);
+}
+
+CString CFileDialogClsid::GetFileExt()
+{
+    CString name = GetFileName();
+    int pos = name.ReverseFind(L'.');
+    return pos < 0 ? CString() : name.Mid(pos + 1);
+}
+
+CString CFileDialogClsid::GetFolderPath()
+{
+    CString full = m_path;
+    int pos = full.ReverseFind(L'\\');
+    return pos < 0 ? CString() : full.Left(pos);
+}
+
+
+INT_PTR CFileDialogClsid::DoModalOpen()
+{
+    CLSID clsid = CLSID_FileOpenDialog;
+    if (!m_bOpen)
+    {
+        clsid = CLSID_FileSaveDialog;
+    }
+    HRESULT hr = CoCreateInstance(clsid, nullptr,
+        CLSCTX_ALL, IID_PPV_ARGS(&m_pDlg));
+    if (FAILED(hr))
+        return IDCANCEL;
+
+	if (!m_bOpen) {
+		std::wstring fileName = utf8ToUtf16(m_saveFileName);
+		m_pDlg->SetFileName(fileName.c_str());
+	}
+
+	auto filters = SplitSavedlgFiletypes(m_filter);
+	std::vector<COMDLG_FILTERSPEC> specs;
+	std::vector<CStringW>        wnames, wfilters;
+	wnames.reserve(filters.size()/2);
+	wfilters.reserve(filters.size()/2);
+	for (size_t i = 0; i < filters.size(); ++i)
+	{
+		if (i % 2 == 0) {
+			wnames.push_back(ToWideString(filters[i]));
+		}
+		else {
+			wfilters.push_back(ToWideString(filters[i]));
+		}
+	}
+	for (size_t i = 0; i < wnames.size(); ++i)
+	{
+		specs.push_back({ wnames[i], wfilters[i] });
+    }
+	m_pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
+
+    if (!m_defExt.IsEmpty())
+    {
+        std::wstring defExt = utf8ToUtf16(m_defExt);
+        m_pDlg->SetDefaultExtension(defExt.c_str());
+    }
+
+    DWORD dwOpt = 0;
+    m_pDlg->GetOptions(&dwOpt);
+    m_pDlg->SetOptions(dwOpt | m_flags);
+
+
+    hr = m_pDlg->Show(m_parent);
+    if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED))
+        return IDCANCEL;
+    if (FAILED(hr))
+        return IDCANCEL;
+
+    CComPtr<IShellItem> pItem;
+    if (FAILED(m_pDlg->GetResult(&pItem)))
+        return IDCANCEL;
+
+    PWSTR psz = nullptr;
+    if (FAILED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &psz)))
+        return IDCANCEL;
+
+    wcscpy_s(m_path, _countof(m_path), psz);
+    CoTaskMemFree(psz);
+    return IDOK;
+}
+
+//void CFileDialogClsid::BuildFilterSpecs(std::vector<COMDLG_FILTERSPEC>& out)
+//{
+//    out.clear();
+//    if (m_filter.IsEmpty()) return;
+//
+//    std::vector<std::wstring> desc, spec;
+//    LPCTSTR p = m_filter;
+//    while (*p)
+//    {
+//        desc.emplace_back(p);
+//        p += desc.back().length() + 1;
+//        if (!*p) break;
+//        spec.emplace_back(p);
+//        p += spec.back().length() + 1;
+//    }
+//
+//    for (size_t i = 0; i < desc.size(); ++i)
+//        out.push_back({ desc[i].c_str(), spec[i].c_str() });
+//}
+
+std::vector<CString> SplitSavedlgFiletypes(const CString& src)
+{
+	std::vector<CString> result;
+
+	if (src.IsEmpty())
+		return result;
+
+	std::vector<CString> segs;
+	int idx = 0;
+	CString token;
+	while (AfxExtractSubString(token, src, idx++, '|'))
+	{
+		if (token.IsEmpty())
+		{
+			continue;
+		}
+		segs.push_back(token);
+	}
+
+	if (segs.size() & 1)
+		return result;
+
+	for (size_t i = 0; i + 1 < segs.size(); i += 2)
+	{
+		result.emplace_back(segs[i]);
+		result.emplace_back(segs[i + 1]);
+	}
+	return result;
+}

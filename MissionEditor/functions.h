@@ -221,7 +221,38 @@ public:
 	static void ListBoolean(CComboBox& combobox);
 };
 
-CStringW ToWideString(const CString& src);
-std::pair<std::vector<CString>, std::vector<CString>> SplitSavedlgFiletypes(const CString& src);
+class CFileDialogClsid
+{
+public:
+	CFileDialogClsid(bool bOpenFileDialog,
+		LPCTSTR lpszDefExt = nullptr,
+		DWORD dwFlags = FOS_FILEMUSTEXIST,
+		LPCTSTR lpszFilter = nullptr,
+		HWND hParentWnd = nullptr);
+
+	INT_PTR DoModal();
+
+	void SetSaveFileName(CString input);
+
+	CString GetFilePath();
+	CString GetFileName();
+	CString GetFileExt();
+	CString GetFolderPath();
+
+private:
+	INT_PTR DoModalOpen();
+	//void BuildFilterSpecs(std::vector<COMDLG_FILTERSPEC>& out);
+
+	BOOL m_bOpen;
+	CString m_defExt;
+	CString m_filter;
+	CString m_saveFileName;
+	HWND m_parent;
+	DWORD m_flags;
+	wchar_t m_path[MAX_PATH]{};
+	CComPtr<IFileDialog> m_pDlg;
+};
+
+std::vector<CString> SplitSavedlgFiletypes(const CString& src);
 
 #endif
