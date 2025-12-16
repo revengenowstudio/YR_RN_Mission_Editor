@@ -1856,8 +1856,8 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 		}
 	}
 
-	CString barlFileName = ID + "barl.vxl";
-	CString barlHVAName = ID + "barl.hva";
+	CString barlFileName = ArtID + "barl.vxl";
+	CString barlHVAName = ArtID + "barl.hva";
 	// barl is optional
 	if (VoxelDrawer::LoadVXLFile(barlFileName, finder) 
 		&& VoxelDrawer::LoadHVAFile(barlHVAName, finder)) {
