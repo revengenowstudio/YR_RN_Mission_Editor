@@ -1769,9 +1769,9 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 		return this->FindFileInMix(lpFilename, reinterpret_cast<TheaterChar*>(pTheaterChar));
 	};
 
-	// As VXL
-	CString FileName = ImageID + ".vxl";
-	CString HVAName = ImageID + ".hva";
+	// As VXL, ignore Image ID but only use ArtID
+	CString FileName = ArtID + ".vxl";
+	CString HVAName = ArtID + ".hva";
 
 	if (!VoxelDrawer::IsVPLLoaded()) {
 		VoxelDrawer::LoadVPLFile("voxels.vpl", finder);
@@ -1812,7 +1812,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 	if (!bHasTurret) {
 		for (int i = 0; i < 8; ++i) {
 			CString DictName;
-			DictName.Format("%s%d", ImageID.operator LPCSTR(), i);
+			DictName.Format("%s%d", ID.operator LPCSTR(), i);
 
 			unsigned char* outBuffer;
 			int outW = 0x100, outH = 0x100;
@@ -1836,8 +1836,8 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 		H = 0;
 	}
 
-	CString turFileName = ImageID + "tur.vxl";
-	CString turHVAName = ImageID + "tur.hva";
+	CString turFileName = ArtID + "tur.vxl";
+	CString turHVAName = ArtID + "tur.hva";
 
 	if (!VoxelDrawer::LoadVXLFile(turFileName, finder)) {
 		return;
@@ -1856,29 +1856,25 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 		}
 	}
 
-	CString barlFileName = ImageID + "barl.vxl";
-	CString barlHVAName = ImageID + "barl.hva";
+	CString barlFileName = ArtID + "barl.vxl";
+	CString barlHVAName = ArtID + "barl.hva";
+	// barl is optional
+	if (VoxelDrawer::LoadVXLFile(barlFileName, finder) 
+		&& VoxelDrawer::LoadHVAFile(barlHVAName, finder)) {
+		for (int i = 0; i < 8; ++i) {
+			// (i+6) % 8 to fix the facing
+			bool result = VoxelDrawer::GetImageData((i + 6) % 8, pBarrelImage[i],
+				barrelrect[i], F, L, H);
 
-	if (!VoxelDrawer::LoadVXLFile(barlFileName, finder)) {
-		return;
-	}
-	if (!VoxelDrawer::LoadHVAFile(barlHVAName, finder)) {
-		return;
-	}
-
-	for (int i = 0; i < 8; ++i) {
-		// (i+6) % 8 to fix the facing
-		bool result = VoxelDrawer::GetImageData((i + 6) % 8, pBarrelImage[i],
-			barrelrect[i], F, L, H);
-
-		if (!result) {
-			break;
+			if (!result) {
+				break;
+			}
 		}
 	}
 
 	for (int i = 0; i < 8; ++i) {
 		CString DictName;
-		DictName.Format("%s%d", ImageID.operator LPCSTR(), i);
+		DictName.Format("%s%d", ArtID.operator LPCSTR(), i);
 
 		unsigned char* outBuffer;
 		int outW = 0x100, outH = 0x100;
