@@ -1838,21 +1838,17 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 
 	CString turFileName = ArtID + "tur.vxl";
 	CString turHVAName = ArtID + "tur.hva";
+	// auto adaptive, skip if no file found
+	if (VoxelDrawer::LoadVXLFile(turFileName, finder) 
+		&& VoxelDrawer::LoadHVAFile(turHVAName, finder)) {
+		for (int i = 0; i < 8; ++i) {
+			// (i+6) % 8 to fix the facing
+			bool result = VoxelDrawer::GetImageData((i + 6) % 8, pTurretImage[i],
+				turretrect[i], F, L, H);
 
-	if (!VoxelDrawer::LoadVXLFile(turFileName, finder)) {
-		return;
-	}
-	if (!VoxelDrawer::LoadHVAFile(turHVAName, finder)) {
-		return;
-	}
-
-	for (int i = 0; i < 8; ++i) {
-		// (i+6) % 8 to fix the facing
-		bool result = VoxelDrawer::GetImageData((i + 6) % 8, pTurretImage[i],
-			turretrect[i], F, L, H);
-
-		if (!result) {
-			break;
+			if (!result) {
+				break;
+			}
 		}
 	}
 
