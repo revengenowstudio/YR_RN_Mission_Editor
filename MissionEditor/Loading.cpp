@@ -1697,7 +1697,6 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 	auto const& rules = IniMegaFile::GetRules();
 	bool bHasTurret = rules.GetBool(ID, "Turret");
 
-
 	// As SHP
 	if (!art.GetBool(ArtID, "Voxel")) {
 		int framesToRead[8];
@@ -1766,7 +1765,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 		return;
 	}
 
-	auto finder = [this](LPCTSTR lpFilename, char* pTheaterChar) {
+	auto const finder = [this](LPCTSTR lpFilename, char* pTheaterChar) {
 		return this->FindFileInMix(lpFilename, reinterpret_cast<TheaterChar*>(pTheaterChar));
 	};
 
@@ -1840,10 +1839,10 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 	CString turFileName = ImageID + "tur.vxl";
 	CString turHVAName = ImageID + "tur.hva";
 
-	if (VoxelDrawer::LoadVXLFile(turFileName, finder)) {
+	if (!VoxelDrawer::LoadVXLFile(turFileName, finder)) {
 		return;
 	}
-	if (VoxelDrawer::LoadHVAFile(turHVAName, finder)) {
+	if (!VoxelDrawer::LoadHVAFile(turHVAName, finder)) {
 		return;
 	}
 
