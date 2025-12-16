@@ -1858,21 +1858,17 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 
 	CString barlFileName = ImageID + "barl.vxl";
 	CString barlHVAName = ImageID + "barl.hva";
+	// barl is optional
+	if (VoxelDrawer::LoadVXLFile(barlFileName, finder) 
+		&& VoxelDrawer::LoadHVAFile(barlHVAName, finder)) {
+		for (int i = 0; i < 8; ++i) {
+			// (i+6) % 8 to fix the facing
+			bool result = VoxelDrawer::GetImageData((i + 6) % 8, pBarrelImage[i],
+				barrelrect[i], F, L, H);
 
-	if (!VoxelDrawer::LoadVXLFile(barlFileName, finder)) {
-		return;
-	}
-	if (!VoxelDrawer::LoadHVAFile(barlHVAName, finder)) {
-		return;
-	}
-
-	for (int i = 0; i < 8; ++i) {
-		// (i+6) % 8 to fix the facing
-		bool result = VoxelDrawer::GetImageData((i + 6) % 8, pBarrelImage[i],
-			barrelrect[i], F, L, H);
-
-		if (!result) {
-			break;
+			if (!result) {
+				break;
+			}
 		}
 	}
 
