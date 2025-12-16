@@ -252,6 +252,4 @@ private:
 	CComPtr<IFileDialog> m_pDlg;
 };
 
-std::vector<CString> SplitSavedlgFiletypes(const CString& src);
-
 #endif

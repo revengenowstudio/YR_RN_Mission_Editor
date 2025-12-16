@@ -1627,30 +1627,36 @@ INT_PTR CFileDialogClsid::DoModalOpen()
     if (FAILED(hr))
         return IDCANCEL;
 
+	std::vector<std::wstring> storage;
 	if (!m_bOpen) {
 		std::wstring fileName = utf8ToUtf16(m_saveFileName);
-		m_pDlg->SetFileName(fileName.c_str());
+		storage.push_back(fileName);
+		m_pDlg->SetFileName(storage[storage.size() - 1].c_str());
 	}
+	storage.clear();
 
-	auto filters = SplitSavedlgFiletypes(m_filter);
 	std::vector<COMDLG_FILTERSPEC> specs;
-	std::vector<CStringW>        wnames, wfilters;
-	wnames.reserve(filters.size()/2);
-	wfilters.reserve(filters.size()/2);
-	for (size_t i = 0; i < filters.size(); ++i)
-	{
-		if (i % 2 == 0) {
-			wnames.push_back(ToWideString(filters[i]));
-		}
-		else {
-			wfilters.push_back(ToWideString(filters[i]));
-		}
+	std::vector<CString> tokens = Split(m_filter, '|');
+
+    // m_filter may have trailing '|'
+	for (size_t i = 0; i < tokens.size(); ++i) {
+		if (tokens[i].IsEmpty()) {
+			tokens.erase(tokens.begin() + i);
+			--i;
+        }
 	}
-	for (size_t i = 0; i < wnames.size(); ++i)
-	{
-		specs.push_back({ wnames[i], wfilters[i] });
-    }
+	for (size_t i = 0; i + 1 < tokens.size(); i += 2) {
+		auto name = utf8ToUtf16(tokens[i]);
+		auto filter = utf8ToUtf16(tokens[i + 1]);
+		storage.push_back(name);
+		storage.push_back(filter);
+		specs.push_back({
+			storage[storage.size() - 2].c_str(),
+			storage[storage.size() - 1].c_str() 
+		});
+	}
 	m_pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
+	storage.clear();
 
     if (!m_defExt.IsEmpty())
     {
@@ -1682,32 +1688,3 @@ INT_PTR CFileDialogClsid::DoModalOpen()
     return IDOK;
 }
 
-std::vector<CString> SplitSavedlgFiletypes(const CString& src)
-{
-	std::vector<CString> result;
-
-	if (src.IsEmpty())
-		return result;
-
-	std::vector<CString> segs;
-	int idx = 0;
-	CString token;
-	while (AfxExtractSubString(token, src, idx++, '|'))
-	{
-		if (token.IsEmpty())
-		{
-			continue;
-		}
-		segs.push_back(token);
-	}
-
-	if (segs.size() & 1)
-		return result;
-
-	for (size_t i = 0; i + 1 < segs.size(); i += 2)
-	{
-		result.emplace_back(segs[i]);
-		result.emplace_back(segs[i + 1]);
-	}
-	return result;
-}
