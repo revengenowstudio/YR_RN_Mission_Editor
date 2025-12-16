@@ -528,57 +528,20 @@ void CFinalSunDlg::OnFileOpenmap()
         fileSearchString.Replace(".yrm", ".mpr");
     }
 
-    CComPtr<IFileOpenDialog> pDlg;
-    HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL,
-        IID_PPV_ARGS(&pDlg));
-    if (FAILED(hr))
+    CFileDialogClsid fileOpenDlg(
+        true,
+        "map",
+        FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST,
+        fileSearchString
+    );
+
+    auto dlgId = fileOpenDlg.DoModal();
+    if (dlgId == IDCANCEL) {
         return;
-
-    auto [displayNames, extFilters] = SplitSavedlgFiletypes(fileSearchString);
-    std::vector<COMDLG_FILTERSPEC> specs;
-    std::vector<CStringW>        wnames, wfilters;
-    wnames.reserve(displayNames.size());
-    wfilters.reserve(extFilters.size());
-
-    for (size_t i = 0; i < displayNames.size(); ++i)
-    {
-        wnames.push_back(ToWideString(displayNames[i]));
-        wfilters.push_back(ToWideString(extFilters[i]));
-        specs.push_back({ wnames[i], wfilters[i] });
     }
 
-    pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
-    pDlg->SetFileTypeIndex(1);
-
-    DWORD dwFlags = 0;
-    pDlg->GetOptions(&dwFlags);
-    pDlg->SetOptions(dwFlags | FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST);
-
-    hr = pDlg->Show(nullptr);
-    if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED))
-        return;
-    if (FAILED(hr))
-        return;
-
-    CComPtr<IShellItem> pItem;
-    if (FAILED(pDlg->GetResult(&pItem)))
-        return;
-
-    PWSTR pszPath = nullptr;
-    if (FAILED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszPath)))
-        return;
-
-    CString fileToOpen(pszPath);
-    CoTaskMemFree(pszPath);
-
-    CString fileName = fileToOpen.Mid(fileToOpen.ReverseFind(L'\\') + 1);
-    CString ext;
-    int dot = fileName.ReverseFind(L'.');
-    if (dot != -1)
-        ext = fileName.Mid(dot + 1);
-
-    ext.MakeLower();
-    fileToOpen.MakeLower();
+    CString fileToOpen = fileOpenDlg.GetFilePath();
+    CString ext = fileOpenDlg.GetFileExt();
 
     ext.MakeLower();
     BOOL bLoadedFromMMX = FALSE;
@@ -796,52 +759,20 @@ void CFinalSunDlg::OnFileSaveas()
     char cuPath[MAX_PATH];
     GetCurrentDirectory(MAX_PATH, cuPath);
 
+    CFileDialogClsid fileSaveDlg(
+        false,                      
+        "map",                                
+        FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST,
+        fileSearchString
+    );
+    fileSaveDlg.SetSaveFileName("new_map");
 
-    CComPtr<IFileSaveDialog> pDlg;
-    if (FAILED(CoCreateInstance(CLSID_FileSaveDialog, nullptr,
-        CLSCTX_ALL, IID_PPV_ARGS(&pDlg))))
+    auto dlgId = fileSaveDlg.DoModal();
+    if (dlgId == IDCANCEL) {
         return;
-
-    auto [displayNames, extFilters] = SplitSavedlgFiletypes(fileSearchString);
-    std::vector<COMDLG_FILTERSPEC> specs;
-    std::vector<CStringW>        wnames, wfilters;
-    wnames.reserve(displayNames.size());
-    wfilters.reserve(extFilters.size());
-
-    for (size_t i = 0; i < displayNames.size(); ++i)
-    {
-        wnames.push_back(ToWideString(displayNames[i]));
-        wfilters.push_back(ToWideString(extFilters[i]));
-        specs.push_back({ wnames[i], wfilters[i] });
     }
 
-    pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
-    pDlg->SetFileTypeIndex(1);
-    pDlg->SetDefaultExtension(L"map");
-    pDlg->SetFileName(L"new_map");
-
-
-    CStringW srcFolder(theApp.m_Options.TSExe);
-    wchar_t  szInitFolder[MAX_PATH] = { 0 };
-    wcsncpy_s(szInitFolder, srcFolder.GetString(), _TRUNCATE);
-    CComPtr<IShellItem> pFolder;
-    if (SUCCEEDED(SHCreateItemFromParsingName(szInitFolder,
-        nullptr,
-        IID_PPV_ARGS(&pFolder))))
-        pDlg->SetFolder(pFolder);
-
-    if (FAILED(pDlg->Show(nullptr)))
-        return;
-
-    CComPtr<IShellItem> pItem;
-    if (FAILED(pDlg->GetResult(&pItem)))
-        return;
-
-    PWSTR pszPath = nullptr;
-    if (FAILED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszPath)))
-        return;
-    CString currentMapFile(pszPath);
-    CoTaskMemFree(pszPath);
+    CString currentMapFile = fileSaveDlg.GetFilePath();
 
     if (currentMapFile.GetLength() >= MAX_PATH)
         return;
