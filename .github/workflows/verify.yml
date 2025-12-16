@@ -14,6 +14,9 @@ on:
       - '**/*.md'
   workflow_dispatch:
 
+env:
+  VCPKG_TOOL_FOLDER: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg'
+
 jobs:
   compile-check:
     runs-on: windows-2022
@@ -31,15 +34,31 @@ jobs:
       with:
         # Target architecture
         arch: x64
-    - name: Restore cache vcpkg
-      uses: actions/cache/restore@v4
+    - name: Get Vcpkg Version
+      id: vcpkg-version
+      shell: powershell
+      run: |
+        $vcpkgPath = "${{ env.VCPKG_TOOL_FOLDER }}\vcpkg.exe"
+        $output = & $vcpkgPath --version
+        echo "vcpkg --version output : $output"
+        $match = $output -split " "
+        if ($match) {
+            $key = $match[5].Trim()
+        } else {
+            $key = "unknown-vcpkg-version"
+        }
+        echo "vcpkg version : $key"
+        echo "vcpkg_key=$key" >> "$GITHUB_OUTPUT"
+        echo "vcpkg_key=$key" >> $env:GITHUB_OUTPUT
+    - name: Cache or restore vcpkg
+      uses: actions/cache@v4
       with:
         path: |
           3rdParty/xcc/vcpkg_downloads
           3rdParty/xcc/vcpkg_installed
           3rdParty/xcc/binary-cache
           C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: Vcpkg install
       run: |
         cd 3rdParty/xcc
@@ -48,7 +67,7 @@ jobs:
         }
         $env:VCPKG_DOWNLOADS = $PWD
         $env:VCPKG_BINARY_SOURCES="files,$PWD\binary-cache,readwrite"
-        $vcpkgPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg"
+        $vcpkgPath = "${{ env.VCPKG_TOOL_FOLDER }}"
         # rm "$vcpkgPath\.vcpkg-root"
         & "$vcpkgPath\vcpkg" install `
           --x-wait-for-lock `
@@ -67,15 +86,6 @@ jobs:
         VCPKG_ENABLE_MANIFEST: "0"
       run: |
         MSBuild MissionEditor.sln /m /p:Configuration="${{ env.CONFIGURATION }}" /p:Platform=x64 /t:UnitTest
-    - name: Cache vcpkg
-      uses: actions/cache/save@v4
-      with:
-        path: |
-          3rdParty/xcc/vcpkg_downloads
-          3rdParty/xcc/vcpkg_installed
-          3rdParty/xcc/binary-cache
-          C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: do UT
       run: |
         cd x64\Debug
