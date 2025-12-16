@@ -1410,7 +1410,10 @@ CString CLoading::GetBuildingFileID(const CString& ID)
 CString CLoading::GetInfantryFileID(const CString& ID)
 {
 	CString ArtID = GetArtID(ID);
-
+	// ugly bypass for YR. RN already supports this logic so needs control
+	if (g_data.GetBool("IgnoreArtImage", ID)) {
+		return ArtID;
+	}
 	CString ImageID = art.GetStringOr(ArtID, "Image", ArtID);
 	auto const& rules = IniMegaFile::GetRules();
 
@@ -1436,9 +1439,7 @@ CString CLoading::GetArtID(const CString& ID)
 CString CLoading::GetVehicleOrAircraftFileID(const CString& ID)
 {
 	CString ArtID = GetArtID(ID);
-
 	CString ImageID = art.GetStringOr(ArtID, "Image", ArtID);
-
 	return ImageID;
 }
 
