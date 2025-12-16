@@ -1812,7 +1812,7 @@ void CLoading::LoadVehicleOrAircraft(const CString& ID)
 	if (!bHasTurret) {
 		for (int i = 0; i < 8; ++i) {
 			CString DictName;
-			DictName.Format("%s%d", ID.operator LPCSTR(), i);
+			DictName.Format("%s%d", ArtID.operator LPCSTR(), i);
 
 			unsigned char* outBuffer;
 			int outW = 0x100, outH = 0x100;
