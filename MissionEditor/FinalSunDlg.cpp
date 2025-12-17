@@ -776,21 +776,11 @@ void CFinalSunDlg::OnFileSaveas()
     fileSaveDlg.SetSaveFileName("new_map");
 
     auto dlgId = fileSaveDlg.DoModal();
-    if (dlgId == IDCANCEL) {
-        return;
+    if (dlgId != IDCANCEL) {
+        CString currentMapFile = fileSaveDlg.GetFilePath();
+        this->SetWindowText(makeWindowTitle(currentMapFile));
+        SaveMap(currentMapFile);
     }
-
-    CString currentMapFile = fileSaveDlg.GetFilePath();
-    if (currentMapFile.GetLength() >= MAX_PATH)
-        return;
-
-    CString str = GetLanguageStringACP("MainDialogCaption");
-    str += " (";
-    str += currentMapFile;
-    str += ")";
-
-    this->SetWindowText(makeWindowTitle(currentMapFile));
-    SaveMap(currentMapFile);
     SetCursor(m_hArrowCursor);
 }
 
