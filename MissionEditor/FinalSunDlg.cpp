@@ -760,9 +760,6 @@ void CFinalSunDlg::OnFileSaveas()
 
     auto const& ext = g_data.GetStringOr("Customizations", "SaveMapExtensionDefault", ".map");
 
-    char cuPath[MAX_PATH];
-    GetCurrentDirectory(MAX_PATH, cuPath);
-
     CFileDialogClsid fileSaveDlg(
         false,                      
         "map",                                
