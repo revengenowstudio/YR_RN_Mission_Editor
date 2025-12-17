@@ -35,6 +35,7 @@ public:
 	CString GetFolderPath();
 
 private:
+	void SetFileFilter(CString filter);
 
 	DialogMode m_dialogMode;
 	CString m_defExt;

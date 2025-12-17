@@ -34,6 +34,27 @@ CString CFileDialogClsid::GetFolderPath()
 	return pos < 0 ? CString() : full.Left(pos);
 }
 
+void CFileDialogClsid::SetFileFilter(CString filter)
+{
+	std::vector<COMDLG_FILTERSPEC> specs;
+	std::vector<CString> tokens = Split(filter, '|');
+
+	// m_filter trailing '|' is removed in CFileDialogClsid CTOR
+	std::vector<std::wstring> storage;
+
+	for (size_t i = 0; i + 1 < tokens.size(); i += 2) {
+		auto name = utf8ToUtf16(tokens[i]);
+		auto filter = utf8ToUtf16(tokens[i + 1]);
+		storage.push_back(name);
+		storage.push_back(filter);
+		specs.push_back({
+			storage[storage.size() - 2].c_str(),
+			storage[storage.size() - 1].c_str()
+			});
+	}
+	m_pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
+}
+
 INT_PTR CFileDialogClsid::DoModal()
 {
 	auto const isSaveDialogMode = m_dialogMode == DialogMode::SaveFile;
@@ -52,25 +73,7 @@ INT_PTR CFileDialogClsid::DoModal()
 		m_pDlg->SetFileName(fileName.c_str());
 	}
 
-	{// better split this block into a member function
-		std::vector<COMDLG_FILTERSPEC> specs;
-		std::vector<CString> tokens = Split(m_filter, '|');
-
-		// m_filter trailing '|' is removed in CFileDialogClsid CTOR
-		std::vector<std::wstring> storage;
-
-		for (size_t i = 0; i + 1 < tokens.size(); i += 2) {
-			auto name = utf8ToUtf16(tokens[i]);
-			auto filter = utf8ToUtf16(tokens[i + 1]);
-			storage.push_back(name);
-			storage.push_back(filter);
-			specs.push_back({
-				storage[storage.size() - 2].c_str(),
-				storage[storage.size() - 1].c_str()
-				});
-		}
-		m_pDlg->SetFileTypes(static_cast<UINT>(specs.size()), specs.data());
-	}
+	SetFileFilter(m_filter);
 
 	if (!m_defExt.IsEmpty()) {
 		std::wstring defExt = utf8ToUtf16(m_defExt);
