@@ -8,9 +8,40 @@ void CFileDialogClsid::SetSaveFileName(CString input)
 	m_saveFileName = input;
 }
 
+void CFileDialogClsid::SetFolder(CString path)
+{
+	m_folderPath = path;
+}
+
+void CFileDialogClsid::SetDefaultFolder(CString path)
+{
+	m_defFolderPath = path;
+}
+
 CString CFileDialogClsid::GetFilePath()
 {
 	return m_path;
+}
+
+HRESULT CFileDialogClsid::setFolder(CString path, bool isDefaultFolder)
+{
+	if (path.IsEmpty()) {
+		return E_INVALIDARG;
+	}
+	CComPtr<IShellItem> pItem;
+	std::wstring folderPath = utf8ToUtf16(path);
+	auto hr = SHCreateItemFromParsingName(
+		folderPath.c_str(), nullptr, IID_PPV_ARGS(&pItem));
+	if (FAILED(hr)) {
+		return hr;
+	}
+	if (isDefaultFolder) {
+		return m_pDlg->SetDefaultFolder(pItem);
+	}
+	else {
+		return m_pDlg->SetFolder(pItem);
+	}
+
 }
 
 CString CFileDialogClsid::GetFileName()
@@ -74,6 +105,8 @@ INT_PTR CFileDialogClsid::DoModal()
 	}
 
 	SetFileFilter(m_filter);
+	setFolder(m_folderPath, false);
+	setFolder(m_defFolderPath, true);
 
 	if (!m_defExt.IsEmpty()) {
 		std::wstring defExt = utf8ToUtf16(m_defExt);
