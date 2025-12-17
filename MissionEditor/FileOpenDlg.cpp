@@ -56,7 +56,7 @@ INT_PTR CFileDialogClsid::DoModal()
 		std::vector<COMDLG_FILTERSPEC> specs;
 		std::vector<CString> tokens = Split(m_filter, '|');
 
-		// m_filter may have trailing '|'
+		// m_filter trailing '|' is removed in CFileDialogClsid CTOR
 		std::vector<std::wstring> storage;
 
 		for (size_t i = 0; i + 1 < tokens.size(); i += 2) {
