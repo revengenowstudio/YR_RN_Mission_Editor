@@ -102,15 +102,6 @@ jobs:
     - name: build-msvc
       run: |
         MSBuild MissionEditor.sln /m /p:Configuration="${{ env.CONFIGURATION }}" /p:Platform=x64 /t:MissionEditor
-    - name: Cache vcpkg
-      uses: actions/cache/save@v4
-      with:
-        path: |
-          3rdParty/xcc/vcpkg_downloads
-          3rdParty/xcc/vcpkg_installed
-          3rdParty/xcc/binary-cache
-          C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
     - name: Pack up
       shell: pwsh
       run: |
