@@ -1,0 +1,75 @@
+name: 'Setup MSVC & vcpkg cache'
+description: 'setup MSVC & vcpkg install & vcpkg cache'
+
+inputs:
+  arch:
+    description: 'MSVC arch'
+    required: true
+  vcpkg-root:
+    description: 'vcpkg root dir path'
+    required: true
+
+outputs:
+  vcpkg-version:
+    description: 'vcpkg version code'
+    value: ${{ steps.vcpkg-version.outputs.vcpkg_key }}
+
+runs:
+  using: composite
+  steps:
+    - name: setup-msvc
+      uses: egor-tensin/vs-shell@v2
+      with:
+        arch: ${{ inputs.arch }}
+
+    - name: Get Vcpkg Version
+      id: vcpkg-version
+      shell: powershell
+      run: |
+        $vcpkgPath = "${{ inputs.vcpkg-rootR }}\vcpkg.exe"
+        $output = & $vcpkgPath --version
+        echo "vcpkg --version output : $output"
+        $match = $output -split " "
+        if ($match) {
+            $key = $match[5].Trim()
+        } else {
+            $key = "unknown-vcpkg-version"
+        }
+        echo "vcpkg version : $key"
+        echo "vcpkg_key=$key" >> "$GITHUB_OUTPUT"
+        echo "vcpkg_key=$key" >> $env:GITHUB_OUTPUT
+
+    - name: Cache/Restore vcpkg
+      uses: actions/cache@v4
+      with:
+        path: |
+          3rdParty/xcc/vcpkg_downloads
+          3rdParty/xcc/vcpkg_installed
+          3rdParty/xcc/binary-cache
+          C:/Users/runneradmin/AppData/Local/vcpkg
+        key: |
+          ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+          ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}
+
+    - name: Vcpkg install
+      shell: powershell
+      run: |
+        cd 3rdParty/xcc
+        if (-not (Test-Path "binary-cache")) {
+            mkdir "binary-cache"
+        }
+        $env:VCPKG_DOWNLOADS = $PWD
+        $env:VCPKG_BINARY_SOURCES="files,$PWD\binary-cache,readwrite"
+        $vcpkgPath = "${{ inputs.vcpkg-root }}"
+        # rm "$vcpkgPath\.vcpkg-root"
+        & "$vcpkgPath\vcpkg" install `
+          --x-wait-for-lock `
+          --triplet "x64-windows" `
+          --vcpkg-root $vcpkgPath `
+          --x-manifest-root="$PWD\" `
+          --x-install-root="$PWD\vcpkg_installed\x64-windows"
+        ls
+        ls vcpkg_installed/x64-windows
+        ls vcpkg_installed/x64-windows/x64-windows
