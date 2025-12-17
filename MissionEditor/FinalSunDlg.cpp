@@ -593,16 +593,12 @@ void CFinalSunDlg::OnFileOpenmap()
 
     bNoDraw = TRUE;
 
-    CString str;
-    str = GetLanguageStringACP("MainDialogCaption");
-    str += " (";
-    str += (char*)(LPCTSTR)fileToOpen;
-    str += ")";
+    auto const& pathName = fileOpenDlg.GetFilePath();
 
     // MW 07/20/01: Update prev. files
-    InsertPrevFile(fileToOpen);
+    InsertPrevFile(pathName);
 
-    this->SetWindowText(makeWindowTitle(fileToOpen));
+    this->SetWindowText(makeWindowTitle(pathName));
 
     SetCursor(LoadCursor(NULL, IDC_WAIT));
 
