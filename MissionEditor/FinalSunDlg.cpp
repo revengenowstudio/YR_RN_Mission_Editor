@@ -545,6 +545,13 @@ void CFinalSunDlg::OnFileOpenmap()
     fileToOpen.MakeLower();
     ext.MakeLower();
 
+    if (checkProjectPathAndRelaunch(fileToOpen)) {
+        reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->UnloadAll(false);
+        return;
+    }
+
+    m_PKTHeader.Clear();
+
     BOOL bLoadedFromMMX = FALSE;
     if (ext == "mmx") {
         HMIXFILE hMix = FSunPackLib::XCC_OpenMix(fileToOpen, NULL);
@@ -595,7 +602,7 @@ void CFinalSunDlg::OnFileOpenmap()
     // MW 07/20/01: Update prev. files
     InsertPrevFile(fileToOpen);
 
-    this->SetWindowText(makeWindowTitle(str));
+    this->SetWindowText(makeWindowTitle(fileToOpen));
 
     SetCursor(LoadCursor(NULL, IDC_WAIT));
 
@@ -774,7 +781,6 @@ void CFinalSunDlg::OnFileSaveas()
     }
 
     CString currentMapFile = fileSaveDlg.GetFilePath();
-
     if (currentMapFile.GetLength() >= MAX_PATH)
         return;
 
@@ -783,10 +789,8 @@ void CFinalSunDlg::OnFileSaveas()
     str += currentMapFile;
     str += ")";
 
-    this->SetWindowText(str);
+    this->SetWindowText(makeWindowTitle(currentMapFile));
     SaveMap(currentMapFile);
-
-
     SetCursor(m_hArrowCursor);
 }
 
