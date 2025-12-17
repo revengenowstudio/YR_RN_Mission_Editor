@@ -55,6 +55,7 @@
 #include "userscriptsdlg.h"
 #include "TriggerDatabase.h"
 #include "Version.h"
+#include "FileOpenDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -529,8 +530,8 @@ void CFinalSunDlg::OnFileOpenmap()
     }
 
     CFileDialogClsid fileOpenDlg(
-        true,
-        "map",
+        CFileDialogClsid::DialogMode::OpenFile,
+        {},
         FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST,
         fileSearchString
     );
@@ -541,16 +542,16 @@ void CFinalSunDlg::OnFileOpenmap()
     }
 
     CString fileToOpen = fileOpenDlg.GetFilePath();
-    CString ext = fileOpenDlg.GetFileExt();
-    fileToOpen.MakeLower();
-    ext.MakeLower();
-
     if (checkProjectPathAndRelaunch(fileToOpen)) {
         reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->UnloadAll(false);
         return;
     }
 
     m_PKTHeader.Clear();
+
+    CString ext = fileOpenDlg.GetFileExt();
+    fileToOpen.MakeLower();
+    ext.MakeLower();
 
     BOOL bLoadedFromMMX = FALSE;
     if (ext == "mmx") {
@@ -607,7 +608,7 @@ void CFinalSunDlg::OnFileOpenmap()
 
 
 
-    Map->LoadMap((char*)(LPCTSTR)fileToOpen);
+    Map->LoadMap(fileToOpen);
 
 
     BOOL bNoMapFile = FALSE;
@@ -751,7 +752,9 @@ void CFinalSunDlg::OnFileSaveas()
 
     CMapValidator validator;
     int iCancel = validator.DoModal();
-    if (iCancel == IDCANCEL) return;
+    if (iCancel == IDCANCEL) {
+        return;
+    }
     CString fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES");
     if (yuri_mode) {
         fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES_YR");
@@ -761,12 +764,12 @@ void CFinalSunDlg::OnFileSaveas()
     auto const& ext = g_data.GetStringOr("Customizations", "SaveMapExtensionDefault", ".map");
 
     CFileDialogClsid fileSaveDlg(
-        false,                      
-        "map",                                
+        CFileDialogClsid::DialogMode::SaveFile,
+        ext,
         FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST,
         fileSearchString
     );
-    fileSaveDlg.SetSaveFileName("new_map");
+    fileSaveDlg.SetSaveFileName(currentMapFile);
 
     auto dlgId = fileSaveDlg.DoModal();
     if (dlgId != IDCANCEL) {

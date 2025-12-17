@@ -490,6 +490,7 @@
     <ClCompile Include="ComboUInputDlg.cpp" />
     <ClCompile Include="CsfViewer.cpp" />
     <ClCompile Include="DynamicGraphDlg.cpp" />
+    <ClCompile Include="FileOpenDlg.cpp" />
     <ClCompile Include="FinalSun.cpp" />
     <ClCompile Include="FinalSunDlg.cpp" />
     <ClCompile Include="FloatEdit.cpp" />
@@ -627,6 +628,7 @@
     <ClInclude Include="ComboUInputDlg.h" />
     <ClInclude Include="CsfViewer.h" />
     <ClInclude Include="defines.h" />
+    <ClInclude Include="FileOpenDlg.h" />
     <ClInclude Include="GlobalObjectPool.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="IniContentEditor.h" />
