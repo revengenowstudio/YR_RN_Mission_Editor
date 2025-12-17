@@ -769,7 +769,9 @@ void CFinalSunDlg::OnFileSaveas()
         FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST,
         fileSearchString
     );
-    fileSaveDlg.SetSaveFileName(currentMapFile);
+    auto pathParts = Split(currentMapFile,'\\\\');
+    auto currentMapFilename = pathParts[pathParts.size() - 1];
+    fileSaveDlg.SetSaveFileName(currentMapFilename);
 
     auto dlgId = fileSaveDlg.DoModal();
     if (dlgId != IDCANCEL) {

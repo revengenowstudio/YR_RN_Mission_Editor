@@ -68,7 +68,7 @@ INT_PTR CFileDialogClsid::DoModal()
 		return IDCANCEL;
 	}
 
-	if (!isSaveDialogMode) {
+	if (isSaveDialogMode) {
 		std::wstring fileName = utf8ToUtf16(m_saveFileName);
 		m_pDlg->SetFileName(fileName.c_str());
 	}
