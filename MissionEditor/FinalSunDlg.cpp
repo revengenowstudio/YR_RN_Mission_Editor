@@ -536,8 +536,7 @@ void CFinalSunDlg::OnFileOpenmap()
         fileSearchString
     );
 
-    auto dlgId = fileOpenDlg.DoModal();
-    if (dlgId == IDCANCEL) {
+    if (fileOpenDlg.DoModal() == IDCANCEL) {
         return;
     }
 
@@ -751,8 +750,7 @@ void CFinalSunDlg::OnFileSaveas()
     }
 
     CMapValidator validator;
-    int iCancel = validator.DoModal();
-    if (iCancel == IDCANCEL) {
+    if (validator.DoModal() == IDCANCEL) {
         return;
     }
     CString fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES");
@@ -773,8 +771,7 @@ void CFinalSunDlg::OnFileSaveas()
     auto currentMapFilename = pathParts[pathParts.size() - 1];
     fileSaveDlg.SetSaveFileName(currentMapFilename);
 
-    auto dlgId = fileSaveDlg.DoModal();
-    if (dlgId != IDCANCEL) {
+    if (fileSaveDlg.DoModal() != IDCANCEL) {
         CString currentMapFile = fileSaveDlg.GetFilePath();
         this->SetWindowText(makeWindowTitle(currentMapFile));
         SaveMap(currentMapFile);
