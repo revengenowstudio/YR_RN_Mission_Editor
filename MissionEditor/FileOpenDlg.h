@@ -18,8 +18,6 @@ public:
 		m_defExt(extension),
 		m_filter(searchFilter),
 		m_saveFileName(),
-		m_defFolderPath(),
-		m_folderPath(),
 		m_path(),
 		m_parent(hParentWnd),
 		m_flags(dwFlags)
@@ -30,8 +28,6 @@ public:
 	INT_PTR DoModal();
 
 	void SetSaveFileName(CString input);
-	void SetFolder(CString path);
-	void SetDefaultFolder(CString path);
 
 	CString GetFilePath();
 	CString GetFileName();
@@ -40,12 +36,9 @@ public:
 
 private:
 	void SetFileFilter(CString filter);
-	HRESULT setFolder(CString path,bool isDefaultFolder);
 
 	DialogMode m_dialogMode;
 	CString m_defExt;
-	CString m_defFolderPath;
-	CString m_folderPath;
 	CString m_filter;
 	CString m_saveFileName;
 	HWND m_parent;
