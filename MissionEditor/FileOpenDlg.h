@@ -18,7 +18,7 @@ public:
 		m_defExt(extension),
 		m_filter(searchFilter),
 		m_saveFileName(),
-		m_path(),
+		m_fileFullPath(),
 		m_parent(hParentWnd),
 		m_flags(dwFlags)
 	{
@@ -43,6 +43,6 @@ private:
 	CString m_saveFileName;
 	HWND m_parent;
 	DWORD m_flags;
-	CString m_path;
+	CString m_fileFullPath;
 	CComPtr<IFileDialog> m_pDlg;
 };

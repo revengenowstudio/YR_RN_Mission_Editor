@@ -10,12 +10,12 @@ void CFileDialogClsid::SetSaveFileName(CString input)
 
 CString CFileDialogClsid::GetFilePath()
 {
-	return m_path;
+	return m_fileFullPath;
 }
 
 CString CFileDialogClsid::GetFileName()
 {
-	CString full = m_path;
+	CString full = m_fileFullPath;
 	int pos = full.ReverseFind(L'\\');
 	return pos < 0 ? full : full.Mid(pos + 1);
 }
@@ -29,7 +29,7 @@ CString CFileDialogClsid::GetFileExt()
 
 CString CFileDialogClsid::GetFolderPath()
 {
-	CString full = m_path;
+	CString full = m_fileFullPath;
 	int pos = full.ReverseFind(L'\\');
 	return pos < 0 ? CString() : full.Left(pos);
 }
@@ -101,7 +101,7 @@ INT_PTR CFileDialogClsid::DoModal()
 	if (FAILED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &psz))) {
 		return IDCANCEL;
 	}
-	m_path = psz;
+	m_fileFullPath = psz;
 	CoTaskMemFree(psz);
 	return IDOK;
 }
