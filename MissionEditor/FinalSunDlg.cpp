@@ -55,7 +55,6 @@
 #include "userscriptsdlg.h"
 #include "TriggerDatabase.h"
 #include "Version.h"
-#include "FileOpenDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -529,29 +528,31 @@ void CFinalSunDlg::OnFileOpenmap()
         fileSearchString.Replace(".yrm", ".mpr");
     }
 
-    CFileDialogClsid fileOpenDlg(
-        CFileDialogClsid::DialogMode::OpenFile,
-        {},
-        FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST,
-        fileSearchString
-    );
+    CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, fileSearchString);
 
-    if (fileOpenDlg.DoModal() == IDCANCEL) {
+    char cuPath[MAX_PATH];
+    GetCurrentDirectory(MAX_PATH, cuPath);
+    dlg.m_ofn.lpstrInitialDir = cuPath;
+
+    if (theApp.m_Options.TSExe.GetLength()) {
+        dlg.m_ofn.lpstrInitialDir = theApp.m_Options.TSExe.operator LPCTSTR();
+    }
+
+    if (dlg.DoModal() == IDCANCEL) {
         return;
     }
 
-    CString fileToOpen = fileOpenDlg.GetFilePath();
-    if (checkProjectPathAndRelaunch(fileToOpen)) {
+    if (checkProjectPathAndRelaunch(dlg.GetPathName())) {
         reinterpret_cast<CFinalSunDlg*>(theApp.m_pMainWnd)->UnloadAll(false);
         return;
     }
 
     m_PKTHeader.Clear();
 
-    CString ext = fileOpenDlg.GetFileExt();
+    CString fileToOpen = dlg.GetPathName();
     fileToOpen.MakeLower();
+    CString ext = dlg.GetFileExt();
     ext.MakeLower();
-
     BOOL bLoadedFromMMX = FALSE;
     if (ext == "mmx") {
         HMIXFILE hMix = FSunPackLib::XCC_OpenMix(fileToOpen, NULL);
@@ -593,7 +594,7 @@ void CFinalSunDlg::OnFileOpenmap()
 
     bNoDraw = TRUE;
 
-    auto const& pathName = fileOpenDlg.GetFilePath();
+    auto const& pathName = dlg.GetPathName();
 
     // MW 07/20/01: Update prev. files
     InsertPrevFile(pathName);
@@ -607,7 +608,7 @@ void CFinalSunDlg::OnFileOpenmap()
 
 
 
-    Map->LoadMap(fileToOpen);
+    Map->LoadMap((char*)(LPCTSTR)fileToOpen);
 
 
     BOOL bNoMapFile = FALSE;
@@ -647,7 +648,7 @@ void CFinalSunDlg::OnFileOpenmap()
 
     if (!bNoMapFile) {
         if (bLoadedFromMMX) {
-            currentMapFile = fileToOpen;
+            currentMapFile = dlg.GetPathName();
         }
         else {
             currentMapFile = fileToOpen;
@@ -750,33 +751,33 @@ void CFinalSunDlg::OnFileSaveas()
     }
 
     CMapValidator validator;
-    if (validator.DoModal() == IDCANCEL) {
-        return;
-    }
-    CString fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES");
+    int iCancel = validator.DoModal();
+    if (iCancel == IDCANCEL) return;
+    CString r = GetLanguageStringACP("SAVEDLG_FILETYPES");
     if (yuri_mode) {
-        fileSearchString = GetLanguageStringACP("SAVEDLG_FILETYPES_YR");
+        r = GetLanguageStringACP("SAVEDLG_FILETYPES_YR");
     }
-    fileSearchString = TranslateStringVariables(8, fileSearchString, ";");
+    r = TranslateStringVariables(8, r, ";");
 
     auto const& ext = g_data.GetStringOr("Customizations", "SaveMapExtensionDefault", ".map");
+    CFileDialog dlg(FALSE, ext, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, r);
+    char cuPath[MAX_PATH];
 
-    CFileDialogClsid fileSaveDlg(
-        CFileDialogClsid::DialogMode::SaveFile,
-        ext,
-        FOS_FILEMUSTEXIST | FOS_PATHMUSTEXIST,
-        fileSearchString
-    );
-    auto pathParts = Split(currentMapFile,'\\\\');
-    auto currentMapFilename = pathParts[pathParts.size() - 1];
-    fileSaveDlg.SetSaveFileName(currentMapFilename);
+    GetCurrentDirectory(MAX_PATH, cuPath);
+    dlg.m_ofn.lpstrInitialDir = cuPath;
 
-    if (fileSaveDlg.DoModal() != IDCANCEL) {
-        CString currentMapFile = fileSaveDlg.GetFilePath();
+    if (theApp.m_Options.TSExe.GetLength()) {
+        dlg.m_ofn.lpstrInitialDir = theApp.m_Options.TSExe;
+    }
+
+    if (dlg.DoModal() != IDCANCEL) {
+        currentMapFile = dlg.GetPathName();
         this->SetWindowText(makeWindowTitle(currentMapFile));
         SaveMap(currentMapFile);
     }
+
     SetCursor(m_hArrowCursor);
+
 }
 
 void CFinalSunDlg::OnOptionsExportrulesini()
