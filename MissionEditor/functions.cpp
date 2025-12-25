@@ -1525,3 +1525,6 @@ CComPtr<IDirectDrawSurface7> BitmapToSurface(IDirectDraw7* pDD, const CBitmap& b
 
 	return pSurface;
 }
+
+
+

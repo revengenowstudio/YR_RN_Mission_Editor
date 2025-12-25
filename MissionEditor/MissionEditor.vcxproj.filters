@@ -303,9 +303,6 @@
     <ClCompile Include="TriggerDatabase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FileOpenDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\VersionInfo.rc">
@@ -644,9 +641,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TriggerDatabase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileOpenDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
