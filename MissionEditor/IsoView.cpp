@@ -5777,7 +5777,7 @@ void CIsoView::DrawMap()
 								if (!picNameAfterLoad.IsEmpty()) {
 									pic = images.Read(picNameAfterLoad);
 								}
-								if (pic->pic == NULL) {
+								if (!pic || pic->pic == NULL) {
 									missingimages[upg] = TRUE;
 								}
 							}
