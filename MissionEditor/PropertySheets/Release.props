@@ -28,7 +28,7 @@
       <PreprocessorDefinitions>NDEBUG;_AFXDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>CncVxlRenderText.lib;ddraw.lib;dxguid.lib;winmm.lib;gdiplus.lib;lzo2.lib;bz2.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dbghelp.lib;CncVxlRenderText.lib;ddraw.lib;dxguid.lib;winmm.lib;gdiplus.lib;lzo2.lib;bz2.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib; libcmtd.lib; msvcrtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
