@@ -3105,8 +3105,6 @@ LONG __stdcall ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
     expParam.ExceptionPointers = ExceptionInfo;
     expParam.ClientPointers = FALSE;
 
-    MessageBox(NULL, "TEST", "TEST", MB_OK);
-
     namespace fs = std::filesystem;
     auto const now = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
     std::wstring subpath = std::format(L"snapshot-{:%Y%m%d-%H%M%S}", now);
