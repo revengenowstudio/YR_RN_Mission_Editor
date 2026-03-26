@@ -372,11 +372,10 @@ BOOL CFinalSunApp::InitInstance()
 	optini.SaveFile(userOptIniFile);
 
 	// MW 07/20/01: Load file list
-	int i;
-	for (i = 0; i < RecentFilesSlots; i++) {
-		char c[50];
-		itoa(i, c, 10);
-		opts.prev_maps[i] = optini.GetString("Files", c);
+	CString fileIdx;
+	for (auto i = 0; i < RecentFilesSlots; i++) {
+		fileIdx.Format("%d", i);
+		opts.prev_maps[i] = optini.GetString("Files", fileIdx);
 	}
 
 	if (opts.bDoNotLoadTemperateGraphics && opts.bDoNotLoadSnowGraphics) {
@@ -404,13 +403,13 @@ BOOL CFinalSunApp::InitInstance()
 		auto const mapData = std::make_unique<CMapData>();
 		Map = mapData.get();
 
-		CLoading loading(NULL);
-		m_loading = &loading;
+		auto const loading = std::make_unique<CLoading>(nullptr);
+		m_loading = loading.get();
 
-		CFinalSunDlg dlg;
-		m_pMainWnd = &dlg;
+		auto const dlg = std::make_unique<CFinalSunDlg>();
+		m_pMainWnd = dlg.get();
 
-		dlg.DoModal();
+		dlg->DoModal();
 	}
 
 	// Map and dialog closed, do further work if required	
