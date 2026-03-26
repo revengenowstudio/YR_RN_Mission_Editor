@@ -53,7 +53,7 @@
 
 class CLoading;
 
-LONG __stdcall ExceptionHandler(_EXCEPTION_POINTERS* ExceptionInfo);
+LONG __stdcall ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo);
 
 /////////////////////////////////////////////////////////////////////////////
 // CFinalSunDlg Dialogfeld

@@ -23,6 +23,8 @@
 //
 
 #include "stdafx.h"
+#include <Dbghelp.h>
+#include <filesystem>
 #include "structs.h"
 #include "FinalSun.h"
 #include "FinalSunDlg.h"
@@ -3035,7 +3037,25 @@ static std::tuple<const char*, const char*, CString> translateException(const PE
     }
 }
 
-LONG __stdcall ExceptionHandler(_EXCEPTION_POINTERS* ExceptionInfo)
+static std::wstring fullDump(
+    std::wstring destinationFolder,
+    PMINIDUMP_EXCEPTION_INFORMATION const pException)
+{
+    std::wstring filename = std::move(destinationFolder);
+    filename += L"\\extcrashdump.dmp";
+
+    HANDLE dumpFile = CreateFileW(filename.c_str(), GENERIC_WRITE,
+        0, nullptr, CREATE_ALWAYS, FILE_FLAG_RANDOM_ACCESS, nullptr);
+
+    MINIDUMP_TYPE type = static_cast<MINIDUMP_TYPE>(MiniDumpWithFullMemory);
+
+    MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), dumpFile, type, pException, nullptr, nullptr);
+    CloseHandle(dumpFile);
+
+    return filename;
+}
+
+LONG __stdcall ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
 {
     errstream << "Exception occured. Current data:" << endl;
     errstream << "Last succeeded operation:" << last_succeeded_operation << endl;
@@ -3079,6 +3099,22 @@ LONG __stdcall ExceptionHandler(_EXCEPTION_POINTERS* ExceptionInfo)
         ExceptionInfo->ExceptionRecord->ExceptionAddress,
         exceptionAdditionalInfo
     );
+
+    MINIDUMP_EXCEPTION_INFORMATION expParam;
+    expParam.ThreadId = GetCurrentThreadId();
+    expParam.ExceptionPointers = ExceptionInfo;
+    expParam.ClientPointers = FALSE;
+
+    MessageBox(NULL, "TEST", "TEST", MB_OK);
+
+    namespace fs = std::filesystem;
+    auto const now = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
+    std::wstring subpath = std::format(L"snapshot-{:%Y%m%d-%H%M%S}", now);
+    auto const crashdumpPath = (fs::path(u8AppDataPath) / "debug" / subpath).wstring();
+    if (!fs::exists(crashdumpPath)) {
+        fs::create_directories(crashdumpPath);
+    }
+    fullDump(crashdumpPath, &expParam);
 
     if (MessageBox(0, exceptionReport, GetLanguageStringACP("Fatal error"), MB_OKCANCEL) == IDOK) {
         return EXCEPTION_CONTINUE_EXECUTION;
