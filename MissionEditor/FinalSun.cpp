@@ -148,6 +148,8 @@ CFinalSunApp::CFinalSunApp()
 
 BOOL CFinalSunApp::InitInstance()
 {
+	SetUnhandledExceptionFilter(ExceptionHandler);
+
 	m_hAccel = LoadAccelerators(this->m_hInstance, MAKEINTRESOURCE(IDR_MAIN));
 
 	if (!AfxInitRichEdit2()) {

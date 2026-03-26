@@ -3035,7 +3035,7 @@ static std::tuple<const char*, const char*, CString> translateException(const PE
     }
 }
 
-LONG __stdcall ExceptionHandler(_EXCEPTION_POINTERS* ExceptionInfo) 
+LONG __stdcall ExceptionHandler(_EXCEPTION_POINTERS* ExceptionInfo)
 {
     errstream << "Exception occured. Current data:" << endl;
     errstream << "Last succeeded operation:" << last_succeeded_operation << endl;
@@ -3115,7 +3115,6 @@ LONG __stdcall ExceptionHandler(_EXCEPTION_POINTERS* ExceptionInfo)
 INT_PTR CFinalSunDlg::DoModal()
 {
     int res = 0;
-    SetUnhandledExceptionFilter(ExceptionHandler);
 
     res = CDialog::DoModal();
 
