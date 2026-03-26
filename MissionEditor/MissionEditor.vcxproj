@@ -489,6 +489,7 @@
     <ClCompile Include="CliffModifier.cpp" />
     <ClCompile Include="ComboUInputDlg.cpp" />
     <ClCompile Include="CsfViewer.cpp" />
+    <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DynamicGraphDlg.cpp" />
     <ClCompile Include="FinalSun.cpp" />
     <ClCompile Include="FinalSunDlg.cpp" />
@@ -626,6 +627,7 @@
     <ClInclude Include="CliffModifier.h" />
     <ClInclude Include="ComboUInputDlg.h" />
     <ClInclude Include="CsfViewer.h" />
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="defines.h" />
     <ClInclude Include="GlobalObjectPool.h" />
     <ClInclude Include="Helpers.h" />
