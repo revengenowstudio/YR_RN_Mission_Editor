@@ -113,5 +113,5 @@ jobs:
         tag_name: ${{ env.RELEASE_VER }}
         name: ${{ env.RELEASE_VER }}
         files: dist/${{ env.PACKAGE_NAME }}
-        target_commitish: ${{ github.ref }}
+        target_commitish: ${{ github.sha }}
         prerelease: ${{ env.IS_PRERELEASE }}
