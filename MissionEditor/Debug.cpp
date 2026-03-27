@@ -169,7 +169,19 @@ static std::wstring fullDump(
     HANDLE dumpFile = CreateFileW(filename.c_str(), GENERIC_WRITE,
         0, nullptr, CREATE_ALWAYS, FILE_FLAG_RANDOM_ACCESS, nullptr);
 
+#if 0
     MINIDUMP_TYPE type = static_cast<MINIDUMP_TYPE>(MiniDumpWithFullMemory);
+#else
+    MINIDUMP_TYPE type = (MINIDUMP_TYPE)(
+        MiniDumpNormal |
+        MiniDumpWithHandleData |
+        MiniDumpWithThreadInfo |
+        MiniDumpWithProcessThreadData |
+        MiniDumpWithIndirectlyReferencedMemory |
+        MiniDumpWithDataSegs |          // Global/Static variables
+        MiniDumpIgnoreInaccessibleMemory // Make it stable
+        );
+#endif
 
     MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), dumpFile, type, pException, nullptr, nullptr);
     CloseHandle(dumpFile);
