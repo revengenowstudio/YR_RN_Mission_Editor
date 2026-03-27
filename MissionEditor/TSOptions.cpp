@@ -66,6 +66,7 @@ void CTSOptions::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTSOptions, CDialog)
 	ON_BN_CLICKED(IDC_CHOOSE, OnChoose)
 	ON_CBN_SELCHANGE(IDC_LANGUAGE, &CTSOptions::OnCbnSelchangeLanguage)
+	ON_BN_CLICKED(IDOK, OnOK)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -87,8 +88,6 @@ void CTSOptions::OnChoose()
 	fd.DoModal();
 
 	this->GetDlgItem(IDC_EDIT1)->SetWindowText((LPCTSTR)fd.GetPathName());
-
-	delete fd;
 }
 
 void CTSOptions::OnOK()
@@ -108,25 +107,29 @@ BOOL CTSOptions::OnInitDialog()
 
 	m_PreferLocalTheaterFiles = theApp.m_Options.bPreferLocalTheaterFiles;
 
+	int englishRealIdx = 0;
+	int selectedRealIdx = -1;
 
-	int englishIdx = 0;
-	int selectedLanIdx = -1;
 	auto const& languageSec = language["Languages"];
 	for (auto i = 0; i < languageSec.Size(); i++) {
 		auto const& def = languageSec.Nth(i).second;
 		auto const& lang = language.GetString(def + "Header", "Name");
-		m_Language.SetItemData(m_Language.AddString(lang), i);
-		if (lang == "English") {
-			englishIdx = i;
+		int realIdx = m_Language.AddString(lang);
+
+		m_Language.SetItemData(realIdx, i);
+
+		if (lang == _T("English")) {
+			englishRealIdx = realIdx;
 		}
 		if (def == theApp.m_Options.LanguageName) {
-			selectedLanIdx = i;
+			selectedRealIdx = realIdx;
 		}
 	}
-	if (selectedLanIdx < 0) {
-		selectedLanIdx = englishIdx;
+
+	if (selectedRealIdx < 0) {
+		selectedRealIdx = englishRealIdx;
 	}
-	m_Language.SetCurSel(selectedLanIdx);
+	m_Language.SetCurSel(selectedRealIdx);
 
 	translateUI();
 	UpdateData(FALSE);
@@ -138,6 +141,8 @@ BOOL CTSOptions::OnInitDialog()
 
 void CTSOptions::OnCbnSelchangeLanguage()
 {
+	m_LanguageName = getLanguageSelected();
+	theApp.m_Options.LanguageName = m_LanguageName;
 	translateUI();
 }
 
