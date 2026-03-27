@@ -260,7 +260,7 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
 
     if (theApp.m_Options.LanguageName == "Chinese") {
         pFormatterStr = "地图编辑器程序错误\n\n" \
-            "版本号: " PRODUCT_VERSION_STRING
+            "版本号: " PRODUCT_VERSION_STRING "\n\n"
             "本应用将尝试将地图保存至 %s 文件夹内的\"fcrash_backup.map\" 并且退出.\n\n\n" \
             "当你看到这个窗口的时候，请截图并反馈给开发者" \
             "\n\n下面为错误信息详情:\n\n" \
