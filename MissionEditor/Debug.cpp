@@ -262,12 +262,12 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
         errDlg->ShowWindow(SW_SHOW);
         theApp.MainWindow()->EnableWindow(FALSE);
 
-        if (!dumpComplete) {
-            MSG msg;
-            while (::IsWindow(errDlg->GetSafeHwnd()) && GetMessage(&msg, NULL, 0, 0)) {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
+        MSG msg;
+        while (!dumpComplete
+            && ::IsWindow(errDlg->GetSafeHwnd())
+            && GetMessage(&msg, NULL, 0, 0)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
         }
 
         handle.wait();
