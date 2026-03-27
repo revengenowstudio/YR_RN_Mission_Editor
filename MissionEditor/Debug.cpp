@@ -188,8 +188,10 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
     errstream << "Additional Info:" << exceptionAdditionalInfo << endl;
 
     auto errDlg = std::make_unique<CDumpProgressDlg>();
+    errDlg->Create(CDumpProgressDlg::IDD);
+    bool dumpComplete = false;
 
-    auto handle = std::async(std::launch::async, [ExceptionInfo, &errDlg] {
+    auto handle = std::async(std::launch::async, [ExceptionInfo, &errDlg, &dumpComplete] {
         MINIDUMP_EXCEPTION_INFORMATION expParam;
         expParam.ThreadId = GetCurrentThreadId();
         expParam.ExceptionPointers = ExceptionInfo;
@@ -203,7 +205,10 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
             fs::create_directories(crashdumpPath);
         }
         fullDump(crashdumpPath, &expParam);
-        });
+        dumpComplete = true;
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        errDlg->PostMessage(WM_CLOSE);
+    });
 
     const char* pFormatterStr = "INTERNAL APPLICATION ERROR\n\n" \
         "Application will now try to free memory, save the current map as \"fcrash_backup.map\" in the %s directory and quit.\n\n\n" \
@@ -241,15 +246,16 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
     );
 
     {
-        errDlg->Create(CDumpProgressDlg::IDD);
         errDlg->SetMessage(exceptionReport);
         errDlg->ShowWindow(SW_SHOW);
         theApp.MainWindow()->EnableWindow(FALSE);
 
-        MSG msg;
-        while (::IsWindow(errDlg->GetSafeHwnd()) && GetMessage(&msg, NULL, 0, 0)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+        if (!dumpComplete) {
+            MSG msg;
+            while (::IsWindow(errDlg->GetSafeHwnd()) && GetMessage(&msg, NULL, 0, 0)) {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
         }
 
         handle.wait();
@@ -278,10 +284,6 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
     tutorial.Clear();
     g_data.Clear();
     language.Clear();
-
-#ifdef _DEBUG
-    return EXCEPTION_CONTINUE_SEARCH;
-#endif
 
     return EXCEPTION_EXECUTE_HANDLER;//EXCEPTION_CONTINUE_SEARCH;//EXCEPTION_EXECUTE_HANDLER;
 }
