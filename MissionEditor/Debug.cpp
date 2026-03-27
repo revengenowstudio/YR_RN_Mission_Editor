@@ -203,6 +203,22 @@ std::wstring prepareCrashdumpDir()
     return crashdumpPath;
 }
 
+void popDumpFolder()
+{
+    auto const strRelativePath = _T("%LOCALAPPDATA%\\FinalRevenge\\debug");
+    TCHAR szFullPath[MAX_PATH];
+
+    DWORD dwRet = ExpandEnvironmentStringsA(strRelativePath, szFullPath, MAX_PATH);
+
+    if (dwRet > 0 && dwRet <= MAX_PATH) {
+        HINSTANCE hInst = ShellExecute(NULL, _T("open"), szFullPath, NULL, NULL, SW_SHOWNORMAL);
+
+        if ((INT_PTR)hInst <= 32) {
+            errstream << "could not open debug folder";
+        }
+    }
+}
+
 LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
 {
     errstream << "Exception occured. Current data:" << endl;
@@ -284,6 +300,7 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
 
         errDlg->ShowWindow(SW_HIDE);
         errDlg.reset();
+        popDumpFolder();
     }
 
     errstream << "Trying to save current map as emergency backup" << endl;
