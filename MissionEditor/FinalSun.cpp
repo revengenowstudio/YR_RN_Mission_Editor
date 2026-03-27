@@ -30,6 +30,7 @@
 #include "variables.h"
 #include "functions.h"
 #include "inlines.h"
+#include "Debug.h"
 #include "Version.h"
 #include <ShlObj.h>
 
@@ -148,7 +149,7 @@ CFinalSunApp::CFinalSunApp()
 
 BOOL CFinalSunApp::InitInstance()
 {
-	SetUnhandledExceptionFilter(ExceptionHandler);
+	SetUnhandledExceptionFilter(Debug::ExceptionHandler);
 
 	m_hAccel = LoadAccelerators(this->m_hInstance, MAKEINTRESOURCE(IDR_MAIN));
 
