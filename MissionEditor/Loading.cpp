@@ -135,9 +135,6 @@ void CLoading::Load()
 
 	CString artFile;
 
-
-
-
 	// show a wait cursor
 	SetCursor(LoadCursor(NULL, IDC_WAIT));
 
