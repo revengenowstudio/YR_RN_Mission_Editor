@@ -5,6 +5,9 @@
 #include <afx.h>
 #include "Debug.h"
 #include "variables.h"
+#include "Version.h"
+
+namespace fs = std::filesystem;
 
 class CDumpProgressDlg : public CDialog
 {
@@ -189,6 +192,17 @@ static std::wstring fullDump(
     return filename;
 }
 
+std::wstring prepareCrashdumpDir()
+{
+    auto const now = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
+    std::wstring subpath = std::format(L"snapshot-{:%Y%m%d-%H%M%S}", now);
+    auto const crashdumpPath = (fs::path(u8AppDataPath) / "debug" / subpath).wstring();
+    if (!fs::exists(crashdumpPath)) {
+        fs::create_directories(crashdumpPath);
+    }
+    return crashdumpPath;
+}
+
 LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
 {
     errstream << "Exception occured. Current data:" << endl;
@@ -202,20 +216,14 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
     auto errDlg = std::make_unique<CDumpProgressDlg>();
     errDlg->Create(CDumpProgressDlg::IDD);
     bool dumpComplete = false;
+    auto const crashdumpPath = prepareCrashdumpDir();
 
-    auto handle = std::async(std::launch::async, [ExceptionInfo, &errDlg, &dumpComplete] {
+    auto handle = std::async(std::launch::async, [ExceptionInfo, &errDlg, &dumpComplete, &crashdumpPath] {
         MINIDUMP_EXCEPTION_INFORMATION expParam;
         expParam.ThreadId = GetCurrentThreadId();
         expParam.ExceptionPointers = ExceptionInfo;
         expParam.ClientPointers = FALSE;
 
-        namespace fs = std::filesystem;
-        auto const now = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
-        std::wstring subpath = std::format(L"snapshot-{:%Y%m%d-%H%M%S}", now);
-        auto const crashdumpPath = (fs::path(u8AppDataPath) / "debug" / subpath).wstring();
-        if (!fs::exists(crashdumpPath)) {
-            fs::create_directories(crashdumpPath);
-        }
         fullDump(crashdumpPath, &expParam);
         dumpComplete = true;
         std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -223,6 +231,7 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
     });
 
     const char* pFormatterStr = "INTERNAL APPLICATION ERROR\n\n" \
+        "Version: " PRODUCT_VERSION_STRING
         "Application will now try to free memory, save the current map as \"fcrash_backup.map\" in the %s directory and quit.\n\n\n" \
         "Important: If this error has occured while loading graphics, it can very often be fixed by using another system color resolution (16, 24 or 32 bit)." \
         "\n\nThe following information is available, please note every line below:\n\n" \
@@ -235,6 +244,7 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
 
     if (theApp.m_Options.LanguageName == "Chinese") {
         pFormatterStr = "地图编辑器程序错误\n\n" \
+            "版本号: " PRODUCT_VERSION_STRING
             "本应用将尝试将地图保存至 %s 文件夹内的\"fcrash_backup.map\" 并且退出.\n\n\n" \
             "当你看到这个窗口的时候，请截图并反馈给开发者" \
             "\n\n下面为错误信息详情:\n\n" \
@@ -278,6 +288,9 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
 
     errstream << "Trying to save current map as emergency backup" << endl;
     errstream.flush();
+
+    auto const dstLogFilePath = (fs::path(crashdumpPath) / FA2_LOG_FIL).string();
+    CopyFileA(theApp.getLogFileName().c_str(), dstLogFilePath.c_str(), FALSE);
 
     std::string file = u8AppDataPath;
     file += "\\fcrash_backup.map";
