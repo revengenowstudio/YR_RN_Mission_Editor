@@ -28,7 +28,7 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>dbghelp.lib;CncVxlRenderText.lib;ddraw.lib;dxguid.lib;winmm.lib;gdiplus.lib;lzo2.lib;bz2d.lib;zlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dbghelp.lib;ntdll.lib;bcrypt.lib;velopack_libc_win_x64_msvc.lib;CncVxlRenderText.lib;ddraw.lib;dxguid.lib;winmm.lib;gdiplus.lib;lzo2.lib;bz2d.lib;zlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>

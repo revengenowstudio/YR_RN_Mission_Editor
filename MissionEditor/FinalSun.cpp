@@ -32,6 +32,7 @@
 #include "inlines.h"
 #include "Debug.h"
 #include "Version.h"
+#include "velopack.hpp"
 #include <ShlObj.h>
 
 
@@ -169,8 +170,10 @@ BOOL CFinalSunApp::InitInstance()
 		exit(0);
 	}
 #endif
-
+	// parse commands first, in case we need some bypass
 	ParseCommandLine();
+
+	Velopack::VelopackApp::Build().Run();
 
 #ifdef RA2_MODE
 	CString game = "RA2";
