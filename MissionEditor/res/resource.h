@@ -1,6 +1,6 @@
 ﻿//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by TriggerEditor.rc
+// Used by DumpProgressDlg.rc
 //
 #define IDD_TIBERIANSUNMISSIONEDITOR_DIALOG 102
 #define IDD_FINALSUN_DIALOG             102
@@ -348,6 +348,7 @@
 #define IDC_BUILTBY                     1233
 #define IDC_LDESC                       1233
 #define IDC_LNAME                       1234
+#define IDC_STATIC_MSG                  1234
 #define IDC_LNEXTSCENARIO               1235
 #define IDC_LALTNEXTSCENARIO            1236
 #define IDC_LNEWINIFORMAT               1237
@@ -771,6 +772,7 @@
 #define IDC_TRGR_ACTION_P6_TXT          1653
 #define IDC_TRGR_ACTION_PARAMETER_6     1654
 #define IDC_TRGR_SEARCH_REFERENCE       1655
+#define IDD_DUMP_PROGRESS               6666
 #define ID_FILE_OPENMAP                 40001
 #define ID_FILE_SAVEAS                  40002
 #define ID_FILE_QUIT                    40003
@@ -865,7 +867,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        333
+#define _APS_NEXT_RESOURCE_VALUE        334
 #define _APS_NEXT_COMMAND_VALUE         40144
 #define _APS_NEXT_CONTROL_VALUE         1580
 #define _APS_NEXT_SYMED_VALUE           111

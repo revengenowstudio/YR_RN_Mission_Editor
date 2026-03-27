@@ -2,8 +2,26 @@
 #include <Dbghelp.h>
 #include <filesystem>
 #include <future>
+#include <afx.h>
 #include "Debug.h"
 #include "variables.h"
+
+class CDumpProgressDlg : public CDialog
+{
+public:
+    CDumpProgressDlg(CWnd* pParent = nullptr);
+    enum { IDD = IDD_DUMP_PROGRESS };
+
+    void SetMessage(LPCTSTR lpszMsg);
+
+protected:
+    virtual BOOL OnInitDialog() override;
+    CProgressCtrl m_Progress;
+    CStatic       m_StaticMsg;
+    CString       m_strInitialMsg;
+
+    DECLARE_MESSAGE_MAP()
+};
 
 static std::tuple<const char*, const char*, CString> translateException(const PEXCEPTION_RECORD pRecord)
 {
@@ -169,7 +187,9 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
     errstream << "Exception type:" << exceptionTypeStr << " description: " << exceptionDesc << endl;
     errstream << "Additional Info:" << exceptionAdditionalInfo << endl;
 
-    auto handle = std::async(std::launch::async, [ExceptionInfo] {
+    auto errDlg = std::make_unique<CDumpProgressDlg>();
+
+    auto handle = std::async(std::launch::async, [ExceptionInfo, &errDlg] {
         MINIDUMP_EXCEPTION_INFORMATION expParam;
         expParam.ThreadId = GetCurrentThreadId();
         expParam.ExceptionPointers = ExceptionInfo;
@@ -220,11 +240,25 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
         exceptionAdditionalInfo
     );
 
-    MessageBox(0, exceptionReport, GetLanguageStringACP("Fatal error"), MB_OKCANCEL);
+    {
+        errDlg->Create(CDumpProgressDlg::IDD);
+        errDlg->SetMessage(exceptionReport);
+        errDlg->ShowWindow(SW_SHOW);
+        theApp.MainWindow()->EnableWindow(FALSE);
 
-    handle.wait();
+        MSG msg;
+        while (::IsWindow(errDlg->GetSafeHwnd()) && GetMessage(&msg, NULL, 0, 0)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
 
-    errstream << "Trying to save current map" << endl;
+        handle.wait();
+
+        errDlg->ShowWindow(SW_HIDE);
+        errDlg.reset();
+    }
+
+    errstream << "Trying to save current map as emergency backup" << endl;
     errstream.flush();
 
     std::string file = u8AppDataPath;
@@ -250,4 +284,34 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
 #endif
 
     return EXCEPTION_EXECUTE_HANDLER;//EXCEPTION_CONTINUE_SEARCH;//EXCEPTION_EXECUTE_HANDLER;
+}
+
+CDumpProgressDlg::CDumpProgressDlg(CWnd* pParent) : CDialog(IDD_DUMP_PROGRESS, pParent) {}
+
+BEGIN_MESSAGE_MAP(CDumpProgressDlg, CDialog)
+END_MESSAGE_MAP()
+
+BOOL CDumpProgressDlg::OnInitDialog()
+{
+    CDialog::OnInitDialog();
+
+    m_StaticMsg.SubclassDlgItem(IDC_STATIC_MSG, this);
+    if (!m_strInitialMsg.IsEmpty()) {
+        m_StaticMsg.SetWindowText(m_strInitialMsg);
+    }
+
+    m_Progress.SubclassDlgItem(IDC_PROGRESS1, this);
+    m_Progress.ModifyStyle(0, PBS_MARQUEE);
+    m_Progress.SendMessage(PBM_SETMARQUEE, TRUE, 50);
+
+    return TRUE;
+}
+
+void CDumpProgressDlg::SetMessage(LPCTSTR lpszMsg)
+{
+    if (::IsWindow(m_StaticMsg.GetSafeHwnd())) {
+        m_StaticMsg.SetWindowText(lpszMsg);
+    } else {
+        m_strInitialMsg = lpszMsg;
+    }
 }
