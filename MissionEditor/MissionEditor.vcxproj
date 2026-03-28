@@ -593,6 +593,7 @@
     <ClCompile Include="Tube.cpp" />
     <ClCompile Include="TubeTool.cpp" />
     <ClCompile Include="Unit.cpp" />
+    <ClCompile Include="Update.cpp" />
     <ClCompile Include="UserScriptsDlg.cpp" />
     <ClCompile Include="variables.cpp" />
     <ClCompile Include="ViewObjects.cpp" />
@@ -709,6 +710,7 @@
     <ClInclude Include="Tube.h" />
     <ClInclude Include="TubeTool.h" />
     <ClInclude Include="Unit.h" />
+    <ClInclude Include="Update.h" />
     <ClInclude Include="UserScriptsDlg.h" />
     <ClInclude Include="variables.h" />
     <ClInclude Include="Vec2.h" />

@@ -863,6 +863,8 @@
 #define IDS_LINEARVERSION               57604
 #define IDC_TOOLTIPCENTER               65535
 
+#define WM_UPDATE_CHECK_FINISHED (WM_USER + 100)
+
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
