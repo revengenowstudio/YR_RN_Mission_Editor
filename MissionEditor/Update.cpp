@@ -10,7 +10,7 @@ CUpdate& CUpdate::Instance()
 }
 
 CUpdate::CUpdate() :
-    UpdateMgr("https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases/latest")
+    UpdateMgr("https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases/latest/download/")
 { }
 
 void CUpdate::PrepareUpdate()
