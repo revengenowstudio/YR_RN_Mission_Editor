@@ -3688,5 +3688,8 @@ afx_msg LRESULT CFinalSunDlg::OnUpdateCheckFinished(WPARAM wParam, LPARAM lParam
 
     CUpdate::Instance().ExecuteUpdateNow();
 
+    errstream << "update executed, exiting";
+    this->PostMessage(WM_CLOSE);
+
     return 0;
 }
