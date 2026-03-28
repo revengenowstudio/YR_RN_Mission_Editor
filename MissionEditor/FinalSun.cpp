@@ -148,6 +148,14 @@ CFinalSunApp::CFinalSunApp()
 /////////////////////////////////////////////////////////////////////////////
 // CFinalSunApp initialization
 
+void velopackLogCallback(void* p_user_data,
+	const char* psz_level,
+	const char* psz_message)
+{
+	errstream << "[Velopack-" << psz_level
+		<< "] " << psz_message;
+}
+
 BOOL CFinalSunApp::InitInstance()
 {
 	SetUnhandledExceptionFilter(Debug::ExceptionHandler);
@@ -173,7 +181,7 @@ BOOL CFinalSunApp::InitInstance()
 	// parse commands first, in case we need some bypass
 	ParseCommandLine();
 
-	Velopack::VelopackApp::Build().Run();
+	Velopack::VelopackApp::Build().SetLogger(velopackLogCallback, nullptr).Run();
 
 #ifdef RA2_MODE
 	CString game = "RA2";
