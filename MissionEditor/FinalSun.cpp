@@ -32,6 +32,7 @@
 #include "inlines.h"
 #include "Debug.h"
 #include "Version.h"
+#include "velopack.hpp"
 #include <ShlObj.h>
 
 
@@ -147,6 +148,14 @@ CFinalSunApp::CFinalSunApp()
 /////////////////////////////////////////////////////////////////////////////
 // CFinalSunApp initialization
 
+void velopackLogCallback(void* p_user_data,
+	const char* psz_level,
+	const char* psz_message)
+{
+	errstream << "[Velopack-" << psz_level
+		<< "] " << psz_message;
+}
+
 BOOL CFinalSunApp::InitInstance()
 {
 	SetUnhandledExceptionFilter(Debug::ExceptionHandler);
@@ -169,8 +178,10 @@ BOOL CFinalSunApp::InitInstance()
 		exit(0);
 	}
 #endif
-
+	// parse commands first, in case we need some bypass
 	ParseCommandLine();
+
+	Velopack::VelopackApp::Build().SetLogger(velopackLogCallback, nullptr).Run();
 
 #ifdef RA2_MODE
 	CString game = "RA2";

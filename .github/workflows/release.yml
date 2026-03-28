@@ -105,13 +105,28 @@ jobs:
     - name: Pack up
       shell: pwsh
       run: |
-        cd dist/FinalRevenge
-        Compress-Archive -Path ./* -DestinationPath ../${{ env.PACKAGE_NAME }}
+        # check whether vpk installed and install
+        $vpkExe = "C:\Program Files\VirusTotal\vpk.exe" # adjust path if needed
+
+        if (-not (Get-Command vpk -ErrorAction SilentlyContinue)) {
+          Write-Host "vpk not found in PATH. Trying choco install vpk..."
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          dotnet tool install -g vpk
+        } else {
+          Write-Host "vpk found in PATH: $(Get-Command vpk)."
+        }
+
+        if (-not (Get-Command vpk -ErrorAction SilentlyContinue)) {
+          throw "vpk is still not available after attempted installation."
+        }
+
+        cd dist
+        vpk pack -u FinalRevenge -v ${{ env.RELEASE_VER }} -p FinalRevenge -e FinalRevenge.exe
     - name: Release - ${{ env.RELEASE_VER }}
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ env.RELEASE_VER }}
         name: ${{ env.RELEASE_VER }}
-        files: dist/${{ env.PACKAGE_NAME }}
+        files: dist/Releases/**
         target_commitish: ${{ github.sha }}
         prerelease: ${{ env.IS_PRERELEASE }}

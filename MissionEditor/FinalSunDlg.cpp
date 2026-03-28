@@ -55,6 +55,7 @@
 #include "userscriptsdlg.h"
 #include "TriggerDatabase.h"
 #include "Version.h"
+#include "Update.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -235,6 +236,7 @@ BEGIN_MESSAGE_MAP(CFinalSunDlg, CDialog)
     ON_COMMAND(ID_OPTIONS_SMOOTHZOOM, &CFinalSunDlg::OnOptionsSmoothzoom)
     ON_WM_SETCURSOR()
     ON_COMMAND(ID_OPTIONS_USEDEFAULTMOUSECURSOR, &CFinalSunDlg::OnOptionsUsedefaultmousecursor)
+    ON_MESSAGE(WM_UPDATE_CHECK_FINISHED, OnUpdateCheckFinished)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -385,6 +387,8 @@ BOOL CFinalSunDlg::OnInitDialog()
         Map->LoadMap(currentMapFile);
         SetCursor(m_hArrowCursor);
     }
+
+    CUpdate::Instance().CheckUpdateAsync();
 
     UpdateDialogs();
 
@@ -3664,4 +3668,28 @@ void CFinalSunDlg::OnOptionsUsedefaultmousecursor()
     Options.SetBool("UserInterface", "UseDefaultMouseCursor", theApp.m_Options.useDefaultMouseCursor);
 
     Options.SaveFile(u8AppDataPath + "\\" FA2_OPTION_FILE);
+}
+
+afx_msg LRESULT CFinalSunDlg::OnUpdateCheckFinished(WPARAM wParam, LPARAM lParam)
+{
+    errstream << "OnUpdateCheckFinished called";
+    if (!CUpdate::Instance().IsUpdateRequired()) {
+        errstream << "update check complete, nothing to do";
+        return 0;
+    }
+
+    if (AfxMessageBox(_T("发现新版本，是否保存地图并更新？"), MB_YESNO | MB_ICONQUESTION) != IDYES) {
+        return 0;
+    }
+
+    if (!currentMapFile.IsEmpty()) {
+        SaveMap(currentMapFile);
+    }
+
+    CUpdate::Instance().ExecuteUpdateNow();
+
+    errstream << "update executed, exiting";
+    this->UnloadAll(false);
+
+    return 0;
 }

@@ -348,7 +348,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertDebug YR|x64'">
     <ClCompile>
       <PreprocessorDefinitions>NOMINMAX;RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib;..\3rdParty\CncVxlRender\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\MissionEditorPackLib;..\3rdParty\CncVxlRender\inc;..\3rdParty\velopack\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
@@ -421,7 +421,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertRelease YR|x64'">
     <ClCompile>
       <PreprocessorDefinitions>NOMINMAX;RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib;..\3rdParty\CncVxlRender\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\MissionEditorPackLib;..\3rdParty\CncVxlRender\inc;..\3rdParty\velopack\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
@@ -593,6 +593,7 @@
     <ClCompile Include="Tube.cpp" />
     <ClCompile Include="TubeTool.cpp" />
     <ClCompile Include="Unit.cpp" />
+    <ClCompile Include="Update.cpp" />
     <ClCompile Include="UserScriptsDlg.cpp" />
     <ClCompile Include="variables.cpp" />
     <ClCompile Include="ViewObjects.cpp" />
@@ -709,6 +710,7 @@
     <ClInclude Include="Tube.h" />
     <ClInclude Include="TubeTool.h" />
     <ClInclude Include="Unit.h" />
+    <ClInclude Include="Update.h" />
     <ClInclude Include="UserScriptsDlg.h" />
     <ClInclude Include="variables.h" />
     <ClInclude Include="Vec2.h" />

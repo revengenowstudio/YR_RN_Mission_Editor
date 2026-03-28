@@ -239,6 +239,7 @@ public:
 	afx_msg void OnOptionsSmoothzoom();
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnOptionsUsedefaultmousecursor();
+	afx_msg LRESULT OnUpdateCheckFinished(WPARAM wParam, LPARAM lParam);
 };
 
 extern HCURSOR m_hArrowCursor;
