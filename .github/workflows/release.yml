@@ -131,6 +131,10 @@ jobs:
 
         cd dist
         vpk pack -u FinalRevenge -v ${{ env.RELEASE_VER }} -p FinalRevenge -e FinalRevenge.exe
+    - name: Backup .git folder
+      shell: bash
+      run: |
+        mv ${{ env.RELEASE_FOLDER }}/.git .git_backup
     - name: Release - ${{ env.RELEASE_VER }}
       uses: softprops/action-gh-release@v2
       with:
@@ -139,6 +143,10 @@ jobs:
         files: ${{ env.RELEASE_FOLDER }}/**
         target_commitish: ${{ github.sha }}
         prerelease: ${{ env.IS_PRERELEASE }}
+    - name: Restore .git folder
+      shell: bash
+      run: |
+        mv .git_backup ${{ env.RELEASE_FOLDER }}/.git
     - name: Push to Releases Repo
       shell: bash
       run: |
