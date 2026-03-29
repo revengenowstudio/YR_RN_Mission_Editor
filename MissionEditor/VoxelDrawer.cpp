@@ -81,3 +81,10 @@ bool VoxelDrawer::IsVPLLoaded()
 {
 	return CncImgIsVPLLoaded();
 }
+
+void VoxelDrawer::FreeBuffer(unsigned char* pBuffer)
+{
+	if (pBuffer) {
+		CncImgFree(pBuffer);
+	}
+}

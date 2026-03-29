@@ -1572,7 +1572,8 @@ void CLoading::LoadBuilding(const CString& ID)
 				int turdeltaY = g_data.GetInteger("BuildingVoxelTurretsRA2", pKey);
 
 				VXL_Add(pTurImages[i], turretRect.X + turdeltaX, turretRect.Y + turdeltaY, turretRect.W, turretRect.H);
-				delete[] pTurImages[i];
+				VoxelDrawer::FreeBuffer(pTurImages[i]);
+				pTurImages[i] = nullptr;
 
 				if (pBarlImages[i]) {
 					pKey.Format("%sX%d", ID, (15 - i) % 8);
@@ -1581,7 +1582,8 @@ void CLoading::LoadBuilding(const CString& ID)
 					int barldeltaY = g_data.GetInteger("BuildingVoxelBarrelsRA2", pKey);
 
 					VXL_Add(pBarlImages[i], barlRect.X + barldeltaX, barlRect.Y + barldeltaY, barlRect.W, barlRect.H);
-					delete[] pBarlImages[i];
+					delete pBarlImages[i];
+					pBarlImages[i] = nullptr;
 				}
 			}
 

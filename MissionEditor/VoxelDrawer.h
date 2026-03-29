@@ -24,4 +24,5 @@ public:
 	static bool GetImageData(unsigned int nFacing, unsigned char*& pBuffer,
 		VoxelRectangle& rect, const int F = 0, const int L = 0, const int H = 0);
 	static bool IsVPLLoaded();
+	static void FreeBuffer(unsigned char* pBuffer);
 };
