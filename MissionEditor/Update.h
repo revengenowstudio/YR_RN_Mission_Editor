@@ -19,7 +19,9 @@ public:
 private:
     CUpdate();
 
-    Velopack::UpdateManager UpdateMgr;
+    bool checkSingleNode(const std::string& url);
+
+    std::unique_ptr< Velopack::UpdateManager> UpdateMgr;
     std::optional<Velopack::UpdateInfo> UpdateInfo;
     std::atomic_bool UpdateRequired;
     std::future<void> CheckJob;
