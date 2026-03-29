@@ -44,6 +44,7 @@ bool CUpdate::checkSingleNode(const std::string& url)
 void CUpdate::PrepareUpdate()
 {
     static const std::string nodes[] = {
+        "https://cnb.cool/RN-Auxiliary/FinalRevenge-Releases/-/git/raw/main/",
         "https://github.com/revengenowstudio/FinalRevenge-Releases/raw/refs/heads/main/",
         "https://github.com/revengenowstudio/YR_RN_Mission_Editor/releases/latest/download/",
     };
