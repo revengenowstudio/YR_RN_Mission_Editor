@@ -139,6 +139,7 @@ jobs:
         target_commitish: ${{ github.sha }}
         prerelease: ${{ env.IS_PRERELEASE }}
     - name: Push to Releases Repo
+      shell: bash
       run: |
         cd Releases
         ls -alh
