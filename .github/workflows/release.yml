@@ -23,6 +23,7 @@ env:
   PACKAGE_NAME: ''
   IS_PRERELEASE: false
   VCPKG_TOOL_FOLDER: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg'
+  RELEASE_FOLDER: dist/Releases
 
 jobs:
   build-and-release:
@@ -102,6 +103,14 @@ jobs:
     - name: build-msvc
       run: |
         MSBuild MissionEditor.sln /m /p:Configuration="${{ env.CONFIGURATION }}" /p:Platform=x64 /t:MissionEditor
+    - uses: actions/checkout@v4
+      with:
+        repository: revengenowstudio/FinalRevenge-Releases
+        path: ${{ env.RELEASE_FOLDER }}
+        fetch-depth: 1
+        submodules: recursive
+        lfs: true
+        token: ${{ secrets.CI_PAT }}
     - name: Pack up
       shell: pwsh
       run: |
@@ -127,6 +136,18 @@ jobs:
       with:
         tag_name: ${{ env.RELEASE_VER }}
         name: ${{ env.RELEASE_VER }}
-        files: dist/Releases/**
+        files: ${{ env.RELEASE_FOLDER }}/**
         target_commitish: ${{ github.sha }}
         prerelease: ${{ env.IS_PRERELEASE }}
+    - name: Push to Releases Repo
+      shell: bash
+      run: |
+        cd ${{ env.RELEASE_FOLDER }}
+        ls -alh
+        git remote -v
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git status
+        git commit -m "Release ${{ env.RELEASE_VER }}"
+        git push origin HEAD:main
