@@ -102,6 +102,14 @@ jobs:
     - name: build-msvc
       run: |
         MSBuild MissionEditor.sln /m /p:Configuration="${{ env.CONFIGURATION }}" /p:Platform=x64 /t:MissionEditor
+    - uses: actions/checkout@v4
+      with:
+        repository: revengenowstudio/FinalRevenge-Releases
+        path: Releases
+        fetch-depth: 1
+        submodules: recursive
+        lfs: true
+        token: ${{ secrets.CI_PAT }}
     - name: Pack up
       shell: pwsh
       run: |
@@ -130,3 +138,11 @@ jobs:
         files: dist/Releases/**
         target_commitish: ${{ github.sha }}
         prerelease: ${{ env.IS_PRERELEASE }}
+    - name: Push to Releases Repo
+      run: |
+        cd Releases
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git commit -m "Release ${{ env.RELEASE_VER }}"
+        git push origin HEAD:main
