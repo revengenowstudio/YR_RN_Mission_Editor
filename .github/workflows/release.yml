@@ -137,12 +137,12 @@ jobs:
         tag_name: ${{ env.RELEASE_VER }}
         name: ${{ env.RELEASE_VER }}
         files: |
-          RELEASES
-          assets.win.json
-          releases.win.json
-          FinalRevenge-win-Portable.zip
-          FinalRevenge-win-Setup.exe
-          FinalRevenge-${{ env.RELEASE_VER }}-**
+          ${{ env.RELEASE_FOLDER }}/RELEASES
+          ${{ env.RELEASE_FOLDER }}/assets.win.json
+          ${{ env.RELEASE_FOLDER }}/releases.win.json
+          ${{ env.RELEASE_FOLDER }}/FinalRevenge-win-Portable.zip
+          ${{ env.RELEASE_FOLDER }}/FinalRevenge-win-Setup.exe
+          ${{ env.RELEASE_FOLDER }}/FinalRevenge-${{ env.RELEASE_VER }}-**
         target_commitish: ${{ github.sha }}
         prerelease: ${{ env.IS_PRERELEASE }}
     - name: Push to Releases Repo
