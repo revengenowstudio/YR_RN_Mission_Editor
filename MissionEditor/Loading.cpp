@@ -2398,10 +2398,10 @@ void CLoading::Unload()
 		FSunPackLib::XCC_CloseMix(m_hECache[i]);
 	}
 
-	MEMORYSTATUS ms;
-	ms.dwLength = sizeof(MEMORYSTATUS);
-	GlobalMemoryStatus(&ms);
-	int cs = ms.dwAvailPhys + ms.dwAvailPageFile;
+	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(MEMORYSTATUSEX);
+	GlobalMemoryStatusEx(&ms);
+	size_t cs = ms.ullAvailPhys + ms.ullAvailPageFile;
 
 	errstream << "CLoading::Unload finished. Available memory: " << cs << endl;
 	errstream.flush();
