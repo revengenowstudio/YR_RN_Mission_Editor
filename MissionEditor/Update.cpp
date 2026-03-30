@@ -58,10 +58,6 @@ void CUpdate::PrepareUpdate()
 
 void CUpdate::CheckUpdateAsync()
 {
-#if defined(DEBUG)
-    MessageBoxA(NULL, "TEST", "TEST", MB_OK);
-#endif
-
     if (!CheckJob.valid()) {
         CheckJob = std::async(std::launch::async, [this] {
             this->PrepareUpdate();
