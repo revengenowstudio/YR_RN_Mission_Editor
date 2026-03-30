@@ -1,22 +1,33 @@
 name: Release Product
+permissions:
+  write-all
 
 on:
-  push:
+  pull_request:
     branches:
       - "main"
       - "RN"
-  workflow_dispatch:
+    types:
+      - closed
+    paths-ignore:
+      - 'image/**'
+      - 'docs/**'
+      - '**/*.md'
+  workflow_dispatch: {}
 
 env:
   VERSION_MAJOR: 2
-  VERSION_MINOR: 2
-  VERSION_REV_OFFSET: 41
-  RELEASE_VER:
-  PACKAGE_NAME:
+  VERSION_MINOR: 3
+  VERSION_REV_OFFSET: 166
+  RELEASE_VER: ''
+  PACKAGE_NAME: ''
   IS_PRERELEASE: false
+  VCPKG_TOOL_FOLDER: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg'
+  RELEASE_FOLDER: dist/Releases
 
 jobs:
   build-and-release:
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.merged == true)
     runs-on: windows-2022
     env:
       CONFIGURATION: FinalAlertRelease YR
@@ -38,31 +49,111 @@ jobs:
       run: |
         revNum=$((${{ github.run_number }} - ${{ env.VERSION_REV_OFFSET }}))
         versionNum=${{ env.VERSION_MAJOR }}.${{ env.VERSION_MINOR }}.$revNum
-        pkgName=RN-Mission-Editor-v$versionNum.zip
+        pkgName=FinalRevenge-v$versionNum.zip
         ./scripts/update_product_version.ps1 -major ${{ env.VERSION_MAJOR }} -minor ${{ env.VERSION_MINOR }} -revision $revNum
         echo "RELEASE_VER=$versionNum" >> $GITHUB_ENV
         echo "PACKAGE_NAME=$pkgName" >> $GITHUB_ENV
-    - name: Restore cache vcpkg
+    - name: Get Vcpkg Version
+      id: vcpkg-version
+      shell: powershell
+      run: |
+        $vcpkgPath = "${{ env.VCPKG_TOOL_FOLDER }}\vcpkg.exe"
+        $output = & $vcpkgPath --version
+        echo "vcpkg --version output : $output"
+        $match = $output -split " "
+        if ($match) {
+            $key = $match[5].Trim()
+        } else {
+            $key = "unknown-vcpkg-version"
+        }
+        echo "vcpkg version : $key"
+        echo "vcpkg_key=$key" >> "$GITHUB_OUTPUT"
+        echo "vcpkg_key=$key" >> $env:GITHUB_OUTPUT
+    - name: Cache or restore vcpkg
       uses: actions/cache/restore@v4
       with:
         path: |
           3rdParty/xcc/vcpkg_downloads
           3rdParty/xcc/vcpkg_installed
+          3rdParty/xcc/binary-cache
           C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+        restore-keys: 
+          ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+          ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}
+    - name: Vcpkg install
+      run: |
+        cd 3rdParty/xcc
+        if (-not (Test-Path "binary-cache")) {
+            mkdir "binary-cache"
+        }
+        $env:VCPKG_DOWNLOADS = $PWD
+        $env:VCPKG_BINARY_SOURCES="files,$PWD\binary-cache,readwrite"
+        $vcpkgPath = "${{ env.VCPKG_TOOL_FOLDER }}"
+        # rm "$vcpkgPath\.vcpkg-root"
+        & "$vcpkgPath\vcpkg" install `
+          --x-wait-for-lock `
+          --triplet "x64-windows" `
+          --vcpkg-root $vcpkgPath `
+          --x-manifest-root="$PWD\" `
+          --x-install-root="$PWD\vcpkg_installed\x64-windows"
+        ls
+        ls vcpkg_installed/x64-windows
+        ls vcpkg_installed/x64-windows/x64-windows
     - name: build-msvc
       run: |
-        devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
+        MSBuild MissionEditor.sln /m /p:Configuration="${{ env.CONFIGURATION }}" /p:Platform=x64 /t:MissionEditor
+    - uses: actions/checkout@v4
+      with:
+        repository: revengenowstudio/FinalRevenge-Releases
+        path: ${{ env.RELEASE_FOLDER }}
+        fetch-depth: 1
+        submodules: recursive
+        lfs: true
+        token: ${{ secrets.CI_PAT }}
     - name: Pack up
       shell: pwsh
       run: |
-        cd dist/FinalAlert2YR
-        Compress-Archive -Path ./* -DestinationPath ../${{ env.PACKAGE_NAME }}
+        # check whether vpk installed and install
+        $vpkExe = "C:\Program Files\VirusTotal\vpk.exe" # adjust path if needed
+
+        if (-not (Get-Command vpk -ErrorAction SilentlyContinue)) {
+          Write-Host "vpk not found in PATH. Trying choco install vpk..."
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          dotnet tool install -g vpk
+        } else {
+          Write-Host "vpk found in PATH: $(Get-Command vpk)."
+        }
+
+        if (-not (Get-Command vpk -ErrorAction SilentlyContinue)) {
+          throw "vpk is still not available after attempted installation."
+        }
+
+        cd dist
+        vpk pack -u FinalRevenge -v ${{ env.RELEASE_VER }} -p FinalRevenge -e FinalRevenge.exe
     - name: Release - ${{ env.RELEASE_VER }}
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ env.RELEASE_VER }}
         name: ${{ env.RELEASE_VER }}
-        files: dist/${{ env.PACKAGE_NAME }}
-        target_commitish: ${{ github.ref }}
+        files: |
+          ${{ env.RELEASE_FOLDER }}/RELEASES
+          ${{ env.RELEASE_FOLDER }}/assets.win.json
+          ${{ env.RELEASE_FOLDER }}/releases.win.json
+          ${{ env.RELEASE_FOLDER }}/FinalRevenge-win-Portable.zip
+          ${{ env.RELEASE_FOLDER }}/FinalRevenge-win-Setup.exe
+          ${{ env.RELEASE_FOLDER }}/FinalRevenge-${{ env.RELEASE_VER }}-**
+        target_commitish: ${{ github.sha }}
         prerelease: ${{ env.IS_PRERELEASE }}
+    - name: Push to Releases Repo
+      shell: bash
+      run: |
+        cd ${{ env.RELEASE_FOLDER }}
+        ls -alh
+        git remote -v
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git status
+        git commit -m "Release ${{ env.RELEASE_VER }}"
+        git push origin HEAD:main

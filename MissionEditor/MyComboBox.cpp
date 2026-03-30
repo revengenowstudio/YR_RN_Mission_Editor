@@ -52,11 +52,6 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // Behandlungsroutinen für Nachrichten CMyComboBox 
 
-
-/*
-This will automatically send a CBN_EDITCHANGE command.
-Also it will set the window text to the selected item
-*/
 void CMyComboBox::OnSelchange()
 {
 	CString SelectedItem;

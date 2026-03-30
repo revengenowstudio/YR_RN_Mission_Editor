@@ -82,6 +82,8 @@ BOOL CNewMapSpDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	translateUI();
+
 	CComboBox& house = *((CComboBox*)(GetDlgItem(IDC_HOUSE)));
 	int i;
 	for (auto const& [seq, id] : rules[HOUSES]) {
@@ -101,4 +103,16 @@ void CNewMapSpDlg::OnOK()
 {
 	CDialog::OnOK();
 	//m_House=TranslateHouse(m_House);
+}
+
+void CNewMapSpDlg::translateUI()
+{
+	TranslateWindowCaption(*this, "NewMapSpCaption");
+	TranslateDlgItem(*this, IDC_NEWMAPSP_TXT_DSC, "NewMapSpDesc");
+	TranslateDlgItem(*this, IDC_PREPAREHOUSES, "NewMapSpPrepareHouses");
+	TranslateDlgItem(*this, IDC_LPLAYERHOUSE, "NewMapSpPlayerHouse");
+	TranslateDlgItem(*this, IDC_AUTOPROD, "NewMapSpAutoProdTriggers");
+
+	TranslateDlgItem(*this, IDOK, "NewMapTypeOK");
+	TranslateDlgItem(*this, IDCANCEL, "Cancel");
 }

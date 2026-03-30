@@ -36,6 +36,12 @@
     <ClCompile Include="Waypoint_Test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\MissionEditor\TriggerDef.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TriggerDefinition_Test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StdAfx.h">
@@ -48,6 +54,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CIni_Test.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MissionEditor\TriggerDef.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

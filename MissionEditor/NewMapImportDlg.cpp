@@ -25,6 +25,7 @@
 #include "finalsun.h"
 #include "NewMapImportDlg.h"
 #include "variables.h"
+#include "functions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -74,17 +75,21 @@ void CNewMapImportDlg::OnBrowse()
 	UpdateData();
 
 	//CComboBox* m_ImportFile=(CComboBox*)GetDlgItem(IDC_IMPORTFILE);
-
-	CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, "All files|*.mpr;*.map;*.bmp|TS/RA2 multi maps|*.mpr|TS/RA2 single maps|*.map|Windows bitmaps|*.bmp|");
+	auto const fileTypeInfo = TranslateStringVariables(8, GetLanguageStringACP("NewMapImportFileTypes"), ";");
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, fileTypeInfo);
 
 	char cuPath[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, cuPath);
 	dlg.m_ofn.lpstrInitialDir = cuPath;
 
-	if (theApp.m_Options.TSExe.GetLength()) dlg.m_ofn.lpstrInitialDir = (char*)(LPCTSTR)theApp.m_Options.TSExe;
+	if (theApp.m_Options.TSExe.GetLength()) {
+		dlg.m_ofn.lpstrInitialDir = theApp.m_Options.TSExe;
+	}
 
 
-	if (dlg.DoModal() == IDCANCEL) return;
+	if (dlg.DoModal() == IDCANCEL) {
+		return;
+	}
 
 	m_ImportFile = dlg.GetPathName();
 
@@ -94,6 +99,8 @@ void CNewMapImportDlg::OnBrowse()
 BOOL CNewMapImportDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+
+	translateUI();
 
 	CComboBox* m_ImportFile = (CComboBox*)GetDlgItem(IDC_IMPORTFILE);
 
@@ -114,4 +121,17 @@ BOOL CNewMapImportDlg::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX-Eigenschaftenseiten sollten FALSE zurückgeben
+}
+
+void CNewMapImportDlg::translateUI()
+{
+	TranslateWindowCaption(*this, "NewMapImportCaption");
+	TranslateDlgItem(*this, IDC_NEWMAPIMPORT_TXT_DSC, "NewMapImportDesc");
+	TranslateDlgItem(*this, IDC_BROWSE, "NewMapImportBrowse");
+	TranslateDlgItem(*this, IDC_IMPORTTREES, "NewMapImportImportTrees");
+	TranslateDlgItem(*this, IDC_IMPORTUNITS, "NewMapImportImportUnits");
+	TranslateDlgItem(*this, IDC_IMPORTOVERLAY, "NewMapImportImportOverlay");
+
+	SetDlgItemText(IDOK, GetLanguageStringACP("NewMapTypeOK"));
+	SetDlgItemText(IDCANCEL, GetLanguageStringACP("Cancel"));
 }

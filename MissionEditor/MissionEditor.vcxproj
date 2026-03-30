@@ -286,7 +286,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertDebug YR|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>FinalAlert2YR_D</TargetName>
+    <TargetName>FinalRevenge_D</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tests FinalAlertDebug YR|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -318,7 +318,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertRelease YR|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>FinalAlert2YR</TargetName>
+    <TargetName>FinalRevenge</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='FinalSunDebug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -348,7 +348,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertDebug YR|x64'">
     <ClCompile>
       <PreprocessorDefinitions>NOMINMAX;RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib;..\3rdParty\CncVxlRender\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\MissionEditorPackLib;..\3rdParty\CncVxlRender\inc;..\3rdParty\velopack\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
@@ -421,7 +421,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertRelease YR|x64'">
     <ClCompile>
       <PreprocessorDefinitions>NOMINMAX;RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib;..\3rdParty\CncVxlRender\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\MissionEditorPackLib;..\3rdParty\CncVxlRender\inc;..\3rdParty\velopack\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
@@ -488,17 +488,21 @@
     <ClCompile Include="ChangeSizeDlg.cpp" />
     <ClCompile Include="CliffModifier.cpp" />
     <ClCompile Include="ComboUInputDlg.cpp" />
+    <ClCompile Include="CsfViewer.cpp" />
+    <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DynamicGraphDlg.cpp" />
     <ClCompile Include="FinalSun.cpp" />
     <ClCompile Include="FinalSunDlg.cpp" />
     <ClCompile Include="FloatEdit.cpp" />
     <ClCompile Include="FrontCliffModifier.cpp" />
     <ClCompile Include="functions.cpp" />
+    <ClCompile Include="GlobalObjectPool.cpp" />
     <ClCompile Include="GlobalsDlg.cpp" />
     <ClCompile Include="Houses.cpp" />
     <ClCompile Include="ImportINI.cpp" />
     <ClCompile Include="Infantry.cpp" />
     <ClCompile Include="Info.cpp" />
+    <ClCompile Include="IniContentEditor.cpp" />
     <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="INIMeta.cpp" />
     <ClCompile Include="InputBox.cpp" />
@@ -573,6 +577,7 @@
     <ClCompile Include="TaskForce.cpp" />
     <ClCompile Include="TeamTypes.cpp" />
     <ClCompile Include="TerrainDlg.cpp" />
+    <ClCompile Include="TerrainGroupMgr.cpp" />
     <ClCompile Include="TerrainModifier.cpp" />
     <ClCompile Include="tests.cpp">
       <ExcludedFromBuild Condition="'$(IS_UNITTEST)'!='True'">true</ExcludedFromBuild>
@@ -580,16 +585,15 @@
     <ClCompile Include="TextDrawer.cpp" />
     <ClCompile Include="TileSetBrowserFrame.cpp" />
     <ClCompile Include="TileSetBrowserView.cpp" />
-    <ClCompile Include="TipDlg.cpp" />
     <ClCompile Include="ToolSettingsBar.cpp" />
-    <ClCompile Include="TriggerActionsDlg.cpp" />
-    <ClCompile Include="TriggerEditorDlg.cpp" />
-    <ClCompile Include="TriggerEventsDlg.cpp" />
-    <ClCompile Include="TriggerOptionsDlg.cpp" />
+    <ClCompile Include="TriggerDatabase.cpp" />
+    <ClCompile Include="TriggerDef.cpp" />
+    <ClCompile Include="TriggerEditorAllDlg.cpp" />
     <ClCompile Include="TSOptions.cpp" />
     <ClCompile Include="Tube.cpp" />
     <ClCompile Include="TubeTool.cpp" />
     <ClCompile Include="Unit.cpp" />
+    <ClCompile Include="Update.cpp" />
     <ClCompile Include="UserScriptsDlg.cpp" />
     <ClCompile Include="variables.cpp" />
     <ClCompile Include="ViewObjects.cpp" />
@@ -598,7 +602,17 @@
     <ClCompile Include="MapCode.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="MissionEditor.rc" />
+    <ResourceCompile Include="res\CreateNewMap.rc" />
+    <ResourceCompile Include="res\DumpProgressDlg.rc" />
+    <ResourceCompile Include="res\EditorOptions.rc" />
+    <ResourceCompile Include="res\IniEdit.rc" />
+    <ResourceCompile Include="res\Lighting.rc" />
+    <ResourceCompile Include="res\MissionEditor.rc" />
+    <ResourceCompile Include="res\SaveOptions.rc" />
+    <ResourceCompile Include="res\SinglePlayerOptions.rc" />
+    <ResourceCompile Include="res\TerrainBar.rc" />
+    <ResourceCompile Include="res\TriggerEditor.rc" />
+    <ResourceCompile Include="res\VersionInfo.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Aircraft.h" />
@@ -614,8 +628,12 @@
     <ClInclude Include="ChangeSizeDlg.h" />
     <ClInclude Include="CliffModifier.h" />
     <ClInclude Include="ComboUInputDlg.h" />
+    <ClInclude Include="CsfViewer.h" />
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="defines.h" />
+    <ClInclude Include="GlobalObjectPool.h" />
     <ClInclude Include="Helpers.h" />
+    <ClInclude Include="IniContentEditor.h" />
     <ClInclude Include="IniHelper.h" />
     <ClInclude Include="IniMega.h" />
     <ClInclude Include="INIMeta.h" />
@@ -661,6 +679,7 @@
     <ClInclude Include="Palettes.h" />
     <ClInclude Include="ProgressDlg.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="res\resource.h" />
     <ClInclude Include="RightFrame.h" />
     <ClInclude Include="RTPDlg.h" />
     <ClInclude Include="SaveMapOptionsDlg.h" />
@@ -677,21 +696,21 @@
     <ClInclude Include="TaskForce.h" />
     <ClInclude Include="TeamTypes.h" />
     <ClInclude Include="TerrainDlg.h" />
+    <ClInclude Include="TerrainGroupMgr.h" />
     <ClInclude Include="TerrainModifier.h" />
     <ClInclude Include="tests.h" />
     <ClInclude Include="TextDrawer.h" />
     <ClInclude Include="TileSetBrowserFrame.h" />
     <ClInclude Include="TileSetBrowserView.h" />
-    <ClInclude Include="TipDlg.h" />
     <ClInclude Include="ToolSettingsBar.h" />
-    <ClInclude Include="TriggerActionsDlg.h" />
-    <ClInclude Include="TriggerEditorDlg.h" />
-    <ClInclude Include="TriggerEventsDlg.h" />
-    <ClInclude Include="TriggerOptionsDlg.h" />
+    <ClInclude Include="TriggerDatabase.h" />
+    <ClInclude Include="TriggerDef.h" />
+    <ClInclude Include="TriggerEditorAllDlg.h" />
     <ClInclude Include="TSOptions.h" />
     <ClInclude Include="Tube.h" />
     <ClInclude Include="TubeTool.h" />
     <ClInclude Include="Unit.h" />
+    <ClInclude Include="Update.h" />
     <ClInclude Include="UserScriptsDlg.h" />
     <ClInclude Include="variables.h" />
     <ClInclude Include="Vec2.h" />
@@ -708,6 +727,7 @@
     <Image Include="res\clifftoo.bmp" />
     <Image Include="res\FinalAlert2.ico" />
     <Image Include="res\FinalAlert2YR.ico" />
+    <Image Include="res\FinalRevenge.ico" />
     <Image Include="res\FinalSun.ico" />
     <Image Include="res\ico00003.ico" />
     <Image Include="res\idr_main.ico" />

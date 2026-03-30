@@ -34,52 +34,60 @@ class CTileSetBrowserView : public CScrollView
 {
 public:
 	CTileSetBrowserView();           // Dynamische Erstellung verwendet geschützten Konstruktor
+	virtual ~CTileSetBrowserView();
 	DECLARE_DYNCREATE(CTileSetBrowserView)
 
 	// Attribute
-public:
 
 	// Operationen
-public:
 
-	// Überschreibungen
-		// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
-		//{{AFX_VIRTUAL(CTileSetBrowserView)
-protected:
-	virtual void OnDraw(CDC* pDC);      // Überschrieben zum Zeichnen dieser Ansicht
-	virtual void OnInitialUpdate();     // Zum ersten Mal nach der Konstruktion
-	virtual void PostNcDestroy();
-	//}}AFX_VIRTUAL
-
-// Implementierung
-public:
+	// Implementierung
 	void SetOverlay(DWORD dwID);
-	int m_currentOverlay;
 	int GetAddedHeight(DWORD dwID);
-	int m_bottom_needed;
 	void DrawIt();
-	LPDIRECTDRAWSURFACE7* m_lpDDS;
 	void SetTileSet(DWORD dwTileSet, BOOL bOnlyRedraw = FALSE);
 	DWORD GetTileID(DWORD dwTileSet, DWORD dwType);
-	int m_currentTileSet;
-	virtual ~CTileSetBrowserView();
-#ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
-#endif
+	const auto BottomNeeded() const { return m_bottom_needed; }
+	const auto CurrentTileSet() const { return m_currentTileSet; }
+	void RecalcBottomNeeded();
 
-	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CTileSetBrowserView)
+protected:
+	enum class PlaceMode : unsigned
+	{
+		None,
+		TileSet,
+		Overlay,
+	};
+
+	virtual void OnDraw(CDC* pDC) override;      // Überschrieben zum Zeichnen dieser Ansicht
+	virtual void OnInitialUpdate() override;     // Zum ersten Mal nach der Konstruktion
+	virtual void PostNcDestroy() override;
+
+	void onDrawTileSetPlacement(CDC* pDC);
+	void onDrawOverlayPlacement(CDC* pDC);
+
+	void onPlaceTileSet(const CPoint point, int max_r);
+	void onPlaceOverlay(const CPoint point, int max_r);
+
+#ifdef _DEBUG
+	virtual void AssertValid() const override;
+	virtual void Dump(CDumpContext& dc) const override;
+#endif
+	LPDIRECTDRAWSURFACE7 RenderTile(DWORD dwID);
+
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-protected:
-	int m_CurrentMode;
-	LPDIRECTDRAWSURFACE7 RenderTile(DWORD dwID);
-	int m_tilecount;
-	int m_tile_height;
-	int m_tile_width;
+
+	PlaceMode m_CurrentMode{ PlaceMode::None };
+	int m_tilecount{ 0 };
+	int m_curItemCount{ 0 };
+	int m_tile_height{ 1 };
+	int m_tile_width{ 1 };
+	int m_currentTileSet{ -1 };
+	int m_bottom_needed{ 1000 };
+	int m_currentOverlay{ -1 };
+	LPDIRECTDRAWSURFACE7* m_lpDDS{ nullptr };
 };
 
 /////////////////////////////////////////////////////////////////////////////

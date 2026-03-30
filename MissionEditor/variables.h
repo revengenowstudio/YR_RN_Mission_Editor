@@ -29,8 +29,22 @@
 #include "FinalSun.h"
 #include "MapData.h"
 
+#ifdef RA2_MODE
+#define FA2_OPTION_FILE "FinalRevenge.ini" // FinalAlert.ini
+#define FA2_OPTION_DEF_FILE "FinalRevengeDefaults.ini"
+#define FA2_PROJECT_FILE "FinalRevengeProject.ini"
+#define FA2_EDITOR_NAME "FinalRevenge" // "FinalAlert 2"
+#define FA2_MAIN_DLG_CAP_LBL "MainDialogCaptionRA2"
+#define FA2_LOG_FIL "finalrevenge2log.txt" // finalalert2log.txt
+#else
+#define FA2_OPTION_FILE "FinalSun.ini"
+#define FA2_OPTION_DEF_FILE "FinalSunDefaults.ini"
+#define FA2_EDITOR_NAME "FinalSun"
+#define FA2_MAIN_DLG_CAP_LBL "MainDialogCaption"
+#define FA2_LOG_FIL "finalsunlog.txt"
+#endif
+
 class CMapData;
-using TranslationMap = map<CString, XCString>;
 
 // the map
 extern CMapData* Map;
@@ -44,6 +58,7 @@ extern CIniFile tutorial;
 extern CIniFile eva;
 extern CIniFile theme;
 extern CIniFile g_data;
+extern CIniFile g_project; //!< project specification
 extern CIniFile language;
 extern CIniFile tiles_t;
 extern CIniFile tiles_s;
@@ -57,10 +72,8 @@ extern CIniFile* tiles;
 extern BOOL bOptionsStartup;
 
 // the current file beeing edited.
-extern char currentMapFile[MAX_PATH + 1];
+extern CString currentMapFile;
 
-// all the pictures shown in the mapview
-extern map<CString, PICDATA> pics;
 extern TILEDATA* t_tiledata;
 extern TILEDATA* s_tiledata;
 extern TILEDATA* u_tiledata;
@@ -124,22 +137,43 @@ extern std::ofstream errstream;
 extern char AppPath[MAX_PATH + 1];
 extern const std::string u8AppDataPath;
 extern const std::wstring u16AppDataPath;
-extern char TSPath[MAX_PATH + 1];
+extern CString TSPath;
 
 extern bool bAllowAccessBehindCliffs;
 
 // overlay types (the ones with additional information like name etc.)
 extern int overlay_count; // number of overlay ids that have additional information
-extern int overlay_number[]; // what overlay id?
-extern CString overlay_name[]; // what name?
-extern BOOL overlay_trail[]; // is it handled as trail?
-extern BOOL overlay_trdebug[];
-extern BOOL overlay_wall[];
+#if defined(RA2_MODE)
+static constexpr BOOL overlay_trdebug[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE };
+static constexpr const char* overlay_name[] = {
+	"Sandbags",
+	"Allied Wall",
+	"Soviet Wall", 
+	"Black fence", 
+	"Prison camp fence", 
+	"White fence", 
+	"Yuri Wall", 
+	"Kremlin Wall", 
+	"Tracks" 
+};
+#else
+static constexpr BOOL overlay_trdebug[] = { FALSE,FALSE,FALSE,FALSE,FALSE, FALSE };
+static constexpr const char* overlay_name[] = {
+	"Sandbags",
+	"GDI Wall", 
+	"Nod Wall",
+	"Veins",
+	"Veinhole monster",
+	"Tracks" 
+};
+#endif
+extern std::unordered_set<int> overlay_trail; // is it handled as trail?
 extern BOOL yr_only[];
 
 
 extern CString currentOwner;
 extern TranslationMap CCStrings;
+extern TranslationMap AllStrings;
 
 // tileset ids
 extern int cliffset;

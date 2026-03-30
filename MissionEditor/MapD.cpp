@@ -24,7 +24,7 @@
 #include "stdafx.h"
 #include "FinalSun.h"
 #include "MapD.h"
-#include "resource.h"
+#include "res/resource.h"
 #include "mapdata.h"
 #include "variables.h"
 #include "functions.h"
@@ -43,10 +43,8 @@ IMPLEMENT_DYNCREATE(CMapD, CDialog)
 
 CMapD::CMapD() : CDialog(CMapD::IDD)
 {
-	//{{AFX_DATA_INIT(CMapD)
 	m_Width = _T("");
 	m_Height = _T("");
-	//}}AFX_DATA_INIT
 }
 
 CMapD::~CMapD()
@@ -56,23 +54,28 @@ CMapD::~CMapD()
 void CMapD::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CMapD)
 	DDX_Control(pDX, IDC_USESIZE, m_LocalSize);
 	DDX_Control(pDX, IDC_THEATER, m_Theater);
 	DDX_Text(pDX, IDC__SIZEX, m_Width);
 	DDX_Text(pDX, IDC__SIZEY, m_Height);
-	//}}AFX_DATA_MAP
 }
 
+BOOL CMapD::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
 
 BEGIN_MESSAGE_MAP(CMapD, CDialog)
-	//{{AFX_MSG_MAP(CMapD)
 	ON_EN_CHANGE(IDC_USESIZE, OnChangeUsesize)
 	ON_CBN_EDITCHANGE(IDC_THEATER, OnEditchangeTheater)
 	ON_BN_CLICKED(IDC_CHANGELOCAL, OnChangelocal)
 	ON_CBN_SELCHANGE(IDC_THEATER, OnEditchangeTheater)
 	ON_BN_CLICKED(IDC_CHANGE, OnChange)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -95,9 +98,20 @@ void CMapD::UpdateDialog()
 	CDialog::UpdateData(FALSE);
 }
 
-void CMapD::UpdateData()
+BOOL CMapD::onMessageKeyDown(MSG* pMsg)
 {
-	//MessageBox("This function ( UpdateData() ) should not be called, please contact the author.");
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+		case VK_RETURN:
+		{
+			switch (::GetDlgCtrlID(pMsg->hwnd)) {
+			default:
+				break;// never exist window (default -1) even nothing did
+			}
+		}
+	}
+	return TRUE;
 }
 
 void CMapD::OnChangeUsesize()
@@ -134,24 +148,15 @@ void CMapD::OnChangelocal()
 	ini.SetString("Map", "LocalSize", GetText(&m_LocalSize));
 
 	Map->CalcMapRect();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	theApp.MainWindow()->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 }
 
 void CMapD::OnChange()
 {
-	/*
-	CDialog::UpdateData(TRUE);
-
-	int width, height;
-	width=atoi(m_Width);
-	height=atoi(m_Height);
-
-	Map->ResizeMap(width, height);
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	*/
-
 	CChangeSizeDlg dlg;
-	if (dlg.DoModal() == IDCANCEL) return;
+	if (dlg.DoModal() == IDCANCEL) {
+		return;
+	}
 
 	if (dlg.m_Width < 16 || dlg.m_Width>400 || dlg.m_Height < 16 || dlg.m_Height>400 || (dlg.m_Width + dlg.m_Height) > 512) {
 		MessageBox("Width and Height must both be between 16 and 400 and both added must be less than 512.", "Error");
@@ -161,8 +166,8 @@ void CMapD::OnChange()
 	Map->ResizeMap(dlg.m_Left, dlg.m_Top, dlg.m_Width, dlg.m_Height);
 
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
-	((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_minimap->UpdateView();
+	theApp.MainWindow()->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	theApp.MainWindow()->m_view.m_minimap->UpdateView();
 
 	char c[50];
 	itoa(dlg.m_Width, c, 10);

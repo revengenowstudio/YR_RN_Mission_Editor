@@ -30,6 +30,7 @@
 #include "functions.h"
 #include "inlines.h"
 #include "Helpers.h"
+#include "TriggerDatabase.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -269,9 +270,47 @@ void CTeamTypes::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
+BOOL CTeamTypes::PreTranslateMessage(MSG* pMsg)
+{
+	int ret = -1;
+	if (pMsg->message == WM_KEYDOWN) {
+		ret = onMessageKeyDown(pMsg);
+	}
+
+	return ret < 0 ? this->CDialog::PreTranslateMessage(pMsg) : ret;
+}
+
+BOOL CTeamTypes::onMessageKeyDown(MSG* pMsg)
+{
+	switch (pMsg->wParam) {
+	default:
+		return -1;
+		case VK_RETURN: {
+			switch (::GetDlgCtrlID(pMsg->hwnd)) {
+			case IDC_NAME:
+			case IDC_PRIORITY:
+			case IDC_MAX:
+			case IDC_VETERANLEVEL:
+			case IDC_HOUSE:
+			case IDC_TECHLEVEL:
+			case IDC_GROUP:
+			case IDC_WAYPOINT:
+			case IDC_SCRIPT:
+			case IDC_TASKFORCE:
+			case IDC_TAG:
+			case IDC_TRANSPORTWAYPOINT:
+			case IDC_MINDCONTROLDECISION:
+				::SendMessage(pMsg->hwnd, WM_KILLFOCUS, 0, 0);
+				break;
+			default:
+				break;// never exist window (default -1) even nothing did
+			}
+		}
+	}
+	return TRUE;
+}
 
 BEGIN_MESSAGE_MAP(CTeamTypes, CDialog)
-	//{{AFX_MSG_MAP(CTeamTypes)
 	ON_CBN_SELCHANGE(IDC_TEAMTYPES, OnSelchangeTeamtypes)
 	ON_EN_KILLFOCUS(IDC_NAME, OnChangeName)
 	ON_BN_CLICKED(IDC_DELETETEAMTYPE, OnDeleteteamtype)
@@ -312,8 +351,7 @@ BEGIN_MESSAGE_MAP(CTeamTypes, CDialog)
 	ON_CBN_KILLFOCUS(IDC_TRANSPORTWAYPOINT, OnKillfocusTransportwaypoint)
 	ON_CBN_EDITCHANGE(IDC_MINDCONTROLDECISION, OnEditchangeMindcontroldecision)
 	ON_CBN_KILLFOCUS(IDC_MINDCONTROLDECISION, OnKillfocusMindcontroldecision)
-	//}}AFX_MSG_MAP
-	ON_BN_CLICKED(IDC_TEAMTYPE_COPY, &CTeamTypes::OnBnClickedTeamtypeCopy)
+	ON_BN_CLICKED(IDC_TEAMTYPE_COPY, OnBnClickedTeamtypeCopy)
 END_MESSAGE_MAP()
 
 BOOL stob(const char* s)
@@ -535,14 +573,11 @@ void CTeamTypes::OnSelchangeTeamtypes()
 	m_Suicide = sec.GetBool("Suicide");
 
 	auto const& tagId = sec.GetString("Tag");
+	auto& tagDb = TagDatabase::Instance();
 	if (!tagId.IsEmpty()) {
 		m_Tag = tagId;
-		auto const& tagDef = ini.GetString("Tags", tagId);
-		if (!tagDef.IsEmpty()) {
-			CString tag = m_Tag;
-			m_Tag += " ";
-			m_Tag += GetParam(tagDef, 1);
-		}
+		auto const& tagData = tagDb.Lookup( tagId);
+		m_Tag.Format("%s %s", tagId, tagData.name);
 	} else {
 		m_Tag = GetLanguageStringACP("None");
 	}
@@ -630,7 +665,7 @@ void CTeamTypes::OnDeleteteamtype()
 		}
 		ini.DeleteSection(str);
 	}
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+	theApp.MainWindow()->UpdateDialogs(TRUE);
 	//UpdateDialog();
 }
 
@@ -1241,7 +1276,7 @@ void CTeamTypes::addTeamtype(const TeamTypeParams& params)
 #endif
 
 	//UpdateDialog();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+	theApp.MainWindow()->UpdateDialogs(TRUE);
 
 	int i;
 	for (i = 0; i < m_TeamTypes.GetCount(); i++) {

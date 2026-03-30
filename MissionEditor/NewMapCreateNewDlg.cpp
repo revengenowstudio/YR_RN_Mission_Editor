@@ -25,6 +25,7 @@
 #include "finalsun.h"
 #include "NewMapCreateNewDlg.h"
 #include "variables.h"
+#include "functions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -72,23 +73,24 @@ BOOL CNewMapCreateNewDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	translateUI();
+
 	CComboBox& theater = *((CComboBox*)GetDlgItem(IDC_THEATER));
 	theater.AddString(THEATER0);
 	theater.AddString(THEATER1);
 #ifdef RA2_MODE
 	theater.AddString(THEATER2);
-	if (yuri_mode) // MW YR support
-	{
+	// MW YR support
+	if (yuri_mode) {
 		theater.AddString(THEATER3);
 		theater.AddString(THEATER4);
 		theater.AddString(THEATER5);
 	}
-
 #endif
 
 	m_Theater = 0;
-	m_Width = 50;
-	m_Height = 50;
+	m_Width = 80;
+	m_Height = 80;
 	m_StartingHeight = 0;
 
 	UpdateData(FALSE);
@@ -103,13 +105,13 @@ void CNewMapCreateNewDlg::OnOK()
 	UpdateData(TRUE);
 
 	if (m_Width > 400 || m_Height > 400 || m_Width < 16 || m_Height < 16 || (m_Width + m_Height) > 512) {
-		MessageBox("Width and Height must both be between 16 and 400 and both added must be less than 512.", "Error");
+		MessageBox(TranslateStringACP("NewMapCreateNewMapSpecNotSuitable"), TranslateStringACP("Error"));
 		return;
 	}
 
 	if (m_Width + m_Height > 256) {
 #ifdef RA2_MODE
-		int res = MessageBox("Width + height is bigger than 256, this may cause problems in RA2. Continue?", "Warning", MB_YESNO);
+		int res = MessageBox(TranslateStringACP("NewMapCreateNewMapSpecAlert"), TranslateStringACP("Warning"), MB_YESNO);
 #else
 		int res = MessageBox("Width + height is bigger than 256, this may cause problems in TS. Continue?", "Warning", MB_YESNO);
 #endif
@@ -118,3 +120,17 @@ void CNewMapCreateNewDlg::OnOK()
 
 	CDialog::OnOK();
 }
+
+void CNewMapCreateNewDlg::translateUI()
+{
+	TranslateWindowCaption(*this, "NewMapCreateNewCaption");
+	TranslateDlgItem(*this, IDC_NEWMAPCREATENEW_TXT_DSC, "NewMapCreateNewDesc");
+	TranslateDlgItem(*this, IDC_NEWMAPCREATENEW_TXT_WIDTH, "NewMapCreateNewWidth");
+	TranslateDlgItem(*this, IDC_NEWMAPCREATENEW_TXT_HEIGHT, "NewMapCreateNewHeight");
+	TranslateDlgItem(*this, IDC_NEWMAPCREATENEW_TXT_THEATER, "NewMapCreateNewTheater");
+	TranslateDlgItem(*this, IDC_NEWMAPCREATENEW_TXT_INIT_HEIGHT, "NewMapCreateNewInitHeight");
+
+	TranslateDlgItem(*this, IDOK, "NewMapTypeOK");
+	TranslateDlgItem(*this, IDCANCEL, "Cancel");
+}
+

@@ -58,7 +58,7 @@ protected:
 	int m_addx;
 	int m_addy;
 	BOOL m_bAlternative;
-	virtual DWORD GetTileToPlace(DWORD dwPos, BOOL* bSmall);
+	int GetTileToPlace(DWORD dwPos, BOOL* bSmall);
 };
 
 #endif // !defined(AFX_CLIFFMODIFIER_H__3853D323_CD37_11D4_9C87_F2DC6A2E6849__INCLUDED_)

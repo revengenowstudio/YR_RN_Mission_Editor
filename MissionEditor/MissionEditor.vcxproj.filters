@@ -222,22 +222,7 @@
     <ClCompile Include="TileSetBrowserView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TipDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ToolSettingsBar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriggerActionsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriggerEditorDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriggerEventsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriggerOptionsDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TSOptions.cpp">
@@ -297,9 +282,66 @@
     <ClCompile Include="MapOperationMiniMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CsfViewer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalObjectPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IniContentEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainGroupMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TriggerEditorAllDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TriggerDef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TriggerDatabase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Update.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="MissionEditor.rc">
+    <ResourceCompile Include="res\VersionInfo.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\SaveOptions.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\MissionEditor.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\CreateNewMap.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\TerrainBar.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\IniEdit.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\TriggerEditor.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\SinglePlayerOptions.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\Lighting.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\EditorOptions.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="res\DumpProgressDlg.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -517,22 +559,7 @@
     <ClInclude Include="TileSetBrowserView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TipDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ToolSettingsBar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriggerActionsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriggerEditorDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriggerEventsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriggerOptionsDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TSOptions.h">
@@ -601,6 +628,36 @@
     <ClInclude Include="Helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CsfViewer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="res\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalObjectPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IniContentEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainGroupMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TriggerEditorAllDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TriggerDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TriggerDatabase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Update.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\clifftoo.bmp">
@@ -652,6 +709,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\bmp00005.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\FinalRevenge.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

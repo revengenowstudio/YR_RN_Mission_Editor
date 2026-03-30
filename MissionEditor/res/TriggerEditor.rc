@@ -1,0 +1,288 @@
+// Microsoft Visual C++ generated resource script.
+//
+#pragma code_page(65001)
+
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// German (Germany) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(65001)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""FinalSun.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
+    "#include ""afxres.rc""         // Standardkomponenten\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_TRIGGER_ALL DIALOGEX 0, 0, 445, 363
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Trigger Editor"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Trigger options",IDC_TRGR_TRIGGER_OPTIONS,6,4,433,80
+    GROUPBOX        "Action options",IDC_TRGR_ACTION_OPTIONS,6,214,433,144
+    GROUPBOX        "Event options",IDC_TRGR_EVENT_OPTIONS,6,92,433,114
+    LTEXT           "Select trigger:",IDC_TRGR_SELECT_TRIGGER_TXT,13,17,54,10
+    COMBOBOX        IDC_TRGR_SELECTED_TRIGGER,69,17,234,201,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "New",IDC_TRGR_NEW_TRIGGER,308,16,40,14
+    PUSHBUTTON      "Clone",IDC_TRGR_CLONE_TRIGGER,351,16,40,14
+    PUSHBUTTON      "Delete",IDC_TRGR_DELETE_TRIGGER,394,16,40,14
+    PUSHBUTTON      "Place On Map",IDC_TRGR_PLACE_ON_MAP,308,33,61,14
+    LTEXT           "Type:",IDC_TRGR_TYPE_TXT,167,49,40,9
+    COMBOBOX        IDC_TRGR_TYPE,213,49,90,63,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Name",IDC_TRGR_NAME_TXT,13,33,36,10
+    EDITTEXT        IDC_TRGR_NAME,69,33,234,12,ES_AUTOHSCROLL
+    LTEXT           "House:",IDC_TRGR_HOUSE_TXT,13,52,38,10
+    COMBOBOX        IDC_TRGR_HOUSE,69,49,90,105,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Trigger attached:",IDC_TRGR_ATTACHED_TRIGGER_TXT,13,65,58,8
+    COMBOBOX        IDC_TRGR_ATTACHED_TRIGGER,69,65,234,127,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Must Transfer",IDC_TRGR_MUST_TRANSFER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,308,52,84,10
+    CONTROL         "Disabled",IDC_TRGR_DISABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,394,49,40,13
+    CONTROL         "Easy",IDC_TRGR_EASY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,308,65,35,13
+    CONTROL         "Medium",IDC_TRGR_MEDIUM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,351,65,35,13
+    CONTROL         "Hard",IDC_TRGR_HARD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,394,65,35,13
+    LTEXT           "Event type:",IDC_TRGR_EVENT_TYPE_TXT,13,105,57,12
+    COMBOBOX        IDC_TRGR_EVENT_TYPE,69,105,234,184,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "New",IDC_TRGR_NEW_EVENT,308,104,40,14
+    PUSHBUTTON      "Clone",IDC_TRGR_CLONE_EVENT,351,104,40,14
+    PUSHBUTTON      "Delete",IDC_TRGR_DELETE_EVENT,394,104,40,14
+    EDITTEXT        IDC_TRGR_EVENT_DESCRIPTION,283,126,149,74,ES_MULTILINE | ES_READONLY | WS_VSCROLL
+    LTEXT           "Event List:",IDC_TRGR_EVENT_LIST_TXT,13,121,74,10
+    LISTBOX         IDC_TRGR_EVENT_LIST,13,132,110,67,LBS_USETABSTOPS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+    LTEXT           "Parameter#1 value:",IDC_TRGR_EVENT_P1_TXT,127,121,118,10
+    COMBOBOX        IDC_TRGR_EVENT_PARAMETER_1,127,133,150,123,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Parameter#2 value:",IDC_TRGR_EVENT_P2_TXT,127,148,118,10
+    COMBOBOX        IDC_TRGR_EVENT_PARAMETER_2,127,160,150,123,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Action type:",IDC_TRGR_ACTION_TYPE_TXT,13,227,57,12
+    EDITTEXT        IDC_TRGR_ACTION_DESCRIPTION,283,249,149,102,ES_MULTILINE | ES_READONLY | WS_VSCROLL
+    PUSHBUTTON      "New",IDC_TRGR_NEW_ACTION,308,226,40,14
+    PUSHBUTTON      "Delete",IDC_TRGR_DELETE_ACTION,394,226,40,14
+    PUSHBUTTON      "Clone",IDC_TRGR_CLONE_ACTION,351,226,40,14
+    COMBOBOX        IDC_TRGR_ACTION_TYPE,69,227,234,184,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Action List:",IDC_TRGR_ACTION_LIST_TXT,13,245,74,10
+    LISTBOX         IDC_TRGR_ACTION_LIST,13,256,110,95,LBS_USETABSTOPS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+    LTEXT           "Parameter#1 value:",IDC_TRGR_ACTION_P1_TXT,127,245,118,10
+    COMBOBOX        IDC_TRGR_ACTION_PARAMETER_1,127,257,150,123,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Parameter#2 value:",IDC_TRGR_ACTION_P2_TXT,127,272,118,10
+    COMBOBOX        IDC_TRGR_ACTION_PARAMETER_2,127,284,150,123,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Parameter#3 value:",IDC_TRGR_ACTION_P3_TXT,127,299,118,10
+    COMBOBOX        IDC_TRGR_ACTION_PARAMETER_3,127,311,150,123,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Parameter#4 value:",IDC_TRGR_ACTION_P4_TXT,127,326,118,10
+    COMBOBOX        IDC_TRGR_ACTION_PARAMETER_4,127,338,150,123,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Parameter#5 value:",IDC_TRGR_ACTION_P5_TXT,127,353,118,10
+    COMBOBOX        IDC_TRGR_ACTION_PARAMETER_5,127,365,150,123,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Parameter#6 value:",IDC_TRGR_ACTION_P6_TXT,127,380,118,10
+    COMBOBOX        IDC_TRGR_ACTION_PARAMETER_6,127,392,150,123,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Search Reference",IDC_TRGR_SEARCH_REFERENCE,373,33,61,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_TRIGGER_ALL, DIALOG
+    BEGIN
+        HORZGUIDE, 62
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_TRIGGER_ALL AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // German (Germany) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_TAGS DIALOGEX 0, 0, 303, 204
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
+CAPTION "Tags"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    LTEXT           "Tags make Triggers work. Without a tag, a trigger is usually useless, because it won't be executed (except if another triggers fires it directly).",IDC_DESC,7,7,290,20
+    LTEXT           "Tag:",IDC_TAGS_CUR_TXT,7,36,54,12
+    COMBOBOX        IDC_TAG,61,37,236,196,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Add",IDC_ADD,169,53,59,14
+    PUSHBUTTON      "Delete",IDC_DELETE,238,53,59,14
+    LTEXT           "Name:",IDC_TAGS_NAME,7,90,54,12
+    EDITTEXT        IDC_NAME,61,89,236,13,ES_AUTOHSCROLL
+    LTEXT           "Repeat:",IDC_TAGS_REPEAT,7,110,54,13
+    COMBOBOX        IDC_REPEAT,61,110,236,59,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Trigger:",IDC_TAGS_TRIGGER,7,131,54,13
+    COMBOBOX        IDC_TRIGGER,61,131,236,135,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "For every trigger you create, you should create a tag to make the trigger work. A trigger consists of some general properties, an event and an action, which can all be defined in the ""trigger"" section.",IDC_TAGS_DESC_2,7,167,290,30
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_TRIGGEREDITOR AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TRIGGERACTIONS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TRIGGEREVENTS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_TRIGGEROPTIONS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_TRIGGERS DLGINIT
+BEGIN
+    IDC_TRIGGER2, 0x403, 7, 0
+0x6e3c, 0x6e6f, 0x3e65, "\000" 
+    0
+END
+
+IDD_TRIGGEROPTIONS DLGINIT
+BEGIN
+    IDC_HOUSE, 0x403, 13, 0
+0x2030, 0x202d, 0x7453, 0x6e61, 0x6164, 0x6472, "\000" 
+    IDC_HOUSE, 0x403, 14, 0
+0x2032, 0x202d, 0x6552, 0x6570, 0x7461, 0x6e69, 0x0067, 
+    0
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(65001)
+#endif //_WIN32
+#include "FinalSun.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
+#include "afxres.rc"         // Standardkomponenten
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

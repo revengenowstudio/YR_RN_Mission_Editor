@@ -24,7 +24,7 @@
 #include "stdafx.h"
 #include "finalsun.h"
 #include "TileSetBrowserFrame.h"
-#include "resource.h"
+#include "res/resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -64,20 +64,24 @@ void CTileSetBrowserFrame::PostNcDestroy()
 
 BOOL CTileSetBrowserFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 {
-	((CDialogBar*)&m_bar)->Create(this, IDD_TERRAINBAR, CBRS_TOP, 5);
+	if (!m_bar.Create(this, IDD_TERRAINBAR, CBRS_TOP, 5)) {
+		return FALSE;
+	}
+
 	m_bar.TranslateUI();
 	m_bar.ShowWindow(SW_SHOW);
-	CRect r;
-	GetClientRect(r);
-	m_view.Create(NULL, NULL, WS_CHILD | WS_VSCROLL | WS_HSCROLL | WS_VISIBLE, r, this, 1, NULL);
 
+	CRect rect;
+	GetClientRect(rect);
 
+	m_view.Create(NULL, NULL, WS_CHILD | WS_VSCROLL | WS_HSCROLL | WS_VISIBLE, rect, this, 1, NULL);
+
+	m_view.RecalcBottomNeeded();
 	RecalcLayout(TRUE);
 
-	CSize sizeTotal;
-	GetClientRect(&r);
-	sizeTotal.cx = r.right;
-	sizeTotal.cy = m_view.m_bottom_needed;
+	const CSize sizeTotal{ rect.right,  m_view.BottomNeeded() };
+	GetClientRect(&rect);
+
 	m_view.SetScrollSizes(MM_TEXT, sizeTotal);
 
 	m_view.ShowWindow(SW_SHOW);
@@ -87,23 +91,21 @@ BOOL CTileSetBrowserFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* p
 
 void CTileSetBrowserFrame::RecalcLayout(BOOL bNotify)
 {
-
-	RECT r;
+	RECT rect;
 	RECT rm;
 	GetClientRect(&rm);
-	m_bar.GetClientRect(&r);
+	m_bar.GetClientRect(&rect);
 
-	m_view.SetWindowPos(NULL, 0, r.bottom, rm.right, rm.bottom - r.bottom, SWP_NOZORDER);
+	m_view.SetWindowPos(NULL, 0, rect.bottom, rm.right, rm.bottom - rect.bottom, SWP_NOZORDER);
+	m_view.RecalcBottomNeeded();
 
-	m_view.GetClientRect(&r);
+	m_view.GetClientRect(&rect);
 	CSize sizeTotal;
-	sizeTotal.cx = r.right;
-	sizeTotal.cy = m_view.m_bottom_needed;
+	sizeTotal.cx = rect.right;
+	sizeTotal.cy = m_view.BottomNeeded();
 	m_view.SetScrollSizes(MM_TEXT, sizeTotal);
 
 	CFrameWnd::RecalcLayout(bNotify);
-
-
 }
 
 void CTileSetBrowserFrame::OnSize(UINT nType, int cx, int cy)

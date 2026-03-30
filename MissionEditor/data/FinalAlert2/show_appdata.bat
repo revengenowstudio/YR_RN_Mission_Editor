@@ -1,1 +1,1 @@
-start explorer "%LOCALAPPDATA%\FinalAlert 2"
+start explorer "%LOCALAPPDATA%\FinalRevenge"

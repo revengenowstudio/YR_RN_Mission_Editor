@@ -2,6 +2,7 @@
 #include <afx.h>
 #include <algorithm>
 #include <array>
+#include <functional>
 
 // coordinate functions
 inline void PosToXY(const char* pos, int* X, int* Y)
@@ -146,3 +147,37 @@ inline CString GetNodeID(int n)
 	GetNodeID(ret, n);
 	return ret;
 }
+
+enum class TrimDir {
+	Left,
+	Right,
+	Both
+};
+
+inline void Trim(std::string_view& str, char ch, TrimDir dir) {
+	if (dir == TrimDir::Left || dir == TrimDir::Both) {
+		while (!str.empty() && str.front() == ch) {
+			str.remove_prefix(1);
+		}
+	}
+	if (dir == TrimDir::Right || dir == TrimDir::Both) {
+		while (!str.empty() && str.back() == ch) {
+			str.remove_suffix(1);
+		}
+	}
+}
+
+class DeferUnlock
+{
+	using Action = std::function<void(void)>;
+public:
+	DeferUnlock(Action&& action) :
+		unlockAction(std::move(action))
+	{ }
+	~DeferUnlock() {
+		unlockAction();
+	}
+
+private:
+	Action unlockAction;
+};

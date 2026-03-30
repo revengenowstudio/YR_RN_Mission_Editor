@@ -263,7 +263,7 @@ building infos
 */
 struct BUILDING_INFO
 {
-	PICDATA pic[8];
+	PICDATA pic[8]; // pic data are read only reference
 	int pic_count;
 	BYTE w;
 	BYTE h;
@@ -367,7 +367,9 @@ struct XCString
 	{
 		this->len = len;
 
-		if (this->wString) delete[] this->wString;
+		if (this->wString) {
+			delete[] this->wString;
+		}
 
 		bUsedDefault = FALSE;
 
@@ -655,6 +657,6 @@ struct RA2STRINGENTRY
 	DWORD value_asc_size;
 };
 
-
+using TranslationMap = map<CString, XCString>;
 
 #endif

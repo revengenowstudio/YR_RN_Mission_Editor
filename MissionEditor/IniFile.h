@@ -30,11 +30,13 @@
 #endif // _MSC_VER > 1000
 
 
+#include <afxwin.h>
 #include <map>
 #include <CString>
 #include <fstream>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 #include <ios>
 #include "IniHelper.h"
 
@@ -71,6 +73,16 @@ public:
 	[[deprecated("instead use GetString or TryGetString")]]
 	const CString& AccessValueByName(const CString& name) const {
 		return GetString(name);
+	}
+
+	auto begin() const noexcept
+	{
+		return value_pairs.begin();
+	}
+
+	auto end() const noexcept
+	{
+		return value_pairs.end();
 	}
 
 	auto const& Nth(size_t index) const {
@@ -139,6 +151,18 @@ public:
 	}
 	bool HasValue(const CString& val) const {
 		return this->FindValue(val) >= 0;
+	}
+
+	/**
+	 * @brief Try get last key as an sequenced integer index
+	 * @return signed, return -1 means not applicable
+	 */
+	std::optional<int> LastIndexKey() const {
+		if (Size() == 0) {
+			return std::nullopt;
+		}
+		auto const key = std::prev(end())->first;
+		return atoi(key);
 	}
 
 	// <pos, existed?>
@@ -240,14 +264,9 @@ public:
 		}
 	}
 
-	auto begin() const noexcept
-	{
-		return value_pairs.begin();
-	}
-
-	auto end() const noexcept
-	{
-		return value_pairs.end();
+	void Clear() {
+		value_pos.clear();
+		value_pairs.clear();
 	}
 
 	[[deprecated("instead use iterators or for_each")]]
@@ -268,6 +287,8 @@ class CIniFile
 	static const CIniFileSection EmptySection;
 
 public:
+	using Const_It = typename StorageMap::const_iterator;
+
 	CIniFile(CIniFile&& rhs) noexcept :
 		m_filename(std::move(rhs.m_filename)),
 		sections(std::move(rhs.sections))
@@ -289,6 +310,7 @@ public:
 	void Clear();
 	WORD InsertFile(const CString& filename, const char* Section, BOOL bNoSpaces = FALSE);
 	WORD InsertFile(const std::string& filename, const char* Section, BOOL bNoSpaces = FALSE);
+	WORD InsertStream(std::istream& input, const char* Section = nullptr, bool bNoSpaces = false);
 	BOOL SaveFile(const CString& Filename) const;
 	BOOL SaveFile(const std::string& Filename) const;
 	WORD LoadFile(const CString& filename, BOOL bNoSpaces = FALSE);

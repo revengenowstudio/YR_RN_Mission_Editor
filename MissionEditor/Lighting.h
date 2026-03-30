@@ -27,10 +27,10 @@
 // Lightning.h : Header-Datei
 //
 
+#include "functions.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CLighting 
-
-
 
 class CLighting : public CDialog
 {
@@ -43,46 +43,43 @@ public:
 	~CLighting();
 
 	// Dialogfelddaten
-		//{{AFX_DATA(CLighting)
 	enum { IDD = IDD_LIGHTING };
-	CFloatEdit	m_Red2;
-	CFloatEdit	m_Red;
-	CFloatEdit	m_Level2;
-	CFloatEdit	m_Level;
-	CFloatEdit	m_Green2;
-	CFloatEdit	m_Green;
-	CFloatEdit	m_Blue2;
-	CFloatEdit	m_Blue;
-	CFloatEdit	m_Ambient2;
-	CFloatEdit	m_Ambient;
-	//}}AFX_DATA
 
-
-// Überschreibungen
-	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
-	//{{AFX_VIRTUAL(CLighting)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
-	//}}AFX_VIRTUAL
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 // Implementierung
-protected:
 	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CLighting)
 	virtual BOOL OnInitDialog();
+	void ddxWithMap(const int controlID, const CString& key, const DdxMode mode);
+	void ddxReadFromMap(const int controlID, const CString& key);
+	void ddxWriteIntoMap(const int controlID, const CString& key);
 	void translateUI();
+	BOOL onMessageKeyDown(MSG* pMsg);
+
 	afx_msg void OnChangeAmbient();
 	afx_msg void OnChangeLevel();
-	afx_msg void OnKillfocusAmbient();
 	afx_msg void OnChangeRed();
 	afx_msg void OnChangeGreen();
 	afx_msg void OnChangeBlue();
+	afx_msg void OnChangeGround();
 	afx_msg void OnChangeAmbient2();
 	afx_msg void OnChangeLevel2();
 	afx_msg void OnChangeRed2();
 	afx_msg void OnChangeGreen2();
 	afx_msg void OnChangeBlue2();
-	//}}AFX_MSG
+	afx_msg void OnChangeGround2();
+	afx_msg void OnChangeAmbient3();
+	afx_msg void OnChangeLevel3();
+	afx_msg void OnChangeRed3();
+	afx_msg void OnChangeGreen3();
+	afx_msg void OnChangeBlue3();
+	afx_msg void OnChangeGround3();
+	afx_msg void OnChangeAmbientDominator();
+	afx_msg void OnChangeAmbientNuke();
+
+
 	DECLARE_MESSAGE_MAP()
 
 };

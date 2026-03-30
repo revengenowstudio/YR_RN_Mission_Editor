@@ -7,7 +7,8 @@
     <DisableFastUpToDateCheck>True</DisableFastUpToDateCheck>
   </PropertyGroup>
   <PropertyGroup>
-    <XccDir>$(MSBuildThisFileDirectory)..\..\3rdParty\xcc</XccDir>
+    <XccDir>$(SolutionDir)\3rdParty\xcc</XccDir>
+    <VelopackDir>$(SolutionDir)\3rdParty\velopack</VelopackDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -30,7 +31,7 @@
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VxlLibDir);$(XccVcpkgDir)\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VxlLibDir);$(XccVcpkgDir)\lib;$(VelopackDir)\lib-static</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <StackReserveSize>11194304</StackReserveSize>
       <StackCommitSize>11194304</StackCommitSize>

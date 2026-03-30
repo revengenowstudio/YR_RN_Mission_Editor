@@ -70,11 +70,7 @@ BEGIN_MESSAGE_MAP(CViewObjects, CTreeView)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-
-extern int overlay_number[];
-extern CString overlay_name[];
 extern BOOL overlay_visible[];
-extern BOOL overlay_trail[];
 
 
 extern int overlay_count;
@@ -152,7 +148,7 @@ void CViewObjects::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 	if (val < 0) { // return;
 		if (val == -2) {
 			AD.reset();
-			((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+			theApp.MainWindow()->m_view.m_isoview->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 		}
 		return;
 	}
@@ -235,36 +231,38 @@ void CViewObjects::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 		case 50:
 		{
 			AD.mode = ACTIONMODE_MAPTOOL;
-			AD.tool.reset(new AddTubeTool(*Map, *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview, true));
+			AD.tool.reset(new AddTubeTool(*Map, *theApp.MainWindow()->m_view.m_isoview, true));
 			break;
 		}
 		case 51:
 		{
 			AD.mode = ACTIONMODE_MAPTOOL;
-			AD.tool.reset(new ModifyTubeTool(*Map, *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview, true));
+			AD.tool.reset(new ModifyTubeTool(*Map, *theApp.MainWindow()->m_view.m_isoview, true));
 			break;
 		}
 		case 52:
 		{
 			AD.mode = ACTIONMODE_MAPTOOL;
-			AD.tool.reset(new AddTubeTool(*Map, *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview, false));
+			AD.tool.reset(new AddTubeTool(*Map, *theApp.MainWindow()->m_view.m_isoview, false));
 			break;
 		}
 		case 53:
 		{
 			AD.mode = ACTIONMODE_MAPTOOL;
-			AD.tool.reset(new ModifyTubeTool(*Map, *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview, false));
+			AD.tool.reset(new ModifyTubeTool(*Map, *theApp.MainWindow()->m_view.m_isoview, false));
 			break;
 		}
 		case 54:
 		{
 			AD.mode = ACTIONMODE_MAPTOOL;
-			AD.tool.reset(new RemoveTubeTool(*Map, *((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview));
+			AD.tool.reset(new RemoveTubeTool(*Map, *theApp.MainWindow()->m_view.m_isoview));
 			break;
 		}
 
 		case 61:
-			if (!tiledata_count) break;
+			if (!tiledata_count) {
+				break;
+			}
 			AD.type = 0;
 			AD.mode = ACTIONMODE_SETTILE;
 			AD.data = 0;
@@ -308,13 +306,13 @@ void CViewObjects::OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult)
 			for (i = 0; i < (*tiledata_count); i++)
 				if ((*tiledata)[i].wTileSet == waterset) break;
 
-			if (((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x < 2 ||
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y < 2) {
+			if (theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x < 2 ||
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y < 2) {
 
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = 1;
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = 2;
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = 2;
+				theApp.MainWindow()->m_settingsbar.m_BrushSize = 1;
+				theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = 2;
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = 2;
 			}
 
 			AD.type = i;
@@ -1283,26 +1281,57 @@ void CViewObjects::UpdateDialog()
 			}
 		};
 
-	for (i = 0; i < overlay_count; i++) {
-		if (overlay_visible[i] && (!yr_only[i] || yuri_mode)) {
-			if (!overlay_trdebug[i] || g_data.GetBool("Debug", "EnableTrackLogic"))
-			{
-				auto item = tree.InsertItem(TVIF_PARAM | TVIF_TEXT, TranslateStringACP(overlay_name[i]), 0, 0, 0, 0, valadded * 6 + 3000 + overlay_number[i], alloverlay, TVI_LAST);
+	auto const& overlayTypeSec = rules["OverlayTypes"];
+	auto const sizeLimit = std::min<unsigned int>(overlayTypeSec.Size(), 255);
 
-				int ovrData = overlay_wall[i] ? 5 : 0;
-				loadOverlayCameo(overlay_number[i], ovrData, item);
-			}
+	for (i = 0; i < sizeLimit; i++) {
+		bool allowedToList = false;
+		auto const& unitname = overlayTypeSec.Nth(i).second;
+		if (rules.GetBool(unitname, "Wall") && rules.GetBool(unitname, "Wall.HasConnection", true)) {
+			allowedToList = true;
+			overlay_trail.insert(i);
+			// int ovrData = overlay_wall[i] ? 5 : 0;
+			// loadOverlayCameo(overlay_number[i], ovrData, item);
 		}
+
+		do {
+			if (allowedToList) {
+				break;
+			}
+			if (!overlay_visible[i]) {
+				allowedToList = false;
+				break;
+			}
+			if (yr_only[i] && !yuri_mode) {
+				allowedToList = false;
+				break;
+			}
+#if 0 // haven't figured out what it is
+			if (i < std::size(overlay_trdebug) && overlay_trdebug[i] && g_data.GetBool("Debug", "EnableTrackLogic")) {
+				allowedToList = true;
+				break;
+			}
+#endif
+		} while (0);
+
+		auto const& overlayName = GetOverlayDisplayName(unitname);
+
+		if (allowedToList) {
+			tree.InsertItem(TVIF_PARAM | TVIF_TEXT, overlayName,
+				0, 0, 0, 0, valadded * 6 + 3000 + i, alloverlay, TVI_LAST);
+		}
+
 	}
 
 	e = 0;
 	if (!theApp.m_Options.bEasy) {
-		for (i = 0; i < rules["OverlayTypes"].Size(); i++) {
+		auto const sizeLimit = std::min<unsigned int>(overlayTypeSec.Size(), 255);
+		for (i = 0; i < sizeLimit; i++) {
 			// it seems there is somewhere a bug that lists empty overlay ids... though they are not in the rules.ini
 			// so this here is the workaround:
-			auto const& unitname = rules["OverlayTypes"].Nth(i).second;
+			auto const& unitname = overlayTypeSec.Nth(i).second;
 			auto id = unitname;
-			//if(strchr(id,' ')!=NULL){ id[strchr(id,' ')-id;};		
+
 			if (id.Find(' ') >= 0) {
 				id = id.Left(id.Find(' '));
 			}
@@ -1515,10 +1544,10 @@ void CViewObjects::HandleBrushSize(int iTile)
 			int tset = tiles->GetInteger("General", n);
 			if (tset == (*tiledata)[iTile].wTileSet) {
 				int bs = atoi(val);
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.m_BrushSize = bs - 1;
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_settingsbar.UpdateData(FALSE);
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_x = bs;
-				((CFinalSunDlg*)theApp.m_pMainWnd)->m_view.m_isoview->m_BrushSize_y = bs;
+				theApp.MainWindow()->m_settingsbar.m_BrushSize = bs - 1;
+				theApp.MainWindow()->m_settingsbar.UpdateData(FALSE);
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_x = bs;
+				theApp.MainWindow()->m_view.m_isoview->m_BrushSize_y = bs;
 			}
 		}
 	}

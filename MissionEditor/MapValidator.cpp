@@ -30,6 +30,7 @@
 #include "inlines.h"
 #include <algorithm>
 #include <string>
+#include "TriggerDatabase.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -183,34 +184,29 @@ BOOL CMapValidator::CheckMap()
 
 		}
 
-		for (auto const& [id, def] : ini["Tags"]) {
-			CString trigger = GetParam(def, 2);
-			if (!ini["Triggers"].Exists(trigger)) {
+		auto const& triggerDb = TriggerDatabase::Instance();
+		auto const& tagDb = TagDatabase::Instance();
+		for (auto const& tag : tagDb) {
+			auto const& trigger = tag.triggerId;
+			if (!triggerDb.Exists(trigger)) {
 				CString error;
 				error = GetLanguageStringACP("MV_TriggerMissing");
 				error = TranslateStringVariables(1, error, trigger);
 				error = TranslateStringVariables(2, error, "Tag");
-				error = TranslateStringVariables(3, error, id);
+				error = TranslateStringVariables(3, error, tag.id);
 				AddItemWithNewLine(m_MapProblemList, error, 1);
 			}
 		}
 
-		if (auto pTriggerSec = ini.TryGetSection("Triggers")) {
-			for (auto& [id, def] : *pTriggerSec) {
-				auto defCopy = def;
-				if (RepairTrigger(defCopy)) {
-					pTriggerSec->SetString(id, defCopy);
-				}
-				// check linked trigger
-				auto const trigger = GetParam(defCopy, 1);
-				if (!pTriggerSec->Exists(trigger) && trigger != "<none>") {
-					CString error;
-					error = GetLanguageStringACP("MV_TriggerMissing");
-					error = TranslateStringVariables(1, error, trigger);
-					error = TranslateStringVariables(2, error, "Trigger");
-					error = TranslateStringVariables(3, error, id);
-					AddItemWithNewLine(m_MapProblemList, error, 1);
-				}
+		for (auto const& trigger : triggerDb) {
+			if (trigger.Options().nextTrigger != "<none>" 
+				&& !triggerDb.Exists(trigger.Options().nextTrigger)) {
+				CString error;
+				error = GetLanguageStringACP("MV_TriggerMissing");
+				error = TranslateStringVariables(1, error, trigger.ID());
+				error = TranslateStringVariables(2, error, "Trigger");
+				error = TranslateStringVariables(3, error, trigger.Options().nextTrigger);
+				AddItemWithNewLine(m_MapProblemList, error, 1);
 			}
 		}
 
@@ -236,15 +232,13 @@ BOOL CMapValidator::CheckMap()
 			}
 			// check tag
 			auto const& tag = sec.GetString("Tag");
-			if (!tag.IsEmpty()) {
-				if (!ini["Tags"].Exists(tag)) {
-					CString error;
-					error = GetLanguageStringACP("MV_TagMissing");
-					error = TranslateStringVariables(1, error, tag);
-					error = TranslateStringVariables(2, error, "Teamtype");
-					error = TranslateStringVariables(3, error, id);
-					AddItemWithNewLine(m_MapProblemList, error, 1);
-				}
+			if (!tag.IsEmpty() && !tagDb.Exists(tag)) {
+				CString error;
+				error = GetLanguageStringACP("MV_TagMissing");
+				error = TranslateStringVariables(1, error, tag);
+				error = TranslateStringVariables(2, error, "Teamtype");
+				error = TranslateStringVariables(3, error, id);
+				AddItemWithNewLine(m_MapProblemList, error, 1);
 			}
 		}
 
@@ -261,7 +255,7 @@ BOOL CMapValidator::CheckMap()
 			CString p = cx;
 			p += "/";
 			p += cy;
-			if (!ini["Tags"].Exists(tag)) {
+			if (!tagDb.Exists(tag)) {
 				CString error;
 				error = GetLanguageStringACP("MV_TagMissing");
 				error = TranslateStringVariables(1, error, tag);

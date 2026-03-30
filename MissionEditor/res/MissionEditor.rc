@@ -3,7 +3,6 @@
 #pragma code_page(65001)
 
 #include "resource.h"
-#include "Version.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -50,7 +49,7 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(65001)\r\n"
     "#endif //_WIN32\r\n"
-    "#include ""res\\FinalSun.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
+    "#include ""FinalSun.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
     "#include ""afxres.rc""         // Standardkomponenten\r\n"
     "#endif\r\n"
     "\0"
@@ -75,19 +74,19 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDC_EDITOR_ARROW$(TS_MODE) CURSOR                  "res\\ts_arrow.cur"
+IDC_EDITOR_ARROW$(TS_MODE) CURSOR                  "ts_arrow.cur"
 
 #else
-IDC_EDITOR_ARROW        CURSOR                  "res\\ts_arrow.cur"
+IDC_EDITOR_ARROW        CURSOR                  "ts_arrow.cur"
 
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDC_EDITOR_ARROW$(RA2_MODE) CURSOR                  "res\\ra2_arrow.cur"
+IDC_EDITOR_ARROW$(RA2_MODE) CURSOR                  "ra2_arrow.cur"
 
 #else
-IDC_EDITOR_ARROW        CURSOR                  "res\\ra2_arrow.cur"
+IDC_EDITOR_ARROW        CURSOR                  "ra2_arrow.cur"
 
 #endif
 #endif
@@ -99,67 +98,65 @@ IDC_EDITOR_ARROW        CURSOR                  "res\\ra2_arrow.cur"
 
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDB_FLAG$(TS_MODE)      BITMAP                  "res\\wp_ts.bmp"
+IDB_FLAG$(TS_MODE)      BITMAP                  "wp_ts.bmp"
 
 #else
-IDB_FLAG                BITMAP                  "res\\wp_ts.bmp"
+IDB_FLAG                BITMAP                  "wp_ts.bmp"
 
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDB_CELLTAG$(TS_MODE)   BITMAP                  "res\\celltag_ts.bmp"
+IDB_CELLTAG$(TS_MODE)   BITMAP                  "celltag_ts.bmp"
 
 #else
-IDB_CELLTAG             BITMAP                  "res\\celltag_ts.bmp"
+IDB_CELLTAG             BITMAP                  "celltag_ts.bmp"
 
 #endif
 #endif
-IDB_LIGHTBULB           BITMAP                  "res\\litebulb.bmp"
+IDB_LIGHTBULB           BITMAP                  "litebulb.bmp"
 
-IDB_MV_ICONS            BITMAP                  "res\\bmp00005.bmp"
+IDB_MV_ICONS            BITMAP                  "bmp00005.bmp"
 
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDB_SCROLLCURSOR$(TS_MODE) BITMAP                  "res\\scrollcursor_ts.bmp"
+IDB_SCROLLCURSOR$(TS_MODE) BITMAP                  "scrollcursor_ts.bmp"
 
 #else
-IDB_SCROLLCURSOR        BITMAP                  "res\\scrollcursor_ts.bmp"
+IDB_SCROLLCURSOR        BITMAP                  "scrollcursor_ts.bmp"
 
 #endif
 #endif
-IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDR_MAINFRAME           BITMAP                  "Toolbar.bmp"
 
-IDR_TERRAINBAR          BITMAP                  "res\\terrainb.bmp"
-
-IDR_CLIFFBAR            BITMAP                  "res\\clifftoo.bmp"
+IDR_CLIFFBAR            BITMAP                  "clifftoo.bmp"
 
 IDB_DEFAULTCAMEO        BITMAP                  "res\\default_cameo.bmp"
 
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDB_CELLTAG$(RA2_MODE)  BITMAP                  "res\\celltag_ra2.bmp"
+IDB_CELLTAG$(RA2_MODE)  BITMAP                  "celltag_ra2.bmp"
 
 #else
-IDB_CELLTAG             BITMAP                  "res\\celltag_ra2.bmp"
+IDB_CELLTAG             BITMAP                  "celltag_ra2.bmp"
 
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDB_FLAG$(RA2_MODE)     BITMAP                  "res\\wp_ra2.bmp"
+IDB_FLAG$(RA2_MODE)     BITMAP                  "wp_ra2.bmp"
 
 #else
-IDB_FLAG                BITMAP                  "res\\wp_ra2.bmp"
+IDB_FLAG                BITMAP                  "wp_ra2.bmp"
 
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDB_SCROLLCURSOR$(RA2_MODE) BITMAP                  "res\\scrollcursor_ra2.bmp"
+IDB_SCROLLCURSOR$(RA2_MODE) BITMAP                  "scrollcursor_ra2.bmp"
 
 #else
-IDB_SCROLLCURSOR        BITMAP                  "res\\scrollcursor_ra2.bmp"
+IDB_SCROLLCURSOR        BITMAP                  "scrollcursor_ra2.bmp"
 
 #endif
 #endif
@@ -180,34 +177,6 @@ BEGIN
     COMBOBOX        IDC_COUNTRY,7,20,112,118,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
-#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_SAVEOPTIONS$(TS_MODE) DIALOG 0, 0, 233, 125
-#else
-IDD_SAVEOPTIONS DIALOG 0, 0, 233, 125
-#endif
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Save options"
-FONT 8, "Tahoma"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,176,104,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,117,104,50,14
-    CONTROL         "Compress map",IDC_COMPRESS,"Button",BS_AUTORADIOBUTTON | NOT WS_VISIBLE | WS_GROUP,19,42,118,12
-    CONTROL         "Don't compress map (use this if any problems with the map occur in RA2/TS)",IDC_NOCOMPRESSION,
-                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | NOT WS_VISIBLE,19,52,192,21
-    CONTROL         "Create new preview using minimap",IDC_PREVIEWMODE,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,19,40,150,13
-    CONTROL         "Use existing preview (if possible)",IDC_EXISTINGPREVIEW,
-                    "Button",BS_AUTORADIOBUTTON,19,53,141,12
-    CONTROL         "Don't save any preview",IDC_NOPREVIEW,"Button",BS_AUTORADIOBUTTON,19,66,141,12
-    GROUPBOX        "Compression",IDC_STATIC,7,28,219,52,NOT WS_VISIBLE
-    GROUPBOX        "Preview",IDC_STATIC,7,29,219,56
-    LTEXT           "If you want to play the map online, you should try to make the file size as low as possible. This includes turning off the preview. You should also try using compression.",IDC_STATIC,7,90,219,27,NOT WS_VISIBLE
-    LTEXT           "Map name:",IDC_STATIC,7,7,63,13
-    EDITTEXT        IDC_MAPNAME,73,7,153,12,ES_AUTOHSCROLL
-END
-#endif
-
 IDD_MULTISAVEOPT DIALOG 0, 0, 281, 105
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Specify file type"
@@ -221,65 +190,6 @@ BEGIN
     CONTROL         "Save as *.mpr (many mprs slow down RA2 while loading)",IDC_MMX2,
                     "Button",BS_AUTORADIOBUTTON,7,59,267,15
 END
-
-IDD_MMXOPTIONS DIALOG 0, 0, 268, 172
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "MMX options"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,211,151,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,141,151,50,14
-    LTEXT           "If description tag does not exist, RA2 will place MISSING: in front of the map name, this does not affect the game!",IDC_STATIC,7,7,254,21
-    LTEXT           "Description tag:",IDC_STATIC,7,37,80,12
-    EDITTEXT        IDC_DESCRIPTION,90,37,171,15,ES_AUTOHSCROLL
-    CONTROL         "Standard",IDC_STANDARD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,89,80,14
-    CONTROL         "Meatgrind",IDC_MEATGRIND,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,90,80,14
-    CONTROL         "Naval War",IDC_NAVALWAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,174,90,80,14
-    CONTROL         "Nuke War",IDC_NUKEWAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,105,80,14
-    CONTROL         "Air War",IDC_AIRWAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,105,80,14
-    CONTROL         "Mega Wealth",IDC_MEGAWEALTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,174,105,80,14
-    CONTROL         "Duel",IDC_DUEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,121,80,14
-    CONTROL         "Cooperative",IDC_COOPERATIVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,121,80,14
-    LTEXT           "Min players:",IDC_STATIC,7,63,54,12
-    COMBOBOX        IDC_MINPLAYERS,89,62,40,103,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Max players:",IDC_STATIC,148,63,54,12
-    COMBOBOX        IDC_MAXPLAYERS,221,61,40,104,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-END
-
-#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_SAVEOPTIONS$(RA2_MODE) DIALOGEX 0, 0, 233, 186
-#else
-IDD_SAVEOPTIONS DIALOGEX 0, 0, 233, 186
-#endif
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Save options"
-FONT 8, "Tahoma", 0, 0, 0x0
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,176,165,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,117,165,50,14
-    CONTROL         "Create new preview using minimap",IDC_PREVIEWMODE,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,19,40,129,13
-    CONTROL         "Use existing preview (if possible)",IDC_EXISTINGPREVIEW,
-                    "Button",BS_AUTORADIOBUTTON,19,53,127,12
-    CONTROL         "Don't save any preview",IDC_NOPREVIEW,"Button",BS_AUTORADIOBUTTON,19,66,127,12
-    GROUPBOX        "Preview",IDC_STATIC,7,29,145,56
-    LTEXT           "If you want to play the map online, you should try to make the file size as low as possible. This includes turning off the preview.",IDC_STATIC,7,143,219,21
-    LTEXT           "Map name:",IDC_STATIC,7,7,41,13
-    EDITTEXT        IDC_MAPNAME,52,7,174,12,ES_AUTOHSCROLL
-    CONTROL         "Standard",IDC_STANDARD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,89,67,14
-    CONTROL         "Meatgrind",IDC_MEATGRIND,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,83,90,65,14
-    CONTROL         "Naval War",IDC_NAVALWAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,161,90,65,14
-    CONTROL         "Nuke War",IDC_NUKEWAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,105,66,14
-    CONTROL         "Air War",IDC_AIRWAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,83,105,65,14
-    CONTROL         "Mega Wealth",IDC_MEGAWEALTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,161,105,80,14
-    CONTROL         "Land Rush",IDC_DUEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,121,59,14
-    CONTROL         "Cooperative",IDC_COOPERATIVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,83,121,70,14
-    CONTROL         "Team Alliance",IDC_TEAMGAME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,161,121,65,14
-    LTEXT           "Min players:",IDC_SAVE_OPT_MP_TXT,159,30,57,8
-    EDITTEXT        IDC_SAVE_OPT_M_PLAYERS,157,42,69,14,ES_AUTOHSCROLL
-END
-#endif
 
 IDD_CHANGESIZE DIALOGEX 0, 0, 212, 194
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
@@ -345,53 +255,6 @@ BEGIN
     LTEXT           "As FinalAlert was dialog based in earlier versions, we need to have this.",IDC_STATIC,7,156,26,26
 END
 
-#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_TSOPTIONS$(RA2_MODE) DIALOGEX 0, 0, 197, 183
-#else
-IDD_TSOPTIONS DIALOGEX 0, 0, 197, 183
-#endif
-STYLE DS_SETFONT | DS_MODALFRAME | DS_NOFAILCREATE | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Options"
-FONT 8, "Tahoma", 0, 0, 0x0
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,140,159,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,85,159,50,14
-    LTEXT           "Red Alert 2 EXE (make sure its in the correct path)",IDC_DESC,5,5,184,20
-    EDITTEXT        IDC_EDIT1,5,25,130,15,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_CHOOSE,140,25,50,15
-    LTEXT           "Language / Sprache:",IDC_OPTIONS_LAN_TXT,7,51,128,11
-    COMBOBOX        IDC_LANGUAGE,7,63,183,94,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Support settings",IDC_OPTIONS_SUPPORT_TXT,7,81,183,71
-    CONTROL         "Support mission disks and mods (recommended)",IDC_RULESLIKETS,
-                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP,14,92,170,16
-    CONTROL         "Only support original Red Alert 2",IDC_ONLYORIGINAL,
-                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE,14,108,168,16
-    CONTROL         "Prefer FinalAlert 2 theater INI files",IDC_PREFER_LOCAL_THEATER_FILES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,131,164,12
-END
-#endif
-
-IDD_ALL DIALOGEX 0, 0, 303, 204
-STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "INI Editor"
-FONT 8, "Tahoma", 0, 0, 0x0
-BEGIN
-    LTEXT           "We highly recommend not to use this editor except you really know what you are doing.",IDC_INI_EDITOR_DESC,6,5,290,15
-    LTEXT           "Sections:",IDC_INI_EDITOR_SECTIONS,5,25,55,10
-    COMBOBOX        IDC_SECTIONS,61,25,235,85,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Keys:",IDC_INI_EDITOR_KEYS,15,80,40,10
-    PUSHBUTTON      "Add",IDC_ADDSECTION,60,40,55,15
-    PUSHBUTTON      "Delete",IDC_DELETESECTION,120,40,55,15
-    GROUPBOX        "Section content",IDC_INI_EDITOR_CONTENT,6,67,290,130
-    LISTBOX         IDC_KEYS,60,80,225,90,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Value:",IDC_INI_EDITOR_VAL,15,175,40,15
-    EDITTEXT        IDC_VALUE,60,175,225,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Add",IDC_ADDKEY,15,95,40,15
-    PUSHBUTTON      "Delete",IDC_DELETEKEY,15,115,40,15
-    PUSHBUTTON      "Insert another INI file content",IDC_INISECTION,181,40,115,15
-END
-
 IDD_MAP DIALOG 0, 0, 303, 204
 STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "Map Properties"
@@ -422,52 +285,6 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,235,20,50,14
     LTEXT           "Static",IDC_SENTENCE,5,5,228,33
     EDITTEXT        IDC_VAL,2,46,280,12,ES_AUTOHSCROLL
-END
-
-IDD_IMPORTINI DIALOG 0, 0, 229, 150
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Insert INI file section"
-FONT 8, "Tahoma"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,170,5,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,170,25,50,14
-    LTEXT           "Choose the sections you want to import in the map. Be careful! If you import a section that already exists, keys of the already existing section may be overwritten!",IDC_STATIC,5,5,155,35
-    LISTBOX         IDC_AVAILABLE,5,75,215,55,LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Available sections:",IDC_STATIC,5,65,100,10
-    CONTROL         "Import all sections",IDC_ALLSECTIONS,"Button",BS_AUTORADIOBUTTON,5,40,155,10
-    CONTROL         "Specify sections to be imported",IDC_SPECIFYSECTIONS,
-                    "Button",BS_AUTORADIOBUTTON,5,50,150,10
-    LTEXT           "Select the sections you wish to import.",IDC_STATIC,5,135,215,10
-END
-
-IDD_LIGHTING DIALOG 0, 0, 303, 204
-STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "Lighting Settings"
-FONT 8, "Tahoma"
-BEGIN
-    LTEXT           "Lighting settings define the color of the terrain in the game, and you can specify a very dark or very bright map. Be careful, using wrong settings may cause the player to be unable to see his units.",IDC_DESC,6,5,290,25
-    GROUPBOX        "Normal",IDC_LNORMAL,6,35,290,65
-    GROUPBOX        "Ion storm settings",IDC_LIONSTORM,6,110,290,65
-    LTEXT           "Ambient:",IDC_LAMBIENT1,15,50,50,10
-    EDITTEXT        IDC_AMBIENT,65,50,75,12,ES_AUTOHSCROLL
-    LTEXT           "Green:",IDC_LGREEN1,160,65,50,10
-    EDITTEXT        IDC_GREEN,210,65,75,12,ES_AUTOHSCROLL
-    LTEXT           "Red:",IDC_LRED1,160,50,50,10
-    EDITTEXT        IDC_RED,210,50,75,12,ES_AUTOHSCROLL
-    LTEXT           "Blue:",IDC_LBLUE1,160,80,50,10
-    EDITTEXT        IDC_BLUE,210,80,75,12,ES_AUTOHSCROLL
-    LTEXT           "Level:",IDC_LLEVEL1,15,65,50,10
-    EDITTEXT        IDC_LEVEL,65,65,75,12,ES_AUTOHSCROLL
-    LTEXT           "Ambient:",IDC_LAMBIENT2,15,125,50,10
-    EDITTEXT        IDC_AMBIENT2,65,125,75,12,ES_AUTOHSCROLL
-    LTEXT           "Green:",IDC_LGREEN2,160,140,50,10
-    EDITTEXT        IDC_GREEN2,210,140,75,12,ES_AUTOHSCROLL
-    LTEXT           "Red:",IDC_LRED2,160,125,50,10
-    EDITTEXT        IDC_RED2,210,125,75,12,ES_AUTOHSCROLL
-    LTEXT           "Blue:",IDC_LBLUE2,160,155,50,10
-    EDITTEXT        IDC_BLUE2,210,155,75,12,ES_AUTOHSCROLL
-    LTEXT           "Level:",IDC_LLEVEL2,15,140,50,10
-    EDITTEXT        IDC_LEVEL2,65,140,75,12,ES_AUTOHSCROLL
 END
 
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
@@ -672,27 +489,6 @@ BEGIN
     COMBOBOX        IDC_P10,164,132,77,41,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
 END
 
-#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_LOADING$(TS_MODE) DIALOGEX 0, 0, 235, 165
-#else
-IDD_LOADING DIALOGEX 0, 0, 235, 165
-#endif
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP
-FONT 8, "Tahoma", 0, 0, 0x1
-BEGIN
-    LTEXT           "Loading...",IDC_CAP,7,7,221,9
-    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH,7,18,221,13,WS_EX_DLGMODALFRAME
-    LTEXT           "Homepage: http://www.ea.com",IDC_STATIC,7,78,221,11,WS_BORDER
-    CTEXT           "",IDC_VERSION,74,37,154,13,SS_CENTERIMAGE | SS_SUNKEN
-    LTEXT           "Version:",IDC_LVERSION,7,37,61,9
-    CTEXT           "",IDC_BUILTBY,74,52,154,13,SS_CENTERIMAGE | SS_SUNKEN
-    LTEXT           "Built by:",IDC_LBUILTBY,7,52,61,9
-    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
-    LTEXT           "This software comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it.\nFor details open Help->Info",IDC_STATIC,6,129,221,26
-END
-#endif
-
 IDD_WAYPOINT DIALOG 0, 0, 186, 93
 STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "Create waypoint"
@@ -812,80 +608,6 @@ BEGIN
     PUSHBUTTON      "Clone",IDC_COPYUNIT,17,118,61,15
 END
 
-IDD_TAGS DIALOGEX 0, 0, 303, 204
-STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "Tags"
-FONT 8, "Tahoma", 0, 0, 0x0
-BEGIN
-    LTEXT           "Tags make Triggers work. Without a tag, a trigger is usually useless, because it won't be executed (except if another triggers fires it directly).",IDC_DESC,7,7,290,20
-    LTEXT           "Tag:",IDC_TAGS_CUR_TXT,7,36,54,12
-    COMBOBOX        IDC_TAG,61,37,236,196,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Add",IDC_ADD,169,53,59,14
-    PUSHBUTTON      "Delete",IDC_DELETE,238,53,59,14
-    LTEXT           "Name:",IDC_TAGS_NAME,7,90,54,12
-    EDITTEXT        IDC_NAME,61,89,236,13,ES_AUTOHSCROLL
-    LTEXT           "Repeat:",IDC_TAGS_REPEAT,7,110,54,13
-    COMBOBOX        IDC_REPEAT,61,110,236,59,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Trigger:",IDC_TAGS_TRIGGER,7,131,54,13
-    COMBOBOX        IDC_TRIGGER,61,131,236,135,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "For every trigger you create, you should create a tag to make the trigger work. A trigger consists of some general properties, an event and an action, which can all be defined in the ""trigger"" section.",IDC_TAGS_DESC_2,7,167,290,30
-END
-
-IDD_TRIGGERS DIALOG 0, 0, 303, 204
-STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "Old Trigger Editor - UNUSED"
-FONT 8, "Tahoma"
-BEGIN
-    LTEXT           "Trigger:",IDC_STATIC,7,7,26,11
-    COMBOBOX        IDC_TRIGGER,37,7,120,122,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "House:",IDC_STATIC,7,25,28,12
-    COMBOBOX        IDC_HOUSE,38,25,60,100,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "New trigger",IDC_ADDTRIGGER,165,7,61,14
-    PUSHBUTTON      "Delete trigger",IDC_DELETETRIGGER,234,7,63,14
-    LTEXT           "Name:",IDC_STATIC,109,26,24,12
-    EDITTEXT        IDC_NAME,135,25,162,13,ES_AUTOHSCROLL
-    LTEXT           "Flags:",IDC_STATIC,7,41,19,13
-    EDITTEXT        IDC_FLAG1,37,41,24,13,ES_AUTOHSCROLL
-    EDITTEXT        IDC_FLAG2,65,41,23,13,ES_AUTOHSCROLL
-    EDITTEXT        IDC_FLAG3,92,41,23,13,ES_AUTOHSCROLL
-    EDITTEXT        IDC_FLAG4,119,41,23,13,ES_AUTOHSCROLL
-    EDITTEXT        IDC_FLAG5,146,41,23,13,ES_AUTOHSCROLL
-    GROUPBOX        "Events which let the trigger start",IDC_STATIC,7,56,290,59
-    GROUPBOX        "Actions - What the trigger will do",IDC_STATIC,7,120,290,77
-    LTEXT           "Event:",IDC_STATIC,13,65,29,11
-    COMBOBOX        IDC_EVENT,57,66,123,68,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Add",IDC_ADDEVENT,185,65,49,15
-    PUSHBUTTON      "Delete",IDC_DELETEEVENT,239,65,49,15
-    LTEXT           "Parameter 1:",IDC_LABEL_E1,13,97,44,16
-    COMBOBOX        IDC_EVENTPARAM1,57,97,86,160,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Parameter 2:",IDC_LABEL_E2,149,97,44,16
-    COMBOBOX        IDC_EVENTPARAM2,198,98,90,172,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_ACTION,45,131,134,68,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Add",IDC_ADDACTION,185,130,49,15
-    PUSHBUTTON      "Delete",IDC_DELETEACTION,239,130,49,15
-    LTEXT           "Action:",IDC_STATIC,14,131,24,13
-    LTEXT           "Type:",IDC_STATIC,13,82,44,12
-    COMBOBOX        IDC_EVENTTYPE,57,82,230,98,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Param1:",IDC_LABEL_A1,13,163,30,14
-    COMBOBOX        IDC_ACTIONPARAM1,45,163,48,219,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Type:",IDC_STATIC,13,148,23,12
-    COMBOBOX        IDC_ACTIONTYPE,45,148,172,133,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Param2:",IDC_LABEL_A2,96,163,30,15
-    COMBOBOX        IDC_ACTIONPARAM2,127,163,74,289,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Param3:",IDC_LABEL_A3,203,162,30,14
-    COMBOBOX        IDC_ACTIONPARAM3,234,163,56,243,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Param4:",IDC_LABEL_A4,13,177,30,15
-    COMBOBOX        IDC_ACTIONPARAM4,45,176,48,204,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Param5:",IDC_LABEL_A5,96,178,30,14
-    COMBOBOX        IDC_ACTIONPARAM5,127,176,74,221,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Param6:",IDC_LABEL_A6,203,176,30,16
-    COMBOBOX        IDC_ACTIONPARAM6,234,176,56,239,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Waypoint:",IDC_WAYPOINT,221,148,33,11
-    COMBOBOX        IDC_ACTIONWAYPOINT,257,148,32,133,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Trigger??? :",IDC_STATIC,177,42,37,12
-    COMBOBOX        IDC_TRIGGER2,221,42,76,152,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-END
-
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
 IDD_AITRIGGERTYPES$(RA2_MODE) DIALOGEX 0, 0, 303, 234
@@ -941,37 +663,6 @@ BEGIN
 END
 #endif
 
-IDD_NEWMAP DIALOG 0, 0, 248, 226
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "New map assistant"
-FONT 8, "Tahoma"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,191,205,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,134,205,50,14
-    PUSHBUTTON      "Browse",IDC_BROWSE,189,106,44,12
-    GROUPBOX        "Import options",IDC_LIMPORTOPTIONS,7,93,234,64
-    CONTROL         "Import Trees",IDC_IMPORTTREES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,125,91,12
-    CONTROL         "Import Overlay",IDC_IMPORTOVERLAY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,138,103,13
-    CONTROL         "Import Units/Buildings",IDC_IMPORTUNITS,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,128,122,94,19
-    CONTROL         "Multiplayer",IDC_MULTIPLAYER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,167,85,12
-    COMBOBOX        IDC_IMPORTFILE,15,106,161,206,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Prepare standard houses",IDC_PREPAREHOUSES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,120,167,113,13
-    COMBOBOX        IDC_HOUSE,177,183,56,99,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Player house:",IDC_LPLAYERHOUSE,119,183,52,15
-    CONTROL         "Set Auto-Production triggers",IDC_AUTOPROD,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,7,178,102,19
-    CONTROL         "Import existing map",IDC_IMPORT,"Button",BS_AUTORADIOBUTTON | WS_GROUP,7,81,234,11
-    CONTROL         "Create new map",IDC_NEW,"Button",BS_AUTORADIOBUTTON,7,8,234,15
-    GROUPBOX        "New map options",IDC_STATIC,7,21,234,51
-    EDITTEXT        IDC_WIDTH,51,31,51,14,ES_AUTOHSCROLL
-    LTEXT           "Width:",IDC_STATIC,13,31,33,14
-    EDITTEXT        IDC_HEIGHT,178,31,51,14,ES_AUTOHSCROLL
-    LTEXT           "Height:",IDC_STATIC,130,31,41,14
-    LTEXT           "Theater:",IDC_STATIC,13,49,38,12
-    COMBOBOX        IDC_THEATER,51,49,68,71,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Ground height:",IDC_STATIC,130,50,47,16
-    COMBOBOX        IDC_GROUNDHEIGHT,178,50,52,71,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-END
-
 IDD_BASIC DIALOG 0, 0, 303, 208
 STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "Basic Settings"
@@ -1022,37 +713,6 @@ BEGIN
     EDITTEXT        IDC_INITTIME,226,164,70,12,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Required add on:",IDC_LADDONNEEDED,150,179,68,20
     COMBOBOX        IDC_REQUIREDADDON,226,179,70,40,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-END
-
-IDD_SINGLEPLAYER DIALOG 0, 0, 303, 207
-STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-CAPTION "Singleplayer Map Settings"
-FONT 8, "Tahoma"
-BEGIN
-    LTEXT           "Movies && other singleplayer stuff.",IDC_DESC,7,7,289,16
-    GROUPBOX        "Movies",IDC_LMOVIES,7,117,289,81
-    LTEXT           "Intro:",IDC_LINTRO,15,128,59,18
-    COMBOBOX        IDC_INTRO,75,128,68,161,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Brief:",IDC_LBRIEF,15,144,59,18
-    COMBOBOX        IDC_BRIEF,75,144,68,202,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Win:",IDC_LWIN,15,160,59,18
-    COMBOBOX        IDC_WIN,75,160,68,185,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Lose:",IDC_LLOSE,14,177,59,15
-    COMBOBOX        IDC_LOSE,75,176,68,203,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Action:",IDC_LACTION,154,128,59,18
-    COMBOBOX        IDC_ACTION,216,128,68,160,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "PostScore:",IDC_LPOSTSCORE,153,144,59,18
-    COMBOBOX        IDC_POSTSCORE,216,144,68,196,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "PreMapSelect:",IDC_LPREMAPSELECT,153,160,59,18
-    COMBOBOX        IDC_PREMAPSELECT,216,160,68,225,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Starting dropships:",IDC_LSTARTINGDROPSHIPS,7,23,67,16
-    COMBOBOX        IDC_STARTINGDROPSHIPS,75,23,68,161,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Carry over money (percent):",IDC_LCARRYOVERMONEY,7,40,67,16
-    EDITTEXT        IDC_CARRYOVERMONEY,75,41,67,14,ES_AUTOHSCROLL
-    LTEXT           "Inherit timer:",IDC_LINHERITTIMER,7,61,67,16
-    COMBOBOX        IDC_TIMERINHERIT,75,61,68,161,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Fill silos:",IDC_LFILLSILOS,7,79,67,16
-    COMBOBOX        IDC_FILLSILOS,75,79,68,161,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_MAPVALIDATOR DIALOGEX 0, 0, 440, 225
@@ -1110,16 +770,6 @@ BEGIN
     PUSHBUTTON      "Add = Enable AITrigger",IDC_ADD,85,81,102,15
 END
 
-IDD_TERRAINBAR DIALOGEX 0, 0, 465, 29
-STYLE DS_SETFONT | WS_CHILD
-FONT 8, "MS Sans Serif", 0, 0, 0x0
-BEGIN
-    LTEXT           "Terrain / Ground:",IDD_TERRAINBAR_TG,7,7,80,20
-    COMBOBOX        IDC_TILESET,64,7,141,169,CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Overlay && Special:",IDD_TERRAINBAR_OS,211,8,85,20
-    COMBOBOX        IDC_OVERLAY,271,8,141,169,CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-END
-
 IDD_TOOLSETTINGS DIALOGEX 0, 0, 116, 17
 STYLE DS_SETFONT | WS_CHILD
 EXSTYLE WS_EX_TRANSPARENT
@@ -1160,78 +810,6 @@ BEGIN
 END
 #endif
 
-IDD_TRIGGEREDITOR DIALOGEX 0, 0, 389, 263
-STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-CAPTION "Trigger editor"
-FONT 8, "Tahoma", 0, 0, 0x1
-BEGIN
-    LTEXT           "Select current trigger:",IDC_STATIC,7,7,80,10
-    PUSHBUTTON      "New trigger",IDC_NEWTRIGGER,180,7,60,14
-    PUSHBUTTON      "Delete trigger",IDC_DELETETRIGGER,254,7,60,14
-    COMBOBOX        IDC_TRIGGER,7,26,307,165,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Tab3",IDC_TRIGGERTAB,"SysTabControl32",TCS_HOTTRACK | TCS_TOOLTIPS,7,44,377,214,WS_EX_TRANSPARENT
-    PUSHBUTTON      "Place on map",IDC_PLACEONMAP,324,7,60,14
-    PUSHBUTTON      "Clone trigger",IDC_CLONE,324,24,60,14
-END
-
-IDD_TRIGGEROPTIONS DIALOGEX 0, 0, 365, 204
-STYLE DS_SETFONT | WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x0
-BEGIN
-    LTEXT           "Type (modifies all attached Tags!):",IDC_TRIGGER_OPTION_TYPE_STR,231,30,125,9
-    COMBOBOX        IDC_TRIGGERTYPE,231,41,125,71,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Name",IDC_TRIGGER_OPTION_NAME,7,2,264,10
-    EDITTEXT        IDC_NAME,6,12,350,13,ES_AUTOHSCROLL
-    LTEXT           "House:",IDC_TRIGGER_OPTION_HOUSE,4,31,125,9
-    COMBOBOX        IDC_HOUSE,4,41,186,78,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Attached trigger:",IDC_TRIGGER_OPTION_ATTACHED_TRIGGER,4,59,125,8
-    COMBOBOX        IDC_ATTACHEDTRIGGER,4,68,352,133,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Disabled",IDC_DISABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,4,90,124,9
-    LTEXT           "Disabled triggers must be enabled using other triggers before they fire.",IDC_TRIGGER_OPTION_TRIGGER_DIS_TIP,4,102,260,9
-    CONTROL         "Easy",IDC_EASY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,4,115,58,13
-    CONTROL         "Medium",IDC_MEDIUM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,68,115,58,13
-    CONTROL         "Hard",IDC_HARD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,140,115,58,13
-END
-
-IDD_TRIGGEREVENTS DIALOGEX 0, 0, 365, 204
-STYLE DS_SETFONT | WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x0
-BEGIN
-    LTEXT           "Current event:",IDC_EVENT_CUR_TXT,6,6,64,11
-    COMBOBOX        IDC_EVENT,72,6,150,79,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "New event",IDC_NEWEVENT,233,6,61,14
-    PUSHBUTTON      "Delete event",IDC_DELETEEVENT,300,6,61,14
-    GROUPBOX        "Event options",IDC_EVENT_OPT_TXT,6,19,355,178
-    LTEXT           "Event type:",IDC_EVENT_TYPE_TXT,14,32,57,12
-    COMBOBOX        IDC_EVENTTYPE,72,30,282,184,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_EVENTDESCRIPTION,14,48,340,26,ES_MULTILINE | ES_READONLY | WS_VSCROLL
-    LTEXT           "Event parameters:",IDC_EVENT_PARAM_TXT,14,79,74,10
-    LISTBOX         IDC_PARAMETER,14,93,159,96,LBS_SORT | LBS_USETABSTOPS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
-    LTEXT           "Parameter value:",IDC_EVENT_VAL_TXT,185,79,118,10
-    COMBOBOX        IDC_PARAMVALUE,185,93,169,125,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_NOINTEGRALHEIGHT | CBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Select the event type first, then set all parameters.",IDC_EVENT_DESC,185,110,169,25
-END
-
-IDD_TRIGGERACTIONS DIALOGEX 0, 0, 365, 202
-STYLE DS_SETFONT | WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x0
-BEGIN
-    LTEXT           "Current action:",IDC_ACTION_CUR_TXT,6,6,58,11
-    COMBOBOX        IDC_ACTION,72,6,149,79,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "New action",IDC_NEWACTION,233,6,60,14
-    PUSHBUTTON      "Delete action",IDC_DELETEACTION,301,6,59,14
-    GROUPBOX        "Action options",IDC_ACTION_OPT_TXT,6,20,354,174
-    LTEXT           "Action type:",IDC_ACTION_TYPE_TXT,14,32,57,12
-    COMBOBOX        IDC_ACTIONTYPE,72,30,282,184,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    EDITTEXT        IDC_ACTIONDESCRIPTION,14,48,340,26,ES_MULTILINE | ES_READONLY | WS_VSCROLL
-    LTEXT           "Action parameters:",IDC_ACTION_PARAM_TXT,14,79,74,10
-    LISTBOX         IDC_PARAMETER,14,93,90,94,LBS_SORT | LBS_USETABSTOPS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
-    LTEXT           "Parameter value:",IDC_ACTION_VAL_TXT,186,79,118,10
-    COMBOBOX        IDC_PARAMVALUE,110,92,244,125,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_NOINTEGRALHEIGHT | CBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Select the event type first, then set all parameters.",IDC_ACTION_DESC,110,110,168,25
-END
-
 IDD_GLOBALS DIALOGEX 0, 0, 186, 79
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Local Variables"
@@ -1244,33 +822,6 @@ BEGIN
     LTEXT           "Preset value:",IDC_LOCAL_VAR_INIT_TXT,7,60,45,11
     COMBOBOX        IDC_VALUE,57,59,122,55,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
 END
-
-#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_TSOPTIONS$(TS_MODE) DIALOGEX 0, 0, 197, 183
-#else
-IDD_TSOPTIONS DIALOGEX 0, 0, 197, 183
-#endif
-STYLE DS_SETFONT | DS_MODALFRAME | DS_NOFAILCREATE | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Options"
-FONT 8, "Tahoma", 0, 0, 0x0
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,140,160,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,85,160,50,14
-    LTEXT           "Tiberian Sun EXE (make sure its in the correct path)",IDC_STATIC,5,5,130,20
-    EDITTEXT        IDC_EDIT1,5,25,130,15,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_CHOOSE,140,25,50,15
-    LTEXT           "Language / Sprache:",IDC_STATIC,7,51,128,11
-    COMBOBOX        IDC_LANGUAGE,7,63,183,94,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Rules, Art && AI ini files",IDC_STATIC,7,81,183,71
-    CONTROL         "Act like Tiberian Sun when searching for files (recommended)",IDC_RULESLIKETS,
-                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP,14,92,170,16
-    CONTROL         "Only use the files inside tibsun.mix (do not use Firestorm or any mods)",IDC_ONLYORIGINAL,
-                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE,14,110,168,16
-    CONTROL         "Prefer FinalSun theater INI files",IDC_PREFER_LOCAL_THEATER_FILES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,131,164,12
-END
-#endif
 
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
@@ -1286,27 +837,6 @@ BEGIN
     LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.   ALL RIGHTS RESERVED\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,189,334,18
     LTEXT           "© 1999-2024 Electronic Arts Inc. Westwood Studios and Electronic Arts are trademarks or registered trademarks of Electronic Arts Inc. in the U.S. and/or other countries. All rights reserved.",IDC_STATIC,7,214,335,28
     EDITTEXT        IDC_LICENSE_AND_COPYRIGHT,6,29,336,148,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | WS_VSCROLL
-END
-#endif
-
-#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_LOADING$(RA2_MODE) DIALOGEX 0, 0, 235, 165
-#else
-IDD_LOADING DIALOGEX 0, 0, 235, 165
-#endif
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP
-FONT 8, "Tahoma", 0, 0, 0x1
-BEGIN
-    LTEXT           "Loading...",IDC_CAP,7,7,221,9
-    CONTROL         "Progress1",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH,7,18,221,13,WS_EX_DLGMODALFRAME
-    LTEXT           "Homepage: http://www.ea.com",IDC_STATIC,7,78,221,11,WS_BORDER
-    CTEXT           "",IDC_VERSION,74,37,154,13,SS_CENTERIMAGE | SS_SUNKEN
-    LTEXT           "Version:",IDC_LVERSION,7,37,61,9
-    CTEXT           "",IDC_BUILTBY,74,52,154,13,SS_CENTERIMAGE | SS_SUNKEN
-    LTEXT           "Built by:",IDC_LBUILTBY,7,52,61,9
-    LTEXT           "© 1999-2024 ELECTRONIC ARTS INC.  ALL RIGHTS RESERVED\nAuthored by Matthias Wagner\nWestwood Studios(tm) is an Electronic Arts(tm) brand.",IDC_STATIC,7,97,221,33
-    LTEXT           "This software comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it.\nFor details open Help->Info",IDC_STATIC,6,129,221,26
 END
 #endif
 
@@ -1380,89 +910,6 @@ BEGIN
 END
 #endif
 
-IDD_NEWMAPTYPE DIALOG 0, 0, 222, 129
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Create new map - Step 1"
-FONT 8, "Tahoma"
-BEGIN
-    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
-    LTEXT           "Please select if you want to create a new singleplayer map or multiplayer map. Multiplayer maps are maps used in both skirmish and multiplayer games.",IDC_STATIC,7,7,208,33
-    CONTROL         "Singleplayer map (only for experienced users that can handle advanced mode)",IDC_SINGLE,
-                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP,7,55,208,20
-    CONTROL         "Multiplayer map",IDC_MULTI,"Button",BS_AUTORADIOBUTTON,7,76,208,11
-END
-
-#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_NEWMAPCREATE$(TS_MODE) DIALOG 0, 0, 222, 129
-#else
-IDD_NEWMAPCREATE DIALOG 0, 0, 222, 129
-#endif
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Create new map - Step 2"
-FONT 8, "Tahoma"
-BEGIN
-    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
-    LTEXT           "Please select here if you want to create a completely new map from scratch or if you want to import an already existing map (Note: You cannot import maps created by the random map generator of RA2 or of TS version 1.15 or higher)",IDC_STATIC,7,7,208,37
-    CONTROL         "Create a completely new map",IDC_CREATE,"Button",BS_AUTORADIOBUTTON | WS_GROUP,7,55,208,11
-    CONTROL         "Import an existing map or bitmap (BMP)",IDC_IMPORT,
-                    "Button",BS_AUTORADIOBUTTON,7,67,208,11
-    CONTROL         "Activate AI Triggers (results in better AI)",IDC_AITRIGGERS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,83,208,14
-END
-#endif
-
-IDD_NEWMAPSPOPTIONS DIALOG 0, 0, 222, 129
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Create new map - Step 4"
-FONT 8, "Tahoma"
-BEGIN
-    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
-    CONTROL         "Prepare standard houses (recommended)",IDC_PREPAREHOUSES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,39,159,13
-    COMBOBOX        IDC_HOUSE,87,63,115,99,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Player house:",IDC_LPLAYERHOUSE,15,63,52,15
-    CONTROL         "Set Auto-Production triggers",IDC_AUTOPROD,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,14,78,192,14
-    LTEXT           "Please select the human player. It is recommended to leave the other options as they are.",IDC_STATIC,7,7,208,26
-    GROUPBOX        "",IDC_STATIC,7,52,208,46
-END
-
-IDD_NEWMAPCREATENEW DIALOG 0, 0, 222, 129
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Create new map - Step 3"
-FONT 8, "Tahoma"
-BEGIN
-    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
-    LTEXT           "Please select size, theater and starting height here. The size should be below 100x100 for best results.",IDC_STATIC,7,7,208,32
-    LTEXT           "Width:",IDC_STATIC,7,39,35,11
-    EDITTEXT        IDC_WIDTH,130,39,85,13,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Height:",IDC_STATIC,7,55,35,11
-    EDITTEXT        IDC_HEIGHT,130,55,85,13,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Theater:",IDC_STATIC,7,71,53,12
-    COMBOBOX        IDC_THEATER,130,71,85,58,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Starting height:",IDC_STATIC,7,87,64,12
-    COMBOBOX        IDC_STARTINGHEIGHT,130,87,85,93,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-END
-
-IDD_NEWMAPIMPORT DIALOG 0, 0, 222, 129
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Create new map - Step 3"
-FONT 8, "Tahoma"
-BEGIN
-    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
-    PUSHBUTTON      "Browse",IDC_BROWSE,155,51,60,12
-    CONTROL         "Import Trees",IDC_IMPORTTREES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,69,91,12
-    CONTROL         "Import Overlay",IDC_IMPORTOVERLAY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,82,103,13
-    CONTROL         "Import Units/Buildings",IDC_IMPORTUNITS,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,120,66,94,19
-    COMBOBOX        IDC_IMPORTFILE,7,51,131,206,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Please select the map you want to import. No triggers or houses will be imported. Bitmaps will be scaled down to appropiate size. Currently bitmaps will always be converted to temperate theater maps.",IDC_STATIC,7,7,208,43
-END
-
 IDD_MAPLOAD DIALOG 0, 0, 220, 50
 STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_CENTER | WS_POPUP | WS_CAPTION
 CAPTION "Loading"
@@ -1470,24 +917,6 @@ FONT 8, "MS Sans Serif"
 BEGIN
     LTEXT           "Loading map, please wait. This may take several minutes on big maps.",IDC_STATIC,7,7,206,18
     CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",PBS_SMOOTH | WS_BORDER,7,29,206,14
-END
-
-IDD_NEWMAPBITMAP DIALOG 0, 0, 222, 129
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Create new map - Step 3"
-FONT 8, "Tahoma"
-BEGIN
-    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
-    LTEXT           "Please select size, theater and starting height here. The size should be below 150x150.",IDC_STATIC,7,7,208,32
-    LTEXT           "Width:",IDC_STATIC,7,39,35,11
-    EDITTEXT        IDC_WIDTH,130,39,85,13,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Height:",IDC_STATIC,7,55,35,11
-    EDITTEXT        IDC_HEIGHT,130,55,85,13,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Theater:",IDC_STATIC,7,71,53,12
-    COMBOBOX        IDC_THEATER,130,71,85,58,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Starting height:",IDC_STATIC,7,87,64,12
-    COMBOBOX        IDC_STARTINGHEIGHT,130,87,85,93,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_PROGRESS DIALOG 0, 0, 208, 89
@@ -1518,27 +947,6 @@ END
 
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDD_NEWMAPCREATE$(RA2_MODE) DIALOG 0, 0, 222, 129
-#else
-IDD_NEWMAPCREATE DIALOG 0, 0, 222, 129
-#endif
-STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Create new map - Step 2"
-FONT 8, "Tahoma"
-BEGIN
-    DEFPUSHBUTTON   "Next",IDOK,165,108,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,7,108,50,14
-    LTEXT           "Please select here if you want to create a completely new map from scratch or if you want to import an already existing map (Note: You cannot import maps created by the random map generator of RA2)",IDC_STATIC,7,7,208,37
-    CONTROL         "Create a completely new map",IDC_CREATE,"Button",BS_AUTORADIOBUTTON | WS_GROUP,7,55,208,11
-    CONTROL         "Import an existing map or bitmap (BMP)",IDC_IMPORT,
-                    "Button",BS_AUTORADIOBUTTON,7,67,208,11
-    CONTROL         "Activate AI Triggers (results in better AI)",IDC_AITRIGGERS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,83,208,14
-END
-#endif
-
-#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
-#if defined(APSTUDIO_INVOKED)
 IDD_SAVING$(RA2_MODE) DIALOG 0, 0, 263, 46
 #else
 IDD_SAVING DIALOG 0, 0, 263, 46
@@ -1547,7 +955,7 @@ STYLE DS_SETFONT | DS_CENTER | WS_POPUP | WS_CAPTION
 CAPTION "Saving"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LTEXT           "Please wait a few seconds while FinalAlert 2 is saving. On very large maps this may even take some minutes, please do not cancel! More information is available in the status bar, most time will be needed for packing.",IDC_STATIC,7,7,249,32
+    LTEXT           "Please wait a few seconds while FinalAlert 2 is saving. On very large maps this may even take some minutes, please do not cancel! More information is available in the status bar, most time will be needed for packing.",IDC_SAV_DLG_DSC,7,7,249,32
 END
 #endif
 
@@ -1690,6 +1098,22 @@ BEGIN
     COMBOBOX        IDC_COMBO1,7,23,224,160,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
+IDD_CSF_VIEWER DIALOGEX 0, 0, 357, 329
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
+CAPTION "CSF Viewer"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Search Label/Text:",1003,7,30,63,8
+    EDITTEXT        IDC_CSF_VIEW_SELECTED,77,28,110,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "OK",IDOK,231,28,45,13
+    PUSHBUTTON      "Reload CSF",IDC_CSF_VIEW_RELOAD,281,28,70,13
+    CONTROL         "",IDC_CSF_VIEW_LIST,"SysListView32",LVS_REPORT | WS_BORDER | WS_TABSTOP,7,44,343,176
+    CONTROL         "", IDC_CSF_VIEW_RICH_EDT, "RichEdit20A", ES_LEFT | ES_MULTILINE | WS_CHILD | WS_BORDER | WS_VSCROLL | WS_TABSTOP, 7, 239, 343, 81
+    LTEXT           "When the trigger editor is to open and the parameter of the selected action is CSF, Click 'Apply' or double click item to apply the currently selected CSF text",1010,7,5,343,18
+    LTEXT           "Label Name:",1012,7,226,68,8
+    EDITTEXT        IDC_CSF_VIEW_CUR_LABEL,77,223,110,13,ES_AUTOHSCROLL | ES_READONLY
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1707,14 +1131,6 @@ BEGIN
         BOTTOMMARGIN, 45
     END
 
-    "IDD_SAVEOPTIONS$(TS_MODE)", DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 226
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 118
-    END
-
     IDD_MULTISAVEOPT, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -1729,14 +1145,6 @@ BEGIN
         RIGHTMARGIN, 261
         TOPMARGIN, 7
         BOTTOMMARGIN, 165
-    END
-
-    "IDD_SAVEOPTIONS$(RA2_MODE)", DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 226
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 179
     END
 
     IDD_CHANGESIZE, DIALOG
@@ -1768,15 +1176,6 @@ BEGIN
     BEGIN
     END
 
-    "IDD_TSOPTIONS$(RA2_MODE)", DIALOG
-    BEGIN
-        BOTTOMMARGIN, 165
-    END
-
-    IDD_ALL, DIALOG
-    BEGIN
-    END
-
     IDD_MAP, DIALOG
     BEGIN
     END
@@ -1785,14 +1184,6 @@ BEGIN
     BEGIN
         RIGHTMARGIN, 285
         BOTTOMMARGIN, 60
-    END
-
-    IDD_IMPORTINI, DIALOG
-    BEGIN
-    END
-
-    IDD_LIGHTING, DIALOG
-    BEGIN
     END
 
     "IDD_INFO$(TS_MODE)", DIALOG
@@ -1861,23 +1252,11 @@ BEGIN
     BEGIN
     END
 
-    IDD_TRIGGERS, DIALOG
-    BEGIN
-    END
-
     "IDD_AITRIGGERTYPES$(RA2_MODE)", DIALOG
     BEGIN
     END
 
-    IDD_NEWMAP, DIALOG
-    BEGIN
-    END
-
     IDD_BASIC, DIALOG
-    BEGIN
-    END
-
-    IDD_SINGLEPLAYER, DIALOG
     BEGIN
     END
 
@@ -1912,13 +1291,6 @@ BEGIN
     BEGIN
     END
 
-    IDD_TERRAINBAR, DIALOG
-    BEGIN
-        RIGHTMARGIN, 412
-        VERTGUIDE, 250
-        HORZGUIDE, 8
-    END
-
     IDD_TOOLSETTINGS, DIALOG
     BEGIN
     END
@@ -1935,63 +1307,8 @@ BEGIN
     BEGIN
     END
 
-    IDD_TRIGGEREDITOR, DIALOG
-    BEGIN
-        RIGHTMARGIN, 384
-        VERTGUIDE, 228
-        BOTTOMMARGIN, 258
-    END
-
-    IDD_TRIGGEROPTIONS, DIALOG
-    BEGIN
-        VERTGUIDE, 4
-        VERTGUIDE, 356
-    END
-
-    IDD_TRIGGEREVENTS, DIALOG
-    BEGIN
-        RIGHTMARGIN, 361
-        VERTGUIDE, 6
-        VERTGUIDE, 14
-        VERTGUIDE, 72
-        VERTGUIDE, 173
-        VERTGUIDE, 185
-        VERTGUIDE, 222
-        VERTGUIDE, 233
-        VERTGUIDE, 294
-        VERTGUIDE, 300
-        VERTGUIDE, 354
-        HORZGUIDE, 6
-        HORZGUIDE, 79
-    END
-
-    IDD_TRIGGERACTIONS, DIALOG
-    BEGIN
-        RIGHTMARGIN, 360
-        VERTGUIDE, 6
-        VERTGUIDE, 14
-        VERTGUIDE, 72
-        VERTGUIDE, 110
-        VERTGUIDE, 174
-        VERTGUIDE, 186
-        VERTGUIDE, 221
-        VERTGUIDE, 233
-        VERTGUIDE, 293
-        VERTGUIDE, 301
-        VERTGUIDE, 354
-        BOTTOMMARGIN, 194
-        HORZGUIDE, 6
-        HORZGUIDE, 74
-        HORZGUIDE, 79
-    END
-
     IDD_GLOBALS, DIALOG
     BEGIN
-    END
-
-    "IDD_TSOPTIONS$(TS_MODE)", DIALOG
-    BEGIN
-        BOTTOMMARGIN, 165
     END
 
     "IDD_INFO$(RA2_MODE)", DIALOG
@@ -2038,31 +1355,7 @@ BEGIN
         HORZGUIDE, 260
     END
 
-    IDD_NEWMAPTYPE, DIALOG
-    BEGIN
-    END
-
-    "IDD_NEWMAPCREATE$(TS_MODE)", DIALOG
-    BEGIN
-    END
-
-    IDD_NEWMAPSPOPTIONS, DIALOG
-    BEGIN
-    END
-
-    IDD_NEWMAPCREATENEW, DIALOG
-    BEGIN
-    END
-
-    IDD_NEWMAPIMPORT, DIALOG
-    BEGIN
-    END
-
     IDD_MAPLOAD, DIALOG
-    BEGIN
-    END
-
-    IDD_NEWMAPBITMAP, DIALOG
     BEGIN
     END
 
@@ -2071,10 +1364,6 @@ BEGIN
     END
 
     IDD_AUTOUPDATE, DIALOG
-    BEGIN
-    END
-
-    "IDD_NEWMAPCREATE$(RA2_MODE)", DIALOG
     BEGIN
     END
 
@@ -2120,6 +1409,10 @@ BEGIN
         RIGHTMARGIN, 231
         TOPMARGIN, 7
         BOTTOMMARGIN, 56
+    END
+
+    IDD_CSF_VIEWER, DIALOG
+    BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2562,13 +1855,6 @@ BEGIN
 END
 #endif
 
-IDD_TRIGGERS DLGINIT
-BEGIN
-    IDC_TRIGGER2, 0x403, 7, 0
-0x6e3c, 0x6e6f, 0x3e65, "\000" 
-    0
-END
-
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
 #if defined(APSTUDIO_INVOKED)
 IDD_AITRIGGERTYPES$(RA2_MODE) DLGINIT
@@ -2643,23 +1929,6 @@ BEGIN
 0x0030, 
     IDC_REQUIREDADDON, 0x403, 2, 0
 0x0031, 
-    0
-END
-
-IDD_SINGLEPLAYER DLGINIT
-BEGIN
-    IDC_STARTINGDROPSHIPS, 0x403, 2, 0
-0x0030, 
-    IDC_STARTINGDROPSHIPS, 0x403, 2, 0
-0x0031, 
-    IDC_TIMERINHERIT, 0x403, 4, 0
-0x6579, 0x0073, 
-    IDC_TIMERINHERIT, 0x403, 3, 0
-0x6f6e, "\000" 
-    IDC_FILLSILOS, 0x403, 4, 0
-0x6579, 0x0073, 
-    IDC_FILLSILOS, 0x403, 3, 0
-0x6f6e, "\000" 
     0
 END
 
@@ -2739,33 +2008,6 @@ BEGIN
     0
 END
 
-IDD_NEWMAP DLGINIT
-BEGIN
-    IDC_GROUNDHEIGHT, 0x403, 2, 0
-0x0030, 
-    IDC_GROUNDHEIGHT, 0x403, 2, 0
-0x0031, 
-    IDC_GROUNDHEIGHT, 0x403, 2, 0
-0x0032, 
-    IDC_GROUNDHEIGHT, 0x403, 2, 0
-0x0033, 
-    IDC_GROUNDHEIGHT, 0x403, 2, 0
-0x0034, 
-    IDC_GROUNDHEIGHT, 0x403, 2, 0
-0x0035, 
-    IDC_GROUNDHEIGHT, 0x403, 2, 0
-0x0036, 
-    IDC_GROUNDHEIGHT, 0x403, 2, 0
-0x0037, 
-    IDC_GROUNDHEIGHT, 0x403, 2, 0
-0x0038, 
-    IDC_GROUNDHEIGHT, 0x403, 2, 0
-0x0039, 
-    IDC_GROUNDHEIGHT, 0x403, 3, 0
-0x3031, "\000" 
-    0
-END
-
 IDD_TOOLSETTINGS DLGINIT
 BEGIN
     IDC_BRUSHSIZE, 0x403, 4, 0
@@ -2788,15 +2030,6 @@ BEGIN
 0x7831, 0x0033, 
     IDC_BRUSHSIZE, 0x403, 4, 0
 0x7833, 0x0031, 
-    0
-END
-
-IDD_TRIGGEROPTIONS DLGINIT
-BEGIN
-    IDC_HOUSE, 0x403, 13, 0
-0x2030, 0x202d, 0x7453, 0x6e61, 0x6164, 0x6472, "\000" 
-    IDC_HOUSE, 0x403, 14, 0
-0x2032, 0x202d, 0x6552, 0x6570, 0x7461, 0x6e69, 0x0067, 
     0
 END
 
@@ -2840,52 +2073,6 @@ BEGIN
     0
 END
 #endif
-
-IDD_NEWMAPCREATENEW DLGINIT
-BEGIN
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0030, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0031, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0032, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0033, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0034, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0035, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0036, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0037, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0038, 
-    0
-END
-
-IDD_NEWMAPBITMAP DLGINIT
-BEGIN
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0030, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0031, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0032, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0033, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0034, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0035, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0036, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0037, 
-    IDC_STARTINGHEIGHT, 0x403, 2, 0
-0x0038, 
-    0
-END
 
 IDD_UNIT DLGINIT
 BEGIN
@@ -3025,28 +2212,28 @@ END
 // remains consistent on all systems.
 #if defined(APSTUDIO_INVOKED) || defined(YR_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDR_MAINFRAME$(YR_MODE) ICON                    "res\\FinalAlert2YR.ico"
+IDR_MAINFRAME$(YR_MODE) ICON                    "FinalRevenge.ico"
 
 #else
-IDR_MAINFRAME           ICON                    "res\\FinalAlert2YR.ico"
+IDR_MAINFRAME           ICON                    "FinalRevenge.ico"
 
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(RA2_MODE_ICON)
 #if defined(APSTUDIO_INVOKED)
-IDR_MAINFRAME$(RA2_MODE_ICON) ICON                    "res\\FinalAlert2.ico"
+IDR_MAINFRAME$(RA2_MODE_ICON) ICON                    "FinalAlert2.ico"
 
 #else
-IDR_MAINFRAME           ICON                    "res\\FinalAlert2.ico"
+IDR_MAINFRAME           ICON                    "FinalAlert2.ico"
 
 #endif
 #endif
 #if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
 #if defined(APSTUDIO_INVOKED)
-IDR_MAINFRAME$(TS_MODE) ICON                    "res\\FinalSun.ico"
+IDR_MAINFRAME$(TS_MODE) ICON                    "FinalSun.ico"
 
 #else
-IDR_MAINFRAME           ICON                    "res\\FinalSun.ico"
+IDR_MAINFRAME           ICON                    "FinalSun.ico"
 
 #endif
 #endif
@@ -3056,101 +2243,14 @@ IDR_MAINFRAME           ICON                    "res\\FinalSun.ico"
 // WAVE
 //
 
-IDR_WAVE1               WAVE                    "RES\\uacbopen.wav"
+IDR_WAVE1               WAVE                    "uacbopen.wav"
 
-IDR_WAVE2               WAVE                    "RES\\ugamclos.wav"
+IDR_WAVE2               WAVE                    "ugamclos.wav"
 
-IDR_WAVE3               WAVE                    "RES\\umenscol.wav"
+IDR_WAVE3               WAVE                    "umenscol.wav"
 
-IDR_WAVE4               WAVE                    "RES\\uqeue.wav"
+IDR_WAVE4               WAVE                    "uqeue.wav"
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
-
-#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
-#if defined(APSTUDIO_INVOKED)
-VS_VERSION_INFO$(RA2_MODE) VERSIONINFO
-#else
-VS_VERSION_INFO VERSIONINFO
-#endif
- FILEVERSION 1,0,0,2
- PRODUCTVERSION 1,0,0,2
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x2bL
-#else
- FILEFLAGS 0x2aL
-#endif
- FILEOS 0x4L
- FILETYPE 0x1L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904b0"
-        BEGIN
-            VALUE "Comments", "FinalAlert 2: Yuri's Revenge Mission Editor"
-            VALUE "CompanyName", "Electronic Arts, Inc."
-            VALUE "FileDescription", "FinalAlert 2: Yuri's Revenge"
-            VALUE "FileVersion", "2.1.0"
-            VALUE "InternalName", "FinalAlert 2: Yuri's Revenge Mission Editor"
-            VALUE "LegalCopyright", "Copyright (C) 1999-2024 Electronic Arts, Inc."
-            VALUE "LegalTrademarks", "FinalAlert 2: Yuri's Revenge"
-            VALUE "OriginalFilename", "FinalAlert2YR.EXE"
-            VALUE "ProductName", "FinalAlert 2: Yuri's Revenge"
-            VALUE "ProductVersion", "2.1.0"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1200
-    END
-END
-#endif
-
-#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
-#if defined(APSTUDIO_INVOKED)
-VS_VERSION_INFO$(TS_MODE) VERSIONINFO
-#else
-VS_VERSION_INFO VERSIONINFO
-#endif
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x23L
-#else
- FILEFLAGS 0x22L
-#endif
- FILEOS 0x4L
- FILETYPE 0x1L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904b0"
-        BEGIN
-            VALUE "Comments", "FinalSun Mission Editor"
-            VALUE "CompanyName", "Electronic Arts, Inc."
-            VALUE "FileDescription", "FinalSun"
-            VALUE "FileVersion", "2.1.0"
-            VALUE "InternalName", "FinalSun Mission Editor"
-            VALUE "LegalCopyright", "Copyright (C) 1999-2024 Electronic Arts, Inc."
-            VALUE "LegalTrademarks", "FinalSun"
-            VALUE "OriginalFilename", "FinalSun.EXE"
-            VALUE "ProductName", "FinalSun"
-            VALUE "ProductVersion", "2.1.0"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1200
-    END
-END
-#endif
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -3259,7 +2359,6 @@ BEGIN
         MENUITEM "Manual\tF1",                  ID_HELP
         MENUITEM SEPARATOR
         MENUITEM "Info",                        ID_HELP_INFO
-        MENUITEM "Tip of the day",              ID_HELP_TIPOFTHEDAY
         MENUITEM SEPARATOR
         MENUITEM "Show logs",                   ID_HELP_SHOWLOGS
     END
@@ -3367,7 +2466,6 @@ BEGIN
         MENUITEM "Manual\tF1",                  ID_HELP
         MENUITEM SEPARATOR
         MENUITEM "Info",                        ID_HELP_INFO
-        MENUITEM "Tip of the day",              ID_HELP_TIPOFTHEDAY
         MENUITEM SEPARATOR
         MENUITEM "Show logs",                   ID_HELP_SHOWLOGS
     END
@@ -3387,21 +2485,6 @@ BEGIN
     BUTTON      ID_FILE_SAVE
 END
 
-IDR_TERRAINBAR TOOLBAR 16, 15
-BEGIN
-    BUTTON      ID_TERRAIN_HEIGHTENGROUND
-    BUTTON      ID_TERRAIN_LOWERGROUND
-    BUTTON      ID_TERRAIN_FLATTEN
-    BUTTON      ID_TERRAIN_CLOAK
-    BUTTON      ID_TERRAIN_SHOWEVERYTILE
-    BUTTON      ID_TERRAIN_HIDEFIELD
-    BUTTON      ID_TERRAIN_SHOWALLFIELDS
-    BUTTON      ID_TERRAIN_RAISETILE
-    BUTTON      ID_TERRAIN_LOWERTILE
-    SEPARATOR
-    BUTTON      ID_MARBLEMADNESS
-END
-
 IDR_CLIFFBAR TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_MAPTOOLS_FRONTCLIFF
@@ -3410,7 +2493,6 @@ BEGIN
     BUTTON      ID_MAPTOOLS_AUTOLEVEL
     BUTTON      ID_MAPTOOLS_AUTOCREATESHORES
 END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3491,54 +2573,7 @@ BEGIN
     0
 END
 
-#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_TSOPTIONS$(TS_MODE) AFX_DIALOG_LAYOUT
-#else
-IDD_TSOPTIONS AFX_DIALOG_LAYOUT
-#endif
-BEGIN
-    0
-END
-#endif
-
-#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_TSOPTIONS$(RA2_MODE) AFX_DIALOG_LAYOUT
-#else
-IDD_TSOPTIONS AFX_DIALOG_LAYOUT
-#endif
-BEGIN
-    0
-END
-#endif
-
-IDD_TRIGGEREDITOR AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_TRIGGERACTIONS AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_TRIGGEREVENTS AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_TRIGGEROPTIONS AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
 IDD_MAPVALIDATOR AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_TERRAINBAR AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -3625,28 +2660,17 @@ BEGIN
     0
 END
 
-IDD_ALL AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
 IDD_INPUTBOX AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
 
-#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
-#if defined(APSTUDIO_INVOKED)
-IDD_SAVEOPTIONS$(RA2_MODE) AFX_DIALOG_LAYOUT
-#else
-IDD_SAVEOPTIONS AFX_DIALOG_LAYOUT
-#endif
+IDD_CHANGESIZE AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
-#endif
 
-IDD_CHANGESIZE AFX_DIALOG_LAYOUT
+IDD_CSF_VIEWER AFX_DIALOG_LAYOUT
 BEGIN
     0
 END
@@ -3656,14 +2680,6 @@ END
 //
 // String Table
 //
-
-STRINGTABLE
-BEGIN
-    IDS_BUILTBY             "Matthias Wagner"
-    IDS_VERSIONTEXT         TEXT("Version " PRODUCT_VERSION_STRING)
-    IDS_VERSION             TEXT(PRODUCT_VERSION_STRING)
-    IDS_VERSIONTEXTTS       TEXT("Version " PRODUCT_VERSION_STRING)
-END
 
 STRINGTABLE
 BEGIN
@@ -3733,7 +2749,7 @@ END
 LANGUAGE 9, 1
 #pragma code_page(65001)
 #endif //_WIN32
-#include "res\FinalSun.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
+#include "FinalSun.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
 #include "afxres.rc"         // Standardkomponenten
 #endif
 

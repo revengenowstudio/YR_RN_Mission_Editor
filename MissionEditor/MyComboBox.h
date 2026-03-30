@@ -32,30 +32,26 @@
 
 class CMyComboBox : public CComboBox
 {
-	// Konstruktion
 public:
+	// Konstruktion
 	CMyComboBox();
 
 	// Attribute
-public:
 
 	// Operationen
-public:
-
-	// Überschreibungen
-		// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
-		//{{AFX_VIRTUAL(CMyComboBox)
-		//}}AFX_VIRTUAL
 
 	// Implementierung
-public:
 	virtual ~CMyComboBox();
 
 	// Generierte Nachrichtenzuordnungsfunktionen
 protected:
-	//{{AFX_MSG(CMyComboBox)
+
+	/**
+	* This will automatically send a CBN_EDITCHANGE command.
+	* Also it will set the window text to the selected item.
+	* So you MUST bind it to ON_CBN_EDITCHANGE instead of ON_CBN_SELCHANGE
+	*/
 	afx_msg void OnSelchange();
-	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
 };

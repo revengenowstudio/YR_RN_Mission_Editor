@@ -28,6 +28,7 @@
 #include "inlines.h"
 #include "mmsystem.h"
 #include "IniMega.h"
+#include "TriggerDatabase.h"
 
 #include <algorithm>
 
@@ -41,12 +42,29 @@ bool isValidUtf8(const char* utf8)
 {
 	// wstring_convert and codecvt_utf8_utf16 are deprecated in C++17, fallback to Win32
 	auto utf8Count = strlen(utf8);
-	if (utf8Count == 0)
+	if (utf8Count == 0) {
 		return true;
+	}
 
 	// unterminatedCountWChars will be the count of WChars NOT including the terminating zero (due to passing in utf8.size() instead of -1)
 	auto unterminatedCountWChars = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8, utf8Count, nullptr, 0);
 	return unterminatedCountWChars > 0;
+}
+
+size_t utf8ByteCount(const CString& input)
+{
+	CT2A utf8String(input, CP_UTF8);
+	const char* utf8 = utf8String;
+
+	const size_t utf8Count = strlen(utf8);
+	if (utf8Count == 0) {
+		return 0;
+	}
+	const int wideCharCount = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8, utf8Count, nullptr, 0);
+	if (wideCharCount == 0) {
+		return utf8Count;
+	}
+	return utf8Count;
 }
 
 std::wstring utf8ToUtf16(const std::string& utf8)
@@ -157,6 +175,13 @@ CString TranslateHouse(CString original, BOOL bToUI)
 }
 
 
+void ddxWithMap(CWnd& wnd, const CString& section, const CString& key, const DdxMode mode,
+	const WinTextValidator& checkOrModify)
+{
+	CIniFile& ini = Map->GetIniFile();
+	ddxWithIni(wnd, ini, section, key, mode, checkOrModify);
+}
+
 bool deleteFile(const std::string& u8FilePath)
 {
 	return DeleteFileW(utf8ToUtf16(u8FilePath).c_str()) ? true : false;
@@ -230,6 +255,7 @@ void HandleParamList(CComboBox& cb, int type)
 	cb.GetWindowText(oldText);
 
 	switch (type) {
+		default:
 		case PARAMTYPE_NOTHING:
 		{
 			while (cb.DeleteString(0) != CB_ERR);
@@ -314,7 +340,7 @@ void HandleParamList(CComboBox& cb, int type)
 	}
 }
 
-void ShowOptionsDialog(CIniFile& optIni)
+bool ShowOptionsDialog(CIniFile& optIni, bool isFirstTimeOption)
 {
 	// show the options dialog, and save the options.
 
@@ -328,16 +354,13 @@ void ShowOptionsDialog(CIniFile& optIni)
 
 	std::string iniFile = "";
 	iniFile = u8AppDataPath;
-#ifndef RA2_MODE
-	iniFile += "\\FinalSun.ini";
-#else
-	iniFile += "\\FinalAlert.ini";
-#endif
+	iniFile += "\\" FA2_OPTION_FILE;
+
 	optIni.LoadFile(iniFile);
 	CTSOptions opt;
 	opt.m_TSEXE = theApp.m_Options.TSExe;
 	if (opt.DoModal() == IDCANCEL) {
-		return;
+		return false;
 	}
 	theApp.m_Options.TSExe = opt.m_TSEXE;
 	optIni.SetString(game, "Exe", theApp.m_Options.TSExe);
@@ -368,10 +391,12 @@ void ShowOptionsDialog(CIniFile& optIni)
 
 	CString oldLang = theApp.m_Options.LanguageName;
 	theApp.m_Options.LanguageName = opt.m_LanguageName;
-	if (oldLang != theApp.m_Options.LanguageName && theApp.m_pMainWnd != NULL && theApp.m_pMainWnd->m_hWnd != NULL) {
-		((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateStrings();
+	auto const languageChanged = oldLang != theApp.m_Options.LanguageName;
+	if (languageChanged && theApp.m_pMainWnd != NULL && theApp.m_pMainWnd->m_hWnd != NULL) {
+		theApp.MainWindow()->UpdateStrings();
 	}
 	optIni.SaveFile(iniFile);
+	return !isFirstTimeOption && languageChanged;
 }
 
 
@@ -452,7 +477,7 @@ CString GetLanguageStringACP(const CString name)
 #ifndef RA2_MODE
 	auto const pStrToInsert = "FinalSun";
 #elif YR_MODE
-	auto const pStrToInsert = "FinalAlert 2: Yuri's Revenge";
+	auto const pStrToInsert = "Final Revenge";
 #else
 	auto const pStrToInsert = "FinalAlert 2";
 #endif
@@ -504,6 +529,25 @@ void TranslateWindowCaption(CWnd& cwnd, const CString& label)
 	}
 }
 
+CString GetOverlayDisplayName(const int typeIndex)
+{
+	if (typeIndex < 0) {
+		return {};
+	}
+	auto const& overlayTypeSec = rules["OverlayTypes"];
+	return GetOverlayDisplayName(overlayTypeSec.Nth(typeIndex).second);
+}
+
+CString GetOverlayDisplayName(const CString& id)
+{
+	auto const& uiName = rules.GetString(id, "UIName");
+	auto it = AllStrings.find(uiName);
+	if (it != AllStrings.end()) {
+		return it->second.cString;
+	}
+	return GetLanguageStringACP(id);
+}
+
 void TruncSpace(string& str)
 {
 	CString cstr = str.data();
@@ -512,8 +556,7 @@ void TruncSpace(string& str)
 }
 void TruncSpace(CString& str)
 {
-	str.TrimLeft();
-	str.TrimRight();
+	str.Trim();
 	auto const spacePos = str.Find(" ");
 	if (spacePos >= 0) {
 		str.Delete(spacePos, str.GetLength() - spacePos);
@@ -794,17 +837,13 @@ void ListTutorial(CComboBox& cb)
 void ListTriggers(CComboBox& cb)
 {
 	while (cb.DeleteString(0) != CB_ERR);
-	CIniFile& ini = Map->GetIniFile();
 
-	for (auto const& kvPair : ini.GetSection("Triggers")) {
-		auto s = kvPair.first;
-		s += " (";
-		s += GetParam(kvPair.second, 2);
-		s += ")";
-
-		cb.AddString(s);
+	CString item; // holder buffer
+	auto const& triggerDb = TriggerDatabase::Instance();
+	for (auto const& trigger : triggerDb) {
+		item.Format("%s (%s)", trigger.ID(), trigger.Options().name);
+		cb.AddString(item);
 	}
-
 }
 
 void ListYesNo(CComboBox& cb)
@@ -861,7 +900,7 @@ void ListSpecialWeapons(CComboBox& cb)
 
 void ListAnimations(CComboBox& cb)
 {
-	listSpecifcTypesWithSequence(cb, "Animations");
+	listSpecifcTypesWithSequence(cb, g_data.GetStringOr("Customizations", "AnimationListID", "Animations"));
 }
 
 void ListParticles(CComboBox& cb)
@@ -929,10 +968,10 @@ void ListTags(CComboBox& cb, BOOL bListNone)
 	if (bListNone) {
 		cb.AddString("None");
 	}
-	for (auto const& kvPair : ini.GetSection("Tags")) {
-		CString s = kvPair.first;
-		s += " ";
-		s += GetParam(kvPair.second, 1);
+	auto const& tagDb = TagDatabase::Instance();
+	for (auto const& tag : tagDb) {
+		CString s ;
+		s.Format("%s %s", tag.id, tag.name);
 		cb.AddString(s);
 	}
 
@@ -1282,12 +1321,19 @@ CString GetFreeID()
 		// ID1=SOME_DEFINITION1
 		// ID2=SOME_DEFINITION2
 		static const CString itemLists[] = {
-			"Triggers",
-			"Events",
-			"Tags",
-			"Actions",
 			"AITriggerTypes",
 		};
+		// trigger and tag:
+		for (auto const& trigger : TriggerDatabase::Instance()) {
+			if (trigger.ID() == input) {
+				return true;
+			}
+		}
+		for (auto const& tag : TagDatabase::Instance()) {
+			if (tag.ID() == input) {
+				return true;
+			}
+		}
 		// 0=GAPOWR ...
 		for (auto const& id : typeLists) {
 			if (ini[id].HasValue(input)) {
@@ -1772,7 +1818,7 @@ CComPtr<IDirectDrawSurface7> BitmapToSurface(IDirectDraw7* pDD, const CBitmap& b
 	ZeroMemory(&desc, sizeof(desc));
 	desc.dwSize = sizeof(desc);
 	desc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
-	desc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+	desc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
 	desc.dwWidth = bm.bmWidth;
 	desc.dwHeight = bm.bmHeight;
 

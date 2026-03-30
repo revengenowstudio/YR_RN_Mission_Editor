@@ -57,36 +57,33 @@ END_MESSAGE_MAP()
 
 BOOL CRightFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 {
+	CRect rect;
+	rect.right = 200;
+	rect.bottom = 200;
 
-	SIZE z;
-	z.cx = 200;
-	z.cy = 700;
-	//if(z.cy<100) z.cy=100;
-
-	CRect r;
-	r.right = 200;
-	r.bottom = 200;
-
-
-	if (!m_Splitter.CreateStatic(this, 2, 1)) return FALSE;
-
+	if (!m_Splitter.CreateStatic(this, 1, 2)) {
+		return FALSE;
+	}
 
 	if (!m_Splitter.CreateView(0, 0,
 		RUNTIME_CLASS(CIsoView),
-		z,
-		pContext)) return FALSE;
+		{ 700,200 },
+		pContext)) {
+		return FALSE;
+	}
 
-	z.cy = 100;
-
-	if (!m_Splitter.CreateView(1, 0,
+	if (!m_Splitter.CreateView(0, 1,
 		RUNTIME_CLASS(CTileSetBrowserFrame),
-		z,
-		pContext)) return FALSE;
+		{ 200,200 },
+		pContext)) {
+		return FALSE;
+	}
 
-	GetClientRect(&r);
+	GetClientRect(&rect);
 
-	m_Splitter.SetRowInfo(0, GetSystemMetrics(SM_CYFULLSCREEN) / 2, 20);
-	m_Splitter.SetRowInfo(1, GetSystemMetrics(SM_CYFULLSCREEN) / 2, 10);
+	auto const oct = GetSystemMetrics(SM_CXFULLSCREEN) / 8;
+	m_Splitter.SetColumnInfo(0, 5 * oct, 20);
+	m_Splitter.SetColumnInfo(1, 3 * oct, 10);
 
 	//SetWindowLong(m_Splitter->m_hWnd, GWL_STYLE, m_rightFrame->GetStyle() ! WS_THICKFRAME);
 

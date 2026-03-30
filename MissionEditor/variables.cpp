@@ -44,6 +44,7 @@ CIniFile tutorial;
 CIniFile eva;
 CIniFile theme;
 CIniFile g_data; // FAData.ini
+CIniFile g_project;
 CIniFile language;
 CIniFile tiles_t; // temperat.ini shouldn´t be used except in CMapData::UpdateIniFile() and CLoading
 CIniFile tiles_s; // snow.ini shouldn´t be used except in CMapData::UpdateIniFile() and CLoading
@@ -109,33 +110,25 @@ map<CString, BOOL> missingimages;
 vector<CString> rndterrainsrc;
 
 /* Overlay tile data */
+std::unordered_set<int> overlay_trail;
 #ifndef RA2_MODE
-int overlay_number[] = { 0x0,0x2, 0x1a, 0x7e, 0xa7, 0x27 };
-CString overlay_name[] = { "Sandbags","GDI Wall", "Nod Wall", "Veins", "Veinhole monster", "Tracks" };
 BOOL overlay_visible[] = { TRUE,TRUE,TRUE,FALSE,FALSE, TRUE };
-BOOL overlay_trail[] = { TRUE,TRUE,TRUE,FALSE,FALSE, TRUE };
-BOOL overlay_trdebug[] = { FALSE,FALSE,FALSE,FALSE,FALSE, FALSE };
 BOOL yr_only[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE };
 int overlay_count = 6;
 const std::string editor_name = "FinalSun";
 #else
-int overlay_number[] = { 0x0,0x2, 0x1a, 0xcb, 0xf1, 0xcc,0xf3,0xf0, 0x27 };
-BOOL overlay_trdebug[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE };
-CString overlay_name[] = { "Sandbags","Allied Wall", "Soviet Wall", "Black fence", "Prison camp fence", "White fence", "Yuri Wall", "Kremlin Wall", "Tracks" };
 BOOL overlay_visible[] = { TRUE,TRUE,TRUE,TRUE,TRUE,TRUE, TRUE, TRUE, TRUE };
-BOOL overlay_trail[] = { TRUE,TRUE,TRUE,TRUE,TRUE,TRUE, TRUE, TRUE, TRUE };
-BOOL overlay_wall[] = { TRUE,TRUE,TRUE,TRUE,TRUE,TRUE, TRUE, TRUE, FALSE };
 BOOL yr_only[] = { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE };
 int overlay_count = 9;
-const std::string editor_name = "FinalAlert 2";
 #endif
 
 static const std::string GetAppDataPath()
 {
 	_setmbcp(CP_UTF8);
 	setlocale(LC_ALL, "C");
-	if (!setlocale(LC_CTYPE, ".65001"))
+	if (!setlocale(LC_CTYPE, ".65001")) {
 		setlocale(LC_CTYPE, "");
+	}
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	CComPtr<IKnownFolderManager> manager;
 	CComPtr<IKnownFolder> local_app_data;
@@ -151,7 +144,7 @@ static const std::string GetAppDataPath()
 			int a = 0;
 			std::string AppFolder = utf16ToUtf8(std::wstring(local_app_data_folder));
 			//return CString(CW2A(CStringW(local_app_data_folder), CP_ACP)) + "\\" + editor_name + "\\";
-			return AppFolder + "\\" + editor_name + "\\";
+			return AppFolder + "\\" FA2_EDITOR_NAME "\\";
 		}
 	}
 
@@ -166,11 +159,11 @@ static const std::string GetAppDataPath()
 }
 
 /* Application specific global variables */
-char AppPath[MAX_PATH + 1] = { 0 };
-const std::string u8AppDataPath = GetAppDataPath();
+TCHAR AppPath[MAX_PATH + 1] = { 0 };
+const std::string u8AppDataPath = GetAppDataPath();// "%LOCALAPPDATA%, user data
 const std::wstring u16AppDataPath = utf8ToUtf16(u8AppDataPath);
-char TSPath[MAX_PATH + 1] = { 0 };
-char currentMapFile[MAX_PATH + 1] = { 0 };
+CString TSPath; // game resource path, with \\ ending
+CString currentMapFile;
 BOOL bOptionsStartup = FALSE;
 bool bAllowAccessBehindCliffs = false;
 

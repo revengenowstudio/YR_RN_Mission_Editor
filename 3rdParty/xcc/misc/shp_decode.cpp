@@ -574,12 +574,12 @@ static void flush_c0(byte*& w, const byte* r, const byte*& copy_from, byte* smal
 	}
 }
 
-int encode5s(const byte* s, byte* d, int cb_s)
+int encode5s(const byte* src, byte* dst, int src_len)
 {
 	lzo_init();
 	static Cvirtual_binary t;
 	lzo_uint cb_d;
-	if (LZO_E_OK != lzo1x_1_compress(s, cb_s, d, &cb_d, t.write_start(LZO1X_1_MEM_COMPRESS)))
+	if (LZO_E_OK != lzo1x_1_compress(src, src_len, dst, &cb_d, t.write_start(LZO1X_1_MEM_COMPRESS)))
 		cb_d = 0;
 	return cb_d;
 }
@@ -674,19 +674,19 @@ int decode5s(const byte* s, byte* d, int cb_s)
 	return w - d;
 }
 
-int encode5(const byte* s, byte* d, int cb_s, int format)
+int encode5(const byte* src, byte* dst, int cb_s, int format)
 {
-	const byte* r = s;
-	const byte* r_end = s + cb_s;
-	byte* w = d;
-	while (r < r_end) {
-		int cb_section = min<size_t>(r_end - r, 8192);
-		t_pack_section_header& header = *reinterpret_cast<t_pack_section_header*>(w);
-		w += sizeof(t_pack_section_header);
-		w += header.size_in = format == 80 ? encode80(r, w, cb_section) : encode5s(r, w, cb_section);
-		r += header.size_out = cb_section;
+	const byte* src_ptr = src;
+	const byte* r_end = src + cb_s;
+	byte* dst_ptr = dst;
+	while (src_ptr < r_end) {
+		int cb_section = min<size_t>(r_end - src_ptr, 8192);
+		t_pack_section_header& header = *reinterpret_cast<t_pack_section_header*>(dst_ptr);
+		dst_ptr += sizeof(t_pack_section_header);
+		dst_ptr += header.size_in = format == 80 ? encode80(src_ptr, dst_ptr, cb_section) : encode5s(src_ptr, dst_ptr, cb_section);
+		src_ptr += header.size_out = cb_section;
 	}
-	return w - d;
+	return dst_ptr - dst;
 }
 
 int decode5(const byte* s, byte* d, const size_t cb_s, int format)

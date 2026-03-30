@@ -1,0 +1,233 @@
+// Microsoft Visual C++ generated resource script.
+//
+#pragma code_page(65001)
+
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// German (Germany) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(65001)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""FinalSun.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
+    "#include ""afxres.rc""         // Standardkomponenten\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // German (Germany) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDD_TSOPTIONS$(RA2_MODE) DIALOGEX 0, 0, 197, 183
+#else
+IDD_TSOPTIONS DIALOGEX 0, 0, 197, 183
+#endif
+STYLE DS_SETFONT | DS_MODALFRAME | DS_NOFAILCREATE | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Options"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,140,159,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,85,159,50,14
+    LTEXT           "Red Alert 2 EXE (make sure its in the correct path)",IDC_DESC,5,5,184,20
+    EDITTEXT        IDC_EDIT1,7,62,130,15,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_CHOOSE,140,62,50,15
+    LTEXT           "Language / Sprache:",IDC_OPTIONS_LAN_TXT,7,24,128,11
+    COMBOBOX        IDC_LANGUAGE,7,36,183,94,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Support settings",IDC_OPTIONS_SUPPORT_TXT,7,81,183,71
+    CONTROL         "Support mission disks and mods (recommended)",IDC_RULESLIKETS,
+                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP,14,92,170,16
+    CONTROL         "Only support original Red Alert 2",IDC_ONLYORIGINAL,
+                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE,14,108,168,16
+    CONTROL         "Prefer FinalAlert 2 theater INI files",IDC_PREFER_LOCAL_THEATER_FILES,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,131,164,12
+END
+#endif
+
+#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDD_TSOPTIONS$(TS_MODE) DIALOGEX 0, 0, 197, 183
+#else
+IDD_TSOPTIONS DIALOGEX 0, 0, 197, 183
+#endif
+STYLE DS_SETFONT | DS_MODALFRAME | DS_NOFAILCREATE | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Options"
+FONT 8, "Tahoma", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,140,160,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,85,160,50,14
+    LTEXT           "Tiberian Sun EXE (make sure its in the correct path)",IDC_STATIC,5,5,130,20
+    EDITTEXT        IDC_EDIT1,5,25,130,15,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_CHOOSE,140,25,50,15
+    LTEXT           "Language / Sprache:",IDC_STATIC,7,51,128,11
+    COMBOBOX        IDC_LANGUAGE,7,63,183,94,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Rules, Art && AI ini files",IDC_STATIC,7,81,183,71
+    CONTROL         "Act like Tiberian Sun when searching for files (recommended)",IDC_RULESLIKETS,
+                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE | WS_GROUP,14,92,170,16
+    CONTROL         "Only use the files inside tibsun.mix (do not use Firestorm or any mods)",IDC_ONLYORIGINAL,
+                    "Button",BS_AUTORADIOBUTTON | BS_MULTILINE,14,110,168,16
+    CONTROL         "Prefer FinalSun theater INI files",IDC_PREFER_LOCAL_THEATER_FILES,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,131,164,12
+END
+#endif
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    "IDD_TSOPTIONS$(RA2_MODE)", DIALOG
+    BEGIN
+        VERTGUIDE, 7
+        VERTGUIDE, 190
+        BOTTOMMARGIN, 165
+        HORZGUIDE, 24
+        HORZGUIDE, 62
+    END
+
+    "IDD_TSOPTIONS$(TS_MODE)", DIALOG
+    BEGIN
+        BOTTOMMARGIN, 165
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+#if defined(APSTUDIO_INVOKED) || defined(TS_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDD_TSOPTIONS$(TS_MODE) AFX_DIALOG_LAYOUT
+#else
+IDD_TSOPTIONS AFX_DIALOG_LAYOUT
+#endif
+BEGIN
+    0
+END
+#endif
+
+#if defined(APSTUDIO_INVOKED) || defined(RA2_MODE)
+#if defined(APSTUDIO_INVOKED)
+IDD_TSOPTIONS$(RA2_MODE) AFX_DIALOG_LAYOUT
+#else
+IDD_TSOPTIONS AFX_DIALOG_LAYOUT
+#endif
+BEGIN
+    0
+END
+#endif
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(65001)
+#endif //_WIN32
+#include "FinalSun.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
+#include "afxres.rc"         // Standardkomponenten
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

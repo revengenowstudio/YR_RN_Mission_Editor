@@ -77,16 +77,20 @@ struct NODEDATA
 };
 
 // mapfielddata is the data of every field in an extracted isomappack!
+#pragma pack(push, 1)
 struct MAPFIELDDATA
 {
 	unsigned short wX;
 	unsigned short wY;
-	WORD wGround;
-	BYTE bData[3];
+	WORD wGround; // TileIndex
+	WORD wTileNum;
+	BYTE bSubTile;
 	BYTE bHeight;
-	BYTE bData2[1];
+	BYTE bIceGrowth;
 };
-#define MAPFIELDDATA_SIZE 11
+#pragma pack(pop)
+#define MAPFIELDDATA_SIZE sizeof(MAPFIELDDATA)
+static_assert(MAPFIELDDATA_SIZE == 11, "malformed MAPFIELDDATA");
 
 struct StructureData
 {
@@ -209,11 +213,10 @@ public:
 			replacement = rand() * (1 + (*tiledata)[dwID].bReplacementCount) / RAND_MAX;
 		}
 
-		fielddata[dwPos].wGround = dwID;
-		fielddata[dwPos].bSubTile = dwTile;
+		fielddata[dwPos].wGround = static_cast<WORD>(dwID);
+		fielddata[dwPos].bSubTile = static_cast<BYTE>(dwTile);
 		fielddata[dwPos].bRNDImage = replacement;
 
-		int e;
 		fielddata[dwPos].bRedrawTerrain = FALSE;
 		int xx, yy;
 		for (xx = -2; xx < 0; xx++) {
@@ -256,6 +259,7 @@ public:
 	DWORD GetStructureCount() const;
 	DWORD GetUnitCount() const;
 	DWORD GetInfantryCount() const;
+	std::vector<NODE> CollectAllBaseNodes() const;
 
 	void GetNthWaypointData(DWORD dwIdx, CString* lpID, DWORD* lpdwPos) const;
 	void GetWaypointData(DWORD dwId, CString* lpID, DWORD* lpdwPos) const;
@@ -289,7 +293,7 @@ public:
 	void InitializeUnitTypes();
 	BOOL AddStructure(STRUCTURE* lpStructure, LPCTSTR lpType = NULL, LPCTSTR lpHouse = NULL, DWORD dwPos = 0, CString suggestedID = "");
 	BOOL AddInfantry(INFANTRY* lpInfantry, int suggestedIndex = -1, LPCTSTR lpType = NULL, LPCTSTR lpHouse = NULL, DWORD dwPos = 0);
-	BOOL AddNode(NODE* lpNode, WORD dwPos);
+	BOOL AddNode(const NODE* lpNode, WORD dwPos, bool reloadAll = true);
 	CString GetNthStructureData(DWORD dwIndex, STRUCTURE* lpStructure) const;
 	void GetStructureData(size_t id, STRUCTURE* lpStructure) const;
 	BOOL AddWaypoint(CString lpID, DWORD dwPos);
@@ -468,7 +472,7 @@ public:
 	{
 		return m_IsoSize;
 	}
-	void LoadMap(const std::string& file);
+	void LoadMap(const CString& file);
 	void UpdateIniFile(DWORD dwFlags = MAPDATA_UPDATE_TO_INI);
 	CIniFile& GetIniFile();
 	CString GetAITriggerTypeID(DWORD dwAITriggerType);
@@ -480,11 +484,11 @@ public:
 	WORD GetHousesCount(BOOL bCountries = FALSE);
 	WORD GetHeight() const
 	{
-		return m_maprect.bottom;
+		return static_cast<WORD>(m_maprect.bottom);
 	};
 	WORD GetWidth() const
 	{
-		return m_maprect.right;
+		return static_cast<WORD>(m_maprect.right);
 	};
 	BOOL IsRulesSection(LPCTSTR lpSection);
 
@@ -520,10 +524,14 @@ public:
 	static CString GetBuildingIDBy(size_t offset);
 
 private:
+	using LUTMap = std::unordered_set<DWORD>;
+
 	void UpdateTubes(BOOL bSave);
 	MAPFIELDDATA* GetMappackPointer(DWORD dwPos);
 
 	void UpdateMapFieldData(BOOL bSave = FALSE);
+
+	std::vector<BYTE> compressAndSortMapData(const BYTE* rawData, const size_t rawLen);
 
 	DWORD m_IsoSize;
 	mutable FIELDDATA outside_f;
@@ -721,11 +729,15 @@ inline bool CMapData::IsCoordInMap(int X, int Y) const
 
 inline bool CMapData::isInside(MapCoords xy) const
 {
-	return xy.x >= 0 && xy.y >= 0 && xy.x < m_IsoSize&& xy.y < m_IsoSize;
+	return xy.x >= 0 && xy.y >= 0 
+		&& xy.x < static_cast<int>(m_IsoSize) 
+		&& xy.y < static_cast<int>(m_IsoSize);
 }
 inline bool CMapData::isInside(int x, int y) const
 {
-	return x >= 0 && y >= 0 && x < m_IsoSize&& y < m_IsoSize;
+	return x >= 0 && y >= 0 
+		&& x < static_cast<int>(m_IsoSize)
+		&& y < static_cast<int>(m_IsoSize);
 }
 
 inline MapCoords CMapData::ToMapCoords(ProjectedCoords xy) const
@@ -738,8 +750,8 @@ inline MapCoords CMapData::ToMapCoords3d(ProjectedCoords xy, int mapZ) const
 	auto const cx = static_cast<float>(xy.x);
 	auto const cy = static_cast<float>(xy.y + mapZ * f_y / 2);
 	return MapCoords(
-		cy / (float)f_y - cx / (float)f_x + (float)(m_IsoSize - 2) / 2 + (float)0.5,
-		cy / (float)f_y + cx / (float)f_x - (float)(m_IsoSize - 2) / 2.0f - (float)0.5
+		static_cast<int16_t>(cy / (float)f_y - cx / (float)f_x + (float)(m_IsoSize - 2) / 2 + (float)0.5),
+		static_cast<int16_t>(cy / (float)f_y + cx / (float)f_x - (float)(m_IsoSize - 2) / 2.0f - (float)0.5)
 	);
 }
 

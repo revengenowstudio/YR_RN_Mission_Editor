@@ -29,6 +29,8 @@
 #include "variables.h"
 #include "functions.h"
 #include "inlines.h"
+#include "GlobalObjectPool.h"
+#include "TerrainGroupMgr.h"
 #include <string>
 
 extern ACTIONDATA AD;
@@ -42,12 +44,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // Dialogfeld CTerrainDlg 
 
-
 CTerrainDlg::CTerrainDlg(CWnd* pParent /*=NULL*/)
 	: CDialogBar()
 {
-	//{{AFX_DATA_INIT(CTerrainDlg)
-	//}}AFX_DATA_INIT
+
 }
 
 
@@ -63,6 +63,7 @@ BEGIN_MESSAGE_MAP(CTerrainDlg, CDialogBar)
 	//{{AFX_MSG_MAP(CTerrainDlg)
 	ON_CBN_SELCHANGE(IDC_TILESET, OnSelchangeTileset)
 	ON_CBN_SELCHANGE(IDC_OVERLAY, OnSelchangeOverlay)
+	ON_CBN_SELCHANGE(IDC_TERRAINBAR_TGROUP, OnSelchangeTileSetGroup)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -79,12 +80,14 @@ void CTerrainDlg::TranslateUI()
 {
 	TranslateDlgItem(*this, IDD_TERRAINBAR_TG, "TerrainDlgTerrainGround");
 	TranslateDlgItem(*this, IDD_TERRAINBAR_OS, "TerrainDlgOverlaySpecial");
+	TranslateDlgItem(*this, IDC_TERRAINBAR_MANAGER, "TerrainDlgManagement");
+	TranslateDlgItem(*this, IDC_TERRAINBAR_GENERATOR, "TerrainDlgGenerator");
+	TranslateDlgItem(*this, IDC_TERRAINBAR_TXT_TGROUP, "TerrainDlgTGroup");
+	
 }
 
 void CTerrainDlg::OnSelchangeTileset()
 {
-	//while(m_Type.DeleteString(0)!=CB_ERR);
-
 	CString currentTileSet;
 	CComboBox* TileSet;
 	TileSet = (CComboBox*)GetDlgItem(IDC_TILESET);
@@ -92,104 +95,107 @@ void CTerrainDlg::OnSelchangeTileset()
 
 	TruncSpace(currentTileSet);
 
-	((CTileSetBrowserFrame*)GetParentFrame())->m_view.SetTileSet(atoi(currentTileSet));
+	auto const frame = reinterpret_cast<CTileSetBrowserFrame*>(GetParentFrame());
+	frame->m_view.SetTileSet(atoi(currentTileSet));
+	frame->RecalcLayout();
 }
 
 
 
-BOOL CTerrainDlg::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
+BOOL CTerrainDlg::Create(
+	CWnd* pParentWnd, UINT nIDTemplate,
+	UINT nStyle, UINT nID)
 {
+	auto const result = CDialogBar::Create(pParentWnd, nIDTemplate, nStyle, nID);
 
-	return CWnd::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext);
+	GetDlgItem(IDC_TERRAINBAR_MANAGER)->EnableWindow(FALSE); // not yet ready, disable it
+	GetDlgItem(IDC_TERRAINBAR_GENERATOR)->EnableWindow(FALSE); // not yet ready, disable it
 
-
+	return result;
 }
 
-// needed to find out if pic exists
-extern PICDATA* ovrlpics[0xFF][max_ovrl_img];
+void CTerrainDlg::handleTiles()
+{
+	if (!tiles) {
+		return;
+	}
+	auto TileSet = reinterpret_cast<CComboBox*>(GetDlgItem(IDC_TILESET));
+	while (TileSet->DeleteString(0) != CB_ERR);
+
+	int tilecount = 0;
+	CString setId;
+	CString setIdxStr;
+
+	auto const cbTerrainGroup = reinterpret_cast<CComboBox*>(GetDlgItem(IDC_TERRAINBAR_TGROUP));
+	auto const groupSelected = cbTerrainGroup->GetCurSel();
+
+	for (auto i = 0; i < 10000; i++) {
+		setId.Format("%04d", i);
+		CString sec = "TileSet" + setId;
+
+		auto const pSec = tiles->TryGetSection(sec);
+		if (!pSec) { // no more tileSet type found
+			break;
+		}
+		if (pSec->GetInteger("TilesInSet") == 0) {
+			continue;
+		}
+
+		auto const& groups = CTerrainGroupManager::Groups();
+		// filter in effect
+		if (!groups.empty() && groupSelected >= 0) {
+			int64_t const groupId = cbTerrainGroup->GetItemData(groupSelected);
+			auto const allowed = groupId < 0 
+				|| groups.at(groupId).Contains(setId);
+			// filtered out
+			if (!allowed) {
+				continue;
+			}
+		}
+
+		CString displayStr;
+		displayStr.Format("%s (%s)", setId, TranslateStringACP(pSec->GetString("SetName")));
+
+		// force yes
+		auto const& theaterType = Map->GetTheater();
+		setIdxStr.Format("%d", i);
+
+		auto const bForced = g_data["UseSet" + theaterType].HasValue(setIdxStr);
+		auto const bIgnore = g_data["IgnoreSet" + theaterType].HasValue(setIdxStr);
+
+		auto legal = false;
+		do {
+			if (bForced) {
+				legal = true;
+				break;
+			}
+			if (bIgnore) {
+				break;
+			}
+			auto const& tile = (*tiledata)[tilecount];
+			if (tile.bMarbleMadness) {
+				break;
+			}
+			if (tile.bAllowToPlace) {
+				legal = true;
+			}
+		} while (0);
+
+		if (legal) {
+			TileSet->SetItemData(TileSet->AddString(displayStr), i);
+		}
+
+		tilecount += tiles->GetInteger(sec, "TilesInSet");
+	}
+
+	TileSet->SetCurSel(0);
+	OnSelchangeTileset();
+}
 
 void CTerrainDlg::Update()
 {
-	CComboBox* TileSet;
-	TileSet = (CComboBox*)GetDlgItem(IDC_TILESET);
-
-	while (TileSet->DeleteString(0) != CB_ERR);
-
-	if (tiles) {
-		int i;
-		int tilecount = 0;
-		for (i = 0; i < 10000; i++) {
-			CString tset;
-			char c[50];
-			itoa(i, c, 10);
-			int e;
-			for (e = 0; e < 4 - strlen(c); e++) {
-				tset += "0";
-			}
-			tset += c;
-			CString sec = "TileSet";
-			sec += tset;
-
-			auto const pSec = tiles->TryGetSection(sec);
-
-			if (!pSec) {
-				break;
-			}
-			if (pSec->GetInteger("TilesInSet") == 0) {
-				continue;
-			}
-
-			CString string;
-			string = tset;
-			string += " (";
-			string += TranslateStringACP(pSec->GetString("SetName"));
-			string += ")";
-
-			bool bForced = false;
-			bool bIgnore = false;
-
-
-			// force yes
-			auto const& theaterType = Map->GetTheater();
-			auto tsetc = CString(std::to_string(atoi(tset)).c_str());
-
-			if (g_data["UseSet" + theaterType].HasValue(tsetc)) {
-				bForced = true;
-			}
-
-			// force no
-			if (g_data["IgnoreSet" + theaterType].HasValue(tsetc)) {
-				bIgnore = true;
-			}
-
-			auto legal = false;
-			do {
-				if (bForced) {
-					legal = true;
-					break;
-				}
-				if (bIgnore) {
-					break;
-				}
-				auto const& tile = (*tiledata)[tilecount];
-				if (tile.bMarbleMadness) {
-					break;
-				}
-				if (tile.bAllowToPlace) {
-					legal = true;
-				}
-			} while (0);
-
-			if (legal) {
-				TileSet->SetItemData(TileSet->AddString(string), i);
-			}
-
-			tilecount += tiles->GetInteger(sec, "TilesInSet");
-		}
-
-		TileSet->SetCurSel(0);
-		OnSelchangeTileset();
-	}
+	handleTiles();
+	handleTileGroups();
 
 	CComboBox* Overlays;
 	Overlays = (CComboBox*)GetDlgItem(IDC_OVERLAY);
@@ -198,11 +204,11 @@ void CTerrainDlg::Update()
 
 
 	int e = 0;
+	auto const& overlayCache = GlobalObjectPool::Instance().Overlays();
 	auto const& types = rules["OverlayTypes"];
 	for (auto i = 0; i < types.Size(); i++) {
 		CString id = types.Nth(i).second;
-		id.TrimLeft();
-		id.TrimRight();
+		id.Trim();
 
 		if (id.GetLength() > 0) {
 
@@ -210,7 +216,7 @@ void CTerrainDlg::Update()
 				int p;
 				BOOL bListIt = TRUE;
 				for (p = 0; p < max_ovrl_img; p++) {
-					if (ovrlpics[i][p] != NULL && ovrlpics[i][p]->pic != NULL) {
+					if (auto const pData = overlayCache.Read(i, p); pData && pData->pic) {
 						bListIt = TRUE;
 					}
 				}
@@ -273,14 +279,54 @@ DWORD CTerrainDlg::GetTileID(DWORD dwTileSet, int iTile)
 
 void CTerrainDlg::OnSelchangeOverlay()
 {
-	CComboBox* Overlay;
-	Overlay = (CComboBox*)GetDlgItem(IDC_OVERLAY);
+	auto Overlay = reinterpret_cast<CComboBox*>(GetDlgItem(IDC_OVERLAY));
 	//TileSet->GetLBText(TileSet->GetCurSel(), currentTileSet);
 	int n = Overlay->GetCurSel();
-
-	if (n < 0) return;
+	if (n < 0) {
+		return;
+	}
 
 	int sel = Overlay->GetItemData(n);
 
-	((CTileSetBrowserFrame*)GetParentFrame())->m_view.SetOverlay(sel);
+	auto const frame = reinterpret_cast<CTileSetBrowserFrame*>(GetParentFrame());
+	frame->m_view.SetOverlay(sel);
+	frame->RecalcLayout();
+}
+
+void CTerrainDlg::OnSelchangeTileSetGroup()
+{
+	if (CTerrainGroupManager::Groups().empty()) {
+		return;
+	}
+	handleTiles();
+}
+
+void CTerrainDlg::handleTileGroups()
+{
+	CTerrainGroupManager::LoadTerrainGroups(Map->GetTheater());
+	auto const& TerrainSorts = CTerrainGroupManager::Groups();
+	if (TerrainSorts.empty()) {
+		errstream << "Waring: terrain group data is empty" << endl;
+		return;
+	}
+
+	auto cbTerrainGroup = reinterpret_cast<CComboBox*>(GetDlgItem(IDC_TERRAINBAR_TGROUP));
+	cbTerrainGroup->ResetContent();
+
+	// always allow clear filter, so we use 'All' as the first item
+	cbTerrainGroup->SetItemData(
+		cbTerrainGroup->AddString(GetLanguageStringACP("All")),
+		-1);
+
+	for (int idx = 0; idx < TerrainSorts.size(); ++idx) {
+		auto const& groupN = TerrainSorts[idx];
+		// skip empty group
+		if (!groupN.Size()) {
+			continue;
+		}
+		cbTerrainGroup->SetItemData(
+			cbTerrainGroup->AddString(groupN.Name()),
+			idx);
+		;
+	}
 }

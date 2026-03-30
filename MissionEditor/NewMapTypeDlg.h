@@ -47,16 +47,14 @@ public:
 	// Vom Klassen-Assistenten generierte virtuelle Funktionsüberschreibungen
 	//{{AFX_VIRTUAL(CNewMapTypeDlg)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
+	virtual BOOL OnInitDialog() override;
 	//}}AFX_VIRTUAL
 
 // Implementierung
 protected:
+	void translateUI();
 
-	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CNewMapTypeDlg)
-	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
 

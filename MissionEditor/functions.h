@@ -24,12 +24,44 @@
 #include <afx.h>
 #include <memory>
 #include <array>
+#include <functional>
 #include "Helpers.h"
 #include "structs.h"
 
 class CIniFile;
 class CSliderCtrl;
 using std::string;
+
+enum DdxMode {
+	DDX_ReadFromIni,
+	DDX_WriteToIni,
+};
+
+using WinTextValidator = std::function<bool(CWnd&, CString&)>;
+
+inline void ddxWithIni(CWnd& wnd, CIniFile& ini, const CString& section,
+	const CString& key, const DdxMode mode, 
+	const WinTextValidator& checkOrModify)
+{
+	if (mode == DDX_ReadFromIni) {
+		wnd.SetWindowText(ini.GetString(section, key));
+		return;
+	}
+	CString newVal;
+	wnd.GetWindowText(newVal);
+	if (!newVal.IsEmpty()) {
+		if (!checkOrModify || checkOrModify(wnd, newVal)) {
+			ini.SetString(section, key, newVal);		
+			wnd.SetWindowText(newVal);
+			return;
+		}
+		// restore value
+		wnd.SetWindowText(ini.GetString(section, key));
+	}
+}
+
+void ddxWithMap(CWnd& wnd, const CString& section, const CString& key, const DdxMode mode,
+	const WinTextValidator& checkOrModify = {});
 
 bool deleteFile(const std::string& u8FilePath);
 
@@ -44,8 +76,11 @@ CString TranslateStringVariables(int n, const char* originaltext, const char* in
 // Alliance->Korea etc...
 CString TranslateHouse(CString original, BOOL bToUI = FALSE);
 
-// show options dialog
-void ShowOptionsDialog(CIniFile& optIni);
+/**
+* @brief Show options dialog
+* @return true means a program restart is required
+*/
+bool ShowOptionsDialog(CIniFile& optIni, bool isFirstTimeOption = false);
 
 // repairs a trigger (sets flags correctly)
 bool RepairTrigger(CString& triggerdata);
@@ -53,6 +88,7 @@ bool RepairTrigger(CString& triggerdata);
 void GetDrawBorder(const BYTE* data, int width, int line, int& left, int& right, unsigned int flags, BOOL* TranspInside = NULL);
 
 // String conversion
+size_t utf8ByteCount(const CString& input);
 std::wstring utf8ToUtf16(const char* utf8);
 std::wstring utf8ToUtf16(const std::string& utf8);
 std::string utf16ToUtf8(const std::wstring& utf16);
@@ -155,6 +191,9 @@ CString TranslateStringACP(WCHAR* u16EnglishString);
 
 void TranslateDlgItem(CWnd& cwnd, int controlID, const CString& label);
 void TranslateWindowCaption(CWnd& cwnd, const CString& label);
+
+CString GetOverlayDisplayName(const int typeIndex);
+CString GetOverlayDisplayName(const CString& id);
 
 /****************************************
  sound functions [03/16/2001]

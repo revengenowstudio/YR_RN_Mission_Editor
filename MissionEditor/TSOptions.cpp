@@ -24,7 +24,7 @@
 #include "stdafx.h"
 #include "FinalSun.h"
 #include "TSOptions.h"
-#include "resource.h"
+#include "res/resource.h"
 #include "mapdata.h"
 #include "variables.h"
 #include "functions.h"
@@ -66,6 +66,7 @@ void CTSOptions::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTSOptions, CDialog)
 	ON_BN_CLICKED(IDC_CHOOSE, OnChoose)
 	ON_CBN_SELCHANGE(IDC_LANGUAGE, &CTSOptions::OnCbnSelchangeLanguage)
+	ON_BN_CLICKED(IDOK, OnOK)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -76,8 +77,8 @@ void CTSOptions::OnChoose()
 	const char* pFileName = "game.exe";
 	const char* pFileSearchPattern = "C&C EXE|game.exe|";
 #if defined(RA2_MODE)
-	pFileName = yuri_mode ? "ra2md.exe" : "ra2.exe";
-	pFileSearchPattern = yuri_mode ? "Yuri's Revenge EXE|ra2md.exe|" : "Red Alert 2 EXE|ra2.exe|";
+	pFileName = yuri_mode ? "ra2md.mix" : "ra2.mix";
+	pFileSearchPattern = yuri_mode ? "Yuri's Revenge Mix|ra2md.mix|" : "Red Alert 2 Mix|ra2.mix|";
 #else
 	pFileName = "Sun.exe";
 	pFileSearchPattern = "Tiberian Sun EXE|Sun.exe|";
@@ -87,15 +88,12 @@ void CTSOptions::OnChoose()
 	fd.DoModal();
 
 	this->GetDlgItem(IDC_EDIT1)->SetWindowText((LPCTSTR)fd.GetPathName());
-
-	delete fd;
 }
 
 void CTSOptions::OnOK()
 {
 	this->GetDlgItem(IDC_EDIT1)->GetWindowText(m_TSEXE);
 	m_LanguageName = getLanguageSelected();
-
 	CDialog::OnOK();
 }
 
@@ -109,27 +107,31 @@ BOOL CTSOptions::OnInitDialog()
 
 	m_PreferLocalTheaterFiles = theApp.m_Options.bPreferLocalTheaterFiles;
 
+	int englishRealIdx = 0;
+	int selectedRealIdx = -1;
 
-	int englishIdx = 0;
-	int selectedLanIdx = -1;
 	auto const& languageSec = language["Languages"];
 	for (auto i = 0; i < languageSec.Size(); i++) {
 		auto const& def = languageSec.Nth(i).second;
 		auto const& lang = language.GetString(def + "Header", "Name");
-		m_Language.SetItemData(m_Language.AddString(lang), i);
-		if (lang == "English") {
-			englishIdx = i;
+		int realIdx = m_Language.AddString(lang);
+
+		m_Language.SetItemData(realIdx, i);
+
+		if (lang == _T("English")) {
+			englishRealIdx = realIdx;
 		}
 		if (def == theApp.m_Options.LanguageName) {
-			selectedLanIdx = i;
+			selectedRealIdx = realIdx;
 		}
 	}
-	if (selectedLanIdx < 0) {
-		selectedLanIdx = englishIdx;
-	}
-	m_Language.SetCurSel(selectedLanIdx);
 
-	updateUI();
+	if (selectedRealIdx < 0) {
+		selectedRealIdx = englishRealIdx;
+	}
+	m_Language.SetCurSel(selectedRealIdx);
+
+	translateUI();
 	UpdateData(FALSE);
 
 
@@ -139,11 +141,12 @@ BOOL CTSOptions::OnInitDialog()
 
 void CTSOptions::OnCbnSelchangeLanguage()
 {
-	theApp.m_Options.LanguageName = getLanguageSelected();
-	updateUI();
+	m_LanguageName = getLanguageSelected();
+	theApp.m_Options.LanguageName = m_LanguageName;
+	translateUI();
 }
 
-void CTSOptions::updateUI()
+void CTSOptions::translateUI()
 {
 	TranslateWindowCaption(*this, "OptionsCaption");
 
@@ -154,6 +157,9 @@ void CTSOptions::updateUI()
 	TranslateDlgItem(*this, IDC_RULESLIKETS, "OptionsSupportMissionsAndMods");
 	TranslateDlgItem(*this, IDC_ONLYORIGINAL, "OptionsSupportOriginalRA2Only");
 	TranslateDlgItem(*this, IDC_PREFER_LOCAL_THEATER_FILES, "OptionsPreferFA2TheaterSettings");
+
+	TranslateDlgItem(*this, IDOK, "OK");
+	TranslateDlgItem(*this, IDCANCEL, "Cancel");
 }
 
 CString CTSOptions::getLanguageSelected()

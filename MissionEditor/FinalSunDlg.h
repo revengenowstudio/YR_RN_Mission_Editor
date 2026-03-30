@@ -39,12 +39,13 @@
 #include "myviewframe.h"
 #include "AiTriggerTypesEnable.h"
 #include "AITriggerTypes.h"
-#include "resource.h"
+#include "res/resource.h"
 #include "SingleplayerSettings.h"	// Hinzugefügt von der Klassenansicht
 #include "loading.h"
 #include "TileSetBrowserFrame.h"	// Hinzugefügt von der Klassenansicht
 #include "ToolSettingsBar.h"
-#include "TriggerEditorDlg.h"
+#include "TriggerEditorAllDlg.h"
+#include "CsfViewer.h"
 
 #if _MSC_VER > 1000
 #pragma once
@@ -59,7 +60,8 @@ class CFinalSunDlg : public CDialog
 {
 	// Konstruktion
 public:
-	void OpenMap(LPCSTR lpFilename);
+	void UnloadAll(bool ask = true);
+	void OpenMap(const CString lpFilename);
 	void InsertPrevFile(CString lpFilename);
 	void CheckAvail(CCmdUI* pCmdUI);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -79,10 +81,11 @@ public:
 	void SaveMap(CString FileName);
 	void SetReady();
 	CScriptTypes m_Scripttypes;
-	CTriggerEditorDlg m_triggereditor;
+	CTriggerEditorAllDlg m_triggereditor;
 	CTags m_tags;
 	CTaskForce m_taskforces;
 	CTeamTypes m_teamtypes;
+	CCsfViewer m_csfStrings;
 
 	CHouses m_houses;
 
@@ -106,26 +109,25 @@ public:
 	// Vom Klassenassistenten generierte Überladungen virtueller Funktionen
 	//{{AFX_VIRTUAL(CFinalSunDlg)
 public:
-	virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pLResult);
-	virtual INT_PTR DoModal();
+	virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pLResult) override;
+	virtual INT_PTR DoModal() override;
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
-	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
-	//}}AFX_VIRTUAL
+	virtual void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV-Unterstützung
+	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
+	virtual BOOL OnInitDialog() override;	
+	virtual void OnOK() override;
+	virtual void OnCancel() override;
 
 // Implementierung
-protected:
 	HICON m_hIcon;
 
 	// Generierte Message-Map-Funktionen
 	//{{AFX_MSG(CFinalSunDlg)
-	virtual BOOL OnInitDialog();
+
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnFileQuit();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	virtual void OnOK();
-	virtual void OnCancel();
 	afx_msg void OnOptionsTiberiansunoptions();
 	afx_msg void OnFileOpenmap();
 	afx_msg void OnFileSaveas();
@@ -139,7 +141,6 @@ protected:
 	afx_msg void OnDebugExportmappacknosections();
 	afx_msg void OnDebugExportmappack();
 	afx_msg void OnFileNew();
-	afx_msg void OnHelpTipoftheday();
 	afx_msg void OnOptionsSimpleview();
 	afx_msg void OnOptionsShowminimap();
 	afx_msg void OnFileValidatemap();
@@ -231,7 +232,6 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
-	void UnloadAll();
 
 	HCURSOR m_hGameCursor;
 
@@ -240,6 +240,7 @@ public:
 	afx_msg void OnOptionsSmoothzoom();
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnOptionsUsedefaultmousecursor();
+	afx_msg LRESULT OnUpdateCheckFinished(WPARAM wParam, LPARAM lParam);
 };
 
 extern HCURSOR m_hArrowCursor;

@@ -43,45 +43,19 @@ public:
 	~CBasic();
 
 	// Dialogfelddaten
-		//{{AFX_DATA(CBasic)
 	enum { IDD = IDD_BASIC };
-	CMyComboBox	m_RequiredAddOn;
-	CMyComboBox	m_VeinGrowthEnabled;
-	CMyComboBox	m_TruckCrate;
-	CMyComboBox	m_TrainCrate;
-	CMyComboBox	m_TiberiumGrowthEnabled;
-	CMyComboBox	m_TiberiumDeathToVisceroid;
-	CMyComboBox	m_SkipScore;
-	CMyComboBox	m_SkipMapSelect;
-	CMyComboBox	m_OneTimeOnly;
-	CMyComboBox	m_Official;
-	CMyComboBox	m_NextScenario;
-	CEdit	m_Percent;
-	CEdit	m_NewINIFormat;
-	CEdit	m_Name;
-	CEdit	m_MultiplayerOnly;
-	CEdit	m_InitTime;
-	CMyComboBox	m_IgnoreGlobalAITriggers;
-	CMyComboBox	m_IceGrowthEnabled;
-	CMyComboBox	m_FreeRadar;
-	CMyComboBox	m_EndOfGame;
-	CEdit	m_CarryOverCap;
-	CMyComboBox	m_AltNextScenario;
-	//}}AFX_DATA
-
 
 // Überschreibungen
 	// Der Klassen-Assistent generiert virtuelle Funktionsüberschreibungen
-	//{{AFX_VIRTUAL(CBasic)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
-	virtual void PostNcDestroy();
-	//}}AFX_VIRTUAL
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV-Unterstützung
+	virtual void PostNcDestroy() override;
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 
 // Implementierung
-protected:
+	BOOL onMessageKeyDown(MSG* pMsg);
+
 	// Generierte Nachrichtenzuordnungsfunktionen
-	//{{AFX_MSG(CBasic)
 	afx_msg void OnChangeName();
 	afx_msg void OnEditchangeNextscenario();
 	afx_msg void OnEditchangeAltnextscenario();
@@ -104,9 +78,31 @@ protected:
 	afx_msg void OnEditchangeFreeradar();
 	afx_msg void OnChangeInittime();
 	afx_msg void OnEditchangeRequiredaddon();
-	//}}AFX_MSG
+
 	DECLARE_MESSAGE_MAP()
 
+	CMyComboBox	m_RequiredAddOn;
+	CMyComboBox	m_VeinGrowthEnabled;
+	CMyComboBox	m_TruckCrate;
+	CMyComboBox	m_TrainCrate;
+	CMyComboBox	m_TiberiumGrowthEnabled;
+	CMyComboBox	m_TiberiumDeathToVisceroid;
+	CMyComboBox	m_SkipScore;
+	CMyComboBox	m_SkipMapSelect;
+	CMyComboBox	m_OneTimeOnly;
+	CMyComboBox	m_Official;
+	CMyComboBox	m_NextScenario;
+	CEdit	m_Percent;
+	CEdit	m_NewINIFormat;
+	CEdit	m_Name;
+	CEdit	m_MultiplayerOnly;
+	CEdit	m_InitTime;
+	CMyComboBox	m_IgnoreGlobalAITriggers;
+	CMyComboBox	m_IceGrowthEnabled;
+	CMyComboBox	m_FreeRadar;
+	CMyComboBox	m_EndOfGame;
+	CEdit	m_CarryOverCap;
+	CMyComboBox	m_AltNextScenario;
 };
 
 //{{AFX_INSERT_LOCATION}}

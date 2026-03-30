@@ -52,8 +52,7 @@
 // #include "functions.h"
 // #include "inlines.h"
 // #include "MapData.h"
-#include "resource.h"
-#include "TipDlg.h"
+#include "res/resource.h"
 
 using std::endl;
 //{{AFX_INSERT_LOCATION}}

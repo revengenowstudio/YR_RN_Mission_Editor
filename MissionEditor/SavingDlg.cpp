@@ -24,6 +24,7 @@
 #include "stdafx.h"
 #include "finalsun.h"
 #include "SavingDlg.h"
+#include "functions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,12 +47,29 @@ CSavingDlg::CSavingDlg(CWnd* pParent /*=NULL*/)
 }
 
 
+BOOL CSavingDlg::OnInitDialog()
+{
+	if (!CDialog::OnInitDialog()) {
+		return FALSE;
+	}
+
+	translateUI();
+
+	return TRUE;
+}
+
 void CSavingDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSavingDlg)
 		// HINWEIS: Der Klassen-Assistent fügt hier DDX- und DDV-Aufrufe ein
 	//}}AFX_DATA_MAP
+}
+
+void CSavingDlg::translateUI()
+{
+	TranslateWindowCaption(*this, "SavingDlgCaption");
+	TranslateDlgItem(*this, IDC_SAV_DLG_DSC, "SavingDlgDesc");
 }
 
 

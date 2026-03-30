@@ -62,46 +62,48 @@ END_MESSAGE_MAP()
 
 BOOL CMyViewFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 {
-	SIZE z;
-	z.cx = 200;
-	z.cy = 200;
+	const SIZE size { 200, 200 };
+	const CRect rect{ 0, 0, 200, 200 };
 
-	CRect r;
-	r.right = 200;
-	r.bottom = 200;
-
-
-
-	if (!m_Splitter.CreateStatic(this, 1, 2)) return FALSE;
-
+	if (!m_Splitter.CreateStatic(this, 1, 2)) {
+		return FALSE;
+	}
 
 	if (!m_Splitter.CreateView(0, 0,
 		RUNTIME_CLASS(CViewObjects),
-		z,
-		pContext)) return FALSE;
+		size,
+		pContext)) {
+		return FALSE;
+	}
 
 	if (!m_Splitter.CreateView(0, 1,
 		RUNTIME_CLASS(CRightFrame),
-		z,
-		pContext)) return FALSE;
+		size,
+		pContext)) {
+		return FALSE;
+	}
 
 	OutputDebugString("CMyViewFrame::OnCreateClient(): windows created\n");
 
-	m_rightFrame = (CRightFrame*)m_Splitter.GetPane(0, 1);
+	m_objectview = reinterpret_cast<CViewObjects*>(m_Splitter.GetPane(0, 0));
+	m_rightFrame = reinterpret_cast<CRightFrame*>(m_Splitter.GetPane(0, 1));
 
-	m_isoview = (CIsoView*)m_rightFrame->m_Splitter.GetPane(0, 0);
+	auto& rightFrameSplitter = m_rightFrame->m_Splitter;
+	m_isoview = reinterpret_cast<CIsoView*>(rightFrameSplitter.GetPane(0, 0));
 	m_isoview->owner = this;
-	m_browser = (CTileSetBrowserFrame*)m_rightFrame->m_Splitter.GetPane(1, 0);
-	m_objectview = (CViewObjects*)m_Splitter.GetPane(0, 0);
+	// vertical
+	m_browser = reinterpret_cast<CTileSetBrowserFrame*>(rightFrameSplitter.GetPane(0, 1));
 
 	// the minimap is not a child window right now, but it is created here though
 	auto miniMapClass = AfxRegisterWndClass(0, m_hArrowCursor, static_cast<HBRUSH>(::GetStockObject(GRAY_BRUSH)));
 	m_minimap = std::make_unique<CMiniMap>();
-	m_minimap->CreateEx(0, miniMapClass, "Minimap", WS_CAPTION | WS_VISIBLE | WS_CHILD, r, this, 0);
+	m_minimap->CreateEx(0, miniMapClass, "Minimap", WS_CAPTION | WS_VISIBLE | WS_CHILD, rect, this, 0);
 	m_minimap->ModifyStyle(WS_MINIMIZEBOX | WS_MAXIMIZEBOX, 0);
 	m_minimap->UpdateView();
 
-	if (!m_statbar.CreateEx(this, SBARS_SIZEGRIP | SBT_TOOLTIPS)) return FALSE;
+	if (!m_statbar.CreateEx(this, SBARS_SIZEGRIP | SBT_TOOLTIPS)) {
+		return FALSE;
+	}
 
 	return CFrameWnd::OnCreateClient(lpcs, pContext);
 }

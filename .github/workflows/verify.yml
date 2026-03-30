@@ -1,14 +1,23 @@
 name: Basic verify
 
 on:
+  schedule:
+    - cron: '0 0 1 * *'
   pull_request:
-    branches: 
-      - "main"
-      - "RN"
+    branches:
+      - "**"
     types:
       - opened
       - synchronize
+      - reopened
+    paths-ignore:
+      - 'image/**'
+      - 'docs/**'
+      - '**/*.md'
   workflow_dispatch:
+
+env:
+  VCPKG_TOOL_FOLDER: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\vcpkg'
 
 jobs:
   compile-check:
@@ -27,28 +36,70 @@ jobs:
       with:
         # Target architecture
         arch: x64
-    - name: Restore cache vcpkg
-      uses: actions/cache/restore@v4
+    - name: Get Vcpkg Version
+      id: vcpkg-version
+      shell: powershell
+      run: |
+        $vcpkgPath = "${{ env.VCPKG_TOOL_FOLDER }}\vcpkg.exe"
+        $output = & $vcpkgPath --version
+        echo "vcpkg --version output : $output"
+        $match = $output -split " "
+        if ($match) {
+            $key = $match[5].Trim()
+        } else {
+            $key = "unknown-vcpkg-version"
+        }
+        echo "vcpkg version : $key"
+        echo "vcpkg_key=$key" >> "$GITHUB_OUTPUT"
+        echo "vcpkg_key=$key" >> $env:GITHUB_OUTPUT
+    - name: Cache or restore vcpkg
+      uses: actions/cache@v4
       with:
         path: |
           3rdParty/xcc/vcpkg_downloads
           3rdParty/xcc/vcpkg_installed
+          3rdParty/xcc/binary-cache
           C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
-    - name: Build Main Program (MSVC)
+        key: ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+        restore-keys: 
+          ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+          ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}
+    - name: Vcpkg install
       run: |
-        devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project MissionEditor
-    - name: Build UT tool (MSVC)
-      run: |
-        devenv.com "MissionEditor.sln"  /Build "${{ env.CONFIGURATION }}|x64" /project UnitTest
+        cd 3rdParty/xcc
+        if (-not (Test-Path "binary-cache")) {
+            mkdir "binary-cache"
+        }
+        $env:VCPKG_DOWNLOADS = $PWD
+        $env:VCPKG_BINARY_SOURCES="files,$PWD\binary-cache,readwrite"
+        $vcpkgPath = "${{ env.VCPKG_TOOL_FOLDER }}"
+        # rm "$vcpkgPath\.vcpkg-root"
+        & "$vcpkgPath\vcpkg" install `
+          --x-wait-for-lock `
+          --triplet "x64-windows" `
+          --vcpkg-root $vcpkgPath `
+          --x-manifest-root="$PWD\" `
+          --x-install-root="$PWD\vcpkg_installed\x64-windows"
+        ls
+        ls vcpkg_installed/x64-windows/x64-windows
+        ls vcpkg_installed/x64-windows/x64-windows/include
     - name: Cache vcpkg
       uses: actions/cache/save@v4
       with:
         path: |
           3rdParty/xcc/vcpkg_downloads
           3rdParty/xcc/vcpkg_installed
+          3rdParty/xcc/binary-cache
           C:/Users/runneradmin/AppData/Local/vcpkg
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ steps.vcpkg-version.outputs.vcpkg_key }}-${{ hashFiles('3rdParty/xcc/vcpkg.json') }}
+    - name: Build Main Program (MSVC)
+      run: |
+        MSBuild MissionEditor.sln /m /p:Configuration="${{ env.CONFIGURATION }}" /p:Platform=x64 /t:MissionEditor
+    - name: Build UT tool (MSVC)
+      env:
+        VCPKG_ENABLE_MANIFEST: "0"
+      run: |
+        MSBuild MissionEditor.sln /m /p:Configuration="${{ env.CONFIGURATION }}" /p:Platform=x64 /t:UnitTest
     - name: do UT
       run: |
         cd x64\Debug
@@ -56,5 +107,6 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: RN-Mission-Editor-pr-${{ github.run_number }}
-        path: dist/FinalAlert2YR
+        name: FinalRevenge-pr-${{ github.run_number }}
+        path: dist/FinalRevenge
+        retention-days: 7

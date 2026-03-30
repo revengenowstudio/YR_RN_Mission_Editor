@@ -43,7 +43,6 @@ public:
 	// Dialogfelddaten
 		//{{AFX_DATA(CAiTriggerTypesEnable)
 	enum { IDD = IDD_AITRIGGERTYPESENABLE };
-	CComboBox	m_AITriggerType;
 	//}}AFX_DATA
 
 
@@ -53,11 +52,13 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV-Unterstützung
 	virtual BOOL OnInitDialog() override;
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 	//}}AFX_VIRTUAL
 
 // Implementierung
 
 	void translateUI();
+	BOOL onMessageKeyDown(MSG* pMsg);
 	// Generierte Nachrichtenzuordnungsfunktionen
 	//{{AFX_MSG(CAiTriggerTypesEnable)
 	afx_msg void OnEnableall();
@@ -67,6 +68,7 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
+	CComboBox	m_AITriggerType;
 };
 
 //{{AFX_INSERT_LOCATION}}

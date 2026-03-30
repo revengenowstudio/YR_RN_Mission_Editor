@@ -26,6 +26,7 @@
 #include "mapdata.h"
 #include "variables.h"
 #include "ovrlinline.h"
+#include "GlobalObjectPool.h"
 #include <string>
 #include <vector>
 #include <ranges>
@@ -59,8 +60,10 @@ inline CString GetUnitPictureFilename(const CString& artSectionId, DWORD dwPicIn
 
 	// store differently for each type even they shares same image,
 	// because they can have different components, e.g. turret image
-	if (pics.find(artSectionId + n) != pics.end()) {
-		return artSectionId + n;
+	auto& images = GlobalObjectPool::Instance().Images();
+	auto existingId = artSectionId + n;
+	if (images.Read(existingId)) {
+		return existingId;
 	}
 	auto artname = artSectionId;
 	auto const& shapeName = art.GetString(artSectionId, "Image");
@@ -76,13 +79,13 @@ inline CString GetUnitPictureFilename(const CString& artSectionId, DWORD dwPicIn
 	if (art.GetBool(artname, "NewTheater") && !art.GetBool(artname, "DemandLoad")) {
 		filename.SetAt(1, 'T');
 	}
-
-	if (pics.find(artname + n) != pics.end()) {
-		return artname + n;
+	existingId = artname + n;
+	if (images.Read(existingId)) {
+		return existingId;
 	}
-
-	if (pics.find(artname + ".bmp") != pics.end()) { // since June, 15th (Matze): Only use BMP if no SHP/VXL exists
-		return artname + ".bmp";
+	existingId = artname + ".bmp";
+	if (images.Read(existingId)) { // since June, 15th (Matze): Only use BMP if no SHP/VXL exists
+		return existingId;
 	}
 
 	return {};
@@ -112,7 +115,7 @@ inline CString GetParam(const CString& data, const int param)
 
 inline std::string GetParam(const std::string& data, const int param)
 {
-	int paramStrPos = 0;
+	size_t paramStrPos = 0;
 	int curParam = param;
 
 	while (curParam--) {
@@ -156,6 +159,29 @@ inline std::vector<CString> SplitParams(const CString& data)
 	return Split(data, ',');
 }
 
+template<size_t slots>
+inline std::array<CString, slots> SplitParams(const CString& data, char separator = ',')
+{
+	int nextComma = -1;
+	int lastComma = -1;
+	const auto len = data.GetLength();
+	std::array<CString, slots> res;
+	auto it = res.begin();
+	while (lastComma < len) {
+		if (it == res.end()) {
+			break;
+		}
+		nextComma = data.Find(separator, lastComma + 1);
+		if (nextComma < 0) {
+			*it = data.Mid(lastComma + 1);
+			break;
+		}
+		*it = data.Mid(lastComma + 1, (nextComma - lastComma - 1));
+		++it;
+		lastComma = nextComma;
+	}
+	return res; // RVO
+}
 
 inline CString Join(const CString& join, const std::vector<CString>& strings)
 {
@@ -164,7 +190,7 @@ inline CString Join(const CString& join, const std::vector<CString>& strings)
 	for (auto& s : strings)
 		len += s.GetLength() + join.GetLength();
 	res.Preallocate(len + 1);
-	int remaining = strings.size();
+	size_t remaining = strings.size();
 	for (auto& s : strings) {
 		res += s;
 		if (--remaining)

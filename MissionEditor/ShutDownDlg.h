@@ -21,7 +21,7 @@
 #if !defined(AFX_SHUTDOWNDLG_H__28D9E061_8340_11D4_9C87_A1B9E12BB04A__INCLUDED_)
 #define AFX_SHUTDOWNDLG_H__28D9E061_8340_11D4_9C87_A1B9E12BB04A__INCLUDED_
 
-#include "resource.h"
+#include "res/resource.h"
 
 #if _MSC_VER > 1000
 #pragma once

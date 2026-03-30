@@ -21,7 +21,7 @@
 #if !defined(AFX_DYNAMICGRAPHDLG_H__ED5FED21_83F5_11D4_9C87_86ADAD0FBC4A__INCLUDED_)
 #define AFX_DYNAMICGRAPHDLG_H__ED5FED21_83F5_11D4_9C87_86ADAD0FBC4A__INCLUDED_
 
-#include "resource.h"
+#include "res/resource.h"
 
 #if _MSC_VER > 1000
 #pragma once

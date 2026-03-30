@@ -33,10 +33,11 @@
 #error include 'stdafx.h' before including this file for PCH
 #endif
 
-#include "resource.h"		// main symbols
+#include "res/resource.h"		// main symbols
 #include "ddeml.h"
 #include "loading.h"
 
+class CFinalSunDlg;
 static auto constexpr RecentFilesSlots = 10;
 
 struct OPTIONS {
@@ -68,7 +69,7 @@ struct OPTIONS {
 	bool bShowStats = false;
 	bool bHighResUI = true;
 	bool bVSync = false;
-	std::vector<float> viewScaleSteps = { 0.75f, 0.5f, 0.25f };
+	std::vector<float> viewScaleSteps = { 2.0f, 1.75f, 1.5f, 1.25f, 1.0f, 0.75f, 0.5f, 0.25f };
 	bool viewScaleUseSteps = true;
 	float viewScaleSpeed = 15.0f;
 	bool useDefaultMouseCursor = false;
@@ -95,7 +96,7 @@ public:
 	{
 		return m_u8LogFileName;
 	}
-
+	CFinalSunDlg* MainWindow() { return reinterpret_cast<CFinalSunDlg*>(m_pMainWnd); }
 
 	// Überladungen
 		// Vom Klassenassistenten generierte Überladungen virtueller Funktionen
@@ -119,11 +120,12 @@ public:
 	UINT m_cf;
 	HACCEL m_hAccel;
 	void ParseCommandLine();
-	void ShowTipAtStartup(void);
-	void ShowTipOfTheDay(void);
+
+	const CString ProjectFilePath() const { return m_projectFilePath; }
 
 private:
 	std::string m_u8LogFileName;
+	CString m_projectFilePath; // UTF-8 encoded
 };
 
 

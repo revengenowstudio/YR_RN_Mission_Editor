@@ -479,7 +479,7 @@ void CTaskForce::OnDeletetaskforce()
 	ini.DeleteSection(tf);
 	while (m_Units.DeleteString(0) != LB_ERR);
 	//UpdateDialog();
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+	theApp.MainWindow()->UpdateDialogs(TRUE);
 }
 
 void CTaskForce::addTaskforce(CString&& name, int group, std::vector<CString>&& members)
@@ -501,7 +501,7 @@ void CTaskForce::addTaskforce(CString&& name, int group, std::vector<CString>&& 
 		sec.SetString(idxStr, std::move(member));
 	}
 
-	((CFinalSunDlg*)theApp.m_pMainWnd)->UpdateDialogs(TRUE);
+	theApp.MainWindow()->UpdateDialogs(TRUE);
 
 	CString tf2;
 	for (auto i = 0; i < m_TaskForces.GetCount(); i++) {
