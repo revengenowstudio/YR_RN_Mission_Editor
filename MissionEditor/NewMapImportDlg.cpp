@@ -75,7 +75,7 @@ void CNewMapImportDlg::OnBrowse()
 	UpdateData();
 
 	//CComboBox* m_ImportFile=(CComboBox*)GetDlgItem(IDC_IMPORTFILE);
-	auto const fileTypeInfo = TranslateStringACP("NewMapImportFileTypes");
+	auto const fileTypeInfo = TranslateStringVariables(8, GetLanguageStringACP("NewMapImportFileTypes"), ";");
 	CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_FILEMUSTEXIST, fileTypeInfo);
 
 	char cuPath[MAX_PATH];
