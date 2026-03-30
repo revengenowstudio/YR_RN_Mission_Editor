@@ -9,6 +9,8 @@
   <PropertyGroup>
     <XccDir>$(SolutionDir)\3rdParty\xcc</XccDir>
     <VelopackDir>$(SolutionDir)\3rdParty\velopack</VelopackDir>
+      <!-- Why duplicated 'x64-windows' ? Because it is how vcpkg automatically does, shitty -->
+    <XccVcpkgDirTriplet>$(XccDir)\vcpkg_installed\$(Platform)-windows\$(Platform)-windows</XccVcpkgDirTriplet>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -16,7 +18,7 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;SCRIPT_SUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)\..\..\MissionEditorPackLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)MissionEditorPackLib</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>

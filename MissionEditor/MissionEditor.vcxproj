@@ -348,7 +348,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertDebug YR|x64'">
     <ClCompile>
       <PreprocessorDefinitions>NOMINMAX;RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib;..\3rdParty\CncVxlRender\inc;..\3rdParty\velopack\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rdParty\velopack\include;..\3rdParty\CncVxlRender\inc;$(XccVcpkgDirTriplet)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
@@ -367,7 +367,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tests FinalAlertDebug YR|x64'">
     <ClCompile>
       <PreprocessorDefinitions>RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rdParty\velopack\include;..\3rdParty\CncVxlRender\inc;$(XccVcpkgDirTriplet)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -385,7 +385,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertDebug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>RA2_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rdParty\velopack\include;..\3rdParty\CncVxlRender\inc;$(XccVcpkgDirTriplet)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>RA2_MODE;RA2_MODE_ICON;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -403,7 +403,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertRelease|x64'">
     <ClCompile>
       <PreprocessorDefinitions>RA2_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rdParty\velopack\include;..\3rdParty\CncVxlRender\inc;$(XccVcpkgDirTriplet)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>RA2_MODE;RA2_MODE_ICON;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -421,7 +421,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalAlertRelease YR|x64'">
     <ClCompile>
       <PreprocessorDefinitions>NOMINMAX;RA2_MODE;YR_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib;..\3rdParty\CncVxlRender\inc;..\3rdParty\velopack\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rdParty\velopack\include;..\3rdParty\CncVxlRender\inc;$(XccVcpkgDirTriplet)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
@@ -440,7 +440,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalSunDebug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>TS_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rdParty\velopack\include;..\3rdParty\CncVxlRender\inc;$(XccVcpkgDirTriplet)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>TS_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -458,7 +458,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FinalSunRelease|x64'">
     <ClCompile>
       <PreprocessorDefinitions>TS_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rdParty\velopack\include;..\3rdParty\CncVxlRender\inc;$(XccVcpkgDirTriplet)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>TS_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -471,7 +471,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Template|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\MissionEditorPackLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rdParty\velopack\include;..\3rdParty\CncVxlRender\inc;$(XccVcpkgDirTriplet)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

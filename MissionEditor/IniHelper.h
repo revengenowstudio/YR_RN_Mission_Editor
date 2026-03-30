@@ -69,7 +69,7 @@ public:
 		buffer[sizeof buffer - 1] = '\0';
 		return buffer;
 	}
-
+	// duplicated with Split function in inlines.h
 	static inline std::vector<CString> Split(CString str, char ch = ',') {
 		std::vector<CString> ret;
 		int start = 0;
