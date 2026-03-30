@@ -216,6 +216,7 @@ protected:
 	afx_msg void OnMaptoolsAutocreateshores();
 	afx_msg void OnOptionsDisableautoshore();
 	afx_msg void OnOptionsDisableautolat();
+	afx_msg void OnOptionsShowcameo();
 	afx_msg void OnEditPaste();
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditCopywholemap();

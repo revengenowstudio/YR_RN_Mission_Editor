@@ -26,6 +26,7 @@
 #include <array>
 #include <functional>
 #include "Helpers.h"
+#include "structs.h"
 
 class CIniFile;
 class CSliderCtrl;
@@ -210,6 +211,9 @@ public:
 
 std::unique_ptr<CBitmap> BitmapFromResource(int resource_id);
 std::unique_ptr<CBitmap> BitmapFromFile(const CString& filepath);
+bool SaveBitmapToFile(CBitmap* pBitmap, const CString& filePath, COLORREF bgColor);
+void ScaleBitmap(CBitmap* pBitmap, int maxSize, COLORREF bgColor, bool trimBg);
+std::unique_ptr<CBitmap> BitmapFromPICDATA(PICDATA* pData);
 
 CComPtr<IDirectDrawSurface7> BitmapToSurface(IDirectDraw7* pDD, const CBitmap& bitmap);
 

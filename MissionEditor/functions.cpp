@@ -1450,6 +1450,327 @@ std::unique_ptr<CBitmap> BitmapFromFile(const CString& filepath)
 	return bm;
 }
 
+bool SaveBitmapToFile(CBitmap* pBitmap, const CString& filePath, COLORREF bgColor)
+{
+	if (!pBitmap) return false;
+
+	BITMAP bmp;
+	pBitmap->GetBitmap(&bmp);
+	if (bmp.bmBitsPixel != 32) return false;
+
+	int width = bmp.bmWidth;
+	int height = bmp.bmHeight;
+
+	BITMAPINFO bmi = {};
+	bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bmi.bmiHeader.biWidth = width;
+	bmi.bmiHeader.biHeight = -height;
+	bmi.bmiHeader.biPlanes = 1;
+	bmi.bmiHeader.biBitCount = 32;
+	bmi.bmiHeader.biCompression = BI_RGB;
+
+	HDC hDC = GetDC(nullptr);
+	void* pDIBPixels = nullptr;
+	HBITMAP hDIB = CreateDIBSection(hDC, &bmi, DIB_RGB_COLORS, &pDIBPixels, nullptr, 0);
+	ReleaseDC(nullptr, hDC);
+
+	if (!hDIB || !pDIBPixels) return false;
+
+	HDC hMemDC = CreateCompatibleDC(nullptr);
+	SelectObject(hMemDC, hDIB);
+	HDC hSrcDC = CreateCompatibleDC(nullptr);
+	SelectObject(hSrcDC, *pBitmap);
+	BitBlt(hMemDC, 0, 0, width, height, hSrcDC, 0, 0, SRCCOPY);
+	DeleteDC(hMemDC);
+	DeleteDC(hSrcDC);
+
+	std::vector<DWORD> pixels(width * height);
+	GetDIBits(GetDC(nullptr), hDIB, 0, height, pixels.data(), &bmi, DIB_RGB_COLORS);
+
+	BYTE bgR = GetRValue(bgColor);
+	BYTE bgG = GetGValue(bgColor);
+	BYTE bgB = GetBValue(bgColor);
+	for (int i = 0; i < width * height; ++i)
+	{
+		BYTE alpha = (pixels[i] >> 24) & 0xFF;
+		if (pixels[i] == 0x00000000)
+		{
+			pixels[i] = (0x00 << 24) | (bgR << 16) | (bgG << 8) | bgB;
+		}
+		else
+		{
+			pixels[i] &= 0x00FFFFFF;
+			pixels[i] |= 0xFF << 24;
+		}
+	}
+
+	BITMAPFILEHEADER bmfHeader;
+	DWORD dwBmpSize = width * height * 4;
+	DWORD dwSizeofDIB = dwBmpSize + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+	bmfHeader.bfType = 0x4D42;  // 'BM'
+	bmfHeader.bfSize = dwSizeofDIB;
+	bmfHeader.bfReserved1 = 0;
+	bmfHeader.bfReserved2 = 0;
+	bmfHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+	HANDLE hFile = CreateFile(filePath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	if (hFile == INVALID_HANDLE_VALUE) return false;
+
+	DWORD dwWritten;
+	WriteFile(hFile, &bmfHeader, sizeof(BITMAPFILEHEADER), &dwWritten, nullptr);
+	WriteFile(hFile, &bmi.bmiHeader, sizeof(BITMAPINFOHEADER), &dwWritten, nullptr);
+	WriteFile(hFile, pixels.data(), dwBmpSize, &dwWritten, nullptr);
+
+	CloseHandle(hFile);
+	DeleteObject(hDIB);
+
+	return true;
+}
+
+void ScaleBitmap(CBitmap* pBitmap, int maxSize, COLORREF bgColor, bool trimBg)
+{
+	if (!pBitmap || maxSize <= 0) return;
+
+	BITMAP bmpInfo = {};
+	pBitmap->GetBitmap(&bmpInfo);
+	int srcW = bmpInfo.bmWidth;
+	int srcH = bmpInfo.bmHeight;
+
+	if (bmpInfo.bmWidth == maxSize && bmpInfo.bmHeight == maxSize)
+		return;
+
+	if (srcW == 0 || srcH == 0)
+		return;
+
+	BITMAPINFO bmi = {};
+	bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bmi.bmiHeader.biWidth = srcW;
+	bmi.bmiHeader.biHeight = -srcH;
+	bmi.bmiHeader.biPlanes = 1;
+	bmi.bmiHeader.biBitCount = 32;
+	bmi.bmiHeader.biCompression = BI_RGB;
+
+	std::vector<DWORD> srcPixels(srcW * srcH);
+	{
+		HDC hdc = GetDC(NULL);
+		GetDIBits(hdc, (HBITMAP)(*pBitmap), 0, srcH, srcPixels.data(), &bmi, DIB_RGB_COLORS);
+		ReleaseDC(NULL, hdc);
+	}
+
+	int left = srcW, right = 0, top = srcH, bottom = 0;
+	DWORD bgRGB = RGB(GetBValue(bgColor), GetGValue(bgColor), GetRValue(bgColor));
+
+	if (trimBg)
+	{
+		for (int y = 0; y < srcH; ++y)
+		{
+			for (int x = 0; x < srcW; ++x)
+			{
+				DWORD px = srcPixels[y * srcW + x];
+				COLORREF pxColor = RGB(px & 0xFF, (px >> 8) & 0xFF, (px >> 16) & 0xFF);
+				if (pxColor != bgRGB)
+				{
+					if (x < left) left = x;
+					if (x > right) right = x;
+					if (y < top) top = y;
+					if (y > bottom) bottom = y;
+				}
+			}
+		}
+	}
+	else
+	{
+		left = 0;
+		top = 0;
+		right = srcW;
+		bottom = srcH;
+	}
+
+	if (left > right || top > bottom)
+		return;
+
+	int cropW = right - left + 1;
+	int cropH = bottom - top + 1;
+	float scale = std::min((float)maxSize / cropW, (float)maxSize / cropH);
+	int newW = int(cropW * scale);
+	int newH = int(cropH * scale);
+	int offsetX = (maxSize - newW) / 2;
+	int offsetY = (maxSize - newH) / 2;
+
+	bmi.bmiHeader.biWidth = maxSize;
+	bmi.bmiHeader.biHeight = -maxSize;
+
+	void* pDstBits = nullptr;
+	HBITMAP hNewBmp = CreateDIBSection(NULL, &bmi, DIB_RGB_COLORS, &pDstBits, NULL, 0);
+	if (!hNewBmp || !pDstBits) return;
+
+	DWORD* dst = (DWORD*)pDstBits;
+
+	DWORD bgARGB = 0xFF000000 | (GetRValue(bgColor) << 16) | (GetGValue(bgColor) << 8) | GetBValue(bgColor);
+	std::fill(dst, dst + maxSize * maxSize, bgARGB);
+
+	for (int y = 0; y < newH; ++y)
+	{
+		for (int x = 0; x < newW; ++x)
+		{
+			float fx = left + x / scale;
+			float fy = top + y / scale;
+
+			int x0 = (int)fx;
+			int y0 = (int)fy;
+			int x1 = std::min(x0 + 1, srcW - 1);
+			int y1 = std::min(y0 + 1, srcH - 1);
+
+			x0 = std::clamp(x0, 0, srcW - 1);
+			x1 = std::clamp(x1, 0, srcW - 1);
+			y0 = std::clamp(y0, 0, srcH - 1);
+			y1 = std::clamp(y1, 0, srcH - 1);
+
+			float dx = fx - x0;
+			float dy = fy - y0;
+
+			DWORD c00 = srcPixels[y0 * srcW + x0];
+			DWORD c10 = srcPixels[y0 * srcW + x1];
+			DWORD c01 = srcPixels[y1 * srcW + x0];
+			DWORD c11 = srcPixels[y1 * srcW + x1];
+
+			auto extractRGB = [](DWORD c) {
+				return std::tuple<int, int, int>(
+					c & 0xFF,
+					(c >> 8) & 0xFF,
+					(c >> 16) & 0xFF
+				);
+				};
+
+			COLORREF cBG = bgRGB;
+
+			auto isBG = [=](DWORD c) {
+				COLORREF pxColor = RGB(c & 0xFF, (c >> 8) & 0xFF, (c >> 16) & 0xFF);
+				return pxColor == cBG;
+				};
+
+			int r = 0, g = 0, b = 0;
+			float totalWeight = 0.0f;
+
+			auto blend = [&](DWORD color, float weight) {
+				if (!isBG(color))
+				{
+					int cr, cg, cb;
+					std::tie(cb, cg, cr) = extractRGB(color);
+					r += int(cr * weight);
+					g += int(cg * weight);
+					b += int(cb * weight);
+					totalWeight += weight;
+				}
+				};
+
+			blend(c00, (1 - dx) * (1 - dy));
+			blend(c10, dx * (1 - dy));
+			blend(c01, (1 - dx) * dy);
+			blend(c11, dx * dy);
+
+			DWORD result = bgARGB;
+			if (totalWeight > 0.0f)
+			{
+				r = int(r / totalWeight);
+				g = int(g / totalWeight);
+				b = int(b / totalWeight);
+				result = 0xFF000000 | (r << 16) | (g << 8) | b;
+			}
+
+			int dxDst = offsetX + x;
+			int dyDst = offsetY + y;
+			dst[dyDst * maxSize + dxDst] = result;
+		}
+	}
+
+	for (int i = 0; i < maxSize * maxSize; ++i)
+	{
+		DWORD& px = dst[i];
+		COLORREF c = RGB(px & 0xFF, (px >> 8) & 0xFF, (px >> 16) & 0xFF);
+		if (c == bgRGB)
+		{
+			px = 0x00000000 | (GetRValue(bgColor) << 16) | (GetGValue(bgColor) << 8) | GetBValue(bgColor);
+		}
+	}
+
+	pBitmap->DeleteObject();
+	pBitmap->Attach(hNewBmp);
+	return;
+}
+
+std::unique_ptr<CBitmap> BitmapFromPICDATA(PICDATA* pData)
+{
+	ASSERT(pData->bType == PICDATA_TYPE_SHP || pData->bType == PICDATA_TYPE_VXL);
+
+	std::unique_ptr<CBitmap> outBitmap(new CBitmap);
+	if (pData->wMaxWidth == 0 || pData->wMaxHeight == 0)
+	{
+		if (outBitmap->CreateBitmap(32, 32, 1, 32, NULL))
+		{
+			CDC dc;
+			dc.CreateCompatibleDC(NULL);
+			CBitmap* pOldBitmap = dc.SelectObject(outBitmap.get());
+			dc.FillSolidRect(0, 0, 32, 32, RGB(255, 0, 255));
+			dc.SelectObject(pOldBitmap);
+			dc.DeleteDC();
+		}
+		return outBitmap;
+	}
+	if (outBitmap->CreateBitmap(pData->wMaxWidth, pData->wMaxHeight, 1, 32, NULL))
+	{
+		CDC memDC;
+		memDC.CreateCompatibleDC(NULL);
+		CBitmap* pOldBitmap = memDC.SelectObject(outBitmap.get());
+
+		LOGPALETTE* pLogPalette = (LOGPALETTE*)malloc(sizeof(LOGPALETTE) + 256 * sizeof(PALETTEENTRY));
+		pLogPalette->palVersion = 0x300;
+		pLogPalette->palNumEntries = 256;
+
+		// magenta bg
+		pLogPalette->palPalEntry[0].peRed = 255;
+		pLogPalette->palPalEntry[0].peGreen = 0;
+		pLogPalette->palPalEntry[0].peBlue = 255;
+		pLogPalette->palPalEntry[0].peFlags = 0;
+
+		for (int i = 1; i < 256; i++)
+		{
+			auto& color = pData->pal[i];
+			// black hack
+			if (GetRValue(color) == 0 && GetGValue(color) == 0 && GetBValue(color) == 0)
+			{
+				pLogPalette->palPalEntry[i].peRed = 1;
+				pLogPalette->palPalEntry[i].peGreen = 1;
+				pLogPalette->palPalEntry[i].peBlue = 1;
+				pLogPalette->palPalEntry[i].peFlags = 0;
+				continue;
+			}
+
+			pLogPalette->palPalEntry[i].peRed = GetBValue(color);
+			pLogPalette->palPalEntry[i].peGreen = GetGValue(color);
+			pLogPalette->palPalEntry[i].peBlue = GetRValue(color);
+			pLogPalette->palPalEntry[i].peFlags = 0;
+		}
+		CPalette paletteObj;
+		paletteObj.CreatePalette(pLogPalette);
+		free(pLogPalette);
+		CPalette* pOldPalette = memDC.SelectPalette(&paletteObj, FALSE);
+		memDC.RealizePalette();
+		for (int y = 0; y < pData->wMaxHeight; y++)
+		{
+			for (int x = 0; x < pData->wMaxWidth; x++)
+			{
+				memDC.SetPixel(x, y, PALETTEINDEX(((BYTE*)pData->pic)[y * pData->wMaxWidth + x]));
+			}
+		}
+		memDC.SelectPalette(pOldPalette, FALSE);
+		memDC.SelectObject(pOldBitmap);
+		memDC.DeleteDC();
+	}
+	return outBitmap;
+}
+
 /*
 Returns the area in the current line that should be painted
 Truncates areas that are transparent, and therefore increases display speed!

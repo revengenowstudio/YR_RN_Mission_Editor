@@ -34,6 +34,7 @@
 #include "TubeTool.h"
 #include "StringHelper.h"
 #include "IniMega.h"
+#include <filesystem>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -45,6 +46,9 @@ static char THIS_FILE[] = __FILE__;
 // CViewObjects
 
 const size_t valadded = 2 << 16;
+const int Cameo_Size = 32;
+namespace fs = std::filesystem;
+extern PICDATA* ovrlpics[0xFF][max_ovrl_img];
 
 IMPLEMENT_DYNCREATE(CViewObjects, CTreeView)
 
@@ -526,6 +530,45 @@ __inline HTREEITEM TV_InsertItemW(HWND hWnd, WCHAR* lpString, int len, HTREEITEM
 	return res;
 }
 
+__inline int PropagateFirstNonZeroIcon(CTreeCtrl& tree, HTREEITEM hItem)
+{
+	if (!hItem) return 0;
+
+	int image = 0, selected = 0;
+	tree.GetItemImage(hItem, image, selected);
+
+	if (image != 0)
+		return image;
+
+	HTREEITEM hChild = tree.GetChildItem(hItem);
+	while (hChild)
+	{
+		int childIcon = PropagateFirstNonZeroIcon(tree, hChild);
+		if (childIcon != 0)
+		{
+			tree.SetItemImage(hItem, childIcon, childIcon);
+			return childIcon;
+		}
+
+		hChild = tree.GetNextSiblingItem(hChild);
+	}
+	return 0;
+}
+
+__inline void UpdateTreeIconsForSubtree(CTreeCtrl& tree, HTREEITEM hItem)
+{
+	if (!hItem) return;
+
+	HTREEITEM hChild = tree.GetChildItem(hItem);
+	while (hChild)
+	{
+		UpdateTreeIconsForSubtree(tree, hChild);
+		hChild = tree.GetNextSiblingItem(hChild);
+	}
+
+	PropagateFirstNonZeroIcon(tree, hItem);
+}
+
 const IgnoreSet CollectIgnoreSet()
 {
 	IgnoreSet ret;
@@ -705,7 +748,70 @@ int GuessSideHelper::guessGenericSide(const CString& regName)
 	return itr->second;
 }
 
+void TreeViewBuilder::setItemCameo(HTREEITEM node, CBitmap* cameo)
+{
+	auto& imageList = ((CFinalSunDlg*)theApp.GetMainWnd())->m_view.m_objectview->m_ImageList;
+	int index = imageList.Add(cameo, RGB(255, 0, 255));
+	tree.SetItemImage(node, index, index);
+}
+
+void TreeViewBuilder::loadAndSaveCameo(HTREEITEM node, CBitmap* cameo, const CString& name)
+{
+	ScaleBitmap(cameo, Cameo_Size, RGB(255, 0, 255), true);
+	setItemCameo(node, cameo);
+	std::string path = u8AppDataPath;
+	path += "\\thumbnails";
+	if (!fs::exists(path) || !fs::is_directory(path))
+	{
+		fs::create_directories(path);
+	}
+	std::string fileName = std::format("{}-{}-{}.bmp", theater.GetString(), name.GetString(), Cameo_Size);
+	path += "\\" + fileName;
+	SaveBitmapToFile(cameo, path.c_str(), RGB(255, 0, 255));
+}
+
+bool TreeViewBuilder::loadExistingCameo(HTREEITEM node, const CString& name)
+{
+	std::string path = u8AppDataPath;
+	path += "\\thumbnails\\";
+	std::string fileName = std::format("{}-{}-{}.bmp", theater.GetString(), name.GetString(), Cameo_Size);
+	path += fileName;
+	if (fs::exists(path))
+	{
+		HBITMAP hBmp = (HBITMAP)::LoadImage(nullptr, path.c_str(),
+			IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+		if (!hBmp)
+			return false;
+		CBitmap cameo;
+		cameo.Attach(hBmp);
+		setItemCameo(node, &cameo);
+		return true;
+	}
+	return false;
+}
+
 void TreeViewBuilder::updateBuildingTypes(HTREEITEM parentNode) {
+
+	auto loadBuildingCameo = [&](int id, const CString& typeId, HTREEITEM& item)
+		{
+			if (Map->GetIsoSize() && theApp.m_Options.bShowCameos)
+			{
+				if (!loadExistingCameo(item, typeId))
+				{
+					theApp.m_loading->LoadUnitGraphic(typeId);
+					Map->UpdateBuildingInfo(&typeId);
+					auto& p = buildinginfo[id].pic[0];
+					if (p.pic)
+					{
+						if (auto cBitmap = BitmapFromPICDATA(&p))
+						{
+							loadAndSaveCameo(item, cBitmap.get(), typeId);
+						}
+					}
+				}
+			}
+		};
+
 	TreeViewCategoryHandler structhouses(this->tree, parentNode);
 	GuessSideHelper sideHelper(*this);
 	auto baseOffset = valadded * 2;
@@ -752,9 +858,10 @@ void TreeViewBuilder::updateBuildingTypes(HTREEITEM parentNode) {
 		addedStrW.SetString(addedString.GetString());
 
 		auto const& name = sideHelper.GetSideName(unitname, TreeViewTechnoType::Building);
-		TV_InsertItemW(tree.m_hWnd, 
+		auto item = TV_InsertItemW(tree.m_hWnd, 
 			addedStrW.wString,
 			addedStrW.len, TVI_LAST, structhouses.GetOrAdd(name), baseOffset + i);
+		loadBuildingCameo(id, unitname, item);
 	}
 
 	// okay, now the user-defined types:
@@ -781,12 +888,47 @@ void TreeViewBuilder::updateBuildingTypes(HTREEITEM parentNode) {
 			addedString += name;
 		}
 		auto const& sideName = sideHelper.GetSideName(typeId, TreeViewTechnoType::Building);
-		tree.InsertItem(TVIF_PARAM | TVIF_TEXT, addedString, 0, 0, 0, 0, baseOffset + i, structhouses.GetOrAdd(sideName), TVI_LAST);
+		auto item = tree.InsertItem(TVIF_PARAM | TVIF_TEXT, addedString, 0, 0, 0, 0, baseOffset + i, structhouses.GetOrAdd(sideName), TVI_LAST);
+		loadBuildingCameo(id, typeId, item);
 	}
 }
 
 void TreeViewBuilder::updateUnitTypes(HTREEITEM parentNode, const char* typeListId, TreeViewTechnoType technoType, int multiple)
 {
+	auto loadUnitCameo = [&](const CString& typeId, HTREEITEM& item)
+		{
+			if (Map->GetIsoSize() && theApp.m_Options.bShowCameos)
+			{
+				if (!loadExistingCameo(item, typeId))
+				{
+					int facing = 0;
+					switch (technoType)
+					{
+
+					case TreeViewTechnoType::Infantry:
+						facing = 5;
+						break;
+					case TreeViewTechnoType::Vehicle:
+					case TreeViewTechnoType::Aircraft:
+						facing = 2;
+						break;
+					default:
+						break;
+					}
+					auto const imageId = theApp.m_loading->GetArtID(typeId);
+					CString lpPicFile = GetUnitPictureFilename(imageId, facing);
+					theApp.m_loading->LoadUnitGraphic(typeId);
+					auto& p = pics[lpPicFile];
+					if (p.pic)
+					{
+						if (auto cBitmap = BitmapFromPICDATA(&p))
+						{
+							loadAndSaveCameo(item, cBitmap.get(), imageId);
+						}
+					}
+				}
+			}
+		};
 	TreeViewCategoryHandler structhouses(this->tree, parentNode);
 	GuessSideHelper sideHelper(*this);
 	auto baseOffset = valadded * multiple;
@@ -806,7 +948,8 @@ void TreeViewBuilder::updateUnitTypes(HTREEITEM parentNode, const char* typeList
 			continue;
 		}
 		auto const& name = sideHelper.GetSideName(typeId, technoType);
-		TV_InsertItemW(tree.m_hWnd, addedString, wcslen(addedString), TVI_LAST, structhouses.GetOrAdd(name), baseOffset + i);
+		auto item = TV_InsertItemW(tree.m_hWnd, addedString, wcslen(addedString), TVI_LAST, structhouses.GetOrAdd(name), baseOffset + i);
+		loadUnitCameo(typeId, item);
 	}
 	// okay, now the user-defined types:
 	baseOffset += rules[typeListId].Size();
@@ -825,7 +968,8 @@ void TreeViewBuilder::updateUnitTypes(HTREEITEM parentNode, const char* typeList
 			undefinedName = typeId + " UNDEFINED";
 			addedString = undefinedName;
 		}
-		tree.InsertItem(TVIF_PARAM | TVIF_TEXT, addedString.get(), 0, 0, 0, 0, baseOffset + i, structhouses.GetOrAdd(sideName), TVI_LAST);
+		auto item = tree.InsertItem(TVIF_PARAM | TVIF_TEXT, addedString.get(), 0, 0, 0, 0, baseOffset + i, structhouses.GetOrAdd(sideName), TVI_LAST);
+		loadUnitCameo(typeId, item);
 	}
 }
 
@@ -845,6 +989,23 @@ void CViewObjects::UpdateDialog()
 
 	tree.Select(0, TVGN_CARET);
 	tree.DeleteAllItems();
+
+	if (theApp.m_Options.bShowCameos)
+	{
+		if (m_ImageList.GetSafeHandle())
+			m_ImageList.DeleteImageList();
+
+		m_ImageList.Create(Cameo_Size, Cameo_Size, ILC_COLOR24 | ILC_MASK, 4, 4);
+
+		auto cBitmap = BitmapFromResource(IDB_DEFAULTCAMEO);
+		ScaleBitmap(cBitmap.get(), Cameo_Size, RGB(255, 255, 255), true);
+		m_ImageList.Add(cBitmap.get(), RGB(255, 255, 255));
+		tree.SetImageList(&m_ImageList, TVSIL_NORMAL);
+	}
+	else
+	{
+		tree.SetImageList(NULL, TVSIL_NORMAL);
+	}
 
 	CString sTreeRoots[15];
 	sTreeRoots[TreeRoot::Infantry] = GetLanguageStringACP("InfantryObList");
@@ -912,7 +1073,18 @@ void CViewObjects::UpdateDialog()
 #endif
 
 
+	CString theater = Map->GetTheater();
+	auto const ignoreSet = CollectIgnoreSet();
 
+	auto needed_terrain = TheaterChar::None;
+	if (tiledata == &s_tiledata) {
+		needed_terrain = TheaterChar::A;
+	}
+	else if (tiledata == &t_tiledata) {
+		needed_terrain = TheaterChar::T;
+	}
+
+	TreeViewBuilder b(tree, ini, ignoreSet, theater, needed_terrain, rootitems);
 
 
 	if (!theApp.m_Options.bEasy) {
@@ -1081,6 +1253,33 @@ void CViewObjects::UpdateDialog()
 
 	}
 
+	auto loadOverlayCameo = [&](int ovr, int ovrd, HTREEITEM& item)
+		{
+			if (Map->GetIsoSize() && theApp.m_Options.bShowCameos)
+			{
+				CString ovrName;
+
+				ovrName.Format("overlay-%d-%d", ovr, ovr);
+				if (!b.loadExistingCameo(item, ovrName))
+				{
+					auto const& overlayId = rules.GetSection("OverlayTypes").Nth(ovr).second;
+					if (!overlayId.IsEmpty())
+					{
+						theApp.m_loading->LoadOverlayGraphic(overlayId, ovr);
+						((CFinalSunDlg*)theApp.GetMainWnd())->m_view.m_isoview->UpdateOverlayPictures(ovr);
+					}
+
+					auto p = ovrlpics[ovr][ovrd];
+					if (p && p->pic)
+					{
+						if (auto cBitmap = BitmapFromPICDATA(p))
+						{
+							b.loadAndSaveCameo(item, cBitmap.get(), ovrName);
+						}
+					}
+				}
+			}
+		};
 
 	auto const& overlayTypeSec = rules["OverlayTypes"];
 	auto const sizeLimit = std::min<unsigned int>(overlayTypeSec.Size(), 255);
@@ -1091,6 +1290,8 @@ void CViewObjects::UpdateDialog()
 		if (rules.GetBool(unitname, "Wall") && rules.GetBool(unitname, "Wall.HasConnection", true)) {
 			allowedToList = true;
 			overlay_trail.insert(i);
+			// int ovrData = overlay_wall[i] ? 5 : 0;
+			// loadOverlayCameo(overlay_number[i], ovrData, item);
 		}
 
 		do {
@@ -1121,8 +1322,6 @@ void CViewObjects::UpdateDialog()
 		}
 
 	}
-
-	auto const ignoreSet = CollectIgnoreSet();
 
 	e = 0;
 	if (!theApp.m_Options.bEasy) {
@@ -1157,22 +1356,22 @@ void CViewObjects::UpdateDialog()
 #ifdef RA2_MODE
 			val.Replace("TIB", "ORE");
 #endif
-			tree.InsertItem(TVIF_PARAM | TVIF_TEXT, val, 0, 0, 0, 0, valadded * 6 + 3000 + e, everyoverlay, TVI_LAST);
+			auto item = tree.InsertItem(TVIF_PARAM | TVIF_TEXT, val, 0, 0, 0, 0, valadded * 6 + 3000 + e, everyoverlay, TVI_LAST);
+
+			int ovrData = 0;
+			if (i >= RIPARIUS_BEGIN && i <= RIPARIUS_END
+				|| i >= CRUENTUS_BEGIN && i <= CRUENTUS_END
+				|| i >= VINIFERA_BEGIN && i <= VINIFERA_END
+				|| i >= ABOREUS_BEGIN && i <= ABOREUS_END) 
+			{
+				ovrData = 11;
+			}
+
+			loadOverlayCameo(i, ovrData, item);
+
 			e++;
 		}
 	}
-
-	CString theater = Map->GetTheater();
-
-
-	auto needed_terrain = TheaterChar::None;
-	if (tiledata == &s_tiledata) {
-		needed_terrain = TheaterChar::A;
-	} else if (tiledata == &t_tiledata) {
-		needed_terrain = TheaterChar::T;
-	}
-
-	TreeViewBuilder b(tree, ini, ignoreSet, theater, needed_terrain, rootitems);
 
 #ifdef RA2_MODE
 	HTREEITEM hTrees = tree.InsertItem(GetLanguageStringACP("TreesObList"), rootitems[TreeRoot::Terrain], TVI_LAST);
@@ -1229,7 +1428,26 @@ void CViewObjects::UpdateDialog()
 #endif
 
 		if (unitname.GetLength() > 0 && unitname != "VEINTREE" && unitname.Find("ICE") < 0 && unitname.Find("BOXES") < 0 && unitname.Find("SPKR") < 0) // out with it :-)
-			tree.InsertItem(TVIF_PARAM | TVIF_TEXT, (addedString + " (" + unitname + ")"), 0, 0, 0, 0, valadded * 5 + i, howner, TVI_LAST);
+		{
+			auto item = tree.InsertItem(TVIF_PARAM | TVIF_TEXT, (addedString + " (" + unitname + ")"), 0, 0, 0, 0, valadded * 5 + i, howner, TVI_LAST);
+
+			if (Map->GetIsoSize() && theApp.m_Options.bShowCameos)
+			{
+				if (!b.loadExistingCameo(item, unitname))
+				{
+					theApp.m_loading->LoadUnitGraphic(unitname);
+					Map->UpdateTreeInfo(&unitname);
+					auto& p = treeinfo[Map->GetUnitTypeID(unitname)].pic;
+					if (p.pic)
+					{
+						if (auto cBitmap = BitmapFromPICDATA(&p))
+						{
+							b.loadAndSaveCameo(item, cBitmap.get(), unitname);
+						}
+					}
+				}
+			}
+		}
 	}
 
 #ifdef SMUDGE_SUPP
@@ -1250,10 +1468,37 @@ void CViewObjects::UpdateDialog()
 
 
 		if (unitname.GetLength() > 0) {
-			tree.InsertItem(TVIF_PARAM | TVIF_TEXT, unitname, 0, 0, 0, 0, valadded * 8 + i, howner, TVI_LAST);
+			auto item = tree.InsertItem(TVIF_PARAM | TVIF_TEXT, unitname, 0, 0, 0, 0, valadded * 8 + i, howner, TVI_LAST);
+
+			if (Map->GetIsoSize() && theApp.m_Options.bShowCameos)
+			{
+				if (!b.loadExistingCameo(item, unitname))
+				{
+					theApp.m_loading->LoadUnitGraphic(unitname);
+					Map->UpdateSmudgeInfo(unitname);
+					auto& p = smudgeinfo[Map->GetUnitTypeID(unitname)].pic;
+					if (p.pic)
+					{
+						if (auto cBitmap = BitmapFromPICDATA(&p))
+						{
+							b.loadAndSaveCameo(item, cBitmap.get(), unitname);
+						}
+					}
+				}
+			}
 		}
 	}
 #endif
+
+	if (theApp.m_Options.bShowCameos)
+	{
+		HTREEITEM hItem = tree.GetRootItem();
+		while (hItem)
+		{
+			UpdateTreeIconsForSubtree(tree, hItem);
+			hItem = tree.GetNextSiblingItem(hItem);
+		}
+	}
 
 	OutputDebugString("Objectbrowser redraw finished\n");
 }

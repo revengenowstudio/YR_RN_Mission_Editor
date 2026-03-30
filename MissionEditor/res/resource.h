@@ -99,6 +99,7 @@
 #define IDC_EDITOR_ARROW                299
 #define IDD_CSF_VIEWER                  300
 #define IDD_TERRAIN_MGR                 301
+#define IDB_DEFAULTCAMEO                302
 #define IDD_TRIGGER_ALL                 307
 #define IDD_INI_EDITOR                  329
 #define IDC_BULB                        1000
@@ -850,6 +851,7 @@
 #define ID_HELP_SHOWLOGS40140           40130
 #define ID_OPTIONS_SMOOTHZOOM           40131
 #define ID_OPTIONS_USEDEFAULTMOUSECURSOR 40132
+#define ID_OPTIONS_SHOWCAMEOS			40133
 #define ID_FILE_FILE1                   40139
 #define ID_FILE_FILE2                   40140
 #define ID_FILE_FILE3                   40141

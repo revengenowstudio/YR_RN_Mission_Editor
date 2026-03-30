@@ -143,6 +143,9 @@ public:
 
 	const houseMap m_owners;
 	const mapSideNodeInfo sideInfo;
+	void loadAndSaveCameo(HTREEITEM node, CBitmap* cameo, const CString& name);
+	void setItemCameo(HTREEITEM node, CBitmap* cameo);
+	bool loadExistingCameo(HTREEITEM node, const CString& name);
 
 private:
 	static mapSideNodeInfo collectCategoryInfo();
@@ -188,7 +191,7 @@ protected:
 
 	// Attribute
 public:
-
+	CImageList m_ImageList;
 	// Operationen
 public:
 	void UpdateDialog();

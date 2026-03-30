@@ -61,6 +61,7 @@ struct OPTIONS {
 	BOOL bDoNotLoadOverlayGraphics;
 	BOOL bDisableAutoShore;
 	BOOL bDisableAutoLat;
+	BOOL bShowCameos;
 	BOOL bNoSounds;
 	BOOL bDisableSlopeCorrection;
 	float fMiniMapScale = 2.0f;
