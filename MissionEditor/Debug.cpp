@@ -286,6 +286,8 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
     {
         errDlg->SetMessage(exceptionReport);
         errDlg->ShowWindow(SW_SHOW);
+        errDlg->BringWindowToTop();
+        errDlg->UpdateWindow();
         theApp.MainWindow()->EnableWindow(FALSE);
 
         MSG msg;
