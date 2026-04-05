@@ -646,8 +646,9 @@ const CString& GuessSideHelper::GetSideName(const CString& regName, TreeViewTech
 int GuessSideHelper::GuessSide(const CString& regName, TreeViewTechnoType type, const CIniFile& inWhichIni)
 {
 	auto const& knownIterator = KnownItem.find(regName.operator LPCSTR());
-	if (knownIterator != KnownItem.end())
+	if (knownIterator != KnownItem.end()) {
 		return knownIterator->second;
+	}
 
 	int result = -1;
 	switch (type) {
@@ -705,6 +706,18 @@ int GuessSideHelper::guessGenericSide(const CString& regName)
 	return itr->second;
 }
 
+std::optional<XCString> makeDisplayString(const CString& technoID)
+{
+	auto const unitDisplayName = Map->GetUnitDisplayName(technoID);
+	if (!unitDisplayName) {
+		return std::nullopt;
+	}
+	CString concatedStr = technoID;
+	concatedStr += ' ';
+	concatedStr += unitDisplayName->cString;
+	return { XCString(concatedStr) };
+}
+
 void TreeViewBuilder::updateBuildingTypes(HTREEITEM parentNode) {
 	TreeViewCategoryHandler structhouses(this->tree, parentNode);
 	GuessSideHelper sideHelper(*this);
@@ -715,46 +728,37 @@ void TreeViewBuilder::updateBuildingTypes(HTREEITEM parentNode) {
 	auto const& bldTypeSec = rules["BuildingTypes"];
 	for (auto i = 0; i < bldTypeSec.Size(); i++) {
 
-		auto const& unitname = bldTypeSec.Nth(i).second;
+		auto const& technoID = bldTypeSec.Nth(i).second;
 
-		if (unitname.IsEmpty()) {
+		if (technoID.IsEmpty()) {
 			continue;
 		}
 
-		if (m_ignoreSet.find((std::string)unitname) != m_ignoreSet.end()) {
+		if (m_ignoreSet.find((std::string)technoID) != m_ignoreSet.end()) {
 			continue;
 		}
 
-		if (!g_data.GetBool("Debug", "ShowBuildingsWithToTile") && !rules[unitname]["ToTile"].IsEmpty()) {
+		if (!g_data.GetBool("Debug", "ShowBuildingsWithToTile") && !rules[technoID]["ToTile"].IsEmpty()) {
 			continue;
 		}
 
-		auto const unitDisplayName = Map->GetUnitDisplayName(unitname);
-		if (!unitDisplayName) {
-			continue;
-		}
-
-		int id = Map->GetBuildingID(unitname);
+		int id = Map->GetBuildingID(technoID);
 		if (id < 0 /*|| (buildinginfo[id].pic[0].bTerrain!=0 && buildinginfo[id].pic[0].bTerrain!=needed_terrain)*/) {
 			continue;
 		}
 
-		if (theater == THEATER0 && !buildinginfo[id].bTemp) { /*MessageBox("Ignored", unitname,0);*/ continue; }
-		if (theater == THEATER1 && !buildinginfo[id].bSnow) { /*MessageBox("Ignored", unitname,0);*/ continue; }
-		if (theater == THEATER2 && !buildinginfo[id].bUrban) { /*MessageBox("Ignored", unitname,0);*/ continue; }
-
+		if (theater == THEATER0 && !buildinginfo[id].bTemp) { /*MessageBox("Ignored", technoID,0);*/ continue; }
+		if (theater == THEATER1 && !buildinginfo[id].bSnow) { /*MessageBox("Ignored", technoID,0);*/ continue; }
+		if (theater == THEATER2 && !buildinginfo[id].bUrban) { /*MessageBox("Ignored", technoID,0);*/ continue; }
 		
-		CString addedString = unitname;
-		addedString += ' ';
-		addedString += unitDisplayName->cString;
+		auto const displayStr = makeDisplayString(technoID);
+		if (!displayStr.has_value()) {
+			continue;
+		}
 
-		XCString addedStrW;
-		addedStrW.SetString(addedString.GetString());
-
-		auto const& name = sideHelper.GetSideName(unitname, TreeViewTechnoType::Building);
-		TV_InsertItemW(tree.m_hWnd, 
-			addedStrW.wString,
-			addedStrW.len, TVI_LAST, structhouses.GetOrAdd(name), baseOffset + i);
+		auto const& name = sideHelper.GetSideName(technoID, TreeViewTechnoType::Building);
+		TV_InsertItemW(tree.m_hWnd,  displayStr->wString, displayStr->len, 
+			TVI_LAST, structhouses.GetOrAdd(name), baseOffset + i);
 	}
 
 	// okay, now the user-defined types:
@@ -769,19 +773,18 @@ void TreeViewBuilder::updateBuildingTypes(HTREEITEM parentNode) {
 		if (id < 0 || (buildinginfo[id].pic[0].bTerrain != TheaterChar::None && buildinginfo[id].pic[0].bTerrain != needed_terrain)) {
 			continue;
 		}
-		CString undefinedName;
-		CString addedString;
+		CString concatedStr;
 		auto const& name = ini[typeId]["Name"];
 		if (name.IsEmpty()) {
-			undefinedName = typeId + " UNDEFINED";
-			addedString = undefinedName;
+			auto undefinedName = typeId + " UNDEFINED";
+			concatedStr = undefinedName;
 		} else {
-			addedString += typeId;
-			addedString += ' ';
-			addedString += name;
+			concatedStr += typeId;
+			concatedStr += ' ';
+			concatedStr += name;
 		}
 		auto const& sideName = sideHelper.GetSideName(typeId, TreeViewTechnoType::Building);
-		tree.InsertItem(TVIF_PARAM | TVIF_TEXT, addedString, 0, 0, 0, 0, baseOffset + i, structhouses.GetOrAdd(sideName), TVI_LAST);
+		tree.InsertItem(TVIF_PARAM | TVIF_TEXT, concatedStr, 0, 0, 0, 0, baseOffset + i, structhouses.GetOrAdd(sideName), TVI_LAST);
 	}
 }
 
@@ -801,12 +804,14 @@ void TreeViewBuilder::updateUnitTypes(HTREEITEM parentNode, const char* typeList
 		if (m_ignoreSet.find((std::string)typeId) != m_ignoreSet.end()) {
 			continue;
 		}
-		WCHAR* addedString = Map->GetUnitName(typeId);
-		if (!addedString) {
+
+		auto const displayStr = makeDisplayString(typeId);
+		if (!displayStr.has_value()) {
 			continue;
 		}
+
 		auto const& name = sideHelper.GetSideName(typeId, technoType);
-		TV_InsertItemW(tree.m_hWnd, addedString, wcslen(addedString), TVI_LAST, structhouses.GetOrAdd(name), baseOffset + i);
+		TV_InsertItemW(tree.m_hWnd, displayStr->wString, displayStr->len, TVI_LAST, structhouses.GetOrAdd(name), baseOffset + i);
 	}
 	// okay, now the user-defined types:
 	baseOffset += rules[typeListId].Size();
