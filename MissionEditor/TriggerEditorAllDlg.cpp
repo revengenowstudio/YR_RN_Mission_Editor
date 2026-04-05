@@ -254,8 +254,6 @@ static void makeTriggerDisplay(CString& ret,  const CString& name, const CString
 
 void listTriggers(CComboBox& cb)
 {
-    CIniFile& ini = Map->GetIniFile();
-
     while (cb.DeleteString(0) != CB_ERR);
 
     auto const& triggersSec = DB::Triggers.CustomIndex();
@@ -365,7 +363,6 @@ void CTriggerEditorAllDlg::resetTriggerTypeList()
 {
     clearTriggerTypes();
     if (m_triggerType.GetCount() <= 0) {
-        CIniFile& ini = Map->GetIniFile();
 
         listTriggers(m_triggerType);
 
@@ -393,8 +390,7 @@ void CTriggerEditorAllDlg::onAddTrigger(TriggerInstance&& trigger)
 {
     auto const id = trigger.ID();
     auto const name = trigger.Options().Name();
-    DB::Triggers.
-        Append(std::move(trigger));
+    DB::Triggers.Append(std::move(trigger));
 
     auto& tag = DB::Tags.Append(GetFreeID(), name + " Tag");
     tag.triggerId = id;
@@ -404,7 +400,6 @@ void CTriggerEditorAllDlg::onAddTrigger(TriggerInstance&& trigger)
     resetTriggerTypeList();
     updateTriggerOptions();
 
-    auto const triggerIdx = DB::Triggers.FindIndex(id);
     CString displayStr;
     makeTriggerDisplay(displayStr, name, id);
 
@@ -426,16 +421,14 @@ void CTriggerEditorAllDlg::onNewTrigger()
 
 void CTriggerEditorAllDlg::onCloneTrigger()
 {
-    CIniFile& ini = Map->GetIniFile();
-
     int sel = m_triggerType.GetCurSel();
     if (sel < 0) {
         return;
     }
-    int triggerIdx = m_triggerType.GetItemData(sel);
 
-    auto trigger = DB::Triggers.Nth(triggerIdx);
-    trigger.SetName(trigger.Options().Name() + " Clone");
+    auto trigger = DB::Triggers.Lookup(m_currentTrigger.Get());
+    // NOTE: index should not update now since 
+    trigger.SetName(trigger.Options().Name() + " Clone", false);
     trigger.SetID(GetFreeID());
     onAddTrigger(std::move(trigger));
 }
@@ -456,7 +449,6 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
 
     auto const triggerId = DB::Triggers.Nth(curTrigger).ID();
 
-    CIniFile& ini = Map->GetIniFile();
     // YES means clean tags, otherwise ignore
     if (res == IDYES) {
         std::vector<CString> keysToDelete;
@@ -486,8 +478,6 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
 
 void CTriggerEditorAllDlg::onPlaceOnMap()
 {
-    CIniFile& ini = Map->GetIniFile();
-
     int sel = m_triggerType.GetCurSel();
     if (sel < 0) {
         return;
@@ -553,7 +543,7 @@ void CTriggerEditorAllDlg::onChangeTriggerName()
     }
 
     auto& trigger = DB::Triggers.Lookup(m_currentTrigger.Get());
-    trigger.SetName(newName);
+    trigger.SetName(newName, true);
 
     int i;
     int p = 0;
@@ -593,8 +583,6 @@ void CTriggerEditorAllDlg::onChangePersistence()
 
 void CTriggerEditorAllDlg::onEditChangeHouse()
 {
-    CIniFile& ini = Map->GetIniFile();
-
     if (m_currentTrigger.Get().IsEmpty()) {
         return;
     }
@@ -613,8 +601,6 @@ void CTriggerEditorAllDlg::onEditChangeHouse()
 
 void CTriggerEditorAllDlg::onEditChangeNextTrigger()
 {
-    CIniFile& ini = Map->GetIniFile();
-
     if (m_currentTrigger.Get().IsEmpty()) {
         return;
     }

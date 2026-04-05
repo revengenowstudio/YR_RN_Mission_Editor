@@ -24,7 +24,7 @@ public:
     auto& Events() const { return events; }
     auto& Actions() const { return actions; }
 
-    void SetName(const CString& name);
+    void SetName(const CString& name, bool updateIndex);
 
 private:
     CString id;
@@ -185,7 +185,7 @@ TObject& ObjectDatabase<TObject>::Append(const CString& id, CString&& name)
 {
     auto const [it, _] = lookupTable.insert_or_assign(id, items.size());
     auto& ret = items.emplace_back(id);
-    ret.SetName(std::move(name)); // index update happens inside
+    ret.SetName(name, true); // index update happens inside
     //if (indexUpdateHandler) {
     //    indexUpdateHandler(this->GetIndexByKey(it->first), it->first, DBOp::Add);
     //}

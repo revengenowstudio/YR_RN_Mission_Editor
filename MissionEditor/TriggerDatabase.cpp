@@ -71,12 +71,13 @@ TriggerInstance::TriggerInstance(CString&& id, CString&& name, CString&& house) 
     this->Options().house = std::move(house);
 }
 
-void TriggerInstance::SetName(const CString& name)
+void TriggerInstance::SetName(const CString& name, bool updateIndex)
 {
-    auto& innerName = Options().name;
-    DB::Triggers.OnUpdateIndex(innerName, id, DBOp::Delete);
-    Options().name = name;
-    DB::Triggers.OnUpdateIndex(name, id, DBOp::Add);
+    auto const oldName = std::exchange(Options().name, name);
+    if (updateIndex && oldName != name) {
+        DB::Triggers.OnUpdateIndex(oldName, id, DBOp::Delete);
+        DB::Triggers.OnUpdateIndex(name, id, DBOp::Add);
+    }
 }
 
 // ---------------------------- TagDatabase --------------------------
