@@ -439,7 +439,6 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
     if (sel < 0) {
         return;
     }
-    int curTrigger = m_triggerType.GetItemData(sel);
     auto const title = TranslateStringACP("Delete trigger");
     auto const content = EscapeString(TranslateStringACP("TriggerDeleteTip"));
     int res = MessageBox(content, title, MB_YESNOCANCEL);
@@ -447,7 +446,7 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
         return;
     }
 
-    auto const triggerId = DB::Triggers.Nth(curTrigger).ID();
+    auto const triggerId = m_currentTrigger.Get();
 
     // YES means clean tags, otherwise ignore
     if (res == IDYES) {
@@ -463,8 +462,9 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
         }
     }
 
-    DB::Triggers.DeleteAt(curTrigger);
-    
+    auto const deleted = DB::Triggers.DeleteByID(triggerId);
+    ASSERT(deleted);
+
     resetTriggerTypeList();
 
     int nextSel = sel - 1; // 0 will be -1, means no selection
@@ -478,13 +478,11 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
 
 void CTriggerEditorAllDlg::onPlaceOnMap()
 {
-    int sel = m_triggerType.GetCurSel();
-    if (sel < 0) {
+    auto const triggerId = m_currentTrigger.Get();
+    if (triggerId.IsEmpty()) {
         return;
     }
 
-    int curtrig = m_triggerType.GetItemData(sel);
-    auto const triggerId = DB::Triggers.Nth(curtrig).ID();
     CString tag;
 
     auto const& tagDb = DB::Tags;
