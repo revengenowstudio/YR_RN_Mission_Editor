@@ -57,7 +57,8 @@ public:
         return items.at(slot);
     }
     TObject& Lookup(const CString& id);
-    const TObject& Lookup(const CString& id) const {
+    TObject* TryLookup(const CString& id);
+        const TObject& Lookup(const CString& id) const {
         using BaseType = std::remove_pointer_t<decltype(this)>;
         using NonConstType = std::remove_const_t<BaseType>;
         return const_cast<NonConstType*>(this)->Lookup(id);
@@ -133,11 +134,22 @@ protected:
 template<typename TObject>
 TObject& ObjectDatabase<TObject>::Lookup(const CString& id)
 {
-    auto const it = lookupTable.find(id);
-    if (it != lookupTable.end()) {
-        return items.at(it->second);
+    auto const ptr = TryLookup(id);
+    if (ptr) {
+        return *ptr;
     }
     throw std::runtime_error("no such trigger");
+}
+
+// implement TryLookUp
+template<typename TObject>
+TObject* ObjectDatabase<TObject>::TryLookup(const CString& id)
+{
+    auto const it = lookupTable.find(id);
+    if (it != lookupTable.end()) {
+        return { &items.at(it->second) };
+    }
+    return nullptr;
 }
 
 template<typename TObject>
