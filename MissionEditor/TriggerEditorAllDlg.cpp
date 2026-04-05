@@ -547,7 +547,7 @@ void CTriggerEditorAllDlg::onChangeTriggerName()
     for (auto& tag: tagDb) {
         if (tag.triggerId == m_currentTrigger) {
             tag.name = newName; 
-            tag.name =+" 1";
+            tag.name += " 1";
             break; // will there be multiple tags point to the same trigger?
         }
     }
