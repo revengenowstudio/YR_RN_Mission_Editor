@@ -234,17 +234,23 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
     bool dumpComplete = false;
     auto const crashdumpPath = prepareCrashdumpDir();
 
-    auto handle = std::async(std::launch::async, [ExceptionInfo, &errDlg, &dumpComplete, &crashdumpPath] {
-        MINIDUMP_EXCEPTION_INFORMATION expParam;
-        expParam.ThreadId = GetCurrentThreadId();
-        expParam.ExceptionPointers = ExceptionInfo;
-        expParam.ClientPointers = FALSE;
+    auto handle = std::async(std::launch::async,
+        [ExceptionInfo, &dumpComplete, &crashdumpPath, 
+            threadId = GetCurrentThreadId(),
+            dlgWnd = errDlg->GetSafeHwnd()
+        ] {
+            MINIDUMP_EXCEPTION_INFORMATION expParam{ 0 };
+            expParam.ExceptionPointers = ExceptionInfo;
+            expParam.ClientPointers = FALSE;
+            expParam.ThreadId = threadId;
 
-        fullDump(crashdumpPath, &expParam);
-        dumpComplete = true;
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-        errDlg->PostMessage(WM_CLOSE);
-    });
+            fullDump(crashdumpPath, &expParam);
+            dumpComplete = true;
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+            if (::IsWindow(dlgWnd)) {
+               ::PostMessage(dlgWnd, WM_CLOSE, 0, 0);
+            }
+        });
 
     const char* pFormatterStr = "INTERNAL APPLICATION ERROR\n\n" \
         "Version: " PRODUCT_VERSION_STRING
@@ -301,7 +307,7 @@ LONG __stdcall Debug::ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
         handle.wait();
 
         errDlg->ShowWindow(SW_HIDE);
-        errDlg.reset();
+        errDlg->DestroyWindow();
         popDumpFolder();
     }
 
