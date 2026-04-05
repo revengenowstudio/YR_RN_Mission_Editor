@@ -54,17 +54,18 @@ void PICDATA::createVBorder()
 	}
 }
 
-void XCString::SetString(const CHAR* cString)
+void XCString::SetString(const CHAR* inputStr)
 {
-	if (!cString || strlen(cString) == 0) {
+	if (!inputStr || strlen(inputStr) == 0) {
 		len = 0;
 		if (auto str = std::exchange( wString, nullptr)) {
 			delete[] str;
 		}
 		return;
 	}
-	auto const requiredWchars = MultiByteToWideChar(CP_ACP, 0, cString, -1, nullptr, 0);
+	auto const requiredWchars = MultiByteToWideChar(CP_ACP, 0, inputStr, -1, nullptr, 0);
 	if (requiredWchars <= 0) {
+		this->cString.Empty();
 		return;
 	}
 	if (this->wString) {
@@ -73,10 +74,10 @@ void XCString::SetString(const CHAR* cString)
 
 	this->wString = new WCHAR[requiredWchars];
 
-	MultiByteToWideChar(CP_ACP, 0, cString, -1, this->wString, requiredWchars);
+	MultiByteToWideChar(CP_ACP, 0, inputStr, -1, this->wString, requiredWchars);
 
 	this->len = requiredWchars - 1; // no \0
-	this->cString = cString;
+	this->cString = inputStr;
 }
 
 void XCString::SetString(const WCHAR* wString, int len)

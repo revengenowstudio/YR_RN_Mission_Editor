@@ -42,6 +42,12 @@
     <ClCompile Include="TriggerDefinition_Test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="XString_Test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MissionEditor\structs.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StdAfx.h">

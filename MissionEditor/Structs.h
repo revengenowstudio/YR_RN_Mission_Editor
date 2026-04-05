@@ -29,6 +29,7 @@
 #include <vector>
 #include <memory>
 #include <cstdint>
+#include <map>
 #include "MissionEditorPackLib.h"
 #include "Vec2.h"
 
@@ -648,6 +649,6 @@ struct RA2STRINGENTRY
 	DWORD value_asc_size;
 };
 
-using TranslationMap = map<CString, XCString>;
+using TranslationMap = std::map<CString, XCString>;
 
 #endif
