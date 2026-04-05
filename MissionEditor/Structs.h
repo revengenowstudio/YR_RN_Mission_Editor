@@ -347,7 +347,7 @@ struct XCString
 	{
 		SetString(cString);
 	}
-	XCString(const WCHAR* wString, int len)
+	XCString(const WCHAR* wString, size_t len)
 	{
 		SetString(wString, len);
 	}
@@ -380,7 +380,7 @@ struct XCString
 	XCString& operator=(const XCString&) = delete;
 
 	void SetString(const CHAR* cString);
-	void SetString(const WCHAR* wString, int len);
+	void SetString(const WCHAR* wString, size_t len);
 
 	// members
 	CString cString{};

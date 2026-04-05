@@ -80,7 +80,7 @@ void XCString::SetString(const CHAR* inputStr)
 	this->cString = inputStr;
 }
 
-void XCString::SetString(const WCHAR* wString, int len)
+void XCString::SetString(const WCHAR* wString, size_t len)
 {
 	this->len = len;
 

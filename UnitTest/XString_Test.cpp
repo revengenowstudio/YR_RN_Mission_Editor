@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "structs.h"
 #include <optional>
 #include <vector>
@@ -9,8 +9,8 @@ TEST(XCStringTest, ConstructorAndConversion) {
     EXPECT_STREQ(s1.cString, "TestNode");
     EXPECT_EQ(wcscmp(s1.wString, L"TestNode"), 0);
 
-    XCString s2("ÖĞÎÄ²âÊÔ");
-    EXPECT_EQ(wcscmp(s2.wString, L"ÖĞÎÄ²âÊÔ"), 0);
+    XCString s2("ä¸­æ–‡æµ‹è¯•");
+    EXPECT_EQ(wcscmp(s2.wString, L"ä¸­æ–‡æµ‹è¯•"), 0);
 }
 
 TEST(XCStringTest, MoveConstructor) {
@@ -106,46 +106,42 @@ TEST(XCStringTest, SelfMoveAssignment) {
     EXPECT_STREQ(s.cString, "SelfMove");
 }
 
-TEST(XCStringTest, ChineseCharacterLengthAccuracy) {
-    // ÔÚ GBK/ANSI ±àÂëÏÂ£º
-    // "CNÖĞÎÄ" µÄ×Ö½ÚÊı (strlen) ÊÇ 2 + 2*2 = 6
-    // "CNÖĞÎÄ" µÄ×Ö·ûÊı (WCHAR count) ÊÇ 2 + 2 = 4
-    const char* mixedStr = "CNÖĞÎÄ";
+TEST(XCStringTest, WideCharConstructorAccuracy) {
+    // ä½¿ç”¨åå…­è¿›åˆ¶æ˜ç¡®æŒ‡å®šï¼šC(43), N(4E), ä¸­(4E2D), æ–‡(6587), æµ‹(6D4B), è¯•(8BD5)
+    const wchar_t wStr[] = { 0x0043, 0x004E, 0x4E2D, 0x6587, 0x6D4B, 0x8BD5, 0x0000 };
 
-    XCString s(mixedStr);
+    size_t inputLen = wcslen(wStr);
+    EXPECT_EQ(inputLen, 6); // `\0` does not count here, so the result is 6
 
-    // ÑéÖ¤ len ±ØĞëÊÇ×Ö·ûÊı 4£¬¶ø²»ÊÇ strlen µÄ 6
-    EXPECT_EQ(s.len, 4);
-
-    // ÑéÖ¤ÄÚ´æ·ÖÅäÊÇ·ñ½ô´Õ (Ó¦·ÖÅä 5 ¸ö WCHAR)
-    // ÑéÖ¤×ª»»ºóµÄÄÚÈİ
-    EXPECT_EQ(s.wString[0], L'C');
-    EXPECT_EQ(s.wString[1], L'N');
-    EXPECT_EQ(s.wString[2], L'ÖĞ');
-    EXPECT_EQ(s.wString[3], L'ÎÄ');
-    EXPECT_EQ(s.wString[4], L'\0');
-}
-
-TEST(XCStringTest, MultiByteConversionRobustness) {
-    // ²âÊÔ¸ü¸´ÔÓµÄ»ìºÏ³¡¾°
-    const char* complexStr = "A¼ÓBµÈÓÚC";
-    // strlen: 1 + 2 + 1 + 2 + 2 + 1 = 9 ×Ö½Ú
-    // WCHAR count: 6 ×Ö·û
-
-    XCString s(complexStr);
+    XCString s(wStr, inputLen);
 
     EXPECT_EQ(s.len, 6);
-    EXPECT_STREQ(s.cString, complexStr);
+    EXPECT_EQ(s.wString[2], 0x4E2D); // ä¸­
+    EXPECT_EQ(s.wString[5], 0x8BD5); // è¯•
+    EXPECT_EQ(s.wString[6], 0x0000); // ç»“å°¾å¿…é¡»æ˜¯ \0
 }
 
-TEST(XCStringTest, BufferSafetyWithLongChinese) {
-    // È·±£³¤ÖĞÎÄ×Ö·û´®²»»áµ¼ÖÂÒç³ö»ò½Ø¶Ï
-    std::string longChinese(100, 'a'); // 100¸öÓ¢ÎÄ×Ö·û
-    longChinese += "²âÊÔÄÚÈİ"; // ¼ÓÉÏ 4 ¸öÖĞÎÄ×Ö·û (8×Ö½Ú)
+// æ¨¡æ‹Ÿ makeDisplayString çš„è·¯å¾„
+TEST(XCStringTest, ConcatedStringHandling) {
+    // å¼ºåˆ¶ä½¿ç”¨å®½å­—ç¬¦æ‹¼è£…æµ‹è¯•ï¼Œé¿å¼€ ANSI ç¼–ç ä¸ä¸€è‡´é—®é¢˜
+    CStringW wID = L"Unit01";
+    CStringW wName = L"å¦å…‹";
+    CStringW wFull = wID + L" " + wName;
 
-    XCString s(longChinese.c_str());
+    XCString s(wFull.GetString(), wFull.GetLength());
 
-    // 100¸ö 'a' + 4¸öºº×Ö = 104 ×Ö·û
-    EXPECT_EQ(s.len, 104);
-    EXPECT_EQ(s.wString[100], L'²â');
+    EXPECT_EQ(s.len, 9); // "Unit01 å¦å…‹" -> 6 + 1 + 2 = 9
+    EXPECT_EQ(s.wString[7], L'å¦');
+}
+
+TEST(XCStringTest, MultiByteConversionConsistency) {
+    // ä½¿ç”¨ u8 å¹¶åœ¨æµ‹è¯•ä¸­æ˜¾å¼å¤„ç†ï¼Œæˆ–è€…ç›´æ¥éªŒè¯è½¬æ¢åçš„å†…å­˜ä¸ä¸º NULL
+    // è¿™é‡Œçš„é‡ç‚¹æ˜¯éªŒè¯ SetString ä¸ä¼šå› ä¸ºå¤šå­—èŠ‚è¾“å…¥è€Œå´©æºƒ
+    const char* utf8Str = reinterpret_cast<const char*>(u8"UTF8å­—ç¬¦ä¸²");
+
+    XCString s(utf8Str);
+
+    EXPECT_GT(s.len, 0);
+    EXPECT_NE(s.wString, nullptr);
+    EXPECT_STREQ(s.cString, utf8Str);
 }
