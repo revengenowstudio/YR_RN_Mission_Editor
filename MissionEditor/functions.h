@@ -84,7 +84,45 @@ bool ShowOptionsDialog(CIniFile& optIni, bool isFirstTimeOption = false);
 // repairs a trigger (sets flags correctly)
 bool RepairTrigger(CString& triggerdata);
 
-void GetDrawBorder(const BYTE* data, int width, int line, int& left, int& right, unsigned int flags, BOOL* TranspInside = NULL);
+/*
+Returns the area in the current line that should be painted
+Truncates areas that are transparent, and therefore increases display speed!
+flags must be set to 0
+*/
+inline void GetDrawBorder(const BYTE* data, int width, int line, 
+	int& left, int& right, unsigned int flags, 
+	BOOL* TranspInside = NULL)
+{
+	int i;
+	const BYTE* lpStart = data + line * width;
+
+	if (flags == 0) {
+		// left border:
+		for (i = 0; i < width; i++) {
+			if (lpStart[i] || i == width - 1) {
+				left = i;
+				break;
+			}
+		}
+
+		// right border:
+		for (i = width - 1; i >= 0; i--) {
+			if (lpStart[i] || i == 0) {
+				right = i;
+				break;
+			}
+		}
+
+		if (TranspInside) {
+			for (i = left; i <= right; i++) {
+				if (!lpStart[i]) {
+					*TranspInside = TRUE;
+					break;
+				}
+			}
+		}
+	}
+}
 
 // String conversion
 size_t utf8ByteCount(const CString& input);

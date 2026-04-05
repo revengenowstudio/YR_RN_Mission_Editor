@@ -29,6 +29,7 @@
 #include <vector>
 #include <memory>
 #include <cstdint>
+#include <map>
 #include "MissionEditorPackLib.h"
 #include "Vec2.h"
 
@@ -333,68 +334,59 @@ Struct for string items
 */
 struct XCString
 {
-	XCString()
-	{
-		//wString=new(WCHAR[2]);
-		//memset(wString, 0, 4);
-		wString = NULL;
-		bUsedDefault = FALSE;
-		len = 0;
-	}
+	XCString() = default;
 	~XCString()
 	{
-		if (wString) delete[] wString;
+		if (auto str = std::exchange(wString, nullptr)) {
+			delete[] str;
+		}
 		len = 0;
-		wString = NULL;
 	}
-	void SetString(const CHAR* cString)
+
+	XCString(const CHAR* cString)
 	{
-		len = strlen(cString);
-
-		this->cString = cString;
-
-		if (wString) delete[] wString;
-
-		bUsedDefault = FALSE;
-		wString = new(WCHAR[len + 1]);
-		memset(wString, 0, (len + 1) * sizeof(WCHAR));
-
-		size_t convertedSize = 0;
-		mbstowcs_s(&convertedSize, wString, len + 1, cString, len);
-
+		SetString(cString);
 	}
-	void SetString(const WCHAR* wString, int len)
+	XCString(const WCHAR* wString, size_t len)
 	{
-		this->len = len;
-
-		if (this->wString) {
-			delete[] this->wString;
-		}
-
-		bUsedDefault = FALSE;
-
-		this->wString = new(WCHAR[len + 1]);
-		memset(this->wString, 0, (len + 1) * 2);
-		memcpy(this->wString, wString, len * 2);
-
-		auto bufferSize = WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, this->wString, len + 1, nullptr, 0, NULL, &bUsedDefault);
-		if (bufferSize == 0) {
-			cString = "";
-			return; // failed
-		}
-
-		std::vector<BYTE> bByte(bufferSize + 4, 0);
-		if (WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, this->wString, len + 1, (LPSTR)bByte.data(), bufferSize, NULL, &bUsedDefault) == 0) {
-			cString = "";
-			return; // failed
-		}
-		cString = bByte.data();
-
+		SetString(wString, len);
 	}
-	CString cString;
-	WCHAR* wString;
-	BOOL bUsedDefault;
-	size_t len;
+
+	// allow move
+	XCString(XCString&& other) noexcept : 
+		cString(std::move(other.cString)),
+		wString(std::exchange(other.wString, nullptr)),
+		bUsedDefault(std::exchange(other.bUsedDefault, FALSE)),
+		len(std::exchange(other.len, 0))
+	{
+	}
+
+	XCString& operator=(XCString&& other) noexcept
+	{
+		if (this != &other) {
+			if (auto str = std::exchange(wString, nullptr)) {
+				delete[] str;
+			}
+			cString = std::move(other.cString);
+			wString = std::exchange(other.wString, nullptr);
+			bUsedDefault = std::exchange(other.bUsedDefault, FALSE);
+			len = std::exchange(other.len, 0);
+		}
+		return *this;
+	}
+
+	// no copy
+	XCString(const XCString&) = delete;
+	XCString& operator=(const XCString&) = delete;
+
+	void SetString(const CHAR* cString);
+	void SetString(const WCHAR* wString, size_t len);
+
+	// members
+	CString cString{};
+	WCHAR* wString{};
+	BOOL bUsedDefault{};
+	size_t len{};
 };
 
 
@@ -657,6 +649,6 @@ struct RA2STRINGENTRY
 	DWORD value_asc_size;
 };
 
-using TranslationMap = map<CString, XCString>;
+using TranslationMap = std::map<CString, XCString>;
 
 #endif

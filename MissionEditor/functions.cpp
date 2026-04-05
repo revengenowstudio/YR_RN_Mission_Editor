@@ -1450,44 +1450,6 @@ std::unique_ptr<CBitmap> BitmapFromFile(const CString& filepath)
 	return bm;
 }
 
-/*
-Returns the area in the current line that should be painted
-Truncates areas that are transparent, and therefore increases display speed!
-flags must be set to 0
-*/
-void GetDrawBorder(const BYTE* data, int width, int line, int& left, int& right, unsigned int flags, BOOL* TranspInside)
-{
-	int i;
-	const BYTE* lpStart = data + line * width;
-
-	if (flags == 0) {
-		// left border:
-		for (i = 0; i < width; i++) {
-			if (lpStart[i] || i == width - 1) {
-				left = i;
-				break;
-			}
-		}
-
-		// right border:
-		for (i = width - 1; i >= 0; i--) {
-			if (lpStart[i] || i == 0) {
-				right = i;
-				break;
-			}
-		}
-
-		if (TranspInside) {
-			for (i = left; i <= right; i++) {
-				if (!lpStart[i]) {
-					*TranspInside = TRUE;
-					break;
-				}
-			}
-		}
-	}
-}
-
 CComPtr<IDirectDrawSurface7> BitmapToSurface(IDirectDraw7* pDD, const CBitmap& bitmap)
 {
 	BITMAP bm;

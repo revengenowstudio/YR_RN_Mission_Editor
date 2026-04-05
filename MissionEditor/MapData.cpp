@@ -3061,8 +3061,8 @@ const XCString* CMapData::GetUnitDisplayName(const CString& id) const
 
 	auto const& renameStr = g_data.GetString("Rename", id);
 	if (!renameStr.IsEmpty()) {
-		CCStrings[id].SetString(GetLanguageStringACP(renameStr));
-		return &CCStrings.at(id);
+		auto const it = CCStrings.emplace(id, GetLanguageStringACP(renameStr));
+		return &it.first->second;
 	}
 
 	if (CCStrings.find(id) != CCStrings.end() && CCStrings.at(id).len > 0) {

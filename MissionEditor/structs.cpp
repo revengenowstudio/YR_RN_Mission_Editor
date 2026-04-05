@@ -53,3 +53,57 @@ void PICDATA::createVBorder()
 		vborder[k].right = r;
 	}
 }
+
+void XCString::SetString(const CHAR* inputStr)
+{
+	if (!inputStr || strlen(inputStr) == 0) {
+		len = 0;
+		if (auto str = std::exchange( wString, nullptr)) {
+			delete[] str;
+		}
+		return;
+	}
+	auto const requiredWchars = MultiByteToWideChar(CP_ACP, 0, inputStr, -1, nullptr, 0);
+	if (requiredWchars <= 0) {
+		this->cString.Empty();
+		return;
+	}
+	if (this->wString) {
+		delete[] this->wString;
+	}
+
+	this->wString = new WCHAR[requiredWchars];
+
+	MultiByteToWideChar(CP_ACP, 0, inputStr, -1, this->wString, requiredWchars);
+
+	this->len = requiredWchars - 1; // no \0
+	this->cString = inputStr;
+}
+
+void XCString::SetString(const WCHAR* wString, size_t len)
+{
+	this->len = len;
+
+	if (this->wString) {
+		delete[] this->wString;
+	}
+
+	bUsedDefault = FALSE;
+
+	this->wString = new(WCHAR[len + 1]);
+	memset(this->wString, 0, (len + 1) * 2);
+	memcpy(this->wString, wString, len * 2);
+
+	auto bufferSize = WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, this->wString, len + 1, nullptr, 0, NULL, &bUsedDefault);
+	if (bufferSize == 0) {
+		cString = "";
+		return; // failed
+	}
+
+	std::vector<BYTE> bByte(bufferSize + 4, 0);
+	if (WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, this->wString, len + 1, (LPSTR)bByte.data(), bufferSize, NULL, &bUsedDefault) == 0) {
+		cString = "";
+		return; // failed
+	}
+	cString = bByte.data();
+}
