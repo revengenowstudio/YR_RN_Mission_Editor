@@ -89,19 +89,19 @@ void XCString::SetString(const WCHAR* wString, size_t len)
 	}
 
 	bUsedDefault = FALSE;
-
-	this->wString = new(WCHAR[len + 1]);
-	memset(this->wString, 0, (len + 1) * 2);
+	auto const lenPadded = static_cast<int>(len + 1);
+	this->wString = new(WCHAR[lenPadded]);
+	memset(this->wString, 0, (lenPadded) * 2);
 	memcpy(this->wString, wString, len * 2);
 
-	auto bufferSize = WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, this->wString, len + 1, nullptr, 0, NULL, &bUsedDefault);
+	auto bufferSize = WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, this->wString, lenPadded, nullptr, 0, NULL, &bUsedDefault);
 	if (bufferSize == 0) {
 		cString = "";
 		return; // failed
 	}
 
 	std::vector<BYTE> bByte(bufferSize + 4, 0);
-	if (WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, this->wString, len + 1, (LPSTR)bByte.data(), bufferSize, NULL, &bUsedDefault) == 0) {
+	if (WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, this->wString, lenPadded, (LPSTR)bByte.data(), bufferSize, NULL, &bUsedDefault) == 0) {
 		cString = "";
 		return; // failed
 	}
