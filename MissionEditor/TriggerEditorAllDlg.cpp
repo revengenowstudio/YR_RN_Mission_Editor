@@ -46,7 +46,8 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
 END_MESSAGE_MAP()
 
 CTriggerEditorAllDlg::CTriggerEditorAllDlg(CWnd* pParent) :
-    CDialog(IDD, pParent)
+    CDialog(IDD, pParent),
+    m_actionParamTexts({})
 {
 }
 
