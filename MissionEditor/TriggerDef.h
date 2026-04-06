@@ -10,6 +10,13 @@
 class CIniFile;
 class TriggerEvents;
 class TriggerActions;
+class TriggerInstance;
+
+class IFilterable
+{
+public:
+    virtual bool IsMatchedByKeyword(const CString& keyword);
+};
 
 struct ParamType 
 {
@@ -69,7 +76,6 @@ struct TriggerOptions
 
     CString house;
     CString nextTrigger{ "<none>" };
-    CString name;
     bool controls[__ControlCount] {
         false,
         true,
@@ -77,6 +83,12 @@ struct TriggerOptions
         true,
         false,
     };
+
+    auto const& Name() const { return name; }
+
+private:
+    friend class TriggerInstance;
+    CString name; // only allowed to update by operator
 };
 
 struct TriggerEvent
@@ -230,7 +242,7 @@ public:
 
     CString Serialize() const;
 
-    void SetName(CString&& name) {
+    void SetName(const CString& name, bool updateIndex = false) {
         this->name = std::move(name);
     }
     auto const& ID() const { return id; }

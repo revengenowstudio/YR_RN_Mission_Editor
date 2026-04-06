@@ -6,6 +6,37 @@ class TriggerInstance;
 
 class CTriggerEditorAllDlg : public CDialog
 {
+    class TriggerID
+    {
+    public:
+        static inline CString RetrieveIDFrom(const CString& displayString)
+        {
+            if (!displayString.IsEmpty()) {
+                auto const lbracketPos = displayString.ReverseFind('(');
+                if (lbracketPos != -1
+                    && lbracketPos < displayString.GetLength() - 1) {
+                    return displayString.Mid(lbracketPos + 1,
+                        displayString.GetLength() - lbracketPos - 2);
+                }
+            }
+            return {};
+        }
+
+        void Set(const CString& newStr)
+        {
+            auto&& retrived = RetrieveIDFrom(newStr);
+            if (!retrived.IsEmpty()) {
+                value = std::move(retrived);
+            }
+        }
+
+        CString Get() const { return value; }
+        void Reset() { value.Empty(); }
+
+    private:
+        CString value;
+    };
+
 public:
     enum { IDD = IDD_TRIGGER_ALL };
 
@@ -78,7 +109,7 @@ protected:
     void resetTriggerTypeList();
 
 
-    CString m_currentTrigger;
+    TriggerID m_currentTrigger;
     // trigger options
     // TODO: add a filter edit
     CComboBox m_triggerType;

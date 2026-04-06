@@ -1108,8 +1108,8 @@ void CFinalSunDlg::SaveMap(CString FileName_)
 
     CIniFile& ini = Map->GetIniFile();
 
-    TriggerDatabase::Instance().SaveInto(ini, errstream);
-    TagDatabase::Instance().SaveInto(ini, errstream);
+    DB::Triggers.SaveInto(ini, errstream);
+    DB::Tags.SaveInto(ini, errstream);
 
     // delete invalid ini sections
     for (auto it = ini.begin(); it != ini.end();) {
@@ -1785,8 +1785,8 @@ void CFinalSunDlg::OnFileNew()
                 ini.DeleteSection("CellTags");
                 // ini.sections.erase("AITriggerTypesEnable");
                 // ini.sections.erase("AITriggerTypes");
-                TriggerDatabase::Instance().Clear();
-                TagDatabase::Instance().Clear();
+                DB::Triggers.Clear();
+                DB::Tags.Clear();
             }
         }
 
@@ -1848,8 +1848,8 @@ void CFinalSunDlg::OnFileNew()
             ini.SetString("Basic", "Player", plhouse);
 
             auto const& rulesHouseSec = rules[HOUSES];
-            auto& triggerDb = TriggerDatabase::Instance();
-            auto& tagDb = TagDatabase::Instance();
+            auto& triggerDb = DB::Triggers;
+            auto& tagDb = DB::Tags;
 
             for (auto idx = 0; idx < rulesHouseSec.Size(); idx++) {
 #ifdef RA2_MODE

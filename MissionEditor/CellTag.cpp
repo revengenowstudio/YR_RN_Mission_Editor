@@ -73,7 +73,7 @@ BOOL CCellTag::OnInitDialog()
 
 	CComboBox& m_Tag = *((CComboBox*)GetDlgItem(IDC_TAG));
 
-	if (!TagDatabase::Instance().Size()) {
+	if (!DB::Tags.Size()) {
 		MessageBox("No tags are specified.");
 		OnCancel();
 	} else {

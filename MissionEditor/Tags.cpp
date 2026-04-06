@@ -122,17 +122,17 @@ void CTags::UpdateDialog()
 	while (m_Trigger.DeleteString(0) != CB_ERR);
 
 	int i;
-	auto const& tagDb = TagDatabase::Instance();
+	auto const& tagDb = DB::Tags;
 	for (auto const& tag : tagDb) {
 		CString s;
 		s.Format("%s (%s)", tag.id, tag.name);
 		m_Tag.AddString(s);
 	}
 
-	auto const& triggerDb = TriggerDatabase::Instance();
+	auto const& triggerDb = DB::Triggers;
 	for (auto const& trigger: triggerDb) {
 		CString s;
-		s.Format("%s (%s)", trigger.ID(), trigger.Options().name);
+		s.Format("%s (%s)", trigger.ID(), trigger.Options().Name());
 		m_Trigger.AddString(s);
 	}
 
@@ -177,15 +177,15 @@ void CTags::OnSelchangeTag()
 	m_Tag.GetLBText(index, type);
 	TruncSpace(type);
 
-	auto const& tagDb = TagDatabase::Instance();
+	auto const& tagDb = DB::Tags;
 	auto const& data = tagDb.Lookup(type);
 	m_Name = data.name;
 	auto const& triggerId = data.triggerId;
 	CString desc = triggerId;
 
-	auto const& triggerDb = TriggerDatabase::Instance();
+	auto const& triggerDb = DB::Triggers;
 
-	desc.Format("%s (%s)", triggerId, triggerDb.Lookup(triggerId).Options().name);
+	desc.Format("%s (%s)", triggerId, triggerDb.Lookup(triggerId).Options().Name());
 
 	m_Trigger.SetWindowText(desc);
 	m_Repeat.SetWindowText(data.PersistenceString());
@@ -210,7 +210,7 @@ void CTags::OnChangeName()
 	m_Tag.GetLBText(index, type);
 	TruncSpace(type);
 
-	auto& data = TagDatabase::Instance().Lookup(type);
+	auto& data = DB::Tags.Lookup(type);
 	data.name = m_Name;
 
 	UpdateDialog();
@@ -234,7 +234,7 @@ void CTags::OnEditchangeRepeat()
 	m_Tag.GetLBText(index, type);
 	TruncSpace(type);
 
-	auto& data = TagDatabase::Instance().Lookup(type);
+	auto& data = DB::Tags.Lookup(type);
 	data.persistence = atoi(str); // TODO: validate str
 
 	UpdateDialog();
@@ -260,7 +260,7 @@ void CTags::OnSelchangeRepeat()
 
 	TruncSpace(str);
 
-	auto& data = TagDatabase::Instance().Lookup(type);
+	auto& data = DB::Tags.Lookup(type);
 	data.persistence = atoi(str); // TODO: validate str
 
 	UpdateDialog();
@@ -281,7 +281,7 @@ void CTags::OnEditchangeTrigger()
 	m_Tag.GetLBText(index, type);
 	TruncSpace(type);
 
-	auto& data = TagDatabase::Instance().Lookup(type);
+	auto& data = DB::Tags.Lookup(type);
 	data.triggerId = str; // TODO: validate str
 	
 	//UpdateDialog();
@@ -307,7 +307,7 @@ void CTags::OnSelchangeTrigger()
 	m_Tag.GetLBText(index, type);
 	TruncSpace(type);
 
-	auto& data = TagDatabase::Instance().Lookup(type);
+	auto& data = DB::Tags.Lookup(type);
 	data.triggerId = str; // TODO: validate str
 
 	//UpdateDialog();
@@ -327,20 +327,20 @@ void CTags::OnDelete()
 		return;
 	}
 
-	TagDatabase::Instance().DeleteAt(index);
+	DB::Tags.DeleteAt(index);
 
 	UpdateDialog();
 }
 
 void CTags::OnAdd()
 {
-	auto const& triggerDb = TriggerDatabase::Instance();
+	auto const& triggerDb = DB::Triggers;
 	if (triggerDb.Size() <= 0) {
 		MessageBox(TranslateStringACP("TagCreateWarning"), TranslateStringACP("Error"));
 		return;
 	};
 
-	auto& tag = TagDatabase::Instance().
+	auto& tag = DB::Tags.
 		Append(GetFreeID(), "New Tag");
 	tag.triggerId = triggerDb.Nth(0).ID();
 

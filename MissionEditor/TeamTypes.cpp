@@ -573,11 +573,13 @@ void CTeamTypes::OnSelchangeTeamtypes()
 	m_Suicide = sec.GetBool("Suicide");
 
 	auto const& tagId = sec.GetString("Tag");
-	auto& tagDb = TagDatabase::Instance();
+	auto& tagDb = DB::Tags;
 	if (!tagId.IsEmpty()) {
 		m_Tag = tagId;
-		auto const& tagData = tagDb.Lookup( tagId);
-		m_Tag.Format("%s %s", tagId, tagData.name);
+		if (auto const tagData = tagDb.TryLookup(tagId)) {
+			m_Tag += ' ';
+			m_Tag += tagData->name;
+		}
 	} else {
 		m_Tag = GetLanguageStringACP("None");
 	}

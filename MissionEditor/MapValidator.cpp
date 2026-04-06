@@ -184,8 +184,8 @@ BOOL CMapValidator::CheckMap()
 
 		}
 
-		auto const& triggerDb = TriggerDatabase::Instance();
-		auto const& tagDb = TagDatabase::Instance();
+		auto const& triggerDb = DB::Triggers;
+		auto const& tagDb = DB::Tags;
 		for (auto const& tag : tagDb) {
 			auto const& trigger = tag.triggerId;
 			if (!triggerDb.Exists(trigger)) {

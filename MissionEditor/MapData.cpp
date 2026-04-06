@@ -879,8 +879,8 @@ void CMapData::LoadMap(const CString& file)
 
 
 	UpdateIniFile(MAPDATA_UPDATE_FROM_INI);
-	TriggerDatabase::Instance().LoadFrom(m_mapfile, errstream);
-	TagDatabase::Instance().LoadFrom(m_mapfile, errstream);
+	DB::Triggers.LoadFrom(m_mapfile, errstream);
+	DB::Tags.LoadFrom(m_mapfile, errstream);
 }
 
 
@@ -6446,7 +6446,7 @@ BOOL CMapData::IsYRMap()
 			}
 		}
 
-		auto const& triggerDb = TriggerDatabase::Instance();
+		auto const& triggerDb = DB::Triggers;
 		auto const& eventDefs = TriggerDefinitionManager::Instance().Events();
 		for (auto const& trigger : triggerDb) {
 			auto const& actionParams = trigger.Actions();

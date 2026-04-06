@@ -839,9 +839,9 @@ void ListTriggers(CComboBox& cb)
 	while (cb.DeleteString(0) != CB_ERR);
 
 	CString item; // holder buffer
-	auto const& triggerDb = TriggerDatabase::Instance();
+	auto const& triggerDb = DB::Triggers;
 	for (auto const& trigger : triggerDb) {
-		item.Format("%s (%s)", trigger.ID(), trigger.Options().name);
+		item.Format("%s (%s)", trigger.ID(), trigger.Options().Name());
 		cb.AddString(item);
 	}
 }
@@ -968,7 +968,7 @@ void ListTags(CComboBox& cb, BOOL bListNone)
 	if (bListNone) {
 		cb.AddString("None");
 	}
-	auto const& tagDb = TagDatabase::Instance();
+	auto const& tagDb = DB::Tags;
 	for (auto const& tag : tagDb) {
 		CString s ;
 		s.Format("%s %s", tag.id, tag.name);
@@ -1324,12 +1324,12 @@ CString GetFreeID()
 			"AITriggerTypes",
 		};
 		// trigger and tag:
-		for (auto const& trigger : TriggerDatabase::Instance()) {
+		for (auto const& trigger : DB::Triggers) {
 			if (trigger.ID() == input) {
 				return true;
 			}
 		}
-		for (auto const& tag : TagDatabase::Instance()) {
+		for (auto const& tag : DB::Tags) {
 			if (tag.ID() == input) {
 				return true;
 			}

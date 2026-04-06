@@ -87,7 +87,7 @@ TEST(TriggerTest, OptionsSerde)
 
         EXPECT_EQ("Americans", options.house);
         EXPECT_EQ("<none>", options.nextTrigger);
-        EXPECT_EQ("[Ob2]Reinforcements-Enable", options.name);
+        EXPECT_EQ("[Ob2]Reinforcements-Enable", options.Name());
         EXPECT_EQ(true, options.controls[TriggerOptions::Disable]);
         EXPECT_EQ(true, options.controls[TriggerOptions::Easy]);
         EXPECT_EQ(true, options.controls[TriggerOptions::Medium]);
@@ -101,7 +101,7 @@ TEST(TriggerTest, OptionsSerde)
 
         EXPECT_EQ("Americans", options.house);
         EXPECT_EQ("<none>", options.nextTrigger);
-        EXPECT_EQ("[Ob2]Reinforcements-Delay 1:30", options.name);
+        EXPECT_EQ("[Ob2]Reinforcements-Delay 1:30", options.Name());
         EXPECT_EQ(true, options.controls[TriggerOptions::Disable]);
         EXPECT_EQ(true, options.controls[TriggerOptions::Easy]);
         EXPECT_EQ(true, options.controls[TriggerOptions::Medium]);
@@ -115,7 +115,7 @@ TEST(TriggerTest, OptionsSerde)
 
         EXPECT_EQ("Americans", options.house);
         EXPECT_EQ("<none>", options.nextTrigger);
-        EXPECT_EQ("[Global]Player Has No forces", options.name);
+        EXPECT_EQ("[Global]Player Has No forces", options.Name());
         EXPECT_EQ(false, options.controls[TriggerOptions::Disable]);
         EXPECT_EQ(true, options.controls[TriggerOptions::Easy]);
         EXPECT_EQ(true, options.controls[TriggerOptions::Medium]);
@@ -129,7 +129,7 @@ TEST(TriggerTest, OptionsSerde)
 
         EXPECT_EQ("Player", options.house);
         EXPECT_EQ("01001748", options.nextTrigger);
-        EXPECT_EQ("[MISC]DestroyBridge-Enable-Case2-2", options.name);
+        EXPECT_EQ("[MISC]DestroyBridge-Enable-Case2-2", options.Name());
         EXPECT_EQ(false, options.controls[TriggerOptions::Disable]);
         EXPECT_EQ(true, options.controls[TriggerOptions::Easy]);
         EXPECT_EQ(true, options.controls[TriggerOptions::Medium]);
@@ -141,7 +141,7 @@ TEST(TriggerTest, OptionsSerde)
         const CString data = "Americans,<none>,[Ob3]Timer - Easy,1,1,0,0,0";
         TriggerOptions options(data);
 
-        EXPECT_EQ("[Ob3]Timer - Easy", options.name);
+        EXPECT_EQ("[Ob3]Timer - Easy", options.Name());
         EXPECT_EQ(true, options.controls[TriggerOptions::Disable]);
         EXPECT_EQ(true, options.controls[TriggerOptions::Easy]);
         EXPECT_EQ(false, options.controls[TriggerOptions::Medium]);
@@ -153,7 +153,7 @@ TEST(TriggerTest, OptionsSerde)
         const CString data = "Americans,<none>,[Ob3]Timer - Hard,1,0,0,1,0";
         TriggerOptions options(data);
 
-        EXPECT_EQ("[Ob3]Timer - Hard", options.name);
+        EXPECT_EQ("[Ob3]Timer - Hard", options.Name());
         EXPECT_EQ(true, options.controls[TriggerOptions::Disable]);
         EXPECT_EQ(false, options.controls[TriggerOptions::Easy]);
         EXPECT_EQ(false, options.controls[TriggerOptions::Medium]);
