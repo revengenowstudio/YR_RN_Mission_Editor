@@ -19,6 +19,7 @@ BEGIN_MESSAGE_MAP(CTriggerEditorAllDlg, CDialog)
     ON_BN_CLICKED(IDC_TRGR_MEDIUM, OnMedium)
     ON_BN_CLICKED(IDC_TRGR_HARD, OnHard)
     ON_EN_KILLFOCUS(IDC_TRGR_NAME, onChangeTriggerName)
+    ON_CBN_EDITCHANGE(IDC_TRGR_HOUSE, onEditChangeHouse)
     ON_CBN_EDITCHANGE(IDC_TRGR_TYPE, onChangePersistence)
     ON_CBN_EDITCHANGE(IDC_TRGR_SELECTED_TRIGGER, onEditChangeTriggerType)
     ON_CBN_SELCHANGE(IDC_TRGR_SELECTED_TRIGGER, onSelChangeTrigger)
@@ -164,14 +165,19 @@ void CTriggerEditorAllDlg::translateUI()
     TranslateDlgItem(*this, IDC_TRGR_SEARCH_REFERENCE, "SearchReferenceTitle");
 }
 
-void CTriggerEditorAllDlg::clear()
+void CTriggerEditorAllDlg::clearTriggerTypes()
 {
     while (m_triggerType.DeleteString(0) != CB_ERR);
+    m_currentTrigger.Empty();
+}
+
+void CTriggerEditorAllDlg::clear()
+{
+    clearTriggerTypes();
     while (m_eventList.DeleteString(0) != CB_ERR);
     while (m_actionList.DeleteString(0) != CB_ERR);
     while (m_house.DeleteString(0) != CB_ERR);
     while (m_nextTrigger.DeleteString(0) != CB_ERR);
-    m_currentTrigger.Empty();
     m_eventTypes.SetCurSel(CB_ERR);
     m_actionTypes.SetCurSel(CB_ERR);
     m_eventTypes.SetWindowText("");
@@ -349,6 +355,7 @@ void CTriggerEditorAllDlg::updateTriggerActions()
 
 void CTriggerEditorAllDlg::resetTriggerTypeList()
 {
+    clearTriggerTypes();
     if (m_triggerType.GetCount() <= 0) {
         CIniFile& ini = Map->GetIniFile();
 
@@ -456,7 +463,6 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
 
     TriggerDatabase::Instance().DeleteAt(curTrigger);
     
-    clear();
     resetTriggerTypeList();
 
     int nextSel = sel - 1; // 0 will be -1, means no selection

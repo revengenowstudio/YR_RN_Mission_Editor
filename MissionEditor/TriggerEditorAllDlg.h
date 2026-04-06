@@ -64,6 +64,7 @@ protected:
     afx_msg BOOL onMessageKeyDown(MSG* pMsg);
 
     void translateUI();
+    void clearTriggerTypes();
     void clear();
     void oneTimeInit();
     void onOptionCheckChanged(const CButton& checkBtn, const TriggerOptions::Controls control);
