@@ -475,6 +475,7 @@ void CTriggerEditorAllDlg::onDeleteTrigger()
     m_triggerType.SetCurSel(nextSel);
 
     onSelChangeTrigger();
+    // TODO: notify tag window
 }
 
 void CTriggerEditorAllDlg::onPlaceOnMap()
