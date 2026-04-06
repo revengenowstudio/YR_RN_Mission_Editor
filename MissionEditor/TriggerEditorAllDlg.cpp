@@ -1311,7 +1311,7 @@ void CTriggerEditorAllDlg::onEditAttachedTrigger()
 
     CString triggerId;
     m_nextTrigger.GetWindowText(triggerId);
-    TruncSpace(triggerId);
+    triggerId = TriggerID::RetrieveIDFrom(triggerId);
 
     auto& db = DB::Triggers;
     if (triggerId != "<none>" && !db.Exists(triggerId)) {
