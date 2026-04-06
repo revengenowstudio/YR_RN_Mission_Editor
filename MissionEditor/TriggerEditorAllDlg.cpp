@@ -581,7 +581,8 @@ void CTriggerEditorAllDlg::onChangePersistence()
 
 void CTriggerEditorAllDlg::onEditChangeHouse()
 {
-    if (m_currentTrigger.Get().IsEmpty()) {
+    auto const triggerId = m_currentTrigger.Get();
+    if (triggerId.IsEmpty()) {
         return;
     }
 
@@ -593,7 +594,7 @@ void CTriggerEditorAllDlg::onEditChangeHouse()
     newHouse.TrimLeft();
     TruncSpace(newHouse);
     newHouse.Trim(',');
-    auto& trigger = DB::Triggers.Lookup(m_currentTrigger.Get());
+    auto& trigger = DB::Triggers.Lookup(triggerId);
     trigger.Options().house = newHouse;
 }
 
