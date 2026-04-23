@@ -5824,7 +5824,7 @@ void CMapData::ResizeMap(int iLeft, int iTop, DWORD dwNewWidth, DWORD dwNewHeigh
 
 	for (int i = 0; i < str_count; i++) {
 		STRUCTURE obj;
-		GetStructureData(i, &obj);
+		GetNthStructureData(i, &obj);
 
 		str[i] = obj;
 	}
