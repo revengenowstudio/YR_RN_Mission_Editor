@@ -143,6 +143,7 @@ jobs:
           ${{ env.RELEASE_FOLDER }}/FinalRevenge-win-Portable.zip
           ${{ env.RELEASE_FOLDER }}/FinalRevenge-win-Setup.exe
           ${{ env.RELEASE_FOLDER }}/FinalRevenge-${{ env.RELEASE_VER }}-**
+          dist/FinalRevenge.pdb
         target_commitish: ${{ github.sha }}
         prerelease: ${{ env.IS_PRERELEASE }}
     - name: Push to Releases Repo
