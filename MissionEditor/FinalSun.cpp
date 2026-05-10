@@ -433,6 +433,10 @@ auto parseArgs(const std::string_view commands) {
 	std::unordered_map<std::string_view, std::string_view> argsMap;
 	std::vector<size_t> positions;
 
+	if (commands.find(';') != commands.npos) {
+		return argsMap;
+	}
+
 	// First pass: Find all positions of `--`
 	size_t pos = 0;
 	while ((pos = commands.find("--", pos)) != std::string_view::npos) {
