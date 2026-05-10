@@ -37,6 +37,7 @@ enum class DBOp
 {
     Add,
     Delete,
+    DeleteAll,
 };
 
 // primK points to unique primary key
@@ -75,6 +76,9 @@ public:
     {
         items.clear();
         lookupTable.clear();
+        if (indexUpdateHandler) {
+            indexUpdateHandler({}, {}, DBOp::DeleteAll);
+        }
     }
 
     void SetIndexUpdateHandler(OnIndexUpdate&& handler)
