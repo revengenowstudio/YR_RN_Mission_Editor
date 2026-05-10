@@ -6,9 +6,7 @@ static auto constexpr SEC_EVENTS = "Events";
 static auto constexpr SEC_ACTIONS = "Actions";
 static auto constexpr SEC_TAGS = "Tags";
 
-const TriggerInstance TriggerInstance::Default {
-    "0"
-};
+const TriggerInstance TriggerInstance::Default{ "0" };
 
 template<>
 void ObjectDatabase<TriggerInstance>::LoadFrom(const CIniFile& ini, std::ostream& err)
@@ -118,13 +116,17 @@ void TriggerDatabase::OnUpdateIndex(const CString& idx, const CString& primK, co
         customIndexTable.emplace(idx, primK);
         return;
     }
-    // delete
-    auto [it, last] = customIndexTable.equal_range(idx);
-    for (; it != last;) {
-        if (it->second == primK) {
-            it = customIndexTable.erase(it);
-            break; // no duplicated elements allowed right ?
+    if (op == DBOp::Delete) {
+        auto [it, last] = customIndexTable.equal_range(idx);
+        for (; it != last;) {
+            if (it->second == primK) {
+                it = customIndexTable.erase(it);
+                break; // no duplicated elements allowed right ?
+            }
+            ++it;
         }
-        ++it;
+    }
+    if (op == DBOp::DeleteAll) {
+        customIndexTable.clear();
     }
 }
