@@ -88,3 +88,23 @@ private:
     CommandBridgeProxy m_proxy;
     bool m_initialized = false;
 };
+
+/* ── Callback declarations ────────────────────────────────────────────── */
+
+extern void OnTriggerList(RPCB_CallContext* ctx);
+extern void OnTriggerGetBasic(RPCB_CallContext* ctx);
+extern void OnTriggerEventCount(RPCB_CallContext* ctx);
+extern void OnTriggerEventGet(RPCB_CallContext* ctx);
+extern void OnTriggerActionCount(RPCB_CallContext* ctx);
+extern void OnTriggerActionGet(RPCB_CallContext* ctx);
+extern void OnTriggerCreate(RPCB_CallContext* ctx);
+extern void OnTriggerUpdate(RPCB_CallContext* ctx);
+extern void OnTriggerDelete(RPCB_CallContext* ctx);
+
+extern void OnTagList(RPCB_CallContext* ctx);
+extern void OnTagGet(RPCB_CallContext* ctx);
+extern void OnTagCreate(RPCB_CallContext* ctx);
+extern void OnTagUpdate(RPCB_CallContext* ctx);
+extern void OnTagDelete(RPCB_CallContext* ctx);
+
+extern void OnUpdateDialogs(RPCB_CallContext* ctx);

@@ -5,6 +5,25 @@
 class CMapData;
 CMapData* Map = nullptr;  // stub — no real map in unit tests
 
+// Stub callbacks — test doesn't exercise real trigger/tag logic
+#define STUB_CALLBACK(name) void name(RPCB_CallContext*) {}
+STUB_CALLBACK(OnTriggerList)
+STUB_CALLBACK(OnTriggerGetBasic)
+STUB_CALLBACK(OnTriggerEventCount)
+STUB_CALLBACK(OnTriggerEventGet)
+STUB_CALLBACK(OnTriggerActionCount)
+STUB_CALLBACK(OnTriggerActionGet)
+STUB_CALLBACK(OnTriggerCreate)
+STUB_CALLBACK(OnTriggerUpdate)
+STUB_CALLBACK(OnTriggerDelete)
+STUB_CALLBACK(OnTagList)
+STUB_CALLBACK(OnTagGet)
+STUB_CALLBACK(OnTagCreate)
+STUB_CALLBACK(OnTagUpdate)
+STUB_CALLBACK(OnTagDelete)
+STUB_CALLBACK(OnUpdateDialogs)
+#undef STUB_CALLBACK
+
 /* ── Test-only proxy extension ─────────────────────────────────────────── */
 
 // Test functions are mock-only and not in the real CommandBridge.h.

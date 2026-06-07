@@ -490,6 +490,8 @@
     <ClCompile Include="CliffModifier.cpp" />
     <ClCompile Include="ComboUInputDlg.cpp" />
     <ClCompile Include="CommandBridgeClient.cpp" />
+    <ClCompile Include="CommandBridgeClient\TriggerCallbacks.cpp" />
+    <ClCompile Include="CommandBridgeClient\TagCallbacks.cpp" />
     <ClCompile Include="CsfViewer.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DynamicGraphDlg.cpp" />
