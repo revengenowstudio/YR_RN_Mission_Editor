@@ -1,56 +1,116 @@
 #pragma once
 
+#include <set>
+#include <afxstr.h>
 #include "CommandBridge.h"
 #include "TriggerDef.h"
 
 namespace Serde {
 
-inline void SetKeyValue(RPCB_StrView* items, size_t& n, const char* k, const CString& v) {
-    items[n].data = k;
-    items[n].len  = strlen(k);
-    n++;
-    items[n].data = v;
-    items[n].len  = v.GetLength();
-    n++;
-}
+    using StrViewVec = std::vector<RPCB_StrView>;
 
-inline void WriteControls(RPCB_StrView* items, size_t& n, const TriggerOptions& opts) {
-    CString s;
-    s.Format("%d", opts.controls[TriggerOptions::Disable] ? 1 : 0);
-    SetKeyValue(items, n, "disabled", s);
-    s.Format("%d", opts.controls[TriggerOptions::Easy] ? 1 : 0);
-    SetKeyValue(items, n, "easy", s);
-    s.Format("%d", opts.controls[TriggerOptions::Medium] ? 1 : 0);
-    SetKeyValue(items, n, "medium", s);
-    s.Format("%d", opts.controls[TriggerOptions::Hard] ? 1 : 0);
-    SetKeyValue(items, n, "hard", s);
-    s.Format("%d", opts.controls[TriggerOptions::MustTransfer] ? 1 : 0);
-    SetKeyValue(items, n, "mustTransfer", s);
-}
+    class CacheBuilder {
+    private:
+        StrViewVec items;
+        std::set<CString> stringPool;
 
-inline void WriteEvent(RPCB_StrView* items, size_t& n, const TriggerEvent& ev) {
-    CString s;
-    s.Format("%d", ev.eventType);
-    SetKeyValue(items, n, "eventType", s);
-    SetKeyValue(items, n, "param1", ev.param1);
-    if (ev.param2) {
-        SetKeyValue(items, n, "param2", *ev.param2);
-    }
-}
+    protected:
+        template<size_t N>
+        void pushKeyValue(const char(&key)[N], RPCB_StrView val) {
+            items.emplace_back(key, N - 1);
+            items.emplace_back(val);
+        }
+        void pushKeyValue(CString&& key, const CString& val) {
+            items.emplace_back(ToStr(key));
+            items.emplace_back(val, val.GetLength());
+        }
 
-inline void WriteAction(RPCB_StrView* items, size_t& n, const TriggerAction& act) {
-    CString s;
-    s.Format("%d", act.ActionType());
-    SetKeyValue(items, n, "actionType", s);
-    s.Format("%d", act.ActionCode());
-    SetKeyValue(items, n, "actionCode", s);
-    s.Format("%d", act.Waypoint());
-    SetKeyValue(items, n, "waypoint", s);
-    char key[8];
-    for (int pi = 0; pi < 5; ++pi) {
-        sprintf_s(key, "param%d", pi);
-        SetKeyValue(items, n, key, act.Params()[pi]);
-    }
-}
+        inline RPCB_StrView toStr(const CString& s) {
+            auto const [result, _] = stringPool.insert(s);
+            auto const& str = *result;
+            return { str, static_cast<size_t>(str.GetLength()) };
+        }
 
+    public:
+        CacheBuilder(size_t capcity = 16) {
+            items.reserve(capcity);
+        }
+
+        const size_t Size() const { return items.size(); }
+        const StrViewVec& Build() const { return items; }
+
+        template <typename T>
+        RPCB_StrView ToStr(const T& val);
+
+        template<size_t N>
+        void PushKeyValue(const char(&key)[N], const CString& val) {
+            pushKeyValue(key, { val, static_cast<size_t>(val.GetLength()) });
+        }
+        template<size_t N>
+        void PushKeyValue(const char(&key)[N], int val) {
+            pushKeyValue(key, ToStr(val));
+        }
+        template<size_t N>
+        void PushKeyValue(const char(&key)[N], size_t val) {
+            pushKeyValue(key, ToStr(val));
+        }
+        template<size_t N>
+        void PushKeyValue(const char(&key)[N], bool val) {
+            pushKeyValue(key, ToStr(val));
+        }
+
+        template <>
+        inline RPCB_StrView ToStr<CString>(const CString& s) {
+            return toStr(s);
+        }
+
+        template <>
+        inline RPCB_StrView ToStr<int>(const int& val) {
+            CString s;
+            s.Format(_T("%d"), val);
+            return toStr(s);
+        }
+        template <>
+        inline RPCB_StrView ToStr<size_t>(const size_t& val) {
+            CString s;
+            s.Format(_T("%llu"), val);
+            return toStr(s);
+        }
+        template <>
+        inline RPCB_StrView ToStr<bool>(const bool& isTrue) { return ToStrView(isTrue ? "1" : "0"); }
+    };
+
+    class TriggerCacheBuilder : public CacheBuilder {
+    public:
+        using CacheBuilder::CacheBuilder;
+
+        inline void WriteControls(const TriggerOptions& opts) {
+            pushKeyValue("disabled", ToStr(opts.controls[TriggerOptions::Disable]));
+            pushKeyValue("easy", ToStr(opts.controls[TriggerOptions::Easy]));
+            pushKeyValue("medium", ToStr(opts.controls[TriggerOptions::Medium]));
+            pushKeyValue("hard", ToStr(opts.controls[TriggerOptions::Hard]));
+            pushKeyValue("mustTransfer", ToStr(opts.controls[TriggerOptions::MustTransfer]));
+        }
+
+        inline void WriteEvent(const TriggerEvent& ev) {
+            pushKeyValue("eventType", ToStr(ev.eventType));
+            PushKeyValue("param1", ev.param1);
+            if (ev.param2) {
+                PushKeyValue("param2", *ev.param2);
+            }
+        }
+
+        inline void WriteAction(const TriggerAction& act) {
+            pushKeyValue("actionType", ToStr(act.ActionType()));
+            pushKeyValue("actionCode", ToStr(act.ActionCode()));
+            pushKeyValue("waypoint", ToStr(act.Waypoint()));
+
+            for (int pi = 0; pi < act.Params().size(); ++pi) {
+                CString keyName;
+                keyName.Format("param%d", pi);
+                pushKeyValue(std::move(keyName), act.Params()[pi]);
+            }
+        }
+    };
+    
 } // namespace Serde

@@ -1,5 +1,6 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "CommandBridgeClient.h"
+#include "CommandBridgeClient/Handler.h"
 #include <string>
 
 class CMapData;
@@ -70,17 +71,14 @@ private:
 
 static void EchoCallback(RPCB_CallContext* ctx) {
     auto* proxy = static_cast<TestProxy*>(ctx->userData);
-    RPCB_StrViewList list;
-    list.items = ctx->params.items;
-    list.count = ctx->params.count;
-    auto emptyErr = EmptyStrView();
-    proxy->SendResponse(ctx->uniqueId, emptyErr, &list);
+    RPCB_Response resp = {RPCB_PARAM_STRING_LIST, EmptyStrView(), {ctx->params.items, ctx->params.count}};
+    proxy->SendResponse(ctx->uniqueId, &resp);
 }
 
 static void NullOutputCallback(RPCB_CallContext* ctx) {
     auto* proxy = static_cast<TestProxy*>(ctx->userData);
-    auto emptyErr = EmptyStrView();
-    proxy->SendResponse(ctx->uniqueId, emptyErr, nullptr);
+    RPCB_Response resp = {RPCB_PARAM_STRING_LIST, EmptyStrView(), {}};
+    proxy->SendResponse(ctx->uniqueId, &resp);
 }
 
 /* ── Test fixture ──────────────────────────────────────────────────────── */
@@ -203,4 +201,104 @@ TEST_F(CommandBridgeTest, IsRunningReportsPort) {
     int32_t port = 0;
     EXPECT_EQ(m_proxy.IsRunning(&port), 1);
     EXPECT_EQ(port, 4333);
+}
+
+/* ── ParamExtractor tests ──────────────────────────────────────────────── */
+
+TEST(ParamExtractorTest, EmptyParams) {
+    ParamExtractor ex;
+    int called = 0;
+    ex.Add("id", [&](std::string_view) { called++; });
+    RPCB_StrViewList params = {nullptr, 0};
+    ex.Extract(params);
+    EXPECT_EQ(called, 0);
+}
+
+TEST(ParamExtractorTest, SingleFieldMatch) {
+    ParamExtractor ex;
+    std::string result;
+    ex.Add("id", [&](std::string_view v) { result = std::string(v); });
+
+    const char* idVal = "70000001";
+    RPCB_StrView items[2] = {
+        ToStrView("id"), {idVal, 8}
+    };
+    RPCB_StrViewList params = {items, 2};
+    ex.Extract(params);
+    EXPECT_EQ(result, "70000001");
+}
+
+TEST(ParamExtractorTest, MultipleFieldsSorted) {
+    ParamExtractor ex;
+    std::string a, b, c;
+    ex.Add("house", [&](std::string_view v) { a = std::string(v); });
+    ex.Add("id",    [&](std::string_view v) { b = std::string(v); });
+    ex.Add("name",  [&](std::string_view v) { c = std::string(v); });
+
+    const char* houseVal = "British";
+    const char* idVal    = "70000001";
+    const char* nameVal  = "Player Arrives";
+    RPCB_StrView items[6] = {
+        {"house", 5}, {houseVal, 7},
+        {"id",    2}, {idVal,    8},
+        {"name",  4}, {nameVal, 14},
+    };
+    RPCB_StrViewList params = {items, 6};
+    ex.Extract(params);
+    EXPECT_EQ(a, "British");
+    EXPECT_EQ(b, "70000001");
+    EXPECT_EQ(c, "Player Arrives");
+}
+
+TEST(ParamExtractorTest, FieldsAddedOutOfOrder) {
+    // Add in non-alphabetical order; extraction should still work
+    ParamExtractor ex;
+    std::string first, second, third;
+    ex.Add("name",  [&](std::string_view v) { first  = std::string(v); });
+    ex.Add("id",    [&](std::string_view v) { second = std::string(v); });
+    ex.Add("house", [&](std::string_view v) { third  = std::string(v); });
+
+    const char* houseVal = "British";
+    const char* idVal    = "70000001";
+    const char* nameVal  = "Player Arrives";
+    RPCB_StrView items[6] = {
+        {"house", 5}, {houseVal, 7},
+        {"id",    2}, {idVal,    8},
+        {"name",  4}, {nameVal, 14},
+    };
+    RPCB_StrViewList params = {items, 6};
+    ex.Extract(params);
+    EXPECT_EQ(first,  "Player Arrives");
+    EXPECT_EQ(second, "70000001");
+    EXPECT_EQ(third,  "British");
+}
+
+TEST(ParamExtractorTest, ExtraUnknownParamsSkipped) {
+    ParamExtractor ex;
+    std::string result;
+    ex.Add("name", [&](std::string_view v) { result = std::string(v); });
+
+    const char* nameVal = "Test";
+    RPCB_StrView items[6] = {
+        {"extra1", 6}, {"val1",   4},
+        {"extra2", 6}, {"val2",   4},
+        {"name",   4}, {nameVal, 4},
+    };
+    RPCB_StrViewList params = {items, 6};
+    ex.Extract(params);
+    EXPECT_EQ(result, "Test");
+}
+
+TEST(ParamExtractorTest, MissingFieldsNotCalled) {
+    ParamExtractor ex;
+    int calledA = 0, calledB = 0;
+    ex.Add("present", [&](std::string_view) { calledA++; });
+    ex.Add("absent",  [&](std::string_view) { calledB++; });
+
+    const char* val = "x";
+    RPCB_StrView items[2] = {{"present", 7}, {val, 1}};
+    RPCB_StrViewList params = {items, 2};
+    ex.Extract(params);
+    EXPECT_EQ(calledA, 1);
+    EXPECT_EQ(calledB, 0);
 }

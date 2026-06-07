@@ -58,9 +58,8 @@ public:
     int32_t RegisterAction(const char* name, RPCB_ActionCallback cb, void* data) {
         return CALL_IMPORT_FUNC(RPCB_RegisterAction, RPCB_ERR_NOT_INIT, name, cb, data);
     }
-    int32_t SendResponse(RPCB_StrView uniqueId, RPCB_StrView errorDetail,
-                         const RPCB_StrViewList* outputData) {
-        return CALL_IMPORT_FUNC(RPCB_SendResponse, RPCB_ERR_NOT_INIT, uniqueId, errorDetail, outputData);
+    int32_t SendResponse(RPCB_StrView uniqueId, const RPCB_Response* response) {
+        return CALL_IMPORT_FUNC(RPCB_SendResponse, RPCB_ERR_NOT_INIT, uniqueId, response);
     }
 
 protected:
@@ -78,9 +77,8 @@ public:
     void Shutdown();
     bool IsInitialized() const { return m_initialized; }
 
-    int32_t SendResponse(RPCB_StrView uniqueId, RPCB_StrView errorDetail,
-                         const RPCB_StrViewList* outputData) {
-        return m_proxy.SendResponse(uniqueId, errorDetail, outputData);
+    int32_t SendResponse(RPCB_StrView uniqueId, const RPCB_Response* response) {
+        return m_proxy.SendResponse(uniqueId, response);
     }
 
 private:

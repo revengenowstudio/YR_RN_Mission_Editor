@@ -33,7 +33,7 @@ COMMAND_BRIDGE_EXPORT int32_t RPCB_Init(const CommandBridgeInitArgs* args) {
     if (s_initialized.exchange(true)) {
         return RPCB_ERR_ALREADY_INIT;
     }
-    if (!args || args->reserved != 0) {
+    if (!args) {
         s_initialized = false;
         return RPCB_ERR_INVALID_ARG;
     }
@@ -78,25 +78,34 @@ COMMAND_BRIDGE_EXPORT int32_t RPCB_RegisterAction(const char* actionName,
 }
 
 COMMAND_BRIDGE_EXPORT int32_t RPCB_SendResponse(RPCB_StrView uniqueId,
-                                                 RPCB_StrView errorDetail,
-                                                 const RPCB_StrViewList* outputData) {
+                                                 const RPCB_Response* response) {
     std::string uid(uniqueId.data, uniqueId.len);
     StoredResponse resp;
-    resp.statusCode = 0;  // mock doesn't map errors; tests check via TestGetResponse
-    if (errorDetail.len > 0) {
+    if (!response || response->errorDetail.len > 0) {
         resp.statusCode = 500;
     } else {
         resp.statusCode = 200;
     }
-    if (outputData && outputData->count > 0) {
-        // Build JSON-like body from key-value pairs
+    if (response && response->items.count > 0) {
         std::string body;
-        for (size_t i = 0; i + 1 < outputData->count; i += 2) {
-            if (!body.empty()) { body += ","; }
-            body += "\"" + std::string(outputData->items[i].data, outputData->items[i].len) + "\":";
-            body += "\"" + std::string(outputData->items[i+1].data, outputData->items[i+1].len) + "\"";
+        if (response->paramType == RPCB_PARAM_STRING_ARRAY) {
+            for (size_t i = 0; i < response->items.count; ++i) {
+                if (i > 0) { body += ","; }
+                body += "\"" + std::string(response->items.items[i].data,
+                                           response->items.items[i].len) + "\"";
+            }
+            body = "[" + body + "]";
+        } else {
+            for (size_t i = 0; i + 1 < response->items.count; i += 2) {
+                if (!body.empty()) { body += ","; }
+                body += "\"" + std::string(response->items.items[i].data,
+                                           response->items.items[i].len) + "\":";
+                body += "\"" + std::string(response->items.items[i+1].data,
+                                           response->items.items[i+1].len) + "\"";
+            }
+            body = "{" + body + "}";
         }
-        resp.body = "{" + body + "}";
+        resp.body = std::move(body);
     }
     s_responses.emplace(std::move(uid), std::move(resp));
     return RPCB_SUCCESS;

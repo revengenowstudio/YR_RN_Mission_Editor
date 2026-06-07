@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <stdint.h>
 #include <stddef.h>
@@ -33,7 +33,7 @@ typedef struct RPCB_StrView {
 } RPCB_StrView;
 
 typedef struct RPCB_StrViewList {
-    RPCB_StrView* items;
+    const RPCB_StrView* items;
     size_t        count;
 } RPCB_StrViewList;
 
@@ -42,7 +42,8 @@ typedef struct RPCB_StrViewList {
    -------------------------------------------------------------------------- */
 
 typedef enum RPCB_ParamType {
-    RPCB_PARAM_STRING_LIST = 0,
+    RPCB_PARAM_STRING_LIST  = 0,  /* key-value pairs → JSON object */
+    RPCB_PARAM_STRING_ARRAY = 1,  /* value-only list  → JSON array  */
 } RPCB_ParamType;
 
 /* --------------------------------------------------------------------------
@@ -50,7 +51,7 @@ typedef enum RPCB_ParamType {
    -------------------------------------------------------------------------- */
 
 typedef struct RPCB_CallContext {
-    RPCB_StrView    uniqueId;   /* request / transaction ID */
+    RPCB_StrView    uniqueId;   /* bridge-generated transaction ID — pass back verbatim to RPCB_SendResponse */
     RPCB_ParamType  paramType;
     RPCB_StrViewList params;    /* input params (valid during callback) */
     void*           userData;
@@ -59,15 +60,23 @@ typedef struct RPCB_CallContext {
 typedef void (*RPCB_ActionCallback)(RPCB_CallContext* ctx);
 
 /* --------------------------------------------------------------------------
-   Response function — called by the editor INSIDE a callback to send data
-   back to the bridge. The bridge copies all data before returning, so the
-   editor can safely free outputData after the call.
+   Response descriptor
+   -------------------------------------------------------------------------- */
+
+typedef struct RPCB_Response {
+    RPCB_ParamType  paramType;    /* STRING_LIST (object) or STRING_ARRAY (array) */
+    RPCB_StrView    errorDetail;  /* empty = success; non-empty = error description */
+    RPCB_StrViewList items;        /* output data */
+} RPCB_Response;
+
+/* --------------------------------------------------------------------------
+   Response function — called by the editor INSIDE a callback.
+   The bridge copies all data before returning.
    -------------------------------------------------------------------------- */
 
 COMMAND_BRIDGE_EXPORT int32_t RPCB_SendResponse(
     RPCB_StrView            uniqueId,
-    RPCB_StrView            errorDetail,     /* empty = success; non-empty = error description */
-    const RPCB_StrViewList* outputData
+    const RPCB_Response*    response
 );
 
 /* --------------------------------------------------------------------------
@@ -81,7 +90,6 @@ typedef struct CommandBridgeActionDef {
 } CommandBridgeActionDef;
 
 typedef struct CommandBridgeInitArgs {
-    int32_t                       reserved;
     const CommandBridgeActionDef* actions;
     size_t                        actionCount;
 } CommandBridgeInitArgs;

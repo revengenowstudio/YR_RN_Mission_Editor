@@ -633,6 +633,8 @@
     <ClInclude Include="CliffModifier.h" />
     <ClInclude Include="ComboUInputDlg.h" />
     <ClInclude Include="CommandBridgeClient.h" />
+    <ClInclude Include="CommandBridgeClient\Handler.h" />
+    <ClInclude Include="CommandBridgeClient\Serde.h" />
     <ClInclude Include="CsfViewer.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="defines.h" />

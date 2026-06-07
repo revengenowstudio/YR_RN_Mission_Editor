@@ -312,6 +312,12 @@
     <ClCompile Include="CommandBridgeClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CommandBridgeClient\TriggerCallbacks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandBridgeClient\TagCallbacks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\VersionInfo.rc">
@@ -662,6 +668,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CommandBridgeClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandBridgeClient\Handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandBridgeClient\Serde.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
