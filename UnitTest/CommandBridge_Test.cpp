@@ -2,20 +2,19 @@
 #include "CommandBridgeClient.h"
 #include <string>
 
-/* ── Test callback that echoes input back as output ────────────────────── */
+/* ── Test callbacks that use RPCB_SendResponse ─────────────────────────── */
 
 static void EchoCallback(RPCB_CallContext* ctx) {
-    // Copy input params to output (echo)
-    if (ctx->params.count > 0) {
-        ctx->output.count = ctx->params.count;
-        ctx->output.items = ctx->params.items;
-    }
-    ctx->statusCode = 200;
+    auto* proxy = static_cast<CommandBridgeProxy*>(ctx->userData);
+    RPCB_StrViewList list;
+    list.items = ctx->params.items;
+    list.count = ctx->params.count;
+    proxy->SendResponse(ctx->uniqueId, 200, &list);
 }
 
 static void NullOutputCallback(RPCB_CallContext* ctx) {
-    ctx->output.count = 0;
-    ctx->statusCode = 204;
+    auto* proxy = static_cast<CommandBridgeProxy*>(ctx->userData);
+    proxy->SendResponse(ctx->uniqueId, 204, nullptr);
 }
 
 /* ── Test fixture ──────────────────────────────────────────────────────── */
@@ -23,7 +22,6 @@ static void NullOutputCallback(RPCB_CallContext* ctx) {
 class CommandBridgeTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        // Load mock DLL from the same output directory
         ASSERT_TRUE(m_proxy.Load("CommandBridgeMock.dll"))
             << "CommandBridgeMock.dll not found";
     }
@@ -47,7 +45,6 @@ TEST_F(CommandBridgeTest, ProxyLoadFail_MissingDll) {
     CommandBridgeProxy proxy;
     EXPECT_FALSE(proxy.Load("nonexistent.dll"));
     EXPECT_FALSE(proxy.IsLoaded());
-    // CALL_IMPORT_FUNC should return default value when not loaded
     EXPECT_EQ(proxy.Shutdown(), RPCB_ERR_NOT_INIT);
 }
 
@@ -55,8 +52,8 @@ TEST_F(CommandBridgeTest, ProxyLoadFail_MissingDll) {
 
 TEST_F(CommandBridgeTest, InitRegistersAllActions) {
     CommandBridgeActionDef actions[] = {
-        {"test_echo", EchoCallback, nullptr},
-        {"test_null", NullOutputCallback, nullptr},
+        {"test_echo", EchoCallback, &m_proxy},
+        {"test_null", NullOutputCallback, &m_proxy},
     };
     CommandBridgeInitArgs args = {};
     args.actions     = actions;
@@ -74,11 +71,11 @@ TEST_F(CommandBridgeTest, InitDoubleCallFails) {
     EXPECT_EQ(m_proxy.Init(&args), RPCB_ERR_ALREADY_INIT);
 }
 
-/* ── Dispatch to callback ──────────────────────────────────────────────── */
+/* ── Dispatch to callback; verify response via TestGetResponse ─────────── */
 
 TEST_F(CommandBridgeTest, DispatchToCallback) {
     CommandBridgeActionDef actions[] = {
-        {"test_echo", EchoCallback, nullptr},
+        {"test_echo", EchoCallback, &m_proxy},
     };
     CommandBridgeInitArgs args = {};
     args.actions     = actions;
@@ -94,16 +91,17 @@ TEST_F(CommandBridgeTest, DispatchToCallback) {
     ctx.params    = {paramItems, 2};
 
     ASSERT_EQ(m_proxy.TestDispatch("test_echo", &ctx), RPCB_SUCCESS);
-    EXPECT_EQ(ctx.statusCode, 200);
-    EXPECT_EQ(ctx.output.count, 2u);
-    // Output should echo input
-    EXPECT_EQ(std::string(ctx.output.items[0].data, ctx.output.items[0].len), "key");
-    EXPECT_EQ(std::string(ctx.output.items[1].data, ctx.output.items[1].len), "value");
+
+    int32_t statusCode = 0;
+    char body[256] = {};
+    ASSERT_EQ(m_proxy.TestGetResponse("70000001", &statusCode, body, sizeof(body)), RPCB_SUCCESS);
+    EXPECT_EQ(statusCode, 200);
+    EXPECT_STRNE(body, "");
 }
 
-/* ── Unknown action returns 404 ────────────────────────────────────────── */
+/* ── Unknown action returns NOT_FOUND ──────────────────────────────────── */
 
-TEST_F(CommandBridgeTest, UnknownActionReturns404) {
+TEST_F(CommandBridgeTest, UnknownActionReturnsNotFound) {
     CommandBridgeInitArgs args = {};
     ASSERT_EQ(m_proxy.Init(&args), RPCB_SUCCESS);
 
@@ -111,8 +109,7 @@ TEST_F(CommandBridgeTest, UnknownActionReturns404) {
     ctx.uniqueId  = {"x", 1};
     ctx.paramType = RPCB_PARAM_STRING_LIST;
 
-    ASSERT_EQ(m_proxy.TestDispatch("nonexistent", &ctx), RPCB_SUCCESS);
-    EXPECT_EQ(ctx.statusCode, 404);
+    EXPECT_EQ(m_proxy.TestDispatch("nonexistent", &ctx), RPCB_ERR_NOT_FOUND);
 }
 
 /* ── Shutdown clears actions ───────────────────────────────────────────── */
@@ -128,7 +125,6 @@ TEST_F(CommandBridgeTest, ShutdownClearsActions) {
     EXPECT_EQ(m_proxy.TestGetActionCount(), 1);
 
     ASSERT_EQ(m_proxy.Shutdown(), RPCB_SUCCESS);
-    // After shutdown, IsRunning returns 0
     EXPECT_EQ(m_proxy.IsRunning(nullptr), 0);
 }
 

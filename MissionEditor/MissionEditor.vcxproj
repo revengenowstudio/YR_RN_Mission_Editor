@@ -489,6 +489,7 @@
     <ClCompile Include="ChangeSizeDlg.cpp" />
     <ClCompile Include="CliffModifier.cpp" />
     <ClCompile Include="ComboUInputDlg.cpp" />
+    <ClCompile Include="CommandBridgeClient.cpp" />
     <ClCompile Include="CsfViewer.cpp" />
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="DynamicGraphDlg.cpp" />
@@ -629,6 +630,7 @@
     <ClInclude Include="ChangeSizeDlg.h" />
     <ClInclude Include="CliffModifier.h" />
     <ClInclude Include="ComboUInputDlg.h" />
+    <ClInclude Include="CommandBridgeClient.h" />
     <ClInclude Include="CsfViewer.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="defines.h" />

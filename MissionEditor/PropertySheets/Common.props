@@ -18,7 +18,7 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;SCRIPT_SUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)MissionEditorPackLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)MissionEditorPackLib;$(SolutionDir)CommandBridgeMock\3rdParty\CommandBridge</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>

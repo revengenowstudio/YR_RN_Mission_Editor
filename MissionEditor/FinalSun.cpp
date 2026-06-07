@@ -25,6 +25,7 @@
 #include "stdafx.h"
 #include "FinalSun.h"
 #include "FinalSunDlg.h"
+#include "CommandBridgeClient.h"
 #include "structs.h"
 #include "mapdata.h"
 #include "variables.h"
@@ -421,12 +422,19 @@ BOOL CFinalSunApp::InitInstance()
 		auto const dlg = std::make_unique<CFinalSunDlg>();
 		m_pMainWnd = dlg.get();
 
+		CommandBridgeClient::Instance().Init();
+
 		dlg->DoModal();
 	}
 
-	// Map and dialog closed, do further work if required	
+	// Map and dialog closed, do further work if required
 
 	return FALSE;
+}
+
+int CFinalSunApp::ExitInstance() {
+	CommandBridgeClient::Instance().Shutdown();
+	return CWinApp::ExitInstance();
 }
 
 auto parseArgs(const std::string_view commands) {

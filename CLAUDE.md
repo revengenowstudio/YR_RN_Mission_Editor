@@ -21,7 +21,7 @@
 
 ### Bracing
 
-Opening brace on the **same line** as the control-flow keyword. Never single-line clauses (always use braces).
+Opening brace on the **same line** as the control-flow keyword. Never single-line clauses — the body always goes on its own indented line, even with braces.
 
 ```cpp
 // Correct
@@ -34,11 +34,26 @@ for (auto const& item : items) {
 }
 
 // Wrong
-if (condition) doThing();       // no braces
-if (condition)                  // brace on next line
+if (condition) doThing();           // no braces
+if (condition) { doThing(); }       // braced but single-line
+if (condition)                      // brace on next line
 {
     doThing();
 }
+```
+
+### One statement per line
+
+Each statement gets its own line. Do not pack multiple statements on one line, even in short scope blocks.
+
+```cpp
+// Correct
+CString s;
+s.Format("%d", value);
+SetKeyValue(items, n, "key", s);
+
+// Wrong
+CString s; s.Format("%d", value);   // two statements on one line
 ```
 
 ### Namespacing
@@ -51,6 +66,34 @@ if (condition)                  // brace on next line
 
 - `#pragma once` (modern files) preferred over `#ifndef` guards (legacy files)
 - Precompiled header: `stdafx.h` (used in MissionEditor project)
+
+### Casts
+
+Use C++ casts exclusively. C-style casts are forbidden.
+
+```cpp
+// Correct
+auto* ptr = static_cast<const char*>(cstring);
+auto  val  = reinterpret_cast<uintptr_t>(ptr);
+
+// Wrong
+auto* ptr = (const char*)cstring;
+auto  val  = (uintptr_t)ptr;
+```
+
+Prefer implicit conversions where available (e.g. `CString` → `const char*` in MultiByte builds).
+
+### Virtual Overrides
+
+All virtual function overrides must use the `override` keyword.
+
+```cpp
+// Correct
+int ExitInstance() override;
+
+// Wrong
+virtual int ExitInstance();
+```
 
 ### C++ Features
 

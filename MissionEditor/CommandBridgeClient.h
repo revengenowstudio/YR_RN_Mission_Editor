@@ -16,8 +16,10 @@ struct CommandBridgeImports {
     DEFINE_IMPORT_FUNC(RPCB_Shutdown);
     DEFINE_IMPORT_FUNC(RPCB_IsRunning);
     DEFINE_IMPORT_FUNC(RPCB_RegisterAction);
+    DEFINE_IMPORT_FUNC(RPCB_SendResponse);
     DEFINE_IMPORT_FUNC(RPCB_TestDispatch);
     DEFINE_IMPORT_FUNC(RPCB_TestGetActionCount);
+    DEFINE_IMPORT_FUNC(RPCB_TestGetResponse);
 };
 
 /* ── Proxy class ────────────────────────────────────────────────────────── */
@@ -49,11 +51,41 @@ public:
     int32_t TestDispatch(const char* name, RPCB_CallContext* ctx) {
         return CALL_IMPORT_FUNC(RPCB_TestDispatch, RPCB_ERR_NOT_INIT, name, ctx);
     }
+    int32_t SendResponse(RPCB_StrView uniqueId, int32_t statusCode,
+                         const RPCB_StrViewList* outputData) {
+        return CALL_IMPORT_FUNC(RPCB_SendResponse, RPCB_ERR_NOT_INIT, uniqueId, statusCode, outputData);
+    }
     int32_t TestGetActionCount() {
         return CALL_IMPORT_FUNC(RPCB_TestGetActionCount, -1);
+    }
+    int32_t TestGetResponse(const char* uniqueId, int32_t* outStatusCode,
+                            char* outBody, size_t bodySize) {
+        return CALL_IMPORT_FUNC(RPCB_TestGetResponse, RPCB_ERR_NOT_INIT,
+                                uniqueId, outStatusCode, outBody, bodySize);
     }
 
 private:
     void*                m_hModule = nullptr;  // HMODULE, cast in .cpp
     CommandBridgeImports m_imports = {};
+};
+
+/* ── Editor integration singleton ─────────────────────────────────────── */
+
+class CommandBridgeClient {
+public:
+    static CommandBridgeClient& Instance();
+
+    bool Init();
+    void Shutdown();
+    bool IsInitialized() const { return m_initialized; }
+
+    int32_t SendResponse(RPCB_StrView uniqueId, int32_t statusCode,
+                         const RPCB_StrViewList* outputData) {
+        return m_proxy.SendResponse(uniqueId, statusCode, outputData);
+    }
+
+private:
+    CommandBridgeClient() = default;
+    CommandBridgeProxy m_proxy;
+    bool m_initialized = false;
 };

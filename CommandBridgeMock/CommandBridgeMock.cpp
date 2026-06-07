@@ -9,7 +9,13 @@ struct CallbackEntry {
     void*               userData;
 };
 
+struct StoredResponse {
+    std::string body;
+    int32_t     statusCode;
+};
+
 static std::unordered_map<std::string, CallbackEntry> s_actions;
+static std::unordered_map<std::string, StoredResponse> s_responses;
 static std::atomic<bool> s_initialized{false};
 
 /* ── Standard C API ─────────────────────────────────────────────────────── */
@@ -37,6 +43,7 @@ COMMAND_BRIDGE_EXPORT int32_t RPCB_Shutdown(void) {
         return RPCB_ERR_NOT_INIT;
     }
     s_actions.clear();
+    s_responses.clear();
     return RPCB_SUCCESS;
 }
 
@@ -63,6 +70,26 @@ COMMAND_BRIDGE_EXPORT int32_t RPCB_RegisterAction(const char* actionName,
     return RPCB_SUCCESS;
 }
 
+COMMAND_BRIDGE_EXPORT int32_t RPCB_SendResponse(RPCB_StrView uniqueId,
+                                                 int32_t statusCode,
+                                                 const RPCB_StrViewList* outputData) {
+    std::string uid(uniqueId.data, uniqueId.len);
+    StoredResponse resp;
+    resp.statusCode = statusCode;
+    if (outputData && outputData->count > 0) {
+        // Build JSON-like body from key-value pairs
+        std::string body;
+        for (size_t i = 0; i + 1 < outputData->count; i += 2) {
+            if (!body.empty()) { body += ","; }
+            body += "\"" + std::string(outputData->items[i].data, outputData->items[i].len) + "\":";
+            body += "\"" + std::string(outputData->items[i+1].data, outputData->items[i+1].len) + "\"";
+        }
+        resp.body = "{" + body + "}";
+    }
+    s_responses.emplace(std::move(uid), std::move(resp));
+    return RPCB_SUCCESS;
+}
+
 /* ── Test-only functions ─────────────────────────────────────────────────── */
 
 COMMAND_BRIDGE_EXPORT int32_t RPCB_TestDispatch(const char* actionName,
@@ -72,17 +99,46 @@ COMMAND_BRIDGE_EXPORT int32_t RPCB_TestDispatch(const char* actionName,
     }
     auto it = s_actions.find(actionName);
     if (it == s_actions.end()) {
-        ctx->statusCode = 404;
+        return RPCB_ERR_NOT_FOUND;
+    }
+
+    std::string uid(ctx->uniqueId.data, ctx->uniqueId.len);
+    s_responses.erase(uid); // clear any previous response
+
+    ctx->userData = it->second.userData;
+    it->second.callback(ctx);
+
+    // Check if callback sent a response
+    auto rit = s_responses.find(uid);
+    if (rit != s_responses.end()) {
+        ctx->userData = reinterpret_cast<void*>(static_cast<intptr_t>(rit->second.statusCode));
         return RPCB_SUCCESS;
     }
-    ctx->userData = it->second.userData;
-    ctx->statusCode = 200;
-    it->second.callback(ctx);
-    return RPCB_SUCCESS;
+    return RPCB_ERR_NOT_FOUND;
 }
 
 COMMAND_BRIDGE_EXPORT int32_t RPCB_TestGetActionCount(void) {
     return static_cast<int32_t>(s_actions.size());
+}
+
+COMMAND_BRIDGE_EXPORT int32_t RPCB_TestGetResponse(const char* uniqueId,
+                                                    int32_t* outStatusCode,
+                                                    char* outBody, size_t bodySize) {
+    std::string uid(uniqueId);
+    auto it = s_responses.find(uid);
+    if (it == s_responses.end()) {
+        return RPCB_ERR_NOT_FOUND;
+    }
+    if (outStatusCode) {
+        *outStatusCode = it->second.statusCode;
+    }
+    if (outBody && bodySize > 0) {
+        size_t copyLen = it->second.body.size() < bodySize - 1
+            ? it->second.body.size() : bodySize - 1;
+        memcpy(outBody, it->second.body.data(), copyLen);
+        outBody[copyLen] = '\0';
+    }
+    return RPCB_SUCCESS;
 }
 
 } // extern "C"

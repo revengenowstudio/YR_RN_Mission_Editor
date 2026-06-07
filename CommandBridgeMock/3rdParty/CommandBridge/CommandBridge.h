@@ -50,15 +50,25 @@ typedef enum RPCB_ParamType {
    -------------------------------------------------------------------------- */
 
 typedef struct RPCB_CallContext {
-    RPCB_StrView    uniqueId;
+    RPCB_StrView    uniqueId;   /* request / transaction ID */
     RPCB_ParamType  paramType;
-    RPCB_StrViewList params;
-    RPCB_StrViewList output;
-    int32_t         statusCode;
+    RPCB_StrViewList params;    /* input params (valid during callback) */
     void*           userData;
 } RPCB_CallContext;
 
 typedef void (*RPCB_ActionCallback)(RPCB_CallContext* ctx);
+
+/* --------------------------------------------------------------------------
+   Response function — called by the editor INSIDE a callback to send data
+   back to the bridge. The bridge copies all data before returning, so the
+   editor can safely free outputData after the call.
+   -------------------------------------------------------------------------- */
+
+COMMAND_BRIDGE_EXPORT int32_t RPCB_SendResponse(
+    RPCB_StrView            uniqueId,
+    int32_t                 statusCode,
+    const RPCB_StrViewList* outputData
+);
 
 /* --------------------------------------------------------------------------
    Init args
@@ -112,6 +122,10 @@ COMMAND_BRIDGE_EXPORT int32_t RPCB_TestDispatch(const char* actionName,
                                                  RPCB_CallContext* ctx);
 
 COMMAND_BRIDGE_EXPORT int32_t RPCB_TestGetActionCount(void);
+
+COMMAND_BRIDGE_EXPORT int32_t RPCB_TestGetResponse(const char* uniqueId,
+                                                    int32_t* outStatusCode,
+                                                    char* outBody, size_t bodySize);
 
 #ifdef __cplusplus
 }

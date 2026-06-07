@@ -101,8 +101,9 @@ public:
 		// Vom Klassenassistenten generierte Überladungen virtueller Funktionen
 		//{{AFX_VIRTUAL(CFinalSunApp)
 public:
-	virtual BOOL InitInstance();
-	virtual int Run();
+	BOOL InitInstance() override;
+	int ExitInstance() override;
+	int Run() override;
 	virtual BOOL ProcessMessageFilter(int code, LPMSG lpMsg);
 	virtual LRESULT ProcessWndProcException(CException* e, const MSG* pMsg);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
