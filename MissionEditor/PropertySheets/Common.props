@@ -44,5 +44,8 @@
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>$(MSBuildThisFileDirectory)force_utf8.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
+    <PostBuildEvent>
+      <Command>call "$(MSBuildThisFileDirectory)copy_commandbridge.bat" "$(Configuration)" "$(Platform)" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
 </Project>
