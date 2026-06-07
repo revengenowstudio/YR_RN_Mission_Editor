@@ -116,17 +116,6 @@ COMMAND_BRIDGE_EXPORT int32_t RPCB_RegisterAction(
 /* (Deferred — not implemented yet.)
    COMMAND_BRIDGE_EXPORT int32_t RPCB_UnregisterAction(const char* actionName); */
 
-/* ── Test-only functions (CommandBridgeMock only) ─────────────────────── */
-
-COMMAND_BRIDGE_EXPORT int32_t RPCB_TestDispatch(const char* actionName,
-                                                 RPCB_CallContext* ctx);
-
-COMMAND_BRIDGE_EXPORT int32_t RPCB_TestGetActionCount(void);
-
-COMMAND_BRIDGE_EXPORT int32_t RPCB_TestGetResponse(const char* uniqueId,
-                                                    int32_t* outStatusCode,
-                                                    char* outBody, size_t bodySize);
-
 #ifdef __cplusplus
 }
 #endif

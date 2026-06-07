@@ -2,10 +2,52 @@
 #include "CommandBridgeClient.h"
 #include <string>
 
+/* ── Test-only proxy extension ─────────────────────────────────────────── */
+
+// Test functions are mock-only and not in the real CommandBridge.h.
+// Declare them here so we can resolve them via GetProcAddress.
+
+extern "C" {
+    using TestDispatchFn      = int32_t (*)(const char*, RPCB_CallContext*);
+    using TestGetActionCountFn = int32_t (*)();
+    using TestGetResponseFn    = int32_t (*)(const char*, int32_t*, char*, size_t);
+}
+
+class TestProxy : public CommandBridgeProxy {
+public:
+    bool Load() {
+        if (!CommandBridgeProxy::Load("CommandBridgeMock.dll")) {
+            return false;
+        }
+        pTestDispatch       = reinterpret_cast<TestDispatchFn>(
+            GetProcAddress(static_cast<HMODULE>(m_hModule), "RPCB_TestDispatch"));
+        pTestGetActionCount = reinterpret_cast<TestGetActionCountFn>(
+            GetProcAddress(static_cast<HMODULE>(m_hModule), "RPCB_TestGetActionCount"));
+        pTestGetResponse    = reinterpret_cast<TestGetResponseFn>(
+            GetProcAddress(static_cast<HMODULE>(m_hModule), "RPCB_TestGetResponse"));
+        return pTestDispatch && pTestGetActionCount && pTestGetResponse;
+    }
+
+    int32_t TestDispatch(const char* name, RPCB_CallContext* ctx) {
+        return pTestDispatch ? pTestDispatch(name, ctx) : RPCB_ERR_NOT_INIT;
+    }
+    int32_t TestGetActionCount() {
+        return pTestGetActionCount ? pTestGetActionCount() : -1;
+    }
+    int32_t TestGetResponse(const char* uid, int32_t* code, char* body, size_t size) {
+        return pTestGetResponse ? pTestGetResponse(uid, code, body, size) : RPCB_ERR_NOT_INIT;
+    }
+
+private:
+    TestDispatchFn       pTestDispatch       = nullptr;
+    TestGetActionCountFn pTestGetActionCount = nullptr;
+    TestGetResponseFn    pTestGetResponse    = nullptr;
+};
+
 /* ── Test callbacks that use RPCB_SendResponse ─────────────────────────── */
 
 static void EchoCallback(RPCB_CallContext* ctx) {
-    auto* proxy = static_cast<CommandBridgeProxy*>(ctx->userData);
+    auto* proxy = static_cast<TestProxy*>(ctx->userData);
     RPCB_StrViewList list;
     list.items = ctx->params.items;
     list.count = ctx->params.count;
@@ -13,7 +55,7 @@ static void EchoCallback(RPCB_CallContext* ctx) {
 }
 
 static void NullOutputCallback(RPCB_CallContext* ctx) {
-    auto* proxy = static_cast<CommandBridgeProxy*>(ctx->userData);
+    auto* proxy = static_cast<TestProxy*>(ctx->userData);
     proxy->SendResponse(ctx->uniqueId, 204, nullptr);
 }
 
@@ -22,7 +64,7 @@ static void NullOutputCallback(RPCB_CallContext* ctx) {
 class CommandBridgeTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        ASSERT_TRUE(m_proxy.Load("CommandBridgeMock.dll"))
+        ASSERT_TRUE(m_proxy.Load())
             << "CommandBridgeMock.dll not found";
     }
 
@@ -32,7 +74,7 @@ protected:
         }
     }
 
-    CommandBridgeProxy m_proxy;
+    TestProxy m_proxy;
 };
 
 /* ── Proxy load ────────────────────────────────────────────────────────── */
@@ -116,7 +158,7 @@ TEST_F(CommandBridgeTest, UnknownActionReturnsNotFound) {
 
 TEST_F(CommandBridgeTest, ShutdownClearsActions) {
     CommandBridgeActionDef actions[] = {
-        {"test_echo", EchoCallback, nullptr},
+        {"test_echo", EchoCallback, &m_proxy},
     };
     CommandBridgeInitArgs args = {};
     args.actions     = actions;

@@ -28,9 +28,6 @@ bool CommandBridgeProxy::Load(const char* dllName) {
     ASSIGN_IMPORT_FUNC(hMod, m_imports, RPCB_IsRunning);
     ASSIGN_IMPORT_FUNC(hMod, m_imports, RPCB_RegisterAction);
     ASSIGN_IMPORT_FUNC(hMod, m_imports, RPCB_SendResponse);
-    ASSIGN_IMPORT_FUNC(hMod, m_imports, RPCB_TestDispatch);
-    ASSIGN_IMPORT_FUNC(hMod, m_imports, RPCB_TestGetActionCount);
-    ASSIGN_IMPORT_FUNC(hMod, m_imports, RPCB_TestGetResponse);
 
     if (!m_imports.pRPCB_Init || !m_imports.pRPCB_Shutdown) {
         ::FreeLibrary(hMod);

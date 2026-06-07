@@ -1,8 +1,15 @@
-#include "3rdParty/CommandBridge/CommandBridge.h"
+#include "CommandBridge.h"
 
 #include <unordered_map>
 #include <string>
 #include <atomic>
+
+/* Test-only exports — not in the public CommandBridge.h */
+extern "C" {
+    COMMAND_BRIDGE_EXPORT int32_t RPCB_TestDispatch(const char*, RPCB_CallContext*);
+    COMMAND_BRIDGE_EXPORT int32_t RPCB_TestGetActionCount(void);
+    COMMAND_BRIDGE_EXPORT int32_t RPCB_TestGetResponse(const char*, int32_t*, char*, size_t);
+}
 
 struct CallbackEntry {
     RPCB_ActionCallback callback;
