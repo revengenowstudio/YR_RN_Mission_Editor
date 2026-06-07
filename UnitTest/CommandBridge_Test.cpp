@@ -24,8 +24,8 @@ class CommandBridgeTest : public ::testing::Test {
 protected:
     void SetUp() override {
         // Load mock DLL from the same output directory
-        ASSERT_TRUE(m_proxy.Load("CommandBridgeMockd.dll"))
-            << "CommandBridgeMockd.dll not found";
+        ASSERT_TRUE(m_proxy.Load("CommandBridgeMock.dll"))
+            << "CommandBridgeMock.dll not found";
     }
 
     void TearDown() override {
