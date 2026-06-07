@@ -2,6 +2,19 @@
 
 #include "CommandBridge.h"
 
+/* ── Error constants ─────────────────────────────────────────────────────── */
+
+namespace CBError {
+    inline constexpr RPCB_StrView MapNotLoaded        = ToStrView("map not loaded");
+    inline constexpr RPCB_StrView TriggerNotFound     = ToStrView("trigger not found");
+    inline constexpr RPCB_StrView TagNotFound         = ToStrView("tag not found");
+    inline constexpr RPCB_StrView EventIndexInvalid   = ToStrView("event index invalid");
+    inline constexpr RPCB_StrView ActionIndexInvalid  = ToStrView("action index invalid");
+    inline constexpr RPCB_StrView MissingFieldId      = ToStrView("missing field: id");
+    inline constexpr RPCB_StrView TriggerAlreadyExists = ToStrView("trigger already exists");
+    inline constexpr RPCB_StrView TagAlreadyExists    = ToStrView("tag already exists");
+}
+
 /* ── Import helper macros ───────────────────────────────────────────────── */
 
 #define DEFINE_IMPORT_FUNC(func) decltype(&func) p##func
@@ -45,9 +58,9 @@ public:
     int32_t RegisterAction(const char* name, RPCB_ActionCallback cb, void* data) {
         return CALL_IMPORT_FUNC(RPCB_RegisterAction, RPCB_ERR_NOT_INIT, name, cb, data);
     }
-    int32_t SendResponse(RPCB_StrView uniqueId, int32_t statusCode,
+    int32_t SendResponse(RPCB_StrView uniqueId, RPCB_StrView errorDetail,
                          const RPCB_StrViewList* outputData) {
-        return CALL_IMPORT_FUNC(RPCB_SendResponse, RPCB_ERR_NOT_INIT, uniqueId, statusCode, outputData);
+        return CALL_IMPORT_FUNC(RPCB_SendResponse, RPCB_ERR_NOT_INIT, uniqueId, errorDetail, outputData);
     }
 
 protected:
@@ -65,9 +78,9 @@ public:
     void Shutdown();
     bool IsInitialized() const { return m_initialized; }
 
-    int32_t SendResponse(RPCB_StrView uniqueId, int32_t statusCode,
+    int32_t SendResponse(RPCB_StrView uniqueId, RPCB_StrView errorDetail,
                          const RPCB_StrViewList* outputData) {
-        return m_proxy.SendResponse(uniqueId, statusCode, outputData);
+        return m_proxy.SendResponse(uniqueId, errorDetail, outputData);
     }
 
 private:

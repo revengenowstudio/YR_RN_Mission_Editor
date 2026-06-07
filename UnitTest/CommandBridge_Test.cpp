@@ -2,6 +2,9 @@
 #include "CommandBridgeClient.h"
 #include <string>
 
+class CMapData;
+CMapData* Map = nullptr;  // stub — no real map in unit tests
+
 /* ── Test-only proxy extension ─────────────────────────────────────────── */
 
 // Test functions are mock-only and not in the real CommandBridge.h.
@@ -51,12 +54,14 @@ static void EchoCallback(RPCB_CallContext* ctx) {
     RPCB_StrViewList list;
     list.items = ctx->params.items;
     list.count = ctx->params.count;
-    proxy->SendResponse(ctx->uniqueId, 200, &list);
+    auto emptyErr = EmptyStrView();
+    proxy->SendResponse(ctx->uniqueId, emptyErr, &list);
 }
 
 static void NullOutputCallback(RPCB_CallContext* ctx) {
     auto* proxy = static_cast<TestProxy*>(ctx->userData);
-    proxy->SendResponse(ctx->uniqueId, 204, nullptr);
+    auto emptyErr = EmptyStrView();
+    proxy->SendResponse(ctx->uniqueId, emptyErr, nullptr);
 }
 
 /* ── Test fixture ──────────────────────────────────────────────────────── */

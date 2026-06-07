@@ -78,11 +78,16 @@ COMMAND_BRIDGE_EXPORT int32_t RPCB_RegisterAction(const char* actionName,
 }
 
 COMMAND_BRIDGE_EXPORT int32_t RPCB_SendResponse(RPCB_StrView uniqueId,
-                                                 int32_t statusCode,
+                                                 RPCB_StrView errorDetail,
                                                  const RPCB_StrViewList* outputData) {
     std::string uid(uniqueId.data, uniqueId.len);
     StoredResponse resp;
-    resp.statusCode = statusCode;
+    resp.statusCode = 0;  // mock doesn't map errors; tests check via TestGetResponse
+    if (errorDetail.len > 0) {
+        resp.statusCode = 500;
+    } else {
+        resp.statusCode = 200;
+    }
     if (outputData && outputData->count > 0) {
         // Build JSON-like body from key-value pairs
         std::string body;

@@ -4,6 +4,7 @@
 #include "TriggerDef.h"
 #include <memory>
 #include <string>
+#include "variables.h"
 
 /* ── Resolve macro ─────────────────────────────────────────────────────── */
 
@@ -63,13 +64,21 @@ void SetKeyValue(RPCB_StrView* items, size_t& n, const char* k, const CString& v
     n++;
 }
 
-void SendKV(RPCB_CallContext* ctx, RPCB_StrView* items, size_t n, int32_t code) {
+void SendKV(RPCB_CallContext* ctx, RPCB_StrView* items, size_t n) {
     RPCB_StrViewList list = {items, n};
-    CommandBridgeClient::Instance().SendResponse(ctx->uniqueId, code, &list);
+    CommandBridgeClient::Instance().SendResponse(ctx->uniqueId, EmptyStrView(), &list);
 }
 
-void SendEmpty(RPCB_CallContext* ctx, int32_t code) {
-    CommandBridgeClient::Instance().SendResponse(ctx->uniqueId, code, nullptr);
+void SendError(RPCB_CallContext* ctx, RPCB_StrView err) {
+    CommandBridgeClient::Instance().SendResponse(ctx->uniqueId, err, nullptr);
+}
+
+bool IsMapReady() {
+    return Map != nullptr;
+}
+
+void SendEmpty(RPCB_CallContext* ctx) {
+    CommandBridgeClient::Instance().SendResponse(ctx->uniqueId, EmptyStrView(), nullptr);
 }
 
 /* ── Param lookup helper ───────────────────────────────────────────────── */
@@ -87,6 +96,10 @@ CString FindParam(const RPCB_StrViewList& params, const char* key) {
 /* ── Trigger callbacks ─────────────────────────────────────────────────── */
 
 void OnTriggerList(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     auto& db = DB::Triggers;
     auto count = db.Size();
     auto items = std::make_unique<RPCB_StrView[]>(count);
@@ -98,14 +111,18 @@ void OnTriggerList(RPCB_CallContext* ctx) {
         list.items[list.count].len  = t.ID().GetLength();
         list.count++;
     }
-    CommandBridgeClient::Instance().SendResponse(ctx->uniqueId, 200, &list);
+    CommandBridgeClient::Instance().SendResponse(ctx->uniqueId, EmptyStrView(), &list);
 }
 
 void OnTriggerGetBasic(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     CString triggerId(ctx->uniqueId.data, ctx->uniqueId.len);
     auto* t = DB::Triggers.TryLookup(triggerId);
     if (!t) {
-        SendEmpty(ctx, 404);
+        SendError(ctx, CBError::TriggerNotFound);
         return;
     }
     auto& opts = t->Options();
@@ -129,30 +146,42 @@ void OnTriggerGetBasic(RPCB_CallContext* ctx) {
     s.Format("%d", opts.controls[TriggerOptions::MustTransfer] ? 1 : 0);
     SetKeyValue(items, n, "mustTransfer", s);
 
-    SendKV(ctx, items, n, 200);
+    SendKV(ctx, items, n);
 }
 
 void OnTriggerEventCount(RPCB_CallContext* ctx) {
-    CString triggerId(ctx->uniqueId.data, ctx->uniqueId.len);
-    auto* t = DB::Triggers.TryLookup(triggerId);
-    CString cnt;
-    cnt.Format("%zu", t ? t->Events().Size() : 0);
-    RPCB_StrView items[2];
-    size_t n = 0;
-    SetKeyValue(items, n, "count", cnt);
-    SendKV(ctx, items, n, t ? 200 : 404);
-}
-
-void OnTriggerEventGet(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     CString triggerId(ctx->uniqueId.data, ctx->uniqueId.len);
     auto* t = DB::Triggers.TryLookup(triggerId);
     if (!t) {
-        SendEmpty(ctx, 404);
+        SendError(ctx, CBError::TriggerNotFound);
+        return;
+    }
+    CString cnt;
+    cnt.Format("%zu", t->Events().Size());
+    RPCB_StrView items[2];
+    size_t n = 0;
+    SetKeyValue(items, n, "count", cnt);
+    SendKV(ctx, items, n);
+}
+
+void OnTriggerEventGet(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
+    CString triggerId(ctx->uniqueId.data, ctx->uniqueId.len);
+    auto* t = DB::Triggers.TryLookup(triggerId);
+    if (!t) {
+        SendError(ctx, CBError::TriggerNotFound);
         return;
     }
     int idx = std::atoi(FindParam(ctx->params, "index"));
     if (idx < 0 || static_cast<size_t>(idx) >= t->Events().Size()) {
-        SendEmpty(ctx, 404);
+        SendError(ctx, CBError::EventIndexInvalid);
         return;
     }
     auto& ev = t->Events().Nth(idx);
@@ -166,30 +195,42 @@ void OnTriggerEventGet(RPCB_CallContext* ctx) {
     if (ev.param2) {
         SetKeyValue(items, n, "param2", *ev.param2);
     }
-    SendKV(ctx, items, n, 200);
+    SendKV(ctx, items, n);
 }
 
 void OnTriggerActionCount(RPCB_CallContext* ctx) {
-    CString triggerId(ctx->uniqueId.data, ctx->uniqueId.len);
-    auto* t = DB::Triggers.TryLookup(triggerId);
-    CString cnt;
-    cnt.Format("%zu", t ? t->Actions().Size() : 0);
-    RPCB_StrView items[2];
-    size_t n = 0;
-    SetKeyValue(items, n, "count", cnt);
-    SendKV(ctx, items, n, t ? 200 : 404);
-}
-
-void OnTriggerActionGet(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     CString triggerId(ctx->uniqueId.data, ctx->uniqueId.len);
     auto* t = DB::Triggers.TryLookup(triggerId);
     if (!t) {
-        SendEmpty(ctx, 404);
+        SendError(ctx, CBError::TriggerNotFound);
+        return;
+    }
+    CString cnt;
+    cnt.Format("%zu", t->Actions().Size());
+    RPCB_StrView items[2];
+    size_t n = 0;
+    SetKeyValue(items, n, "count", cnt);
+    SendKV(ctx, items, n);
+}
+
+void OnTriggerActionGet(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
+    CString triggerId(ctx->uniqueId.data, ctx->uniqueId.len);
+    auto* t = DB::Triggers.TryLookup(triggerId);
+    if (!t) {
+        SendError(ctx, CBError::TriggerNotFound);
         return;
     }
     int idx = std::atoi(FindParam(ctx->params, "index"));
     if (idx < 0 || static_cast<size_t>(idx) >= t->Actions().Size()) {
-        SendEmpty(ctx, 404);
+        SendError(ctx, CBError::ActionIndexInvalid);
         return;
     }
     auto& act = t->Actions().Nth(idx);
@@ -209,10 +250,14 @@ void OnTriggerActionGet(RPCB_CallContext* ctx) {
         sprintf_s(key, "param%d", pi);
         SetKeyValue(items, n, key, act.Params()[pi]);
     }
-    SendKV(ctx, items, n, 200);
+    SendKV(ctx, items, n);
 }
 
 void OnTriggerCreate(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     CString newId     = FindParam(ctx->params, "id");
     CString name      = FindParam(ctx->params, "name");
     CString house     = FindParam(ctx->params, "house");
@@ -220,22 +265,26 @@ void OnTriggerCreate(RPCB_CallContext* ctx) {
         name = "New Trigger";
     }
     if (newId.IsEmpty()) {
-        SendEmpty(ctx, 400);
+        SendError(ctx, CBError::MissingFieldId);
         return;
     }
     if (DB::Triggers.Exists(newId)) {
-        SendEmpty(ctx, 409);
+        SendError(ctx, CBError::TriggerAlreadyExists);
         return;
     }
     DB::Triggers.Append(TriggerInstance(std::move(newId), std::move(name), std::move(house)));
-    SendEmpty(ctx, 201);
+    SendEmpty(ctx);
 }
 
 void OnTriggerUpdate(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     CString triggerId(ctx->uniqueId.data, ctx->uniqueId.len);
     auto* t = DB::Triggers.TryLookup(triggerId);
     if (!t) {
-        SendEmpty(ctx, 404);
+        SendError(ctx, CBError::TriggerNotFound);
         return;
     }
     CString name  = FindParam(ctx->params, "name");
@@ -246,18 +295,30 @@ void OnTriggerUpdate(RPCB_CallContext* ctx) {
     if (!house.IsEmpty()) {
         t->Options().house = house;
     }
-    SendEmpty(ctx, 200);
+    SendEmpty(ctx);
 }
 
 void OnTriggerDelete(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     CString triggerId(ctx->uniqueId.data, ctx->uniqueId.len);
-    int32_t code = DB::Triggers.DeleteByID(triggerId) ? 200 : 404;
-    SendEmpty(ctx, code);
+    if (!DB::Triggers.DeleteByID(triggerId)) {
+        SendError(ctx, CBError::TriggerNotFound);
+    } else {
+        auto emptyErr = EmptyStrView();
+        CommandBridgeClient::Instance().SendResponse(ctx->uniqueId, emptyErr, nullptr);
+    }
 }
 
 /* ── Tag callbacks ─────────────────────────────────────────────────────── */
 
 void OnTagList(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     auto& db = DB::Tags;
     auto count = db.Size();
     auto items = std::make_unique<RPCB_StrView[]>(count);
@@ -269,14 +330,18 @@ void OnTagList(RPCB_CallContext* ctx) {
         list.items[list.count].len  = tag.id.GetLength();
         list.count++;
     }
-    CommandBridgeClient::Instance().SendResponse(ctx->uniqueId, 200, &list);
+    CommandBridgeClient::Instance().SendResponse(ctx->uniqueId, EmptyStrView(), &list);
 }
 
 void OnTagGet(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     CString tagId(ctx->uniqueId.data, ctx->uniqueId.len);
     auto* tag = DB::Tags.TryLookup(tagId);
     if (!tag) {
-        SendEmpty(ctx, 404);
+        SendError(ctx, CBError::TagNotFound);
         return;
     }
     RPCB_StrView items[8];
@@ -287,10 +352,14 @@ void OnTagGet(RPCB_CallContext* ctx) {
     CString s;
     s.Format("%d", tag->persistence);
     SetKeyValue(items, n, "persistence", s);
-    SendKV(ctx, items, n, 200);
+    SendKV(ctx, items, n);
 }
 
 void OnTagCreate(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     CString newId       = FindParam(ctx->params, "id");
     CString name        = FindParam(ctx->params, "name");
     CString triggerId   = FindParam(ctx->params, "triggerId");
@@ -299,11 +368,11 @@ void OnTagCreate(RPCB_CallContext* ctx) {
         name = "New Tag";
     }
     if (newId.IsEmpty()) {
-        SendEmpty(ctx, 400);
+        SendError(ctx, CBError::MissingFieldId);
         return;
     }
     if (DB::Tags.Exists(newId)) {
-        SendEmpty(ctx, 409);
+        SendError(ctx, CBError::TagAlreadyExists);
         return;
     }
     TagInstance tag(newId);
@@ -311,14 +380,18 @@ void OnTagCreate(RPCB_CallContext* ctx) {
     tag.triggerId   = triggerId;
     tag.persistence = std::atoi(persistStr);
     DB::Tags.Append(std::move(tag));
-    SendEmpty(ctx, 201);
+    SendEmpty(ctx);
 }
 
 void OnTagUpdate(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     CString tagId(ctx->uniqueId.data, ctx->uniqueId.len);
     auto* tag = DB::Tags.TryLookup(tagId);
     if (!tag) {
-        SendEmpty(ctx, 404);
+        SendError(ctx, CBError::TagNotFound);
         return;
     }
     CString name      = FindParam(ctx->params, "name");
@@ -333,13 +406,21 @@ void OnTagUpdate(RPCB_CallContext* ctx) {
     if (!persist.IsEmpty()) {
         tag->persistence = std::atoi(persist);
     }
-    SendEmpty(ctx, 200);
+    SendEmpty(ctx);
 }
 
 void OnTagDelete(RPCB_CallContext* ctx) {
+    if (!IsMapReady()) {
+        SendError(ctx, CBError::MapNotLoaded);
+        return;
+    }
     CString tagId(ctx->uniqueId.data, ctx->uniqueId.len);
-    int32_t code = DB::Tags.DeleteByID(tagId) ? 200 : 404;
-    SendEmpty(ctx, code);
+    if (!DB::Tags.DeleteByID(tagId)) {
+        SendError(ctx, CBError::TagNotFound);
+    } else {
+        auto emptyErr = EmptyStrView();
+        CommandBridgeClient::Instance().SendResponse(ctx->uniqueId, emptyErr, nullptr);
+    }
 }
 
 } // namespace

@@ -66,7 +66,7 @@ typedef void (*RPCB_ActionCallback)(RPCB_CallContext* ctx);
 
 COMMAND_BRIDGE_EXPORT int32_t RPCB_SendResponse(
     RPCB_StrView            uniqueId,
-    int32_t                 statusCode,
+    RPCB_StrView            errorDetail,     /* empty = success; non-empty = error description */
     const RPCB_StrViewList* outputData
 );
 
@@ -117,5 +117,15 @@ COMMAND_BRIDGE_EXPORT int32_t RPCB_RegisterAction(
    COMMAND_BRIDGE_EXPORT int32_t RPCB_UnregisterAction(const char* actionName); */
 
 #ifdef __cplusplus
+}
+
+/* Convert a string literal to RPCB_StrView (excludes null terminator). */
+template <size_t N>
+constexpr RPCB_StrView ToStrView(const char (&s)[N]) {
+    return {s, N - 1};
+}
+
+inline RPCB_StrView EmptyStrView() {
+    return {nullptr, 0};
 }
 #endif
