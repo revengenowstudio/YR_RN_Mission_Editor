@@ -86,9 +86,9 @@ namespace Serde {
 
         inline void WriteControls(const TriggerOptions& opts) {
             pushKeyValue("disabled", ToStr(opts.controls[TriggerOptions::Disable]));
-            pushKeyValue("easy", ToStr(opts.controls[TriggerOptions::Easy]));
-            pushKeyValue("medium", ToStr(opts.controls[TriggerOptions::Medium]));
-            pushKeyValue("hard", ToStr(opts.controls[TriggerOptions::Hard]));
+            pushKeyValue("easyEnable", ToStr(opts.controls[TriggerOptions::Easy]));
+            pushKeyValue("mediumEnable", ToStr(opts.controls[TriggerOptions::Medium]));
+            pushKeyValue("hardEnable", ToStr(opts.controls[TriggerOptions::Hard]));
             pushKeyValue("mustTransfer", ToStr(opts.controls[TriggerOptions::MustTransfer]));
         }
 
