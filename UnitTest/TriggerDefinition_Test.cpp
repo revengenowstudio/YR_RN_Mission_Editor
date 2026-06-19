@@ -223,9 +223,9 @@ TEST(TriggerEventTest, EventsSerde)
 43=Event,9
 44=Rain,26
 45=Float Value,0
-46=Technology Type,29
+46=Technology Type,29,2
 47=Building,28
-48=Value,0,2
+48=Count,0
 49=Pixel Animation,23
 50=Film,7
 
@@ -240,8 +240,8 @@ TEST(TriggerEventTest, EventsSerde)
 23=Team leaves map...,-1,7,0,0,If all members of the team leaves map,0,1,23
 36=Local variable on...,0,3,0,0,If local variable is true,0,1,36
 37=Local variable off...,0,3,0,0,If local variable is false,0,1,37
-60=Techno Exists,48,46,0,0,So many techno type exists on map,0,1,60,1
-61=Techno Not Exists,48,46,0,0,Techno type no longer exists on map,0,1,61,1
+60=Techno Exists,46,48,0,0,So many techno type exists on map,0,1,60,1
+61=Techno Not Exists,46,48,0,0,Techno type no longer exists on map,0,1,61,1
 )";
 
     CIniFile ini;
