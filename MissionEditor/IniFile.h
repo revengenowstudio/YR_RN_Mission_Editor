@@ -61,10 +61,18 @@ public:
 	}
 };
 
+struct CStringHash {
+	auto operator()(const CString& sv) const noexcept {
+		std::string_view view(sv.operator LPCSTR(), sv.GetLength());
+		return std::hash<decltype(view)>()(view);
+	}
+};
+
 class CIniFileSection
 {
 public:
 	using Container = vector<std::pair<CString, CString>>;
+	using LookupTable = map<CString, int64_t, SortDummy>; //std::unordered_map<CString, int64_t, CStringHash>
 	static const CString EmptyValue;
 
 	CIniFileSection();
@@ -276,13 +284,13 @@ public:
 	}
 
 private:
-	map<CString, int64_t, SortDummy> value_pos{};
+	LookupTable value_pos{};
 	Container value_pairs{};// sequenced
 };
 
 class CIniFile
 {
-	using StorageMap = map<CString, CIniFileSection>;
+	using StorageMap = std::unordered_map<CString, CIniFileSection, CStringHash>;
 
 	static const CIniFileSection EmptySection;
 
